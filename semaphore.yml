@@ -1,0 +1,26 @@
+version: v1.0
+name: network-config-manager Semaphore
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Network config manager CI/CD
+    task:
+      jobs:
+      - name: Install Compile and run tests
+        commands:
+            - sudo apt-get update -y
+            - sudo apt-get install -y python3.7 python3-pip python3-dev python3-setuptools build-essential python3-sphinx python-sphinx python-configparser
+            - sudo apt-get install -y ninja-build glib-2.0-dev libudev-dev libyaml-dev libsystemd-dev clang
+            - sudo pip3 install -U meson pytest
+            - sudo pip install --upgrade pip
+            - git clone https://github.com/vmware/network-config-manager
+            - cd network-config-manager
+            - meson build
+            - ninja -C build
+            - sudo ninja -C build install
+            - sudo cp -r tests /run/network-config-manager-ci
+            - sudo pytest -v -s /run/network-config-manager-ci/network-config-manager-tests.py
+            - CC=clang  meson build-clang
+            - ninja -C build-clang

@@ -1,0 +1,14 @@
+ network:
+  interface:
+     name: wlan1
+     dhcp: yes
+     access-points:
+         - ssid-name: "network_ssid_name1"
+           key-management: eap
+           method: tls
+           anonymous-identity: "@test.example.com"
+           identity: "cert-max@test.example.com"
+           ca-certificate: /etc/ssl/cust-cacrt.pem
+           client-certificate: /etc/ssl/cust-crt.pem
+           client-key: /etc/ssl/cust-key.pem
+           client-key-password: "QZTrSEtq:h_d.W7_"

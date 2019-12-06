@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 VMware, Inc.
+
+[Unit]
+Description=WPA supplicant %I
+DefaultDependencies=no
+Requires=sys-subsystem-net-devices-%i.device
+After=sys-subsystem-net-devices-%i.device
+Before=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/wpa_supplicant -B -i %i -c /etc/net-manager/wpa_supplicant.conf
+
+[Install]
+WantedBy=multi-user.target

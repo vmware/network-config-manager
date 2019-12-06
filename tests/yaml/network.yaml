@@ -1,0 +1,26 @@
+ network:
+  interface:
+     name: eth1
+     mtu : 1200
+     mac-address: 00:0c:29:3a:bc:89
+     match-mac-address: 00:0c:29:3a:bc:89
+     dhcp: yes
+     dhcp-client-identifier: mac
+     lldp: yes
+     link-local: yes
+     ipv6-accept-ra: yes
+     use-mtu: yes
+     use-domain: yes
+     gateway: 192.168.1.1/24
+     gateway-onlink: yes
+     nameservers: [192.168.0.1, 8.8.8.8]
+     ntp: [192.168.0.2, 8.8.8.1]
+     addresses:
+       - 9.0.0.9/24
+       - 10.0.0.10/24
+       - 11.0.0.11/24
+     routes:
+       - to: 0.0.0.0/0
+         via: 9.0.0.1
+       - to: 0.0.0.1/0
+         via: 9.0.0.2

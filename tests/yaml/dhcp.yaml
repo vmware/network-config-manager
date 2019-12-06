@@ -1,0 +1,4 @@
+ network:
+  interface:
+     name: test99
+     dhcp: yes

@@ -1,0 +1,15 @@
+ network:
+  interface:
+     name: wlan1
+     dhcp: yes
+     use-dns: no
+     use-mtu: yes
+     use-domain: yes
+     gateway: 192.168.1.1/24
+     gateway-onlink: yes
+     nameservers: [192.168.0.1, 8.8.8.8]
+     access-points:
+         - ssid-name: "network_ssid_name1"
+           password: "test123"
+         - ssid-name: "network_ssid_name2"
+           password: "test456"

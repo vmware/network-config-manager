@@ -1,0 +1,11 @@
+ network:
+  interface:
+     name: test99
+     dhcp: yes
+     dhcp-client-identifier: mac
+     lldp: yes
+     link-local: yes
+     ipv6-accept-ra: yes
+     use-mtu: yes
+     use-domain: yes
+     use-dns: yes
