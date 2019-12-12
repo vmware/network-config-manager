@@ -33,7 +33,7 @@ Introspect
 
 ### Building from source.
 
-On Photon
+On Photon OS
 ```bash
 ➜  ~ tdnf install -y build-essential
 ➜  ~ tdnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel python3-sphinx
@@ -50,6 +50,12 @@ On Fedora/CentOS/RHEL
 ➜  ~ sudo ninja -C build install
 ```
 
+Or by simply doing
+```
+❯ make
+❯ sudo make install
+```
+
 ### Use cases
 
 ```bash
@@ -57,7 +63,7 @@ On Fedora/CentOS/RHEL
 ```
 ### Gererate network config from yml file:
 
-nmctl can generate configurations for required network interfaces from YAML description. Configuration written to disk under `/etc/systemd/network` will persist between reboots. When `netmgr-yaml-generator.service` is enabled it reads yaml files from `/etc/network-config-manager/yaml` and generates systemd-networkd configuration files.
+`nmctl` can generate configurations for required network interfaces from YAML description. Configuration written to disk under `/etc/systemd/network` will persist between reboots. When `netmgr-yaml-generator.service` is enabled it reads yaml files from `/etc/network-config-manager/yaml` and generates systemd-networkd configuration files.
 
 `nmctl` uses similar format as defined by [different YAML format](https://curtin.readthedocs.io/en/latest/topics/networking.html).
 
@@ -127,18 +133,18 @@ To set a static IP address, use the addresses key, which takes a list of (IPv4 o
      nameservers: [192.168.0.1, 8.8.8.8]
      ntps: [192.168.0.2, 8.8.8.1]
      addresses:
-       - 9.0.0.9/24
-       - 10.0.0.10/24
-       - 11.0.0.11/24
+       - 5.0.0.5/24
+       - 10.0.0.12/24
+       - 11.0.0.13/24
      routes:
        - to: 0.0.0.0/0
-         via: 9.0.0.1
+         via: 5.0.0.1
        - to: 0.0.0.1/0
-         via: 9.0.0.2
+         via: 5.0.0.2
 ```
 ### Generate WiFi config from yml file
 
-nmctl can generate [WPA Supplicant](https://w1.fi/wpa_supplicant/) configuration from yaml file. When a yml file with wifi
+`nmctl` can generate [WPA Supplicant](https://w1.fi/wpa_supplicant/) configuration from yaml file. When a yml file with wifi
 configuration are found it generates a confiration file found in ```/etc/network-config-manager/wpa_supplicant_photon_os.conf``` which is understood by  `wpa_supplicant`.
 
 #### Connecting to a WPA Personal wireless network
@@ -197,7 +203,7 @@ configuration are found it generates a confiration file found in ```/etc/network
 ```
 ### Generate network config from kernel command line
 
-nmctl understands kernel command line specified in [dracut's](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) network configuration format and can generate [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html)'s configuration while the system boots and will persist between reboots.
+`nmctl` understands kernel command line specified in [dracut's](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) network configuration format and can generate [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html)'s configuration while the system boots and will persist between reboots.
 
 ```bash
  Network
