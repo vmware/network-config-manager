@@ -533,3 +533,30 @@ int dbus_revert_resolve_link(int ifindex) {
 
         return 0;
 }
+
+int dbus_network_reload(void) {
+        _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+        _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
+        int r;
+
+        r = sd_bus_open_system(&bus);
+        if (r < 0) {
+                log_warning("Failed to connect system bus: %s", bus_error.message);
+                return r;
+        }
+
+        r = sd_bus_call_method(bus,
+                               "org.freedesktop.network1",
+                               "/org/freedesktop/network1",
+                               "org.freedesktop.network1.Manager",
+                               "Reload",
+                               &bus_error,
+                               NULL,
+                               NULL);
+        if (r < 0) {
+                log_warning("Failed to reload network settings: %s", bus_error.message);
+                return r;
+        }
+
+        return 0;
+}
