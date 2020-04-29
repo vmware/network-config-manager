@@ -744,6 +744,10 @@ int manager_disable_ipv6(const IfNameIndex *ifnameidx) {
         return dbus_restart_unit("systemd-networkd.service");
 }
 
+int manager_reload_network(void) {
+        return dbus_network_reload();
+}
+
 int manager_write_wifi_config(const Network *n, const GString *config) {
         _cleanup_free_ char *path = NULL;
         _cleanup_close_ int fd = -1;
