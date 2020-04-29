@@ -31,6 +31,7 @@ int manager_read_domains_from_system_config(char **domains);
 int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps);
 int manager_disable_ipv6(const IfNameIndex *ifnameidx);
 int manager_reload_network(void);
+int manager_reconfigure_link(const IfNameIndex *ifnameidx);
 
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v);
 int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v);
