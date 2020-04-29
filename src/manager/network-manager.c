@@ -748,6 +748,10 @@ int manager_reload_network(void) {
         return dbus_network_reload();
 }
 
+int manager_reconfigure_link(const IfNameIndex *ifnameidx) {
+        return dbus_reconfigure_link(ifnameidx->ifindex);
+}
+
 int manager_write_wifi_config(const Network *n, const GString *config) {
         _cleanup_free_ char *path = NULL;
         _cleanup_close_ int fd = -1;

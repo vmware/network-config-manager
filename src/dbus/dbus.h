@@ -31,3 +31,4 @@ int dbus_add_dns_domains(int ifindex, char **domains);
 int dbus_revert_resolve_link(int ifindex);
 int dbus_get_dns_domains_from_resolved(DNSDomains **domains);
 int dbus_network_reload(void);
+int dbus_reconfigure_link(int ifindex);

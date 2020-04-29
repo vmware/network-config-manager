@@ -560,3 +560,33 @@ int dbus_network_reload(void) {
 
         return 0;
 }
+
+int dbus_reconfigure_link(int ifindex) {
+        _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+        _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
+        int r;
+
+        assert(ifindex > 0);
+
+        r = sd_bus_open_system(&bus);
+        if (r < 0) {
+                log_warning("Failed to connect system bus: %s", bus_error.message);
+                return r;
+        }
+
+        r = sd_bus_call_method(bus,
+                               "org.freedesktop.network1",
+                               "/org/freedesktop/network1",
+                               "org.freedesktop.network1.Manager",
+                               "ReconfigureLink",
+                               &bus_error,
+                               NULL,
+                               "i",
+                               ifindex);
+        if (r < 0) {
+                log_warning("Failed to configure link: %s", bus_error.message);
+                return r;
+        }
+
+        return 0;
+}

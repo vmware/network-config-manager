@@ -1277,6 +1277,7 @@ static int revert_resolve_link(int argc, char *argv[]) {
 
         return 0;
 }
+
 static int set_system_hostname(int argc, char *argv[]) {
         int r;
 
@@ -1360,6 +1361,23 @@ static int network_reload(int argc, char *argv[]) {
         return 0;
 }
 
+static int link_reconfigure(int argc, char *argv[]) {
+        _cleanup_free_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = manager_reconfigure_link(p);
+        if (r < 0)
+                return r;
+
+        return 0;
+
+}
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         const char *file = NULL;
         GDir *dir;
@@ -1464,6 +1482,7 @@ static int help(void) {
                "                                       This setting is read by systemd-timesyncd.service(8)\n"
                "  disable-ipv6                 [LINK]  Disables IPv6 on the interface.\n"
                "  reload                               Reload .network and .netdev files.\n"
+               "  reconfigure                  [LINK]  Reconfigure Link.\n"
                "  generate-config-from-yaml    [FILE]  Generates network file configuration from yaml file.\n"
                "  apply-yaml-config                    Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
                "  generate-config-from-cmdline [FILE | COMMAND LINE] Generates network file configuration from command kernel command line or command line.\n"
@@ -1553,6 +1572,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-ntp",                      2,        WORD_ANY, false, link_add_ntp },
                 { "disable-ipv6",                 1,        WORD_ANY, false, link_disable_ipv6 },
                 { "reload",                       WORD_ANY, WORD_ANY, false, network_reload },
+                { "reconfigure",                  WORD_ANY, WORD_ANY, false, link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply-yaml-config"           , WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "generate-config-from-cmdline", WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
