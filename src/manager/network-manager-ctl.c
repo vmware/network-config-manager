@@ -1332,7 +1332,7 @@ static int link_add_ntp(int argc, char *argv[]) {
        return 0;
 }
 
-static int link_disable_ipv6(int argc, char *argv[]) {
+static int link_enable_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1342,9 +1342,13 @@ static int link_disable_ipv6(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = manager_disable_ipv6(p);
+        if (string_equal(argv[0], "enable-ipv6"))
+                r = manager_enable_ipv6(p, true);
+        else
+                r = manager_enable_ipv6(p, false);
+
         if (r < 0) {
-                log_warning("Failed to disable IPv6 for the link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to %s IPv6 for the link '%s': %s",argv[0],  argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -1481,6 +1485,7 @@ static int help(void) {
                "  add-ntp                      [LINK] [NTP] Add Link NTP server address. This option may be specified more than once.\n"
                "                                       This setting is read by systemd-timesyncd.service(8)\n"
                "  disable-ipv6                 [LINK]  Disables IPv6 on the interface.\n"
+               "  enable-ipv6                  [LINK]  Enables IPv6 on the interface.\n"
                "  reload                               Reload .network and .netdev files.\n"
                "  reconfigure                  [LINK]  Reconfigure Link.\n"
                "  generate-config-from-yaml    [FILE]  Generates network file configuration from yaml file.\n"
@@ -1570,7 +1575,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp-use-timezone",        2,        WORD_ANY, false, link_set_dhcp_section },
                 { "set-dhcp-use-routes",          2,        WORD_ANY, false, link_set_dhcp_section },
                 { "add-ntp",                      2,        WORD_ANY, false, link_add_ntp },
-                { "disable-ipv6",                 1,        WORD_ANY, false, link_disable_ipv6 },
+                { "disable-ipv6",                 1,        WORD_ANY, false, link_enable_ipv6 },
+                { "enable-ipv6",                  1,        WORD_ANY, false, link_enable_ipv6 },
                 { "reload",                       WORD_ANY, WORD_ANY, false, network_reload },
                 { "reconfigure",                  WORD_ANY, WORD_ANY, false, link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
