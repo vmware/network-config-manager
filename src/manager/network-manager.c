@@ -715,7 +715,7 @@ int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps) {
         return dbus_restart_unit("systemd-timesyncd.service");
 }
 
-int manager_disable_ipv6(const IfNameIndex *ifnameidx) {
+int manager_enable_ipv6(const IfNameIndex *ifnameidx, bool enable) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -731,7 +731,11 @@ int manager_disable_ipv6(const IfNameIndex *ifnameidx) {
                 return r;
         }
 
-        r = set_config_file_string(network, "Network", "LinkLocalAddressing", "no");
+        if (enable)
+                r = set_config_file_string(network, "Network", "LinkLocalAddressing", "yes");
+        else
+                r = set_config_file_string(network, "Network", "LinkLocalAddressing", "no");
+
         if (r < 0) {
                 log_warning("Failed to write to config file '%s': %s", network, g_strerror(-r));
                 return r;
