@@ -253,7 +253,7 @@ int parse_yaml_address(const char *key,
                        void *userdata,
                        yaml_document_t *doc,
                        yaml_node_t *node) {
-        _cleanup_free_ IPAddress *address = NULL;
+        _auto_cleanup_ IPAddress *address = NULL;
         IPAddress **p = NULL;
         int r;
 
@@ -317,7 +317,7 @@ int parse_yaml_routes(const char *key,
                       void *userdata,
                       yaml_document_t *doc,
                       yaml_node_t *node) {
-        _cleanup_free_ IPAddress *address = NULL;
+        _auto_cleanup_ IPAddress *address = NULL;
         static Route *route;
         Network *network;
         int r;

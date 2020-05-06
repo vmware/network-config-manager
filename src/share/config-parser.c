@@ -84,7 +84,7 @@ int parse_config_file_integer(const char *path, const char *section, const char 
 }
 
 int parse_line(const char *line, char **key, char **value) {
-        _cleanup_free_ char *p = NULL, *s = NULL;
+        _auto_cleanup_ char *p = NULL, *s = NULL;
         int r;
 
         assert(line);
@@ -108,9 +108,9 @@ int parse_line(const char *line, char **key, char **value) {
 }
 
 int parse_state_file(const char *path, const char *key, char **ret) {
-        _cleanup_hash_ GHashTable *hash = NULL;
-        _cleanup_free_ char *contents = NULL;
-        _cleanup_strv_ char **lines = NULL;
+        _auto_cleanup_hash_ GHashTable *hash = NULL;
+        _auto_cleanup_ char *contents = NULL;
+        _auto_cleanup_strv_ char **lines = NULL;
         GError *e = NULL;
         char **l = NULL;
         char *p = NULL;
@@ -135,7 +135,7 @@ int parse_state_file(const char *path, const char *key, char **ret) {
                 return log_oom();
 
         strv_foreach(l, lines) {
-                _cleanup_free_ char *t = NULL, *s = NULL;
+                _auto_cleanup_ char *t = NULL, *s = NULL;
                 char *k = NULL, *v = NULL;
 
                 t = g_strdup(*l);
@@ -168,8 +168,8 @@ int parse_state_file(const char *path, const char *key, char **ret) {
 }
 
 int parse_resolv_conf(char ***dns, char ***domains) {
-        _cleanup_strv_ char **lines = NULL, **a = NULL, **b = NULL;
-        _cleanup_free_ char *contents = NULL;
+        _auto_cleanup_strv_ char **lines = NULL, **a = NULL, **b = NULL;
+        _auto_cleanup_ char *contents = NULL;
         char **l = NULL;
         GError *e = NULL;
         size_t n;
@@ -193,7 +193,7 @@ int parse_resolv_conf(char ***dns, char ***domains) {
                 return log_oom();
 
         strv_foreach(l, lines) {
-                _cleanup_free_ char *t = NULL;
+                _auto_cleanup_ char *t = NULL;
 
                 t = g_strdup(*l);
                 if (!t)

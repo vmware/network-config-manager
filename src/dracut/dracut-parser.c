@@ -129,9 +129,9 @@ static int dracut_parse_mac(char *mac, Network *n) {
  * ip=<client-IP>:[<server-id>]:<gateway-IP-number>:<netmask>:<client-hostname>:<interface>:{dhcp|dhcp6|auto6|on|any|none|off}
  */
  static int parse_command_line_ip_interface(const char *line, Network *n) {
-        _cleanup_free_ IPAddress *peer = NULL, *prefix = NULL;
-        _cleanup_free_ Address *a = NULL;
-        _cleanup_strv_ char **s = NULL;
+        _auto_cleanup_ IPAddress *peer = NULL, *prefix = NULL;
+        _auto_cleanup_ Address *a = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
         int r;
 
         s = strsplit(line, ":", 9);
@@ -209,7 +209,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
 
 /* ip=<interface>:{dhcp|on|any|dhcp6|auto6}[:[<mtu>][:<macaddr>]] */
 static int parse_command_line_ip_dhcp_interface(const char *line, Network *n) {
-        _cleanup_strv_ char **s = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
 
         assert(line);
         assert(n);
@@ -277,9 +277,9 @@ static int parse_command_line_nameserver(const char *line, Network *n) {
 
 /* rd.route=<net>/<netmask>:<gateway>[:<interface>] */
 static int parse_command_line_rd_route(const char *line, Network *n) {
-        _cleanup_free_ IPAddress *destination = NULL, *gw = NULL;
-        _cleanup_free_ Route *route = NULL;
-        _cleanup_strv_ char **s = NULL;
+        _auto_cleanup_ IPAddress *destination = NULL, *gw = NULL;
+        _auto_cleanup_ Route *route = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
         int r;
 
         assert(line);
@@ -368,8 +368,8 @@ static int merge_network(GHashTable *networks_by_ifname, Network *n) {
 }
 
 int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
-        _cleanup_hash_ GHashTable *networks = NULL, *networks_by_ifname = NULL;
-        _cleanup_strv_ char **s;
+        _auto_cleanup_hash_ GHashTable *networks = NULL, *networks_by_ifname = NULL;
+        _auto_cleanup_strv_ char **s;
         static Network *network;
         char **j;
         int r;
@@ -390,7 +390,7 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
 
         strv_foreach(j, s) {
                 _cleanup_(network_unrefp) Network *n = NULL;
-                _cleanup_free_ char *k = NULL, *v = NULL;
+                _auto_cleanup_ char *k = NULL, *v = NULL;
 
                 r = parse_line(*j, &k, &v);
                 if (r < 0)

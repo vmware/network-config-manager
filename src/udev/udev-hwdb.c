@@ -17,7 +17,7 @@
 int hwdb_get_vendor_model(const char *modalias, char **vendor, char **model) {
         _cleanup_(udev_hwdb_free) struct udev_hwdb *hwdb = NULL;
         _cleanup_(udev_free) struct udev *udev = NULL;
-        _cleanup_free_ char *s = NULL, *t = NULL;
+        _auto_cleanup_ char *s = NULL, *t = NULL;
         struct udev_list_entry *head, *entry;
 
         assert(modalias);
@@ -58,7 +58,7 @@ int hwdb_get_vendor_model(const char *modalias, char **vendor, char **model) {
 int hwdb_get_manufacturer(const uint8_t *ether_address, char **manufacturer) {
         _cleanup_(udev_hwdb_free) struct udev_hwdb *hwdb = NULL;
         _cleanup_(udev_free) struct udev *udev = NULL;
-        _cleanup_free_ char *s = NULL;
+        _auto_cleanup_ char *s = NULL;
         struct udev_list_entry *head, *entry;
         char modalias[24] = {};
 

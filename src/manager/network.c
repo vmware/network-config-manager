@@ -197,7 +197,7 @@ int auth_eap_method_to_mode(const char *name) {
 }
 
 int network_new(Network **ret) {
-        _cleanup_free_ Network *n = NULL;
+        _auto_cleanup_ Network *n = NULL;
         int r;
 
         n = new0(Network, 1);
@@ -283,8 +283,8 @@ void g_network_free (gpointer data) {
 }
 
 int parse_address_from_string_and_add(const char *s, Set *a) {
-        _cleanup_free_ IPAddress *address = NULL;
-        _cleanup_free_ char *p = NULL;
+        _auto_cleanup_ IPAddress *address = NULL;
+        _auto_cleanup_ char *p = NULL;
         int r;
 
         if (set_contains(a, (void *) s))
@@ -402,7 +402,7 @@ int generate_wifi_config(Network *n, GString **ret) {
 }
 
 static void append_routes(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_free_ char *gateway = NULL, *destination = NULL;
+        _auto_cleanup_ char *gateway = NULL, *destination = NULL;
         GString *config = userdata;
         Route *route = value;
 
@@ -443,7 +443,7 @@ static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
 
 int generate_network_config(Network *n, GString **ret) {
         _cleanup_(g_string_unrefp) GString *config = NULL;
-        _cleanup_free_ char *gateway = NULL;
+        _auto_cleanup_ char *gateway = NULL;
 
         assert(n);
 

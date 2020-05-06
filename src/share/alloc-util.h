@@ -24,7 +24,7 @@ static inline void freep(void *p) {
         g_free(*(void **) p);
 }
 
-#define DEFINE_CLEANUP_FUNC(type, func)                         \
+#define DEFINE_CLEANUP(type, func)                              \
         static inline void func##p(type *p) {                   \
                 if (*p)                                         \
                         func(*p);                               \
@@ -48,21 +48,21 @@ static inline void close_fdp(int *fd) {
                 close(*fd);
 }
 
-DEFINE_CLEANUP_FUNC(FILE *, fclose);
-DEFINE_CLEANUP_FUNC(FILE *, pclose);
-DEFINE_CLEANUP_FUNC(int *, close_fdp);
-DEFINE_CLEANUP_FUNC(GString **, g_string_unrefp);
-DEFINE_CLEANUP_FUNC(char **, strv_free);
-DEFINE_CLEANUP_FUNC(GHashTable *, g_hash_table_unref);
+DEFINE_CLEANUP(FILE *, fclose);
+DEFINE_CLEANUP(FILE *, pclose);
+DEFINE_CLEANUP(int *, close_fdp);
+DEFINE_CLEANUP(GString **, g_string_unrefp);
+DEFINE_CLEANUP(char **, strv_free);
+DEFINE_CLEANUP(GHashTable *, g_hash_table_unref);
 
-#define _cleanup_free_ _cleanup_(freep)
-#define _cleanup_fclose_ _cleanup_(fclosep)
-#define _cleanup_close_ _cleanup_(close_fdp)
-#define _cleanup_pclose_ _cleanup_(pclosep)
-#define _cleanup_closedir_ _cleanup_(closedirp)
-#define _cleanup_hash_ _cleanup_(g_hash_table_unrefp)
-#define _cleanup_strv_ _cleanup_(strv_freep)
-#define _cleanup_gstring_ _cleanup_(strv_freep)
+#define _auto_cleanup_ _cleanup_(freep)
+#define _auto_cleanup_fclose_ _cleanup_(fclosep)
+#define _auto_cleanup_close_ _cleanup_(close_fdp)
+#define _auto_cleanup_pclose_ _cleanup_(pclosep)
+#define _auto_cleanup_closedir_ _cleanup_(closedirp)
+#define _auto_cleanup_hash_ _cleanup_(g_hash_table_unrefp)
+#define _auto_cleanup_strv_ _cleanup_(strv_freep)
+#define _auto_cleanup_gstring_ _cleanup_(strv_freep)
 
 #define steal_pointer(ptr)                      \
         ({                                      \

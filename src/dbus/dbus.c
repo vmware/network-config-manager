@@ -85,7 +85,7 @@ int dbus_get_property_from_hostnamed(const char *p, char **ret) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
         _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
         _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
-        _cleanup_free_ char *t = NULL;
+        _auto_cleanup_ char *t = NULL;
         char *s;
         int r;
 

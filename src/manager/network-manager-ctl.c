@@ -47,7 +47,7 @@ static void link_state_to_color(const char *state, const char **on) {
 
 static void display_links_info(gpointer data_ptr, gpointer ignored) {
         const char *setup_color, *operational_color, *operstates, *operstates_color;
-        _cleanup_free_ char *setup = NULL, *operational = NULL;
+        _auto_cleanup_ char *setup = NULL, *operational = NULL;
         Link *link = NULL;
 
         setup_color = operational_color = operstates = operstates_color = ansi_color_reset();
@@ -98,8 +98,8 @@ static int list_links(int argc, char *argv[]) {
 }
 
 static void list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_strv_ char **dhcp = NULL;
-        _cleanup_free_ char *c = NULL;
+        _auto_cleanup_strv_ char **dhcp = NULL;
+        _auto_cleanup_ char *c = NULL;
         static bool first = true;
         unsigned long size;
         Address *a = NULL;
@@ -121,7 +121,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
 }
 
 static int display_one_link_udev(Link *l, bool display, char **link_file) {
-        _cleanup_free_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
+        _auto_cleanup_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
         const char *link, *driver, *path, *vendor, *model;
         struct udev_device *dev;
         struct udev *udev;
@@ -174,7 +174,7 @@ static int display_one_link_udev(Link *l, bool display, char **link_file) {
 }
 
 static void list_link_sysfs_attributes(Link *l) {
-        _cleanup_free_ char *duplex = NULL, *speed = NULL, *ether = NULL, *mtu = NULL;
+        _auto_cleanup_ char *duplex = NULL, *speed = NULL, *ether = NULL, *mtu = NULL;
 
         (void) link_read_sysfs_attribute(l->name, "speed", &speed);
         (void) link_read_sysfs_attribute(l->name, "duplex", &duplex);
@@ -193,13 +193,13 @@ static void list_link_sysfs_attributes(Link *l) {
 }
 
 static int list_one_link(char *argv[]) {
-        _cleanup_free_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
-        _cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
+        _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
+        _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
         _cleanup_(addresses_unref) Addresses *addr = NULL;
         _cleanup_(routes_free) Routes *route = NULL;
-        _cleanup_free_ IfNameIndex *p = NULL;
-        _cleanup_free_ Link *l = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ Link *l = NULL;
         int r;
 
         r = parse_ifname_or_index(*argv, &p);
@@ -257,7 +257,7 @@ static int list_one_link(char *argv[]) {
 
                  printf("         %sGateway%s: ", ansi_color_bold_cyan(), ansi_color_reset());
                  for (i = route->routes; i; i = i->next) {
-                         _cleanup_free_ char *c = NULL;
+                         _auto_cleanup_ char *c = NULL;
                          Route *a = NULL;
 
                          a = i->data;
@@ -271,7 +271,7 @@ static int list_one_link(char *argv[]) {
          }
 
          if (dns) {
-                 _cleanup_free_ char *s = NULL;
+                 _auto_cleanup_ char *s = NULL;
 
                  s = strv_join(" ", dns);
                  if (!s)
@@ -281,7 +281,7 @@ static int list_one_link(char *argv[]) {
          }
 
          if (search_domains) {
-                 _cleanup_free_ char *s = NULL;
+                 _auto_cleanup_ char *s = NULL;
 
                  s = strv_join(" ", search_domains);
                  if (!s)
@@ -291,7 +291,7 @@ static int list_one_link(char *argv[]) {
         }
 
          if (route_domains) {
-                 _cleanup_free_ char *s = NULL;
+                 _auto_cleanup_ char *s = NULL;
 
                  s = strv_join(" ", route_domains);
                  if (!s)
@@ -301,7 +301,7 @@ static int list_one_link(char *argv[]) {
          }
 
          if (ntp) {
-                 _cleanup_free_ char *s = NULL;
+                 _auto_cleanup_ char *s = NULL;
 
                  s = strv_join(" ", ntp);
                  if (!s)
@@ -319,7 +319,7 @@ static int list_one_link(char *argv[]) {
 }
 
 static void list_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_free_ char *c = NULL;
+        _auto_cleanup_ char *c = NULL;
         char buf[IF_NAMESIZE + 1] = {};
         static bool first = true;
         unsigned long size;
@@ -338,9 +338,9 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
 }
 
 static int system_status(int argc, char *argv[]) {
-        _cleanup_free_ char *state = NULL, *hostname = NULL, *kernel = NULL, *kernel_release = NULL,
+        _auto_cleanup_ char *state = NULL, *hostname = NULL, *kernel = NULL, *kernel_release = NULL,
                             *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
-        _cleanup_strv_ char **dns = NULL, **ntp = NULL;
+        _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
         _cleanup_(routes_free) Routes *routes = NULL;
         _cleanup_(addresses_unref) Addresses *h = NULL;
         Route *rt;
@@ -392,7 +392,7 @@ static int system_status(int argc, char *argv[]) {
 
                 printf("             %sGateway%s: ", ansi_color_bold_cyan(), ansi_color_reset());
                 for (i = routes->routes; i; i = i->next) {
-                        _cleanup_free_ char *c = NULL;
+                        _auto_cleanup_ char *c = NULL;
                         char buf[IF_NAMESIZE + 1];
 
                         rt = i->data;
@@ -413,7 +413,7 @@ static int system_status(int argc, char *argv[]) {
         (void) network_parse_ntp(&ntp);
 
         if (dns) {
-                _cleanup_free_ char *s = NULL;
+                _auto_cleanup_ char *s = NULL;
 
                 s = strv_join(" ", dns);
                 if (!s)
@@ -423,7 +423,7 @@ static int system_status(int argc, char *argv[]) {
         }
 
         if (ntp) {
-                _cleanup_free_ char *s = NULL;
+                _auto_cleanup_ char *s = NULL;
 
                 s = strv_join(" ", ntp);
                 if (!s)
@@ -450,7 +450,7 @@ static int link_status(int argc, char *argv[]) {
 }
 
 static int link_set_mtu(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t mtu;
         int r;
 
@@ -474,7 +474,7 @@ static int link_set_mtu(int argc, char *argv[]) {
 }
 
 static int link_set_mac(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -498,7 +498,7 @@ static int link_set_mac(int argc, char *argv[]) {
 }
 
 static int link_set_mode(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         bool k;
         int r;
 
@@ -525,7 +525,7 @@ static int link_set_mode(int argc, char *argv[]) {
 }
 
 static int link_set_dhcp_mode(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int mode, r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -550,7 +550,7 @@ static int link_set_dhcp_mode(int argc, char *argv[]) {
 }
 
 static int link_set_dhcp_client_identifier(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClientIdentifier d;
         int r;
 
@@ -576,7 +576,7 @@ static int link_set_dhcp_client_identifier(int argc, char *argv[]) {
 }
 
 static int link_set_dhcp_client_iaid(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t v;
         int r;
 
@@ -602,7 +602,7 @@ static int link_set_dhcp_client_iaid(int argc, char *argv[]) {
 }
 
 static int link_set_network_section_bool(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         const char *k;
         bool v;
         int r;
@@ -647,7 +647,7 @@ static int link_set_network_section_bool(int argc, char *argv[]) {
 }
 
 static int link_set_dhcp_section(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         const char *k;
         bool v;
         int r;
@@ -686,7 +686,7 @@ static int link_set_dhcp_section(int argc, char *argv[]) {
 }
 
 static int link_set_dhcp_client_duid(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClientDUIDType d;
         bool system = false;
         int r;
@@ -718,7 +718,7 @@ static int link_set_dhcp_client_duid(int argc, char *argv[]) {
 }
 
 static int link_update_state(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         LinkState state;
         int r;
 
@@ -744,8 +744,8 @@ static int link_update_state(int argc, char *argv[]) {
 }
 
 static int link_add_address(int argc, char *argv[]) {
-        _cleanup_free_ IPAddress *address = NULL, *peer = NULL;
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IPAddress *address = NULL, *peer = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -778,7 +778,7 @@ static int link_add_address(int argc, char *argv[]) {
 }
 
 static int link_delete_address(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -797,9 +797,9 @@ static int link_delete_address(int argc, char *argv[]) {
 }
 
 static int link_add_default_gateway(int argc, char *argv[]) {
-        _cleanup_free_ IPAddress *address = NULL;
-        _cleanup_free_ IfNameIndex *p = NULL;
-        _cleanup_free_ Route *rt = NULL;
+        _auto_cleanup_ IPAddress *address = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ Route *rt = NULL;
         int r, onlink = 0;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -846,9 +846,9 @@ static int link_add_default_gateway(int argc, char *argv[]) {
 }
 
 static int link_add_route(int argc, char *argv[]) {
-        _cleanup_free_ IPAddress *address = NULL;
-        _cleanup_free_ IfNameIndex *p = NULL;
-        _cleanup_free_ Route *rt = NULL;
+        _auto_cleanup_ IPAddress *address = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ Route *rt = NULL;
         int r, metric = 0;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -896,7 +896,7 @@ static int link_add_route(int argc, char *argv[]) {
 }
 
 static int link_delete_gateway_or_route(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -920,8 +920,8 @@ static int link_delete_gateway_or_route(int argc, char *argv[]) {
 
 static int show_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_free) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
-        _cleanup_free_ IfNameIndex *p = NULL;
-        _cleanup_free_ char *setup = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *setup = NULL;
         char buf[IF_NAMESIZE + 1] = {};
         GSequenceIter *i;
         DNSServer *d;
@@ -942,7 +942,7 @@ static int show_dns_server(int argc, char *argv[]) {
                 }
 
                 if (string_equal(setup, "unmanaged")) {
-                       _cleanup_strv_ char **a = NULL, **b = NULL;
+                       _auto_cleanup_strv_ char **a = NULL, **b = NULL;
                         char **j;
 
                         r = dns_read_resolv_conf(&a, &b);
@@ -969,7 +969,7 @@ static int show_dns_server(int argc, char *argv[]) {
                 printf("                 %sDNS%s:", ansi_color_bold_cyan(), ansi_color_reset());
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        _cleanup_free_ char *pretty = NULL;
+                        _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(i);
 
@@ -985,7 +985,7 @@ static int show_dns_server(int argc, char *argv[]) {
 
         r = dbus_get_dns_servers_from_resolved("CurrentDNSServer", &current);
         if (r >= 0 && current && !g_sequence_is_empty(current->dns_servers)) {
-                _cleanup_free_ char *pretty = NULL;
+                _auto_cleanup_ char *pretty = NULL;
 
                 i = g_sequence_get_begin_iter(current->dns_servers);
                 d = g_sequence_get(i);
@@ -1002,7 +1002,7 @@ static int show_dns_server(int argc, char *argv[]) {
 
                 printf("         %sFallbackDNS%s: ", ansi_color_bold_cyan(), ansi_color_reset());
                 for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        _cleanup_free_ char *pretty = NULL;
+                        _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(i);
 
@@ -1024,7 +1024,7 @@ static int show_dns_server(int argc, char *argv[]) {
                 printf("%s%5s %-20s %-18s%s\n", ansi_color_blue_header(), "INDEX", "LINK", "DNS", ansi_color_reset());
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        _cleanup_free_ char *pretty = NULL;
+                        _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(i);
 
@@ -1043,7 +1043,7 @@ static int show_dns_server(int argc, char *argv[]) {
 
 static int add_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_free) DNSServers *dns = NULL;
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false;
         int r, i;
 
@@ -1058,8 +1058,8 @@ static int add_dns_server(int argc, char *argv[]) {
         }
 
         for (i = 2; i < argc; i++) {
-                _cleanup_free_ IPAddress *a = NULL;
-                _cleanup_free_ DNSServer *s = NULL;
+                _auto_cleanup_ IPAddress *a = NULL;
+                _auto_cleanup_ DNSServer *s = NULL;
 
                 r = parse_ip(argv[i], &a);
                 if (r < 0) {
@@ -1096,8 +1096,8 @@ static int add_dns_server(int argc, char *argv[]) {
 }
 
 static int add_dns_domains(int argc, char *argv[]) {
-       _cleanup_strv_ char **domains = NULL;
-        _cleanup_free_ IfNameIndex *p = NULL;
+       _auto_cleanup_strv_ char **domains = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false;
         int r;
 
@@ -1128,8 +1128,8 @@ static int add_dns_domains(int argc, char *argv[]) {
 
 static int show_dns_server_domains(int argc, char *argv[]) {
         _cleanup_(dns_domains_free) DNSDomains *domains = NULL;
-        _cleanup_free_ char *config_domain = NULL, *setup = NULL;
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *config_domain = NULL, *setup = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         char buffer[LINE_MAX] = {};
         GSequenceIter *i;
         DNSDomain *d;
@@ -1150,7 +1150,7 @@ static int show_dns_server_domains(int argc, char *argv[]) {
                 }
 
                 if (string_equal(setup, "unmanaged")) {
-                       _cleanup_strv_ char **a = NULL, **b = NULL;
+                       _auto_cleanup_strv_ char **a = NULL, **b = NULL;
                         char **j;
 
                         r = dns_read_resolv_conf(&a, &b);
@@ -1260,7 +1260,7 @@ static int show_dns_server_domains(int argc, char *argv[]) {
 }
 
 static int revert_resolve_link(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -1296,8 +1296,8 @@ static int set_system_hostname(int argc, char *argv[]) {
 }
 
 static int link_add_ntp(int argc, char *argv[]) {
-       _cleanup_strv_ char **ntps = NULL;
-       _cleanup_free_ IfNameIndex *p = NULL;
+       _auto_cleanup_strv_ char **ntps = NULL;
+       _auto_cleanup_ IfNameIndex *p = NULL;
        char **d;
        int r;
 
@@ -1314,7 +1314,7 @@ static int link_add_ntp(int argc, char *argv[]) {
        }
 
        strv_foreach(d, ntps) {
-               _cleanup_free_ IPAddress *a = NULL;
+               _auto_cleanup_ IPAddress *a = NULL;
 
                r = parse_ip(*d, &a);
                if (r < 0) {
@@ -1333,7 +1333,7 @@ static int link_add_ntp(int argc, char *argv[]) {
 }
 
 static int link_disable_ipv6(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -1362,7 +1362,7 @@ static int network_reload(int argc, char *argv[]) {
 }
 
 static int link_reconfigure(int argc, char *argv[]) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -1391,7 +1391,7 @@ static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
                 }
 
                 for (;;) {
-                        _cleanup_free_ char *path = NULL;
+                        _auto_cleanup_ char *path = NULL;
 
                         file = g_dir_read_name(dir);
                         if (!file)
@@ -1417,7 +1417,7 @@ static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
 }
 
 static int generate_networkd_config_from_command_line(int argc, char *argv[]) {
-        _cleanup_free_ char *argv_line = NULL;
+        _auto_cleanup_ char *argv_line = NULL;
         int r;
 
         if (argc <= 1)

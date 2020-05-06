@@ -112,7 +112,7 @@ static int link_add(Links **h, Link *link) {
 
 static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
         struct rtattr *rta_tb[IFLA_MAX+1];
-        _cleanup_free_ Link *n = NULL;
+        _auto_cleanup_ Link *n = NULL;
         struct ifinfomsg *iface;
         struct nlmsghdr *p;
         int r, l;
@@ -154,8 +154,8 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
 }
 
 static int acquire_one_link_info(int s, int ifindex, Link **ret) {
-        _cleanup_free_ IPlinkMessage *m = NULL;
-        _cleanup_free_ Link *link = NULL;
+        _auto_cleanup_ IPlinkMessage *m = NULL;
+        _auto_cleanup_ Link *link = NULL;
         struct nlmsghdr *reply = NULL;
         int r;
 
@@ -186,7 +186,7 @@ static int acquire_one_link_info(int s, int ifindex, Link **ret) {
 }
 
 int link_get_one_link(const char *ifname, Link **ret) {
-        _cleanup_close_ int s = -1;
+        _auto_cleanup_close_ int s = -1;
         int r, c;
 
         assert(ifname);
@@ -209,7 +209,7 @@ int link_get_one_link(const char *ifname, Link **ret) {
 
 static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
         struct rtattr *rta_tb[IFLA_MAX+1];
-        _cleanup_free_ Link *n = NULL;
+        _auto_cleanup_ Link *n = NULL;
         struct ifinfomsg *iface;
         struct nlmsghdr *p;
         int r, l;
@@ -256,8 +256,8 @@ static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
 }
 
 static int acquire_link_info(int s, Links **ret) {
-        _cleanup_free_ IPlinkMessage *m = NULL;
-        _cleanup_free_ Links *links = NULL;
+        _auto_cleanup_ IPlinkMessage *m = NULL;
+        _auto_cleanup_ Links *links = NULL;
         struct nlmsghdr *reply = NULL;
         int r;
 
@@ -297,7 +297,7 @@ static int acquire_link_info(int s, Links **ret) {
 }
 
 int link_get_links(Links **ret) {
-       _cleanup_close_ int s = -1;
+       _auto_cleanup_close_ int s = -1;
         int r;
 
         r = rtnl_socket_open(0, &s);
@@ -312,8 +312,8 @@ int link_get_links(Links **ret) {
 }
 
 int link_update_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
-      _cleanup_free_ IPlinkMessage *m = NULL;
-      _cleanup_close_ int s = -1;
+      _auto_cleanup_ IPlinkMessage *m = NULL;
+      _auto_cleanup_close_ int s = -1;
       int r;
 
       assert(mtu > 0);
@@ -335,8 +335,8 @@ int link_update_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
 }
 
 int link_set_mac_address(const IfNameIndex *ifnameidx, const char *mac_address) {
-        _cleanup_free_ IPlinkMessage *m = NULL;
-        _cleanup_close_ int s = -1;
+        _auto_cleanup_ IPlinkMessage *m = NULL;
+        _auto_cleanup_close_ int s = -1;
         int r;
 
         assert(mac_address);
@@ -358,9 +358,9 @@ int link_set_mac_address(const IfNameIndex *ifnameidx, const char *mac_address) 
 }
 
 int link_set_state(const IfNameIndex *ifnameidx, LinkState state) {
-        _cleanup_free_ IPlinkMessage *m = NULL;
-        _cleanup_free_ char *operstate = NULL;
-        _cleanup_close_ int s = -1;
+        _auto_cleanup_ IPlinkMessage *m = NULL;
+        _auto_cleanup_ char *operstate = NULL;
+        _auto_cleanup_close_ int s = -1;
         int r;
 
         assert(ifnameidx);
@@ -399,7 +399,7 @@ int link_set_state(const IfNameIndex *ifnameidx, LinkState state) {
 }
 
 int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **ret) {
-        _cleanup_free_ char *line = NULL, *path = NULL;
+        _auto_cleanup_ char *line = NULL, *path = NULL;
         int r;
 
         assert(ifname);
@@ -421,7 +421,7 @@ int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **
 }
 
 int link_get_mtu(const char *ifname, uint32_t *mtu) {
-        _cleanup_free_ char *s = NULL;
+        _auto_cleanup_ char *s = NULL;
         int r, k;
 
         (void) link_read_sysfs_attribute(ifname, "mtu", &s);

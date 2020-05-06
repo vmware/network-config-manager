@@ -225,7 +225,7 @@ static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Network *net
 int parse_yaml_network_file(const char *file, Network **ret) {
         _cleanup_(yaml_manager_unrefp) YAMLManager *m = NULL;
         _cleanup_(network_unrefp) Network *network = NULL;
-        _cleanup_fclose_ FILE *f = NULL;
+        _auto_cleanup_fclose_ FILE *f = NULL;
         yaml_document_t document;
         yaml_parser_t parser;
         bool done = false;
