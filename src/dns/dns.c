@@ -15,7 +15,7 @@
 #include "string-util.h"
 
 int dns_servers_new(DNSServers **ret) {
-        _cleanup_free_ DNSServers *h = NULL;
+        _auto_cleanup_ DNSServers *h = NULL;
 
         h = new0(DNSServers, 1);
         if (!h)
@@ -95,7 +95,7 @@ int dns_server_add(DNSServers **h, DNSServer *a) {
 }
 
 int dns_domain_news(DNSDomains **ret) {
-        _cleanup_free_ DNSDomains *h = NULL;
+        _auto_cleanup_ DNSDomains *h = NULL;
 
         h = new0(DNSDomains, 1);
         if (!h)
@@ -211,7 +211,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
 
         if (dns) {
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        _cleanup_free_ char *pretty = NULL;
+                        _auto_cleanup_ char *pretty = NULL;
                         DNSServer *d =  g_sequence_get(i);
 
                         r = ip_to_string(d->family, &d->address, &pretty);
@@ -230,7 +230,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
 
         if (domains && domain_config) {
                 strv_foreach(j, domains) {
-                        _cleanup_free_ char *s = NULL;
+                        _auto_cleanup_ char *s = NULL;
 
                         if (!strv_contains((const char **) domain_config, *j)) {
 

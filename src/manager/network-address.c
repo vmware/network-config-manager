@@ -102,7 +102,7 @@ int address_add(Addresses **h, Address *a) {
 }
 
 static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addresses **ret) {
-        _cleanup_free_ Address *a = NULL;
+        _auto_cleanup_ Address *a = NULL;
         struct rtattr *rta_tb[IFA_MAX+1];
         struct ifaddrmsg *ifm;
         struct nlmsghdr *p;
@@ -162,7 +162,7 @@ static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addres
 }
 
 static int acquire_link_address(int s, int ifindex, Addresses **ret) {
-        _cleanup_free_ IPAddressMessage *m = NULL;
+        _auto_cleanup_ IPAddressMessage *m = NULL;
         struct nlmsghdr *reply = NULL;
         int r;
 
@@ -226,7 +226,7 @@ int manager_get_one_link_address(int ifindex, Addresses **ret) {
 }
 
 static int link_add_address(int s, int ifindex, IPAddress *address, IPAddress *peer) {
-        _cleanup_free_ IPAddressMessage *m = NULL;
+        _auto_cleanup_ IPAddressMessage *m = NULL;
         int r;
 
         assert(s);

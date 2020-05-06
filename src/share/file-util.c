@@ -15,7 +15,7 @@
 #include "string-util.h"
 
 int safe_mkdir_p_dir(const char* file_path) {
-    _cleanup_free_  char* dir = g_path_get_dirname(file_path);
+    _auto_cleanup_  char* dir = g_path_get_dirname(file_path);
 
     if (g_mkdir_with_parents(dir, 0755) < 0)
             return -errno;
@@ -43,7 +43,7 @@ int set_file_permisssion(const char *path, const char *user) {
 
 
 int create_conf_file(const char *path, const char *ifname, const char *extension, char **ret) {
-        _cleanup_free_ char *p = NULL, *f = NULL;
+        _auto_cleanup_ char *p = NULL, *f = NULL;
         _cleanup_close_ int fd = -1;
         int r;
 
@@ -72,7 +72,7 @@ int create_conf_file(const char *path, const char *ifname, const char *extension
 
 int read_one_line(const char *path, char **v) {
         _cleanup_fclose_ FILE *fp = NULL;
-        _cleanup_free_ char *line = NULL;
+        _auto_cleanup_ char *line = NULL;
         size_t len = LINE_MAX;
         int l;
 

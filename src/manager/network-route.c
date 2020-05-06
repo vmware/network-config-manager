@@ -80,7 +80,7 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
         assert(ret);
 
         for (p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
-                _cleanup_free_ Route *a = NULL;
+                _auto_cleanup_ Route *a = NULL;
 
                 rt = NLMSG_DATA(p);
 
@@ -136,7 +136,7 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
 }
 
 static int acquire_link_route(int s, int ifindex, Routes **ret) {
-        _cleanup_free_ IPRouteMessage *m = NULL;
+        _auto_cleanup_ IPRouteMessage *m = NULL;
         struct nlmsghdr *reply = NULL;
         int r;
 
@@ -200,7 +200,7 @@ int manager_get_one_link_route(int ifindex, Routes **ret) {
 }
 
 static int link_add_route(int s, Route *route) {
-        _cleanup_free_ IPRouteMessage *m = NULL;
+        _auto_cleanup_ IPRouteMessage *m = NULL;
         int r;
 
         assert(s);

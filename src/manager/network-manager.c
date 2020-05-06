@@ -31,7 +31,7 @@
 #include "yaml-network-parser.h"
 
 static int create_network_conf_file(const IfNameIndex *ifnameidx, char **ret) {
-        _cleanup_free_ char *file = NULL, *network = NULL;
+        _auto_cleanup_ char *file = NULL, *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -55,7 +55,7 @@ static int create_network_conf_file(const IfNameIndex *ifnameidx, char **ret) {
 }
 
 static int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret) {
-        _cleanup_free_ char *setup = NULL, *network = NULL;
+        _auto_cleanup_ char *setup = NULL, *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -80,7 +80,7 @@ static int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret
 }
 
 int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode, char **ret) {
-        _cleanup_free_ char *network = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -106,7 +106,7 @@ int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode, char **ret) {
 }
 
 int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
-        _cleanup_free_ char *network = NULL, *config_dhcp = NULL;
+        _auto_cleanup_ char *network = NULL, *config_dhcp = NULL;
         int r;
 
         assert(ifnameidx);
@@ -136,7 +136,7 @@ int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
 }
 
 int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier) {
-        _cleanup_free_ char *network = NULL, *config = NULL;
+        _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
         assert(ifnameidx);
@@ -161,7 +161,7 @@ int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
 }
 
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iaid) {
-        _cleanup_free_ char *network = NULL;
+        _auto_cleanup_ char *network = NULL;
         unsigned v;
         int r;
 
@@ -187,7 +187,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iai
 }
 
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system) {
-        _cleanup_free_ char *network = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         if (system) {
@@ -220,7 +220,7 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDU
 }
 
 int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
-        _cleanup_free_ char *network = NULL, *config_mtu = NULL, *config_update_mtu = NULL;
+        _auto_cleanup_ char *network = NULL, *config_mtu = NULL, *config_update_mtu = NULL;
         uint32_t k;
         int r;
 
@@ -258,7 +258,7 @@ int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
 }
 
 int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac) {
-        _cleanup_free_ char *p = NULL, *network = NULL, *config_mac = NULL, *config_update_mac = NULL;
+        _auto_cleanup_ char *p = NULL, *network = NULL, *config_mac = NULL, *config_update_mac = NULL;
         int r;
 
         assert(ifnameidx);
@@ -301,7 +301,7 @@ int manager_set_link_state(const IfNameIndex *ifnameidx, LinkState state) {
 }
 
 int manager_configure_link_address(const IfNameIndex *ifnameidx, IPAddress *address, IPAddress *peer) {
-        _cleanup_free_ char *network = NULL, *config_address = NULL, *a = NULL;
+        _auto_cleanup_ char *network = NULL, *config_address = NULL, *a = NULL;
         int r;
 
         assert(ifnameidx);
@@ -355,7 +355,7 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx, IPAddress *addr
 }
 
 int manager_delete_link_address(const IfNameIndex *ifnameidx) {
-        _cleanup_free_ char *setup = NULL, *network = NULL;
+        _auto_cleanup_ char *setup = NULL, *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -382,7 +382,7 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx) {
 }
 
 int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
-        _cleanup_free_ char *network = NULL, *config_rt = NULL, *a = NULL, *config_onlink = NULL;
+        _auto_cleanup_ char *network = NULL, *config_rt = NULL, *a = NULL, *config_onlink = NULL;
         int r, onlink;
 
         assert(ifnameidx);
@@ -426,7 +426,7 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
 }
 
 int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt) {
-        _cleanup_free_ char *network = NULL, *a = NULL, *config_rt = NULL,*config_onlink = NULL;
+        _auto_cleanup_ char *network = NULL, *a = NULL, *config_rt = NULL,*config_onlink = NULL;
         int r, onlink;
 
         assert(ifnameidx);
@@ -468,7 +468,7 @@ int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt) {
 }
 
 int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) {
-        _cleanup_free_ char *setup = NULL, *network = NULL, *config = NULL;
+        _auto_cleanup_ char *setup = NULL, *network = NULL, *config = NULL;
         int r;
 
         assert(ifnameidx);
@@ -509,7 +509,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
 }
 
 int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system) {
-        _cleanup_free_ char *setup = NULL, *network = NULL, *config_dns = NULL, *a = NULL;
+        _auto_cleanup_ char *setup = NULL, *network = NULL, *config_dns = NULL, *a = NULL;
         GSequenceIter *i;
         int r;
 
@@ -532,7 +532,7 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
         }
 
         for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                _cleanup_free_ char *pretty = NULL;
+                _auto_cleanup_ char *pretty = NULL;
                 DNSServer *d = g_sequence_get(i);
 
                 r = ip_to_string(d->family, &d->address, &pretty);
@@ -559,7 +559,7 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
 }
 
 int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, bool system) {
-        _cleanup_free_ char *setup = NULL, *network = NULL, *config_domain = NULL, *a = NULL;
+        _auto_cleanup_ char *setup = NULL, *network = NULL, *config_domain = NULL, *a = NULL;
         char **d;
         int r;
 
@@ -603,7 +603,7 @@ int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, 
 }
 
 int manager_read_domains_from_system_config(char **domains) {
-        _cleanup_free_ char *config_domains = NULL;
+        _auto_cleanup_ char *config_domains = NULL;
         int r;
 
         r = parse_config_file("/etc/systemd/resolved.conf", "Resolve", "DOMAINS", &config_domains);
@@ -616,7 +616,7 @@ int manager_read_domains_from_system_config(char **domains) {
 }
 
 int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx) {
-        _cleanup_free_ char *setup = NULL, *network = NULL, *config = NULL;
+        _auto_cleanup_ char *setup = NULL, *network = NULL, *config = NULL;
         int r;
 
         assert(ifnameidx);
@@ -649,7 +649,7 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx) {
 }
 
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v) {
-        _cleanup_free_ char *network = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -666,7 +666,7 @@ int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k
 }
 
 int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v) {
-        _cleanup_free_ char *network = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -683,7 +683,7 @@ int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v
 }
 
 int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps) {
-        _cleanup_free_ char *network = NULL, *config_ntp = NULL, *a = NULL;
+        _auto_cleanup_ char *network = NULL, *config_ntp = NULL, *a = NULL;
         char **d;
         int r;
 
@@ -716,7 +716,7 @@ int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps) {
 }
 
 int manager_disable_ipv6(const IfNameIndex *ifnameidx) {
-        _cleanup_free_ char *network = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -753,7 +753,7 @@ int manager_reconfigure_link(const IfNameIndex *ifnameidx) {
 }
 
 int manager_write_wifi_config(const Network *n, const GString *config) {
-        _cleanup_free_ char *path = NULL;
+        _auto_cleanup_ char *path = NULL;
         _cleanup_close_ int fd = -1;
         int r;
 
@@ -782,7 +782,7 @@ int manager_write_wifi_config(const Network *n, const GString *config) {
 }
 
 static int manager_write_network_config(const Network *n, const GString *config) {
-        _cleanup_free_ char *network = NULL, *config_file = NULL;
+        _auto_cleanup_ char *network = NULL, *config_file = NULL;
         _cleanup_close_ int fd = -1;
         int r;
 
@@ -888,7 +888,7 @@ static Network *manager_no_interface_name(GHashTable *networks) {
 
 int manager_generate_networkd_config_from_command_line(const char *file, const char *command_line) {
         _cleanup_hash_ GHashTable *networks = NULL;
-        _cleanup_free_ char *line = NULL;
+        _auto_cleanup_ char *line = NULL;
         Network *n;
         int r = 0;
 

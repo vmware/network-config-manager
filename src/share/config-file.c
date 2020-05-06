@@ -130,7 +130,7 @@ int remove_section_from_config(const char *path, const char *section) {
 }
 
 int write_to_resolv_conf(char **dns, char **domains) {
-        _cleanup_free_ char *p = NULL;
+        _auto_cleanup_ char *p = NULL;
         GString* c = NULL;
         size_t len;
         char **l;

@@ -12,7 +12,7 @@
 #include "string-util.h"
 
 int network_parse_operational_state(char **state) {
-        _cleanup_free_ char *s = NULL;
+        _auto_cleanup_ char *s = NULL;
         int r;
 
         assert(state);
@@ -30,7 +30,7 @@ int network_parse_operational_state(char **state) {
 }
 
 static int network_parse_strv(const char *key, char ***ret) {
-        _cleanup_free_ char *s = NULL;
+        _auto_cleanup_ char *s = NULL;
         int r;
 
         assert(ret);
@@ -66,7 +66,7 @@ int network_parse_route_domains(char ***ret) {
 }
 
 static int network_parse_link_strv(int ifindex, const char *key, char ***ret) {
-        _cleanup_free_ char *s = NULL, *path = NULL;
+        _auto_cleanup_ char *s = NULL, *path = NULL;
         int r;
 
         assert(ifindex);
@@ -88,7 +88,7 @@ static int network_parse_link_strv(int ifindex, const char *key, char ***ret) {
 }
 
 static int network_parse_link_string(int ifindex, const char *key, char **ret) {
-        _cleanup_free_ char *s = NULL, *path = NULL;
+        _auto_cleanup_ char *s = NULL, *path = NULL;
         int r;
 
         assert(ifindex);

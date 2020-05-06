@@ -38,7 +38,7 @@ int ip_is_null(const IPAddress *a) {
 }
 
 int ip_to_string(int family, const struct IPAddress *u, char **ret) {
-        _cleanup_free_ char *x = NULL;
+        _auto_cleanup_ char *x = NULL;
         const char *p = NULL;
         size_t l = 0;
 
@@ -75,7 +75,7 @@ int ip_to_string(int family, const struct IPAddress *u, char **ret) {
 }
 
 int ip_to_string_prefix(int family, const struct IPAddress *u, char **ret) {
-        _cleanup_free_ char *x = NULL, *y = NULL;
+        _auto_cleanup_ char *x = NULL, *y = NULL;
         char buf[1024] = {};
         int r;
 
@@ -102,7 +102,7 @@ int ip_to_string_prefix(int family, const struct IPAddress *u, char **ret) {
 }
 
 int parse_ipv4(const char *s, IPAddress **ret) {
-        _cleanup_free_ struct IPAddress *b = NULL;
+        _auto_cleanup_ struct IPAddress *b = NULL;
         struct in_addr buffer;
 
         assert(s);
@@ -124,7 +124,7 @@ int parse_ipv4(const char *s, IPAddress **ret) {
 }
 
 int parse_ipv6(const char *s, IPAddress **ret) {
-        _cleanup_free_ struct IPAddress *b = NULL;
+        _auto_cleanup_ struct IPAddress *b = NULL;
         struct in_addr buffer;
 
         assert(s);
@@ -162,7 +162,7 @@ int parse_ip(const char *s, IPAddress **ret) {
 }
 
 int parse_ip_from_string(const char *s, IPAddress **ret) {
-        _cleanup_free_ char *m = NULL;
+        _auto_cleanup_ char *m = NULL;
         char *p, *k;
         long l;
         int r;
@@ -202,7 +202,7 @@ int ipv4_netmask_to_prefixlen(IPAddress *addr) {
 }
 
 int parse_ifname_or_index(char *s, IfNameIndex **ret) {
-        _cleanup_free_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r, ifindex;
 
         assert(s);

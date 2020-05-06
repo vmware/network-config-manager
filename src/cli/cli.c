@@ -18,7 +18,7 @@
 #include "log.h"
 
 int cli_manager_new(const Cli *cli_commands, CliManager **ret) {
-        _cleanup_free_ CliManager *m = NULL;
+        _auto_cleanup_ CliManager *m = NULL;
         int i;
 
         assert(cli_commands);

@@ -23,7 +23,7 @@ const char *bool_to_string(bool x) {
 }
 
 int split_pair(const char *s, const char *sep, char **l, char **r) {
-        _cleanup_free_ char *a = NULL, *b = NULL;
+        _auto_cleanup_ char *a = NULL, *b = NULL;
         _cleanup_strv_ char **x = NULL;
 
         assert(s);

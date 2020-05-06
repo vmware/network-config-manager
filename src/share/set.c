@@ -10,7 +10,7 @@
 #include "set.h"
 
 int set_new(Set **ret, GHashFunc hash_func, GEqualFunc compare_func) {
-        _cleanup_free_ Set *s = NULL;
+        _auto_cleanup_ Set *s = NULL;
 
         s = new0(Set, 1);
         if (!s)
