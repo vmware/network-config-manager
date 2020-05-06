@@ -200,7 +200,7 @@ int dns_read_resolv_conf(char ***dns, char ***domains) {
 }
 
 int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
-        _cleanup_strv_ char **dns_config = NULL, **domain_config = NULL;
+        _auto_cleanup_strv_ char **dns_config = NULL, **domain_config = NULL;
         GSequenceIter *i;
         char **j;
         int r;

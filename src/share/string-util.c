@@ -24,7 +24,7 @@ const char *bool_to_string(bool x) {
 
 int split_pair(const char *s, const char *sep, char **l, char **r) {
         _auto_cleanup_ char *a = NULL, *b = NULL;
-        _cleanup_strv_ char **x = NULL;
+        _auto_cleanup_strv_ char **x = NULL;
 
         assert(s);
         assert(sep);
@@ -75,7 +75,7 @@ char *string_strip(char *s) {
 }
 
 int skip_first_word_and_split(char *line, const char *first_word, const char *sep, char ***ret) {
-        _cleanup_strv_ char **a = NULL;
+        _auto_cleanup_strv_ char **a = NULL;
         size_t n;
         char *k;
 
@@ -99,7 +99,7 @@ int skip_first_word_and_split(char *line, const char *first_word, const char *se
 }
 
 char **strv_new(char *x) {
-        _cleanup_strv_ char **a = NULL;
+        _auto_cleanup_strv_ char **a = NULL;
 
          a = new0(char *, 2);
          if (!a)
@@ -134,7 +134,7 @@ int strv_add(char ***l, char *value) {
 }
 
 int argv_to_strv(int argc, char *argv[], char ***ret) {
-        _cleanup_strv_ char **s = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
         int r, i;
 
         assert(argc);

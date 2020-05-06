@@ -200,7 +200,7 @@ static int acquire_link_address(int s, int ifindex, Addresses **ret) {
 }
 
 int manager_link_get_address(Addresses **ret) {
-       _cleanup_close_ int s = -1;
+       _auto_cleanup_close_ int s = -1;
         int r;
 
         r = rtnl_socket_open(0, &s);
@@ -211,7 +211,7 @@ int manager_link_get_address(Addresses **ret) {
 }
 
 int manager_get_one_link_address(int ifindex, Addresses **ret) {
-        _cleanup_close_ int s = -1;
+        _auto_cleanup_close_ int s = -1;
         int r;
 
         r = rtnl_socket_open(0, &s);
@@ -259,7 +259,7 @@ static int link_add_address(int s, int ifindex, IPAddress *address, IPAddress *p
 }
 
 int manager_link_add_address(int ifindex, IPAddress *address, IPAddress *peer) {
-       _cleanup_close_ int s = -1;
+       _auto_cleanup_close_ int s = -1;
        int r;
 
         assert(ifindex > 0);

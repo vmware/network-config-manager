@@ -754,7 +754,7 @@ int manager_reconfigure_link(const IfNameIndex *ifnameidx) {
 
 int manager_write_wifi_config(const Network *n, const GString *config) {
         _auto_cleanup_ char *path = NULL;
-        _cleanup_close_ int fd = -1;
+        _auto_cleanup_close_ int fd = -1;
         int r;
 
         assert(config);
@@ -783,7 +783,7 @@ int manager_write_wifi_config(const Network *n, const GString *config) {
 
 static int manager_write_network_config(const Network *n, const GString *config) {
         _auto_cleanup_ char *network = NULL, *config_file = NULL;
-        _cleanup_close_ int fd = -1;
+        _auto_cleanup_close_ int fd = -1;
         int r;
 
         assert(n);
@@ -887,7 +887,7 @@ static Network *manager_no_interface_name(GHashTable *networks) {
 }
 
 int manager_generate_networkd_config_from_command_line(const char *file, const char *command_line) {
-        _cleanup_hash_ GHashTable *networks = NULL;
+        _auto_cleanup_hash_ GHashTable *networks = NULL;
         _auto_cleanup_ char *line = NULL;
         Network *n;
         int r = 0;

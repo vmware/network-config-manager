@@ -108,9 +108,9 @@ int parse_line(const char *line, char **key, char **value) {
 }
 
 int parse_state_file(const char *path, const char *key, char **ret) {
-        _cleanup_hash_ GHashTable *hash = NULL;
+        _auto_cleanup_hash_ GHashTable *hash = NULL;
         _auto_cleanup_ char *contents = NULL;
-        _cleanup_strv_ char **lines = NULL;
+        _auto_cleanup_strv_ char **lines = NULL;
         GError *e = NULL;
         char **l = NULL;
         char *p = NULL;
@@ -168,7 +168,7 @@ int parse_state_file(const char *path, const char *key, char **ret) {
 }
 
 int parse_resolv_conf(char ***dns, char ***domains) {
-        _cleanup_strv_ char **lines = NULL, **a = NULL, **b = NULL;
+        _auto_cleanup_strv_ char **lines = NULL, **a = NULL, **b = NULL;
         _auto_cleanup_ char *contents = NULL;
         char **l = NULL;
         GError *e = NULL;

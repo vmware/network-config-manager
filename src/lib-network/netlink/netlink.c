@@ -227,7 +227,7 @@ int rtnl_message_request_dump(struct nlmsghdr *hdr, int dump) {
 }
 
 int rtnl_socket_open(unsigned int group, int *ret) {
-        _cleanup_close_ int fd = -1;
+        _auto_cleanup_close_ int fd = -1;
         struct sockaddr_nl addr = {
                         .nl_family = AF_NETLINK,
                         .nl_pid = getpid(),

@@ -98,7 +98,7 @@ static int list_links(int argc, char *argv[]) {
 }
 
 static void list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_strv_ char **dhcp = NULL;
+        _auto_cleanup_strv_ char **dhcp = NULL;
         _auto_cleanup_ char *c = NULL;
         static bool first = true;
         unsigned long size;
@@ -194,7 +194,7 @@ static void list_link_sysfs_attributes(Link *l) {
 
 static int list_one_link(char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
-        _cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
+        _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
         _cleanup_(addresses_unref) Addresses *addr = NULL;
         _cleanup_(routes_free) Routes *route = NULL;
@@ -340,7 +340,7 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
 static int system_status(int argc, char *argv[]) {
         _auto_cleanup_ char *state = NULL, *hostname = NULL, *kernel = NULL, *kernel_release = NULL,
                             *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
-        _cleanup_strv_ char **dns = NULL, **ntp = NULL;
+        _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
         _cleanup_(routes_free) Routes *routes = NULL;
         _cleanup_(addresses_unref) Addresses *h = NULL;
         Route *rt;
@@ -942,7 +942,7 @@ static int show_dns_server(int argc, char *argv[]) {
                 }
 
                 if (string_equal(setup, "unmanaged")) {
-                       _cleanup_strv_ char **a = NULL, **b = NULL;
+                       _auto_cleanup_strv_ char **a = NULL, **b = NULL;
                         char **j;
 
                         r = dns_read_resolv_conf(&a, &b);
@@ -1096,7 +1096,7 @@ static int add_dns_server(int argc, char *argv[]) {
 }
 
 static int add_dns_domains(int argc, char *argv[]) {
-       _cleanup_strv_ char **domains = NULL;
+       _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false;
         int r;
@@ -1150,7 +1150,7 @@ static int show_dns_server_domains(int argc, char *argv[]) {
                 }
 
                 if (string_equal(setup, "unmanaged")) {
-                       _cleanup_strv_ char **a = NULL, **b = NULL;
+                       _auto_cleanup_strv_ char **a = NULL, **b = NULL;
                         char **j;
 
                         r = dns_read_resolv_conf(&a, &b);
@@ -1296,7 +1296,7 @@ static int set_system_hostname(int argc, char *argv[]) {
 }
 
 static int link_add_ntp(int argc, char *argv[]) {
-       _cleanup_strv_ char **ntps = NULL;
+       _auto_cleanup_strv_ char **ntps = NULL;
        _auto_cleanup_ IfNameIndex *p = NULL;
        char **d;
        int r;

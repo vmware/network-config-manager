@@ -56,13 +56,13 @@ DEFINE_CLEANUP(char **, strv_free);
 DEFINE_CLEANUP(GHashTable *, g_hash_table_unref);
 
 #define _auto_cleanup_ _cleanup_(freep)
-#define _cleanup_fclose_ _cleanup_(fclosep)
-#define _cleanup_close_ _cleanup_(close_fdp)
-#define _cleanup_pclose_ _cleanup_(pclosep)
-#define _cleanup_closedir_ _cleanup_(closedirp)
-#define _cleanup_hash_ _cleanup_(g_hash_table_unrefp)
-#define _cleanup_strv_ _cleanup_(strv_freep)
-#define _cleanup_gstring_ _cleanup_(strv_freep)
+#define _auto_cleanup_fclose_ _cleanup_(fclosep)
+#define _auto_cleanup_close_ _cleanup_(close_fdp)
+#define _auto_cleanup_pclose_ _cleanup_(pclosep)
+#define _auto_cleanup_closedir_ _cleanup_(closedirp)
+#define _auto_cleanup_hash_ _cleanup_(g_hash_table_unrefp)
+#define _auto_cleanup_strv_ _cleanup_(strv_freep)
+#define _auto_cleanup_gstring_ _cleanup_(strv_freep)
 
 #define steal_pointer(ptr)                      \
         ({                                      \

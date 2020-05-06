@@ -186,7 +186,7 @@ static int acquire_one_link_info(int s, int ifindex, Link **ret) {
 }
 
 int link_get_one_link(const char *ifname, Link **ret) {
-        _cleanup_close_ int s = -1;
+        _auto_cleanup_close_ int s = -1;
         int r, c;
 
         assert(ifname);
@@ -297,7 +297,7 @@ static int acquire_link_info(int s, Links **ret) {
 }
 
 int link_get_links(Links **ret) {
-       _cleanup_close_ int s = -1;
+       _auto_cleanup_close_ int s = -1;
         int r;
 
         r = rtnl_socket_open(0, &s);
@@ -313,7 +313,7 @@ int link_get_links(Links **ret) {
 
 int link_update_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
       _auto_cleanup_ IPlinkMessage *m = NULL;
-      _cleanup_close_ int s = -1;
+      _auto_cleanup_close_ int s = -1;
       int r;
 
       assert(mtu > 0);
@@ -336,7 +336,7 @@ int link_update_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
 
 int link_set_mac_address(const IfNameIndex *ifnameidx, const char *mac_address) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
-        _cleanup_close_ int s = -1;
+        _auto_cleanup_close_ int s = -1;
         int r;
 
         assert(mac_address);
@@ -360,7 +360,7 @@ int link_set_mac_address(const IfNameIndex *ifnameidx, const char *mac_address) 
 int link_set_state(const IfNameIndex *ifnameidx, LinkState state) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
         _auto_cleanup_ char *operstate = NULL;
-        _cleanup_close_ int s = -1;
+        _auto_cleanup_close_ int s = -1;
         int r;
 
         assert(ifnameidx);
