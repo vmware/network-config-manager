@@ -115,37 +115,37 @@ struct rtattr *rtnl_message_parse_rtattr_one(int type, struct rtattr *rta, int l
         return NULL;
 }
 
-uint8_t rtnl_message_get_attribute_u8(const struct rtattr *rta) {
+uint8_t rtnl_message_read_attribute_u8(const struct rtattr *rta) {
         assert(rta);
 
         return *(uint8_t *) RTA_DATA(rta);
 }
 
-uint16_t rtnl_message_get_attribute_u16(const struct rtattr *rta) {
+uint16_t rtnl_message_read_attribute_u16(const struct rtattr *rta) {
         assert(rta);
 
         return *(uint16_t *) RTA_DATA(rta);
 }
 
-be16_t rtnl_message_get_attribute_be16(const struct rtattr *rta) {
+be16_t rtnl_message_read_attribute_be16(const struct rtattr *rta) {
          assert(rta);
 
-        return ntohs(rtnl_message_get_attribute_u16(rta));
+        return ntohs(rtnl_message_read_attribute_u16(rta));
 }
 
-uint32_t rtnl_message_get_attribute_u32(const struct rtattr *rta) {
+uint32_t rtnl_message_read_attribute_u32(const struct rtattr *rta) {
         assert(rta);
 
         return *(uint32_t *) RTA_DATA(rta);
 }
 
-be32_t rtnl_message_get_attribute_be32(const struct rtattr *rta) {
+be32_t rtnl_message_read_attribute_be32(const struct rtattr *rta) {
         assert(rta);
 
-        return ntohl(rtnl_message_get_attribute_u32(rta));
+        return ntohl(rtnl_message_read_attribute_u32(rta));
 }
 
-uint64_t rtnl_message_get_attribute_u64(const struct rtattr *rta) {
+uint64_t rtnl_message_read_attribute_u64(const struct rtattr *rta) {
         uint64_t tmp;
 
         assert(rta);
@@ -154,19 +154,19 @@ uint64_t rtnl_message_get_attribute_u64(const struct rtattr *rta) {
         return tmp;
  }
 
-int rtnl_message_get_attribute_s32(const struct rtattr *rta) {
+int rtnl_message_read_attribute_s32(const struct rtattr *rta) {
         assert(rta);
 
         return *(int *) RTA_DATA(rta);
 }
 
-const char *rtnl_message_get_attribute_string(const struct rtattr *rta) {
+const char *rtnl_message_read_attribute_string(const struct rtattr *rta) {
         assert(rta);
 
         return (const char *) RTA_DATA(rta);
 }
 
-int rtnl_message_get_attribute_ether_address(const struct rtattr *rta, struct ether_addr *data) {
+int rtnl_message_read_attribute_ether_address(const struct rtattr *rta, struct ether_addr *data) {
         assert(rta);
         assert(data);
 
@@ -174,7 +174,7 @@ int rtnl_message_get_attribute_ether_address(const struct rtattr *rta, struct et
         return 0;
 }
 
-int rtnl_message_get_in_addr(const struct rtattr *rta, struct in_addr *data) {
+int rtnl_message_read_in_addr(const struct rtattr *rta, struct in_addr *data) {
         assert(rta);
 
         if (data)
@@ -183,7 +183,7 @@ int rtnl_message_get_in_addr(const struct rtattr *rta, struct in_addr *data) {
         return 0;
 }
 
-int rtnl_message_get_in6_addr(const struct rtattr *rta, struct in6_addr *data) {
+int rtnl_message_read_in6_addr(const struct rtattr *rta, struct in6_addr *data) {
         assert(rta);
 
         if (data)

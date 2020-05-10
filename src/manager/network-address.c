@@ -103,7 +103,6 @@ int address_add(Addresses **h, Address *a) {
 
 static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addresses **ret) {
         _auto_cleanup_ Address *a = NULL;
-        struct rtattr *rta_tb[IFA_MAX+1];
         struct ifaddrmsg *ifm;
         struct nlmsghdr *p;
         int r, l;
@@ -112,6 +111,7 @@ static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addres
         assert(ret);
 
         for (p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
+                _auto_cleanup_ struct rtattr **rta_tb = NULL;
                 ifm = NLMSG_DATA(p);
 
                 l = p->nlmsg_len;
@@ -120,6 +120,10 @@ static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addres
 
                 if (ifindex > 0 && ifindex != (int) ifm->ifa_index)
                         continue;
+
+                rta_tb = new0(struct rtattr *, IFA_MAX + 1);
+                if (!rta_tb)
+                        return log_oom();
 
                 r = rtnl_message_parse_rtattr(rta_tb, IFA_MAX, IFA_RTA(ifm), l);
                 if (r < 0)
@@ -135,16 +139,16 @@ static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addres
                 switch (a->family) {
                 case AF_INET:
                         if (rta_tb[IFA_LOCAL])
-                                (void) rtnl_message_get_in_addr(rta_tb[IFA_LOCAL], &a->address.in);
+                                (void) rtnl_message_read_in_addr(rta_tb[IFA_LOCAL], &a->address.in);
                         else if (rta_tb[IFA_ADDRESS])
-                                (void) rtnl_message_get_in_addr(rta_tb[IFA_ADDRESS], &a->address.in);
+                                (void) rtnl_message_read_in_addr(rta_tb[IFA_ADDRESS], &a->address.in);
 
                         break;
                 case AF_INET6:
                         if (rta_tb[IFA_LOCAL])
-                                (void) rtnl_message_get_in6_addr(rta_tb[IFA_LOCAL], &a->address.in6);
+                                (void) rtnl_message_read_in6_addr(rta_tb[IFA_LOCAL], &a->address.in6);
                         else if (rta_tb[IFA_ADDRESS])
-                                (void) rtnl_message_get_in6_addr(rta_tb[IFA_ADDRESS], &a->address.in6);
+                                (void) rtnl_message_read_in6_addr(rta_tb[IFA_ADDRESS], &a->address.in6);
 
                         break;
                 default:

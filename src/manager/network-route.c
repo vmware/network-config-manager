@@ -71,7 +71,6 @@ static int route_add(Routes **h, Route *rt) {
 }
 
 static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes **ret) {
-        struct rtattr *rta_tb[RTA_MAX+1];
         struct nlmsghdr *p;
         struct rtmsg *rt;
         int r, l;
@@ -80,6 +79,7 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
         assert(ret);
 
         for (p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
+                _auto_cleanup_ struct rtattr **rta_tb = NULL;
                 _auto_cleanup_ Route *a = NULL;
 
                 rt = NLMSG_DATA(p);
@@ -87,7 +87,11 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
                 l = p->nlmsg_len;
                 l -= NLMSG_LENGTH(sizeof(*rt));
 
-                r = rtnl_message_parse_rtattr(rta_tb, IFA_MAX, RTM_RTA(rt), l);
+                rta_tb = new0(struct rtattr *, RTA_MAX + 1);
+                if (!rta_tb)
+                        return log_oom();
+
+                r = rtnl_message_parse_rtattr(rta_tb, RTA_MAX, RTM_RTA(rt), l);
                 if (r < 0)
                         return r;
 
@@ -98,7 +102,7 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
                 a->family = rt->rtm_family;
 
                 if (rta_tb[RTA_OIF])
-                        a->ifindex = rtnl_message_get_attribute_u32(rta_tb[RTA_OIF]);
+                        a->ifindex = rtnl_message_read_attribute_u32(rta_tb[RTA_OIF]);
                 else
                         continue;
 
@@ -115,11 +119,11 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
                 switch (a->family) {
                 case AF_INET:
                         if (rta_tb[RTA_GATEWAY])
-                                (void) rtnl_message_get_in_addr(rta_tb[RTA_GATEWAY], &a->address.in);
+                                (void) rtnl_message_read_in_addr(rta_tb[RTA_GATEWAY], &a->address.in);
                         break;
                 case AF_INET6:
                         if (rta_tb[RTA_GATEWAY])
-                                (void) rtnl_message_get_in6_addr(rta_tb[RTA_GATEWAY], &a->address.in6);
+                                (void) rtnl_message_read_in6_addr(rta_tb[RTA_GATEWAY], &a->address.in6);
                         break;
                 default:
                         break;
