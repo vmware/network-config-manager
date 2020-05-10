@@ -78,6 +78,7 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
         assert(h);
         assert(ret);
 
+
         for (p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
                 _auto_cleanup_ struct rtattr **rta_tb = NULL;
                 _auto_cleanup_ Route *a = NULL;
@@ -130,10 +131,11 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
                 }
 
                 r = route_add(ret, a);
-                if (r < 0)
+                if (r < 0) {
                         return r;
+                }
 
-                a = NULL;
+                steal_pointer(a);
         }
 
         return 0;

@@ -393,11 +393,9 @@ static int system_status(int argc, char *argv[]) {
                 printf("             %sGateway%s: ", ansi_color_bold_cyan(), ansi_color_reset());
                 for (i = routes->routes; i; i = i->next) {
                         _auto_cleanup_ char *c = NULL;
-                        char buf[IF_NAMESIZE + 1];
+                        char buf[IF_NAMESIZE + 1] = {};
 
                         rt = i->data;
-
-                        memset(buf, 0, IF_NAMESIZE + 1);
                         if_indextoname(rt->ifindex, buf);
 
                         (void) ip_to_string_prefix(rt->family, &rt->address, &c);

@@ -141,7 +141,7 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
 
         if (rta_tb[IFLA_MTU]) {
                 n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MTU]);
-                n->containts_mtu = true;
+                n->contains_mtu = true;
         }
 
         if (rta_tb[IFLA_OPERSTATE])
@@ -238,7 +238,7 @@ static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
 
                 if (rta_tb[IFLA_MTU]) {
                         n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MTU]);
-                        n->containts_mtu = true;
+                        n->contains_mtu = true;
                 }
 
                 if (rta_tb[IFLA_OPERSTATE])

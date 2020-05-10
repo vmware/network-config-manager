@@ -35,7 +35,7 @@ int rtnl_send_message(int fd, struct nlmsghdr *hdr);
 size_t rtnl_receive_message(int fd, char *buf, int len, int flags);
 int netlink_call(int fd, struct nlmsghdr *hdr, char *ret, size_t len);
 
-int rtnl_message_parse_rtattr(struct rtattr *tb[], int max, struct rtattr *rta, int len);
+int rtnl_message_parse_rtattr(struct rtattr **tb, int max, struct rtattr *rta, int len);
 struct rtattr *rtnl_message_parse_rtattr_one(int type, struct rtattr *rta, int len);
 
 uint8_t rtnl_message_read_attribute_u8(const struct rtattr *rta);

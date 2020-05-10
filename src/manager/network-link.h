@@ -25,7 +25,7 @@ typedef struct Link {
         uint32_t mtu;
 
         bool contains_mac_address:1;
-        bool containts_mtu:1;
+        bool contains_mtu:1;
 } Link;
 
 typedef struct Links {

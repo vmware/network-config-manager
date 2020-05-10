@@ -57,9 +57,11 @@ int parse_boolean(const char *v) {
         if (!v)
                 return -EINVAL;
 
-        if (string_equal(v, "1") || string_equal_fold(v, "yes") || string_equal_fold(v, "y") || string_equal_fold(v, "true") || string_equal_fold(v, "t") || string_equal_fold(v, "on"))
+        if (string_equal(v, "1") || string_equal_fold(v, "yes") || string_equal_fold(v, "y") ||
+            string_equal_fold(v, "true") || string_equal_fold(v, "t") || string_equal_fold(v, "on"))
                 return 1;
-        else if (string_equal(v, "0") || string_equal_fold(v, "no") || string_equal_fold(v, "n") || string_equal_fold(v, "false") || string_equal_fold(v, "f") || string_equal_fold(v, "off"))
+        else if (string_equal(v, "0") || string_equal_fold(v, "no") || string_equal_fold(v, "n") ||
+                 string_equal_fold(v, "false") || string_equal_fold(v, "f") || string_equal_fold(v, "off"))
                 return 0;
 
         return -EINVAL;
