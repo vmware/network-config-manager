@@ -88,14 +88,13 @@ int rtnl_message_add_attribute_string(struct nlmsghdr *hdr, int type, const char
         return rtnl_message_add_attribute(hdr, type, attribute, strlen(attribute) + 1);
 }
 
-int rtnl_message_parse_rtattr(struct rtattr *tb[], int max, struct rtattr *rta, int len) {
+int rtnl_message_parse_rtattr(struct rtattr **tb, int max, struct rtattr *rta, int len) {
         unsigned short type;
 
-        memset(tb, 0, sizeof(struct rtattr *) * (max + 1));
         while (RTA_OK(rta, len)) {
                 type = rta->rta_type;
-                if ((type <= max) && (!tb[type]))
-                        tb[type] = rta;
+                if ((type <= max) && (tb + type))
+                        *(tb + type) = rta;
 
                 rta = RTA_NEXT(rta, len);
         }
