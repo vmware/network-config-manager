@@ -111,7 +111,7 @@ static int link_add(Links **h, Link *link) {
 }
 
 static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
-        struct rtattr *rta_tb[IFLA_MAX+1];
+        _auto_cleanup_ struct rtattr **rta_tb = NULL;
         _auto_cleanup_ Link *n = NULL;
         struct ifinfomsg *iface;
         struct nlmsghdr *p;
@@ -125,6 +125,10 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
         iface = NLMSG_DATA(p);
         l = p->nlmsg_len - NLMSG_LENGTH(sizeof(*iface));
 
+        rta_tb = new0(struct rtattr *, IFLA_MAX + 1);
+        if (!rta_tb)
+                return log_oom();
+
         r = rtnl_message_parse_rtattr(rta_tb, IFLA_MAX, IFLA_RTA(iface), l);
         if (r < 0)
                 return r;
@@ -133,18 +137,18 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
         n->iftype = iface->ifi_type;
 
         if (rta_tb[IFLA_IFNAME])
-                memcpy(n->name, rtnl_message_get_attribute_string(rta_tb[IFLA_IFNAME]), IFNAMSIZ);
+                memcpy(n->name, rtnl_message_read_attribute_string(rta_tb[IFLA_IFNAME]), IFNAMSIZ);
 
         if (rta_tb[IFLA_MTU]) {
-                n->mtu = rtnl_message_get_attribute_u32(rta_tb[IFLA_MTU]);
+                n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MTU]);
                 n->containts_mtu = true;
         }
 
         if (rta_tb[IFLA_OPERSTATE])
-                n->operstate = rtnl_message_get_attribute_u8(rta_tb[IFLA_OPERSTATE]);
+                n->operstate = rtnl_message_read_attribute_u8(rta_tb[IFLA_OPERSTATE]);
 
         if (rta_tb[IFLA_ADDRESS]) {
-                rtnl_message_get_attribute_ether_address(rta_tb[IFLA_ADDRESS], &n->mac_address);
+                rtnl_message_read_attribute_ether_address(rta_tb[IFLA_ADDRESS], &n->mac_address);
                 n->contains_mac_address = true;
         }
 
@@ -230,18 +234,18 @@ static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
                 n->iftype = iface->ifi_type;
 
                 if (rta_tb[IFLA_IFNAME])
-                        memcpy(n->name, rtnl_message_get_attribute_string(rta_tb[IFLA_IFNAME]), IFNAMSIZ);
+                        memcpy(n->name, rtnl_message_read_attribute_string(rta_tb[IFLA_IFNAME]), IFNAMSIZ);
 
                 if (rta_tb[IFLA_MTU]) {
-                        n->mtu = rtnl_message_get_attribute_u32(rta_tb[IFLA_MTU]);
+                        n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MTU]);
                         n->containts_mtu = true;
                 }
 
                 if (rta_tb[IFLA_OPERSTATE])
-                        n->operstate = rtnl_message_get_attribute_u8(rta_tb[IFLA_OPERSTATE]);
+                        n->operstate = rtnl_message_read_attribute_u8(rta_tb[IFLA_OPERSTATE]);
 
                 if (rta_tb[IFLA_ADDRESS]) {
-                        rtnl_message_get_attribute_ether_address(rta_tb[IFLA_ADDRESS], &n->mac_address);
+                        rtnl_message_read_attribute_ether_address(rta_tb[IFLA_ADDRESS], &n->mac_address);
                         n->contains_mac_address = true;
                 }
 
