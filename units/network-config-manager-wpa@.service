@@ -12,7 +12,7 @@ Wants=network.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/sbin/wpa_supplicant -B -i %i -c /etc/net-manager/wpa_supplicant.conf
+ExecStart=/usr/sbin/wpa_supplicant -B -i %i -c /etc/network-config-manager/wpa_supplicant.conf
 
 [Install]
 WantedBy=multi-user.target

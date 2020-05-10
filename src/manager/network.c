@@ -388,7 +388,7 @@ int generate_wifi_config(Network *n, GString **ret) {
                 return log_oom();
 
         g_string_append(config, "# WPA Supplicant Configuration\n"
-                                "# this goes in /etc/net-manager/wpa_supplicant.conf on Photon OS\n"
+                                "# this goes in /etc/network-config--manager/wpa_supplicant.conf on Photon OS\n"
                                 "# chown root, chmod 600 \n\n");
         g_string_append(config, "# allow frontend (e.g., wpa_cli) to be used by all users in 'wheel' group\n"
                                 "ctrl_interface=DIR=/run/wpa_supplicant GROUP=wheel\n"

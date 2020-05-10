@@ -19,7 +19,7 @@ net_manager_ci_yaml_path = '/run/network-config-manager-ci/yaml'
 net_manager_config_path = '/etc/network-config-manager'
 net_manager_yaml_config_path = '/etc/network-config-manager/yaml'
 
-net_manager_wpa_supplilant_conf_file = '/etc/net-manager/wpa_supplicant.conf'
+net_manager_wpa_supplilant_conf_file = '/etc/network-config-manager/wpa_supplicant.conf'
 
 units = ["10-test99.network", "10-test98.network", "10-wlan1.network", "10-wlan0.network"]
 
@@ -638,7 +638,7 @@ class TestWifiWPASupplicantConf:
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
-	    shutil.copy(os.path.join(net_manager_ci_yaml_path, config_file), net_manager_yaml_config_path)
+        shutil.copy(os.path.join(net_manager_ci_yaml_path, config_file), net_manager_yaml_config_path)
 
     def remove_units_from_netmanager_yaml_path(self):
         for config_file in self.yaml_configs:
