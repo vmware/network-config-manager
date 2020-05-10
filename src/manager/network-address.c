@@ -135,16 +135,16 @@ static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addres
                 switch (a->family) {
                 case AF_INET:
                         if (rta_tb[IFA_LOCAL])
-                                (void) rtnl_message_get_in_addr(rta_tb[IFA_LOCAL], &a->address.in);
+                                (void) rtnl_message_read_in_addr(rta_tb[IFA_LOCAL], &a->address.in);
                         else if (rta_tb[IFA_ADDRESS])
-                                (void) rtnl_message_get_in_addr(rta_tb[IFA_ADDRESS], &a->address.in);
+                                (void) rtnl_message_read_in_addr(rta_tb[IFA_ADDRESS], &a->address.in);
 
                         break;
                 case AF_INET6:
                         if (rta_tb[IFA_LOCAL])
-                                (void) rtnl_message_get_in6_addr(rta_tb[IFA_LOCAL], &a->address.in6);
+                                (void) rtnl_message_read_in6_addr(rta_tb[IFA_LOCAL], &a->address.in6);
                         else if (rta_tb[IFA_ADDRESS])
-                                (void) rtnl_message_get_in6_addr(rta_tb[IFA_ADDRESS], &a->address.in6);
+                                (void) rtnl_message_read_in6_addr(rta_tb[IFA_ADDRESS], &a->address.in6);
 
                         break;
                 default:

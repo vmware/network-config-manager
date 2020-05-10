@@ -98,7 +98,7 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
                 a->family = rt->rtm_family;
 
                 if (rta_tb[RTA_OIF])
-                        a->ifindex = rtnl_message_get_attribute_u32(rta_tb[RTA_OIF]);
+                        a->ifindex = rtnl_message_read_attribute_u32(rta_tb[RTA_OIF]);
                 else
                         continue;
 
@@ -115,11 +115,11 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
                 switch (a->family) {
                 case AF_INET:
                         if (rta_tb[RTA_GATEWAY])
-                                (void) rtnl_message_get_in_addr(rta_tb[RTA_GATEWAY], &a->address.in);
+                                (void) rtnl_message_read_in_addr(rta_tb[RTA_GATEWAY], &a->address.in);
                         break;
                 case AF_INET6:
                         if (rta_tb[RTA_GATEWAY])
-                                (void) rtnl_message_get_in6_addr(rta_tb[RTA_GATEWAY], &a->address.in6);
+                                (void) rtnl_message_read_in6_addr(rta_tb[RTA_GATEWAY], &a->address.in6);
                         break;
                 default:
                         break;
