@@ -763,9 +763,9 @@ int manager_write_wifi_config(const Network *n, const GString *config) {
 
         assert(config);
 
-        (void) mkdir("/etc/network-config--manager", 0755);
+        (void) mkdir("/etc/network-config-manager", 0755);
 
-        r = create_conf_file("/etc/network-config--manager", "wpa_supplicant", "conf", &path);
+        r = create_conf_file("/etc/network-config-manager", "wpa_supplicant", "conf", &path);
         if (r < 0)
                 return r;
 
