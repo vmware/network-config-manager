@@ -212,15 +212,20 @@ int link_get_one_link(const char *ifname, Link **ret) {
 }
 
 static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
-        struct rtattr *rta_tb[IFLA_MAX+1];
         _auto_cleanup_ Link *n = NULL;
         struct ifinfomsg *iface;
         struct nlmsghdr *p;
         int r, l;
 
         for (p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
+                _auto_cleanup_ struct rtattr **rta_tb = NULL;
+
                 iface = NLMSG_DATA(p);
                 l = p->nlmsg_len - NLMSG_LENGTH(sizeof(*iface));
+
+                rta_tb = new0(struct rtattr *, IFLA_MAX + 1);
+                if (!rta_tb)
+                        return log_oom();
 
                 r = rtnl_message_parse_rtattr(rta_tb, IFLA_MAX, IFLA_RTA(iface), l);
                 if (r < 0)
