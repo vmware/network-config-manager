@@ -1,5 +1,5 @@
 network-config-manager
-Copyright (c) 2019 VMware, Inc.  All rights reserved.				
+Copyright (c) 2020 VMware, Inc.  All rights reserved.
 
 The Apache 2.0 license (the "License") set forth below applies to all parts of the network-config-manager project.  You may not use this file except in compliance with the License.
 
