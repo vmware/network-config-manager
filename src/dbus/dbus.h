@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0
- * Copyright © 2019 VMware, Inc.
+ * Copyright © 2020 VMware, Inc.
  */
 
 #include <stdint.h>
