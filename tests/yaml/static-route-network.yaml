@@ -1,5 +1,5 @@
  network:
-  interface:
+  link:
      name: test99
      nameservers: [192.168.0.1, 8.8.8.8]
      ntps: [192.168.0.2, 8.8.8.1]

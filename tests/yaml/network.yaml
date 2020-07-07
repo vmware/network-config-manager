@@ -1,5 +1,5 @@
  network:
-  interface:
+  link:
      name: eth1
      mtu : 1200
      mac-address: 00:0c:29:3a:bc:89

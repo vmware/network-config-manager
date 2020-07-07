@@ -1,5 +1,5 @@
  network:
-  interface:
+  link:
      name: wlan0
      dhcp: yes
      access-points:

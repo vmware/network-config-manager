@@ -1,4 +1,4 @@
  network:
-  interface:
+  link:
      name: test99
      dhcp: yes
