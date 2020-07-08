@@ -13,13 +13,13 @@ import collections
 
 networkd_unit_file_path = '/etc/systemd/network'
 
-net_manager_ci_path = '/run/network-config-manager-ci'
-net_manager_ci_yaml_path = '/run/network-config-manager-ci/yaml'
+network_config_manager_ci_path = '/run/network-config-manager-ci'
+network_config_manager_ci_yaml_path = '/run/network-config-manager-ci/yaml'
 
-net_manager_config_path = '/etc/network-config-manager'
-net_manager_yaml_config_path = '/etc/network-config-manager/yaml'
+network_config_manager_config_path = '/etc/network-config-manager'
+network_config_manager_yaml_config_path = '/etc/network-config-manager/yaml'
 
-net_manager_wpa_supplilant_conf_file = '/etc/network-config-manager/wpa_supplicant.conf'
+network_config_manager_wpa_supplilant_conf_file = '/etc/network-config-manager/wpa_supplicant.conf'
 
 units = ["10-test99.network", "10-test98.network", "10-wlan1.network", "10-wlan0.network"]
 
@@ -37,7 +37,7 @@ def unit_exits(unit):
     return os.path.exists(os.path.join(networkd_unit_file_path, unit))
 
 def wifi_wpa_supplilant_conf_exits():
-    return os.path.exists(net_manager_wpa_supplilant_conf_file)
+    return os.path.exists(network_config_manager_wpa_supplilant_conf_file)
 
 def remove_units_from_netword_unit_path():
     for i in units:
@@ -82,7 +82,7 @@ def read_wpa_supplicant_conf(conf_file):
 
     return networks
 
-class TestNetManagerYAML:
+class TestNetworkConfigManagerYAML:
     yaml_configs = [
         "dhcp.yaml",
         "dhcp-client-identifier.yaml",
@@ -92,12 +92,12 @@ class TestNetManagerYAML:
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
-        shutil.copy(os.path.join(net_manager_ci_yaml_path, config_file), net_manager_yaml_config_path)
+        shutil.copy(os.path.join(network_config_manager_ci_yaml_path, config_file), network_config_manager_yaml_config_path)
 
     def remove_units_from_netmanager_yaml_path(self):
         for config_file in self.yaml_configs:
-            if (os.path.exists(os.path.join(net_manager_yaml_config_path, config_file))):
-                os.remove(os.path.join(net_manager_yaml_config_path, config_file))
+            if (os.path.exists(os.path.join(network_config_manager_yaml_config_path, config_file))):
+                os.remove(os.path.join(network_config_manager_yaml_config_path, config_file))
 
     def teardown_method(self):
         self.remove_units_from_netmanager_yaml_path()
@@ -638,12 +638,12 @@ class TestWifiWPASupplicantConf:
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
-        shutil.copy(os.path.join(net_manager_ci_yaml_path, config_file), net_manager_yaml_config_path)
+        shutil.copy(os.path.join(network_config_manager_ci_yaml_path, config_file), network_config_manager_yaml_config_path)
 
     def remove_units_from_netmanager_yaml_path(self):
         for config_file in self.yaml_configs:
-            if (os.path.exists(os.path.join(net_manager_yaml_config_path, config_file))):
-                os.remove(os.path.join(net_manager_yaml_config_path, config_file))
+            if (os.path.exists(os.path.join(network_config_manager_yaml_config_path, config_file))):
+                os.remove(os.path.join(network_config_manager_yaml_config_path, config_file))
 
     def teardown_method(self):
         remove_units_from_netword_unit_path()
@@ -663,7 +663,7 @@ class TestWifiWPASupplicantConf:
 
         assert(wifi_wpa_supplilant_conf_exits() == True)
 
-        network = read_wpa_supplicant_conf(net_manager_wpa_supplilant_conf_file)
+        network = read_wpa_supplicant_conf(network_config_manager_wpa_supplilant_conf_file)
         assert(network["ssid"] == "network_ssid_name1")
         assert(network["password"] == "test123")
 
@@ -682,7 +682,7 @@ class TestWifiWPASupplicantConf:
 
         assert(wifi_wpa_supplilant_conf_exits() == True)
 
-        network = read_wpa_supplicant_conf(net_manager_wpa_supplilant_conf_file)
+        network = read_wpa_supplicant_conf(network_config_manager_wpa_supplilant_conf_file)
         if network is None:
             assert(False)
 
@@ -703,7 +703,7 @@ class TestWifiWPASupplicantConf:
 
         assert(wifi_wpa_supplilant_conf_exits() == True)
 
-        network = read_wpa_supplicant_conf(net_manager_wpa_supplilant_conf_file)
+        network = read_wpa_supplicant_conf(network_config_manager_wpa_supplilant_conf_file)
         if network is None:
             assert(False)
 
@@ -730,7 +730,7 @@ class TestWifiWPASupplicantConf:
 
         assert(wifi_wpa_supplilant_conf_exits() == True)
 
-        network = read_wpa_supplicant_conf(net_manager_wpa_supplilant_conf_file)
+        network = read_wpa_supplicant_conf(network_config_manager_wpa_supplilant_conf_file)
         if network is None:
             assert(False)
 
@@ -740,12 +740,12 @@ class TestWifiWPASupplicantConf:
         assert(network["password"] == "test123")
 
 def setUpModule():
-    if not os.path.exists(net_manager_yaml_config_path):
-        os.makedirs(net_manager_yaml_config_path)
+    if not os.path.exists(network_config_manager_yaml_config_path):
+        os.makedirs(network_config_manager_yaml_config_path)
 
-    if not os.path.exists(net_manager_yaml_config_path):
-        shutil.mkdirs(net_manager_yaml_config_path)
+    if not os.path.exists(network_config_manager_yaml_config_path):
+        shutil.mkdirs(network_config_manager_yaml_config_path)
 
 def tearDownModule():
-    if os.path.exists(net_manager_ci_path):
-        shutil.rmtree(net_manager_ci_path)
+    if os.path.exists(network_config_manager_ci_path):
+        shutil.rmtree(network_config_manager_ci_path)
