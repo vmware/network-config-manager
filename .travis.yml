@@ -6,16 +6,22 @@ services:
   - docker
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install python3.7 python3-pip python3-dev python3-setuptools build-essential python3-sphinx python-sphinx python-configparser
-  - sudo apt-get install -y ninja-build glib-2.0-dev libudev-dev libyaml-dev libsystemd-dev clang
-  - sudo pip3 install -U meson pytest
+  - docker pull fedora:rawhide
+  - docker run --name travis-ci -v $TRAVIS_BUILD_DIR:/travis -w /travis --privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup:ro -dit fedora:rawhide /sbin/init
+
+install:
+  - docker exec -ti travis-ci bash -c "systemctl is-running --wait || :"
+  - docker exec -ti travis-ci bash -c "dnf makecache"
+  - docker exec -ti travis-ci bash -c "dnf -y update"
+  - docker exec -ti travis-ci bash -c "dnf -y install @development-tools git dnf-utils dnf-plugins-core"
+  - docker exec -ti travis-ci bash -c "dnf -y install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel python3-sphinx iproute clang"
+  - docker exec -ti travis-ci bash -c "pip3 install -U meson pytest"
+  - docker exec -ti travis-ci bash -c "systemctl enable systemd-networkd; systemctl start systemd-networkd"
 
 script:
-  - meson build
-  - ninja -C build
-  - sudo ninja -C build install
-  - sudo cp -r tests /run/network-config-manager-ci
-  - sudo pytest -v -s /run/network-config-manager-ci/network-config-manager-tests.py
-  - CC=clang  meson build-clang
-  - ninja -C build-clang
+  - docker exec -ti travis-ci bash -c "make;sudo make install"
+  - docker exec -ti travis-ci bash -c "sudo cp -r tests /run/network-config-manager-ci"
+  - docker exec -ti travis-ci bash -c "sudo pytest -v -s /run/network-config-manager-ci/network-config-manager-tests.py"
+  - docker exec -ti travis-ci bash -c "CC=clang  meson build-clang"
+after_script:
+  - docker stop travis-ci
