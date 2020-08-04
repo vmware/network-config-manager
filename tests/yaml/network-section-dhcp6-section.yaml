@@ -1,0 +1,9 @@
+ network:
+  link:
+     name: test99
+     dhcp: yes
+     link-local: yes
+     ipv6-accept-ra: yes
+     dhcp6-use-mtu: yes
+     dhcp6-use-domain: yes
+     dhcp6-use-dns: yes

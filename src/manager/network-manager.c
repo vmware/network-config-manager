@@ -145,15 +145,15 @@ int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
         if (r < 0)
                 return r;
 
-        (void) parse_config_file(network, "DHCP", "ClientIdentifier", &config);
+        (void) parse_config_file(network, "DHCPv4", "ClientIdentifier", &config);
         if (config) {
                 if (string_equal(config, dhcp_client_identifier_to_name(identifier)))
                         return 0;
         }
 
-        r = set_config_file_string(network, "DHCP", "ClientIdentifier", dhcp_client_identifier_to_name(identifier));
+        r = set_config_file_string(network, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(identifier));
         if (r < 0) {
-                log_warning("Failed to update DHCP ClientIdentifier= to config file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to update DHCP4 ClientIdentifier= to config file '%s': %s", network, g_strerror(-r));
                 return r;
         }
 
@@ -171,7 +171,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iai
         if (r < 0)
                 return r;
 
-        r = parse_config_file_integer(network, "DHCP", "IAID", &v);
+        r = parse_config_file_integer(network, "DHCPv6", "IAID", &v);
         if (r >= 0) {
                 if (v == iaid)
                         return 0;
@@ -202,16 +202,16 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDU
                         return r;
         }
 
-        r = set_config_file_string(network, "DHCP", "DUIDType", dhcp_client_duid_type_to_name(duid));
+        r = set_config_file_string(network, "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
         if (r < 0) {
                 log_warning("Failed to update DHCP ClientIdentifier= to config file '%s': %s", network, g_strerror(-r));
                 return r;
         }
 
         if (raw_data) {
-                r = set_config_file_string(network, "DHCP", "DUIDRawData", raw_data);
+                r = set_config_file_string(network, "DHCPv6", "DUIDRawData", raw_data);
                 if (r < 0) {
-                        log_warning("Failed to update DHCP IAID= to config file '%s': %s", network, g_strerror(-r));
+                        log_warning("Failed to update DHCPv6 IAID= to config file '%s': %s", network, g_strerror(-r));
                         return r;
                 }
         }
@@ -664,7 +664,7 @@ int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k
         return dbus_reconfigure_link(ifnameidx->ifindex);
 }
 
-int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v) {
+int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v, bool dhcp4) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -674,7 +674,10 @@ int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v
         if (r < 0)
                 return r;
 
-        r = set_config_file_bool(network, "DHCP", k, v);
+        if (dhcp4)
+                r = set_config_file_bool(network, "DHCPv4", k, v);
+        else
+                r = set_config_file_bool(network, "DHCPv6", k, v);
         if (r < 0)
                 return r;
 

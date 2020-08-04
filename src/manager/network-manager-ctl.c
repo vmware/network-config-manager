@@ -547,7 +547,7 @@ static int link_set_dhcp_mode(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_dhcp_client_identifier(int argc, char *argv[]) {
+static int link_set_dhcp4_client_identifier(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClientIdentifier d;
         int r;
@@ -644,23 +644,23 @@ static int link_set_network_section_bool(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_dhcp_section(int argc, char *argv[]) {
+static int link_set_dhcp4_section(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         const char *k;
         bool v;
         int r;
 
-        if (string_equal(argv[0], "set-dhcp-use-dns"))
+        if (string_equal(argv[0], "set-dhcp4-use-dns"))
                 k = "UseDNS";
-        else if (string_equal(argv[0], "set-dhcp-use-ntp"))
+        else if (string_equal(argv[0], "set-dhcp4-use-ntp"))
                 k = "UseNTP";
-        else if (string_equal(argv[0], "set-dhcp-use-domains"))
+        else if (string_equal(argv[0], "set-dhcp4-use-domains"))
                 k = "UseDomains";
-        else if (string_equal(argv[0], "set-dhcp-use-mtu"))
+        else if (string_equal(argv[0], "set-dhcp4-use-mtu"))
                 k = "UseMTU";
-        else if (string_equal(argv[0], "set-dhcp-use-routes"))
+        else if (string_equal(argv[0], "set-dhcp4-use-routes"))
                 k = "UseRoutes";
-        else if (string_equal(argv[0], "set-dhcp-use-timezone"))
+        else if (string_equal(argv[0], "set-dhcp4-use-timezone"))
                 k = "UseTimezone";
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -676,7 +676,46 @@ static int link_set_dhcp_section(int argc, char *argv[]) {
         }
 
         v = r;
-        r = manager_set_dhcp_section(p, k, v);
+        r = manager_set_dhcp_section(p, k, v, true);
+        if (r < 0)
+                return r;
+
+        return 0;
+}
+
+static int link_set_dhcp6_section(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        const char *k;
+        bool v;
+        int r;
+
+        if (string_equal(argv[0], "set-dhcp6-use-dns"))
+                k = "UseDNS";
+        else if (string_equal(argv[0], "set-dhcp6-use-ntp"))
+                k = "UseNTP";
+        else if (string_equal(argv[0], "set-dhcp6-use-domains"))
+                k = "UseDomains";
+        else if (string_equal(argv[0], "set-dhcp6-use-mtu"))
+                k = "UseMTU";
+        else if (string_equal(argv[0], "set-dhcp6-use-routes"))
+                k = "UseRoutes";
+        else if (string_equal(argv[0], "set-dhcp6-use-timezone"))
+                k = "UseTimezone";
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = parse_boolean(argv[2]);
+        if (r < 0) {
+                log_warning("Failed to parse %s=%s for link '%s': %s", argv[0], argv[2], argv[1], g_strerror(-r));
+                return r;
+        }
+
+        v = r;
+        r = manager_set_dhcp_section(p, k, v, false);
         if (r < 0)
                 return r;
 
@@ -1448,7 +1487,7 @@ static int help(void) {
                "  set-mac                      [LINK] [MAC] Set Link MAC\n"
                "  set-link-mode                [LINK] [MODE { yes | no | on | off | 1 | 0} ] Set Link managed by networkd\n"
                "  set-dhcp-mode                [LINK] [DHCP-MODE { yes | no | ipv4 | ipv6 } ] Set Link DHCP setting\n"
-               "  set-dhcp-client-identifier   [LINK] [IDENTIFIER { mac | duid | duid-only}\n"
+               "  set-dhcp4-client-identifier   [LINK] [IDENTIFIER { mac | duid | duid-only}\n"
                "  set-dhcp-iaid                [LINK] [IAID] Sets the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
                "  set-dhcp-duid                [LINK | system] [DUID { link-layer-time | vendor | link-layer | uuid } ] [RAWDATA] Sets the DHCP Client\n"
                "                                      DUID type which specifies how the DUID should be generated and [RAWDATA] to overides the global DUIDRawData.\n"
@@ -1475,11 +1514,16 @@ static int help(void) {
                "  set-ipforward                [LINK] [IPForward { yes | no | on | off | 1 | 0}] Set Link IP packet forwarding for the system\n"
                "  set-ipv6acceptra             [LINK] [IPv6AcceptRA { yes | no | on | off | 1 | 0}] Set Link IPv6 Router Advertisement (RA) reception support for the interface\n"
                "  set-ipmasquerade             [LINK] [IPMasquerade { yes | no | on | off | 1 | 0}] Set IP masquerading for the network interface\n"
-               "  set-dhcp-use-dns             [LINK] [UseDNS { yes | no | on | off | 1 | 0}] Set Link DHCP Use DNS\n"
-               "  set-dhcp-use-domains         [LINK] [UseDomains { yes | no | on | off | 1 | 0}] Set Link DHCP Use DOMAINS\n"
-               "  set-dhcp-use-mtu             [LINK] [UseMTU { yes | no | on | off | 1 | 0}] Set Link DHCP Use MTU\n"
-               "  set-dhcp-use-ntp             [LINK] [UseNTP { yes | no | on | off | 1 | 0}] Set Link DHCP Use NTP\n"
-               "  set-dhcp-use-routes          [LINK] [UseRoutes { yes | no | on | off | 1 | 0}] Set Link DHCP Use ROUTES\n"
+               "  set-dhcp4-use-dns            [LINK] [UseDNS { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use DNS\n"
+               "  set-dhcp4-use-domains        [LINK] [UseDomains { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use DOMAINS\n"
+               "  set-dhcp4-use-mtu            [LINK] [UseMTU { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use MTU\n"
+               "  set-dhcp4-use-ntp            [LINK] [UseNTP { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use NTP\n"
+               "  set-dhcp4-use-dns            [LINK] [UseDNS { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use DNS\n"
+               "  set-dhcp6-use-domains        [LINK] [UseDomains { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use DOMAINS\n"
+               "  set-dhcp6-use-mtu            [LINK] [UseMTU { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use MTU\n"
+               "  set-dhcp6-use-ntp            [LINK] [UseNTP { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use NTP\n"
+               "  set-dhcp6-use-routes         [LINK] [UseRoutes { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use ROUTES\n"
+               "  set-dhcp6-use-routes         [LINK] [UseRoutes { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use ROUTES\n"
                "  add-ntp                      [LINK] [NTP] Add Link NTP server address. This option may be specified more than once.\n"
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
                "  disable-ipv6                 [LINK] Disables IPv6 on the interface.\n"
@@ -1541,7 +1585,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-mac",                      2,        WORD_ANY, false, link_set_mac },
                 { "set-link-mode",                2,        WORD_ANY, false, link_set_mode },
                 { "set-dhcp-mode",                2,        WORD_ANY, false, link_set_dhcp_mode },
-                { "set-dhcp-client-identifier",   2,        WORD_ANY, false, link_set_dhcp_client_identifier},
+                { "set-dhcp4-client-identifier",  2,        WORD_ANY, false, link_set_dhcp4_client_identifier},
                 { "set-dhcp-iaid",                2,        WORD_ANY, false, link_set_dhcp_client_iaid},
                 { "set-dhcp-duid",                2,        WORD_ANY, false, link_set_dhcp_client_duid},
                 { "set-link-state",               2,        WORD_ANY, false, link_update_state },
@@ -1566,12 +1610,18 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-ipforward",                2,        WORD_ANY, false, link_set_network_section_bool },
                 { "set-ipv6acceptra",             2,        WORD_ANY, false, link_set_network_section_bool },
                 { "set-ipmasquerade",             2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-dhcp-use-dns",             2,        WORD_ANY, false, link_set_dhcp_section },
-                { "set-dhcp-use-domains",         2,        WORD_ANY, false, link_set_dhcp_section },
-                { "set-dhcp-use-ntp",             2,        WORD_ANY, false, link_set_dhcp_section },
-                { "set-dhcp-use-mtu",             2,        WORD_ANY, false, link_set_dhcp_section },
-                { "set-dhcp-use-timezone",        2,        WORD_ANY, false, link_set_dhcp_section },
-                { "set-dhcp-use-routes",          2,        WORD_ANY, false, link_set_dhcp_section },
+                { "set-dhcp4-use-dns",            2,        WORD_ANY, false, link_set_dhcp4_section },
+                { "set-dhcp4-use-domains",        2,        WORD_ANY, false, link_set_dhcp4_section },
+                { "set-dhcp4-use-ntp",            2,        WORD_ANY, false, link_set_dhcp4_section },
+                { "set-dhcp4-use-mtu",            2,        WORD_ANY, false, link_set_dhcp4_section },
+                { "set-dhcp4-use-timezone",       2,        WORD_ANY, false, link_set_dhcp4_section },
+                { "set-dhcp4-use-routes",         2,        WORD_ANY, false, link_set_dhcp4_section },
+                { "set-dhcp6-use-dns",            2,        WORD_ANY, false, link_set_dhcp6_section },
+                { "set-dhcp6-use-domains",        2,        WORD_ANY, false, link_set_dhcp6_section },
+                { "set-dhcp6-use-ntp",            2,        WORD_ANY, false, link_set_dhcp6_section },
+                { "set-dhcp6-use-mtu",            2,        WORD_ANY, false, link_set_dhcp6_section },
+                { "set-dhcp6-use-timezone",       2,        WORD_ANY, false, link_set_dhcp6_section },
+                { "set-dhcp6-use-routes",         2,        WORD_ANY, false, link_set_dhcp6_section },
                 { "add-ntp",                      2,        WORD_ANY, false, link_add_ntp },
                 { "disable-ipv6",                 1,        WORD_ANY, false, link_enable_ipv6 },
                 { "enable-ipv6",                  1,        WORD_ANY, false, link_enable_ipv6 },

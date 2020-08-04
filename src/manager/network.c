@@ -206,9 +206,12 @@ int network_new(Network **ret) {
 
         *n = (Network) {
                 .dhcp_type = _DHCP_MODE_INVALID,
-                .use_mtu = -1,
-                .use_dns = -1,
-                .use_domains = -1,
+                .dhcp4_use_mtu = -1,
+                .dhcp4_use_dns = -1,
+                .dhcp4_use_domains = -1,
+                .dhcp6_use_mtu = -1,
+                .dhcp6_use_dns = -1,
+                .dhcp6_use_domains = -1,
                 .gateway_onlink = -1,
                 .lldp = -1,
                 .ipv6_accept_ra = -1,
@@ -502,21 +505,35 @@ int generate_network_config(Network *n, GString **ret) {
                 g_string_append(config, "\n");
         }
 
-        if (n->use_dns != -1 || n->use_domains != -1 || n->use_mtu != -1 || n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID) {
-                g_string_append(config, "\n[DHCP]\n");
+        if (n->dhcp4_use_dns != -1 || n->dhcp4_use_domains != -1 || n->dhcp4_use_mtu != -1 || n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID) {
+                g_string_append(config, "\n[DHCPv4]\n");
 
                 if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID)
                         g_string_append_printf(config, "ClientIdentifier=%s\n", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
 
-                if (n->use_dns != -1)
-                        g_string_append_printf(config, "UseDNS=%s\n", bool_to_string(n->use_dns));
+                if (n->dhcp4_use_dns != -1)
+                        g_string_append_printf(config, "UseDNS=%s\n", bool_to_string(n->dhcp4_use_dns));
 
-                if (n->use_domains != -1)
-                        g_string_append_printf(config, "UseDomains=%s\n", bool_to_string(n->use_domains));
+                if (n->dhcp4_use_domains != -1)
+                        g_string_append_printf(config, "UseDomains=%s\n", bool_to_string(n->dhcp4_use_domains));
 
-                if (n->use_mtu != -1)
-                        g_string_append_printf(config, "UseMTU=%s\n", bool_to_string(n->use_mtu));
+                if (n->dhcp4_use_mtu != -1)
+                        g_string_append_printf(config, "UseMTU=%s\n", bool_to_string(n->dhcp4_use_mtu));
         }
+
+        if (n->dhcp6_use_dns != -1 || n->dhcp6_use_domains != -1 || n->dhcp6_use_mtu != -1) {
+                g_string_append(config, "\n[DHCPv6]\n");
+
+                if (n->dhcp6_use_dns != -1)
+                        g_string_append_printf(config, "UseDNS=%s\n", bool_to_string(n->dhcp6_use_dns));
+
+                if (n->dhcp6_use_domains != -1)
+                        g_string_append_printf(config, "UseDomains=%s\n", bool_to_string(n->dhcp6_use_domains));
+
+                if (n->dhcp6_use_mtu != -1)
+                        g_string_append_printf(config, "UseMTU=%s\n", bool_to_string(n->dhcp6_use_mtu));
+        }
+
 
         if (n->addresses && set_size(n->addresses) > 0)
                 set_foreach(n->addresses, append_addresses, config);

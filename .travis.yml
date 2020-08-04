@@ -6,8 +6,10 @@ services:
   - docker
 
 before_install:
+  - sudo apt-get update && sudo apt-get install -y init && sudo apt-get clean all
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
   - docker pull fedora:rawhide
-  - docker run --name travis-ci -v $TRAVIS_BUILD_DIR:/travis -w /travis --privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup:ro -dit fedora:rawhide /sbin/init
+  - docker run --name travis-ci -v $TRAVIS_BUILD_DIR:/travis -w /travis --privileged=true -dit --net=host fedora:rawhide /sbin/init
 
 install:
   - docker exec -ti travis-ci bash -c "systemctl is-running --wait || :"
@@ -16,7 +18,7 @@ install:
   - docker exec -ti travis-ci bash -c "dnf -y install @development-tools git dnf-utils dnf-plugins-core"
   - docker exec -ti travis-ci bash -c "dnf -y install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel python3-sphinx iproute clang"
   - docker exec -ti travis-ci bash -c "pip3 install -U meson pytest"
-  - docker exec -ti travis-ci bash -c "systemctl enable systemd-networkd; systemctl start systemd-networkd"
+  - docker exec -ti travis-ci bash -c "systemctl start systemd-networkd"
 
 script:
   - docker exec -ti travis-ci bash -c "make;sudo make install"
