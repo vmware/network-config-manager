@@ -34,7 +34,7 @@ int manager_reload_network(void);
 int manager_reconfigure_link(const IfNameIndex *ifnameidx);
 
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v);
-int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v);
+int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v, bool dhcp4);
 
 int manager_generate_network_config_from_yaml(const char *file);
 int manager_write_wifi_config(const Network *n, const GString *config);

@@ -2,9 +2,9 @@
   link:
      name: wlan1
      dhcp: yes
-     use-dns: no
-     use-mtu: yes
-     use-domain: yes
+     dhcp4-use-dns: no
+     dhcp4-use-mtu: yes
+     dhcp4-use-domain: yes
      gateway: 192.168.1.1/24
      gateway-onlink: yes
      nameservers: [192.168.0.1, 8.8.8.8]

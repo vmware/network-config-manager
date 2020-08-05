@@ -103,9 +103,12 @@ typedef struct Network {
         DHCPClientIdentifier dhcp_client_identifier_type;
         LinkLocalAddress link_local;
 
-        int use_mtu;
-        int use_dns;
-        int use_domains;
+        int dhcp4_use_mtu;
+        int dhcp4_use_dns;
+        int dhcp4_use_domains;
+        int dhcp6_use_mtu;
+        int dhcp6_use_dns;
+        int dhcp6_use_domains;
         int lldp;
         int ipv6_accept_ra;
 

@@ -2,4 +2,4 @@
   link:
      name: test99
      dhcp: yes
-     dhcp-client-identifier: mac
+     dhcp4-client-identifier: mac
