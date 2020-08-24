@@ -1,7 +1,6 @@
 # network-config-manager
 
 ![network config manager CI](https://github.com/vmware/network-config-manager/workflows/network%20config%20manager%20CI/badge.svg)
-![N|Solid](https://travis-ci.com/vmware/network-config-manager.svg?branch=master)
 
 ### What is nmctl
 
@@ -37,7 +36,7 @@ Introspect
 On Photon OS
 ```bash
 ➜  ~ tdnf install -y build-essential
-➜  ~ tdnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel python3-sphinx
+➜  ~ tdnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel
 ➜  ~ meson build
 ➜  ~ ninja -C build
 ➜  ~ sudo ninja -C build install
