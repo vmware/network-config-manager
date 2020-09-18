@@ -1524,6 +1524,11 @@ static int help(void) {
         return 0;
 }
 
+static int show_version(void) {
+       printf("%s\n", PACKAGE_STRING);
+       return 0;
+}
+
 static int parse_argv(int argc, char *argv[]) {
 
         enum {
@@ -1546,6 +1551,9 @@ static int parse_argv(int argc, char *argv[]) {
 
                 case 'h':
                         return help();
+
+                case ARG_VERSION:
+                        return show_version();
 
                 case '?':
                         return -EINVAL;
