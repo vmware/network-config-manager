@@ -39,7 +39,7 @@ int dns_server_new(DNSServer **ret) {
         if (!a)
                 return -ENOMEM;
 
-        *ret = a;
+        *ret = steal_pointer(a);
 
         return 0;
 }
@@ -119,7 +119,7 @@ int dns_domain_new(DNSDomain **ret) {
         if (!a)
                 return -ENOMEM;
 
-        *ret = a;
+        *ret = steal_pointer(a);
 
         return 0;
 }
