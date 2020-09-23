@@ -1420,8 +1420,8 @@ static int link_reconfigure(int argc, char *argv[]) {
 
 }
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
+        _cleanup_(g_dir_unrefp) GDir *dir = NULL;
         const char *file = NULL;
-        GDir *dir;
         int r, i;
 
         if (string_equal(argv[0], "apply-yaml-config")) {
