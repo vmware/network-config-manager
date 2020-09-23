@@ -301,8 +301,9 @@ int parse_address_from_string_and_add(const char *s, Set *a) {
         if (!p)
                 return log_oom();
 
-        set_add(a, p);
-        p = NULL;
+        (void) set_add(a, p);
+
+        steal_pointer(p);
 
         return 0;
 }

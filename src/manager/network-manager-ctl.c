@@ -314,7 +314,6 @@ static int list_one_link(char *argv[]) {
          if (tz)
                  printf("       %sTime Zone%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), tz);
 
-
         return 0;
 }
 
@@ -637,11 +636,7 @@ static int link_set_network_section_bool(int argc, char *argv[]) {
         }
 
         v = r;
-        r = manager_set_network_section_bool(p, k, v);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return manager_set_network_section_bool(p, k, v);
 }
 
 static int link_set_dhcp4_section(int argc, char *argv[]) {
@@ -1393,13 +1388,7 @@ static int link_enable_ipv6(int argc, char *argv[]) {
 }
 
 static int network_reload(int argc, char *argv[]) {
-        int r;
-
-        r = manager_reload_network();
-        if (r < 0)
-                return r;
-
-        return 0;
+        return manager_reload_network();
 }
 
 static int link_reconfigure(int argc, char *argv[]) {
@@ -1412,16 +1401,11 @@ static int link_reconfigure(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = manager_reconfigure_link(p);
-        if (r < 0)
-                return r;
-
-        return 0;
-
+        return manager_reconfigure_link(p);
 }
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
+        _cleanup_(g_dir_unrefp) GDir *dir = NULL;
         const char *file = NULL;
-        GDir *dir;
         int r, i;
 
         if (string_equal(argv[0], "apply-yaml-config")) {

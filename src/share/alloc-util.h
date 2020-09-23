@@ -43,6 +43,11 @@ static inline void g_string_unrefp(GString **s) {
                 g_string_free(*s, false);
 }
 
+static inline void g_dir_unrefp(GDir **d) {
+        if (d && *d)
+                g_dir_close(*d);
+}
+
 static inline void close_fdp(int *fd) {
         if (fd && *fd && *fd >= 0)
                 close(*fd);
@@ -54,6 +59,7 @@ DEFINE_CLEANUP(int *, close_fdp);
 DEFINE_CLEANUP(GString **, g_string_unrefp);
 DEFINE_CLEANUP(char **, strv_free);
 DEFINE_CLEANUP(GHashTable *, g_hash_table_unref);
+DEFINE_CLEANUP(GDir **, g_dir_unrefp);
 
 #define _auto_cleanup_ _cleanup_(freep)
 #define _auto_cleanup_fclose_ _cleanup_(fclosep)
