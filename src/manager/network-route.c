@@ -192,17 +192,13 @@ int manager_link_get_routes(Routes **ret) {
 
 int manager_get_one_link_route(int ifindex, Routes **ret) {
         _auto_cleanup_close_ int s = -1;
-        int r, c;
+        int r;
 
         r = rtnl_socket_open(0, &s);
         if (r < 0)
                 return r;
 
-        c = acquire_link_route(s, ifindex, ret);
-        if (c < 0)
-                return c;
-
-        return 0;
+        return acquire_link_route(s, ifindex, ret);
 }
 
 static int link_add_route(int s, Route *route) {
@@ -275,11 +271,7 @@ int manager_link_add_default_gateway(Route *route) {
         if (r < 0)
                 return r;
 
-        r = link_add_route(s, route);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return link_add_route(s, route);
 }
 
 int manager_link_add_route(Route *route) {
@@ -292,9 +284,5 @@ int manager_link_add_route(Route *route) {
         if (r < 0)
                 return r;
 
-        r = link_add_route(s, route);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return link_add_route(s, route);
 }
