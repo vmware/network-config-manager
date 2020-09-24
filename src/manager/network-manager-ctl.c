@@ -1566,6 +1566,13 @@ static int parse_argv(int argc, char *argv[]) {
         return 1;
 }
 
+static void is_netword_running(void) {
+        if (access("/run/systemd/netif/state", F_OK) < 0) {
+                log_warning("systemd-networkd is not running. Failed to continue.\n\n");
+                exit(-1);
+        }
+}
+
 static int cli_run(int argc, char *argv[]) {
         _cleanup_(cli_unrefp) CliManager *m = NULL;
         int r;
@@ -1591,7 +1598,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "show-dns",                     WORD_ANY, WORD_ANY, false, show_dns_server },
                 { "add-dns",                      2,        WORD_ANY, false, add_dns_server },
                 { "add-domain",                   1,        WORD_ANY, false, add_dns_domains },
-                { "show-domains",                 WORD_ANY, WORD_ANY, false,  show_dns_server_domains },
+                { "show-domains",                 WORD_ANY, WORD_ANY, false, show_dns_server_domains },
                 { "revert-resolve-link",          1,        WORD_ANY, false, revert_resolve_link },
                 { "set-link-local-address",       2,        WORD_ANY, false, link_set_network_section_bool },
                 { "set-ipv4ll-route",             2,        WORD_ANY, false, link_set_network_section_bool },
@@ -1625,6 +1632,13 @@ static int cli_run(int argc, char *argv[]) {
                 {}
         };
 
+        r = parse_argv(argc, argv);
+        if (r <= 0)
+                return r;
+
+        if (!isempty_string(argv[1]) && !string_equal(argv[1], "generate-config-from-cmdline"))
+                is_netword_running();
+
         r = cli_manager_new(commands, &m);
         if (r < 0)
                 return r;
@@ -1632,24 +1646,8 @@ static int cli_run(int argc, char *argv[]) {
         return cli_run_command(m, argc, argv);
 }
 
-static void is_netword_running(void) {
-        if (access("/run/systemd/netif/state", F_OK) < 0) {
-                log_warning("systemd-networkd is not running. Failed to continue.\n\n");
-                exit(-1);
-        }
-}
-
 int main(int argc, char *argv[]) {
-        int r;
-
         g_log_set_default_handler (g_log_default_handler, NULL);
-
-        r = parse_argv(argc, argv);
-        if (r <= 0)
-                return r;
-
-        if (!isempty_string(argv[1]) && !string_equal(argv[1], "generate-config-from-cmdline"))
-                is_netword_running();
 
         return cli_run(argc, argv);
 }
