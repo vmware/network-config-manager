@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <network-config-manager.h>
 #include "alloc-util.h"
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
@@ -74,7 +75,7 @@ static void display_links_info(gpointer data_ptr, gpointer ignored) {
                setup_color, string_na(setup), ansi_color_reset());
 }
 
-static int list_links(int argc, char *argv[]) {
+int list_links(int argc, char *argv[]) {
         _cleanup_(links_free) Links *h = NULL;
         int r;
 
@@ -192,7 +193,7 @@ static void list_link_sysfs_attributes(Link *l) {
                 printf("           %sSpeed%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), speed);
 }
 
-static int list_one_link(char *argv[]) {
+int list_one_link(char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
@@ -336,7 +337,7 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
                 printf("                      %-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
 }
 
-static int system_status(int argc, char *argv[]) {
+int system_status(int argc, char *argv[]) {
         _auto_cleanup_ char *state = NULL, *hostname = NULL, *kernel = NULL, *kernel_release = NULL,
                             *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
@@ -432,7 +433,7 @@ static int system_status(int argc, char *argv[]) {
         return r;
 }
 
-static int link_status(int argc, char *argv[]) {
+int link_status(int argc, char *argv[]) {
         int c;
 
         if (argc <= 1)
@@ -446,7 +447,7 @@ static int link_status(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_mtu(int argc, char *argv[]) {
+int link_set_mtu(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t mtu;
         int r;
@@ -470,7 +471,7 @@ static int link_set_mtu(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_mac(int argc, char *argv[]) {
+int link_set_mac(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -494,7 +495,7 @@ static int link_set_mac(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_mode(int argc, char *argv[]) {
+int link_set_mode(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool k;
         int r;
@@ -521,7 +522,7 @@ static int link_set_mode(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_dhcp_mode(int argc, char *argv[]) {
+int link_set_dhcp_mode(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int mode, r;
 
@@ -546,7 +547,7 @@ static int link_set_dhcp_mode(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_dhcp4_client_identifier(int argc, char *argv[]) {
+int link_set_dhcp4_client_identifier(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClientIdentifier d;
         int r;
@@ -572,7 +573,7 @@ static int link_set_dhcp4_client_identifier(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_dhcp_client_iaid(int argc, char *argv[]) {
+int link_set_dhcp_client_iaid(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t v;
         int r;
@@ -598,7 +599,7 @@ static int link_set_dhcp_client_iaid(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_network_section_bool(int argc, char *argv[]) {
+int link_set_network_section_bool(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         const char *k;
         bool v;
@@ -639,7 +640,7 @@ static int link_set_network_section_bool(int argc, char *argv[]) {
         return manager_set_network_section_bool(p, k, v);
 }
 
-static int link_set_dhcp4_section(int argc, char *argv[]) {
+int link_set_dhcp4_section(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         const char *k;
         bool v;
@@ -678,7 +679,7 @@ static int link_set_dhcp4_section(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_dhcp6_section(int argc, char *argv[]) {
+int link_set_dhcp6_section(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         const char *k;
         bool v;
@@ -717,7 +718,7 @@ static int link_set_dhcp6_section(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_set_dhcp_client_duid(int argc, char *argv[]) {
+int link_set_dhcp_client_duid(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClientDUIDType d;
         bool system = false;
@@ -749,7 +750,7 @@ static int link_set_dhcp_client_duid(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_update_state(int argc, char *argv[]) {
+int link_update_state(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         LinkState state;
         int r;
@@ -775,7 +776,7 @@ static int link_update_state(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_add_address(int argc, char *argv[]) {
+int link_add_address(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *address = NULL, *peer = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
@@ -809,7 +810,7 @@ static int link_add_address(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_delete_address(int argc, char *argv[]) {
+int link_delete_address(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -828,7 +829,7 @@ static int link_delete_address(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_add_default_gateway(int argc, char *argv[]) {
+int link_add_default_gateway(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt = NULL;
@@ -877,7 +878,7 @@ static int link_add_default_gateway(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_add_route(int argc, char *argv[]) {
+int link_add_route(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt = NULL;
@@ -927,7 +928,7 @@ static int link_add_route(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_delete_gateway_or_route(int argc, char *argv[]) {
+int link_delete_gateway_or_route(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -950,7 +951,7 @@ static int link_delete_gateway_or_route(int argc, char *argv[]) {
         return 0;
 }
 
-static int show_dns_server(int argc, char *argv[]) {
+int show_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_free) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *setup = NULL;
@@ -1073,7 +1074,7 @@ static int show_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
-static int add_dns_server(int argc, char *argv[]) {
+int add_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_free) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false;
@@ -1127,7 +1128,7 @@ static int add_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
-static int add_dns_domains(int argc, char *argv[]) {
+int add_dns_domains(int argc, char *argv[]) {
        _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false;
@@ -1158,7 +1159,7 @@ static int add_dns_domains(int argc, char *argv[]) {
         return 0;
 }
 
-static int show_dns_server_domains(int argc, char *argv[]) {
+int show_dns_server_domains(int argc, char *argv[]) {
         _cleanup_(dns_domains_free) DNSDomains *domains = NULL;
         _auto_cleanup_ char *config_domain = NULL, *setup = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -1291,7 +1292,7 @@ static int show_dns_server_domains(int argc, char *argv[]) {
         return 0;
 }
 
-static int revert_resolve_link(int argc, char *argv[]) {
+int revert_resolve_link(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1310,7 +1311,7 @@ static int revert_resolve_link(int argc, char *argv[]) {
         return 0;
 }
 
-static int set_system_hostname(int argc, char *argv[]) {
+int set_system_hostname(int argc, char *argv[]) {
         int r;
 
         if (isempty_string(argv[1])) {
@@ -1327,7 +1328,7 @@ static int set_system_hostname(int argc, char *argv[]) {
         return 0;
 }
 
-static int link_add_ntp(int argc, char *argv[]) {
+int link_add_ntp(int argc, char *argv[]) {
        _auto_cleanup_strv_ char **ntps = NULL;
        _auto_cleanup_ IfNameIndex *p = NULL;
        char **d;
@@ -1364,7 +1365,7 @@ static int link_add_ntp(int argc, char *argv[]) {
        return 0;
 }
 
-static int link_enable_ipv6(int argc, char *argv[]) {
+int link_enable_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1387,11 +1388,11 @@ static int link_enable_ipv6(int argc, char *argv[]) {
         return 0;
 }
 
-static int network_reload(int argc, char *argv[]) {
+int network_reload(int argc, char *argv[]) {
         return manager_reload_network();
 }
 
-static int link_reconfigure(int argc, char *argv[]) {
+int link_reconfigure(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1403,7 +1404,8 @@ static int link_reconfigure(int argc, char *argv[]) {
 
         return manager_reconfigure_link(p);
 }
-static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
+
+int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         _cleanup_(g_dir_unrefp) GDir *dir = NULL;
         const char *file = NULL;
         int r, i;
@@ -1441,7 +1443,7 @@ static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         return 0;
 }
 
-static int generate_networkd_config_from_command_line(int argc, char *argv[]) {
+int generate_networkd_config_from_command_line(int argc, char *argv[]) {
         _auto_cleanup_ char *argv_line = NULL;
         int r;
 
@@ -1573,7 +1575,7 @@ static void is_netword_running(void) {
         }
 }
 
-static int cli_run(int argc, char *argv[]) {
+int cli_run(int argc, char *argv[]) {
         _cleanup_(cli_unrefp) CliManager *m = NULL;
         int r;
 
