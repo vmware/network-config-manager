@@ -7,6 +7,8 @@ project('network-config-manager', 'c',
         ],
         meson_version : '>= 0.40')
 
+so_version = '1'
+
 conf = configuration_data()
 conf.set_quoted('PACKAGE_VERSION', meson.project_version())
 conf.set_quoted('PACKAGE_STRING',  meson.project_name() + ' ' + meson.project_version())
@@ -129,7 +131,19 @@ includes = include_directories('src/cli',
                                'src/share',
                                'src/udev',
                                'src/yaml',
+                               'include',
                                '.')
+
+install_headers('include/network-config-manager.h')
+
+network_config_managerlib = library('network_config_manager',
+                        network_config_manager_sources,
+                        include_directories: includes,
+                        dependencies : [
+                        libsystemd, glib_dep, udev_dep, yaml_dep],
+                        install: true,
+                        version: meson.project_version(),
+                        soversion: so_version)
 
 network_config_manager = executable(
                               'nmctl',
@@ -137,5 +151,11 @@ network_config_manager = executable(
                               include_directories : includes,
                               dependencies : [
                               libsystemd, glib_dep, udev_dep, yaml_dep],
-                              install : true,
-                              install_dir : '/usr/bin')
+                              install : true)
+
+pkg = import('pkgconfig')
+pkg.generate(libraries : network_config_managerlib,
+              version : meson.project_version(),
+              name : 'libnetwork_config_manager',
+              filebase : 'network-config-manager',
+              description : 'A library for setting the network configuration manager files.')
