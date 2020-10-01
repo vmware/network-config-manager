@@ -28,7 +28,8 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
 int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, bool system);
 int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx);
 int manager_read_domains_from_system_config(char **domains);
-int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps);
+int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps, bool add);
+int manager_remove_ntp_addresses(const IfNameIndex *ifnameidx);
 int manager_enable_ipv6(const IfNameIndex *ifnameidx, bool enable);
 int manager_reload_network(void);
 int manager_reconfigure_link(const IfNameIndex *ifnameidx);

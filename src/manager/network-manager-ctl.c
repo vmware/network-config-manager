@@ -1356,9 +1356,31 @@ int link_add_ntp(int argc, char *argv[]) {
                 }
        }
 
-       r = manager_add_ntp_addresses(p, ntps);
+       if (string_equal(argv[0], "set-ntp"))
+               r = manager_add_ntp_addresses(p, ntps, false);
+       else
+               r = manager_add_ntp_addresses(p, ntps, true);
        if (r < 0) {
                log_warning("Failed to add NTP addresses '%s': %s", argv[1], g_strerror(-r));
+               return r;
+       }
+
+       return 0;
+}
+
+int link_delete_ntp(int argc, char *argv[]) {
+       _auto_cleanup_ IfNameIndex *p = NULL;
+       int r;
+
+       r = parse_ifname_or_index(argv[1], &p);
+       if (r < 0) {
+               log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+               return -errno;
+       }
+
+       r = manager_remove_ntp_addresses(p);
+       if (r < 0) {
+               log_warning("Failed to delete NTP addresses '%s': %s", argv[1], g_strerror(-r));
                return r;
        }
 
@@ -1512,6 +1534,10 @@ static int help(void) {
                "  set-dhcp6-use-routes         [LINK] [UseRoutes { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use ROUTES\n"
                "  add-ntp                      [LINK] [NTP] Add Link NTP server address. This option may be specified more than once.\n"
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
+               "  set-ntp                      [LINK] [NTP] Set Link NTP server address. This option may be specified more than once.\n"
+               "                                      This setting is read by systemd-timesyncd.service(8)\n"
+               "  delete-ntp                   [LINK] Delete Link NTP server addresses.\n"
+               "                                      This setting is read by systemd-timesyncd.service(8)\n"
                "  disable-ipv6                 [LINK] Disables IPv6 on the interface.\n"
                "  enable-ipv6                  [LINK] Enables IPv6 on the interface.\n"
                "  reload                              Reload .network and .netdev files.\n"
@@ -1624,6 +1650,8 @@ int cli_run(int argc, char *argv[]) {
                 { "set-dhcp6-use-timezone",       2,        WORD_ANY, false, link_set_dhcp6_section },
                 { "set-dhcp6-use-routes",         2,        WORD_ANY, false, link_set_dhcp6_section },
                 { "add-ntp",                      2,        WORD_ANY, false, link_add_ntp },
+                { "set-ntp",                      2,        WORD_ANY, false, link_add_ntp },
+                { "delete-ntp",                   2,        WORD_ANY, false, link_delete_ntp },
                 { "disable-ipv6",                 1,        WORD_ANY, false, link_enable_ipv6 },
                 { "enable-ipv6",                  1,        WORD_ANY, false, link_enable_ipv6 },
                 { "reload",                       WORD_ANY, WORD_ANY, false, network_reload },
