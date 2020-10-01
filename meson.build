@@ -106,9 +106,8 @@ config_h = configure_file(
         configuration : conf)
 add_project_arguments('-include', 'config.h', language : 'c')
 
+subdir('include')
 subdir('src')
-includes = include_directories('src')
-
 #subdir('doc')
 subdir('units')
 
@@ -133,8 +132,6 @@ includes = include_directories('src/cli',
                                'src/yaml',
                                'include',
                                '.')
-
-install_headers('include/network-config-manager.h')
 
 network_config_managerlib = library('network_config_manager',
                         network_config_manager_sources,

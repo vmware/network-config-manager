@@ -22,3 +22,5 @@
 
 #define ELEMENTSOF(x) (sizeof(x)/sizeof((x)[0]))
 #define OFFSETOF(x,y) __builtin_offsetof(x,y)
+
+#define _public_ __attribute__((visibility("default")))
