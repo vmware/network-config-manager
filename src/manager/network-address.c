@@ -159,7 +159,7 @@ static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addres
                 if (r < 0)
                         return r;
 
-                a = NULL;
+                steal_pointer(a);
         }
 
         return 0;
