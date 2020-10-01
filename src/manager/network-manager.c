@@ -684,8 +684,8 @@ int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v
         return dbus_reconfigure_link(ifnameidx->ifindex);
 }
 
-int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps) {
-        _auto_cleanup_ char *network = NULL, *config_ntp = NULL, *a = NULL;
+int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps, bool add) {
+        _auto_cleanup_ char *network = NULL, *config_ntp = NULL, *a = NULL, *b = NULL;
         char **d;
         int r;
 
@@ -708,12 +708,39 @@ int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps) {
                         return 0;
         }
 
-        r = set_config_file_string(network, "Network", "NTP", a);
+        if (add) {
+                b = strv_join(config_ntp, &a);
+                if (!b)
+                        return log_oom();
+        }
+
+        r = set_config_file_string(network, "Network", "NTP", add ? b : a);
         if (r < 0) {
                 log_warning("Failed to write to config file '%s': %s", network, g_strerror(-r));
                 return r;
         }
 
+        (void) dbus_restart_unit("systemd-networkd.service");
+        return dbus_restart_unit("systemd-timesyncd.service");
+}
+
+int manager_remove_ntp_addresses(const IfNameIndex *ifnameidx) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_string(network, "Network", "NTP", "");
+        if (r < 0) {
+                log_warning("Failed to write to config file '%s': %s", network, g_strerror(-r));
+                return r;
+        }
+
+        (void) dbus_restart_unit("systemd-networkd.service");
         return dbus_restart_unit("systemd-timesyncd.service");
 }
 

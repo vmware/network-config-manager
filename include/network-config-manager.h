@@ -14,6 +14,7 @@ int generate_networkd_config_from_yaml(int argc, char *argv[]);
 int link_add_address(int argc, char *argv[]);
 int link_add_default_gateway(int argc, char *argv[]);
 int link_add_ntp(int argc, char *argv[]);
+int link_delete_ntp(int argc, char *argv[]);
 int link_add_route(int argc, char *argv[]);
 int link_delete_address(int argc, char *argv[]);
 int link_delete_gateway_or_route(int argc, char *argv[]);
