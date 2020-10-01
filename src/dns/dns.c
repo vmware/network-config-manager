@@ -224,7 +224,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
                                         return r;
                         }
 
-                        pretty = NULL;
+                        steal_pointer(pretty);
                 }
         }
 
@@ -242,7 +242,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
                                 if (r < 0)
                                         return r;
 
-                                s = NULL;
+                                steal_pointer(s);
                         }
                 }
         }

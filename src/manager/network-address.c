@@ -159,7 +159,7 @@ static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addres
                 if (r < 0)
                         return r;
 
-                a = NULL;
+                steal_pointer(a);
         }
 
         return 0;
@@ -222,11 +222,7 @@ int manager_get_one_link_address(int ifindex, Addresses **ret) {
         if (r < 0)
                 return r;
 
-        r = acquire_link_address(s, ifindex, ret);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return acquire_link_address(s, ifindex, ret);
 }
 
 static int link_add_address(int s, int ifindex, IPAddress *address, IPAddress *peer) {
@@ -273,9 +269,5 @@ int manager_link_add_address(int ifindex, IPAddress *address, IPAddress *peer) {
         if (r < 0)
                 return r;
 
-        r = link_add_address(s, ifindex, address, peer);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return link_add_address(s, ifindex, address, peer);
 }
