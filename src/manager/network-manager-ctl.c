@@ -689,14 +689,6 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
                 k = "UseDNS";
         else if (string_equal(argv[0], "set-dhcp6-use-ntp"))
                 k = "UseNTP";
-        else if (string_equal(argv[0], "set-dhcp6-use-domains"))
-                k = "UseDomains";
-        else if (string_equal(argv[0], "set-dhcp6-use-mtu"))
-                k = "UseMTU";
-        else if (string_equal(argv[0], "set-dhcp6-use-routes"))
-                k = "UseRoutes";
-        else if (string_equal(argv[0], "set-dhcp6-use-timezone"))
-                k = "UseTimezone";
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
@@ -1527,11 +1519,8 @@ static int help(void) {
                "  set-dhcp4-use-mtu            [LINK] [UseMTU { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use MTU\n"
                "  set-dhcp4-use-ntp            [LINK] [UseNTP { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use NTP\n"
                "  set-dhcp4-use-dns            [LINK] [UseDNS { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use DNS\n"
-               "  set-dhcp6-use-domains        [LINK] [UseDomains { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use DOMAINS\n"
-               "  set-dhcp6-use-mtu            [LINK] [UseMTU { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use MTU\n"
+               "  set-dhcp6-use-dns            [LINK] [UseDNS { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use DNS\n"
                "  set-dhcp6-use-ntp            [LINK] [UseNTP { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use NTP\n"
-               "  set-dhcp6-use-routes         [LINK] [UseRoutes { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use ROUTES\n"
-               "  set-dhcp6-use-routes         [LINK] [UseRoutes { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use ROUTES\n"
                "  add-ntp                      [LINK] [NTP] Add Link NTP server address. This option may be specified more than once.\n"
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
                "  set-ntp                      [LINK] [NTP] Set Link NTP server address. This option may be specified more than once.\n"
@@ -1644,11 +1633,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp4-use-timezone",       2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp4-use-routes",         2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp6-use-dns",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
-                { "set-dhcp6-use-domains",        2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "set-dhcp6-use-ntp",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
-                { "set-dhcp6-use-mtu",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
-                { "set-dhcp6-use-timezone",       2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
-                { "set-dhcp6-use-routes",         2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "add-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "set-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "delete-ntp",                   2,        WORD_ANY, false, ncm_link_delete_ntp },
