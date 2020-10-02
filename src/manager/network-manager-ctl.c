@@ -1487,7 +1487,7 @@ static int help(void) {
                "  set-mac                      [LINK] [MAC] Set Link MAC\n"
                "  set-link-mode                [LINK] [MODE { yes | no | on | off | 1 | 0} ] Set Link managed by networkd\n"
                "  set-dhcp-mode                [LINK] [DHCP-MODE { yes | no | ipv4 | ipv6 } ] Set Link DHCP setting\n"
-               "  set-dhcp4-client-identifier   [LINK] [IDENTIFIER { mac | duid | duid-only}\n"
+               "  set-dhcp4-client-identifier  [LINK] [IDENTIFIER { mac | duid | duid-only}\n"
                "  set-dhcp-iaid                [LINK] [IAID] Sets the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
                "  set-dhcp-duid                [LINK | system] [DUID { link-layer-time | vendor | link-layer | uuid } ] [RAWDATA] Sets the DHCP Client\n"
                "                                      DUID type which specifies how the DUID should be generated and [RAWDATA] to overides the global DUIDRawData.\n"
