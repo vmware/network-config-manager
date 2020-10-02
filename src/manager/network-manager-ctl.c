@@ -75,7 +75,7 @@ static void display_links_info(gpointer data_ptr, gpointer ignored) {
                setup_color, string_na(setup), ansi_color_reset());
 }
 
-int list_links(int argc, char *argv[]) {
+static int list_links(int argc, char *argv[]) {
         _cleanup_(links_free) Links *h = NULL;
         int r;
 
@@ -193,7 +193,7 @@ static void list_link_sysfs_attributes(Link *l) {
                 printf("           %sSpeed%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), speed);
 }
 
-int list_one_link(char *argv[]) {
+static int list_one_link(char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
@@ -337,7 +337,7 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
                 printf("                      %-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
 }
 
-int system_status(int argc, char *argv[]) {
+_public_ int ncm_system_status(int argc, char *argv[]) {
         _auto_cleanup_ char *state = NULL, *hostname = NULL, *kernel = NULL, *kernel_release = NULL,
                             *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
@@ -433,7 +433,7 @@ int system_status(int argc, char *argv[]) {
         return r;
 }
 
-int link_status(int argc, char *argv[]) {
+_public_ int ncm_link_status(int argc, char *argv[]) {
         int c;
 
         if (argc <= 1)
@@ -447,7 +447,7 @@ int link_status(int argc, char *argv[]) {
         return 0;
 }
 
-int link_set_mtu(int argc, char *argv[]) {
+_public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t mtu;
         int r;
@@ -471,7 +471,7 @@ int link_set_mtu(int argc, char *argv[]) {
         return 0;
 }
 
-int link_set_mac(int argc, char *argv[]) {
+_public_ int ncm_link_set_mac(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -495,7 +495,7 @@ int link_set_mac(int argc, char *argv[]) {
         return 0;
 }
 
-int link_set_mode(int argc, char *argv[]) {
+_public_ int ncm_link_set_mode(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool k;
         int r;
@@ -522,7 +522,7 @@ int link_set_mode(int argc, char *argv[]) {
         return 0;
 }
 
-int link_set_dhcp_mode(int argc, char *argv[]) {
+_public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int mode, r;
 
@@ -547,7 +547,7 @@ int link_set_dhcp_mode(int argc, char *argv[]) {
         return 0;
 }
 
-int link_set_dhcp4_client_identifier(int argc, char *argv[]) {
+_public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClientIdentifier d;
         int r;
@@ -573,7 +573,7 @@ int link_set_dhcp4_client_identifier(int argc, char *argv[]) {
         return 0;
 }
 
-int link_set_dhcp_client_iaid(int argc, char *argv[]) {
+_public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t v;
         int r;
@@ -599,7 +599,7 @@ int link_set_dhcp_client_iaid(int argc, char *argv[]) {
         return 0;
 }
 
-int link_set_network_section_bool(int argc, char *argv[]) {
+_public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         const char *k;
         bool v;
@@ -640,7 +640,7 @@ int link_set_network_section_bool(int argc, char *argv[]) {
         return manager_set_network_section_bool(p, k, v);
 }
 
-int link_set_dhcp4_section(int argc, char *argv[]) {
+_public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         const char *k;
         bool v;
@@ -679,7 +679,7 @@ int link_set_dhcp4_section(int argc, char *argv[]) {
         return 0;
 }
 
-int link_set_dhcp6_section(int argc, char *argv[]) {
+_public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         const char *k;
         bool v;
@@ -689,14 +689,6 @@ int link_set_dhcp6_section(int argc, char *argv[]) {
                 k = "UseDNS";
         else if (string_equal(argv[0], "set-dhcp6-use-ntp"))
                 k = "UseNTP";
-        else if (string_equal(argv[0], "set-dhcp6-use-domains"))
-                k = "UseDomains";
-        else if (string_equal(argv[0], "set-dhcp6-use-mtu"))
-                k = "UseMTU";
-        else if (string_equal(argv[0], "set-dhcp6-use-routes"))
-                k = "UseRoutes";
-        else if (string_equal(argv[0], "set-dhcp6-use-timezone"))
-                k = "UseTimezone";
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
@@ -718,7 +710,7 @@ int link_set_dhcp6_section(int argc, char *argv[]) {
         return 0;
 }
 
-int link_set_dhcp_client_duid(int argc, char *argv[]) {
+_public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClientDUIDType d;
         bool system = false;
@@ -750,7 +742,7 @@ int link_set_dhcp_client_duid(int argc, char *argv[]) {
         return 0;
 }
 
-int link_update_state(int argc, char *argv[]) {
+_public_ int ncm_link_update_state(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         LinkState state;
         int r;
@@ -776,7 +768,7 @@ int link_update_state(int argc, char *argv[]) {
         return 0;
 }
 
-int link_add_address(int argc, char *argv[]) {
+_public_ int ncm_link_add_address(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *address = NULL, *peer = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
@@ -810,7 +802,7 @@ int link_add_address(int argc, char *argv[]) {
         return 0;
 }
 
-int link_delete_address(int argc, char *argv[]) {
+_public_ int ncm_link_delete_address(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -829,7 +821,7 @@ int link_delete_address(int argc, char *argv[]) {
         return 0;
 }
 
-int link_add_default_gateway(int argc, char *argv[]) {
+_public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt = NULL;
@@ -878,7 +870,7 @@ int link_add_default_gateway(int argc, char *argv[]) {
         return 0;
 }
 
-int link_add_route(int argc, char *argv[]) {
+_public_ int ncm_link_add_route(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt = NULL;
@@ -928,7 +920,7 @@ int link_add_route(int argc, char *argv[]) {
         return 0;
 }
 
-int link_delete_gateway_or_route(int argc, char *argv[]) {
+_public_ int ncm_link_delete_gateway_or_route(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -951,7 +943,7 @@ int link_delete_gateway_or_route(int argc, char *argv[]) {
         return 0;
 }
 
-int show_dns_server(int argc, char *argv[]) {
+_public_ int ncm_show_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_free) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *setup = NULL;
@@ -1074,7 +1066,7 @@ int show_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
-int add_dns_server(int argc, char *argv[]) {
+_public_ int ncm_add_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_free) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false;
@@ -1128,7 +1120,7 @@ int add_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
-int add_dns_domains(int argc, char *argv[]) {
+_public_ int ncm_add_dns_domains(int argc, char *argv[]) {
        _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false;
@@ -1159,7 +1151,7 @@ int add_dns_domains(int argc, char *argv[]) {
         return 0;
 }
 
-int show_dns_server_domains(int argc, char *argv[]) {
+_public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
         _cleanup_(dns_domains_free) DNSDomains *domains = NULL;
         _auto_cleanup_ char *config_domain = NULL, *setup = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -1292,7 +1284,7 @@ int show_dns_server_domains(int argc, char *argv[]) {
         return 0;
 }
 
-int revert_resolve_link(int argc, char *argv[]) {
+_public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1311,7 +1303,7 @@ int revert_resolve_link(int argc, char *argv[]) {
         return 0;
 }
 
-int set_system_hostname(int argc, char *argv[]) {
+_public_ int ncm_set_system_hostname(int argc, char *argv[]) {
         int r;
 
         if (isempty_string(argv[1])) {
@@ -1328,7 +1320,7 @@ int set_system_hostname(int argc, char *argv[]) {
         return 0;
 }
 
-int link_add_ntp(int argc, char *argv[]) {
+_public_ int ncm_link_add_ntp(int argc, char *argv[]) {
        _auto_cleanup_strv_ char **ntps = NULL;
        _auto_cleanup_ IfNameIndex *p = NULL;
        char **d;
@@ -1368,7 +1360,7 @@ int link_add_ntp(int argc, char *argv[]) {
        return 0;
 }
 
-int link_delete_ntp(int argc, char *argv[]) {
+_public_ int ncm_link_delete_ntp(int argc, char *argv[]) {
        _auto_cleanup_ IfNameIndex *p = NULL;
        int r;
 
@@ -1387,7 +1379,7 @@ int link_delete_ntp(int argc, char *argv[]) {
        return 0;
 }
 
-int link_enable_ipv6(int argc, char *argv[]) {
+_public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1410,11 +1402,11 @@ int link_enable_ipv6(int argc, char *argv[]) {
         return 0;
 }
 
-int network_reload(int argc, char *argv[]) {
+_public_ int ncm_network_reload(int argc, char *argv[]) {
         return manager_reload_network();
 }
 
-int link_reconfigure(int argc, char *argv[]) {
+_public_ int ncm_link_reconfigure(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1427,7 +1419,7 @@ int link_reconfigure(int argc, char *argv[]) {
         return manager_reconfigure_link(p);
 }
 
-int generate_networkd_config_from_yaml(int argc, char *argv[]) {
+static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         _cleanup_(g_dir_unrefp) GDir *dir = NULL;
         const char *file = NULL;
         int r, i;
@@ -1465,7 +1457,7 @@ int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         return 0;
 }
 
-int generate_networkd_config_from_command_line(int argc, char *argv[]) {
+static int generate_networkd_config_from_command_line(int argc, char *argv[]) {
         _auto_cleanup_ char *argv_line = NULL;
         int r;
 
@@ -1495,7 +1487,7 @@ static int help(void) {
                "  set-mac                      [LINK] [MAC] Set Link MAC\n"
                "  set-link-mode                [LINK] [MODE { yes | no | on | off | 1 | 0} ] Set Link managed by networkd\n"
                "  set-dhcp-mode                [LINK] [DHCP-MODE { yes | no | ipv4 | ipv6 } ] Set Link DHCP setting\n"
-               "  set-dhcp4-client-identifier   [LINK] [IDENTIFIER { mac | duid | duid-only}\n"
+               "  set-dhcp4-client-identifier  [LINK] [IDENTIFIER { mac | duid | duid-only}\n"
                "  set-dhcp-iaid                [LINK] [IAID] Sets the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
                "  set-dhcp-duid                [LINK | system] [DUID { link-layer-time | vendor | link-layer | uuid } ] [RAWDATA] Sets the DHCP Client\n"
                "                                      DUID type which specifies how the DUID should be generated and [RAWDATA] to overides the global DUIDRawData.\n"
@@ -1527,11 +1519,8 @@ static int help(void) {
                "  set-dhcp4-use-mtu            [LINK] [UseMTU { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use MTU\n"
                "  set-dhcp4-use-ntp            [LINK] [UseNTP { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use NTP\n"
                "  set-dhcp4-use-dns            [LINK] [UseDNS { yes | no | on | off | 1 | 0}] Set Link DHCP4 Use DNS\n"
-               "  set-dhcp6-use-domains        [LINK] [UseDomains { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use DOMAINS\n"
-               "  set-dhcp6-use-mtu            [LINK] [UseMTU { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use MTU\n"
+               "  set-dhcp6-use-dns            [LINK] [UseDNS { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use DNS\n"
                "  set-dhcp6-use-ntp            [LINK] [UseNTP { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use NTP\n"
-               "  set-dhcp6-use-routes         [LINK] [UseRoutes { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use ROUTES\n"
-               "  set-dhcp6-use-routes         [LINK] [UseRoutes { yes | no | on | off | 1 | 0}] Set Link DHCP6 Use ROUTES\n"
                "  add-ntp                      [LINK] [NTP] Add Link NTP server address. This option may be specified more than once.\n"
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
                "  set-ntp                      [LINK] [NTP] Set Link NTP server address. This option may be specified more than once.\n"
@@ -1552,7 +1541,7 @@ static int help(void) {
         return 0;
 }
 
-static int show_version(void) {
+_public_ int ncm_show_version(void) {
        printf("%s\n", PACKAGE_STRING);
        return 0;
 }
@@ -1581,7 +1570,7 @@ static int parse_argv(int argc, char *argv[]) {
                         return help();
 
                 case ARG_VERSION:
-                        return show_version();
+                        return ncm_show_version();
 
                 case '?':
                         return -EINVAL;
@@ -1601,61 +1590,57 @@ static void is_netword_running(void) {
         }
 }
 
-int cli_run(int argc, char *argv[]) {
+static int cli_run(int argc, char *argv[]) {
         _cleanup_(cli_unrefp) CliManager *m = NULL;
         int r;
 
         static const Cli commands[] = {
-                { "status",                       WORD_ANY, WORD_ANY, true, system_status },
-                { "show",                         WORD_ANY, WORD_ANY, false, link_status },
-                { "set-mtu",                      2,        WORD_ANY, false, link_set_mtu },
-                { "set-mac",                      2,        WORD_ANY, false, link_set_mac },
-                { "set-link-mode",                2,        WORD_ANY, false, link_set_mode },
-                { "set-dhcp-mode",                2,        WORD_ANY, false, link_set_dhcp_mode },
-                { "set-dhcp4-client-identifier",  2,        WORD_ANY, false, link_set_dhcp4_client_identifier},
-                { "set-dhcp-iaid",                2,        WORD_ANY, false, link_set_dhcp_client_iaid},
-                { "set-dhcp-duid",                2,        WORD_ANY, false, link_set_dhcp_client_duid},
-                { "set-link-state",               2,        WORD_ANY, false, link_update_state },
-                { "add-link-address",             2,        WORD_ANY, false, link_add_address },
-                { "delete-link-address",          1,        WORD_ANY, false, link_delete_address },
-                { "add-default-gateway",          2,        WORD_ANY, false, link_add_default_gateway },
-                { "delete-gateway",               1,        WORD_ANY, false, link_delete_gateway_or_route },
-                { "add-route",                    2,        WORD_ANY, false, link_add_route },
-                { "delete-route",                 1,        WORD_ANY, false, link_delete_gateway_or_route },
-                { "set-hostname",                 1,        WORD_ANY, false, set_system_hostname },
-                { "show-dns",                     WORD_ANY, WORD_ANY, false, show_dns_server },
-                { "add-dns",                      2,        WORD_ANY, false, add_dns_server },
-                { "add-domain",                   1,        WORD_ANY, false, add_dns_domains },
-                { "show-domains",                 WORD_ANY, WORD_ANY, false, show_dns_server_domains },
-                { "revert-resolve-link",          1,        WORD_ANY, false, revert_resolve_link },
-                { "set-link-local-address",       2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-ipv4ll-route",             2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-llmnr",                    2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-multicast-dns",            2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-lldp",                     2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-emit-lldp",                2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-ipforward",                2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-ipv6acceptra",             2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-ipmasquerade",             2,        WORD_ANY, false, link_set_network_section_bool },
-                { "set-dhcp4-use-dns",            2,        WORD_ANY, false, link_set_dhcp4_section },
-                { "set-dhcp4-use-domains",        2,        WORD_ANY, false, link_set_dhcp4_section },
-                { "set-dhcp4-use-ntp",            2,        WORD_ANY, false, link_set_dhcp4_section },
-                { "set-dhcp4-use-mtu",            2,        WORD_ANY, false, link_set_dhcp4_section },
-                { "set-dhcp4-use-timezone",       2,        WORD_ANY, false, link_set_dhcp4_section },
-                { "set-dhcp4-use-routes",         2,        WORD_ANY, false, link_set_dhcp4_section },
-                { "set-dhcp6-use-dns",            2,        WORD_ANY, false, link_set_dhcp6_section },
-                { "set-dhcp6-use-domains",        2,        WORD_ANY, false, link_set_dhcp6_section },
-                { "set-dhcp6-use-ntp",            2,        WORD_ANY, false, link_set_dhcp6_section },
-                { "set-dhcp6-use-mtu",            2,        WORD_ANY, false, link_set_dhcp6_section },
-                { "set-dhcp6-use-timezone",       2,        WORD_ANY, false, link_set_dhcp6_section },
-                { "set-dhcp6-use-routes",         2,        WORD_ANY, false, link_set_dhcp6_section },
-                { "add-ntp",                      2,        WORD_ANY, false, link_add_ntp },
-                { "set-ntp",                      2,        WORD_ANY, false, link_add_ntp },
-                { "delete-ntp",                   2,        WORD_ANY, false, link_delete_ntp },
-                { "disable-ipv6",                 1,        WORD_ANY, false, link_enable_ipv6 },
-                { "enable-ipv6",                  1,        WORD_ANY, false, link_enable_ipv6 },
-                { "reload",                       WORD_ANY, WORD_ANY, false, network_reload },
-                { "reconfigure",                  WORD_ANY, WORD_ANY, false, link_reconfigure },
+                { "status",                       WORD_ANY, WORD_ANY, true,  ncm_system_status },
+                { "show",                         WORD_ANY, WORD_ANY, false, ncm_link_status },
+                { "set-mtu",                      2,        WORD_ANY, false, ncm_link_set_mtu },
+                { "set-mac",                      2,        WORD_ANY, false, ncm_link_set_mac },
+                { "set-link-mode",                2,        WORD_ANY, false, ncm_link_set_mode },
+                { "set-dhcp-mode",                2,        WORD_ANY, false, ncm_link_set_dhcp_mode },
+                { "set-dhcp4-client-identifier",  2,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
+                { "set-dhcp-iaid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
+                { "set-dhcp-duid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
+                { "set-link-state",               2,        WORD_ANY, false, ncm_link_update_state },
+                { "add-link-address",             2,        WORD_ANY, false, ncm_link_add_address },
+                { "delete-link-address",          1,        WORD_ANY, false, ncm_link_delete_address },
+                { "add-default-gateway",          2,        WORD_ANY, false, ncm_link_add_default_gateway },
+                { "delete-gateway",               1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
+                { "add-route",                    2,        WORD_ANY, false, ncm_link_add_route },
+                { "delete-route",                 1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
+                { "set-hostname",                 1,        WORD_ANY, false, ncm_set_system_hostname },
+                { "show-dns",                     WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
+                { "add-dns",                      2,        WORD_ANY, false, ncm_add_dns_server },
+                { "add-domain",                   1,        WORD_ANY, false, ncm_add_dns_domains },
+                { "show-domains",                 WORD_ANY, WORD_ANY, false, ncm_show_dns_server_domains },
+                { "revert-resolve-link",          1,        WORD_ANY, false, ncm_revert_resolve_link },
+                { "set-link-local-address",       2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-ipv4ll-route",             2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-llmnr",                    2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-multicast-dns",            2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-lldp",                     2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-emit-lldp",                2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-ipforward",                2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-ipv6acceptra",             2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-ipmasquerade",             2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-dhcp4-use-dns",            2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
+                { "set-dhcp4-use-domains",        2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
+                { "set-dhcp4-use-ntp",            2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
+                { "set-dhcp4-use-mtu",            2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
+                { "set-dhcp4-use-timezone",       2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
+                { "set-dhcp4-use-routes",         2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
+                { "set-dhcp6-use-dns",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
+                { "set-dhcp6-use-ntp",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
+                { "add-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
+                { "set-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
+                { "delete-ntp",                   2,        WORD_ANY, false, ncm_link_delete_ntp },
+                { "disable-ipv6",                 1,        WORD_ANY, false, ncm_link_enable_ipv6 },
+                { "enable-ipv6",                  1,        WORD_ANY, false, ncm_link_enable_ipv6 },
+                { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
+                { "reconfigure",                  WORD_ANY, WORD_ANY, false, ncm_link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply-yaml-config"           , WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "generate-config-from-cmdline", WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
