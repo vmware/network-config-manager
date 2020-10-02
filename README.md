@@ -29,14 +29,14 @@ Introspect
 
 ### Dependencies
 
- `meson, ninja-build, systemd-devel, libudev-devel, libyaml-devel, glib2-devel, python3-sphinx`
+ `meson, ninja-build, systemd-devel, libudev-devel, libyaml-devel, glib-devel, python3-sphinx`
 
 ### Building from source.
 
 On Photon OS
 ```bash
 ➜  ~ tdnf install -y build-essential
-➜  ~ tdnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel
+➜  ~ tdnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib-devel
 ➜  ~ meson build
 ➜  ~ ninja -C build
 ➜  ~ sudo ninja -C build install
