@@ -1628,7 +1628,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp6-use-ntp",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "add-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "set-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
-                { "delete-ntp",                   2,        WORD_ANY, false, ncm_link_delete_ntp },
+                { "delete-ntp",                   1,        WORD_ANY, false, ncm_link_delete_ntp },
                 { "disable-ipv6",                 1,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "enable-ipv6",                  1,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },

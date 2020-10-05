@@ -435,6 +435,20 @@ class TestCLI:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
 
+    def test_cli_set_ntp(self):
+        assert(link_exits('test99') == True)
+
+        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        assert(unit_exits('10-test99.network') == True)
+
+        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['nmctl', 'set-ntp', 'test99', '192.168.1.34', '192.168.1.45'])
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
+
     def test_cli_set_ip_v6_router_advertisement(self):
         assert(link_exits('test99') == True)
 
