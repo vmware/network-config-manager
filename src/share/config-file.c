@@ -144,9 +144,8 @@ int write_to_resolv_conf(char **dns, char **domains) {
         if (dns && g_strv_length(dns) > 0) {
                 c = g_string_append(c, "nameserver ");
 
-                strv_foreach(l, dns) {
+                strv_foreach(l, dns)
                         g_string_append_printf(c, " %s", *l);
-                }
 
                 c = g_string_append(c, "\n");
         }
@@ -154,9 +153,9 @@ int write_to_resolv_conf(char **dns, char **domains) {
         if (domains && g_strv_length(domains) > 0) {
                 c = g_string_append(c, "domain ");
 
-                strv_foreach(l, domains) {
+                strv_foreach(l, domains)
                         g_string_append_printf(c, " %s", *l);
-                }
+
                 c = g_string_append(c, "\n");
         }
 
