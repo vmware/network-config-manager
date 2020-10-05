@@ -106,9 +106,9 @@ typedef struct Network {
         int dhcp4_use_mtu;
         int dhcp4_use_dns;
         int dhcp4_use_domains;
-        int dhcp6_use_mtu;
+        int dhcp4_use_ntp;
         int dhcp6_use_dns;
-        int dhcp6_use_domains;
+        int dhcp6_use_ntp;
         int lldp;
         int ipv6_accept_ra;
 
