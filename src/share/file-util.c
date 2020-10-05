@@ -103,7 +103,7 @@ int write_one_line(const char *path, const char *v) {
 
         f = fopen(path, "w");
         if (!f)
-                return -1;
+                return -errno;
 
         if (fputs(v, f) == EOF)
                 return -1;
