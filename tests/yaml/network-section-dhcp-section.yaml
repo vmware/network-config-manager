@@ -9,3 +9,4 @@
      dhcp4-use-mtu: yes
      dhcp4-use-domain: yes
      dhcp4-use-dns: yes
+     dhcp4-use-ntp: yes

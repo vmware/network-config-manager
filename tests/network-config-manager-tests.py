@@ -155,6 +155,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('DHCPv4', 'UseDNS') == 'yes')
         assert(parser.get('DHCPv4', 'UseDomains') == 'yes')
         assert(parser.get('DHCPv4', 'UseMTU') == 'yes')
+        assert(parser.get('DHCPv4', 'UseNTP') == 'yes')
 
     def test_network_and_dhcp6_section(self):
         self.copy_yaml_file_to_netmanager_yaml_path('network-section-dhcp6-section.yaml')
