@@ -49,6 +49,7 @@ static ParserTable parser_network_vtable[] = {
         { "dhcp4-client-identifier", CONF_TYPE_NETWORK,    parse_yaml_dhcp_client_identifier, offsetof(Network, dhcp_client_identifier_type)},
         { "dhcp4-use-dns",          CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp4_use_dns)},
         { "dhcp4-use-domain",       CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp4_use_domains)},
+        { "dhcp4-use-ntp",          CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp4_use_ntp)},
         { "dhcp4-use-mtu",          CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp4_use_mtu)},
         { "dhcp6-use-dns",          CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp6_use_dns)},
         { "dhcp6-use-ntp",          CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp6_use_ntp)},
