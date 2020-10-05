@@ -672,11 +672,7 @@ _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
         }
 
         v = r;
-        r = manager_set_dhcp_section(p, k, v, true);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return manager_set_dhcp_section(p, k, v, true);
 }
 
 _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
@@ -703,11 +699,7 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
         }
 
         v = r;
-        r = manager_set_dhcp_section(p, k, v, false);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return manager_set_dhcp_section(p, k, v, false);
 }
 
 _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
