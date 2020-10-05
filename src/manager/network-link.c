@@ -191,7 +191,7 @@ static int acquire_one_link_info(int s, int ifindex, Link **ret) {
 
 int link_get_one_link(const char *ifname, Link **ret) {
         _auto_cleanup_close_ int s = -1;
-        int r, c;
+        int r;
 
         assert(ifname);
         assert(ret);
@@ -204,11 +204,7 @@ int link_get_one_link(const char *ifname, Link **ret) {
         if (r <= 0)
                 return -errno;
 
-        c = acquire_one_link_info(s, r, ret);
-        if (c < 0)
-                return c;
-
-        return 0;
+        return acquire_one_link_info(s, r, ret);
 }
 
 static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
