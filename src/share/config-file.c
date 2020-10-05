@@ -95,6 +95,7 @@ int remove_key_from_config(const char *path, const char *section, const char *k)
 
         if (!g_key_file_remove_key(key_file, section, k, &e)) {
                 g_debug("Failed to remove key from '%s': section %s key %s", path, section, k);
+                return -e->code;
         }
 
         if (!g_key_file_save_to_file(key_file, path, &e)) {
@@ -119,6 +120,7 @@ int remove_section_from_config(const char *path, const char *section) {
 
         if (!g_key_file_remove_group(key_file, section, &e)) {
                 g_debug("Failed to remove key from '%s': section %s", path, section);
+                return -e->code;
         }
 
         if (!g_key_file_save_to_file(key_file, path, &e)) {
