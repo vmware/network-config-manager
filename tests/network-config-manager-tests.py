@@ -171,8 +171,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Network', 'IPv6AcceptRA') == 'yes')
 
         assert(parser.get('DHCPv6', 'UseDNS') == 'yes')
-        assert(parser.get('DHCPv6', 'UseDomains') == 'yes')
-        assert(parser.get('DHCPv6', 'UseMTU') == 'yes')
+        assert(parser.get('DHCPv6', 'UseNTP') == 'yes')
 
     @pytest.mark.skip(reason="skipping")
     def test_network_static_configuration(self):
