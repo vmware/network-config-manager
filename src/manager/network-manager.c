@@ -734,7 +734,7 @@ int manager_remove_ntp_addresses(const IfNameIndex *ifnameidx) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", "NTP", "");
+        r = remove_key_from_config(network, "Network", "NTP");
         if (r < 0) {
                 log_warning("Failed to write to config file '%s': %s", network, g_strerror(-r));
                 return r;

@@ -154,11 +154,7 @@ int parse_ip(const char *s, IPAddress **ret) {
         if (r >= 0)
                 return 0;
 
-        r = parse_ipv6(s, ret);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return parse_ipv6(s, ret);
 }
 
 int parse_ip_from_string(const char *s, IPAddress **ret) {
