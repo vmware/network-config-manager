@@ -112,7 +112,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 printf("%s", c);
                 first = false;
         } else
-                printf("                  %s", c);
+                printf("                   %s", c);
 
         r = network_parse_link_dhcp4_addresses(a->ifindex, &dhcp);
         if (r >= 0 && strv_contains((const char **) dhcp, c))
@@ -156,17 +156,17 @@ static int display_one_link_udev(Link *l, bool display, char **link_file) {
                 return 0;
 
         if (path)
-                printf("            %sPath%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), path);
+                printf("             %sPath%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), path);
         if (driver)
-                printf("          %sDriver%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), driver);
+                printf("           %sDriver%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), driver);
         if (vendor)
-                printf("          %sVendor%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), vendor);
+                printf("           %sVendor%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), vendor);
         if (model)
-                printf("           %sModel%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), model);
+                printf("            %sModel%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), model);
 
         hwdb_get_manufacturer((uint8_t *) &l->mac_address.ether_addr_octet, &manufacturer);
         if (manufacturer)
-                printf("    %sManufacturer%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), manufacturer);
+                printf("     %sManufacturer%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), manufacturer);
 
         udev_device_unref(dev);
         udev_unref(udev);
@@ -183,14 +183,14 @@ static void list_link_sysfs_attributes(Link *l) {
         (void) link_read_sysfs_attribute(l->name, "mtu", &mtu);
 
         if (ether)
-                printf("      %sHW Address%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), ether);
+                printf("       %sHW Address%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), ether);
         if (mtu)
-                printf("             %sMTU%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), mtu);
+                printf("              %sMTU%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), mtu);
 
         if (duplex)
-                printf("          %sDuplex%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), duplex);
+                printf("           %sDuplex%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), duplex);
         if (speed)
-                printf("           %sSpeed%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), speed);
+                printf("            %sSpeed%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), speed);
 }
 
 static int list_one_link(char *argv[]) {
@@ -200,7 +200,7 @@ static int list_one_link(char *argv[]) {
         _cleanup_(addresses_unref) Addresses *addr = NULL;
         _cleanup_(routes_free) Routes *route = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_ Link *l = NULL;
+        _cleanup_(link_free_one) Link *l = NULL;
         int r;
 
         r = parse_ifname_or_index(*argv, &p);
@@ -232,10 +232,10 @@ static int list_one_link(char *argv[]) {
 
         (void) network_parse_link_network_file(l->ifindex, &network);
         (void)  display_one_link_udev(l, false, &link);
-         printf("       %sLink File%s: %s\n"
-                "    %sNetwork File%s: %s\n"
-                "            %sType%s: %s\n"
-                "           %sState%s: %s%s%s %s(%s)%s\n",
+         printf("        %sLink File%s: %s\n"
+                "     %sNetwork File%s: %s\n"
+                "             %sType%s: %s\n"
+                "            %sState%s: %s%s%s %s(%s)%s\n",
                 ansi_color_bold_cyan(), ansi_color_reset(), string_na(link),
                 ansi_color_bold_cyan(), ansi_color_reset(), string_na(network),
                 ansi_color_bold_cyan(), ansi_color_reset(), string_na(arphrd_to_name(l->iftype)),
@@ -245,9 +245,19 @@ static int list_one_link(char *argv[]) {
          (void)  display_one_link_udev(l, true, NULL);
          list_link_sysfs_attributes(l);
 
+
+         if (l->alt_names) {
+                 char **j;
+
+                 printf("%sAlternative names%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                 strv_foreach(j, l->alt_names)
+                         printf("%s ", *j);
+                 printf("\n");
+         }
+
          r = manager_get_one_link_address(l->ifindex, &addr);
          if (r >= 0 && addr && set_size(addr->addresses) > 0) {
-                 printf("         %sAddress%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                 printf("          %sAddress%s: ", ansi_color_bold_cyan(), ansi_color_reset());
                  set_foreach(addr->addresses, list_one_link_addresses, NULL);
          }
 
@@ -256,7 +266,7 @@ static int list_one_link(char *argv[]) {
                  bool first = true;
                  GList *i;
 
-                 printf("         %sGateway%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                 printf("          %sGateway%s: ", ansi_color_bold_cyan(), ansi_color_reset());
                  for (i = route->routes; i; i = i->next) {
                          _auto_cleanup_ char *c = NULL;
                          Route *a = NULL;
@@ -278,7 +288,7 @@ static int list_one_link(char *argv[]) {
                  if (!s)
                          return log_oom();
 
-                 printf("             %sDNS%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                 printf("              %sDNS%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
          }
 
          if (search_domains) {
@@ -288,7 +298,7 @@ static int list_one_link(char *argv[]) {
                  if (!s)
                          return log_oom();
 
-                 printf("  %sSearch Domains%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                 printf("   %sSearch Domains%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
         }
 
          if (route_domains) {
@@ -298,7 +308,7 @@ static int list_one_link(char *argv[]) {
                  if (!s)
                          return log_oom();
 
-                 printf("             %sRoute Domains%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                 printf("              %sRoute Domains%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
          }
 
          if (ntp) {
@@ -308,12 +318,12 @@ static int list_one_link(char *argv[]) {
                  if (!s)
                          return log_oom();
 
-                 printf("             %sNTP%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                 printf("              %sNTP%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
          }
 
          (void) network_parse_link_timezone(l->ifindex, &tz);
          if (tz)
-                 printf("       %sTime Zone%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), tz);
+                 printf("        %sTime Zone%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), tz);
 
         return 0;
 }
