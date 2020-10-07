@@ -75,7 +75,7 @@ static int help(void) {
         printf("%s [OPTIONS...]\n\n"
                "Query and control the netmanager subsystem.\n\n"
                "  -h --help                    Show this help message and exit\n"
-               "     --version                 Show package version\n"
+               "  -v --version                 Show package version\n"
                "\nCommands:\n"
                "  show                         Show system status\n"
                "  status                       List links\n"
@@ -145,8 +145,8 @@ static int parse_argv(int argc, char *argv[]) {
         };
 
         static const struct option options[] = {
-                { "help",      no_argument,       NULL, 'h'           },
-                { "version",   no_argument,       NULL, ARG_VERSION   },
+                { "help",      no_argument,       NULL, 'h'   },
+                { "version",   no_argument,       NULL, 'v'   },
                 {}
         };
         int c;
@@ -154,14 +154,14 @@ static int parse_argv(int argc, char *argv[]) {
         assert(argc >= 0);
         assert(argv);
 
-        while ((c = getopt_long(argc, argv, "h", options, NULL)) >= 0) {
+        while ((c = getopt_long(argc, argv, "hv", options, NULL)) >= 0) {
 
                 switch (c) {
 
                 case 'h':
                         return help();
 
-                case ARG_VERSION:
+                case 'v':
                         return ncm_show_version();
 
                 case '?':
