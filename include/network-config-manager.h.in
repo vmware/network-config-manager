@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <stdarg.h>
-
 int ncm_add_dns_domains(int argc, char *argv[]);
 int ncm_add_dns_server(int argc, char *argv[]);
 int ncm_link_add_address(int argc, char *argv[]);
@@ -36,3 +34,4 @@ int ncm_show_dns_server(int argc, char *argv[]);
 int ncm_show_dns_server_domains(int argc, char *argv[]);
 int ncm_show_version(void);
 int ncm_system_status(int argc, char *argv[]);
+void ncm_is_netword_running(void);
