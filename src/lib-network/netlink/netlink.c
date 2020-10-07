@@ -92,7 +92,8 @@ int rtnl_message_parse_rtattr(struct rtattr **tb, int max, struct rtattr *rta, i
         unsigned short type;
 
         while (RTA_OK(rta, len)) {
-                type = rta->rta_type;
+                type = rta->rta_type & ~NLA_F_NESTED;
+
                 if ((type <= max) && (tb + type))
                         *(tb + type) = rta;
 
