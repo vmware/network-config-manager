@@ -245,7 +245,6 @@ static int list_one_link(char *argv[]) {
          (void)  display_one_link_udev(l, true, NULL);
          list_link_sysfs_attributes(l);
 
-
          if (l->alt_names) {
                  char **j;
 
@@ -1138,7 +1137,7 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
                 }
         }
 
-        r = argv_to_strv(argc - 1, argv + 1, &domains);
+        r = argv_to_strv(argc - 2, argv + 2, &domains);
         if (r < 0) {
                 log_warning("Failed to parse domains addresses: %s", g_strerror(-r));
                 return r;
@@ -1334,7 +1333,7 @@ _public_ int ncm_link_add_ntp(int argc, char *argv[]) {
                return -errno;
        }
 
-       r = argv_to_strv(argc - 1, argv + 1, &ntps);
+       r = argv_to_strv(argc - 2, argv + 2, &ntps);
        if (r < 0) {
                log_warning("Failed to parse NTP addresses: %s", g_strerror(-r));
                return r;
