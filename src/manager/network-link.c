@@ -152,6 +152,27 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                 n->contains_mac_address = true;
         }
 
+        if (rta_tb[IFLA_PROP_LIST]) {
+                struct rtattr *i, *j = rta_tb[IFLA_PROP_LIST];
+                _auto_cleanup_strv_ char **s = NULL;
+                int k = RTA_PAYLOAD(j);
+
+                for (i = RTA_DATA(j); RTA_OK(i, k); i = RTA_NEXT(i, k)) {
+                        if (!s) {
+                                s = strv_new((char *) RTA_DATA(i));
+                                if (!s)
+                                        return -ENOMEM;
+                        } else {
+                                r = strv_add(&s, (char *) RTA_DATA(i));
+                                if (r < 0)
+                                        return r;
+                        }
+
+                }
+
+                n->alt_names = steal_pointer(s);
+        }
+
         *ret = steal_pointer(n);
 
         return 0;

@@ -105,8 +105,8 @@ char **strv_new(char *x) {
          if (!a)
                  return NULL;
 
-         a[1] = g_strdup(x);
-         if (!a[1])
+         a[0] = g_strdup(x);
+         if (!a[0])
                  return NULL;
 
          return steal_pointer(a);

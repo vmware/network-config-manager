@@ -23,6 +23,7 @@ typedef struct Link {
         uint8_t operstate;
         struct ether_addr mac_address;
         uint32_t mtu;
+        char **alt_names;
 
         bool contains_mac_address:1;
         bool contains_mtu:1;
@@ -31,6 +32,11 @@ typedef struct Link {
 typedef struct Links {
          GList *links;
 } Links;
+
+static inline void link_free_one(Link **l) {
+        strv_free((*l)->alt_names);
+        free(*l);
+}
 
 static inline void links_free(Links **l) {
         if (l && *l) {
