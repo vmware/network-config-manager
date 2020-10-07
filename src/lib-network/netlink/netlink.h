@@ -15,6 +15,10 @@
 
 #define NLMSG_TAIL(nmsg) ((struct rtattr *) (((char *) (nmsg)) + NLMSG_ALIGN((nmsg)->nlmsg_len)))
 
+#ifndef IFLA_PROP_LIST
+#define IFLA_PROP_LIST 52
+#endif
+
 int rtnl_message_add_attribute(struct nlmsghdr *hdr, int type, const void *value, int len);
 struct rtattr *rtnl_message_add_attribute_nested(struct nlmsghdr *hdr, int type, const void *value, int len);
 int addattr_nest_end(struct nlmsghdr *hdr, struct rtattr *nested);
