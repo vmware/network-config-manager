@@ -84,7 +84,7 @@ static int links_new(Links **ret) {
 static int link_new(Link **ret) {
         Link *link = NULL;
 
-        link = new(Link, 1);
+        link = new0(Link, 1);
         if (!link)
                 return log_oom();
 
@@ -154,20 +154,19 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
 
         if (rta_tb[IFLA_PROP_LIST]) {
                 struct rtattr *i, *j = rta_tb[IFLA_PROP_LIST];
-                _auto_cleanup_strv_ char **s = NULL;
                 int k = RTA_PAYLOAD(j);
+                GPtrArray *s;
+                char *a;
 
+                s = g_ptr_array_new();
+                if (!s)
+                        return log_oom();
                 for (i = RTA_DATA(j); RTA_OK(i, k); i = RTA_NEXT(i, k)) {
-                        if (!s) {
-                                s = strv_new((char *) RTA_DATA(i));
-                                if (!s)
-                                        return -ENOMEM;
-                        } else {
-                                r = strv_add(&s, (char *) RTA_DATA(i));
-                                if (r < 0)
-                                        return r;
-                        }
+                        a = strdup((char *) RTA_DATA(i));
+                        if (!a)
+                                return -ENOMEM;
 
+                        g_ptr_array_add(s, a);
                 }
 
                 n->alt_names = steal_pointer(s);
@@ -180,7 +179,6 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
 
 static int acquire_one_link_info(int s, int ifindex, Link **ret) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
-        _auto_cleanup_ Link *link = NULL;
         struct nlmsghdr *reply = NULL;
         int r;
 
@@ -201,13 +199,8 @@ static int acquire_one_link_info(int s, int ifindex, Link **ret) {
                 return r;
 
         reply = (struct nlmsghdr *) m->buf;
-        r = fill_one_link_info(reply, r, &link);
-        if (r < 0)
-                return r;
 
-        *ret = steal_pointer(link);
-
-        return 0;
+        return fill_one_link_info(reply, r, ret);
 }
 
 int link_get_one_link(const char *ifname, Link **ret) {
