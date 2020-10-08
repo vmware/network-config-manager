@@ -162,7 +162,7 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                 if (!s)
                         return log_oom();
                 for (i = RTA_DATA(j); RTA_OK(i, k); i = RTA_NEXT(i, k)) {
-                        a = strdup((char *) RTA_DATA(i));
+                        a = strdup(rtnl_message_read_attribute_string(i));
                         if (!a)
                                 return -ENOMEM;
 
