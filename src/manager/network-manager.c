@@ -98,11 +98,7 @@ int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode, char **ret) {
         if (r < 0)
                 return r;
 
-        r = dbus_reconfigure_link(ifnameidx->ifindex);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
@@ -132,7 +128,7 @@ int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
                 return r;
         }
 
-        return dbus_reconfigure_link(ifnameidx->ifindex);
+        return dbus_network_reload();
 }
 
 int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier) {
@@ -350,7 +346,7 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx, IPAddress *addr
                 }
         }
 
-        return dbus_reconfigure_link(ifnameidx->ifindex);
+        return dbus_network_reload();
 }
 
 int manager_delete_link_address(const IfNameIndex *ifnameidx) {
@@ -377,7 +373,7 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx) {
                 return r;
         }
 
-        return dbus_reconfigure_link(ifnameidx->ifindex);
+        return dbus_network_reload();
 }
 
 int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
@@ -421,7 +417,7 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
                 return r;
         }
 
-        return dbus_reconfigure_link(ifnameidx->ifindex);
+        return dbus_network_reload();
 }
 
 int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt) {
@@ -463,7 +459,7 @@ int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt) {
                 }
         }
 
-        return dbus_reconfigure_link(ifnameidx->ifindex);
+        return dbus_network_reload();
 }
 
 int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) {
@@ -504,7 +500,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
                         (void) remove_key_from_config(network, "Route", "Metric");
         }
 
-        return dbus_reconfigure_link(ifnameidx->ifindex);
+        return dbus_network_reload();
 }
 
 int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system) {
@@ -681,7 +677,7 @@ int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v
         if (r < 0)
                 return r;
 
-        return dbus_reconfigure_link(ifnameidx->ifindex);
+        return dbus_network_reload();
 }
 
 int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps, bool add) {

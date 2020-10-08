@@ -33,9 +33,11 @@ typedef struct Links {
          GList *links;
 } Links;
 
-static inline void link_free_one(Link **l) {
-        g_ptr_array_free((*l)->alt_names, true);
-        free(*l);
+static inline void link_unref(Link **l) {
+        if (l && *l) {
+                g_ptr_array_free((*l)->alt_names, true);
+                free(*l);
+        }
 }
 
 static inline void links_free(Links **l) {
