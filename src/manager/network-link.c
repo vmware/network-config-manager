@@ -154,20 +154,19 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
 
         if (rta_tb[IFLA_PROP_LIST]) {
                 struct rtattr *i, *j = rta_tb[IFLA_PROP_LIST];
-                _auto_cleanup_strv_ char **s = NULL;
                 int k = RTA_PAYLOAD(j);
+                GPtrArray *s;
+                char *a;
 
+                s = g_ptr_array_new();
+                if (!s)
+                        return log_oom();
                 for (i = RTA_DATA(j); RTA_OK(i, k); i = RTA_NEXT(i, k)) {
-                        if (!s) {
-                                s = strv_new((char *) RTA_DATA(i));
-                                if (!s)
-                                        return -ENOMEM;
-                        } else {
-                                r = strv_add(&s, (char *) RTA_DATA(i));
-                                if (r < 0)
-                                        return r;
-                        }
+                        a = strdup((char *) RTA_DATA(i));
+                        if (!a)
+                                return -ENOMEM;
 
+                        g_ptr_array_add(s, a);
                 }
 
                 n->alt_names = steal_pointer(s);

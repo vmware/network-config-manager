@@ -193,14 +193,20 @@ static void list_link_sysfs_attributes(Link *l) {
                 printf("            %sSpeed%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), speed);
 }
 
+static void display_alterative_names(gpointer data, gpointer user_data) {
+        char *s = data;
+
+        printf("%s ", s);
+}
+
 static int list_one_link(char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
         _cleanup_(addresses_unref) Addresses *addr = NULL;
         _cleanup_(routes_free) Routes *route = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
         _cleanup_(link_free_one) Link *l = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         r = parse_ifname_or_index(*argv, &p);
@@ -212,6 +218,12 @@ static int list_one_link(char *argv[]) {
         r = link_get_one_link(*argv, &l);
         if (r < 0)
                 return r;
+
+        if (l->alt_names) {
+                printf("%sAlternative names%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                g_ptr_array_foreach(l->alt_names, display_alterative_names, NULL);
+                printf("\n");
+        }
 
         (void) network_parse_link_operational_state(l->ifindex, &operational_state);
 
@@ -245,16 +257,7 @@ static int list_one_link(char *argv[]) {
          (void)  display_one_link_udev(l, true, NULL);
          list_link_sysfs_attributes(l);
 
-         if (l->alt_names) {
-                 char **j;
-
-                 printf("%sAlternative names%s: ", ansi_color_bold_cyan(), ansi_color_reset());
-                 strv_foreach(j, l->alt_names)
-                         printf("%s ", *j);
-                 printf("\n");
-         }
-
-         r = manager_get_one_link_address(l->ifindex, &addr);
+        r = manager_get_one_link_address(l->ifindex, &addr);
          if (r >= 0 && addr && set_size(addr->addresses) > 0) {
                  printf("          %sAddress%s: ", ansi_color_bold_cyan(), ansi_color_reset());
                  set_foreach(addr->addresses, list_one_link_addresses, NULL);
