@@ -525,6 +525,24 @@ _public_ int ncm_link_set_mac(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_get_mac(const char *ifname, char **ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        char *mac;
+        int r;
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = link_read_sysfs_attribute(p->ifname, "address", &mac);
+        if (r < 0)
+                return r;
+
+        *ret = mac;
+
+        return 0;
+}
+
 _public_ int ncm_link_set_mode(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool k;
