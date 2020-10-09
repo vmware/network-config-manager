@@ -13,9 +13,9 @@ network_config_manager_sources = files('''
         manager/network-address.c
         manager/network-route.h
         manager/network-route.c
+        manager/network-config-manager.c
         manager/network-manager.h
         manager/network-manager.c
-        manager/network-manager-ctl.c
         manager/network.h
         manager/network.c
         share/ansi-color.h

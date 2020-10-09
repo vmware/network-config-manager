@@ -91,13 +91,11 @@ int rtnl_message_add_attribute_string(struct nlmsghdr *hdr, int type, const char
 int rtnl_message_parse_rtattr(struct rtattr **tb, int max, struct rtattr *rta, int len) {
         unsigned short type;
 
-        while (RTA_OK(rta, len)) {
+        for (;RTA_OK(rta, len); rta = RTA_NEXT(rta, len)) {
                 type = rta->rta_type & ~NLA_F_NESTED;
 
                 if ((type <= max) && (tb + type))
                         *(tb + type) = rta;
-
-                rta = RTA_NEXT(rta, len);
         }
 
         return 0;
@@ -106,11 +104,9 @@ int rtnl_message_parse_rtattr(struct rtattr **tb, int max, struct rtattr *rta, i
 struct rtattr *rtnl_message_parse_rtattr_one(int type, struct rtattr *rta, int len) {
          assert(rta);
 
-        while (RTA_OK(rta, len)) {
+         for (;RTA_OK(rta, len); rta = RTA_NEXT(rta, len))
                 if (rta->rta_type == type)
                         return rta;
-                rta = RTA_NEXT(rta, len);
-        }
 
         return NULL;
 }

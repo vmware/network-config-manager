@@ -144,7 +144,7 @@ network_config_managerlib = library('network_config_manager',
 
 network_config_manager = executable(
                               'nmctl',
-                              [network_config_manager_sources, 'src/manager/network-config-manager.c'],
+                              [network_config_manager_sources, 'src/manager/network-manager-ctl.c'],
                               include_directories : includes,
                               dependencies : [
                               libsystemd, glib_dep, udev_dep, yaml_dep],
