@@ -483,6 +483,24 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_get_mtu(const char *ifname, uint32_t *ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        uint32_t mtu;
+        int r;
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = link_get_mtu(p->ifname, &mtu);
+        if (r < 0)
+                return r;
+
+        *ret = mtu;
+
+        return 0;
+}
+
 _public_ int ncm_link_set_mac(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;

@@ -49,7 +49,7 @@ int ipv4_netmask_to_prefixlen(IPAddress *addr);
 bool ip4_addr_is_null(const IPAddress *a);
 int ip_is_null(const IPAddress *a);
 
-int parse_ifname_or_index(char *s, IfNameIndex **ret);
+int parse_ifname_or_index(const char *s, IfNameIndex **ret);
 char *ether_addr_to_string(const struct ether_addr *addr, char *s);
 bool ether_addr_is_not_null(const struct ether_addr *addr);
 int parse_mtu(char *mtu, uint32_t *ret);

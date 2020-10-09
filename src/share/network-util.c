@@ -197,7 +197,7 @@ int ipv4_netmask_to_prefixlen(IPAddress *addr) {
         return 32U - __builtin_ctz(be32toh(addr->in.s_addr));
 }
 
-int parse_ifname_or_index(char *s, IfNameIndex **ret) {
+int parse_ifname_or_index(const char *s, IfNameIndex **ret) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r, ifindex;
 
