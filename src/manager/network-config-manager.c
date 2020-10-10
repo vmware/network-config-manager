@@ -1169,7 +1169,6 @@ _public_ int ncm_get_dns_server(char ***ret) {
         }
 
         *ret = steal_pointer(s);
-
         return 0;
 }
 
@@ -1388,6 +1387,49 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 }
         }
 
+        return 0;
+}
+
+_public_ int ncm_get_dns_domains(char ***ret) {
+        _cleanup_(dns_domains_free) DNSDomains *domains = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        GSequenceIter *i;
+        int r;
+
+        assert(ret);
+
+        r = dbus_get_dns_domains_from_resolved(&domains);
+        if (r < 0)
+                return r;
+
+        if (!domains || g_sequence_is_empty(domains->dns_domains))
+                return -ENODATA;
+        else
+                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                        _auto_cleanup_ char *k = NULL;
+                        DNSDomain *d;
+
+                        d = g_sequence_get(i);
+
+                        k = strdup(d->domain);
+                        if (!k)
+                                return -ENOMEM;
+
+                        if (!s) {
+                                s = strv_new(k);
+                                if (!s)
+                                        return -ENOMEM;
+                        }
+
+                        r = strv_add(&s, k);
+                        if (r < 0)
+                                return r;
+
+                        steal_pointer(k);
+                }
+
+        *ret = steal_pointer(s);
         return 0;
 }
 
