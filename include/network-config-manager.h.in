@@ -40,3 +40,4 @@ int ncm_show_dns_server_domains(int argc, char *argv[]);
 int ncm_show_version(void);
 int ncm_system_status(int argc, char *argv[]);
 void ncm_is_netword_running(void);
+int ncm_get_hostname(char **ret);

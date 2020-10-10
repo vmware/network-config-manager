@@ -1493,3 +1493,17 @@ _public_ int ncm_show_version(void) {
        printf("%s\n", PACKAGE_STRING);
        return 0;
 }
+
+_public_ int ncm_get_hostname(char **ret) {
+        char *hostname;
+        int r;
+
+        assert(ret);
+
+        r = dbus_get_property_from_hostnamed("StaticHostname", &hostname);
+        if (r < 0)
+                return r;
+
+        *ret = hostname;
+        return 0;
+}
