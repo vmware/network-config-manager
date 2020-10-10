@@ -236,8 +236,10 @@ static int cli_run(int argc, char *argv[]) {
         if (r <= 0)
                 return r;
 
-        if (!isempty_string(argv[1]) && !string_equal(argv[1], "generate-config-from-cmdline"))
-                ncm_is_netword_running();
+        if (!isempty_string(argv[1]) && !string_equal(argv[1], "generate-config-from-cmdline")) {
+                if (!ncm_is_netword_running())
+                        exit(-1);
+        }
 
         r = cli_manager_new(commands, &m);
         if (r < 0)

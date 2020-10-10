@@ -483,6 +483,26 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_get_mtu(const char *ifname, uint32_t *ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        uint32_t mtu;
+        int r;
+
+        assert(ifname);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = link_get_mtu(p->ifname, &mtu);
+        if (r < 0)
+                return r;
+
+        *ret = mtu;
+
+        return 0;
+}
+
 _public_ int ncm_link_set_mac(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
@@ -503,6 +523,26 @@ _public_ int ncm_link_set_mac(int argc, char *argv[]) {
                 log_warning("Failed to update MAC Address for '%s': %s", p->ifname, g_strerror(-r) );
                 return r;
         }
+
+        return 0;
+}
+
+_public_ int ncm_link_get_mac(const char *ifname, char **ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        char *mac;
+        int r;
+
+        assert(ifname);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = link_read_sysfs_attribute(p->ifname, "address", &mac);
+        if (r < 0)
+                return r;
+
+        *ret = mac;
 
         return 0;
 }
@@ -555,6 +595,25 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
                 log_warning("Failed to set link mode '%s': %s\n", p->ifname, g_strerror(-r));
                 return r;
         }
+
+        return 0;
+}
+
+_public_ int ncm_link_get_dhcp_mode(const char *ifname, int *ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int mode, r;
+
+        assert(ifname);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = manager_get_link_dhcp_mode(p, &mode);
+        if (r < 0)
+                return r;
+
+        *ret = mode;
 
         return 0;
 }
@@ -1070,6 +1129,49 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_get_dns_server(char ***ret) {
+        _cleanup_(dns_servers_free) DNSServers *dns = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        GSequenceIter *i;
+        DNSServer *d;
+
+        int r;
+
+        assert(ret);
+
+        r = dbus_get_dns_servers_from_resolved("DNS", &dns);
+        if (r < 0)
+                return r;
+
+        for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                _auto_cleanup_ char *k = NULL;
+
+                d = g_sequence_get(i);
+
+                if (!d->ifindex)
+                        continue;
+
+                r = ip_to_string(d->family, &d->address, &k);
+                if (r >= 0) {
+                        if (!s) {
+                                s = strv_new(k);
+                                if (!s)
+                                        return -ENOMEM;
+                        }
+
+                        r = strv_add(&s, k);
+                        if (r < 0)
+                                return r;
+                }
+
+                steal_pointer(k);
+        }
+
+        *ret = steal_pointer(s);
+        return 0;
+}
+
 _public_ int ncm_add_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_free) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -1288,6 +1390,49 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_get_dns_domains(char ***ret) {
+        _cleanup_(dns_domains_free) DNSDomains *domains = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        GSequenceIter *i;
+        int r;
+
+        assert(ret);
+
+        r = dbus_get_dns_domains_from_resolved(&domains);
+        if (r < 0)
+                return r;
+
+        if (!domains || g_sequence_is_empty(domains->dns_domains))
+                return -ENODATA;
+        else
+                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                        _auto_cleanup_ char *k = NULL;
+                        DNSDomain *d;
+
+                        d = g_sequence_get(i);
+
+                        k = strdup(d->domain);
+                        if (!k)
+                                return -ENOMEM;
+
+                        if (!s) {
+                                s = strv_new(k);
+                                if (!s)
+                                        return -ENOMEM;
+                        }
+
+                        r = strv_add(&s, k);
+                        if (r < 0)
+                                return r;
+
+                        steal_pointer(k);
+                }
+
+        *ret = steal_pointer(s);
+        return 0;
+}
+
 _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
@@ -1321,6 +1466,20 @@ _public_ int ncm_set_system_hostname(int argc, char *argv[]) {
                 return r;
         }
 
+        return 0;
+}
+
+_public_ int ncm_get_system_hostname(char **ret) {
+        char *hostname;
+        int r;
+
+        assert(ret);
+
+        r = dbus_get_property_from_hostnamed("StaticHostname", &hostname);
+        if (r < 0)
+                return r;
+
+        *ret = hostname;
         return 0;
 }
 
@@ -1383,6 +1542,27 @@ _public_ int ncm_link_delete_ntp(int argc, char *argv[]) {
        return 0;
 }
 
+_public_ int ncm_link_get_ntp(const char *ifname, char ***ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        char **ntp = NULL;
+        int r;
+
+        assert(ifname);
+        assert(ret);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = network_parse_link_ntp(p->ifindex, &ntp);
+        if (r < 0)
+                return r;
+
+        *ret = ntp;
+
+        return 0;
+}
+
 _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
@@ -1423,11 +1603,13 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
         return manager_reconfigure_link(p);
 }
 
-_public_ void ncm_is_netword_running(void) {
+_public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");
-                exit(-1);
+                return false;
         }
+
+        return true;
 }
 
 _public_ int ncm_show_version(void) {
