@@ -1383,6 +1383,20 @@ _public_ int ncm_set_system_hostname(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_get_system_hostname(char **ret) {
+        char *hostname;
+        int r;
+
+        assert(ret);
+
+        r = dbus_get_property_from_hostnamed("StaticHostname", &hostname);
+        if (r < 0)
+                return r;
+
+        *ret = hostname;
+        return 0;
+}
+
 _public_ int ncm_link_add_ntp(int argc, char *argv[]) {
        _auto_cleanup_strv_ char **ntps = NULL;
        _auto_cleanup_ IfNameIndex *p = NULL;
@@ -1442,6 +1456,27 @@ _public_ int ncm_link_delete_ntp(int argc, char *argv[]) {
        return 0;
 }
 
+_public_ int ncm_link_get_ntp(const char *ifname, char ***ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        char **ntp = NULL;
+        int r;
+
+        assert(ifname);
+        assert(ret);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = network_parse_link_ntp(p->ifindex, &ntp);
+        if (r < 0)
+                return r;
+
+        *ret = ntp;
+
+        return 0;
+}
+
 _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
@@ -1494,18 +1529,4 @@ _public_ bool ncm_is_netword_running(void) {
 _public_ int ncm_show_version(void) {
        printf("%s\n", PACKAGE_STRING);
        return 0;
-}
-
-_public_ int ncm_get_hostname(char **ret) {
-        char *hostname;
-        int r;
-
-        assert(ret);
-
-        r = dbus_get_property_from_hostnamed("StaticHostname", &hostname);
-        if (r < 0)
-                return r;
-
-        *ret = hostname;
-        return 0;
 }
