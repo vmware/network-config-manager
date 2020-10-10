@@ -1129,6 +1129,50 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_get_dns_server(char ***ret) {
+        _cleanup_(dns_servers_free) DNSServers *dns = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        GSequenceIter *i;
+        DNSServer *d;
+
+        int r;
+
+        assert(ret);
+
+        r = dbus_get_dns_servers_from_resolved("DNS", &dns);
+        if (r < 0)
+                return r;
+
+        for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                _auto_cleanup_ char *k = NULL;
+
+                d = g_sequence_get(i);
+
+                if (!d->ifindex)
+                        continue;
+
+                r = ip_to_string(d->family, &d->address, &k);
+                if (r >= 0) {
+                        if (!s) {
+                                s = strv_new(k);
+                                if (!s)
+                                        return -ENOMEM;
+                        }
+
+                        r = strv_add(&s, k);
+                        if (r < 0)
+                                return r;
+                }
+
+                steal_pointer(k);
+        }
+
+        *ret = steal_pointer(s);
+
+        return 0;
+}
+
 _public_ int ncm_add_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_free) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;

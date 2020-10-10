@@ -7,8 +7,14 @@
 #include <bits/stdint-uintn.h>
 #include <stdbool.h>
 
-int ncm_add_dns_domains(int argc, char *argv[]);
+
 int ncm_add_dns_server(int argc, char *argv[]);
+int ncm_get_dns_server(char ***ret);
+int ncm_show_dns_server(int argc, char *argv[]);
+
+int ncm_add_dns_domains(int argc, char *argv[]);
+int ncm_show_dns_server_domains(int argc, char *argv[]);
+
 int ncm_link_add_address(int argc, char *argv[]);
 int ncm_link_add_default_gateway(int argc, char *argv[]);
 int ncm_link_add_route(int argc, char *argv[]);
@@ -46,8 +52,6 @@ int ncm_network_reload(int argc, char *argv[]);
 int ncm_revert_resolve_link(int argc, char *argv[]);
 int ncm_set_system_hostname(int argc, char *argv[]);
 int ncm_get_system_hostname(char **ret);
-int ncm_show_dns_server(int argc, char *argv[]);
-int ncm_show_dns_server_domains(int argc, char *argv[]);
 int ncm_show_version(void);
 
 int ncm_system_status(int argc, char *argv[]);
