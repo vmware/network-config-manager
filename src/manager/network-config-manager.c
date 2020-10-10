@@ -1482,11 +1482,13 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
         return manager_reconfigure_link(p);
 }
 
-_public_ void ncm_is_netword_running(void) {
+_public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");
-                exit(-1);
+                return false;
         }
+
+        return true;
 }
 
 _public_ int ncm_show_version(void) {
