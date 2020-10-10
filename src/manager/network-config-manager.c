@@ -488,6 +488,8 @@ _public_ int ncm_link_get_mtu(const char *ifname, uint32_t *ret) {
         uint32_t mtu;
         int r;
 
+        assert(ifname);
+
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
                 return -errno;
@@ -529,6 +531,8 @@ _public_ int ncm_link_get_mac(const char *ifname, char **ret) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         char *mac;
         int r;
+
+        assert(ifname);
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
@@ -591,6 +595,25 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
                 log_warning("Failed to set link mode '%s': %s\n", p->ifname, g_strerror(-r));
                 return r;
         }
+
+        return 0;
+}
+
+_public_ int ncm_link_get_dhcp_mode(const char *ifname, int *ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int mode, r;
+
+        assert(ifname);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = manager_get_link_dhcp_mode(p, &mode);
+        if (r < 0)
+                return r;
+
+        *ret = mode;
 
         return 0;
 }

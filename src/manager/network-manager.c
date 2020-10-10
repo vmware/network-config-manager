@@ -131,6 +131,29 @@ int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
         return dbus_network_reload();
 }
 
+int manager_get_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode *mode) {
+        _auto_cleanup_ char *network = NULL, *config_dhcp = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = network_parse_link_network_file(ifnameidx->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_config_file(network, "Network", "DHCP", &config_dhcp);
+        if (r < 0)
+                return r;
+
+        r = dhcp_name_to_mode(config_dhcp);
+        if (r < 0)
+                return r;
+
+        *mode = r;
+
+        return 0;
+}
+
 int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
