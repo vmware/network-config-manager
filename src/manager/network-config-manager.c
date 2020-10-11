@@ -446,15 +446,15 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_status(int argc, char *argv[]) {
-        int c;
+        int r;
 
         if (argc <= 1)
                 return list_links(argc, argv);
         else
-                c = list_one_link(argv + 1);
+                r = list_one_link(argv + 1);
 
-        if (c < 0)
-                return c;
+        if (r < 0)
+                return r;
 
         return 0;
 }
@@ -666,6 +666,24 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
                 log_warning("Failed to set link DHCP4 client IAID for'%s': %s\n", p->ifname, g_strerror(r));
                 return r;
         }
+
+        return 0;
+}
+
+_public_ int ncm_link_get_dhcp_client_iaid(char *ifname, uint32_t *ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        uint32_t v;
+        int r;
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = manager_get_link_dhcp_client_iaid(p, &v);
+        if (r < 0)
+                return r;
+
+        *ret = v;
 
         return 0;
 }

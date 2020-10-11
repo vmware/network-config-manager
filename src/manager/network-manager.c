@@ -205,6 +205,25 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iai
         return 0;
 }
 
+int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *iaid) {
+        _auto_cleanup_ char *network = NULL;
+        unsigned v;
+        int r;
+
+        assert(ifnameidx);
+
+        r = network_parse_link_network_file(ifnameidx->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_config_file_integer(network, "DHCPv6", "IAID", &v);
+        if (r < 0)
+                return r;
+
+        *iaid = v;
+        return 0;
+}
+
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system) {
         _auto_cleanup_ char *network = NULL;
         int r;
