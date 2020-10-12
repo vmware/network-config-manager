@@ -101,6 +101,8 @@ int skip_first_word_and_split(char *line, const char *first_word, const char *se
 char **strv_new(char *x) {
         _auto_cleanup_strv_ char **a = NULL;
 
+        assert(x);
+
          a = new0(char *, 2);
          if (!a)
                  return NULL;
@@ -116,8 +118,8 @@ int strv_add(char ***l, char *value) {
         char **c;
         size_t n, m;
 
-        if (!value)
-                return 0;
+        assert(l);
+        assert(value);
 
         n = g_strv_length(*l);
         m = n + 2;
