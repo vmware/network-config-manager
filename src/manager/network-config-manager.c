@@ -1049,6 +1049,53 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_get_routes(char *ifname, char ***ret) {
+        _cleanup_(routes_free) Routes *route = NULL;
+        _auto_cleanup_ IPAddress *address = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        GList *i;
+        int r;
+
+        assert(ifname);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = manager_get_one_link_route(p->ifindex, &route);
+        if (r < 0)
+                return r;
+
+        if (g_list_length(route->routes) <= 0)
+                return -ENODATA;
+
+        for (i = route->routes; i; i = i->next) {
+                _auto_cleanup_ char *c = NULL;
+                Route *a = NULL;
+
+                a = i->data;
+                ip_to_string(a->family, &a->address, &c);
+                if (r < 0)
+                        return r;
+
+                if (!s) {
+                        s = strv_new(c);
+                        if (!s)
+                                return log_oom();
+                } else {
+                        r = strv_add(&s, c);
+                        if (r < 0)
+                                return log_oom();
+                }
+
+                steal_pointer(c);
+        }
+
+        *ret = steal_pointer(s);
+        return 0;
+}
+
 _public_ int ncm_link_delete_gateway_or_route(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
