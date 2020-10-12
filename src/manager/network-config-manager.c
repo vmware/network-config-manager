@@ -446,15 +446,15 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_status(int argc, char *argv[]) {
-        int c;
+        int r;
 
         if (argc <= 1)
                 return list_links(argc, argv);
         else
-                c = list_one_link(argv + 1);
+                r = list_one_link(argv + 1);
 
-        if (c < 0)
-                return c;
+        if (r < 0)
+                return r;
 
         return 0;
 }
@@ -666,6 +666,24 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
                 log_warning("Failed to set link DHCP4 client IAID for'%s': %s\n", p->ifname, g_strerror(r));
                 return r;
         }
+
+        return 0;
+}
+
+_public_ int ncm_link_get_dhcp_client_iaid(char *ifname, uint32_t *ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        uint32_t v;
+        int r;
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = manager_get_link_dhcp_client_iaid(p, &v);
+        if (r < 0)
+                return r;
+
+        *ret = v;
 
         return 0;
 }
@@ -884,6 +902,54 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
+        _cleanup_(addresses_unref) Addresses *addr = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        GHashTableIter iter;
+        gpointer key, value;
+        unsigned long size;
+        int r;
+
+        assert(ifname);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = manager_get_one_link_address(p->ifindex, &addr);
+        if (r < 0)
+                return r;
+
+        if (!set_size(addr->addresses))
+                return -ENODATA;
+
+        g_hash_table_iter_init(&iter, addr->addresses->hash);
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+                Address *a = (Address *) g_bytes_get_data(key, &size);
+                _auto_cleanup_ char *c = NULL;
+
+                r = ip_to_string_prefix(a->family, &a->address, &c);
+                if (r < 0)
+                        return r;
+
+                if (!s) {
+                        s = strv_new(c);
+                        if (!s)
+                                return log_oom();
+                } else {
+                        r = strv_add(&s, c);
+                        if (r < 0)
+                                return log_oom();
+                }
+
+                steal_pointer(c);
+        }
+
+        *ret = steal_pointer(s);
+        return 0;
+}
+
 _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -980,6 +1046,53 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                 return r;
         }
 
+        return 0;
+}
+
+_public_ int ncm_link_get_routes(char *ifname, char ***ret) {
+        _cleanup_(routes_free) Routes *route = NULL;
+        _auto_cleanup_ IPAddress *address = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        GList *i;
+        int r;
+
+        assert(ifname);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = manager_get_one_link_route(p->ifindex, &route);
+        if (r < 0)
+                return r;
+
+        if (g_list_length(route->routes) <= 0)
+                return -ENODATA;
+
+        for (i = route->routes; i; i = i->next) {
+                _auto_cleanup_ char *c = NULL;
+                Route *a = NULL;
+
+                a = i->data;
+                ip_to_string(a->family, &a->address, &c);
+                if (r < 0)
+                        return r;
+
+                if (!s) {
+                        s = strv_new(c);
+                        if (!s)
+                                return log_oom();
+                } else {
+                        r = strv_add(&s, c);
+                        if (r < 0)
+                                return log_oom();
+                }
+
+                steal_pointer(c);
+        }
+
+        *ret = steal_pointer(s);
         return 0;
 }
 
