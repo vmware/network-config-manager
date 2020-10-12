@@ -902,6 +902,54 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
+        _cleanup_(addresses_unref) Addresses *addr = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        GHashTableIter iter;
+        gpointer key, value;
+        unsigned long size;
+        int r;
+
+        assert(ifname);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = manager_get_one_link_address(p->ifindex, &addr);
+        if (r < 0)
+                return r;
+
+        if (!set_size(addr->addresses))
+                return -ENODATA;
+
+        g_hash_table_iter_init(&iter, addr->addresses->hash);
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+                Address *a = (Address *) g_bytes_get_data(key, &size);
+                _auto_cleanup_ char *c = NULL;
+
+                r = ip_to_string_prefix(a->family, &a->address, &c);
+                if (r < 0)
+                        return r;
+
+                if (!s) {
+                        s = strv_new(c);
+                        if (!s)
+                                return log_oom();
+                } else {
+                        r = strv_add(&s, c);
+                        if (r < 0)
+                                return log_oom();
+                }
+
+                steal_pointer(c);
+        }
+
+        *ret = steal_pointer(s);
+        return 0;
+}
+
 _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
