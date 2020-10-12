@@ -644,6 +644,28 @@ _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_get_dhcp4_client_identifier(const char *ifname, char **ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        DHCPClientIdentifier d;
+        int r;
+
+        assert(ifname);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        r = manager_get_link_dhcp_client_identifier(p, &d);
+        if (r < 0)
+                return r;
+
+        *ret = strdup(dhcp_client_identifier_to_name(d));
+        if (!*ret)
+                return -ENOMEM;
+
+        return 0;
+}
+
 _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t v;
