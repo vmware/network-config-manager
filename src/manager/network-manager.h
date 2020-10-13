@@ -16,7 +16,9 @@ int manager_get_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode *mode);
 
 int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode, char **ret);
 int manager_set_link_state(const IfNameIndex *ifnameidx, LinkState state);
+
 int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier);
+int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret);
 
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t v);
 int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *iaid);

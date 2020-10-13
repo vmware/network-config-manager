@@ -179,6 +179,25 @@ int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
         return 0;
 }
 
+int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret) {
+        _auto_cleanup_ char *network = NULL, *config = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = network_parse_link_network_file(ifnameidx->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_config_file(network, "DHCPv4", "ClientIdentifier", &config);
+        if (r < 0)
+                return r;
+
+        *ret = dhcp_client_identifier_to_mode(config);
+
+        return 0;
+}
+
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iaid) {
         _auto_cleanup_ char *network = NULL;
         unsigned v;
