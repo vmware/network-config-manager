@@ -350,8 +350,8 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
 }
 
 _public_ int ncm_system_status(int argc, char *argv[]) {
-        _auto_cleanup_ char *state = NULL, *hostname = NULL, *kernel = NULL, *kernel_release = NULL,
-                            *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
+        _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *address_state = NULL, *hostname = NULL, *kernel = NULL,
+                *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
         _cleanup_(routes_free) Routes *routes = NULL;
         _cleanup_(addresses_unref) Addresses *h = NULL;
@@ -384,13 +384,19 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         if (os)
                 printf("    %sOperating System%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), os);
 
-        (void) network_parse_operational_state(&state);
+        (void) dbus_get_system_property_from_networkd("OperationalState", &state);
         if (state) {
-                const char *state_color;
+                const char *state_color, *carrier_color;
+
+                (void) dbus_get_system_property_from_networkd("CarrierState", &carrier_state);
 
                 link_state_to_color(state, &state_color);
-                printf("        %sSystem State%s: %s%s%s\n", ansi_color_bold_cyan(), ansi_color_reset(), state_color,  state, ansi_color_reset());
+                link_state_to_color(carrier_state, &carrier_color);
+
+                printf("        %sSystem State%s: %s%s%s (%s%s%s)\n", ansi_color_bold_cyan(), ansi_color_reset(), state_color,  state, ansi_color_reset(),
+                       carrier_color, carrier_state, ansi_color_reset());
         }
+
 
         r = manager_link_get_address(&h);
         if (r >= 0 && set_size(h->addresses) > 0) {
