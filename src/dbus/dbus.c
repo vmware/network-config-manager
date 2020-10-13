@@ -590,3 +590,45 @@ int dbus_reconfigure_link(int ifindex) {
 
         return 0;
 }
+
+int dbus_get_system_property_from_networkd(const char *p, char **ret) {
+        _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+        _cleanup_(sd_bus_message_unrefp) sd_bus_message *m = NULL;
+        _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
+        char *v;
+        int r;
+
+        assert(p);
+
+        r = sd_bus_open_system(&bus);
+        if (r < 0) {
+                log_warning("Failed to connect system bus: %s", bus_error.message);
+                return r;
+        }
+
+
+        r = sd_bus_get_property(bus,
+                                "org.freedesktop.network1",
+                                "/org/freedesktop/network1",
+                                "org.freedesktop.network1.Manager",
+                                p,
+                                &bus_error,
+                                &m,
+                                "s");
+        if (r < 0) {
+                log_warning("Failed to issue method call: %s", bus_error.message);
+                return r;
+        }
+
+        r = sd_bus_message_read(m, "s", &v);
+        if (r < 0)
+                return r;
+
+        v = g_strdup(v);
+        if (!v)
+                return log_oom();
+        else
+                *ret = v;
+
+        return 0;
+}
