@@ -119,6 +119,8 @@ libsystemd = dependency('libsystemd',
 glib_dep = dependency('glib-2.0')
 udev_dep = dependency('libudev')
 yaml_dep = dependency('yaml-0.1')
+libmnl_dep = dependency('libmnl')
+libnftnl_dep = dependency('libnftnl')
 
 includes = include_directories('src/cli',
                                'src/dbus',
@@ -127,6 +129,7 @@ includes = include_directories('src/cli',
                                'src/lib-network/netlink',
                                'src/lib-network/networkd',
                                'src/manager',
+                               'src/nftables',
                                'src/share',
                                'src/udev',
                                'src/yaml',
@@ -137,7 +140,7 @@ network_config_managerlib = library('network_config_manager',
                         network_config_manager_sources,
                         include_directories: includes,
                         dependencies : [
-                        libsystemd, glib_dep, udev_dep, yaml_dep],
+                        libsystemd, glib_dep, udev_dep, yaml_dep, libmnl_dep, libnftnl_dep],
                         install: true,
                         version: meson.project_version(),
                         soversion: so_version)
@@ -147,7 +150,7 @@ network_config_manager = executable(
                               [network_config_manager_sources, 'src/manager/network-manager-ctl.c'],
                               include_directories : includes,
                               dependencies : [
-                              libsystemd, glib_dep, udev_dep, yaml_dep],
+                              libsystemd, glib_dep, udev_dep, yaml_dep, libmnl_dep, libnftnl_dep],
                               install : true)
 
 pkg = import('pkgconfig')
