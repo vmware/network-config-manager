@@ -27,6 +27,7 @@
 #include "network-manager.h"
 #include "network-util.h"
 #include "networkd-api.h"
+#include "nftables.h"
 #include "parse-util.h"
 #include "udev-hwdb.h"
 
@@ -1760,4 +1761,24 @@ _public_ bool ncm_is_netword_running(void) {
 _public_ int ncm_show_version(void) {
        printf("%s\n", PACKAGE_STRING);
        return 0;
+}
+
+_public_ int ncm_nft_add_tables(int argc, char *argv[]) {
+        _auto_cleanup_ char *argv_line = NULL;
+        int r, f;
+
+        f = nft_family_name_to_type(argv[1]);
+        if (f < 0) {
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                return -errno;
+        }
+
+        r = nft_add_table(f, argv[2]);
+        if (r < 0) {
+                log_warning("Failed to add table  %s : %s", argv[2], g_strerror(-r));
+                return -errno;
+
+        }
+
+        return r;
 }

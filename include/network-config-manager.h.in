@@ -68,3 +68,5 @@ int ncm_show_version(void);
 
 int ncm_system_status(int argc, char *argv[]);
 bool ncm_is_netword_running(void);
+
+int ncm_nft_add_tables(int argc, char *argv[]);
