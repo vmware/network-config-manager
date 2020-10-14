@@ -718,7 +718,7 @@ int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k
         if (r < 0)
                 return r;
 
-        return dbus_reconfigure_link(ifnameidx->ifindex);
+        return dbus_network_reload();
 }
 
 int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v, bool dhcp4) {
@@ -831,7 +831,7 @@ int manager_enable_ipv6(const IfNameIndex *ifnameidx, bool enable) {
         if (r < 0)
                 return r;
 
-        return dbus_reconfigure_link(ifnameidx->ifindex);
+        return dbus_network_reload();
 }
 
 int manager_reload_network(void) {
