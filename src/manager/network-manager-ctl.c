@@ -131,6 +131,7 @@ static int help(void) {
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
                "  apply-yaml-config                   Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
                "  generate-config-from-cmdline [FILE | COMMAND LINE] Generates network file configuration from command kernel command line or command line.\n"
+               "  add-nftables-table           [Family {ip | ip6 | ipnet}] [table name ] adds a new table.\n"
 
                , program_invocation_short_name
         );
@@ -229,6 +230,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply-yaml-config"           , WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "generate-config-from-cmdline", WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
+                { "add-nftables-table",           2,        WORD_ANY, false, ncm_nft_add_tables },
                 {}
         };
 

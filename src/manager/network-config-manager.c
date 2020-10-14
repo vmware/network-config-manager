@@ -27,6 +27,7 @@
 #include "network-manager.h"
 #include "network-util.h"
 #include "networkd-api.h"
+#include "nftables.h"
 #include "parse-util.h"
 #include "udev-hwdb.h"
 
@@ -355,6 +356,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
         _cleanup_(routes_free) Routes *routes = NULL;
         _cleanup_(addresses_unref) Addresses *h = NULL;
+        sd_id128_t machine_id = {};
         Route *rt;
         GList *i;
         int r;
@@ -384,6 +386,10 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         if (os)
                 printf("    %sOperating System%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), os);
 
+        r = sd_id128_get_machine(&machine_id);
+        if (r >= 0)
+                printf("          %sMachine ID%s: " SD_ID128_FORMAT_STR "\n", ansi_color_bold_cyan(),  ansi_color_reset(), SD_ID128_FORMAT_VAL(machine_id));
+
         (void) dbus_get_system_property_from_networkd("OperationalState", &state);
         if (state) {
                 const char *state_color, *carrier_color;
@@ -396,7 +402,6 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 printf("        %sSystem State%s: %s%s%s (%s%s%s)\n", ansi_color_bold_cyan(), ansi_color_reset(), state_color,  state, ansi_color_reset(),
                        carrier_color, carrier_state, ansi_color_reset());
         }
-
 
         r = manager_link_get_address(&h);
         if (r >= 0 && set_size(h->addresses) > 0) {
@@ -1756,4 +1761,24 @@ _public_ bool ncm_is_netword_running(void) {
 _public_ int ncm_show_version(void) {
        printf("%s\n", PACKAGE_STRING);
        return 0;
+}
+
+_public_ int ncm_nft_add_tables(int argc, char *argv[]) {
+        _auto_cleanup_ char *argv_line = NULL;
+        int r, f;
+
+        f = nft_family_name_to_type(argv[1]);
+        if (f < 0) {
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                return -errno;
+        }
+
+        r = nft_add_table(f, argv[2]);
+        if (r < 0) {
+                log_warning("Failed to add table  %s : %s", argv[2], g_strerror(-r));
+                return -errno;
+
+        }
+
+        return r;
 }
