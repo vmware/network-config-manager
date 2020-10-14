@@ -99,5 +99,5 @@ int nft_add_table(int family, const char *name) {
         nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
         mnl_nlmsg_batch_next(m->batch);
 
-        return mnl_send(m);
+        return mnl_send(m, NULL);
 }

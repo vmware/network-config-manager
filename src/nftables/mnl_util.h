@@ -21,4 +21,4 @@ int mnl_new(Mnl **ret);
 void mnl_unrefp(Mnl **m);
 
 void unref_mnl_socket(struct mnl_socket **nl);
-int mnl_send(struct Mnl *m);
+int mnl_send(struct Mnl *m, mnl_cb_t cb);
