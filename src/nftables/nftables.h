@@ -29,3 +29,4 @@ void nft_tables_unref(struct nftnl_table **t);
 
 int new_nft_table(int family, const char *name, struct nftnl_table **ret);
 int nft_add_table(int family, const char *name);
+int nft_get_tables(int family, char ***ret);
