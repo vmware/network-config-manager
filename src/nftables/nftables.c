@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include <linux/netfilter.h>
 #include <linux/netfilter/nf_tables.h>
@@ -25,12 +26,13 @@
 #include "string-util.h"
 
 static const char* const nft_family[] = {
-        [NF_PROTO_FAMILY_INET]   = "ip",
-        [NF_PROTO_FAMILY_IPV4]   = "ipv4",
-        [NF_PROTO_FAMILY_ARP]    = "arp",
-        [NF_PROTO_FAMILY_NETDEV] = "netdev",
-        [NF_PROTO_FAMILY_BRIDGE] = "bridge",
-        [NF_PROTO_FAMILY_IPV6]   = "ipv6",
+        [NF_PROTO_FAMILY_UNSPEC]   = "none",
+        [NF_PROTO_FAMILY_INET]     = "ip",
+        [NF_PROTO_FAMILY_IPV4]     = "ipv4",
+        [NF_PROTO_FAMILY_ARP]      = "arp",
+        [NF_PROTO_FAMILY_NETDEV]   = "netdev",
+        [NF_PROTO_FAMILY_BRIDGE]   = "bridge",
+        [NF_PROTO_FAMILY_IPV6]     = "ipv6",
 };
 
 const char *nft_family_to_name(int id) {
@@ -55,21 +57,36 @@ int nft_family_name_to_type(char *name) {
         return _NF_PROTO_FAMILY_INVALID;
 }
 
-void nft_table_unref(struct nftnl_table **t) {
-        if (t && *t)
-                nftnl_table_free(*t);
+void nft_table_unref(NFTNLTable **t) {
+        if (t && *t) {
+                nftnl_table_free((*t)->table);
+                free((*t)->name);
+        }
 }
 
-int new_nft_table(int family, const char *name, struct nftnl_table **ret) {
-        struct nftnl_table *t = NULL;
+int new_nft_table(int family, const char *name, NFTNLTable **ret) {
+        _cleanup_(nft_table_unref) NFTNLTable *t = NULL;
 
-        t = nftnl_table_alloc();
+        t = new(NFTNLTable, 1);
         if (!t)
+                return -ENOMEM;
+
+        *t = (NFTNLTable) {
+                .family = family,
+        };
+
+        t->table = nftnl_table_alloc();
+        if (!t->table)
                 return log_oom();
 
-        nftnl_table_set_u32(t, NFTNL_TABLE_FAMILY, family);
-        if (name)
-                nftnl_table_set_str(t, NFTNL_TABLE_NAME, name);
+        nftnl_table_set_u32(t->table, NFTNL_TABLE_FAMILY, family);
+
+        if (name) {
+                nftnl_table_set_str(t->table, NFTNL_TABLE_NAME, name);
+                t->name = strdup(name);
+                if (!t->name)
+                        return -ENOMEM;
+        }
 
         *ret = steal_pointer(t);
 
@@ -98,7 +115,7 @@ int new_nft_chain(int family, const char *name, const char *table, struct nftnl_
 }
 
 int nft_add_table(int family, const char *name) {
-        _cleanup_(nft_table_unref) struct nftnl_table *t = NULL;
+        _cleanup_(nft_table_unref) NFTNLTable *t = NULL;
         _cleanup_(mnl_unrefp) Mnl *m = NULL;
         int r;
 
@@ -116,13 +133,12 @@ int nft_add_table(int family, const char *name) {
         nftnl_batch_begin(mnl_nlmsg_batch_current(m->batch), m->seq++);
         mnl_nlmsg_batch_next(m->batch);
 
-        family = nftnl_table_get_u32(t, NFTNL_TABLE_FAMILY);
         m->nlh = nftnl_table_nlmsg_build_hdr(mnl_nlmsg_batch_current(m->batch),
                                              NFT_MSG_NEWTABLE,
                                              family,
                                              NLM_F_CREATE|NLM_F_ACK, m->seq++);
 
-        nftnl_table_nlmsg_build_payload(m->nlh, t);
+        nftnl_table_nlmsg_build_payload(m->nlh, t->table);
         mnl_nlmsg_batch_next(m->batch);
 
         nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
@@ -144,7 +160,9 @@ static int get_table_data_attr_cb(const struct nlattr *attr, void *data) {
 
 static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
         struct nfgenmsg *nfg = mnl_nlmsg_get_payload(nlh);
+        _cleanup_(nft_table_unref) NFTNLTable *t = NULL;
         struct nlattr *tb[NFTA_TABLE_MAX+1] = {};
+        const char *name = NULL;
         GPtrArray *s = data;
         int r;
 
@@ -155,38 +173,31 @@ static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
         if (r < 0)
                 return MNL_CB_ERROR;
 
-        if (tb[NFTA_TABLE_NAME]) {
-                _auto_cleanup_ char *a = NULL;
+        if (tb[NFTA_TABLE_NAME])
+                name = mnl_attr_get_str(tb[NFTA_TABLE_NAME]);
 
-                a = strdup(mnl_attr_get_str(tb[NFTA_TABLE_NAME]));
-                if (!a)
-                        return -ENOMEM;
+        r = new_nft_table(nfg->nfgen_family, name, &t);
+        if (r < 0)
+                return r;
 
-                g_ptr_array_add(s, a);
-                steal_pointer(a);
-        }
+        g_ptr_array_add(s, t);
+        steal_pointer(t);
 
         return MNL_CB_OK;
 }
 
-int nft_get_tables(int family, char ***ret) {
-        _cleanup_(nft_table_unref) struct nftnl_table *t = NULL;
+int nft_get_tables(int family, GPtrArray **ret) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _cleanup_(mnl_unrefp) Mnl *m = NULL;
         _auto_cleanup_strv_ char **p = NULL;
         guint i;
-        int r, f;
-
-        r = new_nft_table(family, 0, &t);
-        if (r < 0)
-                return r;
+        int r;
 
         r = mnl_new(&m);
         if (r < 0)
                 return r;
 
-        f = nftnl_table_get_u32(t, NFTNL_TABLE_FAMILY);
-        m->nlh = nftnl_table_nlmsg_build_hdr(m->buf, NFT_MSG_GETTABLE, f, NLM_F_DUMP, m->seq++);
+        m->nlh = nftnl_table_nlmsg_build_hdr(m->buf, NFT_MSG_GETTABLE, family, NLM_F_DUMP, m->seq++);
         if (!m->nlh)
                 return -ENOMEM;
 
@@ -199,7 +210,19 @@ int nft_get_tables(int family, char ***ret) {
                 return r;
 
         for (i = 0; i < s->len; i++) {
-                char *a = g_ptr_array_index (s, i);
+                _cleanup_(g_string_unrefp) GString *v = NULL;
+                NFTNLTable *t = g_ptr_array_index(s, i);
+                _auto_cleanup_ char *a = NULL;
+
+                v = g_string_new(nft_family_to_name(t->family));
+                if (!v)
+                        return -ENOMEM;
+
+                g_string_append_printf(v, ": %s", t->name);
+
+                a = strdup(v->str);
+                if (!a)
+                        return -ENOMEM;
 
                 if (!p) {
                         p = strv_new(a);
@@ -214,7 +237,7 @@ int nft_get_tables(int family, char ***ret) {
                 steal_pointer(a);
         }
 
-        *ret = steal_pointer(p);
+        *ret = steal_pointer(s);
 
         return 0;
 }
