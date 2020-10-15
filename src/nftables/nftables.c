@@ -147,7 +147,7 @@ int nft_add_table(int family, const char *name) {
         return mnl_send(m, 0, 0);
 }
 
-static int get_table_data_attr_cb(const struct nlattr *attr, void *data) {
+static int generic_parrse_data_attr_cb(const struct nlattr *attr, void *data) {
         const struct nlattr **tb = data;
         int type = mnl_attr_get_type(attr);
 
@@ -169,7 +169,7 @@ static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
         assert(nlh);
         assert(s);
 
-        r = mnl_attr_parse(nlh, sizeof(*nfg), get_table_data_attr_cb, tb);
+        r = mnl_attr_parse(nlh, sizeof(*nfg), generic_parrse_data_attr_cb, tb);
         if (r < 0)
                 return MNL_CB_ERROR;
 
