@@ -89,7 +89,6 @@ int new_nft_table(int family, const char *name, NFTNLTable **ret) {
         }
 
         *ret = steal_pointer(t);
-
         return 0;
 }
 
@@ -148,11 +147,14 @@ int nft_add_table(int family, const char *name) {
 }
 
 static int generic_parrse_data_attr_cb(const struct nlattr *attr, void *data) {
-        const struct nlattr **tb = data;
-        int type = mnl_attr_get_type(attr);
+        const struct nlattr **tb;
+        int type;
 
-        assert(attr);
         assert(data);
+        assert(attr);
+
+        tb = data;
+        type = mnl_attr_get_type(attr);
 
         tb[type] = attr;
         return MNL_CB_OK;
@@ -217,6 +219,7 @@ int nft_add_chain(int family, const char *table, const char *name) {
         int r;
 
         assert(name);
+        assert(table);
 
         r = new_nft_chain(family, name, table, &c);
         if (r < 0)
