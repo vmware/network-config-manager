@@ -177,17 +177,17 @@ int nft_get_tables(int family, char ***ret) {
                 return r;
 
         for (i = 0; i < s->len; i++) {
-                GValueArray *a = g_ptr_array_index (s, i);
+                char *a = g_ptr_array_index (s, i);
 
                 if (!s) {
                         p = strv_new((char *) a);
                         if (!p)
                                 return -ENOMEM;
+                } else {
+                        r = strv_add(&p, (char *) a);
+                        if (r < 0)
+                                return r;
                 }
-
-                r = strv_add(&p, (char *) a);
-                if (r < 0)
-                        return r;
 
                 steal_pointer(a);
         }
