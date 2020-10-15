@@ -42,6 +42,10 @@ static inline void g_string_unrefp(GString **s) {
         if (s && *s)
                 g_string_free(*s, false);
 }
+static inline void g_ptr_array_unrefp(GPtrArray **s) {
+        if (s && *s)
+                g_ptr_array_free(*s, true);
+}
 
 static inline void g_dir_unrefp(GDir **d) {
         if (d && *d)
@@ -57,6 +61,7 @@ DEFINE_CLEANUP(FILE *, fclose);
 DEFINE_CLEANUP(FILE *, pclose);
 DEFINE_CLEANUP(int *, close_fdp);
 DEFINE_CLEANUP(GString **, g_string_unrefp);
+DEFINE_CLEANUP(GPtrArray **, g_ptr_array_unrefp);
 DEFINE_CLEANUP(char **, strv_free);
 DEFINE_CLEANUP(GHashTable *, g_hash_table_unref);
 DEFINE_CLEANUP(GDir **, g_dir_unrefp);

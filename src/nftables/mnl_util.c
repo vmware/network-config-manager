@@ -44,9 +44,10 @@ void unref_mnl_socket(struct mnl_socket **nl) {
                 mnl_socket_close(*nl);
 }
 
-int mnl_send(Mnl *m) {
+int mnl_send(Mnl *m, mnl_cb_t cb, void *d) {
         _cleanup_(unref_mnl_socket) struct mnl_socket *nl = NULL;
         uint32_t port_id;
+        size_t k;
         int r;
 
         assert(m);
@@ -60,16 +61,21 @@ int mnl_send(Mnl *m) {
                 return -errno;
 
         port_id = mnl_socket_get_portid(nl);
+        if (m->batch)
+                k = mnl_nlmsg_batch_size(m->batch);
+        else
+                k = m->nlh->nlmsg_len;
 
-        r = mnl_socket_sendto(nl, mnl_nlmsg_batch_head(m->batch), mnl_nlmsg_batch_size(m->batch));
+        r = mnl_socket_sendto(nl, m->batch ? mnl_nlmsg_batch_head(m->batch) : m->nlh, k);
         if (r < 0)
                 return -errno;
 
-        mnl_nlmsg_batch_stop(m->batch);
+        if (m->batch)
+                mnl_nlmsg_batch_stop(m->batch);
 
         r = mnl_socket_recvfrom(nl, m->buf, MNL_SOCKET_BUFFER_SIZE);
         while (r > 0) {
-                r = mnl_cb_run(m->buf, r, 0, port_id, 0, 0);
+                r = mnl_cb_run(m->buf, r, 0, port_id, cb, d);
                 if (r <= 0)
                         break;
 
