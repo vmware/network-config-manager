@@ -1802,9 +1802,9 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
 
         }
 
-        strv_foreach(s, t) {
-                printf("%s ", *s);
-        }
+        printf("%s NFTable Tables: %s\n\n", ansi_color_bold_cyan(), ansi_color_reset());
+        strv_foreach(s, t)
+                printf("%s%s%s \n", ansi_color_bold_blue(), *s, ansi_color_reset());
 
         return 0;
 }
@@ -1823,4 +1823,24 @@ _public_ int ncm_nft_get_tables(char *family, char ***ret) {
 
         *ret = steal_pointer(t);
         return 0;
+}
+
+_public_ int ncm_nft_add_chain(int argc, char *argv[]) {
+        _auto_cleanup_ char *argv_line = NULL;
+        int r, f;
+
+        f = nft_family_name_to_type(argv[1]);
+        if (f < 0) {
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                return -errno;
+        }
+
+        r = nft_add_chain(f, argv[2], argv[3]);
+        if (r < 0) {
+                log_warning("Failed to add chain  %s : %s", argv[3], g_strerror(-r));
+                return -errno;
+
+        }
+
+        return r;
 }
