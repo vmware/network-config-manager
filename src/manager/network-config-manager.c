@@ -1792,7 +1792,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
         f = nft_family_name_to_type(argv[1]);
         if (f < 0) {
                 log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
+                return -EINVAL;
         }
 
         r = nft_get_tables(f, &t);
@@ -1802,12 +1802,25 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
 
         }
 
-        if (strv_length(t) <= 0)
-                return -ENODATA;
-
         strv_foreach(s, t) {
                 printf("%s ", *s);
         }
 
+        return 0;
+}
+
+_public_ int ncm_nft_get_tables(char *family, char ***ret) {
+        _auto_cleanup_strv_ char **t = NULL;
+        int r, f;
+
+        f = nft_family_name_to_type(family);
+        if (f < 0)
+                return -EINVAL;
+
+        r = nft_get_tables(f, &t);
+        if (r < 0)
+                return r;
+
+        *ret = steal_pointer(t);
         return 0;
 }
