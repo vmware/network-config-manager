@@ -189,8 +189,6 @@ static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
 int nft_get_tables(int family, GPtrArray **ret) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _cleanup_(mnl_unrefp) Mnl *m = NULL;
-        _auto_cleanup_strv_ char **p = NULL;
-        guint i;
         int r;
 
         r = mnl_new(&m);
@@ -209,36 +207,7 @@ int nft_get_tables(int family, GPtrArray **ret) {
         if (r < 0)
                 return r;
 
-        for (i = 0; i < s->len; i++) {
-                _cleanup_(g_string_unrefp) GString *v = NULL;
-                NFTNLTable *t = g_ptr_array_index(s, i);
-                _auto_cleanup_ char *a = NULL;
-
-                v = g_string_new(nft_family_to_name(t->family));
-                if (!v)
-                        return -ENOMEM;
-
-                g_string_append_printf(v, ": %s", t->name);
-
-                a = strdup(v->str);
-                if (!a)
-                        return -ENOMEM;
-
-                if (!p) {
-                        p = strv_new(a);
-                        if (!p)
-                                return -ENOMEM;
-                } else {
-                        r = strv_add(&p, a);
-                        if (r < 0)
-                                return r;
-                }
-
-                steal_pointer(a);
-        }
-
         *ret = steal_pointer(s);
-
         return 0;
 }
 
