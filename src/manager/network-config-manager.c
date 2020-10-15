@@ -1784,10 +1784,10 @@ _public_ int ncm_nft_add_tables(int argc, char *argv[]) {
 }
 
 _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
+        _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _auto_cleanup_ char *argv_line = NULL;
-        _auto_cleanup_strv_ char **t = NULL;
-        char **s = NULL;
         int r, f;
+        guint i;
 
         f = nft_family_name_to_type(argv[1]);
         if (f < 0) {
@@ -1795,33 +1795,69 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = nft_get_tables(f, &t);
+        r = nft_get_tables(f, &s);
         if (r < 0) {
                 log_warning("Failed to get table  %s : %s", argv[2] ? argv[2] : "", g_strerror(-r));
                 return r;
 
         }
 
-        printf("%s NFTable Tables: %s\n\n", ansi_color_bold_cyan(), ansi_color_reset());
-        strv_foreach(s, t)
-                printf("%s%s%s \n", ansi_color_bold_blue(), *s, ansi_color_reset());
+        printf("%sFamily  Tables %s\n", ansi_color_blue_header(), ansi_color_reset());
+        for (i = 0; i < s->len; i++) {
+                _cleanup_(g_string_unrefp) GString *v = NULL;
+                NFTNLTable *t = g_ptr_array_index(s, i);
+
+                printf("%s%-3s : %s %s\n", ansi_color_blue(), nft_family_to_name(t->family), ansi_color_reset(), t->name);
+        }
 
         return 0;
 }
 
 _public_ int ncm_nft_get_tables(char *family, char ***ret) {
-        _auto_cleanup_strv_ char **t = NULL;
+        _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
+        _auto_cleanup_strv_ char **p = NULL;
         int r, f;
+        guint i;
 
         f = nft_family_name_to_type(family);
         if (f < 0)
                 return -EINVAL;
 
-        r = nft_get_tables(f, &t);
+        r = nft_get_tables(f, &s);
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(t);
+        for (i = 0; i < s->len; i++) {
+                _cleanup_(g_string_unrefp) GString *v = NULL;
+                NFTNLTable *t = g_ptr_array_index(s, i);
+                _auto_cleanup_ char *a = NULL;
+
+                v = g_string_new(nft_family_to_name(t->family));
+                if (!v)
+                        return -ENOMEM;
+
+                g_string_append_printf(v, ":%s", t->name);
+
+                a = strdup(v->str);
+                if (!a)
+                        return -ENOMEM;
+
+                if (!p) {
+                        p = strv_new(a);
+                        if (!p)
+                                return -ENOMEM;
+
+                } else {
+                        r = strv_add(&p, a);
+                        if (r < 0)
+                                return r;
+                }
+
+                steal_pointer(a);
+
+        }
+
+        *ret = steal_pointer(p);
         return 0;
 }
 

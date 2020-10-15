@@ -10,6 +10,8 @@
 #include <libnftnl/chain.h>
 #include <libnftnl/table.h>
 
+#include <gmodule.h>
+
 typedef enum NfProtoFamily {
         NF_PROTO_FAMILY_UNSPEC = NFPROTO_UNSPEC,
         NF_PROTO_FAMILY_INET   = NFPROTO_INET,
@@ -23,14 +25,21 @@ typedef enum NfProtoFamily {
         _NF_PROTO_FAMILY_INVALID = -1
 } NfProtoFamily;
 
+typedef struct NFTNLTable {
+        struct nftnl_table *table;
+
+        char *name;
+        int family;
+} NFTNLTable;
+
 const char *nft_family_to_name(int id);
 int nft_family_name_to_type(char *name);
 
-void nft_table_unref(struct nftnl_table **t);
+void nft_table_unref(NFTNLTable **t);
 
-int new_nft_table(int family, const char *name, struct nftnl_table **ret);
+int new_nft_table(int family, const char *name, NFTNLTable **ret);
 int nft_add_table(int family, const char *name);
-int nft_get_tables(int family, char ***ret);
+int nft_get_tables(int family, GPtrArray **ret);
 
 void nft_chain_unref(struct nftnl_chain **c);
 int new_nft_chain(int family, const char *name, const char *table, struct nftnl_chain **ret);
