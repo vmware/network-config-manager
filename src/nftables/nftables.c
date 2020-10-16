@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include <netinet/udp.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -270,7 +271,6 @@ int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **r
 
         *ret = steal_pointer(nf_rule);
         return 0;
-
 }
 
 int nft_add_table(int family, const char *name) {
@@ -549,14 +549,21 @@ int nft_configure_rule_port(int family,
                 return r;
 
         nf_add_payload(nf_rule, NFT_PAYLOAD_NETWORK_HEADER, NFT_REG_1, offsetof(struct iphdr, protocol), sizeof(uint8_t));
-        nf_add_cmp(nf_rule, NFT_REG_1, NFT_CMP_EQ, &port_type, sizeof(uint8_t));
+        nf_add_cmp(nf_rule, NFT_REG_1, NFT_CMP_EQ, &protocol, sizeof(uint8_t));
 
         k = htobe16(port);
 
-        if (port_type == IP_PACKET_PORT_DPORT)
-                nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, dest), sizeof(uint16_t));
-        else
-                nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, source), sizeof(uint16_t));
+        if (protocol == IP_PACKET_PROTOCOL_TCP) {
+                if (port_type == IP_PACKET_PORT_DPORT)
+                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, dest), sizeof(uint16_t));
+                else
+                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, source), sizeof(uint16_t));
+        } else {
+                if (port_type == IP_PACKET_PORT_DPORT)
+                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, dest), sizeof(uint16_t));
+                else
+                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, source), sizeof(uint16_t));
+        }
 
         nf_add_cmp(nf_rule, NFT_REG_1, NFT_CMP_EQ, &k, sizeof(uint16_t));
         nf_add_counter(nf_rule);

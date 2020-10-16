@@ -1980,14 +1980,12 @@ _public_ int ncm_nft_add_rule_port(int argc, char *argv[]) {
         if (protocol < 0) {
                 log_warning("Failed to parse protocol %s : %s", argv[4], g_strerror(-EINVAL));
                 return -errno;
-
         }
 
         port_type = ip_packet_port_name_to_type(argv[5]);
         if (port_type < 0) {
                 log_warning("Failed to parse IP protocol %s : %s", argv[5], g_strerror(-EINVAL));
                 return -errno;
-
         }
 
         r = parse_uint16(argv[6], &port);

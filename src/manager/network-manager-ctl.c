@@ -135,7 +135,7 @@ static int help(void) {
                "  show-nft-tables              [FAMILY {ipv4 | ip6 | ip}] shows nftable's tables.\n"
                "  add-nft-chain                [FAMILY {ipv4 | ip6 | ip}] [table] [chain] adds a new chain.\n"
                "  show-nft-chains              [FAMILY {ipv4 | ip6 | ip}] [table] shows nftable's chains.\n"
-               "  add-nft-rule                 [FAMILY {ipv4 | ip6 | ip}] [table] [chain] [protocol] [sport|dport] [port] [action] configures a nft rule for a port.\n"
+               "  add-nft-rule                 [FAMILY {ipv4 | ip6 | ip}] [table] [chain] [protocol { tcp | udp}] [sport|dport] [port] [action {accept | drop}] \n\t\t\t\t\t\t\t configures a nft rule for a port.\n"
 
                , program_invocation_short_name
         );
