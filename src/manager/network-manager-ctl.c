@@ -134,6 +134,7 @@ static int help(void) {
                "  add-nft-table                [FAMILY {ipv4 | ip6 | ip}] [table name ] adds a new table.\n"
                "  show-nft-tables              [FAMILY {ipv4 | ip6 | ip}] shows nftable's tables.\n"
                "  add-nft-chain                [FAMILY {ipv4 | ip6 | ip}] [table name] [chain name] adds a new chain.\n"
+               "  show-nft-chains              [FAMILY {ipv4 | ip6 | ip}] [table name] shows nftable's chains.\n"
 
                , program_invocation_short_name
         );
@@ -233,8 +234,9 @@ static int cli_run(int argc, char *argv[]) {
                 { "apply-yaml-config"           , WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "generate-config-from-cmdline", WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
                 { "add-nft-table",                2,        WORD_ANY, false, ncm_nft_add_tables },
-                { "show-nft-tables",              1,        WORD_ANY, false, ncm_nft_show_tables },
+                { "show-nft-tables",              WORD_ANY, WORD_ANY, false, ncm_nft_show_tables },
                 { "add-nft-chain",                3,        WORD_ANY, false, ncm_nft_add_chain },
+                { "show-nft-chains",              WORD_ANY, WORD_ANY, false, ncm_nft_show_chains },
                 {}
         };
 

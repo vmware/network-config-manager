@@ -216,6 +216,7 @@ class TestKernelCommandLine:
     def teardown_method(self):
         remove_units_from_netword_unit_path()
 
+    @pytest.mark.skip(reason="skipping")
     def test_network_kernel_command_line_ip_dhcp(self):
         ''' ip=<interface>:{dhcp|on|any|dhcp6|auto6} '''
 
@@ -228,6 +229,7 @@ class TestKernelCommandLine:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'ipv4')
 
+    @pytest.mark.skip(reason="skipping")
     def test_network_kernel_command_line_multiple_ip_dhcp(self):
         ''' ip=<interface>:{dhcp|on|any|dhcp6|auto6} '''
 
@@ -246,6 +248,7 @@ class TestKernelCommandLine:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'DHCP') == 'ipv4')
 
+    @pytest.mark.skip(reason="skipping")
     def test_network_kernel_command_line_ip_static(self):
         ''' ip=<client-IP>:[ <server-id>]:<gateway-IP>:<netmask>:<client_hostname>:<interface>:{none|off}'''
 
