@@ -64,7 +64,7 @@ void nft_table_unref(NFTNLTable **t) {
         }
 }
 
-int new_nft_table(int family, const char *name, NFTNLTable **ret) {
+int nft_table_new(int family, const char *name, NFTNLTable **ret) {
         _cleanup_(nft_table_unref) NFTNLTable *t = NULL;
 
         t = new(NFTNLTable, 1);
@@ -97,7 +97,7 @@ void nft_chain_unref(struct nftnl_chain **c) {
                 nftnl_chain_free(*c);
 }
 
-int new_nft_chain(int family, const char *name, const char *table, struct nftnl_chain **ret) {
+int nft_chain_new(int family, const char *name, const char *table, struct nftnl_chain **ret) {
         struct nftnl_chain *c = NULL;
 
         c = nftnl_chain_alloc();
@@ -120,7 +120,7 @@ int nft_add_table(int family, const char *name) {
 
         assert(name);
 
-        r = new_nft_table(family, name, &t);
+        r = nft_table_new(family, name, &t);
         if (r < 0)
                 return r;
 
@@ -178,7 +178,7 @@ static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
         if (tb[NFTA_TABLE_NAME])
                 name = mnl_attr_get_str(tb[NFTA_TABLE_NAME]);
 
-        r = new_nft_table(nfg->nfgen_family, name, &t);
+        r = nft_table_new(nfg->nfgen_family, name, &t);
         if (r < 0)
                 return r;
 
@@ -221,7 +221,7 @@ int nft_add_chain(int family, const char *table, const char *name) {
         assert(name);
         assert(table);
 
-        r = new_nft_chain(family, name, table, &c);
+        r = nft_chain_new(family, name, table, &c);
         if (r < 0)
                 return r;
 

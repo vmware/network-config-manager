@@ -37,10 +37,10 @@ int nft_family_name_to_type(char *name);
 
 void nft_table_unref(NFTNLTable **t);
 
-int new_nft_table(int family, const char *name, NFTNLTable **ret);
+int nft_table_new(int family, const char *name, NFTNLTable **ret);
 int nft_add_table(int family, const char *name);
 int nft_get_tables(int family, GPtrArray **ret);
 
 void nft_chain_unref(struct nftnl_chain **c);
-int new_nft_chain(int family, const char *name, const char *table, struct nftnl_chain **ret);
+int nft_chain_new(int family, const char *name, const char *table, struct nftnl_chain **ret);
 int nft_add_chain(int family, const char *table, const char *name);
