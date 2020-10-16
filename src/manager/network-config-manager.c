@@ -1816,12 +1816,14 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
 _public_ int ncm_nft_get_tables(char *family, char ***ret) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _auto_cleanup_strv_ char **p = NULL;
-        int r, f;
+        int r, f = AF_UNSPEC;
         guint i;
 
-        f = nft_family_name_to_type(family);
-        if (f < 0)
-                return -EINVAL;
+        if (family) {
+                f = nft_family_name_to_type(family);
+                if (f < 0)
+                        return -EINVAL;
+        }
 
         r = nft_get_tables(f, &s);
         if (r < 0)
@@ -1908,5 +1910,55 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
                 printf("%s%-3s : %s%-8s %-8s\n", ansi_color_blue(), nft_family_to_name(c->family), ansi_color_reset(), c->table, c->name);
         }
 
+        return 0;
+}
+
+_public_ int ncm_nft_get_chains(char *family, char ***ret) {
+        _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
+        _auto_cleanup_strv_ char **p = NULL;
+        int r, f = AF_UNSPEC;
+        guint i;
+
+        if (family) {
+                f = nft_family_name_to_type(family);
+                if (f < 0)
+                        return -EINVAL;
+        }
+
+        r = nft_get_chains(f, &s);
+        if (r < 0)
+                return r;
+
+        for (i = 0; i < s->len; i++) {
+                _cleanup_(g_string_unrefp) GString *v = NULL;
+                NFTNLChain *c= g_ptr_array_index(s, i);
+                _auto_cleanup_ char *a = NULL;
+
+                v = g_string_new(nft_family_to_name(c->family));
+                if (!v)
+                        return -ENOMEM;
+
+                g_string_append_printf(v, ":%s:%s", c->table, c->name);
+
+                a = strdup(v->str);
+                if (!a)
+                        return -ENOMEM;
+
+                if (!p) {
+                        p = strv_new(a);
+                        if (!p)
+                                return -ENOMEM;
+
+                } else {
+                        r = strv_add(&p, a);
+                        if (r < 0)
+                                return r;
+                }
+
+                steal_pointer(a);
+
+        }
+
+        *ret = steal_pointer(p);
         return 0;
 }

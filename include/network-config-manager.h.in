@@ -76,3 +76,4 @@ int ncm_nft_get_tables(char *family, char ***ret);
 
 int ncm_nft_add_chain(int argc, char *argv[]);
 int ncm_nft_show_chains(int argc, char *argv[]);
+int ncm_nft_get_chains(char *family, char ***ret);
