@@ -4,7 +4,17 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stddef.h>
 #include <time.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <netinet/udp.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <errno.h>
+
 #include <glib-object.h>
 #include <gmodule.h>
 
@@ -15,6 +25,7 @@
 #include <libmnl/libmnl.h>
 #include <libnftnl/chain.h>
 #include <libnftnl/table.h>
+#include <libnftnl/expr.h>
 
 #include "alloc-util.h"
 #include "file-util.h"
@@ -25,7 +36,7 @@
 #include "parse-util.h"
 #include "string-util.h"
 
-static const char* const nft_family[] = {
+static const char* const nft_family_table[] = {
         [NF_PROTO_FAMILY_UNSPEC]   = "none",
         [NF_PROTO_FAMILY_INET]     = "ip",
         [NF_PROTO_FAMILY_IPV4]     = "ipv4",
@@ -39,10 +50,10 @@ const char *nft_family_to_name(int id) {
         if (id < 0)
                 return "n/a";
 
-        if ((size_t) id >= ELEMENTSOF(nft_family))
+        if ((size_t) id >= ELEMENTSOF(nft_family_table))
                 return NULL;
 
-        return nft_family[id];
+        return nft_family_table[id];
 }
 
 int nft_family_name_to_type(char *name) {
@@ -50,11 +61,96 @@ int nft_family_name_to_type(char *name) {
 
         assert(name);
 
-        for (i = NF_PROTO_FAMILY_INET; i < (int) ELEMENTSOF(nft_family); i++)
-                if (string_equal_fold(name, nft_family[i]))
+        for (i = NF_PROTO_FAMILY_INET; i < (int) ELEMENTSOF(nft_family_table); i++)
+                if (nft_family_table[i] && string_equal_fold(name, nft_family_table[i]))
                         return i;
 
         return _NF_PROTO_FAMILY_INVALID;
+}
+
+static const char* const nft_packet_action_table[] = {
+        [NF_PACKET_ACTION_DROP]      = "drop",
+        [NF_PACKET_ACTION_ACCEPT]    = "accept",
+        [NF_PACKET_ACTION_NF_STOLEN] = "stolen",
+        [NF_PACKET_ACTION_NF_QUEUE]  = "queue",
+        [NF_PACKET_ACTION_NF_REPEAT] = "repeat",
+        [NF_PACKET_ACTION_NF_STOP]   = "stop",
+};
+
+const char *nft_packet_action_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(nft_packet_action_table))
+                return NULL;
+
+        return nft_packet_action_table[id];
+}
+
+int nft_packet_action_name_to_type(char *name) {
+        int i;
+
+        assert(name);
+
+        for (i = NF_PACKET_ACTION_DROP; i < (int) ELEMENTSOF(nft_packet_action_table); i++)
+                if (nft_packet_action_table[i] && string_equal_fold(name, nft_packet_action_table[i]))
+                        return i;
+
+        return _NF_PACKET_ACTION_INVALID;
+}
+
+static const char* const ip_packet_port_table[] = {
+        [IP_PACKET_PORT_SPORT] = "sport",
+        [IP_PACKET_PORT_DPORT] = "dport",
+};
+
+const char *ip_packet_port_type_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(ip_packet_port_table))
+                return NULL;
+
+        return ip_packet_port_table[id];
+}
+
+int ip_packet_port_name_to_type(char *name) {
+        int i;
+
+        assert(name);
+
+        for (i = IP_PACKET_PORT_SPORT; i < (int) ELEMENTSOF(ip_packet_port_table); i++)
+                if (ip_packet_port_table[i] && string_equal_fold(name, ip_packet_port_table[i]))
+                        return i;
+
+        return _IP_PACKET_PORT_INVALID;
+}
+
+static const char* const ip_packet_protocol_table[] = {
+        [IP_PACKET_PROTOCOL_TCP] = "tcp",
+        [IP_PACKET_PROTOCOL_UDP] = "udp",
+};
+
+const char *ip_packet_protocol_type_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(ip_packet_protocol_table))
+                return NULL;
+
+        return ip_packet_protocol_table[id];
+}
+
+int ip_packet_protcol_name_to_type(char *name) {
+        int i;
+
+        assert(name);
+
+        for (i = IP_PACKET_PROTOCOL_TCP; i < (int) ELEMENTSOF(ip_packet_protocol_table); i++)
+                if (ip_packet_protocol_table[i] && string_equal_fold(name, ip_packet_protocol_table[i]))
+                        return i;
+
+        return _IP_PACKET_PROTOCOL_INVALID;
 }
 
 void nft_table_unrefp(NFTNLTable **t) {
@@ -131,6 +227,49 @@ int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **
         }
 
         *ret = steal_pointer(c);
+        return 0;
+}
+
+void nft_rule_unrefp(NFTNLRule **r) {
+        if (r && *r) {
+                nftnl_rule_free((*r)->rule);
+                free((*r)->table);
+                free((*r)->chain);
+        }
+}
+
+int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **ret) {
+        _cleanup_(nft_rule_unrefp) NFTNLRule *nf_rule = NULL;
+
+        nf_rule = new(NFTNLRule, 1);
+        if (!nf_rule)
+                return -ENOMEM;
+
+        *nf_rule = (NFTNLRule) {
+                .family = family,
+        };
+
+        nf_rule->rule = nftnl_rule_alloc();
+        if (!nf_rule->rule)
+                return -ENOMEM;
+
+        if (table) {
+                nftnl_rule_set_str(nf_rule->rule, NFTNL_RULE_TABLE, table);
+                nf_rule->table = strdup(table);
+                if (!nf_rule->table)
+                        return -ENOMEM;
+        }
+
+        if (chain) {
+                nftnl_rule_set_str(nf_rule->rule, NFTNL_RULE_CHAIN, chain);
+                nf_rule->table = strdup(table);
+                if (!nf_rule->table)
+                        return -ENOMEM;
+        }
+
+        nftnl_rule_set_u32(nf_rule->rule, NFTNL_RULE_FAMILY, family);
+
+        *ret = steal_pointer(nf_rule);
         return 0;
 }
 
@@ -321,4 +460,133 @@ int nft_get_chains(int family, GPtrArray **ret) {
 
         *ret = steal_pointer(s);
         return 0;
+}
+
+
+static int nf_add_counter(NFTNLRule *r) {
+        struct nftnl_expr *e;
+
+        assert(r);
+
+        e = nftnl_expr_alloc("counter");
+        if (!e)
+                return -ENOMEM;
+
+        nftnl_rule_add_expr(r->rule, e);
+
+        return 0;
+}
+
+static int nf_add_cmp(NFTNLRule *r, uint32_t sreg, uint32_t op, const void *data, uint32_t data_len){
+        struct nftnl_expr *e;
+
+        assert(r);
+
+        e = nftnl_expr_alloc("cmp");
+        if (!e)
+                return -ENOMEM;
+
+        nftnl_expr_set_u32(e, NFTNL_EXPR_CMP_SREG, sreg);
+        nftnl_expr_set_u32(e, NFTNL_EXPR_CMP_OP, op);
+        nftnl_expr_set(e, NFTNL_EXPR_CMP_DATA, data, data_len);
+
+        nftnl_rule_add_expr(r->rule, e);
+        return 0;
+}
+
+static int nf_add_immediate_verdict(NFTNLRule *r, uint32_t verdict, const char *chain) {
+        struct nftnl_expr *e;
+
+        assert(r);
+
+        e = nftnl_expr_alloc("immediate");
+        if (!e)
+                return -ENOMEM;
+
+        nftnl_expr_set_u32(e, NFTNL_EXPR_IMM_DREG, NFT_REG_VERDICT);
+        if (chain)
+                nftnl_expr_set_str(e, NFTNL_EXPR_IMM_CHAIN, chain);
+
+        nftnl_expr_set_u32(e, NFTNL_EXPR_IMM_VERDICT, verdict);
+
+        nftnl_rule_add_expr(r->rule, e);
+        return 0;
+}
+
+static int nf_add_payload(NFTNLRule *r, uint32_t base, uint32_t dreg, uint32_t offset, uint32_t len) {
+        struct nftnl_expr *e;
+
+        assert(r);
+
+        e = nftnl_expr_alloc("payload");
+        if (!e)
+                return -ENOMEM;
+
+        nftnl_expr_set_u32(e, NFTNL_EXPR_PAYLOAD_BASE, base);
+        nftnl_expr_set_u32(e, NFTNL_EXPR_PAYLOAD_DREG, dreg);
+        nftnl_expr_set_u32(e, NFTNL_EXPR_PAYLOAD_OFFSET, offset);
+        nftnl_expr_set_u32(e, NFTNL_EXPR_PAYLOAD_LEN, len);
+
+        nftnl_rule_add_expr(r->rule, e);
+        return 0;
+}
+
+int nft_configure_rule_port(int family,
+                            const char *table,
+                            const char *chain,
+                            IPPacketProtocol protocol,
+                            IPPacketPort port_type,
+                            uint16_t port,
+                            NFPacketAction action) {
+
+        _cleanup_(nft_rule_unrefp) NFTNLRule *nf_rule = NULL;
+        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        uint16_t k;
+        int r;
+
+        r = nft_rule_new(family, table, chain, &nf_rule);
+        if (r < 0)
+                return r;
+
+        nf_add_payload(nf_rule, NFT_PAYLOAD_NETWORK_HEADER, NFT_REG_1, offsetof(struct iphdr, protocol), sizeof(uint8_t));
+        nf_add_cmp(nf_rule, NFT_REG_1, NFT_CMP_EQ, &protocol, sizeof(uint8_t));
+
+        k = htobe16(port);
+
+        if (protocol == IP_PACKET_PROTOCOL_TCP) {
+                if (port_type == IP_PACKET_PORT_DPORT)
+                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, dest), sizeof(uint16_t));
+                else
+                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, source), sizeof(uint16_t));
+        } else {
+                if (port_type == IP_PACKET_PORT_DPORT)
+                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, dest), sizeof(uint16_t));
+                else
+                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, source), sizeof(uint16_t));
+        }
+
+        nf_add_cmp(nf_rule, NFT_REG_1, NFT_CMP_EQ, &k, sizeof(uint16_t));
+        nf_add_counter(nf_rule);
+        nf_add_immediate_verdict(nf_rule, action, chain);
+
+        r = mnl_new(&m);
+        if (r < 0)
+                return r;
+
+        m->batch = mnl_nlmsg_batch_start(m->buf, MNL_SOCKET_BUFFER_SIZE);
+        nftnl_batch_begin(mnl_nlmsg_batch_current(m->batch), m->seq++);
+        mnl_nlmsg_batch_next(m->batch);
+
+        m->nlh = nftnl_chain_nlmsg_build_hdr(mnl_nlmsg_batch_current(m->batch),
+                                             NFT_MSG_NEWRULE,
+                                             family,
+                                             NLM_F_APPEND|NLM_F_CREATE|NLM_F_ACK, m->seq++);
+
+        nftnl_rule_nlmsg_build_payload(m->nlh, nf_rule->rule);
+        mnl_nlmsg_batch_next(m->batch);
+
+        nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
+        mnl_nlmsg_batch_next(m->batch);
+
+        return mnl_send(m, 0, 0);
 }
