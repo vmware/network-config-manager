@@ -1764,7 +1764,6 @@ _public_ int ncm_show_version(void) {
 }
 
 _public_ int ncm_nft_add_tables(int argc, char *argv[]) {
-        _auto_cleanup_ char *argv_line = NULL;
         int r, f;
 
         f = nft_family_name_to_type(argv[1]);
@@ -1785,14 +1784,15 @@ _public_ int ncm_nft_add_tables(int argc, char *argv[]) {
 
 _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
-        _auto_cleanup_ char *argv_line = NULL;
-        int r, f;
+        int r, f = AF_UNSPEC;
         guint i;
 
-        f = nft_family_name_to_type(argv[1]);
-        if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -EINVAL;
+        if (argc > 2) {
+                f = nft_family_name_to_type(argv[1]);
+                if (f < 0) {
+                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                        return -EINVAL;
+                }
         }
 
         r = nft_get_tables(f, &s);
@@ -1862,7 +1862,6 @@ _public_ int ncm_nft_get_tables(char *family, char ***ret) {
 }
 
 _public_ int ncm_nft_add_chain(int argc, char *argv[]) {
-        _auto_cleanup_ char *argv_line = NULL;
         int r, f;
 
         f = nft_family_name_to_type(argv[1]);
@@ -1879,4 +1878,35 @@ _public_ int ncm_nft_add_chain(int argc, char *argv[]) {
         }
 
         return r;
+}
+
+_public_ int ncm_nft_show_chains(int argc, char *argv[]) {
+        _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
+        int r, f = AF_UNSPEC;
+        guint i;
+
+        if (argc > 2) {
+                f = nft_family_name_to_type(argv[1]);
+                if (f < 0) {
+                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                        return -EINVAL;
+                }
+        }
+
+        r = nft_get_chains(f, &s);
+        if (r < 0) {
+                log_warning("Failed to get chains  %s : %s", argv[2] ? argv[2] : "", g_strerror(-r));
+                return r;
+
+        }
+
+        printf("%sFamily Tables   Chains%s\n", ansi_color_blue_header(), ansi_color_reset());
+        for (i = 0; i < s->len; i++) {
+                _cleanup_(g_string_unrefp) GString *v = NULL;
+                NFTNLChain *c = g_ptr_array_index(s, i);
+
+                printf("%s%-3s : %s%-8s %-8s\n", ansi_color_blue(), nft_family_to_name(c->family), ansi_color_reset(), c->table, c->name);
+        }
+
+        return 0;
 }
