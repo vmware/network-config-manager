@@ -57,7 +57,7 @@ int nft_family_name_to_type(char *name) {
         return _NF_PROTO_FAMILY_INVALID;
 }
 
-void nft_table_unref(NFTNLTable **t) {
+void nft_table_unrefp(NFTNLTable **t) {
         if (t && *t) {
                 nftnl_table_free((*t)->table);
                 free((*t)->name);
@@ -65,7 +65,7 @@ void nft_table_unref(NFTNLTable **t) {
 }
 
 int nft_table_new(int family, const char *name, NFTNLTable **ret) {
-        _cleanup_(nft_table_unref) NFTNLTable *t = NULL;
+        _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
 
         t = new(NFTNLTable, 1);
         if (!t)
@@ -77,7 +77,7 @@ int nft_table_new(int family, const char *name, NFTNLTable **ret) {
 
         t->table = nftnl_table_alloc();
         if (!t->table)
-                return log_oom();
+                return -ENOMEM;
 
         nftnl_table_set_u32(t->table, NFTNL_TABLE_FAMILY, family);
 
@@ -92,29 +92,50 @@ int nft_table_new(int family, const char *name, NFTNLTable **ret) {
         return 0;
 }
 
-void nft_chain_unref(struct nftnl_chain **c) {
-        if (c && *c)
-                nftnl_chain_free(*c);
+void nft_chain_unrefp(NFTNLChain **c) {
+        if (c && *c) {
+                nftnl_chain_free((*c)->chain);
+
+                free((*c)->name);
+                free((*c)->table);
+        }
 }
 
-int nft_chain_new(int family, const char *name, const char *table, struct nftnl_chain **ret) {
-        struct nftnl_chain *c = NULL;
+int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **ret) {
+        _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
 
-        c = nftnl_chain_alloc();
+        c = new(NFTNLChain, 1);
         if (!c)
-                return log_oom();
+                return -ENOMEM;
 
-        if (table)
-                nftnl_chain_set_str(c, NFTNL_CHAIN_TABLE, table);
-        if (name)
-                nftnl_chain_set_str(c, NFTNL_CHAIN_NAME, name);
+        *c = (NFTNLChain) {
+                .family = family,
+        };
+
+        c->chain = nftnl_chain_alloc();
+        if (!c->chain)
+                return -ENOMEM;
+
+        if (table) {
+                nftnl_chain_set_str(c->chain, NFTNL_CHAIN_TABLE, table);
+                c->table = strdup(table);
+                if (!c->table)
+                        return -ENOMEM;
+        }
+
+        if (name) {
+                nftnl_chain_set_str(c->chain, NFTNL_CHAIN_NAME, name);
+                c->name = strdup(name);
+                if (!c->name)
+                        return -ENOMEM;
+        }
 
         *ret = steal_pointer(c);
         return 0;
 }
 
 int nft_add_table(int family, const char *name) {
-        _cleanup_(nft_table_unref) NFTNLTable *t = NULL;
+        _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
         _cleanup_(mnl_unrefp) Mnl *m = NULL;
         int r;
 
@@ -162,7 +183,7 @@ static int generic_parrse_data_attr_cb(const struct nlattr *attr, void *data) {
 
 static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
         struct nfgenmsg *nfg = mnl_nlmsg_get_payload(nlh);
-        _cleanup_(nft_table_unref) NFTNLTable *t = NULL;
+        _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
         struct nlattr *tb[NFTA_TABLE_MAX+1] = {};
         const char *name = NULL;
         GPtrArray *s = data;
@@ -214,7 +235,7 @@ int nft_get_tables(int family, GPtrArray **ret) {
 }
 
 int nft_add_chain(int family, const char *table, const char *name) {
-        _cleanup_(nft_chain_unref) struct nftnl_chain *c = NULL;
+        _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
         _cleanup_(mnl_unrefp) Mnl *m = NULL;
         int r;
 
@@ -238,11 +259,66 @@ int nft_add_chain(int family, const char *table, const char *name) {
                                              family,
                                              NLM_F_CREATE|NLM_F_ACK, m->seq++);
 
-        nftnl_chain_nlmsg_build_payload(m->nlh, c);
+        nftnl_chain_nlmsg_build_payload(m->nlh, c->chain);
         mnl_nlmsg_batch_next(m->batch);
 
         nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
         mnl_nlmsg_batch_next(m->batch);
 
         return mnl_send(m, 0, 0);
+}
+
+static int get_chain_cb(const struct nlmsghdr *nlh, void *data) {
+        struct nfgenmsg *nfg = mnl_nlmsg_get_payload(nlh);
+        _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
+        struct nlattr *tb[NFTA_CHAIN_MAX+1] = {};
+        const char *name = NULL, *table = NULL;
+        GPtrArray *s = data;
+        int r;
+
+        assert(nlh);
+        assert(s);
+
+        r = mnl_attr_parse(nlh, sizeof(*nfg), generic_parrse_data_attr_cb, tb);
+        if (r < 0)
+                return MNL_CB_ERROR;
+
+        if (tb[NFTA_CHAIN_NAME])
+                name = mnl_attr_get_str(tb[NFTA_CHAIN_NAME]);
+        if (tb[NFTA_CHAIN_TABLE])
+                table = mnl_attr_get_str(tb[NFTA_CHAIN_TABLE]);
+
+        r = nft_chain_new(nfg->nfgen_family, name, table, &c);
+        if (r < 0)
+                return r;
+
+        g_ptr_array_add(s, c);
+        steal_pointer(c);
+
+        return MNL_CB_OK;
+}
+
+int nft_get_chains(int family, GPtrArray **ret) {
+        _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
+        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        int r;
+
+        r = mnl_new(&m);
+        if (r < 0)
+                return r;
+
+        m->nlh = nftnl_chain_nlmsg_build_hdr(m->buf, NFT_MSG_GETCHAIN, family, NLM_F_DUMP, m->seq++);
+        if (!m->nlh)
+                return -ENOMEM;
+
+        s = g_ptr_array_new();
+        if (!s)
+                return -ENOMEM;
+
+        r = mnl_send(m, get_chain_cb, s);
+        if (r < 0)
+                return r;
+
+        *ret = steal_pointer(s);
+        return 0;
 }
