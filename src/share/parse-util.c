@@ -53,6 +53,27 @@ int parse_uint32(const char *c, unsigned *val) {
         return 0;
 }
 
+int parse_uint16(const char *c, uint16_t *val) {
+        char *p;
+        long r;
+
+        assert(c);
+
+        r = strtol(c, &p, 0);
+        if (!p || p == c || *p)
+                return -1;
+
+        if ((r == LONG_MAX || r == LONG_MIN) && errno == ERANGE)
+                return -ERANGE;
+
+        if (r > 0xffff)
+                return -ERANGE;
+
+        *val = r;
+
+        return 0;
+}
+
 int parse_boolean(const char *v) {
         if (!v)
                 return -EINVAL;
