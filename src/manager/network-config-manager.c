@@ -1962,3 +1962,52 @@ _public_ int ncm_nft_get_chains(char *family, char ***ret) {
         *ret = steal_pointer(p);
         return 0;
 }
+
+_public_ int ncm_nft_add_rule_port(int argc, char *argv[]) {
+        IPPacketProtocol protocol;
+        IPPacketPort port_type;
+        NFPacketAction action;
+        uint16_t port;
+        int r, f;
+
+        f = nft_family_name_to_type(argv[1]);
+        if (f < 0) {
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                return -errno;
+        }
+
+        protocol = ip_packet_protcol_name_to_type(argv[4]);
+        if (protocol < 0) {
+                log_warning("Failed to parse protocol %s : %s", argv[4], g_strerror(-EINVAL));
+                return -errno;
+
+        }
+
+        port_type = ip_packet_port_name_to_type(argv[5]);
+        if (port_type < 0) {
+                log_warning("Failed to parse IP protocol %s : %s", argv[5], g_strerror(-EINVAL));
+                return -errno;
+
+        }
+
+        r = parse_uint16(argv[6], &port);
+        if (r < 0) {
+                log_warning("Failed to parse port %s : %s", argv[5], g_strerror(r));
+                return -errno;
+        }
+
+        action = nft_packet_action_name_to_type(argv[7]);
+        if (action < 0) {
+                log_warning("Failed to parse action %s : %s", argv[6], g_strerror(r));
+                return -errno;
+        }
+
+        r = nft_configure_rule_port(f, argv[2], argv[3], protocol,  port_type , port, action);
+        if (r < 0) {
+                log_warning("Failed to add rule for %s port %s : %s", argv[4], argv[3], g_strerror(-r));
+                return -errno;
+
+        }
+
+        return r;
+}

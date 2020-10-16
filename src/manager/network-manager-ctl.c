@@ -131,10 +131,11 @@ static int help(void) {
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
                "  apply-yaml-config                   Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
                "  generate-config-from-cmdline [FILE | COMMAND LINE] Generates network file configuration from command kernel command line or command line.\n"
-               "  add-nft-table                [FAMILY {ipv4 | ip6 | ip}] [table name ] adds a new table.\n"
+               "  add-nft-table                [FAMILY {ipv4 | ip6 | ip}] [table] adds a new table.\n"
                "  show-nft-tables              [FAMILY {ipv4 | ip6 | ip}] shows nftable's tables.\n"
-               "  add-nft-chain                [FAMILY {ipv4 | ip6 | ip}] [table name] [chain name] adds a new chain.\n"
-               "  show-nft-chains              [FAMILY {ipv4 | ip6 | ip}] [table name] shows nftable's chains.\n"
+               "  add-nft-chain                [FAMILY {ipv4 | ip6 | ip}] [table] [chain] adds a new chain.\n"
+               "  show-nft-chains              [FAMILY {ipv4 | ip6 | ip}] [table] shows nftable's chains.\n"
+               "  add-nft-rule                 [FAMILY {ipv4 | ip6 | ip}] [table] [chain] [protocol] [sport|dport] [port] [action] configures a nft rule for a port.\n"
 
                , program_invocation_short_name
         );
@@ -237,6 +238,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "show-nft-tables",              WORD_ANY, WORD_ANY, false, ncm_nft_show_tables },
                 { "add-nft-chain",                3,        WORD_ANY, false, ncm_nft_add_chain },
                 { "show-nft-chains",              WORD_ANY, WORD_ANY, false, ncm_nft_show_chains },
+                { "add-nft-rule",                 7,        WORD_ANY, false, ncm_nft_add_rule_port },
                 {}
         };
 
