@@ -496,6 +496,40 @@ int nft_get_chains(int family, GPtrArray **ret) {
         return 0;
 }
 
+int nft_remove_chain(int family, const char *table, const char *name) {
+        _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
+        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        int r;
+
+        assert(name);
+        assert(table);
+
+        r = nft_chain_new(family, name, table, &c);
+        if (r < 0)
+                return r;
+
+        r = mnl_new(&m);
+        if (r < 0)
+                return r;
+
+        m->batch = mnl_nlmsg_batch_start(m->buf, MNL_SOCKET_BUFFER_SIZE);
+        nftnl_batch_begin(mnl_nlmsg_batch_current(m->batch), m->seq++);
+        mnl_nlmsg_batch_next(m->batch);
+
+        m->nlh = nftnl_chain_nlmsg_build_hdr(mnl_nlmsg_batch_current(m->batch),
+                                             NFT_MSG_DELCHAIN,
+                                             family,
+                                             NLM_F_CREATE|NLM_F_ACK, m->seq++);
+
+        nftnl_chain_nlmsg_build_payload(m->nlh, c->chain);
+        mnl_nlmsg_batch_next(m->batch);
+
+        nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
+        mnl_nlmsg_batch_next(m->batch);
+
+        return mnl_send(m, 0, 0);
+}
+
 int nft_configure_rule_port(int family,
                             const char *table,
                             const char *chain,
