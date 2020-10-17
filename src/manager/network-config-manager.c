@@ -1776,7 +1776,6 @@ _public_ int ncm_nft_add_tables(int argc, char *argv[]) {
         if (r < 0) {
                 log_warning("Failed to add table  %s : %s", argv[2], g_strerror(-r));
                 return -errno;
-
         }
 
         return r;
@@ -1811,6 +1810,24 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
         }
 
         return 0;
+}
+
+_public_ int ncm_nft_delete_table(int argc, char *argv[]) {
+        int r, f;
+
+        f = nft_family_name_to_type(argv[1]);
+        if (f < 0) {
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                return -errno;
+        }
+
+        r = nft_remove_table(f, argv[2]);
+        if (r < 0) {
+                log_warning("Failed to delete table  %s : %s", argv[2], g_strerror(-r));
+                return -errno;
+        }
+
+        return r;
 }
 
 _public_ int ncm_nft_get_tables(char *family, char ***ret) {
@@ -1899,7 +1916,6 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
         if (r < 0) {
                 log_warning("Failed to get chains  %s : %s", argv[2] ? argv[2] : "", g_strerror(-r));
                 return r;
-
         }
 
         printf("%sFamily Tables   Chains%s\n", ansi_color_blue_header(), ansi_color_reset());
