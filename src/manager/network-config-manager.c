@@ -351,7 +351,7 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
 }
 
 _public_ int ncm_system_status(int argc, char *argv[]) {
-        _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *address_state = NULL, *hostname = NULL, *kernel = NULL,
+        _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
         _cleanup_(routes_free) Routes *routes = NULL;
@@ -1084,7 +1084,6 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
 _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
         _cleanup_(routes_free) Routes *route = NULL;
-        _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         GList *i;
@@ -1277,7 +1276,6 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
 _public_ int ncm_get_dns_server(char ***ret) {
         _cleanup_(dns_servers_free) DNSServers *dns = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         GSequenceIter *i;
         DNSServer *d;
@@ -1538,7 +1536,6 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
 
 _public_ int ncm_get_dns_domains(char ***ret) {
         _cleanup_(dns_domains_free) DNSDomains *domains = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         GSequenceIter *i;
         int r;
@@ -1920,7 +1917,6 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
 
         printf("%sFamily Tables   Chains%s\n", ansi_color_blue_header(), ansi_color_reset());
         for (i = 0; i < s->len; i++) {
-                _cleanup_(g_string_unrefp) GString *v = NULL;
                 NFTNLChain *c = g_ptr_array_index(s, i);
 
                 printf("%s%-3s : %s%-8s %-8s\n", ansi_color_blue(), nft_family_to_name(c->family), ansi_color_reset(), c->table, c->name);
