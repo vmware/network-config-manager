@@ -1800,7 +1800,6 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
 
         printf("%sFamily  Tables %s\n", ansi_color_blue_header(), ansi_color_reset());
         for (i = 0; i < s->len; i++) {
-                _cleanup_(g_string_unrefp) GString *v = NULL;
                 NFTNLTable *t = g_ptr_array_index(s, i);
 
                 printf("%s%-3s : %s %s\n", ansi_color_blue(), nft_family_to_name(t->family), ansi_color_reset(), t->name);
@@ -1923,6 +1922,25 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
         }
 
         return 0;
+}
+
+_public_ int ncm_nft_delete_chain(int argc, char *argv[]) {
+        int r, f;
+
+        f = nft_family_name_to_type(argv[1]);
+        if (f < 0) {
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                return -errno;
+        }
+
+        r = nft_remove_chain(f, argv[2], argv[3]);
+        if (r < 0) {
+                log_warning("Failed to add chain  %s : %s", argv[3], g_strerror(-r));
+                return -errno;
+
+        }
+
+        return r;
 }
 
 _public_ int ncm_nft_get_chains(char *family, char ***ret) {
