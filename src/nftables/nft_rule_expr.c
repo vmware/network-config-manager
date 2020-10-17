@@ -4,6 +4,8 @@
 
 #include <assert.h>
 
+#include <asm-generic/errno-base.h>
+
 #include <linux/netfilter.h>
 #include <linux/netfilter/nf_tables.h>
 #include <linux/netfilter/nfnetlink.h>

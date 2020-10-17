@@ -79,6 +79,7 @@ void nft_table_unrefp(NFTNLTable **t);
 int nft_table_new(int family, const char *name, NFTNLTable **ret);
 int nft_add_table(int family, const char *name);
 int nft_get_tables(int family, GPtrArray **ret);
+int nft_remove_table(int family, const char *name);
 
 void nft_chain_unrefp(NFTNLChain **c);
 int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **ret);

@@ -274,6 +274,20 @@ int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **r
         return 0;
 }
 
+static int generic_parser_data_attr_cb(const struct nlattr *attr, void *data) {
+        const struct nlattr **tb;
+        int type;
+
+        assert(data);
+        assert(attr);
+
+        tb = data;
+        type = mnl_attr_get_type(attr);
+
+        tb[type] = attr;
+        return MNL_CB_OK;
+}
+
 int nft_add_table(int family, const char *name) {
         _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
         _cleanup_(mnl_unrefp) Mnl *m = NULL;
@@ -307,18 +321,37 @@ int nft_add_table(int family, const char *name) {
         return mnl_send(m, 0, 0);
 }
 
-static int generic_parrse_data_attr_cb(const struct nlattr *attr, void *data) {
-        const struct nlattr **tb;
-        int type;
+int nft_remove_table(int family, const char *name) {
+        _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
+        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        int r;
 
-        assert(data);
-        assert(attr);
+        assert(name);
 
-        tb = data;
-        type = mnl_attr_get_type(attr);
+        r = nft_table_new(family, name, &t);
+        if (r < 0)
+                return r;
 
-        tb[type] = attr;
-        return MNL_CB_OK;
+        r = mnl_new(&m);
+        if (r < 0)
+                return r;
+
+        m->batch = mnl_nlmsg_batch_start(m->buf, MNL_SOCKET_BUFFER_SIZE);
+        nftnl_batch_begin(mnl_nlmsg_batch_current(m->batch), m->seq++);
+        mnl_nlmsg_batch_next(m->batch);
+
+        m->nlh = nftnl_table_nlmsg_build_hdr(mnl_nlmsg_batch_current(m->batch),
+                                             NFT_MSG_DELTABLE,
+                                             family,
+                                             NLM_F_CREATE|NLM_F_ACK, m->seq++);
+
+        nftnl_table_nlmsg_build_payload(m->nlh, t->table);
+        mnl_nlmsg_batch_next(m->batch);
+
+        nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
+        mnl_nlmsg_batch_next(m->batch);
+
+        return mnl_send(m, 0, 0);
 }
 
 static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
@@ -332,7 +365,7 @@ static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
         assert(nlh);
         assert(s);
 
-        r = mnl_attr_parse(nlh, sizeof(*nfg), generic_parrse_data_attr_cb, tb);
+        r = mnl_attr_parse(nlh, sizeof(*nfg), generic_parser_data_attr_cb, tb);
         if (r < 0)
                 return MNL_CB_ERROR;
 
@@ -419,7 +452,7 @@ static int get_chain_cb(const struct nlmsghdr *nlh, void *data) {
         assert(nlh);
         assert(s);
 
-        r = mnl_attr_parse(nlh, sizeof(*nfg), generic_parrse_data_attr_cb, tb);
+        r = mnl_attr_parse(nlh, sizeof(*nfg), generic_parser_data_attr_cb, tb);
         if (r < 0)
                 return MNL_CB_ERROR;
 
