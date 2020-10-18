@@ -81,3 +81,4 @@ int ncm_nft_get_chains(char *family, char ***ret);
 int ncm_nft_delete_chain(int argc, char *argv[]);
 
 int ncm_nft_add_rule_port(int argc, char *argv[]);
+int ncm_nft_show_rules(int argc, char *argv[]);

@@ -7,29 +7,30 @@
 #include <libudev.h>
 #include <net/ethernet.h>
 #include <net/if.h>
+#include <network-config-manager.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
-#include <network-config-manager.h>
 #include "alloc-util.h"
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
 #include "cli.h"
+#include "dbus.h"
 #include "dns.h"
 #include "log.h"
 #include "macros.h"
 #include "network-address.h"
-#include "dbus.h"
 #include "network-link.h"
-#include "network-route.h"
 #include "network-manager.h"
+#include "network-route.h"
 #include "network-util.h"
 #include "networkd-api.h"
 #include "nftables.h"
 #include "parse-util.h"
 #include "udev-hwdb.h"
+
 
 static void link_state_to_color(const char *state, const char **on) {
         if (string_equal(state, "routable") || string_equal(state, "configured") || string_equal(state,"up"))
@@ -2038,4 +2039,21 @@ _public_ int ncm_nft_add_rule_port(int argc, char *argv[]) {
         }
 
         return r;
+}
+
+_public_ int ncm_nft_show_rules(int argc, char *argv[]) {
+        _cleanup_(g_string_unrefp) GString *s = NULL;
+        int r;
+
+        r = nft_get_rules(argv[1], &s);
+        if (r < 0) {
+                log_warning("Failed to get rules %s : %s", argv[1] ? argv[1] : "", g_strerror(-r));
+                return r;
+        }
+        if (!s)
+                return -errno;
+
+        g_print("%s", s->str);
+
+        return 0;
 }
