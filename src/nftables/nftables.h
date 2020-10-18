@@ -5,12 +5,14 @@
 
 #include <gmodule.h>
 
-#include <linux/netfilter.h>
-#include <linux/netfilter/nf_tables.h>
 #include <libmnl/libmnl.h>
 #include <libnftnl/chain.h>
-#include <libnftnl/table.h>
 #include <libnftnl/rule.h>
+#include <libnftnl/table.h>
+#include <linux/netfilter.h>
+#include <linux/netfilter/nf_tables.h>
+
+typedef struct nft_ctx nft_ctx;
 
 typedef enum NfProtoFamily {
         NF_PROTO_FAMILY_UNSPEC = NFPROTO_UNSPEC,
@@ -75,6 +77,8 @@ typedef struct NFTNLRule {
         int family;
 } NFTNLRule;
 
+void nft_ctx_unbuffer_output_unrefp(nft_ctx **t);
+
 void nft_table_unrefp(NFTNLTable **t);
 int nft_table_new(int family, const char *name, NFTNLTable **ret);
 int nft_add_table(int family, const char *name);
@@ -92,6 +96,8 @@ int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **r
 int nft_configure_rule_port(int family, const char *table, const char *chain,
                             IPPacketProtocol protocol, IPPacketPort port_type,
                             uint16_t port, NFPacketAction action);
+
+int nft_get_rules(const char *table, GString **ret);
 
 const char *nft_packet_action_to_name(int id);
 int nft_packet_action_name_to_type(char *name);

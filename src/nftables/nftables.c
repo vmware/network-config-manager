@@ -2,30 +2,29 @@
  * Copyright © 2020 VMware, Inc.
  */
 
+#include <arpa/inet.h>
 #include <assert.h>
-#include <string.h>
-#include <stddef.h>
-#include <time.h>
+#include <errno.h>
+#include <glib-object.h>
+#include <gmodule.h>
+#include <libmnl/libmnl.h>
+#include <libnftnl/chain.h>
+#include <libnftnl/expr.h>
+#include <libnftnl/table.h>
+#include <linux/netfilter.h>
+#include <linux/netfilter/nf_tables.h>
+#include <linux/netfilter/nf_tables_compat.h>
+#include <linux/netfilter/nfnetlink.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
+#include <nftables/libnftables.h>
+#include <stddef.h>
+#include <string.h>
 #include <sys/socket.h>
-#include <errno.h>
-
-#include <glib-object.h>
-#include <gmodule.h>
-
-#include <linux/netfilter.h>
-#include <linux/netfilter/nf_tables.h>
-#include <linux/netfilter/nfnetlink.h>
-#include <linux/netfilter/nf_tables_compat.h>
-#include <libmnl/libmnl.h>
-#include <libnftnl/chain.h>
-#include <libnftnl/table.h>
-#include <libnftnl/expr.h>
+#include <sys/types.h>
+#include <time.h>
 
 #include "alloc-util.h"
 #include "file-util.h"
@@ -140,6 +139,13 @@ const char *ip_packet_protocol_type_to_name(int id) {
                 return NULL;
 
         return ip_packet_protocol_table[id];
+}
+
+void nft_ctx_unbuffer_output_unrefp(nft_ctx **t) {
+        if (t && *t) {
+                nft_ctx_unbuffer_output(*t);
+                nft_ctx_free(*t);
+        }
 }
 
 int ip_packet_protcol_name_to_type(char *name) {
@@ -588,4 +594,35 @@ int nft_configure_rule_port(int family,
         mnl_nlmsg_batch_next(m->batch);
 
         return mnl_send(m, 0, 0);
+}
+
+int nft_get_rules(const char *table, GString **ret) {
+        _cleanup_(nft_ctx_unbuffer_output_unrefp) struct nft_ctx *nft = NULL;
+        _cleanup_(g_string_unrefp) GString *o = NULL;
+        _auto_cleanup_ char *c = NULL;
+        const char *v = NULL;
+
+        assert(table);
+
+        c = string_join(" ", "list table", table, NULL);
+        if (!c)
+                return -ENOMEM;
+
+        nft = nft_ctx_new(NFT_CTX_DEFAULT);
+        if (!nft)
+                return -ENOMEM;
+
+        if (nft_ctx_buffer_output(nft) || nft_run_cmd_from_buffer(nft, c))
+                return 1;
+
+        v = nft_ctx_get_output_buffer(nft);
+        if (isempty_string(v))
+                return -ENODATA;
+
+        o = g_string_new(v);
+        if (!o)
+                return -ENOMEM;
+
+        *ret = steal_pointer(o);
+        return 0;
 }

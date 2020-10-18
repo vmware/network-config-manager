@@ -4,12 +4,12 @@
 
 #include <getopt.h>
 #include <glib.h>
+#include <network-config-manager.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
-#include <network-config-manager.h>
 #include "alloc-util.h"
 #include "cli.h"
 #include "log.h"
@@ -138,7 +138,7 @@ static int help(void) {
                "  show-nft-chains              [FAMILY {ipv4 | ip6 | ip}] [table] shows nftable's chains.\n"
                "  delete-nft-chain             [FAMILY {ipv4 | ip6 | ip}] [table] [chain] deletes a nftable's chain from table\n"
                "  add-nft-rule                 [FAMILY {ipv4 | ip6 | ip}] [table] [chain] [protocol { tcp | udp}] [sport|dport] [port] [action {accept | drop}] \n\t\t\t\t\t\t\t configures a nft rule for a port.\n"
-
+               "  show-nft-rules               [FAMILY {ipv4 | ip6 | ip}] [table] shows nftable's rules.\n"
                , program_invocation_short_name
         );
 
@@ -243,6 +243,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "show-nft-chains",              WORD_ANY, WORD_ANY, false, ncm_nft_show_chains },
                 { "delete-nft-chain",             3,        WORD_ANY, false, ncm_nft_delete_chain },
                 { "add-nft-rule",                 7,        WORD_ANY, false, ncm_nft_add_rule_port },
+                { "show-nft-rules",               1,        WORD_ANY, false, ncm_nft_show_rules },
                 {}
         };
 

@@ -3,10 +3,9 @@
  */
 
 #include <assert.h>
-#include <linux/netfilter.h>
-#include <linux/netfilter/nf_tables.h>
 #include <libmnl/libmnl.h>
 #include <libnftnl/table.h>
+#include <linux/netfilter.h>
 
 #include "alloc-util.h"
 #include "file-util.h"
