@@ -6,6 +6,8 @@
 
 #include"nftables.h"
 
+int nf_expr_new(const char *kind, struct nftnl_expr **ret);
+
 int nf_add_counter(NFTNLRule *r) ;
 int nf_add_cmp(NFTNLRule *r, uint32_t sreg, uint32_t op, const void *data, uint32_t data_len);
 int nf_add_immediate_verdict(NFTNLRule *r, uint32_t verdict, const char *chain);
