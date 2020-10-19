@@ -562,7 +562,11 @@ int nft_configure_rule_port(int family,
 
         k = htobe16(port);
 
-        if (family == NF_PROTO_FAMILY_IPV4 || family == NF_PROTO_FAMILY_INET) {
+        switch(family) {
+        case NF_PROTO_FAMILY_IPV4:
+        case NF_PROTO_FAMILY_IPV6:
+        case NF_PROTO_FAMILY_INET:
+
                 if (protocol == IP_PACKET_PROTOCOL_TCP) {
                         if (port_type == IP_PACKET_PORT_DPORT)
                                 nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, dest), sizeof(uint16_t));
@@ -574,6 +578,9 @@ int nft_configure_rule_port(int family,
                         else
                                 nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, source), sizeof(uint16_t));
                 }
+
+        default:
+                break;
         }
 
         nf_add_cmp(nf_rule, NFT_REG_1, NFT_CMP_EQ, &k, sizeof(uint16_t));
