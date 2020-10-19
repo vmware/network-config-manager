@@ -138,7 +138,7 @@ static int help(void) {
                "  show-nft-chains              [FAMILY {ipv4 | ip6 | ip}] [table] shows nftable's chains.\n"
                "  delete-nft-chain             [FAMILY {ipv4 | ip6 | ip}] [table] [chain] deletes a nftable's chain from table\n"
                "  add-nft-rule                 [FAMILY {ipv4 | ip6 | ip}] [table] [chain] [protocol { tcp | udp}] [sport|dport] [port] [action {accept | drop}] \n\t\t\t\t\t\t\t configures a nft rule for a port.\n"
-               "  show-nft-rules               [FAMILY {ipv4 | ip6 | ip}] [table] shows nftable's rules.\n"
+               "  show-nft-rules               [table] shows nftable's rules.\n"
                , program_invocation_short_name
         );
 

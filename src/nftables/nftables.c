@@ -549,6 +549,10 @@ int nft_configure_rule_port(int family,
         uint16_t k;
         int r;
 
+        assert(table);
+        assert(chain);
+        assert(port);
+
         r = nft_rule_new(family, table, chain, &nf_rule);
         if (r < 0)
                 return r;
@@ -558,16 +562,18 @@ int nft_configure_rule_port(int family,
 
         k = htobe16(port);
 
-        if (protocol == IP_PACKET_PROTOCOL_TCP) {
-                if (port_type == IP_PACKET_PORT_DPORT)
-                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, dest), sizeof(uint16_t));
-                else
-                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, source), sizeof(uint16_t));
-        } else {
-                if (port_type == IP_PACKET_PORT_DPORT)
-                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, dest), sizeof(uint16_t));
-                else
-                        nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, source), sizeof(uint16_t));
+        if (family == NF_PROTO_FAMILY_IPV4 || family == NF_PROTO_FAMILY_INET) {
+                if (protocol == IP_PACKET_PROTOCOL_TCP) {
+                        if (port_type == IP_PACKET_PORT_DPORT)
+                                nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, dest), sizeof(uint16_t));
+                        else
+                                nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, source), sizeof(uint16_t));
+                } else {
+                        if (port_type == IP_PACKET_PORT_DPORT)
+                                nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, dest), sizeof(uint16_t));
+                        else
+                                nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, source), sizeof(uint16_t));
+                }
         }
 
         nf_add_cmp(nf_rule, NFT_REG_1, NFT_CMP_EQ, &k, sizeof(uint16_t));
@@ -613,7 +619,7 @@ int nft_get_rules(const char *table, GString **ret) {
                 return -ENOMEM;
 
         if (nft_ctx_buffer_output(nft) || nft_run_cmd_from_buffer(nft, c))
-                return 1;
+                return -ENODATA;
 
         v = nft_ctx_get_output_buffer(nft);
         if (isempty_string(v))
