@@ -1870,7 +1870,6 @@ _public_ int ncm_nft_get_tables(char *family, char ***ret) {
                 }
 
                 steal_pointer(a);
-
         }
 
         *ret = steal_pointer(p);
@@ -1890,7 +1889,6 @@ _public_ int ncm_nft_add_chain(int argc, char *argv[]) {
         if (r < 0) {
                 log_warning("Failed to add chain  %s : %s", argv[3], g_strerror(-r));
                 return -errno;
-
         }
 
         return r;
@@ -2054,6 +2052,27 @@ _public_ int ncm_nft_show_rules(int argc, char *argv[]) {
                 return -errno;
 
         g_print("%s", s->str);
+
+        return 0;
+}
+
+_public_ int ncm_get_nft_rules(const char *table, char **ret) {
+        _cleanup_(g_string_unrefp) GString *s = NULL;
+        int r;
+
+        assert(table);
+
+        r = nft_get_rules(table, &s);
+        if (r < 0) {
+                log_warning("Failed to get rules %s : %s", table, g_strerror(-r));
+                return r;
+        }
+        if (!s)
+                return -errno;
+
+        *ret = strdup(s->str);
+        if (!*ret)
+                return -ENOMEM;
 
         return 0;
 }
