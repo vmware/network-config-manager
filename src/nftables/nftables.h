@@ -97,7 +97,7 @@ int nft_configure_rule_port(int family, const char *table, const char *chain,
                             IPPacketProtocol protocol, IPPacketPort port_type,
                             uint16_t port, NFPacketAction action);
 
-int nft_get_rules(const char *table, GString **ret);
+int nft_get_rules(int family, const char *table, GString **ret);
 int nft_delete_rule(int family, const char *table, const char *chain, int handle);
 
 const char *nft_packet_action_to_name(int id);
@@ -110,4 +110,4 @@ const char *ip_packet_protocol_type_to_name(int id);
 int ip_packet_protcol_name_to_type(char *name);
 
 const char *nft_family_to_name(int id);
-int nft_family_name_to_type(char *name);
+int nft_family_name_to_type(const char *name);

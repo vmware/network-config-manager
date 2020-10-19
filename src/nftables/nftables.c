@@ -56,7 +56,7 @@ const char *nft_family_to_name(int id) {
         return nft_family_table[id];
 }
 
-int nft_family_name_to_type(char *name) {
+int nft_family_name_to_type(const char *name) {
         int i;
 
         assert(name);
@@ -562,7 +562,11 @@ int nft_configure_rule_port(int family,
 
         k = htobe16(port);
 
-        if (family == NF_PROTO_FAMILY_IPV4 || family == NF_PROTO_FAMILY_INET) {
+        switch(family) {
+        case NF_PROTO_FAMILY_IPV4:
+        case NF_PROTO_FAMILY_IPV6:
+        case NF_PROTO_FAMILY_INET:
+
                 if (protocol == IP_PACKET_PROTOCOL_TCP) {
                         if (port_type == IP_PACKET_PORT_DPORT)
                                 nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct tcphdr, dest), sizeof(uint16_t));
@@ -574,6 +578,9 @@ int nft_configure_rule_port(int family,
                         else
                                 nf_add_payload(nf_rule, NFT_PAYLOAD_TRANSPORT_HEADER, NFT_REG_1, offsetof(struct udphdr, source), sizeof(uint16_t));
                 }
+
+        default:
+                break;
         }
 
         nf_add_cmp(nf_rule, NFT_REG_1, NFT_CMP_EQ, &k, sizeof(uint16_t));
@@ -602,7 +609,7 @@ int nft_configure_rule_port(int family,
         return mnl_send(m, 0, 0);
 }
 
-int nft_get_rules(const char *table, GString **ret) {
+int nft_get_rules(int family, const char *table, GString **ret) {
         _cleanup_(nft_ctx_unbuffer_output_unrefp) struct nft_ctx *nft = NULL;
         _cleanup_(g_string_unrefp) GString *o = NULL;
         _auto_cleanup_ char *c = NULL;
@@ -610,7 +617,24 @@ int nft_get_rules(const char *table, GString **ret) {
 
         assert(table);
 
-        c = string_join(" ", "list table", table, NULL);
+        switch(family) {
+        case NF_PROTO_FAMILY_INET:
+        case NF_PROTO_FAMILY_IPV4:
+
+                c = string_join(" ", "list table", nft_family_to_name(family), table, NULL);
+                break;
+
+        case AF_UNSPEC:
+
+                c = string_join(" ", "list table", table, NULL);
+                break;
+        case NF_PROTO_FAMILY_IPV6:
+
+                c = string_join(" ", "list table ip6", table, NULL);
+                break;
+        default:
+                break;
+        }
         if (!c)
                 return -ENOMEM;
 
