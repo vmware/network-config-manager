@@ -15,6 +15,7 @@ Configure
   - DNS, Domains and NTP.
   - Link's MAC, MTU.
   - Hostname.
+  - Add delete and view nftables table, chains and rules.
 
   Please see [systemd.network](https://www.freedesktop.org/software/systemd/man/systemd.network.html) for more information.
 
@@ -26,17 +27,18 @@ Introspect
  - Links.
  - DNS and Domains.
  - Hostname.
+ - nftable
 
 ### Dependencies
 
- `meson, ninja-build, systemd-devel, libudev-devel, libyaml-devel, glib-devel, python3-sphinx`
+ `meson, ninja-build, systemd-devel, libudev-devel, libyaml-devel, glib-devel, python3-sphinx libmnl-devel libnftnl-devel libnftables-devel`
 
 ### Building from source.
 
 On Photon OS
 ```bash
 ➜  ~ tdnf install -y build-essential
-➜  ~ tdnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib-devel
+➜  ~ tdnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib-devel libmnl-devel libnftnl-devel libnftables-devel
 ➜  ~ meson build
 ➜  ~ ninja -C build
 ➜  ~ sudo ninja -C build install
@@ -44,7 +46,7 @@ On Photon OS
 On Fedora/CentOS/RHEL
 ```bash
 ➜  ~ sudo dnf group install 'Development Tools'
-➜  ~ sudo dnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel python3-sphinx
+➜  ~ sudo dnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel python3-sphinx libmnl-devel libnftnl-devel libnftables-devel
 ➜  ~ meson build
 ➜  ~ ninja -C build
 ➜  ~ sudo ninja -C build install
