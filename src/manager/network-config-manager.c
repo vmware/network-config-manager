@@ -31,7 +31,6 @@
 #include "parse-util.h"
 #include "udev-hwdb.h"
 
-
 static void link_state_to_color(const char *state, const char **on) {
         if (string_equal(state, "routable") || string_equal(state, "configured") || string_equal(state,"up"))
                 *on = ansi_color_green();
@@ -1818,7 +1817,7 @@ _public_ int ncm_nft_delete_table(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = nft_remove_table(f, argv[2]);
+        r = nft_delete_table(f, argv[2]);
         if (r < 0) {
                 log_warning("Failed to delete table  %s : %s", argv[2], g_strerror(-r));
                 return -errno;
@@ -1932,7 +1931,7 @@ _public_ int ncm_nft_delete_chain(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = nft_remove_chain(f, argv[2], argv[3]);
+        r = nft_delete_chain(f, argv[2], argv[3]);
         if (r < 0) {
                 log_warning("Failed to add chain  %s : %s", argv[3], g_strerror(-r));
                 return -errno;
@@ -2075,4 +2074,31 @@ _public_ int ncm_get_nft_rules(const char *table, char **ret) {
                 return -ENOMEM;
 
         return 0;
+}
+
+_public_ int ncm_nft_delete_rule(int argc, char *argv[]) {
+        int r, f, h = 0;
+
+        f = nft_family_name_to_type(argv[1]);
+        if (f < 0) {
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                return -errno;
+        }
+
+        if (argc > 4) {
+                r = parse_integer(argv[4], &h);
+                if (r < 0) {
+                        log_warning("Failed to parse handle  %s : %s", argv[4], g_strerror(-r));
+                        return -errno;
+                }
+        }
+
+        r = nft_delete_rule(f, argv[2], argv[3], h);
+        if (r < 0) {
+                log_warning("Failed to delete rule family=%s table=%s chain=%s : %s", argv[1], argv[2], argv[3], g_strerror(-r));
+                return -errno;
+
+        }
+
+        return r;
 }

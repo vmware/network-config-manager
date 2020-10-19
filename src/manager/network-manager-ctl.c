@@ -139,6 +139,7 @@ static int help(void) {
                "  delete-nft-chain             [FAMILY {ipv4 | ip6 | ip}] [table] [chain] deletes a nftable's chain from table\n"
                "  add-nft-rule                 [FAMILY {ipv4 | ip6 | ip}] [table] [chain] [protocol { tcp | udp}] [sport|dport] [port] [action {accept | drop}] \n\t\t\t\t\t\t\t configures a nft rule for a port.\n"
                "  show-nft-rules               [table] shows nftable's rules.\n"
+               "  delete-nft-rule              [FAMILY {ipv4 | ip6 | ip}] [table] [chain] [handle] deletes a nftable's rule from table\n"
                , program_invocation_short_name
         );
 
@@ -244,6 +245,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "delete-nft-chain",             3,        WORD_ANY, false, ncm_nft_delete_chain },
                 { "add-nft-rule",                 7,        WORD_ANY, false, ncm_nft_add_rule_port },
                 { "show-nft-rules",               1,        WORD_ANY, false, ncm_nft_show_rules },
+                { "delete-nft-rule",              2,        WORD_ANY, false, ncm_nft_delete_rule },
                 {}
         };
 
