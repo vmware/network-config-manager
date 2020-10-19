@@ -2040,9 +2040,13 @@ _public_ int ncm_nft_add_rule_port(int argc, char *argv[]) {
 
 _public_ int ncm_nft_show_rules(int argc, char *argv[]) {
         _cleanup_(g_string_unrefp) GString *s = NULL;
-        int r;
+        int r, f = AF_UNSPEC;
 
-        r = nft_get_rules(argv[1], &s);
+        r = nft_family_name_to_type(argv[1]);
+        if (r >= 0)
+                f = r;
+
+        r = nft_get_rules(f, argv[1], &s);
         if (r < 0) {
                 log_warning("Failed to get rules %s : %s", argv[1] ? argv[1] : "", g_strerror(-r));
                 return r;
@@ -2055,13 +2059,17 @@ _public_ int ncm_nft_show_rules(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_get_nft_rules(const char *table, char **ret) {
+_public_ int ncm_get_nft_rules(const char *family, const char *table, char **ret) {
         _cleanup_(g_string_unrefp) GString *s = NULL;
-        int r;
+        int r, f = AF_UNSPEC;
 
         assert(table);
 
-        r = nft_get_rules(table, &s);
+        r = nft_family_name_to_type(family);
+        if (r >= 0)
+                f = r;
+
+        r = nft_get_rules(f, table, &s);
         if (r < 0) {
                 log_warning("Failed to get rules %s : %s", table, g_strerror(-r));
                 return r;
