@@ -83,13 +83,13 @@ void nft_table_unrefp(NFTNLTable **t);
 int nft_table_new(int family, const char *name, NFTNLTable **ret);
 int nft_add_table(int family, const char *name);
 int nft_get_tables(int family, GPtrArray **ret);
-int nft_remove_table(int family, const char *name);
+int nft_delete_table(int family, const char *name);
 
 void nft_chain_unrefp(NFTNLChain **c);
 int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **ret);
 int nft_add_chain(int family, const char *table, const char *name);
 int nft_get_chains(int family, GPtrArray **ret);
-int nft_remove_chain(int family, const char *table, const char *name);
+int nft_delete_chain(int family, const char *table, const char *name);
 
 void nft_rule_unrefp(NFTNLRule **c);
 int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **ret);
@@ -98,6 +98,7 @@ int nft_configure_rule_port(int family, const char *table, const char *chain,
                             uint16_t port, NFPacketAction action);
 
 int nft_get_rules(const char *table, GString **ret);
+int nft_delete_rule(int family, const char *table, const char *chain, int handle);
 
 const char *nft_packet_action_to_name(int id);
 int nft_packet_action_name_to_type(char *name);
