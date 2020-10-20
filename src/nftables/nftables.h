@@ -96,6 +96,7 @@ int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **r
 int nft_configure_rule_port(int family, const char *table, const char *chain,
                             IPPacketProtocol protocol, IPPacketPort port_type,
                             uint16_t port, NFPacketAction action);
+int nft_run_command(char **command, GString **ret);
 
 int nft_get_rules(int family, const char *table, GString **ret);
 int nft_delete_rule(int family, const char *table, const char *chain, int handle);

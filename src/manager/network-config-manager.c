@@ -1999,8 +1999,8 @@ _public_ int ncm_nft_add_rule_port(int argc, char *argv[]) {
         int r, f;
 
         f = nft_family_name_to_type(argv[1]);
-        if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+        if (f < 0 || f == NF_PROTO_FAMILY_IPV6) {
+                log_warning("Unsupproted family type %s : %s", argv[1], g_strerror(-EINVAL));
                 return -errno;
         }
 
@@ -2108,5 +2108,27 @@ _public_ int ncm_nft_delete_rule(int argc, char *argv[]) {
 
         }
 
+        return r;
+}
+
+_public_ int ncm_nft_run_command(int argc, char *argv[]) {
+        _cleanup_(g_string_unrefp) GString *s = NULL;
+        _auto_cleanup_strv_ char **c = NULL;
+        int r;
+
+        r = argv_to_strv(argc - 1, argv + 1, &c);
+        if (r < 0) {
+                log_warning("Failed to parse nft command: %s", g_strerror(-r));
+                return r;
+        }
+
+        r = nft_run_command(c, &s);
+        if (r < 0) {
+                log_warning("Failed run command: %s", g_strerror(-r));
+                return -errno;
+
+        }
+
+        g_print("%s", s->str);
         return r;
 }

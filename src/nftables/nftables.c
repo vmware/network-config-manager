@@ -553,6 +553,9 @@ int nft_configure_rule_port(int family,
         assert(chain);
         assert(port);
 
+        if (family != NF_PROTO_FAMILY_IPV4 && family != NF_PROTO_FAMILY_INET)
+                return -ENOTSUP;
+
         r = nft_rule_new(family, table, chain, &nf_rule);
         if (r < 0)
                 return r;
@@ -564,7 +567,6 @@ int nft_configure_rule_port(int family,
 
         switch(family) {
         case NF_PROTO_FAMILY_IPV4:
-        case NF_PROTO_FAMILY_IPV6:
         case NF_PROTO_FAMILY_INET:
 
                 if (protocol == IP_PACKET_PROTOCOL_TCP) {
@@ -607,6 +609,37 @@ int nft_configure_rule_port(int family,
         mnl_nlmsg_batch_next(m->batch);
 
         return mnl_send(m, 0, 0);
+}
+
+int nft_run_command(char **command, GString **ret) {
+        _cleanup_(nft_ctx_unbuffer_output_unrefp) struct nft_ctx *nft = NULL;
+        _cleanup_(g_string_unrefp) GString *o = NULL;
+        _auto_cleanup_ char *c = NULL;
+        const char *v = NULL;
+
+        assert(command);
+
+        c = strv_join(" ", command);
+        if (!c)
+                return -ENOMEM;
+
+        nft = nft_ctx_new(NFT_CTX_DEFAULT);
+        if (!nft)
+                return -ENOMEM;
+
+        if (nft_ctx_buffer_output(nft) || nft_run_cmd_from_buffer(nft, c))
+                return -ENODATA;
+
+        v = nft_ctx_get_output_buffer(nft);
+        if (isempty_string(v))
+                return -ENODATA;
+
+        o = g_string_new(v);
+        if (!o)
+                return -ENOMEM;
+
+        *ret = steal_pointer(o);
+        return 0;
 }
 
 int nft_get_rules(int family, const char *table, GString **ret) {
