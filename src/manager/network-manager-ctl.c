@@ -134,12 +134,13 @@ static int help(void) {
                "  add-nft-table                [FAMILY {ipv4 | ipv6 | ip}] [table] adds a new table.\n"
                "  show-nft-tables              [FAMILY {ipv4 | ipv6 | ip}] shows nftable's tables.\n"
                "  delete-nft-table             [FAMILY {ipv4 | ipv6 | ip}] [table] deletes a existing nftable's table.\n"
-               "  add-nft-chain                [FAMILY {ipv4 | ipv6 | ip}] [table] [chain] adds a new nftable's chain.\n"
+               "  add-nft-chain                [FAMILY {ipv4 | ip}] [table] [chain] adds a new nftable's chain.\n"
                "  show-nft-chains              [FAMILY {ipv4 | ipv6 | ip}] [table] shows nftable's chains.\n"
                "  delete-nft-chain             [FAMILY {ipv4 | ipv6 | ip}] [table] [chain] deletes a nftable's chain from table\n"
                "  add-nft-rule                 [FAMILY {ipv4 | ipv6 | ip}] [table] [chain] [protocol { tcp | udp}] [sport|dport] [port] [action {accept | drop}] \n\t\t\t\t\t\t\t configures a nft rule for a port.\n"
                "  show-nft-rules               [FAMILY {ipv4 | ipv6 | ip}] [table] shows nftable's rules.\n"
                "  delete-nft-rule              [FAMILY {ipv4 | ipv6 | ip}] [table] [chain] [handle] deletes a nftable's rule from table\n"
+               "  nft-run                      runs a nft command.  See man NFT(8)\n"
                , program_invocation_short_name
         );
 
@@ -246,6 +247,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-nft-rule",                 7,        WORD_ANY, false, ncm_nft_add_rule_port },
                 { "show-nft-rules",               1,        WORD_ANY, false, ncm_nft_show_rules },
                 { "delete-nft-rule",              2,        WORD_ANY, false, ncm_nft_delete_rule },
+                { "nft-run",                      WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
                 {}
         };
 
