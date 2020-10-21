@@ -8,7 +8,7 @@
 #include <libnftnl/expr.h>
 
 #include "alloc-util.h"
-#include "nft_rule_expr.h"
+#include "nft_util.h"
 
 int nf_expr_new(const char *kind, struct nftnl_expr **ret) {
         struct nftnl_expr *e;
