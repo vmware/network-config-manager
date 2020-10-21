@@ -642,32 +642,16 @@ int nft_run_command(char **command, GString **ret) {
         return 0;
 }
 
-int nft_get_rules(int family, const char *table, GString **ret) {
+int nft_get_rules(const char *table, GString **ret) {
         _cleanup_(nft_ctx_unbuffer_output_unrefp) struct nft_ctx *nft = NULL;
         _cleanup_(g_string_unrefp) GString *o = NULL;
         _auto_cleanup_ char *c = NULL;
         const char *v = NULL;
 
+        assert(ret);
         assert(table);
 
-        switch(family) {
-        case NF_PROTO_FAMILY_INET:
-        case NF_PROTO_FAMILY_IPV4:
-
-                c = string_join(" ", "list table", nft_family_to_name(family), table, NULL);
-                break;
-
-        case AF_UNSPEC:
-
-                c = string_join(" ", "list table", table, NULL);
-                break;
-        case NF_PROTO_FAMILY_IPV6:
-
-                c = string_join(" ", "list table ip6", table, NULL);
-                break;
-        default:
-                break;
-        }
+        c = string_join(" ", "list table", table, NULL);
         if (!c)
                 return -ENOMEM;
 
