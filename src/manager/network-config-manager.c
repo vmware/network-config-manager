@@ -1783,7 +1783,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
         int r, f = AF_UNSPEC;
         guint i;
 
-        if (argc > 2) {
+        if (argc > 1) {
                 f = nft_family_name_to_type(argv[1]);
                 if (f < 0) {
                         log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
@@ -1791,7 +1791,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
                 }
         }
 
-        r = nft_get_tables(f, &s);
+        r = nft_get_tables(f, argc >= 2 ? argv[2] : NULL, &s);
         if (r < 0) {
                 log_warning("Failed to get table  %s : %s", argv[2] ? argv[2] : "", g_strerror(-r));
                 return r;
@@ -1808,25 +1808,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_nft_delete_table(int argc, char *argv[]) {
-        int r, f;
-
-        f = nft_family_name_to_type(argv[1]);
-        if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
-        }
-
-        r = nft_delete_table(f, argv[2]);
-        if (r < 0) {
-                log_warning("Failed to delete table  %s : %s", argv[2], g_strerror(-r));
-                return -errno;
-        }
-
-        return r;
-}
-
-_public_ int ncm_nft_get_tables(char *family, char ***ret) {
+_public_ int ncm_nft_get_tables(const char *family, const char *table, char ***ret) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _auto_cleanup_strv_ char **p = NULL;
         int r, f = AF_UNSPEC;
@@ -1838,7 +1820,7 @@ _public_ int ncm_nft_get_tables(char *family, char ***ret) {
                         return -EINVAL;
         }
 
-        r = nft_get_tables(f, &s);
+        r = nft_get_tables(f, table, &s);
         if (r < 0)
                 return r;
 
@@ -1875,6 +1857,23 @@ _public_ int ncm_nft_get_tables(char *family, char ***ret) {
         return 0;
 }
 
+_public_ int ncm_nft_delete_table(int argc, char *argv[]) {
+        int r, f;
+
+        f = nft_family_name_to_type(argv[1]);
+        if (f < 0) {
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                return -errno;
+        }
+
+        r = nft_delete_table(f, argv[2]);
+        if (r < 0) {
+                log_warning("Failed to delete table  %s : %s", argv[2], g_strerror(-r));
+                return -errno;
+        }
+
+        return r;
+}
 _public_ int ncm_nft_add_chain(int argc, char *argv[]) {
         int r, f;
 

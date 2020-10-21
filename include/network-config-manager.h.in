@@ -72,7 +72,7 @@ bool ncm_is_netword_running(void);
 
 int ncm_nft_add_tables(int argc, char *argv[]);
 int ncm_nft_show_tables(int argc, char *argv[]);
-int ncm_nft_get_tables(char *family, char ***ret);
+int ncm_nft_get_tables(const char *family, const char *table, char ***ret);
 int ncm_nft_delete_table(int argc, char *argv[]);
 
 int ncm_nft_add_chain(int argc, char *argv[]);
