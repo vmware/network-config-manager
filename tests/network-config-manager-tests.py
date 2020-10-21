@@ -10,6 +10,7 @@ import shutil
 import configparser
 import pytest
 import collections
+import unittest
 
 networkd_unit_file_path = '/etc/systemd/network'
 
@@ -661,7 +662,6 @@ class TestCLI:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'true')
 
-
 class TestWifiWPASupplicantConf:
     yaml_configs = [
         "name-password-wifi-dhcp.yaml",
@@ -722,7 +722,8 @@ class TestWifiWPASupplicantConf:
         assert(network["ssid"] == "network_ssid_name1")
         assert(network["password"] == "test123")
 
-    def atest_wifi_wpa_supplicant_eap_tls_dhcp(self):
+    @pytest.mark.skip(reason="skipping")
+    def test_wifi_wpa_supplicant_eap_tls_dhcp(self):
         self.copy_yaml_file_to_netmanager_yaml_path('wpa-eap-tls-wifi.yaml')
 
         subprocess.check_call(['nmctl', 'apply-yaml-config'])
@@ -771,6 +772,26 @@ class TestWifiWPASupplicantConf:
         assert(network["identity"] == "max@internal.example.com")
         assert(network["anonymous_identity"] == "@test.example.com")
         assert(network["password"] == "test123")
+
+class TestNFTable(unittest.TestCase):
+    def tearDown(self):
+        subprocess.call(['nft', 'delete', 'table', 'test99'])
+
+    def test_nmctl_add_table(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'test99'])
+
+        output = subprocess.check_output(['nft', 'list', 'tables'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'table ip test99')
+
+    def test_nmctl_show_table(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'test99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-tables'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'test99')
 
 def setUpModule():
     if not os.path.exists(network_config_manager_yaml_config_path):
