@@ -1912,11 +1912,11 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
                 return r;
         }
 
-        printf("%sFamily Tables   Chains%s\n", ansi_color_blue_header(), ansi_color_reset());
+        printf("%sFamily  Tables   Chains%s\n", ansi_color_blue_header(), ansi_color_reset());
         for (i = 0; i < s->len; i++) {
                 NFTNLChain *c = g_ptr_array_index(s, i);
 
-                printf("%s%-3s : %s%-8s %-8s\n", ansi_color_blue(), nft_family_to_name(c->family), ansi_color_reset(), c->table, c->name);
+                printf("%s%-5s : %s%-8s %-8s\n", ansi_color_blue(), nft_family_to_name(c->family), ansi_color_reset(), c->table, c->name);
         }
 
         return 0;
