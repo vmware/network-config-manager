@@ -388,7 +388,7 @@ static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
         return MNL_CB_OK;
 }
 
-int nft_get_tables(int family, GPtrArray **ret) {
+int nft_get_tables(int family, const char *table, GPtrArray **ret) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _cleanup_(mnl_unrefp) Mnl *m = NULL;
         int r;
@@ -397,9 +397,23 @@ int nft_get_tables(int family, GPtrArray **ret) {
         if (r < 0)
                 return r;
 
-        m->nlh = nftnl_table_nlmsg_build_hdr(m->buf, NFT_MSG_GETTABLE, family, NLM_F_DUMP, m->seq++);
-        if (!m->nlh)
-                return -ENOMEM;
+        if (!table) {
+                m->nlh = nftnl_table_nlmsg_build_hdr(m->buf, NFT_MSG_GETTABLE, family, NLM_F_DUMP, m->seq++);
+                if (!m->nlh)
+                        return -ENOMEM;
+        } else {
+                _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
+
+                r = nft_table_new(family, table, &t);
+                if (r < 0)
+                        return r;
+
+                m->nlh = nftnl_table_nlmsg_build_hdr(m->buf, NFT_MSG_GETTABLE, family, NLM_F_ACK, m->seq);
+                if (!m->nlh)
+                        return -ENOMEM;
+
+                nftnl_table_nlmsg_build_payload(m->nlh, t->table);
+        }
 
         s = g_ptr_array_new();
         if (!s)
@@ -437,6 +451,8 @@ int nft_add_chain(int family, const char *table, const char *name) {
                                              NFT_MSG_NEWCHAIN,
                                              family,
                                              NLM_F_CREATE|NLM_F_ACK, m->seq++);
+        if (!m->nlh)
+                return -ENOMEM;
 
         nftnl_chain_nlmsg_build_payload(m->nlh, c->chain);
         mnl_nlmsg_batch_next(m->batch);
@@ -477,7 +493,7 @@ static int get_chain_cb(const struct nlmsghdr *nlh, void *data) {
         return MNL_CB_OK;
 }
 
-int nft_get_chains(int family, GPtrArray **ret) {
+int nft_get_chains(int family, const char *table, const char *chain, GPtrArray **ret) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _cleanup_(mnl_unrefp) Mnl *m = NULL;
         int r;
@@ -486,9 +502,23 @@ int nft_get_chains(int family, GPtrArray **ret) {
         if (r < 0)
                 return r;
 
-        m->nlh = nftnl_chain_nlmsg_build_hdr(m->buf, NFT_MSG_GETCHAIN, family, NLM_F_DUMP, m->seq++);
-        if (!m->nlh)
-                return -ENOMEM;
+        if (!table) {
+                m->nlh = nftnl_chain_nlmsg_build_hdr(m->buf, NFT_MSG_GETCHAIN, family, NLM_F_DUMP, m->seq++);
+                if (!m->nlh)
+                        return -ENOMEM;
+        } else {
+                _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
+
+                r = nft_chain_new(family, chain, table, &c);
+                if (r < 0)
+                        return r;
+
+                m->nlh = nftnl_chain_nlmsg_build_hdr(m->buf, NFT_MSG_GETCHAIN, family, NLM_F_ACK, m->seq);
+                if (!m->nlh)
+                        return -ENOMEM;
+
+                nftnl_chain_nlmsg_build_payload(m->nlh, c->chain);
+        }
 
         s = g_ptr_array_new();
         if (!s)
@@ -526,6 +556,8 @@ int nft_delete_chain(int family, const char *table, const char *name) {
                                              NFT_MSG_DELCHAIN,
                                              family,
                                              NLM_F_CREATE|NLM_F_ACK, m->seq++);
+        if (!m->nlh)
+                return -ENOMEM;
 
         nftnl_chain_nlmsg_build_payload(m->nlh, c->chain);
         mnl_nlmsg_batch_next(m->batch);
@@ -601,6 +633,9 @@ int nft_configure_rule_port(int family,
                                              NFT_MSG_NEWRULE,
                                              family,
                                              NLM_F_APPEND|NLM_F_CREATE|NLM_F_ACK, m->seq++);
+
+        if (!m->nlh)
+                return -ENOMEM;
 
         nftnl_rule_nlmsg_build_payload(m->nlh, nf_rule->rule);
         mnl_nlmsg_batch_next(m->batch);
@@ -701,6 +736,8 @@ int nft_delete_rule(int family, const char *table, const char *chain, int handle
                                              NFT_MSG_DELRULE,
                                              family,
                                              NLM_F_CREATE|NLM_F_ACK, m->seq++);
+        if (!m->nlh)
+                return -ENOMEM;
 
         nftnl_rule_nlmsg_build_payload(m->nlh, rl->rule);
         mnl_nlmsg_batch_next(m->batch);

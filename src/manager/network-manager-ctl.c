@@ -137,7 +137,7 @@ static int help(void) {
                "  add-nft-chain                [FAMILY {ipv4 | ip}] [TABLE] [CHAIN] adds a new nftable's chain.\n"
                "  show-nft-chains              [FAMILY {ipv4 | ipv6 | ip}] [TABLE] shows nftable's chains.\n"
                "  delete-nft-chain             [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] deletes a nftable's chain from table\n"
-               "  add-nft-rule                 [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] [PROTOCOL { tcp | udp}] [SOURCEPORT / DESTINATIONPORT {sport|dport}] [PORT] [ACTION {accept | drop}] configures a nft rule for a port.\n"
+               "  add-nft-rule                 [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] [PROTOCOL { tcp | udp}] [SOURCE PORT / DESTINATION PORT {sport|dport}] [PORT] [ACTION {accept | drop}] configures a nft rule for a port.\n"
                "  show-nft-rules               [TABLE] shows nftable's rules.\n"
                "  delete-nft-rule              [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] [HANDLE] deletes a nftable's rule from table\n"
                "  nft-run                      runs a nft command.  See man NFT(8)\n"

@@ -82,13 +82,13 @@ void nft_ctx_unbuffer_output_unrefp(nft_ctx **t);
 void nft_table_unrefp(NFTNLTable **t);
 int nft_table_new(int family, const char *name, NFTNLTable **ret);
 int nft_add_table(int family, const char *name);
-int nft_get_tables(int family, GPtrArray **ret);
+int nft_get_tables(int family, const char *name, GPtrArray **ret);
 int nft_delete_table(int family, const char *name);
 
 void nft_chain_unrefp(NFTNLChain **c);
 int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **ret);
 int nft_add_chain(int family, const char *table, const char *name);
-int nft_get_chains(int family, GPtrArray **ret);
+int nft_get_chains(int family, const char *table, const char *chain, GPtrArray **ret);
 int nft_delete_chain(int family, const char *table, const char *name);
 
 void nft_rule_unrefp(NFTNLRule **c);
