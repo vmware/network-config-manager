@@ -509,7 +509,6 @@ int nft_get_chains(int family, const char *table, const char *chain, GPtrArray *
         } else {
                 _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
 
-                printf("%s %s\n", chain, table);
                 r = nft_chain_new(family, chain, table, &c);
                 if (r < 0)
                         return r;

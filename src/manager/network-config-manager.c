@@ -1791,18 +1791,32 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
                 }
         }
 
-        r = nft_get_tables(f, argc >= 2 ? argv[2] : NULL, &s);
-        if (r < 0) {
-                log_warning("Failed to get table  %s : %s", argv[2] ? argv[2] : "", g_strerror(-r));
-                return r;
+        if (argc <= 2) {
+                r = nft_get_tables(f, NULL, &s);
+                if (r < 0) {
+                        log_warning("Failed to get table %s : %s", argv[1] ? argv[1] : "", g_strerror(-r));
+                        return r;
+                }
 
-        }
+                printf("%sFamily   Tables %s\n", ansi_color_blue_header(), ansi_color_reset());
+                for (i = 0; i < s->len; i++) {
+                        NFTNLTable *t = g_ptr_array_index(s, i);
 
-        printf("%sFamily  Tables %s\n", ansi_color_blue_header(), ansi_color_reset());
-        for (i = 0; i < s->len; i++) {
-                NFTNLTable *t = g_ptr_array_index(s, i);
+                        printf("%s%-5s : %-3s %s\n", ansi_color_blue(), nft_family_to_name(t->family), ansi_color_reset(), t->name);
+                }
+        } else {
+                _cleanup_(g_string_unrefp) GString *rl = NULL;
 
-                printf("%s%-5s : %-3s %s\n", ansi_color_blue(), nft_family_to_name(t->family), ansi_color_reset(), t->name);
+                r = nft_get_rules(argv[2], &rl);
+                if (r < 0) {
+                        log_warning("Failed to get rules for table '%s': %s", argv[1], g_strerror(-r));
+                        return r;
+                }
+                if (!rl)
+                        return -errno;
+
+                printf("%sTable :  %s %s\n", ansi_color_blue_header(), argv[2], ansi_color_reset());
+                g_print("%s", rl->str);
         }
 
         return 0;
