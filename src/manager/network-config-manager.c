@@ -1802,7 +1802,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
         for (i = 0; i < s->len; i++) {
                 NFTNLTable *t = g_ptr_array_index(s, i);
 
-                printf("%s%-3s : %s %s\n", ansi_color_blue(), nft_family_to_name(t->family), ansi_color_reset(), t->name);
+                printf("%s%-5s : %-3s %s\n", ansi_color_blue(), nft_family_to_name(t->family), ansi_color_reset(), t->name);
         }
 
         return 0;
@@ -2032,7 +2032,6 @@ _public_ int ncm_nft_add_rule_port(int argc, char *argv[]) {
         if (r < 0) {
                 log_warning("Failed to add rule for %s port %s : %s", argv[4], argv[3], g_strerror(-r));
                 return -errno;
-
         }
 
         return r;
@@ -2097,7 +2096,6 @@ _public_ int ncm_nft_delete_rule(int argc, char *argv[]) {
         if (r < 0) {
                 log_warning("Failed to delete rule family=%s table=%s chain=%s : %s", argv[1], argv[2], argv[3], g_strerror(-r));
                 return -errno;
-
         }
 
         return r;
