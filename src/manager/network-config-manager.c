@@ -1897,7 +1897,7 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
         int r, f = AF_UNSPEC;
         guint i;
 
-        if (argc > 2) {
+        if (argc > 1) {
                 f = nft_family_name_to_type(argv[1]);
                 if (f < 0) {
                         log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
@@ -1905,9 +1905,9 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
                 }
         }
 
-        r = nft_get_chains(f, &s);
+        r = nft_get_chains(f, argc > 3 ? argv[2] : NULL, argc > 3 ? argv[3] : NULL, &s);
         if (r < 0) {
-                log_warning("Failed to get chains  %s : %s", argv[2] ? argv[2] : "", g_strerror(-r));
+                log_warning("Failed to get chains %s : %s", argv[2] ? argv[2] : "", g_strerror(-r));
                 return r;
         }
 
@@ -1940,7 +1940,7 @@ _public_ int ncm_nft_delete_chain(int argc, char *argv[]) {
         return r;
 }
 
-_public_ int ncm_nft_get_chains(char *family, char ***ret) {
+_public_ int ncm_nft_get_chains(char *family, const char *table, const char *chain, char ***ret) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _auto_cleanup_strv_ char **p = NULL;
         int r, f = AF_UNSPEC;
@@ -1952,7 +1952,7 @@ _public_ int ncm_nft_get_chains(char *family, char ***ret) {
                         return -EINVAL;
         }
 
-        r = nft_get_chains(f, &s);
+        r = nft_get_chains(f, table, chain, &s);
         if (r < 0)
                 return r;
 
