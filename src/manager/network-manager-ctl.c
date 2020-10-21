@@ -134,12 +134,12 @@ static int help(void) {
                "  add-nft-table                [FAMILY {ipv4 | ipv6 | ip}] [TABLE] adds a new table.\n"
                "  show-nft-tables              [FAMILY {ipv4 | ipv6 | ip}] shows nftable's tables.\n"
                "  delete-nft-table             [FAMILY {ipv4 | ipv6 | ip}] [TABLE] deletes a existing nftable's table.\n"
-               "  add-nft-chain                [FAMILY {ipv4 | ip}] [table] [CHAIN] adds a new nftable's chain.\n"
+               "  add-nft-chain                [FAMILY {ipv4 | ip}] [TABLE] [CHAIN] adds a new nftable's chain.\n"
                "  show-nft-chains              [FAMILY {ipv4 | ipv6 | ip}] [TABLE] shows nftable's chains.\n"
                "  delete-nft-chain             [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] deletes a nftable's chain from table\n"
-               "  add-nft-rule                 [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] [protocol { tcp | udp}] [sport|dport] [port] [action {accept | drop}] \n\t\t\t\t\t\t\t configures a nft rule for a port.\n"
+               "  add-nft-rule                 [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] [PROTOCOL { tcp | udp}] [SOURCEPORT / DESTINATIONPORT {sport|dport}] [PORT] [ACTION {accept | drop}] configures a nft rule for a port.\n"
                "  show-nft-rules               [TABLE] shows nftable's rules.\n"
-               "  delete-nft-rule              [FAMILY {ipv4 | ipv6 | ip}] [table] [chain] [handle] deletes a nftable's rule from table\n"
+               "  delete-nft-rule              [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] [HANDLE] deletes a nftable's rule from table\n"
                "  nft-run                      runs a nft command.  See man NFT(8)\n"
                , program_invocation_short_name
         );
