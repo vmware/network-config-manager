@@ -775,23 +775,218 @@ class TestWifiWPASupplicantConf:
 
 class TestNFTable(unittest.TestCase):
     def tearDown(self):
-        subprocess.call(['nft', 'delete', 'table', 'test99'])
+        subprocess.call(['nft', 'delete', 'table', 'testtable99'])
 
     def test_nmctl_add_table(self):
-        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'test99'])
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
 
         output = subprocess.check_output(['nft', 'list', 'tables'], universal_newlines=True).rstrip()
         print(output)
 
-        self.assertRegex(output, 'table ip test99')
+        self.assertRegex(output, 'table ip testtable99')
 
     def test_nmctl_show_table(self):
-        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'test99'])
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
 
         output = subprocess.check_output(['nmctl', 'show-nft-tables'], universal_newlines=True).rstrip()
         print(output)
 
-        self.assertRegex(output, 'test99')
+        self.assertRegex(output, 'testtable99')
+
+    def test_nmctl_delete_table(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+
+        output = subprocess.check_output(['nft', 'list', 'tables'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'table ip testtable99')
+        subprocess.check_call(['nmctl', 'delete-nft-table', 'ipv4', 'testtable99'])
+
+        output = subprocess.check_output(['nft', 'list', 'tables'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertNotRegex(output, 'table ip testtable99')
+
+    def test_nmctl_add_chain(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+    def test_nmctl_show_chain(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+    def test_nmctl_delete_chain(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+        subprocess.check_call(['nmctl', 'delete-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertNotRegex(output, 'testchain99')
+
+    def test_nmctl_add_rule_tcp_accept(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+        subprocess.check_call(['nmctl', 'add-nft-rule', 'ipv4', 'testtable99', 'testchain99', 'tcp', 'dport', '9999', 'accept'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'tcp dport 9999 counter packets 0 bytes 0 accept')
+
+    def test_nmctl_add_rule_tcp_drop(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+        subprocess.check_call(['nmctl', 'add-nft-rule', 'ipv4', 'testtable99', 'testchain99', 'tcp', 'dport', '9999', 'drop'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'tcp dport 9999 counter packets 0 bytes 0 drop')
+
+    def test_nmctl_add_rule_tcp_drop_sport(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+        subprocess.check_call(['nmctl', 'add-nft-rule', 'ipv4', 'testtable99', 'testchain99', 'tcp', 'sport', '9999', 'drop'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'tcp sport 9999 counter packets 0 bytes 0 drop')
+
+
+    def test_nmctl_add_rule_tcp_drop_accept_sport(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+        subprocess.check_call(['nmctl', 'add-nft-rule', 'ipv4', 'testtable99', 'testchain99', 'tcp', 'sport', '9999', 'accept'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'tcp sport 9999 counter packets 0 bytes 0 accept')
+
+    def test_nmctl_add_rule_udp_accept_sport(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+        subprocess.check_call(['nmctl', 'add-nft-rule', 'ipv4', 'testtable99', 'testchain99', 'udp', 'sport', '9999', 'accept'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'udp sport 9999 counter packets 0 bytes 0 accept')
+
+    def test_nmctl_add_rule_udp_drop_dport(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+        subprocess.check_call(['nmctl', 'add-nft-rule', 'ipv4', 'testtable99', 'testchain99', 'udp', 'dport', '9999', 'drop'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'udp dport 9999 counter packets 0 bytes 0 drop')
+
+    def test_nmctl_add_rule_udp_accept_dport(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+        subprocess.check_call(['nmctl', 'add-nft-rule', 'ipv4', 'testtable99', 'testchain99', 'udp', 'dport', '9999', 'accept'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'udp dport 9999 counter packets 0 bytes 0 accept')
+
+    def test_nmctl_delete_rule(self):
+        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
+        subprocess.check_call(['nmctl', 'add-nft-chain', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nmctl', 'show-nft-chains', 'ipv4', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'testtable99')
+        self.assertRegex(output, 'testchain99')
+
+        subprocess.check_call(['nmctl', 'add-nft-rule', 'ipv4', 'testtable99', 'testchain99', 'udp', 'dport', '9999', 'accept'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+
+        self.assertRegex(output, 'udp dport 9999 counter packets 0 bytes 0 accept')
+
+        subprocess.check_call(['nmctl', 'delete-nft-rule', 'ipv4', 'testtable99', 'testchain99'])
+
+        output = subprocess.check_output(['nft', 'list', 'table', 'testtable99'], universal_newlines=True).rstrip()
+        print(output)
+        self.assertNotRegex(output, 'udp dport 9999 counter packets 0 bytes 0 accept')
 
 def setUpModule():
     if not os.path.exists(network_config_manager_yaml_config_path):
