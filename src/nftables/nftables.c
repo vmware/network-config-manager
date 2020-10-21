@@ -31,7 +31,7 @@
 #include "macros.h"
 #include "mnl_util.h"
 #include "nftables.h"
-#include "nft_rule_expr.h"
+#include "nft_util.h"
 #include "log.h"
 #include "parse-util.h"
 #include "string-util.h"
