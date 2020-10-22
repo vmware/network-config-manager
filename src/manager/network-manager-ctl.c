@@ -71,6 +71,41 @@ static int generate_networkd_config_from_command_line(int argc, char *argv[]) {
         return r;
 }
 
+static bool runs_without_networkd(char *c) {
+        _cleanup_(g_hash_table_unrefp) GHashTable *h = NULL;
+        const char *cli_commands[] = {
+                "generate-config-from-yaml",
+                "apply-yaml-config",
+                "generate-config-from-cmdline",
+                "add-nft-table",
+                "show-nft-tables",
+                "delete-nft-table",
+                "add-nft-chain",
+                "show-nft-chains",
+                "delete-nft-chain",
+                "add-nft-rule",
+                "show-nft-rules",
+                "delete-nft-rule",
+                "nft-run"
+        };
+        uint32_t i;
+
+        h = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!h) {
+                log_oom();
+                return false;
+        }
+
+        for (i = 0; i < ELEMENTSOF(cli_commands); i++)
+                if (!g_hash_table_insert(h, (gpointer *) cli_commands[i], (gpointer *) c))
+                        continue;
+
+        if (g_hash_table_lookup(h, c))
+                return true;
+
+        return false;
+}
+
 static int help(void) {
         printf("%s [OPTIONS...]\n\n"
                "Query and control the netmanager subsystem.\n\n"
@@ -234,7 +269,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "disable-ipv6",                 1,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "enable-ipv6",                  1,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
-                { "reconfigure",                  WORD_ANY, WORD_ANY, false, ncm_link_reconfigure },
+                { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply-yaml-config"           , WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "generate-config-from-cmdline", WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
@@ -255,10 +290,9 @@ static int cli_run(int argc, char *argv[]) {
         if (r <= 0)
                 return r;
 
-        if (!isempty_string(argv[1]) && !string_equal(argv[1], "generate-config-from-cmdline")) {
+        if (!isempty_string(argv[1]) && !runs_without_networkd(argv[1]))
                 if (!ncm_is_netword_running())
                         exit(-1);
-        }
 
         r = cli_manager_new(commands, &m);
         if (r < 0)
