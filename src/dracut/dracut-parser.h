@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <glib.h>
-
 typedef enum DracutDHCPMode {
         DRACUT_DHCP_MODE_NONE,
         DRACUT_DHCP_MODE_OFF,

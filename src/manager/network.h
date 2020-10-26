@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <glib.h>
-
 #include "network-address.h"
 #include "network-route.h"
 

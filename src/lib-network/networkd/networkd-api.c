@@ -2,10 +2,6 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <errno.h>
-#include <glib.h>
-#include <string.h>
-
 #include "alloc-util.h"
 #include "config-parser.h"
 #include "networkd-api.h"

@@ -5,7 +5,6 @@
 #pragma once
 
 #include <libudev.h>
-#include <stdint.h>
 
 static inline void udev_hwdb_free(struct udev_hwdb **db) {
         if (db && *db)

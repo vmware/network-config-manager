@@ -2,16 +2,6 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <assert.h>
-#include <glib.h>
-#include <net/if.h>
-#include <linux/if.h>
-#include <net/ethernet.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#include <yaml.h>
-
 #include "alloc-util.h"
 #include "file-util.h"
 #include "log.h"

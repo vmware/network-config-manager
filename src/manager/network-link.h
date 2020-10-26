@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <glib.h>
-
 #include "alloc-util.h"
 #include "network-util.h"
 

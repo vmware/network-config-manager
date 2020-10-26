@@ -2,16 +2,7 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <getopt.h>
-#include <glib.h>
-#include <libudev.h>
-#include <net/ethernet.h>
-#include <net/if.h>
 #include <network-config-manager.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "alloc-util.h"
 #include "ansi-color.h"

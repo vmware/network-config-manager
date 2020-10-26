@@ -2,10 +2,7 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <assert.h>
-#include <errno.h>
 #include <netinet/in.h>
-#include <stdio.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>

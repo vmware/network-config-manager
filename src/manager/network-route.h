@@ -4,15 +4,6 @@
 
 #pragma once
 
-#include <assert.h>
-#include <glib.h>
-#include <linux/if.h>
-#include <net/ethernet.h>
-#include <net/if.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-
 #include "macros.h"
 #include "netlink-message.h"
 #include "netlink.h"

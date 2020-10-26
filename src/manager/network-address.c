@@ -3,15 +3,10 @@
  */
 
 #include <arpa/inet.h>
-#include <assert.h>
-#include <glib.h>
 #include <net/if.h>
 #include <linux/if.h>
 #include <linux/netlink.h>
 #include <net/ethernet.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
 
 #include "alloc-util.h"
 #include "log.h"

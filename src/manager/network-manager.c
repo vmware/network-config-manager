@@ -2,14 +2,9 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <assert.h>
 #include <net/if.h>
 #include <linux/if.h>
 #include <net/ethernet.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
