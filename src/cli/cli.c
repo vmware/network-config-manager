@@ -19,9 +19,10 @@
 
 int cli_manager_new(const Cli *cli_commands, CliManager **ret) {
         _auto_cleanup_ CliManager *m = NULL;
-        int i;
+        size_t i;
 
         assert(cli_commands);
+        assert(ret);
 
         m = new0(CliManager, 1);
         if (!m)
@@ -31,20 +32,15 @@ int cli_manager_new(const Cli *cli_commands, CliManager **ret) {
                .hash = g_hash_table_new(g_str_hash, g_str_equal),
                .commands = (Cli *) cli_commands,
         };
-
         if (!m->hash)
                 return log_oom();
 
-        for (i = 0;; i++) {
-                if (cli_commands[i].name) {
-                        if (!g_hash_table_insert(m->hash, (gpointer *) cli_commands[i].name, (gpointer *) &cli_commands[i]))
+        for (i = 0; cli_commands[i].name; i++) {
+                if (!g_hash_table_insert(m->hash, (gpointer *) cli_commands[i].name, (gpointer *) &cli_commands[i]))
                                 continue;
-                } else
-                        break;
         }
 
         *ret = steal_pointer(m);
-
         return 0;
 }
 
