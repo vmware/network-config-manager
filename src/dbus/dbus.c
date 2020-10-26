@@ -2,14 +2,8 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <systemd/sd-bus.h>
-
 #include "alloc-util.h"
 #include "dbus.h"
-#include "network-util.h"
 #include "log.h"
 #include "string-util.h"
 

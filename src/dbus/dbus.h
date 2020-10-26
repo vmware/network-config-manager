@@ -2,7 +2,6 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <stdint.h>
 #include <systemd/sd-bus.h>
 
 #include "alloc-util.h"
