@@ -390,8 +390,8 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         if (r >= 0)
                 printf("          %sMachine ID%s: " SD_ID128_FORMAT_STR "\n", ansi_color_bold_cyan(),  ansi_color_reset(), SD_ID128_FORMAT_VAL(machine_id));
 
-        (void) dbus_get_system_property_from_networkd("OperationalState", &state);
-        if (state) {
+        r = dbus_get_system_property_from_networkd("OperationalState", &state);
+        if (r >= 0) {
                 const char *state_color, *carrier_color;
 
                 (void) dbus_get_system_property_from_networkd("CarrierState", &carrier_state);
@@ -1159,43 +1159,6 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         GSequenceIter *i;
         DNSServer *d;
         int r;
-
-        /* backward compatinility */
-        if (argc > 1 && string_equal(argv[1], "system")) {
-                r = parse_ifname_or_index(argv[1], &p);
-                if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                        return -errno;
-                }
-
-                r = network_parse_link_setup_state(p->ifindex, &setup);
-                if (r < 0) {
-                        log_warning("Failed to get link setup '%s': %s\n", p->ifname, g_strerror(-r));
-                        return r;
-                }
-
-                if (string_equal(setup, "unmanaged")) {
-                       _auto_cleanup_strv_ char **a = NULL, **b = NULL;
-                        char **j;
-
-                        r = dns_read_resolv_conf(&a, &b);
-                        if (r < 0) {
-                                log_warning("Failed to read resolv.conf: %s", g_strerror(-r));
-                                return r;
-
-                        }
-
-                        printf("DNSMode=static\n");
-                        printf("DNSServers=");
-                        strv_foreach(j, a) {
-                                printf("%s ", *j);
-                        }
-
-                        printf("\n");
-
-                        return 0;
-                }
-        }
 
         r = dbus_get_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && g_sequence_is_empty(dns->dns_servers)) {
