@@ -18,8 +18,10 @@
 #include "set.h"
 
 static int addresses_new(Addresses **ret) {
-        Addresses *h = NULL;
+        Addresses *h;
         int r;
+
+        assert(ret);
 
         h = new0(Addresses, 1);
         if (!h)
@@ -35,7 +37,7 @@ static int addresses_new(Addresses **ret) {
 }
 
 int address_new(Address **ret) {
-        Address *a = NULL;
+        Address *a;
 
         assert(ret);
 
@@ -202,6 +204,8 @@ int manager_link_get_address(Addresses **ret) {
        _auto_cleanup_close_ int s = -1;
         int r;
 
+        assert(ret);
+
         r = rtnl_socket_open(0, &s);
         if (r < 0)
                 return r;
@@ -212,6 +216,9 @@ int manager_link_get_address(Addresses **ret) {
 int manager_get_one_link_address(int ifindex, Addresses **ret) {
         _auto_cleanup_close_ int s = -1;
         int r;
+
+        assert(ifindex > 0);
+        assert(ret);
 
         r = rtnl_socket_open(0, &s);
         if (r < 0)

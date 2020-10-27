@@ -27,7 +27,7 @@ int dns_servers_new(DNSServers **ret) {
 }
 
 int dns_server_new(DNSServer **ret) {
-        DNSServer *a = NULL;
+        DNSServer *a;
 
         assert(ret);
 
