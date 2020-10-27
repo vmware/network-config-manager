@@ -3,12 +3,7 @@
  */
 
 #include <getopt.h>
-#include <glib.h>
 #include <network-config-manager.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "alloc-util.h"
 #include "cli.h"

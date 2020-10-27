@@ -2,10 +2,6 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <errno.h>
-#include <glib.h>
-#include <string.h>
-
 #include "alloc-util.h"
 #include "config-parser.h"
 #include "networkd-api.h"
@@ -25,7 +21,6 @@ int network_parse_operational_state(char **state) {
                 return -ENODATA;
 
         *state = steal_pointer(s);
-
         return 0;
 }
 
@@ -45,7 +40,6 @@ static int network_parse_strv(const char *key, char ***ret) {
         }
 
         *ret = strsplit(s, " ", -1);
-
         return r;
 }
 
@@ -105,7 +99,6 @@ static int network_parse_link_string(int ifindex, const char *key, char **ret) {
         }
 
         *ret = steal_pointer(s);
-
         return r;
 }
 

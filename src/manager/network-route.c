@@ -2,15 +2,9 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <arpa/inet.h>
-#include <assert.h>
-#include <glib.h>
 #include <net/if.h>
 #include <linux/if.h>
 #include <net/ethernet.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
 
 #include "alloc-util.h"
 #include "log.h"
@@ -20,7 +14,7 @@
 #include "network-util.h"
 
 static int route_news(Routes **ret) {
-        Routes *h = NULL;
+        Routes *h;
 
         h = new0(Routes, 1);
         if (!h)
@@ -32,7 +26,7 @@ static int route_news(Routes **ret) {
 }
 
 int route_new(Route **ret) {
-        Route *route = NULL;
+        Route *route;
 
         assert(ret);
 
@@ -77,7 +71,7 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
 
         assert(h);
         assert(ret);
-
+        assert(len);
 
         for (p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
                 _auto_cleanup_ struct rtattr **rta_tb = NULL;

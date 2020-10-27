@@ -2,16 +2,6 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <assert.h>
-#include <errno.h>
-#include <getopt.h>
-#include <net/ethernet.h>
-#include <net/if.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "alloc-util.h"
 #include "cli.h"
 #include "macros.h"
@@ -35,10 +25,8 @@ int cli_manager_new(const Cli *cli_commands, CliManager **ret) {
         if (!m->hash)
                 return log_oom();
 
-        for (i = 0; cli_commands[i].name; i++) {
-                if (!g_hash_table_insert(m->hash, (gpointer *) cli_commands[i].name, (gpointer *) &cli_commands[i]))
-                                continue;
-        }
+        for (i = 0; cli_commands[i].name; i++)
+                g_hash_table_insert(m->hash, (gpointer *) cli_commands[i].name, (gpointer *) &cli_commands[i]);
 
         *ret = steal_pointer(m);
         return 0;

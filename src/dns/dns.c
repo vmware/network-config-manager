@@ -2,10 +2,6 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <arpa/inet.h>
-#include <assert.h>
-#include <glib.h>
-
 #include "alloc-util.h"
 #include "config-file.h"
 #include "config-parser.h"
@@ -31,7 +27,7 @@ int dns_servers_new(DNSServers **ret) {
 }
 
 int dns_server_new(DNSServer **ret) {
-        DNSServer *a = NULL;
+        DNSServer *a;
 
         assert(ret);
 

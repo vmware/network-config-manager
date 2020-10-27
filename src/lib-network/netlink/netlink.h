@@ -8,8 +8,6 @@
 #include <linux/rtnetlink.h>
 #include <net/ethernet.h>
 #include <netinet/in.h>
-#include <stdbool.h>
-#include <stdint.h>
 
 #include "defines.h"
 

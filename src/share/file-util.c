@@ -48,6 +48,8 @@ int create_conf_file(const char *path, const char *ifname, const char *extension
         int r;
 
         assert(path);
+        assert(ifname);
+        assert(extension);
 
         f = string_join(".", ifname, extension, NULL);
         if (!f)
@@ -100,6 +102,7 @@ int write_one_line(const char *path, const char *v) {
         _auto_cleanup_fclose_ FILE *f = NULL;
 
         assert(path);
+        assert(v);
 
         f = fopen(path, "w");
         if (!f)

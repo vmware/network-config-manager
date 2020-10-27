@@ -2,13 +2,6 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <getopt.h>
-#include <glib.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "macros.h"
 #include "string-util.h"
 

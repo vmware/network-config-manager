@@ -2,13 +2,6 @@
  * Copyright © 2020 VMware, Inc.
  */
 
-#include <bits/types.h>
-#include <errno.h>
-#include <glib.h>
-#include <libudev.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "alloc-util.h"
 #include "macros.h"
 #include "string-util.h"
