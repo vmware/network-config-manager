@@ -90,7 +90,7 @@ int dns_server_add(DNSServers **h, DNSServer *a) {
         return 0;
 }
 
-int dns_domain_news(DNSDomains **ret) {
+int dns_domains_new(DNSDomains **ret) {
         _auto_cleanup_ DNSDomains *h = NULL;
 
         h = new0(DNSDomains, 1);
@@ -176,7 +176,7 @@ int dns_domain_add(DNSDomains **h, DNSDomain *a) {
         assert(a);
 
         if (!*h) {
-                r = dns_domain_news(h);
+                r = dns_domains_new(h);
                 if (r < 0)
                         return r;
         }

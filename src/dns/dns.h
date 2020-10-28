@@ -33,7 +33,7 @@ int dns_servers_new(DNSServers **ret);
 int dns_server_new(DNSServer **ret);
 int dns_server_add(DNSServers **h, DNSServer *a);
 
-int dns_domain_news(DNSDomains **ret);
+int dns_domains_new(DNSDomains **ret);
 int dns_domain_new(DNSDomain **ret);
 int dns_domain_add(DNSDomains **h, DNSDomain *a);
 
