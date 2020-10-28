@@ -164,6 +164,7 @@ void nft_table_unrefp(NFTNLTable **t) {
         if (t && *t) {
                 nftnl_table_free((*t)->table);
                 free((*t)->name);
+                free(*t);
         }
 }
 
@@ -201,6 +202,7 @@ void nft_chain_unrefp(NFTNLChain **c) {
 
                 free((*c)->name);
                 free((*c)->table);
+                free(*c);
         }
 }
 
@@ -242,6 +244,7 @@ void nft_rule_unrefp(NFTNLRule **r) {
                 nftnl_rule_free((*r)->rule);
                 free((*r)->table);
                 free((*r)->chain);
+                free(*r);
         }
 }
 
@@ -269,8 +272,8 @@ int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **r
 
         if (chain) {
                 nftnl_rule_set_str(nf_rule->rule, NFTNL_RULE_CHAIN, chain);
-                nf_rule->table = strdup(table);
-                if (!nf_rule->table)
+                nf_rule->chain = strdup(chain);
+                if (!nf_rule->chain)
                         return -ENOMEM;
         }
 
