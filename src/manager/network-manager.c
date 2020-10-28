@@ -74,7 +74,7 @@ static int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret
         return 0;
 }
 
-int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode, char **ret) {
+int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
