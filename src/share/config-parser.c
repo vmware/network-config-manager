@@ -13,7 +13,7 @@
 #include "log.h"
 
 int load_config_file(const char *path, GKeyFile **ret) {
-        _cleanup_(key_file_free) GKeyFile *key_file = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         GError *error = NULL;
 
         assert(path);
@@ -38,7 +38,7 @@ int load_config_file(const char *path, GKeyFile **ret) {
 }
 
 int parse_config_file(const char *path, const char *section, const char *k, char **ret) {
-        _cleanup_(key_file_free) GKeyFile *key_file = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         gchar *s;
         int r;
 
@@ -62,7 +62,7 @@ int parse_config_file(const char *path, const char *section, const char *k, char
 }
 
 int parse_config_file_integer(const char *path, const char *section, const char *k, unsigned *ret) {
-        _cleanup_(key_file_free) GKeyFile *key_file = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         GError *error = NULL;
         int r, v;
 

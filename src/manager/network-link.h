@@ -33,10 +33,18 @@ typedef struct Links {
 
 static inline void link_unref(Link **l) {
         if (l && *l) {
-                if ((*l)->alt_names)
-                        g_ptr_array_free((*l)->alt_names, true);
+                if ((*l)->alt_names) {
+                        gsize i, j;
 
-                free(*l);
+                        g_ptr_array_steal((*l)->alt_names, &j);
+                        for (i=0; i < j; i++ ) {
+                                char *c;
+
+                                c = g_ptr_array_steal_index((*l)->alt_names, i);
+                                free(c);
+                        }
+                        g_ptr_array_free((*l)->alt_names, true);
+                }
         }
 }
 

@@ -12,7 +12,7 @@
 #include "string-util.h"
 
 int set_config_file_string(const char *path, const char *section, const char *k, const char *v) {
-        _cleanup_(key_file_free) GKeyFile *key_file = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         GError *e = NULL;
         int r;
 
@@ -35,7 +35,7 @@ int set_config_file_string(const char *path, const char *section, const char *k,
 }
 
 int set_config_file_bool(const char *path, const char *section, const char *k, bool b) {
-        _cleanup_(key_file_free) GKeyFile *key_file = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         GError *e = NULL;
         int r;
 
@@ -58,7 +58,7 @@ int set_config_file_bool(const char *path, const char *section, const char *k, b
 }
 
 int set_config_file_integer(const char *path, const char *section, const char *k, int v) {
-        _cleanup_(key_file_free) GKeyFile *key_file = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         GError *e = NULL;
         int r;
 
@@ -81,7 +81,7 @@ int set_config_file_integer(const char *path, const char *section, const char *k
 }
 
 int remove_key_from_config(const char *path, const char *section, const char *k) {
-        _cleanup_(key_file_free) GKeyFile *key_file = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         GError *e = NULL;
         int r;
 
@@ -107,7 +107,7 @@ int remove_key_from_config(const char *path, const char *section, const char *k)
 }
 
 int remove_section_from_config(const char *path, const char *section) {
-        _cleanup_(key_file_free) GKeyFile *key_file = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         GError *e = NULL;
         int r;
 
