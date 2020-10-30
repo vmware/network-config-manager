@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "netdev.h"
 #include "network-address.h"
 #include "network-route.h"
 
@@ -116,6 +117,8 @@ typedef struct Network {
         Set *addresses;
         Set *nameservers;
         Set *ntps;
+
+        NetDev *netdev;
 
         GHashTable *access_points;
         GHashTable *routes;

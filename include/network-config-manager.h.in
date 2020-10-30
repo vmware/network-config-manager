@@ -67,6 +67,8 @@ int ncm_get_system_hostname(char **ret);
 
 int ncm_show_version(void);
 
+int ncm_create_vlan(int argc, char *argv[]);
+
 int ncm_system_status(int argc, char *argv[]);
 bool ncm_is_netword_running(void);
 

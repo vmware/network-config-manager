@@ -7,6 +7,8 @@ network_config_manager_sources = files('''
         dns/dns.c
         dracut/dracut-parser.h
         dracut/dracut-parser.c
+        manager/netdev.h
+        manager/netdev.c
         manager/network-link.h
         manager/network-link.c
         manager/network-address.h

@@ -1700,6 +1700,32 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
         return manager_reconfigure_link(p);
 }
 
+_public_ int ncm_create_vlan(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        uint16_t id;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = parse_uint16(argv[3], &id);
+        if (r < 0) {
+                log_warning("Failed to parse VLAN id '%s' for link '%s': %s", argv[3], argv[2], g_strerror(-r));
+                return r;
+        }
+
+        r = manager_create_vlan(p, argv[2], id);
+        if (r < 0) {
+                log_warning("Failed to %s IPv6 for the link '%s': %s", argv[0],  argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");

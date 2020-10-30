@@ -898,6 +898,37 @@ static int manager_write_network_config(const Network *n, const GString *config)
         return 0;
 }
 
+static int manager_write_netdev_config(const NetDev *n, const GString *config) {
+        _auto_cleanup_ char *netdev = NULL, *config_file = NULL;
+        _auto_cleanup_close_ int fd = -1;
+        int r;
+
+        assert(n);
+        assert(config);
+
+        config_file = string_join("-", "10", n->ifname, NULL);
+        if (!config_file)
+                return log_oom();
+
+        r = create_conf_file("/etc/systemd/network", config_file, "netdev", &netdev);
+        if (r < 0)
+                return r;
+
+        r = open(netdev, O_WRONLY);
+        if (r < 0) {
+                log_warning("Failed to open netdev file '%s': %s", netdev, g_strerror(-r));
+                return r;
+        }
+
+        fd = r;
+        r = write(fd, config->str, config->len);
+        if (r < 0)
+                return -errno;
+
+        (void) set_file_permisssion(netdev, "systemd-network");
+        return 0;
+}
+
 int manager_generate_network_config_from_yaml(const char *file) {
         _cleanup_(g_string_unrefp) GString *config = NULL, *wifi_config = NULL;
         _cleanup_(network_unrefp) Network *n = NULL;
@@ -1025,6 +1056,74 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
 
         } else
                 g_hash_table_foreach(networks, manager_command_line_config_generator, NULL);
+
+        return dbus_network_reload();
+}
+
+int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id) {
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vlan_network_config = NULL, *dev_network_config = NULL;
+        _auto_cleanup_ char *vlan_netdev = NULL, *vlan_network = NULL, *network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(vlan);
+        assert(id > 0);
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                .id = id,
+                .ifname = strdup(vlan),
+        };
+
+        if (!netdev->ifname)
+                return log_oom();
+
+        r = create_netdev_conf_file(ifnameidx, &vlan_netdev);
+        if (r < 0)
+                return r;
+
+        r = generate_netdev_config(netdev, &netdev_config);
+        if (r < 0)
+                return r;
+
+        r = manager_write_netdev_config(netdev, netdev_config);
+        if (r < 0)
+                return r;
+
+        r = network_new(&v);
+        if (r < 0)
+                return r;
+
+        *v = (Network) {
+                .ifname = strdup(vlan),
+        };
+        if (!v->ifname)
+                return log_oom();
+
+        r = generate_network_config(v, &vlan_network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(ifnameidx, &vlan_network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(v, vlan_network_config);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_string(network, "Network", "VLAN", vlan);
+        if (r < 0)
+                return r;
 
         return dbus_network_reload();
 }
