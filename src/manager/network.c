@@ -497,6 +497,11 @@ int generate_network_config(Network *n, GString **ret) {
                 g_string_append(config, "\n");
         }
 
+        if (n->netdev)
+                g_string_append_printf(config, "%s=%s\n", g_ascii_strup(netdev_kind_to_name(n->netdev->kind),
+                                                                        strlen(netdev_kind_to_name(n->netdev->kind))),
+                                                                        n->netdev->ifname);
+
         if (n->dhcp4_use_dns != -1 || n->dhcp4_use_domains != -1 || n->dhcp4_use_mtu != -1 ||
             n->dhcp4_use_ntp != -1 || n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID) {
                 g_string_append(config, "\n[DHCPv4]\n");

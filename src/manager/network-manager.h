@@ -5,8 +5,9 @@
 #pragma once
 
 #include "dns.h"
-#include "network-route.h"
+#include "netdev.h"
 #include "network.h"
+#include "network-route.h"
 
 int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu);
 int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac);
@@ -44,6 +45,8 @@ int manager_reconfigure_link(const IfNameIndex *ifnameidx);
 
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v);
 int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v, bool dhcp4);
+
+int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id);
 
 int manager_generate_network_config_from_yaml(const char *file);
 int manager_write_wifi_config(const Network *n, const GString *config);
