@@ -13,7 +13,7 @@
 
 int set_config_file_string(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        GError *e = NULL;
+        _cleanup_(gerror_unrefp) GError *e = NULL;
         int r;
 
         assert(path);
@@ -31,12 +31,13 @@ int set_config_file_string(const char *path, const char *section, const char *k,
                 return -e->code;
         }
 
+        e = NULL;
         return set_file_permisssion(path, "systemd-network");
 }
 
 int set_config_file_bool(const char *path, const char *section, const char *k, bool b) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        GError *e = NULL;
+        _cleanup_(gerror_unrefp) GError *e = NULL;
         int r;
 
         assert(path);
@@ -54,12 +55,13 @@ int set_config_file_bool(const char *path, const char *section, const char *k, b
                 return -e->code;
         }
 
-         return set_file_permisssion(path, "systemd-network");
+        e = NULL;
+        return set_file_permisssion(path, "systemd-network");
 }
 
 int set_config_file_integer(const char *path, const char *section, const char *k, int v) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        GError *e = NULL;
+        _cleanup_(gerror_unrefp) GError *e = NULL;
         int r;
 
         assert(path);
@@ -77,12 +79,13 @@ int set_config_file_integer(const char *path, const char *section, const char *k
                 return -e->code;
         }
 
+        e = NULL;
          return set_file_permisssion(path, "systemd-network");
 }
 
 int remove_key_from_config(const char *path, const char *section, const char *k) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        GError *e = NULL;
+        _cleanup_(gerror_unrefp) GError *e = NULL;
         int r;
 
         assert(path);
@@ -103,12 +106,13 @@ int remove_key_from_config(const char *path, const char *section, const char *k)
                 return -e->code;
         }
 
+        e = NULL;
         return set_file_permisssion(path, "systemd-network");
 }
 
 int remove_section_from_config(const char *path, const char *section) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        GError *e = NULL;
+        _cleanup_(gerror_unrefp) GError *e = NULL;
         int r;
 
         assert(path);
@@ -128,12 +132,26 @@ int remove_section_from_config(const char *path, const char *section) {
                 return -e->code;
         }
 
+        e = NULL;
         return set_file_permisssion(path, "systemd-network");
+}
+
+int write_to_conf(const char *path, const GString *s) {
+        _cleanup_(gerror_unrefp) GError *e = NULL;
+
+        assert(path);
+        assert(s);
+
+        if (!g_file_set_contents(path, s->str, s->len, &e))
+                return -e->code;
+
+        e = NULL;
+        return 0;
 }
 
 int write_to_resolv_conf(char **dns, char **domains) {
         _auto_cleanup_ char *p = NULL;
-        GString* c = NULL;
+        GString *c = NULL;
         size_t len;
         char **l;
 
@@ -163,6 +181,5 @@ int write_to_resolv_conf(char **dns, char **domains) {
         p = g_string_free(c, FALSE);
 
         g_file_set_contents("/etc/resolv.conf", p, len, NULL);
-
         return 0;
 }

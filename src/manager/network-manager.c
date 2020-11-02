@@ -433,8 +433,8 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx) {
 }
 
 int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
-        _auto_cleanup_ char *network = NULL, *config_rt = NULL, *a = NULL, *config_onlink = NULL;
-        int r, onlink;
+        _auto_cleanup_ char *network = NULL, *a = NULL;
+        int r;
 
         assert(ifnameidx);
         assert(rt);
@@ -451,34 +451,26 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
         if (r < 0)
                 return r;
 
-        r = parse_config_file(network, "Route", "Gateway", &config_rt);
-        if (r >= 0) {
-                r = parse_config_file(network, "Route", "GatewayOnlink", &config_onlink);
-                if (r >=0) {
-                        onlink = parse_boolean(config_onlink);
-                        if (onlink < 0)
-                                log_warning("Failed to parse GatwayOnlink. Ignoring\n");
-                }
-        }
-
         r = set_config_file_string(network, "Route", "Gateway", a);
         if (r < 0) {
                 log_warning("Failed to write to config file: %s", network);
                 return r;
         }
 
-        r = set_config_file_string(network, "Route", "GatewayOnlink", "yes");
-        if (r < 0) {
-                log_warning("Failed to write to config file: %s", network);
-                return r;
+        if (rt->onlink) {
+                r = set_config_file_string(network, "Route", "GatewayOnlink", "yes");
+                if (r < 0) {
+                        log_warning("Failed to write to config file: %s", network);
+                        return r;
+                }
         }
 
         return dbus_network_reload();
 }
 
 int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt) {
-        _auto_cleanup_ char *network = NULL, *a = NULL, *config_rt = NULL,*config_onlink = NULL;
-        int r, onlink;
+        _auto_cleanup_ char *network = NULL, *a = NULL;
+        int r;
 
         assert(ifnameidx);
         assert(rt);
@@ -490,16 +482,6 @@ int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt) {
         r = ip_to_string(rt->destination.family, &rt->destination, &a);
         if (r < 0)
                 return r;
-
-        r = parse_config_file(network, "Route", "Gateway", &config_rt);
-        if (r >= 0) {
-                r = parse_config_file(network, "Route", "GatewayOnlink", &config_onlink);
-                if (r >= 0) {
-                        onlink = parse_boolean(config_onlink);
-                        if (onlink < 0)
-                                log_warning("Failed to parse GatwayOnlink. Ignoring\n");
-                }
-        }
 
         r = set_config_file_string(network, "Route", "Destination", a);
         if (r < 0) {
@@ -555,6 +537,72 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
                 if (r >= 0)
                         (void) remove_key_from_config(network, "Route", "Metric");
         }
+
+        return dbus_network_reload();
+}
+
+int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
+        _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL, *destination = NULL, *pref_source = NULL;
+        _cleanup_(g_string_unrefp) GString *config = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(rt);
+
+        r = create_network_conf_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to get create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                return r;
+        }
+
+        r = ip_to_string_prefix(rt->address.family, &rt->address, &address);
+        if (r < 0)
+                return r;
+
+        r = ip_to_string(rt->destination.family, &rt->destination, &destination);
+        if (r < 0)
+                return r;
+
+        r = ip_to_string(rt->gw.family, &rt->gw, &gw);
+        if (r < 0)
+                return r;
+
+        config = g_string_new(NULL);
+        if (!config)
+                return log_oom();
+
+        g_string_append(config, "[Match]\n");
+        if (ifnameidx->ifname)
+                g_string_append_printf(config, "Name=%s\n\n", ifnameidx->ifname);
+
+        g_string_append(config, "[Address]\n");
+        if (ifnameidx->ifname)
+                g_string_append_printf(config, "Address=%s\n\n", address);
+
+        r = ip_to_string_prefix(rt->address.family, &rt->address, &pref_source);
+        if (r < 0)
+                return r;
+
+        g_string_append(config, "[Route]\n");
+        g_string_append_printf(config, "Table=%d\n", rt->table);
+        g_string_append_printf(config, "PreferredSource=%s\n", pref_source);
+        g_string_append_printf(config, "Destination=%s\n\n", destination);
+
+        g_string_append(config, "[Route]\n");
+        g_string_append_printf(config, "Table=%d\n", rt->table);
+        g_string_append_printf(config, "Gateway=%s\n\n", gw);
+
+        g_string_append(config, "[RoutingPolicyRule]\n");
+        g_string_append_printf(config, "Table=%d\n", rt->table);
+        g_string_append_printf(config, "To=%s\n\n", address);
+
+        g_string_append(config, "[RoutingPolicyRule]\n");
+        g_string_append_printf(config, "Table=%d\n", rt->table);
+        g_string_append_printf(config, "From=%s\n", address);
+
+        r = write_to_conf(network, config);
+        if (r < 0)
+                return r;
 
         return dbus_network_reload();
 }

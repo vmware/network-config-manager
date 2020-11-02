@@ -57,6 +57,11 @@ static inline void close_fdp(int *fd) {
                 close(*fd);
 }
 
+static inline void gerror_unrefp(GError **e) {
+        if(e && *e)
+                g_error_free(*e);
+}
+
 DEFINE_CLEANUP(FILE *, fclose);
 DEFINE_CLEANUP(FILE *, pclose);
 DEFINE_CLEANUP(int *, close_fdp);
@@ -65,6 +70,7 @@ DEFINE_CLEANUP(GPtrArray **, g_ptr_array_unrefp);
 DEFINE_CLEANUP(char **, strv_free);
 DEFINE_CLEANUP(GHashTable *, g_hash_table_unref);
 DEFINE_CLEANUP(GDir **, g_dir_unrefp);
+DEFINE_CLEANUP(GError **, gerror_unrefp);
 
 #define _auto_cleanup_ _cleanup_(freep)
 #define _auto_cleanup_fclose_ _cleanup_(fclosep)

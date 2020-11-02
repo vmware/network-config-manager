@@ -121,10 +121,11 @@ static int help(void) {
                "  set-link-state               [LINK] [STATE { up | down } ] Set Link State\n"
                "  add-link-address             [LINK] [ADDRESS] [PEER] ] Add Link Address\n"
                "  delete-link-address          [LINK] Removes Address from Link\n"
-               "  add-default-gateway          [LINK] [ADDRESS] onlink [ONLINK { yes | no | on | off | 1 | 0}] Add Link Default Gateway\n"
+               "  add-default-gateway          [LINK] [GW address] onlink [ONLINK { yes | no | on | off | 1 | 0}] Add Link Default Gateway\n"
                "  delete-gateway               [LINK] Removes Gateway from Link\n"
-               "  add-route                    [LINK] [ADDRESS] metric [METRIC { number }] Set Link route\n"
+               "  add-route                    [LINK] [GW address] metric [METRIC { number }] Set Link route\n"
                "  delete-route                 [LINK] Removes route from Link\n"
+               "  add-additional-gw            [LINK] [ADDRESS] [ROUTE address] [GW address] [ROUTING POLICY TABLE number] configures additional gateway for \n\t\t\t\t\t\t another NIC with routing policy rules\n"
                "  set-hostname                 [HOSTNAME] Sets hostname\n"
                "  show-dns                            Show DNS Servers\n"
                "  add-dns                      [LINK | system] [ADDRESS] Set Link DNS servers\n"
@@ -236,6 +237,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "delete-gateway",               1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-route",                    2,        WORD_ANY, false, ncm_link_add_route },
                 { "delete-route",                 1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
+                { "add-additional-gw",            5,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "set-hostname",                 1,        WORD_ANY, false, ncm_set_system_hostname },
                 { "show-dns",                     WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
                 { "add-dns",                      2,        WORD_ANY, false, ncm_add_dns_server },
