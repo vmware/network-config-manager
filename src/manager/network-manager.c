@@ -433,8 +433,8 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx) {
 }
 
 int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
-        _auto_cleanup_ char *network = NULL, *config_rt = NULL, *a = NULL, *config_onlink = NULL;
-        int r, onlink;
+        _auto_cleanup_ char *network = NULL, *a = NULL;
+        int r;
 
         assert(ifnameidx);
         assert(rt);
@@ -451,34 +451,26 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
         if (r < 0)
                 return r;
 
-        r = parse_config_file(network, "Route", "Gateway", &config_rt);
-        if (r >= 0) {
-                r = parse_config_file(network, "Route", "GatewayOnlink", &config_onlink);
-                if (r >=0) {
-                        onlink = parse_boolean(config_onlink);
-                        if (onlink < 0)
-                                log_warning("Failed to parse GatwayOnlink. Ignoring\n");
-                }
-        }
-
         r = set_config_file_string(network, "Route", "Gateway", a);
         if (r < 0) {
                 log_warning("Failed to write to config file: %s", network);
                 return r;
         }
 
-        r = set_config_file_string(network, "Route", "GatewayOnlink", "yes");
-        if (r < 0) {
-                log_warning("Failed to write to config file: %s", network);
-                return r;
+        if (rt->onlink) {
+                r = set_config_file_string(network, "Route", "GatewayOnlink", "yes");
+                if (r < 0) {
+                        log_warning("Failed to write to config file: %s", network);
+                        return r;
+                }
         }
 
         return dbus_network_reload();
 }
 
 int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt) {
-        _auto_cleanup_ char *network = NULL, *a = NULL, *config_rt = NULL,*config_onlink = NULL;
-        int r, onlink;
+        _auto_cleanup_ char *network = NULL, *a = NULL;
+        int r;
 
         assert(ifnameidx);
         assert(rt);
@@ -490,16 +482,6 @@ int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt) {
         r = ip_to_string(rt->destination.family, &rt->destination, &a);
         if (r < 0)
                 return r;
-
-        r = parse_config_file(network, "Route", "Gateway", &config_rt);
-        if (r >= 0) {
-                r = parse_config_file(network, "Route", "GatewayOnlink", &config_onlink);
-                if (r >= 0) {
-                        onlink = parse_boolean(config_onlink);
-                        if (onlink < 0)
-                                log_warning("Failed to parse GatwayOnlink. Ignoring\n");
-                }
-        }
 
         r = set_config_file_string(network, "Route", "Destination", a);
         if (r < 0) {
