@@ -136,6 +136,19 @@ int remove_section_from_config(const char *path, const char *section) {
         return set_file_permisssion(path, "systemd-network");
 }
 
+int write_to_conf(const char *path, const GString *s) {
+        _cleanup_(gerror_unrefp) GError *e = NULL;
+
+        assert(path);
+        assert(s);
+
+        if (!g_file_set_contents(path, s->str, s->len, &e))
+                return -e->code;
+
+        e = NULL;
+        return 0;
+}
+
 int write_to_resolv_conf(char **dns, char **domains) {
         _auto_cleanup_ char *p = NULL;
         GString *c = NULL;
