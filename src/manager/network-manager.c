@@ -541,6 +541,72 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
         return dbus_network_reload();
 }
 
+int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
+        _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL, *destination = NULL, *pref_source = NULL;
+        _cleanup_(g_string_unrefp) GString *config = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(rt);
+
+        r = create_network_conf_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to get create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                return r;
+        }
+
+        r = ip_to_string_prefix(rt->address.family, &rt->address, &address);
+        if (r < 0)
+                return r;
+
+        r = ip_to_string(rt->destination.family, &rt->destination, &destination);
+        if (r < 0)
+                return r;
+
+        r = ip_to_string(rt->gw.family, &rt->gw, &gw);
+        if (r < 0)
+                return r;
+
+        config = g_string_new(NULL);
+        if (!config)
+                return log_oom();
+
+        g_string_append(config, "[Match]\n");
+        if (ifnameidx->ifname)
+                g_string_append_printf(config, "Name=%s\n\n", ifnameidx->ifname);
+
+        g_string_append(config, "[Address]\n");
+        if (ifnameidx->ifname)
+                g_string_append_printf(config, "Address=%s\n\n", address);
+
+        r = ip_to_string_prefix(rt->address.family, &rt->address, &pref_source);
+        if (r < 0)
+                return r;
+
+        g_string_append(config, "[Route]\n");
+        g_string_append_printf(config, "Table=%d\n", rt->table);
+        g_string_append_printf(config, "PreferredSource=%s\n", pref_source);
+        g_string_append_printf(config, "Destination=%s\n\n", destination);
+
+        g_string_append(config, "[Route]\n");
+        g_string_append_printf(config, "Table=%d\n", rt->table);
+        g_string_append_printf(config, "Gateway=%s\n\n", gw);
+
+        g_string_append(config, "[RoutingPolicyRule]\n");
+        g_string_append_printf(config, "Table=%d\n", rt->table);
+        g_string_append_printf(config, "To=%s\n\n", address);
+
+        g_string_append(config, "[RoutingPolicyRule]\n");
+        g_string_append_printf(config, "Table=%d\n", rt->table);
+        g_string_append_printf(config, "From=%s\n", address);
+
+        r = write_to_conf(network, config);
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
 int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config_dns = NULL, *a = NULL;
         GSequenceIter *i;

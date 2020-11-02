@@ -1142,6 +1142,66 @@ _public_ int ncm_link_delete_gateway_or_route(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
+        _auto_cleanup_ IPAddress *a = NULL, *gw = NULL, *destination = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ Route *rt = NULL;
+        uint32_t table;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = parse_ip_from_string(argv[2], &a);
+        if (r < 0) {
+                log_warning("Failed to parse address : %s", argv[2]);
+                return r;
+        }
+
+        r = parse_ip_from_string(argv[3], &gw);
+        if (r < 0) {
+                log_warning("Failed to parse address : %s", argv[3]);
+                return r;
+        }
+
+        r = parse_ip_from_string(argv[4], &destination);
+        if (r < 0) {
+                log_warning("Failed to parse address : %s", argv[4]);
+                return r;
+        }
+
+        r = parse_uint32(argv[5], &table);
+        if (r < 0) {
+                log_warning("Failed to parse address : %s", argv[5]);
+                return r;
+        }
+
+        r = route_new(&rt);
+        if (r < 0)
+                return log_oom();
+
+        *rt = (Route) {
+                .family = a->family,
+                .ifindex = p->ifindex,
+                .table = table,
+                .dst_prefixlen = destination->prefix_len,
+                .destination = *destination,
+                .address = *a,
+                .gw = *gw,
+        };
+
+        r = manager_configure_additional_gw(p, rt);
+        if (r < 0) {
+                log_warning("Failed to add route to link '%s': %s\n", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_free) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
