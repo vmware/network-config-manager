@@ -444,8 +444,10 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
                 return r;
 
         r = manager_link_add_default_gateway(rt);
-        if (r < 0 && r != -EEXIST)
+        if (r < 0 && r != -EEXIST) {
                log_warning("Failed to add Gateway to kernel : %s\n", g_strerror(-r));
+               return r;
+        }
 
         r = ip_to_string(rt->gw.family, &rt->gw, &a);
         if (r < 0)
@@ -572,12 +574,10 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
                 return log_oom();
 
         g_string_append(config, "[Match]\n");
-        if (ifnameidx->ifname)
-                g_string_append_printf(config, "Name=%s\n\n", ifnameidx->ifname);
+        g_string_append_printf(config, "Name=%s\n\n", ifnameidx->ifname);
 
         g_string_append(config, "[Address]\n");
-        if (ifnameidx->ifname)
-                g_string_append_printf(config, "Address=%s\n\n", address);
+        g_string_append_printf(config, "Address=%s\n\n", address);
 
         r = ip_to_string_prefix(rt->address.family, &rt->address, &pref_source);
         if (r < 0)
