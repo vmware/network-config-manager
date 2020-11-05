@@ -1779,6 +1779,34 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_create_bond(int argc, char *argv[]) {
+        _auto_cleanup_strv_ char **links = NULL;
+        BondMode mode;
+        int r;
+
+        r = bond_mode_to_id(argv[2]);
+        if (r < 0) {
+                log_warning("Failed to parse bond mode '%s' : %s", argv[2], g_strerror(EINVAL));
+                return r;
+        }
+
+        mode = r;
+
+        r = argv_to_strv(argc - 3, argv + 3, &links);
+        if (r < 0) {
+                log_warning("Failed to parse links: %s", g_strerror(-r));
+                return r;
+        }
+
+        r = manager_create_bond(argv[1], mode, links);
+        if (r < 0) {
+                log_warning("Failed to create bridge '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_create_vlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint16_t id;

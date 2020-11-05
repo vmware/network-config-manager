@@ -1242,3 +1242,73 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
 
         return dbus_network_reload();
 }
+
+int manager_create_bond(const char *bond, BondMode mode, char **interfaces) {
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *bond_network_config = NULL, *dev_network_config = NULL;
+        _auto_cleanup_ char *bond_netdev = NULL, *bond_network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        char **s;
+        int r;
+
+        assert(bond);
+        assert(interfaces);
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                .ifname = strdup(bond),
+                .kind = NET_DEV_KIND_BOND,
+                .bond_mode = mode,
+        };
+        if (!netdev->ifname)
+                return log_oom();
+
+        r = create_netdev_conf_file(bond, &bond_netdev);
+        if (r < 0)
+                return r;
+
+        r = generate_netdev_config(netdev, &netdev_config);
+        if (r < 0)
+                return r;
+
+        r = manager_write_netdev_config(netdev, netdev_config);
+        if (r < 0)
+                return r;
+
+        r = network_new(&v);
+        if (r < 0)
+                return r;
+
+        v->ifname = strdup(bond);
+        if (!v->ifname)
+                return log_oom();
+
+        r = generate_network_config(v, &bond_network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(bond, &bond_network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(v, bond_network_config);
+
+        strv_foreach(s, interfaces) {
+                _auto_cleanup_ char *network = NULL;
+
+                r = create_network_conf_file(*s, &network);
+                if (r < 0)
+                        return r;
+
+                r = set_config_file_string(network, "Network", "Bond", bond);
+                if (r < 0)
+                        return r;
+        }
+
+        return dbus_network_reload();
+}
