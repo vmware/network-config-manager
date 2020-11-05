@@ -158,6 +158,7 @@ static int help(void) {
                "  disable-ipv6                 [LINK] Disables IPv6 on the interface.\n"
                "  enable-ipv6                  [LINK] Enables IPv6 on the interface.\n"
                "  create-vlan                  [LINK master] [VLAN] [ID] Creates vlan netdev and sets master to device\n"
+               "  create-bridge                [BRIDGE name] [LINK] [LINK] Creates bridge netdev and sets master to device\n"
                "  reload                              Reload .network and .netdev files.\n"
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -267,6 +268,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "disable-ipv6",                 1,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "enable-ipv6",                  1,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "create-vlan",                  3,        WORD_ANY, false, ncm_create_vlan },
+                { "create-bridge",                2,        WORD_ANY, false, ncm_create_bridge },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
