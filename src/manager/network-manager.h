@@ -56,3 +56,4 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
 int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt);
 
 int manager_create_bridge(const char *bridge, char **interfaces);
+int manager_create_bond(const char *bond, BondMode mode, char **interfaces);

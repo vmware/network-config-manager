@@ -13,6 +13,7 @@
 static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_VLAN]   = "vlan",
         [NET_DEV_KIND_BRIDGE] = "bridge",
+        [NET_DEV_KIND_BOND]   = "bond",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -35,6 +36,38 @@ int netdev_kind_to_id(const char *name) {
                         return i;
 
         return _NET_DEV_KIND_INVALID;
+}
+
+static const char *const bond_mode[_BOND_MODE_MAX] = {
+        [BOND_MODE_ROUNDROBIN]   = "balance-rr",
+        [BOND_MODE_ACTIVEBACKUP] = "active-backup",
+        [BOND_MODE_XOR]          = "balance-xor",
+        [BOND_MODE_BROADCAST]    = "broadcast",
+        [BOND_MODE_8023AD]       = "802.3ad",
+        [BOND_MODE_TLB]          = "balance-tlb",
+        [BOND_MODE_ALB]          = "balance-alb",
+};
+
+const char *bond_mode_to_name(BondMode id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(bond_mode))
+                return NULL;
+
+        return bond_mode[id];
+}
+
+int bond_mode_to_id(const char *name) {
+        int i;
+
+        assert(name);
+
+        for (i = BOND_MODE_ROUNDROBIN; i < (int) ELEMENTSOF(bond_mode); i++)
+                if (bond_mode[i] && string_equal_fold(name, bond_mode[i]))
+                        return i;
+
+        return _BOND_MODE_INVALID;
 }
 
 int netdev_new(NetDev **ret) {
@@ -79,6 +112,11 @@ int generate_netdev_config(NetDev *n, GString **ret) {
         if (n->kind == NET_DEV_KIND_VLAN) {
                 g_string_append(config, "[VLAN]\n");
                 g_string_append_printf(config, "Id=%d\n", n->id);
+        }
+
+        if (n->kind == NET_DEV_KIND_BOND) {
+                g_string_append(config, "[Bond]\n");
+                g_string_append_printf(config, "Mode=%s\n", bond_mode_to_name(n->bond_mode));
         }
 
         *ret = steal_pointer(config);
