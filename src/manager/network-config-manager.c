@@ -1760,6 +1760,25 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
         return manager_reconfigure_link(p);
 }
 
+_public_ int ncm_create_bridge(int argc, char *argv[]) {
+        _auto_cleanup_strv_ char **links = NULL;
+        int r;
+
+        r = argv_to_strv(argc - 2, argv + 2, &links);
+        if (r < 0) {
+                log_warning("Failed to parse links: %s", g_strerror(-r));
+                return r;
+        }
+
+        r = manager_create_bridge(argv[1], links);
+        if (r < 0) {
+                log_warning("Failed to create bridge '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_create_vlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint16_t id;

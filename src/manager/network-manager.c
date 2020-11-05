@@ -25,13 +25,13 @@
 #include "string-util.h"
 #include "yaml-network-parser.h"
 
-static int create_network_conf_file(const IfNameIndex *ifnameidx, char **ret) {
+static int create_network_conf_file(const char *ifname, char **ret) {
         _auto_cleanup_ char *file = NULL, *network = NULL;
         int r;
 
-        assert(ifnameidx);
+        assert(ifname);
 
-        file = string_join("-", "10", ifnameidx->ifname, NULL);
+        file = string_join("-", "10", ifname, NULL);
         if (!file)
                 return log_oom();
 
@@ -39,7 +39,7 @@ static int create_network_conf_file(const IfNameIndex *ifnameidx, char **ret) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Match", "Name", ifnameidx->ifname);
+        r = set_config_file_string(network, "Match", "Name", ifname);
         if (r < 0)
                 return r;
 
@@ -57,13 +57,13 @@ static int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
-                r = create_network_conf_file(ifnameidx, &network);
+                r = create_network_conf_file(ifnameidx->ifname, &network);
                 if (r < 0)
                         return r;
         } else {
                 r = network_parse_link_network_file(ifnameidx->ifindex, &network);
                 if (r < 0) {
-                        r = create_network_conf_file(ifnameidx, &network);
+                        r = create_network_conf_file(ifnameidx->ifname, &network);
                         if (r < 0)
                                 return r;
                 }
@@ -444,8 +444,10 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
                 return r;
 
         r = manager_link_add_default_gateway(rt);
-        if (r < 0 && r != -EEXIST)
+        if (r < 0 && r != -EEXIST) {
                log_warning("Failed to add Gateway to kernel : %s\n", g_strerror(-r));
+               return r;
+        }
 
         r = ip_to_string(rt->gw.family, &rt->gw, &a);
         if (r < 0)
@@ -549,7 +551,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
         assert(ifnameidx);
         assert(rt);
 
-        r = create_network_conf_file(ifnameidx, &network);
+        r = create_network_conf_file(ifnameidx->ifname, &network);
         if (r < 0) {
                 log_warning("Failed to get create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
                 return r;
@@ -572,12 +574,10 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
                 return log_oom();
 
         g_string_append(config, "[Match]\n");
-        if (ifnameidx->ifname)
-                g_string_append_printf(config, "Name=%s\n\n", ifnameidx->ifname);
+        g_string_append_printf(config, "Name=%s\n\n", ifnameidx->ifname);
 
         g_string_append(config, "[Address]\n");
-        if (ifnameidx->ifname)
-                g_string_append_printf(config, "Address=%s\n\n", address);
+        g_string_append_printf(config, "Address=%s\n\n", address);
 
         r = ip_to_string_prefix(rt->address.family, &rt->address, &pref_source);
         if (r < 0)
@@ -625,7 +625,7 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
 
         r = network_parse_link_network_file(ifnameidx->ifindex, &network);
         if (r < 0) {
-                r = create_network_conf_file(ifnameidx, &network);
+                r = create_network_conf_file(ifnameidx->ifname, &network);
                 if (r < 0)
                         return r;
         }
@@ -675,7 +675,7 @@ int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, 
 
         r = network_parse_link_network_file(ifnameidx->ifindex, &network);
         if (r < 0) {
-                r = create_network_conf_file(ifnameidx, &network);
+                r = create_network_conf_file(ifnameidx->ifname, &network);
                 if (r < 0)
                         return r;
         }
@@ -1126,12 +1126,12 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
         *netdev = (NetDev) {
                 .id = id,
                 .ifname = strdup(vlan),
+                .kind = NET_DEV_KIND_VLAN,
         };
-
         if (!netdev->ifname)
                 return log_oom();
 
-        r = create_netdev_conf_file(ifnameidx, &vlan_netdev);
+        r = create_netdev_conf_file(ifnameidx->ifname, &vlan_netdev);
         if (r < 0)
                 return r;
 
@@ -1147,9 +1147,7 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
         if (r < 0)
                 return r;
 
-        *v = (Network) {
-                .ifname = strdup(vlan),
-        };
+        v->ifname = strdup(vlan);
         if (!v->ifname)
                 return log_oom();
 
@@ -1159,7 +1157,7 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
                 return r;
         }
 
-        r = create_network_conf_file(ifnameidx, &vlan_network);
+        r = create_network_conf_file(ifnameidx->ifname, &vlan_network);
         if (r < 0)
                 return r;
 
@@ -1172,6 +1170,75 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
         r = set_config_file_string(network, "Network", "VLAN", vlan);
         if (r < 0)
                 return r;
+
+        return dbus_network_reload();
+}
+
+int manager_create_bridge(const char *bridge, char **interfaces) {
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *bridge_network_config = NULL, *dev_network_config = NULL;
+        _auto_cleanup_ char *bridge_netdev = NULL, *bridge_network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        char **s;
+        int r;
+
+        assert(bridge);
+        assert(interfaces);
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                .ifname = strdup(bridge),
+                .kind = NET_DEV_KIND_BRIDGE,
+        };
+        if (!netdev->ifname)
+                return log_oom();
+
+        r = create_netdev_conf_file(bridge, &bridge_netdev);
+        if (r < 0)
+                return r;
+
+        r = generate_netdev_config(netdev, &netdev_config);
+        if (r < 0)
+                return r;
+
+        r = manager_write_netdev_config(netdev, netdev_config);
+        if (r < 0)
+                return r;
+
+        r = network_new(&v);
+        if (r < 0)
+                return r;
+
+        v->ifname = strdup(bridge);
+        if (!v->ifname)
+                return log_oom();
+
+        r = generate_network_config(v, &bridge_network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(bridge, &bridge_network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(v, bridge_network_config);
+
+        strv_foreach(s, interfaces) {
+                _auto_cleanup_ char *network = NULL;
+
+                r = create_network_conf_file(*s, &network);
+                if (r < 0)
+                        return r;
+
+                r = set_config_file_string(network, "Network", "Bridge", bridge);
+                if (r < 0)
+                        return r;
+        }
 
         return dbus_network_reload();
 }

@@ -54,3 +54,5 @@ int manager_write_wifi_config(const Network *n, const GString *config);
 int manager_generate_networkd_config_from_command_line(const char *file, const char *command_line);
 
 int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt);
+
+int manager_create_bridge(const char *bridge, char **interfaces);

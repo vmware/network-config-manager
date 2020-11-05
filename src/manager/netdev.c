@@ -12,6 +12,7 @@
 
 static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_VLAN]   = "vlan",
+        [NET_DEV_KIND_BRIDGE] = "bridge",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -85,13 +86,13 @@ int generate_netdev_config(NetDev *n, GString **ret) {
         return 0;
 }
 
-int create_netdev_conf_file(const IfNameIndex *ifnameidx, char **ret) {
+int create_netdev_conf_file(const char *ifname, char **ret) {
         _auto_cleanup_ char *file = NULL, *netdev = NULL;
         int r;
 
-        assert(ifnameidx);
+        assert(ifname);
 
-        file = string_join("-", "10", ifnameidx->ifname, NULL);
+        file = string_join("-", "10", ifname, NULL);
         if (!file)
                 return log_oom();
 
