@@ -12,6 +12,7 @@ Configure
   - LLDP, Link Local Addressing, IPv4LLRoute, LLMNR.
   - DNS, Domains and NTP.
   - Link's MAC, MTU.
+  - Create netdevs, vlan, vxlan, bridge, bond.
   - Hostname.
   - Add delete and view nftables table, chains and rules.
 
