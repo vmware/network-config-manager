@@ -57,3 +57,6 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt);
 
 int manager_create_bridge(const char *bridge, char **interfaces);
 int manager_create_bond(const char *bond, BondMode mode, char **interfaces);
+int manager_create_vxlan(const char *vxlan, uint32_t vni, IPAddress *local,
+                         IPAddress *remote, IPAddress *group, uint16_t port,
+                         const char *dev, bool independent);

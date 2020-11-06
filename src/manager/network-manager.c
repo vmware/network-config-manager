@@ -1131,10 +1131,6 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
         if (!netdev->ifname)
                 return log_oom();
 
-        r = create_netdev_conf_file(ifnameidx->ifname, &vlan_netdev);
-        if (r < 0)
-                return r;
-
         r = generate_netdev_config(netdev, &netdev_config);
         if (r < 0)
                 return r;
@@ -1309,6 +1305,89 @@ int manager_create_bond(const char *bond, BondMode mode, char **interfaces) {
                 if (r < 0)
                         return r;
         }
+
+        return dbus_network_reload();
+}
+
+int manager_create_vxlan(const char *vxlan,
+                         uint32_t vni,
+                         IPAddress *local,
+                         IPAddress *remote,
+                         IPAddress *group,
+                         uint16_t port,
+                         const char *dev,
+                         bool independent) {
+
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vxlan_network_config = NULL, *dev_network_config = NULL;
+        _auto_cleanup_ char *vxlan_netdev = NULL, *vxlan_network = NULL, *network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        int r;
+
+        assert(vxlan);
+        assert(dev);
+        assert(vni > 0);
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                .ifname = strdup(vxlan),
+                .kind = NET_DEV_KIND_VXLAN,
+                .id = vni,
+                .destination_port = port,
+                .independent = dev ? false : true,
+        };
+        if (!netdev->ifname)
+                return log_oom();
+
+        if (local)
+                netdev->local = *local;
+        if (remote)
+                netdev->remote = *remote;
+        if (group)
+                netdev->group = *group;
+
+        r = create_netdev_conf_file(vxlan, &vxlan_netdev);
+        if (r < 0)
+                return r;
+
+        r = generate_netdev_config(netdev, &netdev_config);
+        if (r < 0)
+                return r;
+
+        r = manager_write_netdev_config(netdev, netdev_config);
+        if (r < 0)
+                return r;
+
+        r = network_new(&v);
+        if (r < 0)
+                return r;
+
+        v->ifname = strdup(vxlan);
+        if (!v->ifname)
+                return log_oom();
+
+        r = generate_network_config(v, &vxlan_network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(vxlan, &vxlan_network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(v, vxlan_network_config);
+
+        r = create_network_conf_file(dev, &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_string(network, "Network", "VXLAN", vxlan);
+        if (r < 0)
+                return r;
 
         return dbus_network_reload();
 }

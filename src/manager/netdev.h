@@ -10,6 +10,7 @@ typedef enum NetDevKind {
         NET_DEV_KIND_VLAN,
         NET_DEV_KIND_BRIDGE,
         NET_DEV_KIND_BOND,
+        NET_DEV_KIND_VXLAN,
         _NET_DEV_KIND_MAX,
         _NET_DEV_KIND_INVALID = -1
 } NetDevKind;
@@ -29,6 +30,14 @@ typedef enum BondMode {
 typedef struct NetDev {
         char *ifname;
         char *mac;
+
+        bool independent;
+
+        IPAddress local;
+        IPAddress remote;
+        IPAddress group;
+
+        uint16_t destination_port;
 
         uint32_t id;
         NetDevKind kind;

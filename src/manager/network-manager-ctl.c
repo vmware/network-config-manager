@@ -125,7 +125,8 @@ static int help(void) {
                "  delete-gateway               [LINK] Removes Gateway from Link\n"
                "  add-route                    [LINK] [GW address] metric [METRIC { number }] Set Link route\n"
                "  delete-route                 [LINK] Removes route from Link\n"
-               "  add-additional-gw            [LINK] [ADDRESS] [ROUTE address] [GW address] [ROUTING POLICY TABLE number] configures additional gateway for \n\t\t\t\t\t\t another NIC with routing policy rules\n"
+               "  add-additional-gw            [LINK] [ADDRESS] [ROUTE address] [GW address] [ROUTING POLICY TABLE number] configures additional gateway for"
+                                                      "\n\t\t\t\t\t\t another NIC with routing policy rules\n"
                "  set-hostname                 [HOSTNAME] Sets hostname\n"
                "  show-dns                            Show DNS Servers\n"
                "  add-dns                      [LINK | system] [ADDRESS] Set Link DNS servers\n"
@@ -157,9 +158,12 @@ static int help(void) {
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
                "  disable-ipv6                 [LINK] Disables IPv6 on the interface.\n"
                "  enable-ipv6                  [LINK] Enables IPv6 on the interface.\n"
-               "  create-vlan                  [LINK master] [VLAN] [ID] Creates vlan netdev and sets master to device\n"
-               "  create-bridge                [BRIDGE name] [LINK] [LINK] Creates bridge netdev and sets master to device\n"
-               "  create-bond                  [BOND name] [MODE {balance-rr | active-backup | balance-xor | broadcast | 802.3ad | balance-tlb | balance-alb}] \n\t\t\t\t\t\t [LINK] [LINK] Creates bridge netdev and sets master to device\n"
+               "  create-vlan                  [LINK master] [VLAN] id [ID integer] Creates vlan netdev and sets master to device\n"
+               "  create-bridge                [BRIDGE name] [LINK] [LINK] ... Creates bridge netdev and sets master to device\n"
+               "  create-bond                  [BOND name] mode [MODE {balance-rr | active-backup | balance-xor | broadcast | 802.3ad | balance-tlb | balance-alb}]"
+                                                     "\n\t\t\t\t\t\t [LINK] [LINK] ... Creates bond netdev and sets master to device\n"
+               "  create-vxlan                 [dev LINK] [VXLAN name] vni [INTEGER] [local ADDRESS] [remote ADDRESS] [port PORT] [independent { yes | no | on | off | 1 | 0}]"
+                                                      "\n\t\t\t\t\t\t  Creates vxlan netdev\n"
                "  reload                              Reload .network and .netdev files.\n"
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -171,7 +175,8 @@ static int help(void) {
                "  add-nft-chain                [FAMILY {ipv4 | ip}] [TABLE] [CHAIN] adds a new nftable's chain.\n"
                "  show-nft-chains              [FAMILY {ipv4 | ipv6 | ip}] [TABLE] shows nftable's chains.\n"
                "  delete-nft-chain             [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] deletes a nftable's chain from table\n"
-               "  add-nft-rule                 [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] [PROTOCOL { tcp | udp}] [SOURCE PORT / DESTINATION PORT {sport|dport}]  \n\t\t\t\t\t\t [PORT] [ACTION {accept | drop}] configures a nft rule for a port.\n"
+               "  add-nft-rule                 [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] [PROTOCOL { tcp | udp}] [SOURCE PORT / DESTINATION PORT {sport|dport}]"
+                                                       "\n\t\t\t\t\t\t [PORT] [ACTION {accept | drop}] configures a nft rule for a port.\n"
                "  show-nft-rules               [TABLE] shows nftable's rules.\n"
                "  delete-nft-rule              [FAMILY {ipv4 | ipv6 | ip}] [TABLE] [CHAIN] [HANDLE] deletes a nftable's rule from table\n"
                "  nft-run                      runs a nft command.  See man NFT(8)\n"
@@ -268,9 +273,10 @@ static int cli_run(int argc, char *argv[]) {
                 { "delete-ntp",                   1,        WORD_ANY, false, ncm_link_delete_ntp },
                 { "disable-ipv6",                 1,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "enable-ipv6",                  1,        WORD_ANY, false, ncm_link_enable_ipv6 },
-                { "create-vlan",                  3,        WORD_ANY, false, ncm_create_vlan },
+                { "create-vlan",                  4,        WORD_ANY, false, ncm_create_vlan },
                 { "create-bridge",                2,        WORD_ANY, false, ncm_create_bridge },
-                { "create-bond",                  4,        WORD_ANY, false, ncm_create_bond },
+                { "create-bond",                  5,        WORD_ANY, false, ncm_create_bond },
+                { "create-vxlan",                 2,        WORD_ANY, false, ncm_create_vxlan },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },

@@ -22,7 +22,13 @@ network_config_manager_yaml_config_path = '/etc/network-config-manager/yaml'
 
 network_config_manager_wpa_supplilant_conf_file = '/etc/network-config-manager/wpa_supplicant.conf'
 
-units = ["10-test99.network", "10-test98.network", "10-wlan1.network", "10-wlan0.network"]
+units = ["10-test99.network",
+         "10-test98.network",
+         "10-wlan1.network",
+         "10-wlan0.network",
+         '10-dummy98.network',
+         '10-vlan-98.netdev',
+         '10-vlan-98.network']
 
 def link_exits(link):
     return os.path.exists(os.path.join('/sys/class/net', link))
@@ -264,7 +270,7 @@ class TestKernelCommandLine:
         assert(parser.get('Route', 'Gateway') == '192.168.1.1/32')
         assert(parser.get('Address', 'Address') == '192.168.1.34')
 
-class TestCLI:
+class TestCLINetwork:
     def setup_method(self):
         link_remove('test99')
         link_add_dummy('test99')
@@ -661,6 +667,48 @@ class TestCLI:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'true')
+
+class TestCLINetDev:
+    def setup_method(self):
+        link_remove('test98')
+        link_add_dummy('test98')
+        restart_networkd()
+
+    def teardown_method(self):
+        remove_units_from_netword_unit_path()
+        link_remove('test98')
+
+    def test_cli_create_vlan(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-vlan', 'test98', 'vlan-98', 'id', '11'])
+        assert(unit_exits('10-dummy98.network') == True)
+        assert(unit_exits('10-vlan-98.network') == True)
+        assert(unit_exits('10-vlan-98.netdev') == True)
+
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('vlan-98') == True)
+
+        vlan_parser = configparser.ConfigParser()
+        vlan_parser.read(os.path.join(networkd_unit_file_path, '10-vlan-98.netdev'))
+
+        assert(vlan_parser.get('NetDev', 'Name') == 'vlan-98')
+        assert(vlan_parser.get('NetDev', 'kind') == 'vlan')
+        assert(vlan_parser.get('VLAN', 'id') == '11')
+
+        vlan_network_parser = configparser.ConfigParser()
+        vlan_network_parser.read(os.path.join(networkd_unit_file_path, '10-vlan-98.network'))
+
+        assert(vlan_network_parser.get('Match', 'Name') == 'vlan-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-dummy98.network'))
+
+        assert(parser.get('Match', 'Name') == 'dummy98')
+        assert(parser.get('Network', 'VLAN') == 'vlan-98')
+
+        link_remove('vlan-98')
 
 class TestWifiWPASupplicantConf:
     yaml_configs = [

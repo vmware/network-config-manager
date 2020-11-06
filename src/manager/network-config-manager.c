@@ -1784,15 +1784,16 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         BondMode mode;
         int r;
 
-        r = bond_mode_to_id(argv[2]);
-        if (r < 0) {
-                log_warning("Failed to parse bond mode '%s' : %s", argv[2], g_strerror(EINVAL));
-                return r;
+        if (string_equal(argv[2], "mode")) {
+                r = bond_mode_to_id(argv[3]);
+                if (r < 0) {
+                        log_warning("Failed to parse bond mode '%s' : %s", argv[2], g_strerror(EINVAL));
+                        return r;
+                }
+                mode = r;
         }
 
-        mode = r;
-
-        r = argv_to_strv(argc - 3, argv + 3, &links);
+        r = argv_to_strv(argc - 4, argv + 4, &links);
         if (r < 0) {
                 log_warning("Failed to parse links: %s", g_strerror(-r));
                 return r;
@@ -1801,6 +1802,100 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         r = manager_create_bond(argv[1], mode, links);
         if (r < 0) {
                 log_warning("Failed to create bridge '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_create_vxlan(int argc, char *argv[]) {
+        _auto_cleanup_ IPAddress *local = NULL, *remote = NULL, *group = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        bool independent = false;
+        uint16_t port;
+        uint32_t vni;
+        int r, i;
+
+        for (i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "dev")) {
+                        i++;
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
+                                return -errno;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "vni")) {
+                        i++;
+                        r = parse_uint32(argv[i], &vni);
+                        if (r < 0) {
+                                log_warning("Failed to parse vni %s: %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "local")) {
+                        i++;
+
+                        r = parse_ip_from_string(argv[i], &local);
+                        if (r < 0) {
+                                log_warning("Failed to parse local address : %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "remote")) {
+                        i++;
+
+                        r = parse_ip_from_string(argv[i], &remote);
+                        if (r < 0) {
+                                log_warning("Failed to parse remote address : %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "group")) {
+                        i++;
+
+                        r = parse_ip_from_string(argv[i], &group);
+                        if (r < 0) {
+                                log_warning("Failed to parse greoup address : %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "independent")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse independent %s : %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+                        independent = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "port")) {
+                        i++;
+                        r = parse_uint16(argv[i], &port);
+                        if (r < 0) {
+                                log_warning("Failed to parse port %s: %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        r = manager_create_vxlan(argv[3], vni, local, remote, group, port, p->ifname, independent);
+        if (r < 0) {
+                log_warning("Failed to create vxlan '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -1818,10 +1913,12 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = parse_uint16(argv[3], &id);
-        if (r < 0) {
-                log_warning("Failed to parse VLAN id '%s' for link '%s': %s", argv[3], argv[2], g_strerror(-r));
-                return r;
+        if (string_equal(argv[3], "id")) {
+                r = parse_uint16(argv[4], &id);
+                if (r < 0) {
+                        log_warning("Failed to parse VLAN id '%s' for link '%s': %s", argv[3], argv[4], g_strerror(EINVAL));
+                        return r;
+                }
         }
 
         r = manager_create_vlan(p, argv[2], id);
