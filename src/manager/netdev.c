@@ -14,6 +14,7 @@ static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_VLAN]   = "vlan",
         [NET_DEV_KIND_BRIDGE] = "bridge",
         [NET_DEV_KIND_BOND]   = "bond",
+        [NET_DEV_KIND_VXLAN]  = "vxlan",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -108,7 +109,6 @@ int generate_netdev_config(NetDev *n, GString **ret) {
 
         g_string_append_printf(config, "Kind=%s\n\n", netdev_kind_to_name(n->kind));
 
-
         if (n->kind == NET_DEV_KIND_VLAN) {
                 g_string_append(config, "[VLAN]\n");
                 g_string_append_printf(config, "Id=%d\n", n->id);
@@ -117,6 +117,31 @@ int generate_netdev_config(NetDev *n, GString **ret) {
         if (n->kind == NET_DEV_KIND_BOND) {
                 g_string_append(config, "[Bond]\n");
                 g_string_append_printf(config, "Mode=%s\n", bond_mode_to_name(n->bond_mode));
+        }
+
+        if (n->kind == NET_DEV_KIND_VXLAN) {
+                _auto_cleanup_ char *local = NULL, *remote = NULL, *group = NULL;
+
+                g_string_append(config, "[VXLAN]\n");
+                g_string_append_printf(config, "VNI=%d\n", n->id);
+
+                if (!ip_is_null(&n->local)) {
+                        (void) ip_to_string(n->local.family, &n->local, &local);
+                        g_string_append_printf(config, "Local=%s\n", local);
+                }
+
+                if (!ip_is_null(&n->remote)) {
+                        (void) ip_to_string(n->remote.family, &n->remote, &remote);
+                        g_string_append_printf(config, "Remote=%s\n", remote);
+                }
+
+                if (!ip_is_null(&n->group)) {
+                        (void) ip_to_string(n->group.family, &n->group, &group);
+                        g_string_append_printf(config, "Group=%s\n", group);
+                }
+
+                if (n->destination_port > 0)
+                        g_string_append_printf(config, "DestinationPort=%d\n", n->destination_port);
         }
 
         *ret = steal_pointer(config);
