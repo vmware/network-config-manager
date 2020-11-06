@@ -1381,13 +1381,15 @@ int manager_create_vxlan(const char *vxlan,
 
         (void) manager_write_network_config(v, vxlan_network_config);
 
-        r = create_network_conf_file(dev, &network);
-        if (r < 0)
-                return r;
+        if (!independent) {
+                r = create_network_conf_file(dev, &network);
+                if (r < 0)
+                        return r;
 
-        r = set_config_file_string(network, "Network", "VXLAN", vxlan);
-        if (r < 0)
-                return r;
+                r = set_config_file_string(network, "Network", "VXLAN", vxlan);
+                if (r < 0)
+                        return r;
+        }
 
         return dbus_network_reload();
 }

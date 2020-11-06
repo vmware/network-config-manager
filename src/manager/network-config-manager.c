@@ -1787,7 +1787,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         if (string_equal(argv[2], "mode")) {
                 r = bond_mode_to_id(argv[3]);
                 if (r < 0) {
-                        log_warning("Failed to parse bond mode '%s' : %s", argv[2], g_strerror(EINVAL));
+                        log_warning("Failed to parse bond mode '%s' : %s", argv[3], g_strerror(EINVAL));
                         return r;
                 }
                 mode = r;
