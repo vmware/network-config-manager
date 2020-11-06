@@ -24,11 +24,19 @@ network_config_manager_wpa_supplilant_conf_file = '/etc/network-config-manager/w
 
 units = ["10-test99.network",
          "10-test98.network",
+         '10-test-99.network',
          "10-wlan1.network",
          "10-wlan0.network",
-         '10-dummy98.network',
+         '10-test98.network',
+         '10-vlan-98.network',
          '10-vlan-98.netdev',
-         '10-vlan-98.network']
+         '10-vlan-98.network',
+         '10-vxlan-98.network',
+         '10-vxlan-98.netdev',
+         '10-bridge-98.netdev',
+         '10-bridge-98.network',
+         '10-bond-98.netdev',
+         '10-bond-98.network']
 
 def link_exits(link):
     return os.path.exists(os.path.join('/sys/class/net', link))
@@ -682,9 +690,9 @@ class TestCLINetDev:
         assert(link_exits('test98') == True)
 
         subprocess.check_call(['nmctl', 'create-vlan', 'test98', 'vlan-98', 'id', '11'])
-        assert(unit_exits('10-dummy98.network') == True)
-        assert(unit_exits('10-vlan-98.network') == True)
+        assert(unit_exits('10-test98.network') == True)
         assert(unit_exits('10-vlan-98.netdev') == True)
+        assert(unit_exits('10-vlan-98.network') == True)
 
         subprocess.check_call(['sleep', '5'])
 
@@ -703,12 +711,131 @@ class TestCLINetDev:
         assert(vlan_network_parser.get('Match', 'Name') == 'vlan-98')
 
         parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-dummy98.network'))
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
 
-        assert(parser.get('Match', 'Name') == 'dummy98')
+        assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'VLAN') == 'vlan-98')
 
         link_remove('vlan-98')
+
+    def test_cli_create_vxlan(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-vxlan', 'dev', 'test98', 'vxlan-98', 'vni', '32', 'local', '192.168.1.2', 'remote', '192.168.1.3', 'port', '7777'])
+        assert(unit_exits('10-test98.network') == True)
+        assert(unit_exits('10-vxlan-98.network') == True)
+        assert(unit_exits('10-vxlan-98.netdev') == True)
+
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('vxlan-98') == True)
+
+        vxlan_parser = configparser.ConfigParser()
+        vxlan_parser.read(os.path.join(networkd_unit_file_path, '10-vxlan-98.netdev'))
+
+        assert(vxlan_parser.get('NetDev', 'Name') == 'vxlan-98')
+        assert(vxlan_parser.get('NetDev', 'kind') == 'vxlan')
+        assert(vxlan_parser.get('VXLAN', 'VNI') == '32')
+        assert(vxlan_parser.get('VXLAN', 'Local') == '192.168.1.2')
+        assert(vxlan_parser.get('VXLAN', 'Remote') == '192.168.1.3')
+        assert(vxlan_parser.get('VXLAN', 'DestinationPort') == '7777')
+
+        vxlan_network_parser = configparser.ConfigParser()
+        vxlan_network_parser.read(os.path.join(networkd_unit_file_path, '10-vxlan-98.network'))
+
+        assert(vxlan_network_parser.get('Match', 'Name') == 'vxlan-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+        assert(parser.get('Network', 'VXLAN') == 'vxlan-98')
+
+        link_remove('vxlan-98')
+
+    def test_cli_create_bridge(self):
+        link_add_dummy('test-99')
+        assert(link_exits('test98') == True)
+        assert(link_exits('test-99') == True)
+
+        subprocess.check_call(['nmctl', 'create-bridge', 'bridge-98', 'test98', 'test-99'])
+        assert(unit_exits('10-test98.network') == True)
+        assert(unit_exits('10-test-99.network') == True)
+        assert(unit_exits('10-bridge-98.network') == True)
+        assert(unit_exits('10-bridge-98.netdev') == True)
+
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('bridge-98') == True)
+
+        bridge_parser = configparser.ConfigParser()
+        bridge_parser.read(os.path.join(networkd_unit_file_path, '10-bridge-98.netdev'))
+
+        assert(bridge_parser.get('NetDev', 'Name') == 'bridge-98')
+        assert(bridge_parser.get('NetDev', 'kind') == 'bridge')
+
+        bridge_network_parser = configparser.ConfigParser()
+        bridge_network_parser.read(os.path.join(networkd_unit_file_path, '10-bridge-98.network'))
+
+        assert(bridge_network_parser.get('Match', 'Name') == 'bridge-98')
+
+        test98_parser = configparser.ConfigParser()
+        test98_parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(test98_parser.get('Match', 'Name') == 'test98')
+        assert(test98_parser.get('Network', 'Bridge') == 'bridge-98')
+
+        test99_parser = configparser.ConfigParser()
+        test99_parser.read(os.path.join(networkd_unit_file_path, '10-test-99.network'))
+
+        assert(test99_parser.get('Match', 'Name') == 'test-99')
+        assert(test99_parser.get('Network', 'Bridge') == 'bridge-98')
+
+        link_remove('bridge-98')
+        link_remove('test-99')
+
+    def test_cli_create_bond(self):
+        link_add_dummy('test-99')
+        assert(link_exits('test98') == True)
+        assert(link_exits('test-99') == True)
+
+        subprocess.check_call(['nmctl', 'create-bond', 'bond-98', 'mode', 'balance-rr', 'test98', 'test-99'])
+        assert(unit_exits('10-test98.network') == True)
+        assert(unit_exits('10-test-99.network') == True)
+        assert(unit_exits('10-bond-98.network') == True)
+        assert(unit_exits('10-bond-98.netdev') == True)
+
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('bond-98') == True)
+
+        bond_parser = configparser.ConfigParser()
+        bond_parser.read(os.path.join(networkd_unit_file_path, '10-bond-98.netdev'))
+
+        assert(bond_parser.get('NetDev', 'Name') == 'bond-98')
+        assert(bond_parser.get('NetDev', 'kind') == 'bond')
+        assert(bond_parser.get('Bond', 'Mode') == 'balance-rr')
+
+        bond_network_parser = configparser.ConfigParser()
+        bond_network_parser.read(os.path.join(networkd_unit_file_path, '10-bond-98.network'))
+
+        assert(bond_network_parser.get('Match', 'Name') == 'bond-98')
+
+        test98_parser = configparser.ConfigParser()
+        test98_parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(test98_parser.get('Match', 'Name') == 'test98')
+        assert(test98_parser.get('Network', 'Bond') == 'bond-98')
+
+        test99_parser = configparser.ConfigParser()
+        test99_parser.read(os.path.join(networkd_unit_file_path, '10-test-99.network'))
+
+        assert(test99_parser.get('Match', 'Name') == 'test-99')
+        assert(test99_parser.get('Network', 'Bond') == 'bond-98')
+
+        link_remove('bond-98')
+        link_remove('test-99')
+
 
 class TestWifiWPASupplicantConf:
     yaml_configs = [
