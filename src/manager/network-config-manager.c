@@ -1781,6 +1781,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
 
 _public_ int ncm_create_bond(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **links = NULL;
+        bool k = false;
         BondMode mode;
         int r;
 
@@ -1790,6 +1791,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                         log_warning("Failed to parse bond mode '%s' : %s", argv[3], g_strerror(EINVAL));
                         return r;
                 }
+                k = true;
                 mode = r;
         }
 
@@ -1797,6 +1799,11 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         if (r < 0) {
                 log_warning("Failed to parse links: %s", g_strerror(-r));
                 return r;
+        }
+
+        if (!k) {
+                log_warning("Missing Bond mode: %s", g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_create_bond(argv[1], mode, links);
@@ -1810,8 +1817,8 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
 
 _public_ int ncm_create_vxlan(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *local = NULL, *remote = NULL, *group = NULL;
+        bool independent = false, vni = false;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool independent = false;
         uint16_t port;
         uint32_t vni;
         int r, i;
@@ -1834,6 +1841,8 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                                 log_warning("Failed to parse vni %s: %s", argv[i], g_strerror(-r));
                                 return r;
                         }
+
+                        vni = true;
                         continue;
                 }
 
@@ -1893,6 +1902,11 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                 }
         }
 
+        if (!vni) {
+                log_warning("Missing VxLan vni: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_create_vxlan(argv[3], vni, local, remote, group, port, p->ifname, independent);
         if (r < 0) {
                 log_warning("Failed to create vxlan '%s': %s", argv[1], g_strerror(-r));
@@ -1904,6 +1918,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
 _public_ int ncm_create_vlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        bool k = false;
         uint16_t id;
         int r;
 
@@ -1919,6 +1934,12 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         log_warning("Failed to parse VLAN id '%s' for link '%s': %s", argv[3], argv[4], g_strerror(EINVAL));
                         return r;
                 }
+                k = true;
+        }
+
+        if (!vni) {
+                log_warning("Missing Vlan id: %s", g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_create_vlan(p, argv[2], id);
