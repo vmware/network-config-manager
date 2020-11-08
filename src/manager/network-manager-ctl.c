@@ -166,6 +166,8 @@ static int help(void) {
                                                       "\n\t\t\t\t\t\t  Creates vxlan netdev\n"
                "  create-macvlan               [MACVLAN name] mode [MODE {private | vepa | bridge | passthru | source}]\n"
                "  create-macvtap               [MACVTAP name] mode [MODE {private | vepa | bridge | passthru | source}]\n"
+               "  create-ipvlan                [IPVLAN name] mode [MODE {l2 | l3 | l3s}]\n"
+               "  create-ipvtap                [IPVTAP name] mode [MODE {l2 | l3 | l3s}]\n"
                "  reload                              Reload .network and .netdev files.\n"
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -281,6 +283,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-vxlan",                 2,        WORD_ANY, false, ncm_create_vxlan },
                 { "create-macvlan",               2,        WORD_ANY, false, ncm_create_macvlan },
                 { "create-macvtap",               2,        WORD_ANY, false, ncm_create_macvlan },
+                { "create-ipvlan",                2,        WORD_ANY, false, ncm_create_ipvlan },
+                { "create-ipvtap",                2,        WORD_ANY, false, ncm_create_ipvlan },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },

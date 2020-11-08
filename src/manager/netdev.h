@@ -14,6 +14,8 @@ typedef enum NetDevKind {
         NET_DEV_KIND_VXLAN,
         NET_DEV_KIND_MACVLAN,
         NET_DEV_KIND_MACVTAP,
+        NET_DEV_KIND_IPVLAN,
+        NET_DEV_KIND_IPVTAP,
         _NET_DEV_KIND_MAX,
         _NET_DEV_KIND_INVALID = -1
 } NetDevKind;
@@ -40,6 +42,14 @@ typedef enum MACVLanMode {
         _MAC_VLAN_MODE_INVALID = -1
 } MACVLanMode;
 
+typedef enum IPVLanMode {
+        IP_VLAN_MODE_L2  = IPVLAN_MODE_L2,
+        IP_VLAN_MODE_L3  = IPVLAN_MODE_L3,
+        IP_VLAN_MODE_L3S = IPVLAN_MODE_L3S,
+        _IP_VLAN_MODE_MAX,
+        _IP_VLAN_MODE_INVALID = -1
+} IPVLanMode;
+
 typedef struct NetDev {
         char *ifname;
         char *mac;
@@ -56,6 +66,7 @@ typedef struct NetDev {
         NetDevKind kind;
         BondMode bond_mode;
         MACVLanMode macvlan_mode;
+        IPVLanMode ipvlan_mode;
 } NetDev;
 
 int netdev_new(NetDev **ret);
@@ -72,3 +83,6 @@ int bond_name_to_mode(const char *name);
 
 const char *macvlan_mode_to_name(MACVLanMode id);
 int macvlan_name_to_mode(const char *name);
+
+const char *ipvlan_mode_to_name(IPVLanMode id);
+int ipvlan_name_to_mode(const char *name);
