@@ -164,6 +164,7 @@ static int help(void) {
                                                      "\n\t\t\t\t\t\t [LINK] [LINK] ... Creates bond netdev and sets master to device\n"
                "  create-vxlan                 [dev LINK] [VXLAN name] vni [INTEGER] [local ADDRESS] [remote ADDRESS] [port PORT] [independent { yes | no | on | off | 1 | 0}]"
                                                       "\n\t\t\t\t\t\t  Creates vxlan netdev\n"
+               "  create-macvlan               [MACVLAN name] mode [MODE {private | vepa | bridge | passthru | source}]\n"
                "  reload                              Reload .network and .netdev files.\n"
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -277,6 +278,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-bridge",                2,        WORD_ANY, false, ncm_create_bridge },
                 { "create-bond",                  5,        WORD_ANY, false, ncm_create_bond },
                 { "create-vxlan",                 2,        WORD_ANY, false, ncm_create_vxlan },
+                { "create-macvlan",               2,        WORD_ANY, false, ncm_create_macvlan },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },

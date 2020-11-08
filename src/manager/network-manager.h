@@ -60,3 +60,5 @@ int manager_create_bond(const char *bond, BondMode mode, char **interfaces);
 int manager_create_vxlan(const char *vxlan, uint32_t vni, IPAddress *local,
                          IPAddress *remote, IPAddress *group, uint16_t port,
                          const char *dev, bool independent);
+
+int manager_create_macvlan(const char *macvlan, MACVLanMode mode);
