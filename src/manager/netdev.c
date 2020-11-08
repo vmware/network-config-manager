@@ -16,6 +16,9 @@ static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_BOND]    = "bond",
         [NET_DEV_KIND_VXLAN]   = "vxlan",
         [NET_DEV_KIND_MACVLAN] = "macvlan",
+        [NET_DEV_KIND_MACVTAP] = "macvtap",
+        [NET_DEV_KIND_IPVLAN]  = "ipvlan",
+        [NET_DEV_KIND_IPVTAP]  = "ipvtap",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -102,6 +105,34 @@ int macvlan_name_to_mode(const char *name) {
         return _MAC_VLAN_MODE_INVALID;
 }
 
+static const char *const ipvlan_mode[_IP_VLAN_MODE_MAX] = {
+        [IP_VLAN_MODE_L2]  = "L2",
+        [IP_VLAN_MODE_L3]  = "L3",
+        [IP_VLAN_MODE_L3S] = "L3S",
+};
+
+const char *ipvlan_mode_to_name(IPVLanMode id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(ipvlan_mode))
+                return NULL;
+
+        return ipvlan_mode[id];
+}
+
+int ipvlan_name_to_mode(const char *name) {
+        int i;
+
+        assert(name);
+
+        for (i = IP_VLAN_MODE_L2; i < (int) ELEMENTSOF(ipvlan_mode); i++)
+                if (ipvlan_mode[i] && string_equal_fold(name, ipvlan_mode[i]))
+                        return i;
+
+        return _IP_VLAN_MODE_INVALID;
+}
+
 int netdev_new(NetDev **ret) {
         _auto_cleanup_ NetDev *n;
 
@@ -178,6 +209,21 @@ int generate_netdev_config(NetDev *n, GString **ret) {
         if (n->kind == NET_DEV_KIND_MACVLAN) {
                 g_string_append(config, "[MACVLAN]\n");
                 g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
+        }
+
+        if (n->kind == NET_DEV_KIND_MACVTAP) {
+                g_string_append(config, "[MACVTAP]\n");
+                g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
+        }
+
+        if (n->kind == NET_DEV_KIND_IPVLAN) {
+                g_string_append(config, "[IPVLAN]\n");
+                g_string_append_printf(config, "Mode=%s\n", ipvlan_mode_to_name(n->ipvlan_mode));
+        }
+
+        if (n->kind == NET_DEV_KIND_IPVTAP) {
+                g_string_append(config, "[IPVTAP]\n");
+                g_string_append_printf(config, "Mode=%s\n", ipvlan_mode_to_name(n->ipvlan_mode));
         }
 
         *ret = steal_pointer(config);
