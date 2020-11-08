@@ -1781,17 +1781,17 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
 
 _public_ int ncm_create_bond(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **links = NULL;
-        bool k = false;
+        bool have_mode = false;
         BondMode mode;
         int r;
 
         if (string_equal(argv[2], "mode")) {
-                r = bond_mode_to_id(argv[3]);
+                r = bond_name_to_mode(argv[3]);
                 if (r < 0) {
                         log_warning("Failed to parse bond mode '%s' : %s", argv[3], g_strerror(EINVAL));
                         return r;
                 }
-                k = true;
+                have_mode = true;
                 mode = r;
         }
 
@@ -1801,14 +1801,43 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                 return r;
         }
 
-        if (!k) {
+        if (!have_mode) {
                 log_warning("Missing Bond mode: %s", g_strerror(EINVAL));
                 return -EINVAL;
         }
 
         r = manager_create_bond(argv[1], mode, links);
         if (r < 0) {
-                log_warning("Failed to create bridge '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create bond '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_create_macvlan(int argc, char *argv[]) {
+        bool have_mode = false;
+        MACVLanMode mode;
+        int r;
+
+        if (string_equal(argv[2], "mode")) {
+                r = macvlan_name_to_mode(argv[3]);
+                if (r < 0) {
+                        log_warning("Failed to parse macvlan mode '%s' : %s", argv[3], g_strerror(EINVAL));
+                        return r;
+                }
+                have_mode = true;
+                mode = r;
+        }
+
+        if (!have_mode) {
+                log_warning("Missing MACVLan mode: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_create_macvlan(argv[1], mode);
+        if (r < 0) {
+                log_warning("Failed to create macvlan '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -1817,7 +1846,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
 
 _public_ int ncm_create_vxlan(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *local = NULL, *remote = NULL, *group = NULL;
-        bool independent = false, vni = false;
+        bool independent = false, have_vni = false;
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint16_t port;
         uint32_t vni;
@@ -1842,7 +1871,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                                 return r;
                         }
 
-                        vni = true;
+                        have_vni = true;
                         continue;
                 }
 
@@ -1902,7 +1931,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                 }
         }
 
-        if (!vni) {
+        if (!have_vni) {
                 log_warning("Missing VxLan vni: %s", g_strerror(EINVAL));
                 return -EINVAL;
         }
@@ -1918,7 +1947,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
 _public_ int ncm_create_vlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool k = false;
+        bool have_id = false;
         uint16_t id;
         int r;
 
@@ -1934,10 +1963,10 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         log_warning("Failed to parse VLAN id '%s' for link '%s': %s", argv[3], argv[4], g_strerror(EINVAL));
                         return r;
                 }
-                k = true;
+                have_id = true;
         }
 
-        if (!vni) {
+        if (!have_id) {
                 log_warning("Missing Vlan id: %s", g_strerror(EINVAL));
                 return -EINVAL;
         }

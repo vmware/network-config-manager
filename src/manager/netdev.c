@@ -11,10 +11,11 @@
 #include "log.h"
 
 static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
-        [NET_DEV_KIND_VLAN]   = "vlan",
-        [NET_DEV_KIND_BRIDGE] = "bridge",
-        [NET_DEV_KIND_BOND]   = "bond",
-        [NET_DEV_KIND_VXLAN]  = "vxlan",
+        [NET_DEV_KIND_VLAN]    = "vlan",
+        [NET_DEV_KIND_BRIDGE]  = "bridge",
+        [NET_DEV_KIND_BOND]    = "bond",
+        [NET_DEV_KIND_VXLAN]   = "vxlan",
+        [NET_DEV_KIND_MACVLAN] = "macvlan",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -27,7 +28,7 @@ const char *netdev_kind_to_name(NetDevKind id) {
         return netdev_kind[id];
 }
 
-int netdev_kind_to_id(const char *name) {
+int netdev_name_to_kind(const char *name) {
         int i;
 
         assert(name);
@@ -59,7 +60,7 @@ const char *bond_mode_to_name(BondMode id) {
         return bond_mode[id];
 }
 
-int bond_mode_to_id(const char *name) {
+int bond_name_to_mode(const char *name) {
         int i;
 
         assert(name);
@@ -69,6 +70,36 @@ int bond_mode_to_id(const char *name) {
                         return i;
 
         return _BOND_MODE_INVALID;
+}
+
+static const char *const macvlan_mode[_MAC_VLAN_MODE_MAX] = {
+        [MAC_VLAN_MODE_PRIVATE]  = "private",
+        [MAC_VLAN_MODE_VEPA]     = "vepa",
+        [MAC_VLAN_MODE_BRIDGE]   = "bridge",
+        [MAC_VLAN_MODE_PASSTHRU] = "passthru",
+        [MAC_VLAN_MODE_SOURCE]   = "source",
+};
+
+const char *macvlan_mode_to_name(MACVLanMode id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(macvlan_mode))
+                return NULL;
+
+        return macvlan_mode[id];
+}
+
+int macvlan_name_to_mode(const char *name) {
+        int i;
+
+        assert(name);
+
+        for (i = MAC_VLAN_MODE_PRIVATE; i < (int) ELEMENTSOF(macvlan_mode); i++)
+                if (macvlan_mode[i] && string_equal_fold(name, macvlan_mode[i]))
+                        return i;
+
+        return _MAC_VLAN_MODE_INVALID;
 }
 
 int netdev_new(NetDev **ret) {
@@ -144,8 +175,12 @@ int generate_netdev_config(NetDev *n, GString **ret) {
                         g_string_append_printf(config, "DestinationPort=%d\n", n->destination_port);
         }
 
-        *ret = steal_pointer(config);
+        if (n->kind == NET_DEV_KIND_MACVLAN) {
+                g_string_append(config, "[MACVLAN]\n");
+                g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
+        }
 
+        *ret = steal_pointer(config);
         return 0;
 }
 
