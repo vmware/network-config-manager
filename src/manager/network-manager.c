@@ -1394,7 +1394,7 @@ int manager_create_vxlan(const char *vxlan,
         return dbus_network_reload();
 }
 
-int manager_create_macvlan(const char *macvlan, MACVLanMode mode) {
+int manager_create_macvlan(const char *macvlan, MACVLanMode mode, bool kind) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *macvlan_network_config = NULL;
         _auto_cleanup_ char *macvlan_netdev = NULL, *macvlan_network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
@@ -1409,7 +1409,7 @@ int manager_create_macvlan(const char *macvlan, MACVLanMode mode) {
 
         *netdev = (NetDev) {
                 .ifname = strdup(macvlan),
-                .kind = NET_DEV_KIND_MACVLAN,
+                .kind = kind ? NET_DEV_KIND_MACVLAN : NET_DEV_KIND_MACVTAP,
                 .macvlan_mode = mode,
         };
         if (!netdev->ifname)
@@ -1446,7 +1446,6 @@ int manager_create_macvlan(const char *macvlan, MACVLanMode mode) {
                 return r;
 
         (void) manager_write_network_config(v, macvlan_network_config);
-
 
         return dbus_network_reload();
 }

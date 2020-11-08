@@ -1823,7 +1823,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
         if (string_equal(argv[2], "mode")) {
                 r = macvlan_name_to_mode(argv[3]);
                 if (r < 0) {
-                        log_warning("Failed to parse macvlan mode '%s' : %s", argv[3], g_strerror(EINVAL));
+                        log_warning("Failed to parse MacVLan/MacVTap mode '%s' : %s", argv[3], g_strerror(EINVAL));
                         return r;
                 }
                 have_mode = true;
@@ -1831,13 +1831,17 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
         }
 
         if (!have_mode) {
-                log_warning("Missing MACVLan mode: %s", g_strerror(EINVAL));
+                log_warning("Missing MacVLan/MacVTap mode: %s", g_strerror(EINVAL));
                 return -EINVAL;
         }
 
-        r = manager_create_macvlan(argv[1], mode);
+        if (string_equal(argv[0], "create-macvlan"))
+                r = manager_create_macvlan(argv[1], mode, true);
+        else
+                r = manager_create_macvlan(argv[1], mode, false);
+
         if (r < 0) {
-                log_warning("Failed to create macvlan '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to %s '%s': %s", argv[0], argv[1], g_strerror(-r));
                 return r;
         }
 

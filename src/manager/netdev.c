@@ -16,6 +16,7 @@ static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_BOND]    = "bond",
         [NET_DEV_KIND_VXLAN]   = "vxlan",
         [NET_DEV_KIND_MACVLAN] = "macvlan",
+        [NET_DEV_KIND_MACVTAP] = "macvtap",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -177,6 +178,11 @@ int generate_netdev_config(NetDev *n, GString **ret) {
 
         if (n->kind == NET_DEV_KIND_MACVLAN) {
                 g_string_append(config, "[MACVLAN]\n");
+                g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
+        }
+
+        if (n->kind == NET_DEV_KIND_MACVTAP) {
+                g_string_append(config, "[MACVTAP]\n");
                 g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
         }
 

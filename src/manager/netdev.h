@@ -13,6 +13,7 @@ typedef enum NetDevKind {
         NET_DEV_KIND_BOND,
         NET_DEV_KIND_VXLAN,
         NET_DEV_KIND_MACVLAN,
+        NET_DEV_KIND_MACVTAP,
         _NET_DEV_KIND_MAX,
         _NET_DEV_KIND_INVALID = -1
 } NetDevKind;
