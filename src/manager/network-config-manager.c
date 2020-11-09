@@ -1973,7 +1973,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_create_vxlan(argv[3], vni, local, remote, group, port, p->ifname, independent);
+        r = manager_create_vxlan(argv[1], vni, local, remote, group, port, p->ifname, independent);
         if (r < 0) {
                 log_warning("Failed to create vxlan '%s': %s", argv[1], g_strerror(-r));
                 return r;
@@ -1984,31 +1984,43 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
 _public_ int ncm_create_vlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool have_id = false;
+        bool have_id = false, have_dev = false;
         uint16_t id;
-        int r;
+        int r, i;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
-        }
-
-        if (string_equal(argv[3], "id")) {
-                r = parse_uint16(argv[4], &id);
-                if (r < 0) {
-                        log_warning("Failed to parse VLAN id '%s' for link '%s': %s", argv[3], argv[4], g_strerror(EINVAL));
-                        return r;
+        for (i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "dev")) {
+                        i++;
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
+                                return -errno;
+                        }
+                        have_dev = true;
                 }
-                have_id = true;
+
+                if (string_equal(argv[i], "id")) {
+                        i++;
+                        r = parse_uint16(argv[i], &id);
+                        if (r < 0) {
+                                log_warning("Failed to parse VLan id '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+                        have_id = true;
+                }
         }
 
         if (!have_id) {
-                log_warning("Missing Vlan id: %s", g_strerror(EINVAL));
+                log_warning("Missing VLan id: %s", g_strerror(EINVAL));
                 return -EINVAL;
         }
 
-        r = manager_create_vlan(p, argv[2], id);
+        if (!have_dev) {
+                log_warning("Missing dev: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_create_vlan(p, argv[1], id);
         if (r < 0) {
                 log_warning("Failed to create vlan '%s': %s", argv[2], g_strerror(-r));
                 return r;
