@@ -2010,7 +2010,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 
         r = manager_create_vlan(p, argv[2], id);
         if (r < 0) {
-                log_warning("Failed to %s IPv6 for the link '%s': %s", argv[0],  argv[1], g_strerror(-r));
+                log_warning("Failed to create vlan '%s': %s", argv[2], g_strerror(-r));
                 return r;
         }
 
@@ -2029,7 +2029,35 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_create_tunnnel(int argc, char *argv[]) {
+_public_ int ncm_create_vrf(int argc, char *argv[]) {
+        bool have_table = false;
+        uint32_t table;
+        int r;
+
+        if (string_equal(argv[2], "table")) {
+                r = parse_uint32(argv[3], &table);
+                if (r < 0) {
+                        log_warning("Failed to parse table id '%s' for '%s': %s", argv[3], argv[1], g_strerror(EINVAL));
+                        return r;
+                }
+                have_table = true;
+        }
+
+        if (!have_table) {
+                log_warning("Missing table id: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_create_vrf(argv[1], table);
+        if (r < 0) {
+                log_warning("Failed to create vrf '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_create_tunnel(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *local = NULL, *remote = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool independent = false;

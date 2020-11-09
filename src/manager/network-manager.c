@@ -1589,3 +1589,55 @@ int manager_create_tunnel(const char *tunnel,
 
         return dbus_network_reload();
 }
+
+int manager_create_vrf(const char *vrf, uint32_t table) {
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vrf_network_config = NULL, *dev_network_config = NULL;
+        _auto_cleanup_ char *vrf_netdev = NULL, *vrf_network = NULL, *network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        int r;
+
+        assert(vrf);
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                .ifname = strdup(vrf),
+                .kind = NET_DEV_KIND_VRF,
+                .table = table
+        };
+        if (!netdev->ifname)
+                return log_oom();
+
+        r = generate_netdev_config(netdev, &netdev_config);
+        if (r < 0)
+                return r;
+
+        r = manager_write_netdev_config(netdev, netdev_config);
+        if (r < 0)
+                return r;
+
+        r = network_new(&v);
+        if (r < 0)
+                return r;
+
+        v->ifname = strdup(vrf);
+        if (!v->ifname)
+                return log_oom();
+
+        r = generate_network_config(v, &vrf_network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(vrf, &vrf_network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(v, vrf_network_config);
+
+        return dbus_network_reload();
+}
