@@ -689,7 +689,7 @@ class TestCLINetDev:
     def test_cli_create_vlan(self):
         assert(link_exits('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-vlan', 'test98', 'vlan-98', 'id', '11'])
+        subprocess.check_call(['nmctl', 'create-vlan', 'vlan-98', 'dev', 'test98',  'id', '11'])
         assert(unit_exits('10-test98.network') == True)
         assert(unit_exits('10-vlan-98.netdev') == True)
         assert(unit_exits('10-vlan-98.network') == True)
@@ -721,7 +721,7 @@ class TestCLINetDev:
     def test_cli_create_vxlan(self):
         assert(link_exits('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-vxlan', 'dev', 'test98', 'vxlan-98', 'vni', '32', 'local', '192.168.1.2', 'remote', '192.168.1.3', 'port', '7777'])
+        subprocess.check_call(['nmctl', 'create-vxlan', 'vxlan-98', 'dev', 'test98', 'vni', '32', 'local', '192.168.1.2', 'remote', '192.168.1.3', 'port', '7777'])
         assert(unit_exits('10-test98.network') == True)
         assert(unit_exits('10-vxlan-98.network') == True)
         assert(unit_exits('10-vxlan-98.netdev') == True)
