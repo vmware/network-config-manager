@@ -19,6 +19,7 @@ static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_MACVTAP]     = "macvtap",
         [NET_DEV_KIND_IPVLAN]      = "ipvlan",
         [NET_DEV_KIND_IPVTAP]      = "ipvtap",
+        [NET_DEV_KIND_VRF]         = "vrf",
         [NET_DEV_KIND_VETH]        = "veth",
         [NET_DEV_KIND_IPIP_TUNNEL] = "ipip",
         [NET_DEV_KIND_SIT_TUNNEL]  = "sit",
@@ -257,6 +258,11 @@ int generate_netdev_config(NetDev *n, GString **ret) {
         if (n->kind == NET_DEV_KIND_VETH && n->peer) {
                 g_string_append(config, "[Peer]\n");
                 g_string_append_printf(config, "Name=%s\n", n->peer);
+        }
+
+        if (n->kind == NET_DEV_KIND_VRF) {
+                g_string_append(config, "[VRF]\n");
+                g_string_append_printf(config, "Table=%d\n", n->table);
         }
 
         if (n->kind == NET_DEV_KIND_IPIP_TUNNEL || n->kind == NET_DEV_KIND_SIT_TUNNEL ||
