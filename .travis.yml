@@ -1,30 +1,18 @@
 os: linux
-dist: bionic
+dist: focal
 language: c
 
-services:
-  - docker
-
 before_install:
-  - sudo apt-get update && sudo apt-get install -y init && sudo apt-get clean all
-  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
-  - sudo systemctl restart docker
-  - docker pull fedora:rawhide
-  - docker run --name travis-ci -v $TRAVIS_BUILD_DIR:/travis -w /travis --privileged=true -dit -v /sys/fs/cgroup:/sys/fs/cgroup:ro fedora:rawhide /sbin/init
+  - sudo apt-get update
+  - sudo apt-get clean all
 
 install:
-  - docker exec -ti travis-ci bash -c "systemctl is-running --wait || :"
-  - docker exec -ti travis-ci bash -c "dnf makecache"
-  - docker exec -ti travis-ci bash -c "dnf -y update"
-  - docker exec -ti travis-ci bash -c "dnf -y install @development-tools git dnf-utils dnf-plugins-core"
-  - docker exec -ti travis-ci bash -c "dnf -y install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel python3-sphinx iproute clang"
-  - docker exec -ti travis-ci bash -c "pip3 install -U meson pytest"
-  - docker exec -ti travis-ci bash -c "systemctl start systemd-networkd"
+  - sudo apt-get install python3 python3-pip python3-dev python3-setuptools build-essential python3-sphinx python-configparser ninja-build glib-2.0-dev libudev-dev libyaml-dev libsys\
+temd-dev clang sudo libglib2.0-dev python3-dev libffi-dev libssl-dev systemd libsystemd-dev libmnl-dev libnftnl-dev nftables libnftables-dev -y
+  - pip3 install -U meson pytest
+  - systemctl start systemd-networkd
 
 script:
-  - docker exec -ti travis-ci bash -c "make;sudo make install"
-  - docker exec -ti travis-ci bash -c "sudo cp -r tests /run/network-config-manager-ci"
-  - docker exec -ti travis-ci bash -c "sudo pytest -v -s /run/network-config-manager-ci/network-config-manager-tests.py"
-  - docker exec -ti travis-ci bash -c "CC=clang  meson build-clang"
-after_script:
-  - docker stop travis-ci
+  - meson --prefix=/usr build; ninja -C build; sudo ninja -C build install
+  - sudo cp -r tests /run/network-config-manager-ci; sudo pytest -v -s /run/network-config-manager-ci/network-config-manager-tests.py
+  - CC=clang  meson build-clang; ninja -C build-clang
