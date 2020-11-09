@@ -21,6 +21,9 @@ static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_IPVTAP]      = "ipvtap",
         [NET_DEV_KIND_VETH]        = "veth",
         [NET_DEV_KIND_IPIP_TUNNEL] = "ipip",
+        [NET_DEV_KIND_SIT_TUNNEL]  = "sit",
+        [NET_DEV_KIND_GRE_TUNNEL]  = "gre",
+        [NET_DEV_KIND_VTI_TUNNEL]  = "vti",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -256,7 +259,8 @@ int generate_netdev_config(NetDev *n, GString **ret) {
                 g_string_append_printf(config, "Name=%s\n", n->peer);
         }
 
-        if (n->kind == NET_DEV_KIND_IPIP_TUNNEL) {
+        if (n->kind == NET_DEV_KIND_IPIP_TUNNEL || n->kind == NET_DEV_KIND_SIT_TUNNEL ||
+            n->kind == NET_DEV_KIND_GRE_TUNNEL || n->kind == NET_DEV_KIND_VTI_TUNNEL) {
                 _auto_cleanup_ char *local = NULL, *remote = NULL, *group = NULL;
 
                 g_string_append(config, "[Tunnel]\n");

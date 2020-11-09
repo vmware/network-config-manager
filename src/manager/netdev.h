@@ -18,6 +18,9 @@ typedef enum NetDevKind {
         NET_DEV_KIND_IPVTAP,
         NET_DEV_KIND_VETH,
         NET_DEV_KIND_IPIP_TUNNEL,
+        NET_DEV_KIND_SIT_TUNNEL,
+        NET_DEV_KIND_GRE_TUNNEL,
+        NET_DEV_KIND_VTI_TUNNEL,
         _NET_DEV_KIND_MAX,
         _NET_DEV_KIND_INVALID = -1
 } NetDevKind;
