@@ -169,6 +169,7 @@ static int help(void) {
                "  create-ipvlan                [IPVLAN name] mode [MODE {l2 | l3 | l3s}]\n"
                "  create-ipvtap                [IPVTAP name] mode [MODE {l2 | l3 | l3s}]\n"
                "  create-veth                  [LINK name] peer [PEER name}]\n"
+               "  create-ipip                  [dev LINK] [IPIP name] [local ADDRESS] [remote ADDRESS] [independent { yes | no | on | off | 1 | 0}] Creates ipip tunnel\n"
                "  reload                              Reload .network and .netdev files.\n"
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -287,6 +288,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-ipvlan",                2,        WORD_ANY, false, ncm_create_ipvlan },
                 { "create-ipvtap",                2,        WORD_ANY, false, ncm_create_ipvlan },
                 { "create-veth",                  1,        WORD_ANY, false, ncm_create_veth },
+                { "create-ipip",                  3,        WORD_ANY, false, ncm_create_ipip_tunnnel },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
