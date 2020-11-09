@@ -16,6 +16,7 @@ typedef enum NetDevKind {
         NET_DEV_KIND_MACVTAP,
         NET_DEV_KIND_IPVLAN,
         NET_DEV_KIND_IPVTAP,
+        NET_DEV_KIND_VRF,
         NET_DEV_KIND_VETH,
         NET_DEV_KIND_IPIP_TUNNEL,
         NET_DEV_KIND_SIT_TUNNEL,
@@ -69,6 +70,8 @@ typedef struct NetDev {
         uint16_t destination_port;
 
         uint32_t id;
+        uint32_t table;
+
         NetDevKind kind;
         BondMode bond_mode;
         MACVLanMode macvlan_mode;

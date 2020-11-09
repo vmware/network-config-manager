@@ -74,8 +74,9 @@ int ncm_create_bond(int argc, char *argv[]);
 int ncm_create_vxlan(int argc, char *argv[]);
 int ncm_create_macvlan(int argc, char *argv[]);
 int ncm_create_ipvlan(int argc, char *argv[]);
+int ncm_create_vrf(int argc, char *argv[]);
 int ncm_create_veth(int argc, char *argv[]);
-int ncm_create_tunnnel(int argc, char *argv[]);
+int ncm_create_tunnel(int argc, char *argv[]);
 
 int ncm_system_status(int argc, char *argv[]);
 bool ncm_is_netword_running(void);
