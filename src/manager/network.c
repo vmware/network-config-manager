@@ -3,7 +3,10 @@
  */
 
 #include "alloc-util.h"
+#include "config-file.h"
+#include "dbus.h"
 #include "dracut-parser.h"
+#include "file-util.h"
 #include "macros.h"
 #include "network-manager.h"
 #include "network.h"
@@ -185,6 +188,55 @@ int auth_eap_method_to_mode(const char *name) {
                         return i;
 
         return _AUTH_EAP_METHOD_INVALID;
+}
+
+int create_network_conf_file(const char *ifname, char **ret) {
+        _auto_cleanup_ char *file = NULL, *network = NULL;
+        int r;
+
+        assert(ifname);
+
+        file = string_join("-", "10", ifname, NULL);
+        if (!file)
+                return log_oom();
+
+        r = create_conf_file("/etc/systemd/network", file, "network", &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_string(network, "Match", "Name", ifname);
+        if (r < 0)
+                return r;
+
+        if (ret)
+                *ret = steal_pointer(network);
+
+        return dbus_network_reload();
+}
+
+int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret) {
+        _auto_cleanup_ char *setup = NULL, *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
+        if (r < 0) {
+                r = create_network_conf_file(ifnameidx->ifname, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = network_parse_link_network_file(ifnameidx->ifindex, &network);
+                if (r < 0) {
+                        r = create_network_conf_file(ifnameidx->ifname, &network);
+                        if (r < 0)
+                                return r;
+                }
+        }
+
+        *ret = steal_pointer(network);
+
+        return 0;
 }
 
 int network_new(Network **ret) {

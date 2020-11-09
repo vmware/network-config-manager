@@ -25,55 +25,6 @@
 #include "string-util.h"
 #include "yaml-network-parser.h"
 
-static int create_network_conf_file(const char *ifname, char **ret) {
-        _auto_cleanup_ char *file = NULL, *network = NULL;
-        int r;
-
-        assert(ifname);
-
-        file = string_join("-", "10", ifname, NULL);
-        if (!file)
-                return log_oom();
-
-        r = create_conf_file("/etc/systemd/network", file, "network", &network);
-        if (r < 0)
-                return r;
-
-        r = set_config_file_string(network, "Match", "Name", ifname);
-        if (r < 0)
-                return r;
-
-        if (ret)
-                *ret = steal_pointer(network);
-
-        return dbus_network_reload();
-}
-
-static int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret) {
-        _auto_cleanup_ char *setup = NULL, *network = NULL;
-        int r;
-
-        assert(ifnameidx);
-
-        r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
-        if (r < 0) {
-                r = create_network_conf_file(ifnameidx->ifname, &network);
-                if (r < 0)
-                        return r;
-        } else {
-                r = network_parse_link_network_file(ifnameidx->ifindex, &network);
-                if (r < 0) {
-                        r = create_network_conf_file(ifnameidx->ifname, &network);
-                        if (r < 0)
-                                return r;
-                }
-        }
-
-        *ret = steal_pointer(network);
-
-        return 0;
-}
-
 int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode) {
         _auto_cleanup_ char *network = NULL;
         int r;
@@ -1502,6 +1453,139 @@ int manager_create_ipvlan(const char *ipvlan, IPVLanMode mode, bool kind) {
                 return r;
 
         (void) manager_write_network_config(v, ipvlan_network_config);
+
+        return dbus_network_reload();
+}
+
+int manager_create_veth(const char *veth, const char *veth_peer) {
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *veth_network_config = NULL, *dev_network_config = NULL;
+        _auto_cleanup_ char *veth_netdev = NULL, *veth_network = NULL, *network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        int r;
+
+        assert(veth);
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                .ifname = strdup(veth),
+                .peer = veth_peer ? strdup(veth_peer) : NULL,
+                .kind = NET_DEV_KIND_VETH,
+        };
+        if (!netdev->ifname)
+                return log_oom();
+
+        if (veth_peer && !netdev->peer)
+                return log_oom();
+
+        r = generate_netdev_config(netdev, &netdev_config);
+        if (r < 0)
+                return r;
+
+        r = manager_write_netdev_config(netdev, netdev_config);
+        if (r < 0)
+                return r;
+
+        r = network_new(&v);
+        if (r < 0)
+                return r;
+
+        v->ifname = strdup(veth);
+        if (!v->ifname)
+                return log_oom();
+
+        r = generate_network_config(v, &veth_network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(veth, &veth_network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(v, veth_network_config);
+
+        return dbus_network_reload();
+}
+
+int manager_create_tunnel(const char *tunnel,
+                          NetDevKind kind,
+                          IPAddress *local,
+                          IPAddress *remote,
+                          const char *dev,
+                          bool independent) {
+
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *tunnel_network_config = NULL, *dev_network_config = NULL;
+        _auto_cleanup_ char *tunnel_netdev = NULL, *tunnel_network = NULL, *network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        int r;
+
+        assert(tunnel);
+        assert(dev);
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                .ifname = strdup(tunnel),
+                .kind = kind,
+                .independent = dev ? false : true,
+        };
+        if (!netdev->ifname)
+                return log_oom();
+
+        if (local)
+                netdev->local = *local;
+        if (remote)
+                netdev->remote = *remote;
+
+        r = create_netdev_conf_file(tunnel, &tunnel_netdev);
+        if (r < 0)
+                return r;
+
+        r = generate_netdev_config(netdev, &netdev_config);
+        if (r < 0)
+                return r;
+
+        r = manager_write_netdev_config(netdev, netdev_config);
+        if (r < 0)
+                return r;
+
+        r = network_new(&v);
+        if (r < 0)
+                return r;
+
+        v->ifname = strdup(tunnel);
+        if (!v->ifname)
+                return log_oom();
+
+        r = generate_network_config(v, &tunnel_network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(tunnel, &tunnel_network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(v, tunnel_network_config);
+
+        if (!independent) {
+                r = create_network_conf_file(dev, &network);
+                if (r < 0)
+                        return r;
+
+                r = set_config_file_string(network, "Network", "Tunnel", tunnel);
+                if (r < 0)
+                        return r;
+        }
 
         return dbus_network_reload();
 }

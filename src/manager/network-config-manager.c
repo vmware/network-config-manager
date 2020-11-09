@@ -2017,6 +2017,88 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_create_veth(int argc, char *argv[]) {
+        int r;
+
+        r = manager_create_veth(argv[1], argv[2]);
+        if (r < 0) {
+                log_warning("Failed to create veth '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_create_tunnnel(int argc, char *argv[]) {
+        _auto_cleanup_ IPAddress *local = NULL, *remote = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        bool independent = false;
+        NetDevKind kind;
+        int r, i;
+        char *c;
+
+        c = strchr(argv[0], '-');
+        kind = netdev_name_to_kind(++c);
+        if (kind < 0) {
+                log_warning("Failed to find tunnel kind '%s': %s", c, g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        for (i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "dev")) {
+                        i++;
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
+                                return -errno;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "local")) {
+                        i++;
+
+                        r = parse_ip_from_string(argv[i], &local);
+                        if (r < 0) {
+                                log_warning("Failed to parse local address : %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "remote")) {
+                        i++;
+
+                        r = parse_ip_from_string(argv[i], &remote);
+                        if (r < 0) {
+                                log_warning("Failed to parse remote address : %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "independent")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse independent %s : %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+                        independent = r;
+                        continue;
+                }
+        }
+
+        r = manager_create_tunnel(argv[1], kind, local, remote, p->ifname, independent);
+        if (r < 0) {
+                log_warning("Failed to create vxlan '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");
