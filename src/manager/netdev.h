@@ -16,6 +16,7 @@ typedef enum NetDevKind {
         NET_DEV_KIND_MACVTAP,
         NET_DEV_KIND_IPVLAN,
         NET_DEV_KIND_IPVTAP,
+        NET_DEV_KIND_VETH,
         _NET_DEV_KIND_MAX,
         _NET_DEV_KIND_INVALID = -1
 } NetDevKind;
@@ -52,6 +53,7 @@ typedef enum IPVLanMode {
 
 typedef struct NetDev {
         char *ifname;
+        char *peer;
         char *mac;
 
         bool independent;

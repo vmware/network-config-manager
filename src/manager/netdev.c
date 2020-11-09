@@ -19,6 +19,7 @@ static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_MACVTAP] = "macvtap",
         [NET_DEV_KIND_IPVLAN]  = "ipvlan",
         [NET_DEV_KIND_IPVTAP]  = "ipvtap",
+        [NET_DEV_KIND_VETH]    = "veth",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -133,6 +134,24 @@ int ipvlan_name_to_mode(const char *name) {
         return _IP_VLAN_MODE_INVALID;
 }
 
+int create_netdev_conf_file(const char *ifname, char **ret) {
+        _auto_cleanup_ char *file = NULL, *netdev = NULL;
+        int r;
+
+        assert(ifname);
+
+        file = string_join("-", "10", ifname, NULL);
+        if (!file)
+                return log_oom();
+
+        r = create_conf_file("/etc/systemd/network", file, "netdev", &netdev);
+        if (r < 0)
+                return r;
+
+        *ret = steal_pointer(netdev);
+        return 0;
+}
+
 int netdev_new(NetDev **ret) {
         _auto_cleanup_ NetDev *n;
 
@@ -151,6 +170,8 @@ int netdev_new(NetDev **ret) {
 void netdev_unrefp(NetDev **n) {
         if (n && *n) {
                 g_free((*n)->ifname);
+                g_free((*n)->peer);
+                g_free((*n)->mac);
                 g_free(*n);
         }
 }
@@ -160,6 +181,9 @@ int generate_netdev_config(NetDev *n, GString **ret) {
         _auto_cleanup_ char *gateway = NULL;
 
         assert(n);
+
+        if (!netdev_kind_to_name(n->kind))
+                return -EINVAL;
 
         config = g_string_new(NULL);
         if (!config)
@@ -226,24 +250,11 @@ int generate_netdev_config(NetDev *n, GString **ret) {
                 g_string_append_printf(config, "Mode=%s\n", ipvlan_mode_to_name(n->ipvlan_mode));
         }
 
+        if (n->kind == NET_DEV_KIND_VETH && n->peer) {
+                g_string_append(config, "[Peer]\n");
+                g_string_append_printf(config, "Name=%s\n", n->peer);
+        }
+
         *ret = steal_pointer(config);
-        return 0;
-}
-
-int create_netdev_conf_file(const char *ifname, char **ret) {
-        _auto_cleanup_ char *file = NULL, *netdev = NULL;
-        int r;
-
-        assert(ifname);
-
-        file = string_join("-", "10", ifname, NULL);
-        if (!file)
-                return log_oom();
-
-        r = create_conf_file("/etc/systemd/network", file, "netdev", &netdev);
-        if (r < 0)
-                return r;
-
-        *ret = steal_pointer(netdev);
         return 0;
 }
