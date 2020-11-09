@@ -11,15 +11,16 @@
 #include "log.h"
 
 static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
-        [NET_DEV_KIND_VLAN]    = "vlan",
-        [NET_DEV_KIND_BRIDGE]  = "bridge",
-        [NET_DEV_KIND_BOND]    = "bond",
-        [NET_DEV_KIND_VXLAN]   = "vxlan",
-        [NET_DEV_KIND_MACVLAN] = "macvlan",
-        [NET_DEV_KIND_MACVTAP] = "macvtap",
-        [NET_DEV_KIND_IPVLAN]  = "ipvlan",
-        [NET_DEV_KIND_IPVTAP]  = "ipvtap",
-        [NET_DEV_KIND_VETH]    = "veth",
+        [NET_DEV_KIND_VLAN]        = "vlan",
+        [NET_DEV_KIND_BRIDGE]      = "bridge",
+        [NET_DEV_KIND_BOND]        = "bond",
+        [NET_DEV_KIND_VXLAN]       = "vxlan",
+        [NET_DEV_KIND_MACVLAN]     = "macvlan",
+        [NET_DEV_KIND_MACVTAP]     = "macvtap",
+        [NET_DEV_KIND_IPVLAN]      = "ipvlan",
+        [NET_DEV_KIND_IPVTAP]      = "ipvtap",
+        [NET_DEV_KIND_VETH]        = "veth",
+        [NET_DEV_KIND_IPIP_TUNNEL] = "ipip",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -253,6 +254,22 @@ int generate_netdev_config(NetDev *n, GString **ret) {
         if (n->kind == NET_DEV_KIND_VETH && n->peer) {
                 g_string_append(config, "[Peer]\n");
                 g_string_append_printf(config, "Name=%s\n", n->peer);
+        }
+
+        if (n->kind == NET_DEV_KIND_IPIP_TUNNEL) {
+                _auto_cleanup_ char *local = NULL, *remote = NULL, *group = NULL;
+
+                g_string_append(config, "[Tunnel]\n");
+
+                if (!ip_is_null(&n->local)) {
+                        (void) ip_to_string(n->local.family, &n->local, &local);
+                        g_string_append_printf(config, "Local=%s\n", local);
+                }
+
+                if (!ip_is_null(&n->remote)) {
+                        (void) ip_to_string(n->remote.family, &n->remote, &remote);
+                        g_string_append_printf(config, "Remote=%s\n", remote);
+                }
         }
 
         *ret = steal_pointer(config);

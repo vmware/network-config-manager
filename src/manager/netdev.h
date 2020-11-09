@@ -17,6 +17,7 @@ typedef enum NetDevKind {
         NET_DEV_KIND_IPVLAN,
         NET_DEV_KIND_IPVTAP,
         NET_DEV_KIND_VETH,
+        NET_DEV_KIND_IPIP_TUNNEL,
         _NET_DEV_KIND_MAX,
         _NET_DEV_KIND_INVALID = -1
 } NetDevKind;
