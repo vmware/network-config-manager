@@ -2017,6 +2017,18 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_create_veth(int argc, char *argv[]) {
+        int r;
+
+        r = manager_create_veth(argv[1], argv[2]);
+        if (r < 0) {
+                log_warning("Failed to create veth '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");

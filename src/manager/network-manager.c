@@ -1456,3 +1456,58 @@ int manager_create_ipvlan(const char *ipvlan, IPVLanMode mode, bool kind) {
 
         return dbus_network_reload();
 }
+
+int manager_create_veth(const char *veth, const char *veth_peer) {
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *veth_network_config = NULL, *dev_network_config = NULL;
+        _auto_cleanup_ char *veth_netdev = NULL, *veth_network = NULL, *network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        int r;
+
+        assert(veth);
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                .ifname = strdup(veth),
+                .peer = veth_peer ? strdup(veth_peer) : NULL,
+                .kind = NET_DEV_KIND_VETH,
+        };
+        if (!netdev->ifname)
+                return log_oom();
+
+        if (veth_peer && !netdev->peer)
+                return log_oom();
+
+        r = generate_netdev_config(netdev, &netdev_config);
+        if (r < 0)
+                return r;
+
+        r = manager_write_netdev_config(netdev, netdev_config);
+        if (r < 0)
+                return r;
+
+        r = network_new(&v);
+        if (r < 0)
+                return r;
+
+        v->ifname = strdup(veth);
+        if (!v->ifname)
+                return log_oom();
+
+        r = generate_network_config(v, &veth_network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(veth, &veth_network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(v, veth_network_config);
+
+        return dbus_network_reload();
+}

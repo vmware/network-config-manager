@@ -63,3 +63,4 @@ int manager_create_vxlan(const char *vxlan, uint32_t vni, IPAddress *local,
 
 int manager_create_macvlan(const char *macvlan, MACVLanMode mode, bool kind);
 int manager_create_ipvlan(const char *ipvlan, IPVLanMode mode, bool kind);
+int manager_create_veth(const char *veth, const char *veth_peer);
