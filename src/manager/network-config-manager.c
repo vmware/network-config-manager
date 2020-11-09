@@ -2029,7 +2029,7 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_create_ipip_tunnnel(int argc, char *argv[]) {
+_public_ int ncm_create_tunnnel(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *local = NULL, *remote = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool independent = false;
@@ -2039,6 +2039,10 @@ _public_ int ncm_create_ipip_tunnnel(int argc, char *argv[]) {
 
         c = strchr(argv[0], '-');
         kind = netdev_name_to_kind(++c);
+        if (kind < 0) {
+                log_warning("Failed to find tunnel kind '%s': %s", c, g_strerror(EINVAL));
+                return -EINVAL;
+        }
 
         for (i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "dev")) {
