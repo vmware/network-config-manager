@@ -130,6 +130,9 @@ void g_network_free(gpointer data);
 
 int parse_address_from_string_and_add(const char *s, Set *a);
 
+int create_network_conf_file(const char *ifname, char **ret);
+int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret);
+
 const char *dhcp_modes_to_name(int id);
 int dhcp_name_to_mode(char *name);
 
