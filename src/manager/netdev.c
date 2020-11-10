@@ -25,6 +25,7 @@ static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_SIT_TUNNEL]  = "sit",
         [NET_DEV_KIND_GRE_TUNNEL]  = "gre",
         [NET_DEV_KIND_VTI_TUNNEL]  = "vti",
+        [NET_DEV_KIND_WIREGUARD]   = "wireguard",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -177,6 +178,13 @@ void netdev_unrefp(NetDev **n) {
                 g_free((*n)->ifname);
                 g_free((*n)->peer);
                 g_free((*n)->mac);
+
+                g_free((*n)->wg_private_key);
+                g_free((*n)->wg_public_key);
+                g_free((*n)->wg_preshared_key);
+                g_free((*n)->wg_endpoint);
+                g_free((*n)->wg_allowed_ips);
+
                 g_free(*n);
         }
 }
@@ -280,6 +288,26 @@ int generate_netdev_config(NetDev *n, GString **ret) {
                         (void) ip_to_string(n->remote.family, &n->remote, &remote);
                         g_string_append_printf(config, "Remote=%s\n", remote);
                 }
+        }
+
+        if (n->kind == NET_DEV_KIND_WIREGUARD) {
+                g_string_append(config, "[WireGuard]\n");
+                g_string_append_printf(config, "PrivateKey=%s\n", n->wg_private_key);
+
+                if (n->listen_port > 0)
+                        g_string_append_printf(config, "ListenPort=%d\n\n", n->listen_port);
+
+                g_string_append(config, "[WireGuardPeer]\n");
+                g_string_append_printf(config, "PublicKey=%s\n", n->wg_public_key);
+
+                if (n->wg_endpoint)
+                        g_string_append_printf(config, "Endpoint=%s\n", n->wg_endpoint);
+
+                if (n->wg_preshared_key)
+                        g_string_append_printf(config, "PresharedKey=%s\n", n->wg_preshared_key);
+
+                if (n->wg_allowed_ips)
+                        g_string_append_printf(config, "AllowedIPs=%s\n\n", n->wg_allowed_ips);
         }
 
         *ret = steal_pointer(config);
