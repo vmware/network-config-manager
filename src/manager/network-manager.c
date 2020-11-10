@@ -1641,3 +1641,78 @@ int manager_create_vrf(const char *vrf, uint32_t table) {
 
         return dbus_network_reload();
 }
+
+int manager_create_wireguard_tunnel(char *wireguard,
+                                    char *private_key,
+                                    char *public_key,
+                                    char *preshared_key,
+                                    char *endpoint,
+                                    char *allowed_ips,
+                                    uint16_t listen_port) {
+
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *wireguard_network_config = NULL, *dev_network_config = NULL;
+        _auto_cleanup_ char *wireguard_netdev = NULL, *wireguard_network = NULL, *network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        int r;
+
+        assert(wireguard);
+        assert(private_key);
+        assert(public_key);
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                .ifname = strdup(wireguard),
+                .kind = NET_DEV_KIND_WIREGUARD,
+                .wg_private_key = private_key ? strdup(private_key) : private_key,
+                .wg_public_key = public_key ? strdup(public_key) : public_key,
+                .listen_port = listen_port,
+        };
+        if (!netdev->ifname || !netdev->wg_private_key || !netdev->wg_public_key)
+                return log_oom();
+
+        if (endpoint) {
+                netdev->wg_endpoint = strdup(endpoint);
+                if (!netdev->wg_endpoint)
+                        return -ENOMEM;
+        }
+
+        if (allowed_ips) {
+                netdev->wg_allowed_ips = strdup(allowed_ips);
+                if (!netdev->wg_allowed_ips)
+                        return -ENOMEM;
+        }
+
+        r = generate_netdev_config(netdev, &netdev_config);
+        if (r < 0)
+                return r;
+
+        r = manager_write_netdev_config(netdev, netdev_config);
+        if (r < 0)
+                return r;
+
+        r = network_new(&v);
+        if (r < 0)
+                return r;
+
+        v->ifname = strdup(wireguard);
+        if (!v->ifname)
+                return log_oom();
+
+        r = generate_network_config(v, &wireguard_network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(wireguard, &wireguard_network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(v, wireguard_network_config);
+
+        return dbus_network_reload();
+}

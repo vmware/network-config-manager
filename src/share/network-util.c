@@ -190,11 +190,41 @@ int parse_ip_from_string(const char *s, IPAddress **ret) {
         return 0;
 }
 
-
 int ipv4_netmask_to_prefixlen(IPAddress *addr) {
         assert(addr);
 
         return 32U - __builtin_ctz(be32toh(addr->in.s_addr));
+}
+
+int parse_ip_port(const char *s, IPAddress **ret, uint16_t *port) {
+        _auto_cleanup_ char *c = NULL;
+        char *p;
+        int r;
+
+        assert(s);
+
+        c = strdup(s);
+        if (!c)
+                return -ENOMEM;
+
+        p = strchr(c, ':');
+        if (p) {
+                uint16_t k;
+
+                *p++ = 0;
+
+                r = parse_uint16(p, &k);
+                if (r < 0)
+                        return r;
+
+                *port = k;
+        }
+
+        r = parse_ip_from_string(c, ret);
+        if (r < 0)
+                return r;
+
+        return 0;
 }
 
 int parse_ifname_or_index(const char *s, IfNameIndex **ret) {

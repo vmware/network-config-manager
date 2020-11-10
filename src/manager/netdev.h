@@ -22,6 +22,7 @@ typedef enum NetDevKind {
         NET_DEV_KIND_SIT_TUNNEL,
         NET_DEV_KIND_GRE_TUNNEL,
         NET_DEV_KIND_VTI_TUNNEL,
+        NET_DEV_KIND_WIREGUARD,
         _NET_DEV_KIND_MAX,
         _NET_DEV_KIND_INVALID = -1
 } NetDevKind;
@@ -61,6 +62,13 @@ typedef struct NetDev {
         char *peer;
         char *mac;
 
+        /* wireguard */
+        char *wg_private_key;
+        char *wg_public_key;
+        char *wg_preshared_key;
+        char *wg_endpoint;      /* ip:port */
+        char *wg_allowed_ips;
+
         bool independent;
 
         IPAddress local;
@@ -68,6 +76,7 @@ typedef struct NetDev {
         IPAddress group;
 
         uint16_t destination_port;
+        uint16_t listen_port;  /* wireguard */
 
         uint32_t id;
         uint32_t table;
