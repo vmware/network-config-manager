@@ -694,7 +694,8 @@ class TestCLINetDev:
         assert(unit_exits('10-vlan-98.netdev') == True)
         assert(unit_exits('10-vlan-98.network') == True)
 
-        subprocess.check_call(['sleep', '5'])
+        restart_networkd()
+        subprocess.check_call(['sleep', '15'])
 
         assert(link_exits('vlan-98') == True)
 
@@ -726,7 +727,8 @@ class TestCLINetDev:
         assert(unit_exits('10-vxlan-98.network') == True)
         assert(unit_exits('10-vxlan-98.netdev') == True)
 
-        subprocess.check_call(['sleep', '5'])
+        restart_networkd()
+        subprocess.check_call(['sleep', '15'])
 
         assert(link_exits('vxlan-98') == True)
 
