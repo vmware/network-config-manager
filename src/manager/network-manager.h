@@ -67,3 +67,10 @@ int manager_create_veth(const char *veth, const char *veth_peer);
 int manager_create_tunnel(const char *tunnel, NetDevKind kind, IPAddress *local,
                           IPAddress *remote, const char *dev, bool independent);
 int manager_create_vrf(const char *vrf, uint32_t table);
+int manager_create_wireguard_tunnel(char *wireguard,
+                                    char *private_key,
+                                    char *public_key,
+                                    char *preshared_key,
+                                    char *endpoint,
+                                    char *allowed_ips,
+                                    uint16_t listen_port);

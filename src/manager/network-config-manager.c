@@ -2138,6 +2138,122 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 
         return 0;
 }
+_public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
+        _auto_cleanup_ char *private_key = NULL, *public_key = NULL, *preshared_key = NULL, *endpoint = NULL, *allowed_ips = NULL;
+        bool have_private_key = false, have_public_key = false;
+        uint16_t listen_port;
+        int r, i;
+
+        for (i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "private-key")) {
+                        i++;
+                        private_key = strdup(argv[i]);
+                        if (!private_key)
+                                return log_oom();
+
+                        have_private_key = true;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "public-key")) {
+                        i++;
+                        public_key = strdup(argv[i]);
+                        if (!public_key)
+                                return log_oom();
+
+                        have_public_key = true;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "preshared-key")) {
+                        i++;
+                        preshared_key= strdup(argv[i]);
+                        if (!preshared_key)
+                                return log_oom();
+                }
+
+                if (string_equal(argv[i], "allowed-ips")) {
+                        i++;
+
+                        if (strchr(argv[i], ',')) {
+                                _auto_cleanup_strv_ char **s = NULL;
+                                char **d;
+
+                                s = strsplit(argv[i], ",", -1);
+                                if (!s) {
+                                        log_warning("Failed to parse allowed ips '%s': %s", argv[i], g_strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                strv_foreach(d, s) {
+                                        _auto_cleanup_ IPAddress *address = NULL;
+
+                                        r = parse_ip_from_string(*d, &address);
+                                        if (r < 0) {
+                                                log_warning("Failed to parse allowed ips '%s': %s", argv[i], g_strerror(EINVAL));
+                                                return -EINVAL;
+                                        }
+                                }
+                        } else {
+                                _auto_cleanup_ IPAddress *address = NULL;
+
+                                r = parse_ip_from_string(argv[i], &address);
+                                if (r < 0) {
+                                        log_warning("Failed to parse allowed ips '%s': %s", argv[i], g_strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+                        }
+
+                        allowed_ips = strdup(argv[i]);
+                        if (!allowed_ips)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "endpoint")) {
+                        _auto_cleanup_ IPAddress *address = NULL;
+                        uint16_t port;
+
+                        i++;
+
+                        r = parse_ip_port(argv[i], &address, &port);
+                        if (r < 0) {
+                                log_warning("Failed to parse endpoint '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        endpoint = strdup(argv[i]);
+                        if (!endpoint)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "listen-port")) {
+                        i++;
+                        r = parse_uint16(argv[i], &listen_port);
+                        if (r < 0) {
+                                log_warning("Failed to parse listen port '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!have_public_key || !have_private_key) {
+                log_warning("Missing public-key or private-key : %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_create_wireguard_tunnel(argv[1], private_key, public_key, preshared_key, endpoint, allowed_ips, listen_port);
+        if (r < 0) {
+                log_warning("Failed to create wireguard tunnel '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
 
 _public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {

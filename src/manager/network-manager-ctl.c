@@ -158,7 +158,7 @@ static int help(void) {
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
                "  disable-ipv6                 [LINK] Disables IPv6 on the interface.\n"
                "  enable-ipv6                  [LINK] Enables IPv6 on the interface.\n"
-               "  create-vlan                  [VLAN name] dev [LINK master] id [ID integer] Creates vlan netdev and sets master to device\n"
+               "  create-vlan                  [VLAN name] dev [LINK master] id [ID INTEGER] Creates vlan netdev and sets master to device\n"
                "  create-bridge                [BRIDGE name] [LINK] [LINK] ... Creates bridge netdev and sets master to device\n"
                "  create-bond                  [BOND name] mode [MODE {balance-rr | active-backup | balance-xor | broadcast | 802.3ad | balance-tlb | balance-alb}]"
                                                "\n\t\t\t\t[LINK] [LINK] ... Creates bond netdev and sets master to device\n"
@@ -174,6 +174,8 @@ static int help(void) {
                "  create-sit                   [SIT name] [dev LINK] local [ADDRESS] remote [ADDRESS] [independent { yes | no | on | off | 1 | 0}] Creates sit tunnel.\n"
                "  create-vti                   [VTI name] [dev LINK] local [ADDRESS] remote [ADDRESS] [independent { yes | no | on | off | 1 | 0}] Creates vti tunnel.\n"
                "  create-gre                   [GRE name] [dev LINK] local [ADDRESS] remote [ADDRESS] [independent { yes | no | on | off | 1 | 0}] Creates gre tunnel.\n"
+               "  create-wg                    [WIREGUARD name] private-key [PRIVATEKEY] listen-port [PORT INTEGER] public-key [PUBLICKEY] preshared-key [PRESHAREDKEY]"
+                                               "\n\t\t\t\t\t\t allowed-ips [IP,IP ...] endpoint [IP:PORT] Creates a wireguard tunnel.\n"
                "  reload                       Reload .network and .netdev files.\n"
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -297,6 +299,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-sit",                   3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-gre",                   3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-vti",                   3,        WORD_ANY, false, ncm_create_tunnel },
+                { "create-wg",                    3,        WORD_ANY, false, ncm_create_wireguard_tunnel },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
