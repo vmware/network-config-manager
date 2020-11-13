@@ -164,10 +164,10 @@ static int help(void) {
                                                "\n\t\t\t\t[LINK] [LINK] ... Creates bond netdev and sets master to device\n"
                "  create-vxlan                 [VXLAN name] [dev LINK] vni [INTEGER] [local ADDRESS] [remote ADDRESS] [port PORT] [independent { yes | no | on | off | 1 | 0}]."
                                                "\n\t\t\t\tCreates vxlan VXLAN (Virtual eXtensible Local Area Network) tunneling.\n"
-               "  create-macvlan               [MACVLAN name] mode [MODE {private | vepa | bridge | passthru | source}] Creates macvlan virtualized bridged networking.\n"
-               "  create-macvtap               [MACVTAP name] mode [MODE {private | vepa | bridge | passthru | source}] Creates macvtap virtualized bridged networking.\n"
-               "  create-ipvlan                [IPVLAN name] mode [MODE {l2 | l3 | l3s}] Creates ipvlan, virtual LAN, separates broadcast domains by adding tags to network packet.\n"
-               "  create-ipvtap                [IPVTAP name] mode [MODE {l2 | l3 | l3s}] Create ipvtap.\n"
+               "  create-macvlan               [MACVLAN name] dev [LINK] mode [MODE {private | vepa | bridge | passthru | source}] Creates macvlan virtualized bridged networking.\n"
+               "  create-macvtap               [MACVTAP name] dev [LINK] mode [MODE {private | vepa | bridge | passthru | source}] Creates macvtap virtualized bridged networking.\n"
+               "  create-ipvlan                [IPVLAN name] dev [LINK] mode [MODE {l2 | l3 | l3s}] Creates ipvlan, virtual LAN, separates broadcast domains by adding tags to network packet.\n"
+               "  create-ipvtap                [IPVTAP name] dev [LINK] mode [MODE {l2 | l3 | l3s}] Create ipvtap.\n"
                "  create-vrf                   [VRF name] table [INTEGER}] Creates Virtual routing and forwarding (VRF).\n"
                "  create-veth                  [VETH name] peer [PEER name}] Creates virtual Ethernet devices\n"
                "  create-ipip                  [IPIP name] [dev LINK] local [ADDRESS] remote [ADDRESS] [independent { yes | no | on | off | 1 | 0}] Creates ipip tunnel.\n"
@@ -289,10 +289,10 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-bridge",                2,        WORD_ANY, false, ncm_create_bridge },
                 { "create-bond",                  5,        WORD_ANY, false, ncm_create_bond },
                 { "create-vxlan",                 2,        WORD_ANY, false, ncm_create_vxlan },
-                { "create-macvlan",               2,        WORD_ANY, false, ncm_create_macvlan },
-                { "create-macvtap",               2,        WORD_ANY, false, ncm_create_macvlan },
-                { "create-ipvlan",                2,        WORD_ANY, false, ncm_create_ipvlan },
-                { "create-ipvtap",                2,        WORD_ANY, false, ncm_create_ipvlan },
+                { "create-macvlan",               5,        WORD_ANY, false, ncm_create_macvlan },
+                { "create-macvtap",               5,        WORD_ANY, false, ncm_create_macvlan },
+                { "create-ipvlan",                5,        WORD_ANY, false, ncm_create_ipvlan },
+                { "create-ipvtap",                5,        WORD_ANY, false, ncm_create_ipvlan },
                 { "create-vrf",                   3,        WORD_ANY, false, ncm_create_vrf },
                 { "create-veth",                  1,        WORD_ANY, false, ncm_create_veth },
                 { "create-ipip",                  3,        WORD_ANY, false, ncm_create_tunnel },

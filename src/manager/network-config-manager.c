@@ -1816,18 +1816,32 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_macvlan(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_mode = false;
         MACVLanMode mode;
-        int r;
+        int r, i;
 
-        if (string_equal(argv[2], "mode")) {
-                r = macvlan_name_to_mode(argv[3]);
-                if (r < 0) {
-                        log_warning("Failed to parse MacVLan/MacVTap mode '%s' : %s", argv[3], g_strerror(EINVAL));
-                        return r;
+        for (i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "dev")) {
+                        i++;
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
+                                return -errno;
+                        }
+                        continue;
                 }
-                have_mode = true;
-                mode = r;
+
+                if (string_equal(argv[i], "mode")) {
+                        i++;
+                        r = macvlan_name_to_mode(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse MacVLan/MacVTap mode '%s' : %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+                        have_mode = true;
+                        mode = r;
+                }
         }
 
         if (!have_mode) {
@@ -1836,9 +1850,9 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
         }
 
         if (string_equal(argv[0], "create-macvlan"))
-                r = manager_create_macvlan(argv[1], mode, true);
+                r = manager_create_macvlan(argv[1], p->ifname, mode, true);
         else
-                r = manager_create_macvlan(argv[1], mode, false);
+                r = manager_create_macvlan(argv[1], p->ifname, mode, false);
 
         if (r < 0) {
                 log_warning("Failed to %s '%s': %s", argv[0], argv[1], g_strerror(-r));
@@ -1849,18 +1863,33 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_mode = false;
         IPVLanMode mode;
-        int r;
+        int r, i;
 
-        if (string_equal(argv[2], "mode")) {
-                r = ipvlan_name_to_mode(argv[3]);
-                if (r < 0) {
-                        log_warning("Failed to parse IPVLan/IPVTap mode '%s' : %s", argv[3], g_strerror(EINVAL));
-                        return r;
+        for (i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "dev")) {
+                        i++;
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
+                                return -errno;
+                        }
+                        continue;
                 }
-                have_mode = true;
-                mode = r;
+
+                if (string_equal(argv[i], "mode")) {
+                        i++;
+
+                        r = ipvlan_name_to_mode(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse IPVLan/IPVTap mode '%s' : %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+                        have_mode = true;
+                        mode = r;
+                }
         }
 
         if (!have_mode) {
@@ -1869,9 +1898,9 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
         }
 
         if (string_equal(argv[0], "create-ipvlan"))
-                r = manager_create_ipvlan(argv[1], mode, true);
+                r = manager_create_ipvlan(argv[1], p->ifname, mode, true);
         else
-                r = manager_create_ipvlan(argv[1], mode, false);
+                r = manager_create_ipvlan(argv[1], p->ifname, mode, false);
 
         if (r < 0) {
                 log_warning("Failed to %s '%s': %s", argv[0], argv[1], g_strerror(-r));

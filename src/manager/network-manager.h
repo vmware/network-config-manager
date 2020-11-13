@@ -61,16 +61,11 @@ int manager_create_vxlan(const char *vxlan, uint32_t vni, IPAddress *local,
                          IPAddress *remote, IPAddress *group, uint16_t port,
                          const char *dev, bool independent);
 
-int manager_create_macvlan(const char *macvlan, MACVLanMode mode, bool kind);
-int manager_create_ipvlan(const char *ipvlan, IPVLanMode mode, bool kind);
+int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mode, bool kind);
+int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, bool kind);
 int manager_create_veth(const char *veth, const char *veth_peer);
 int manager_create_tunnel(const char *tunnel, NetDevKind kind, IPAddress *local,
                           IPAddress *remote, const char *dev, bool independent);
 int manager_create_vrf(const char *vrf, uint32_t table);
-int manager_create_wireguard_tunnel(char *wireguard,
-                                    char *private_key,
-                                    char *public_key,
-                                    char *preshared_key,
-                                    char *endpoint,
-                                    char *allowed_ips,
-                                    uint16_t listen_port);
+int manager_create_wireguard_tunnel(char *wireguard, char *private_key, char *public_key, char *preshared_key,
+                                    char *endpoint, char *allowed_ips, uint16_t listen_port);
