@@ -1856,7 +1856,8 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
 
         if (r < 0) {
                 log_warning("Failed to %s '%s': %s", argv[0], argv[1], g_strerror(-r));
-                return r;
+                return
+                        r;
         }
 
         return 0;
@@ -2059,9 +2060,20 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_veth(int argc, char *argv[]) {
-        int r;
+        _auto_cleanup_ char *peer = NULL;
+        int r, i;
 
-        r = manager_create_veth(argv[1], argv[2]);
+        for (i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "peer")) {
+                        i++;
+
+                        peer = strdup(argv[i]);
+                        if (!peer)
+                                return log_oom();
+                }
+        }
+
+        r = manager_create_veth(argv[1], peer);
         if (r < 0) {
                 log_warning("Failed to create veth '%s': %s", argv[1], g_strerror(-r));
                 return r;
