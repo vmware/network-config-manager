@@ -36,7 +36,13 @@ units = ["10-test99.network",
          '10-bridge-98.netdev',
          '10-bridge-98.network',
          '10-bond-98.netdev',
-         '10-bond-98.network']
+         '10-bond-98.network'
+         '10-macvlan-98.netdev',
+         '10-macvlan-98.network'
+         '10-macvtap-98.netdev',
+         '10-macvtap-98.network'
+         '10-ipvlan-98.netdev',
+         '10-ipvtap-98.network']
 
 def link_exits(link):
     return os.path.exists(os.path.join('/sys/class/net', link))
@@ -719,6 +725,138 @@ class TestCLINetDev:
 
         link_remove('vlan-98')
 
+    def test_cli_create_macvlan(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-macvlan', 'macvlan-98', 'dev', 'test98', 'mode', 'private'])
+        assert(unit_exits('10-macvlan-98.netdev') == True)
+        assert(unit_exits('10-macvlan-98.network') == True)
+        assert(unit_exits('10-test98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('macvlan-98') == True)
+
+        macvlan_parser = configparser.ConfigParser()
+        macvlan_parser.read(os.path.join(networkd_unit_file_path, '10-macvlan-98.netdev'))
+
+        assert(macvlan_parser.get('NetDev', 'Name') == 'macvlan-98')
+        assert(macvlan_parser.get('NetDev', 'kind') == 'macvlan')
+        assert(macvlan_parser.get('MACVLAN', 'Mode') == 'private')
+
+        macvlan_network_parser = configparser.ConfigParser()
+        macvlan_network_parser.read(os.path.join(networkd_unit_file_path, '10-macvlan-98.network'))
+
+        assert(macvlan_network_parser.get('Match', 'Name') == 'macvlan-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+        assert(parser.get('Network', 'MACVLAN') == 'macvlan-98')
+
+        link_remove('macvlan-98')
+
+    def test_cli_create_macvtap(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-macvtap', 'macvtap-98', 'dev', 'test98', 'mode', 'private'])
+        assert(unit_exits('10-macvtap-98.netdev') == True)
+        assert(unit_exits('10-macvtap-98.network') == True)
+        assert(unit_exits('10-test98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('macvtap-98') == True)
+
+        macvlan_parser = configparser.ConfigParser()
+        macvlan_parser.read(os.path.join(networkd_unit_file_path, '10-macvtap-98.netdev'))
+
+        assert(macvlan_parser.get('NetDev', 'Name') == 'macvtap-98')
+        assert(macvlan_parser.get('NetDev', 'kind') == 'macvtap')
+        assert(macvlan_parser.get('MACVTAP', 'Mode') == 'private')
+
+        macvlan_network_parser = configparser.ConfigParser()
+        macvlan_network_parser.read(os.path.join(networkd_unit_file_path, '10-macvtap-98.network'))
+
+        assert(macvlan_network_parser.get('Match', 'Name') == 'macvtap-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+        assert(parser.get('Network', 'MACVTAP') == 'macvtap-98')
+
+        link_remove('macvtap-98')
+
+    def test_cli_create_ipvlan(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-ipvlan', 'ipvlan-98', 'dev', 'test98', 'mode', 'l2'])
+        assert(unit_exits('10-ipvlan-98.netdev') == True)
+        assert(unit_exits('10-ipvlan-98.network') == True)
+        assert(unit_exits('10-test98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('ipvlan-98') == True)
+
+        ipvlan_parser = configparser.ConfigParser()
+        ipvlan_parser.read(os.path.join(networkd_unit_file_path, '10-ipvlan-98.netdev'))
+
+        assert(ipvlan_parser.get('NetDev', 'Name') == 'ipvlan-98')
+        assert(ipvlan_parser.get('NetDev', 'kind') == 'ipvlan')
+        assert(ipvlan_parser.get('IPVLAN', 'Mode') == 'L2')
+
+        ipvlan_network_parser = configparser.ConfigParser()
+        ipvlan_network_parser.read(os.path.join(networkd_unit_file_path, '10-ipvlan-98.network'))
+
+        assert(ipvlan_network_parser.get('Match', 'Name') == 'ipvlan-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+        assert(parser.get('Network', 'IPVLAN') == 'ipvlan-98')
+
+        link_remove('ipvlan-98')
+
+    def test_cli_create_ipvtap(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-ipvtap', 'ipvtap-98', 'dev', 'test98', 'mode', 'l2'])
+        assert(unit_exits('10-ipvtap-98.netdev') == True)
+        assert(unit_exits('10-ipvtap-98.network') == True)
+        assert(unit_exits('10-test98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('ipvtap-98') == True)
+
+        ipvtap_parser = configparser.ConfigParser()
+        ipvtap_parser.read(os.path.join(networkd_unit_file_path, '10-ipvtap-98.netdev'))
+
+        assert(ipvtap_parser.get('NetDev', 'Name') == 'ipvtap-98')
+        assert(ipvtap_parser.get('NetDev', 'kind') == 'ipvtap')
+        assert(ipvtap_parser.get('IPVTAP', 'Mode') == 'L2')
+
+        ipvtap_network_parser = configparser.ConfigParser()
+        ipvtap_network_parser.read(os.path.join(networkd_unit_file_path, '10-ipvtap-98.network'))
+
+        assert(ipvtap_network_parser.get('Match', 'Name') == 'ipvtap-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+        assert(parser.get('Network', 'IPVTAP') == 'ipvtap-98')
+
+        link_remove('ipvtap-98')
+
     def test_cli_create_vxlan(self):
         assert(link_exits('test98') == True)
 
@@ -837,7 +975,6 @@ class TestCLINetDev:
 
         link_remove('bond-98')
         link_remove('test-99')
-
 
 class TestWifiWPASupplicantConf:
     yaml_configs = [

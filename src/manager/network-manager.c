@@ -1345,14 +1345,15 @@ int manager_create_vxlan(const char *vxlan,
         return dbus_network_reload();
 }
 
-int manager_create_macvlan(const char *macvlan, MACVLanMode mode, bool kind) {
+int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mode, bool kind) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *macvlan_network_config = NULL;
-        _auto_cleanup_ char *macvlan_netdev = NULL, *macvlan_network = NULL;
+        _auto_cleanup_ char *macvlan_netdev = NULL, *macvlan_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
         assert(macvlan);
+        assert(dev);
 
         r = netdev_new(&netdev);
         if (r < 0)
@@ -1398,17 +1399,30 @@ int manager_create_macvlan(const char *macvlan, MACVLanMode mode, bool kind) {
 
         (void) manager_write_network_config(v, macvlan_network_config);
 
+        r = create_network_conf_file(dev, &network);
+        if (r < 0)
+                return r;
+
+        if (kind)
+                r = set_config_file_string(network, "Network", "MACVLAN", macvlan);
+        else
+                r = set_config_file_string(network, "Network", "MACVTAP", macvlan);
+
+        if (r < 0)
+                return r;
+
         return dbus_network_reload();
 }
 
-int manager_create_ipvlan(const char *ipvlan, IPVLanMode mode, bool kind) {
+int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, bool kind) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *ipvlan_network_config = NULL;
-        _auto_cleanup_ char *ipvlan_netdev = NULL, *ipvlan_network = NULL;
+        _auto_cleanup_ char *ipvlan_netdev = NULL, *ipvlan_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
         assert(ipvlan);
+        assert(dev);
 
         r = netdev_new(&netdev);
         if (r < 0)
@@ -1453,6 +1467,19 @@ int manager_create_ipvlan(const char *ipvlan, IPVLanMode mode, bool kind) {
                 return r;
 
         (void) manager_write_network_config(v, ipvlan_network_config);
+
+        r = create_network_conf_file(dev, &network);
+        if (r < 0)
+                return r;
+
+        if (kind)
+                r = set_config_file_string(network, "Network", "IPVLAN", ipvlan);
+        else
+                r = set_config_file_string(network, "Network", "IPVTAP", ipvlan);
+
+        if (r < 0)
+                return r;
+
 
         return dbus_network_reload();
 }
