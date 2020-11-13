@@ -294,7 +294,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-ipvlan",                5,        WORD_ANY, false, ncm_create_ipvlan },
                 { "create-ipvtap",                5,        WORD_ANY, false, ncm_create_ipvlan },
                 { "create-vrf",                   3,        WORD_ANY, false, ncm_create_vrf },
-                { "create-veth",                  1,        WORD_ANY, false, ncm_create_veth },
+                { "create-veth",                  3,        WORD_ANY, false, ncm_create_veth },
                 { "create-ipip",                  3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-sit",                   3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-gre",                   3,        WORD_ANY, false, ncm_create_tunnel },

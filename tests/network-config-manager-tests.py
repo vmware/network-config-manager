@@ -42,7 +42,19 @@ units = ["10-test99.network",
          '10-macvtap-98.netdev',
          '10-macvtap-98.network'
          '10-ipvlan-98.netdev',
-         '10-ipvtap-98.network']
+         '10-ipvtap-98.network',
+         '10-vrf-98.netdev',
+         '10-vrf-98.network',
+         '10-veth-98.netdev',
+         '10-veth-98.network'
+         '10-ipip-98.netdev',
+         '10-ipip-98.network'
+         '10-sit-98.netdev',
+         '10-sit-98.network'
+         '10-gre-98.netdev',
+         '10-gre-98.network'
+         '10-vti-98.netdev',
+         '10-vti-98.network']
 
 def link_exits(link):
     return os.path.exists(os.path.join('/sys/class/net', link))
@@ -856,6 +868,191 @@ class TestCLINetDev:
         assert(parser.get('Network', 'IPVTAP') == 'ipvtap-98')
 
         link_remove('ipvtap-98')
+
+    def test_cli_create_vrf(self):
+        subprocess.check_call(['nmctl', 'create-vrf', 'vrf-98', 'table', '11'])
+        assert(unit_exits('10-vrf-98.netdev') == True)
+        assert(unit_exits('10-vrf-98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('vrf-98') == True)
+
+        vrf_parser = configparser.ConfigParser()
+        vrf_parser.read(os.path.join(networkd_unit_file_path, '10-vrf-98.netdev'))
+
+        assert(vrf_parser.get('NetDev', 'Name') == 'vrf-98')
+        assert(vrf_parser.get('NetDev', 'kind') == 'vrf')
+        assert(vrf_parser.get('VRF', 'Table') == '11')
+
+        vrf_network_parser = configparser.ConfigParser()
+        vrf_network_parser.read(os.path.join(networkd_unit_file_path, '10-vrf-98.network'))
+
+        assert(vrf_network_parser.get('Match', 'Name') == 'vrf-98')
+
+        link_remove('vrf-98')
+
+    def test_cli_create_veth(self):
+        subprocess.check_call(['nmctl', 'create-veth', 'veth-98', 'peer', 'veth-99'])
+        assert(unit_exits('10-veth-98.netdev') == True)
+        assert(unit_exits('10-veth-98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('veth-98') == True)
+        assert(link_exits('veth-99') == True)
+
+        vrf_parser = configparser.ConfigParser()
+        vrf_parser.read(os.path.join(networkd_unit_file_path, '10-veth-98.netdev'))
+
+        assert(vrf_parser.get('NetDev', 'Name') == 'veth-98')
+        assert(vrf_parser.get('NetDev', 'kind') == 'veth')
+        assert(vrf_parser.get('Peer', 'Name') == 'veth-99')
+
+        vrf_network_parser = configparser.ConfigParser()
+        vrf_network_parser.read(os.path.join(networkd_unit_file_path, '10-veth-98.network'))
+
+        assert(vrf_network_parser.get('Match', 'Name') == 'veth-98')
+
+        link_remove('veth-98')
+
+    def test_cli_create_ipip(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-ipip', 'ipip-98', 'dev', 'test98', 'local', '192.168.1.2', 'remote', '192.168.1.3'])
+        assert(unit_exits('10-ipip-98.netdev') == True)
+        assert(unit_exits('10-ipip-98.network') == True)
+        assert(unit_exits('10-test98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('ipip-98') == True)
+
+        ipip_parser = configparser.ConfigParser()
+        ipip_parser.read(os.path.join(networkd_unit_file_path, '10-ipip-98.netdev'))
+
+        assert(ipip_parser.get('NetDev', 'Name') == 'ipip-98')
+        assert(ipip_parser.get('NetDev', 'kind') == 'ipip')
+        assert(ipip_parser.get('Tunnel', 'Local') == '192.168.1.2')
+        assert(ipip_parser.get('Tunnel', 'Remote') == '192.168.1.3')
+
+        ipip_network_parser = configparser.ConfigParser()
+        ipip_network_parser.read(os.path.join(networkd_unit_file_path, '10-ipip-98.network'))
+
+        assert(ipip_network_parser.get('Match', 'Name') == 'ipip-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+        assert(parser.get('Network', 'Tunnel') == 'ipip-98')
+
+        link_remove('ipip-98')
+
+    def test_cli_create_gre(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-gre', 'gre-98', 'dev', 'test98', 'local', '192.168.1.2', 'remote', '192.168.1.3'])
+        assert(unit_exits('10-gre-98.netdev') == True)
+        assert(unit_exits('10-gre-98.network') == True)
+        assert(unit_exits('10-test98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('gre-98') == True)
+
+        gre_parser = configparser.ConfigParser()
+        gre_parser.read(os.path.join(networkd_unit_file_path, '10-gre-98.netdev'))
+
+        assert(gre_parser.get('NetDev', 'Name') == 'gre-98')
+        assert(gre_parser.get('NetDev', 'kind') == 'gre')
+        assert(gre_parser.get('Tunnel', 'Local') == '192.168.1.2')
+        assert(gre_parser.get('Tunnel', 'Remote') == '192.168.1.3')
+
+        gre_network_parser = configparser.ConfigParser()
+        gre_network_parser.read(os.path.join(networkd_unit_file_path, '10-gre-98.network'))
+
+        assert(gre_network_parser.get('Match', 'Name') == 'gre-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+        assert(parser.get('Network', 'Tunnel') == 'gre-98')
+
+        link_remove('gre-98')
+
+    def test_cli_create_gre(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-gre', 'gre-98', 'dev', 'test98', 'local', '192.168.1.2', 'remote', '192.168.1.3'])
+        assert(unit_exits('10-gre-98.netdev') == True)
+        assert(unit_exits('10-gre-98.network') == True)
+        assert(unit_exits('10-test98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('gre-98') == True)
+
+        gre_parser = configparser.ConfigParser()
+        gre_parser.read(os.path.join(networkd_unit_file_path, '10-gre-98.netdev'))
+
+        assert(gre_parser.get('NetDev', 'Name') == 'gre-98')
+        assert(gre_parser.get('NetDev', 'kind') == 'gre')
+        assert(gre_parser.get('Tunnel', 'Local') == '192.168.1.2')
+        assert(gre_parser.get('Tunnel', 'Remote') == '192.168.1.3')
+
+        gre_network_parser = configparser.ConfigParser()
+        gre_network_parser.read(os.path.join(networkd_unit_file_path, '10-gre-98.network'))
+
+        assert(gre_network_parser.get('Match', 'Name') == 'gre-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+        assert(parser.get('Network', 'Tunnel') == 'gre-98')
+
+        link_remove('gre-98')
+
+    def test_cli_create_vti(self):
+        assert(link_exits('test98') == True)
+
+        subprocess.check_call(['nmctl', 'create-vti', 'vti-98', 'dev', 'test98', 'local', '192.168.1.2', 'remote', '192.168.1.3'])
+        assert(unit_exits('10-vti-98.netdev') == True)
+        assert(unit_exits('10-vti-98.network') == True)
+        assert(unit_exits('10-test98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exits('vti-98') == True)
+
+        vti_parser = configparser.ConfigParser()
+        vti_parser.read(os.path.join(networkd_unit_file_path, '10-vti-98.netdev'))
+
+        assert(vti_parser.get('NetDev', 'Name') == 'vti-98')
+        assert(vti_parser.get('NetDev', 'kind') == 'vti')
+        assert(vti_parser.get('Tunnel', 'Local') == '192.168.1.2')
+        assert(vti_parser.get('Tunnel', 'Remote') == '192.168.1.3')
+
+        vti_network_parser = configparser.ConfigParser()
+        vti_network_parser.read(os.path.join(networkd_unit_file_path, '10-vti-98.network'))
+
+        assert(vti_network_parser.get('Match', 'Name') == 'vti-98')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+        assert(parser.get('Network', 'Tunnel') == 'vti-98')
+
+        link_remove('vti-98')
 
     def test_cli_create_vxlan(self):
         assert(link_exits('test98') == True)
