@@ -155,15 +155,15 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iai
         if (r < 0)
                 return r;
 
-        r = parse_config_file_integer(network, "DHCPv6", "IAID", &v);
+        r = parse_config_file_integer(network, "DHCPv4", "IAID", &v);
         if (r >= 0) {
                 if (v == iaid)
                         return 0;
         }
 
-        r = set_config_file_integer(network, "DHCP", "IAID", iaid);
+        r = set_config_file_integer(network, "DHCPv4", "IAID", iaid);
         if (r < 0) {
-                log_warning("Failed to update DHCP IAID= to config file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to update DHCPv4 IAID= to config file '%s': %s", network, g_strerror(-r));
                 return r;
         }
 
@@ -181,7 +181,7 @@ int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *ia
         if (r < 0)
                 return r;
 
-        r = parse_config_file_integer(network, "DHCPv6", "IAID", &v);
+        r = parse_config_file_integer(network, "DHCPv4", "IAID", &v);
         if (r < 0)
                 return r;
 
