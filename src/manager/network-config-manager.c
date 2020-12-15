@@ -2183,6 +2183,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 
         return 0;
 }
+
 _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
         _auto_cleanup_ char *private_key = NULL, *public_key = NULL, *preshared_key = NULL, *endpoint = NULL, *allowed_ips = NULL;
         bool have_private_key = false, have_public_key = false;

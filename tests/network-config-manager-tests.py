@@ -365,7 +365,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCP', 'IAID') == '5555')
+        assert(parser.get('DHCPv4', 'IAID') == '5555')
 
     def test_cli_add_static_address(self):
         assert(link_exits('test99') == True)
