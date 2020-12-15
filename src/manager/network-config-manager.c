@@ -199,6 +199,7 @@ static int list_one_link(char *argv[]) {
         _cleanup_(routes_free) Routes *route = NULL;
         _cleanup_(link_unref) Link *l = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        uint32_t iaid;
         int r;
 
         r = parse_ifname_or_index(*argv, &p);
@@ -318,6 +319,10 @@ static int list_one_link(char *argv[]) {
          (void) network_parse_link_timezone(l->ifindex, &tz);
          if (tz)
                  printf("        %sTime Zone%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), tz);
+
+         r = manager_get_link_dhcp_client_iaid(p, &iaid);
+         if (r >= 0)
+                 printf("      %sDHCPv4 IAID%s: %d\n", ansi_color_bold_cyan(), ansi_color_reset(), iaid);
 
         return 0;
 }
@@ -2178,6 +2183,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 
         return 0;
 }
+
 _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
         _auto_cleanup_ char *private_key = NULL, *public_key = NULL, *preshared_key = NULL, *endpoint = NULL, *allowed_ips = NULL;
         bool have_private_key = false, have_public_key = false;
