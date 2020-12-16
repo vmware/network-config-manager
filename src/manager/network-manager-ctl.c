@@ -207,6 +207,7 @@ static int parse_argv(int argc, char *argv[]) {
         static const struct option options[] = {
                 { "help",      no_argument,       NULL, 'h'   },
                 { "version",   no_argument,       NULL, 'v'   },
+                { "json",      no_argument,       NULL, 'j'   },
                 {}
         };
         int c;
@@ -223,6 +224,9 @@ static int parse_argv(int argc, char *argv[]) {
 
                 case 'v':
                         return ncm_show_version();
+                case 'j':
+                        set_json(true);
+                        break;
 
                 case '?':
                         return -EINVAL;
