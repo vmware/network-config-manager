@@ -21,6 +21,9 @@
 #include "nftables.h"
 #include "parse-util.h"
 #include "udev-hwdb.h"
+#include "network-json.h"
+
+bool arg_json = false;
 
 static void link_state_to_color(const char *state, const char **on) {
         if (string_equal(state, "routable") || string_equal(state, "configured") || string_equal(state,"up"))
@@ -356,6 +359,9 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         Route *rt;
         GList *i;
         int r;
+
+        if (arg_json)
+                return json_system_status();
 
         (void) dbus_get_property_from_hostnamed("StaticHostname", &hostname);
         if (hostname)
@@ -2689,4 +2695,8 @@ _public_ int ncm_nft_run_command(int argc, char *argv[]) {
 
         g_print("%s", s->str);
         return r;
+}
+
+void set_json(bool k) {
+        arg_json = k;
 }
