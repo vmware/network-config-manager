@@ -7,6 +7,8 @@ network_config_manager_sources = files('''
         dns/dns.c
         dracut/dracut-parser.h
         dracut/dracut-parser.c
+        json/network-json.h
+        json/network-json.c
         manager/netdev.h
         manager/netdev.c
         manager/network-link.h
@@ -20,8 +22,6 @@ network_config_manager_sources = files('''
         manager/network-manager.c
         manager/network.h
         manager/network.c
-        manager/network-json.h
-        manager/network-json.c
         nftables/nftables.h
         nftables/nftables.c
         nftables/mnl_util.h
