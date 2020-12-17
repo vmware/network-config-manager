@@ -2703,3 +2703,23 @@ _public_ int ncm_nft_run_command(int argc, char *argv[]) {
 void set_json(bool k) {
         arg_json = k;
 }
+
+_public_ int ncm_get_system_status(char **ret) {
+        assert(ret);
+
+        return json_system_status(ret);
+}
+
+_public_ int ncm_get_link_status(const char *ifname, char **ret) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        assert(ifname);
+        assert(ret);
+
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return -errno;
+
+        return json_list_one_link(p, ret);
+}
