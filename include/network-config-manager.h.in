@@ -97,3 +97,6 @@ int ncm_nft_show_rules(int argc, char *argv[]);
 int ncm_get_nft_rules(const char *table, char **ret);
 int ncm_nft_delete_rule(int argc, char *argv[]);
 int ncm_nft_run_command(int argc, char *argv[]);
+
+int ncm_get_system_status(char **ret);
+int ncm_get_link_status(const char *ifname, char **ret);
