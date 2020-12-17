@@ -211,6 +211,9 @@ static int list_one_link(char *argv[]) {
                 return -errno;
         }
 
+        if (arg_json)
+                return json_list_one_link(p, NULL);
+
         r = link_get_one_link(*argv, &l);
         if (r < 0)
                 return r;
@@ -361,7 +364,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         int r;
 
         if (arg_json)
-                return json_system_status();
+                return json_system_status(NULL);
 
         (void) dbus_get_property_from_hostnamed("StaticHostname", &hostname);
         if (hostname)
