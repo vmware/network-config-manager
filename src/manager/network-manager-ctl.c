@@ -12,7 +12,7 @@
 #include "network-manager.h"
 
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
-        _cleanup_(g_dir_unrefp) GDir *dir = NULL;
+        _cleanup_(g_dir_closep) GDir *dir = NULL;
         const char *file = NULL;
         int r, i;
 

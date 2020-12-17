@@ -38,39 +38,25 @@ static inline void strv_free(char **strv) {
                 g_strfreev(strv);
 }
 
-static inline void g_string_unrefp(GString **s) {
-        if (s && *s)
-                g_string_free(*s, false);
-}
-static inline void g_ptr_array_unrefp(GPtrArray **s) {
-        if (s && *s)
-                g_ptr_array_free(*s, true);
-}
-
-static inline void g_dir_unrefp(GDir **d) {
-        if (d && *d)
-                g_dir_close(*d);
+static inline void g_string_unref(GString *s) {
+        if (s)
+                g_string_free(s, false);
 }
 
 static inline void close_fdp(int *fd) {
-        if (fd && *fd && *fd >= 0)
+        if (fd && *fd >= 0)
                 close(*fd);
-}
-
-static inline void gerror_unrefp(GError **e) {
-        if(e && *e)
-                g_error_free(*e);
 }
 
 DEFINE_CLEANUP(FILE *, fclose);
 DEFINE_CLEANUP(FILE *, pclose);
 DEFINE_CLEANUP(int *, close_fdp);
-DEFINE_CLEANUP(GString **, g_string_unrefp);
-DEFINE_CLEANUP(GPtrArray **, g_ptr_array_unrefp);
+DEFINE_CLEANUP(GString*, g_string_unref);
+DEFINE_CLEANUP(GPtrArray*, g_ptr_array_unref);
 DEFINE_CLEANUP(char **, strv_free);
-DEFINE_CLEANUP(GHashTable *, g_hash_table_unref);
-DEFINE_CLEANUP(GDir **, g_dir_unrefp);
-DEFINE_CLEANUP(GError **, gerror_unrefp);
+DEFINE_CLEANUP(GHashTable*, g_hash_table_unref);
+DEFINE_CLEANUP(GDir*, g_dir_close);
+DEFINE_CLEANUP(GError*, g_error_free);
 
 #define _auto_cleanup_ _cleanup_(freep)
 #define _auto_cleanup_fclose_ _cleanup_(fclosep)

@@ -13,7 +13,7 @@
 
 int set_config_file_string(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(gerror_unrefp) GError *e = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
         int r;
 
         assert(path);
@@ -37,7 +37,7 @@ int set_config_file_string(const char *path, const char *section, const char *k,
 
 int set_config_file_bool(const char *path, const char *section, const char *k, bool b) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(gerror_unrefp) GError *e = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
         int r;
 
         assert(path);
@@ -61,7 +61,7 @@ int set_config_file_bool(const char *path, const char *section, const char *k, b
 
 int set_config_file_integer(const char *path, const char *section, const char *k, int v) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(gerror_unrefp) GError *e = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
         int r;
 
         assert(path);
@@ -85,7 +85,7 @@ int set_config_file_integer(const char *path, const char *section, const char *k
 
 int remove_key_from_config(const char *path, const char *section, const char *k) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(gerror_unrefp) GError *e = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
         int r;
 
         assert(path);
@@ -112,7 +112,7 @@ int remove_key_from_config(const char *path, const char *section, const char *k)
 
 int remove_section_from_config(const char *path, const char *section) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(gerror_unrefp) GError *e = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
         int r;
 
         assert(path);
@@ -137,7 +137,7 @@ int remove_section_from_config(const char *path, const char *section) {
 }
 
 int write_to_conf(const char *path, const GString *s) {
-        _cleanup_(gerror_unrefp) GError *e = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
 
         assert(path);
         assert(s);

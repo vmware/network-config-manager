@@ -6,6 +6,9 @@
 
 #include <libudev.h>
 
+DEFINE_CLEANUP(struct udev_device*, udev_device_unref);
+DEFINE_CLEANUP(struct udev *, udev_unref);
+
 static inline void udev_hwdb_free(struct udev_hwdb **db) {
         if (db && *db)
                 *db = udev_hwdb_unref(*db);
