@@ -119,8 +119,8 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
 static int display_one_link_udev(Link *l, bool display, char **link_file) {
         _auto_cleanup_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
         const char *link, *driver, *path, *vendor, *model;
-        struct udev_device *dev;
-        struct udev *udev;
+        _cleanup_(udev_device_unrefp) struct udev_device *dev = NULL;
+        _cleanup_(udev_unrefp) struct udev *udev = NULL;
 
         assert(l);
 
@@ -162,9 +162,6 @@ static int display_one_link_udev(Link *l, bool display, char **link_file) {
         hwdb_get_manufacturer((uint8_t *) &l->mac_address.ether_addr_octet, &manufacturer);
         if (manufacturer)
                 printf("     %sManufacturer%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), manufacturer);
-
-        udev_device_unref(dev);
-        udev_unref(udev);
 
         return 0;
 }

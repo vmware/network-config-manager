@@ -402,8 +402,8 @@ static void json_list_one_link_addresses(gpointer key, gpointer value, gpointer 
 static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
         _auto_cleanup_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
         const char *link, *driver, *path, *vendor, *model;
-        struct udev_device *dev;
-        struct udev *udev;
+        _cleanup_(udev_device_unrefp) struct udev_device *dev = NULL;
+        _cleanup_(udev_unrefp) struct udev *udev = NULL;
 
         assert(l);
 
@@ -487,9 +487,6 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
                 json_object_object_add(j, "Manufacturer", js);
                 steal_pointer(js);
         }
-
-        udev_device_unref(dev);
-        udev_unref(udev);
 
         return 0;
 }
@@ -625,7 +622,6 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         if (r < 0)
                 return r;
 
-
         if (string_na(link)) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
@@ -660,6 +656,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 json_object_object_add(jobj, "Type", js);
                 steal_pointer(js);
         }
+
         if (string_na(operational_state)) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
@@ -717,7 +714,6 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                  json_object_object_add(jobj, "Routes", ja);
                  steal_pointer(ja);
          }
-
 
          if (dns) {
                  _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
