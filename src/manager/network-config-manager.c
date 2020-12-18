@@ -71,7 +71,7 @@ static void display_links_info(gpointer data_ptr, gpointer ignored) {
 }
 
 static int list_links(int argc, char *argv[]) {
-        _cleanup_(links_free) Links *h = NULL;
+        _cleanup_(links_unrefp) Links *h = NULL;
         int r;
 
         r = link_get_links(&h);
@@ -197,7 +197,7 @@ static int list_one_link(char *argv[]) {
         const char *operational_state_color, *setup_set_color;
         _cleanup_(addresses_unref) Addresses *addr = NULL;
         _cleanup_(routes_free) Routes *route = NULL;
-        _cleanup_(link_unref) Link *l = NULL;
+        _cleanup_(link_unrefp) Link *l = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t iaid;
         int r;

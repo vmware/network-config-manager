@@ -31,19 +31,11 @@ typedef struct Links {
          GList *links;
 } Links;
 
-static inline void link_unref(Link **l) {
-        if (l && *l) {
-                if ((*l)->alt_names)
-                        g_ptr_array_free((*l)->alt_names, true);
-        }
-}
+void link_unref(Link *l);
+void links_unref(Links *l);
 
-static inline void links_free(Links **l) {
-        if (l && *l) {
-                g_list_free_full(g_list_first((*l)->links), g_free);
-                g_free(*l);
-        }
-}
+DEFINE_CLEANUP(Link*, link_unref);
+DEFINE_CLEANUP(Links*, links_unref);
 
 int link_get_links(Links **ret);
 int link_get_one_link(const char *ifname, Link **ret);

@@ -401,15 +401,21 @@ static void json_list_one_link_addresses(gpointer key, gpointer value, gpointer 
 
 static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
         _auto_cleanup_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
-        const char *link, *driver, *path, *vendor, *model;
         _cleanup_(udev_device_unrefp) struct udev_device *dev = NULL;
+        const char *link, *driver, *path, *vendor, *model;
         _cleanup_(udev_unrefp) struct udev *udev = NULL;
+        int r;
 
         assert(l);
 
-        asprintf(&devid, "n%i", l->ifindex);
+        r = asprintf(&devid, "n%i", l->ifindex);
+        if (r < 0)
+                return log_oom();
 
-        asprintf(&device,"%s/%s", "/sys/class/net", l->name);
+        r = asprintf(&device,"%s/%s", "/sys/class/net", l->name);
+        if (r < 0)
+                return log_oom();
+
         udev = udev_new();
         if (!udev)
                 return log_oom();
@@ -440,7 +446,6 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
 
                 json_object_object_add(j, "Driver", js);
                 steal_pointer(js);
-
         }
 
         vendor = udev_device_get_property_value(dev, "ID_VENDOR_FROM_DATABASE");
@@ -466,7 +471,6 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
 
                 json_object_object_add(j, "Model", js);
                 steal_pointer(js);
-
         }
 
         link = udev_device_get_property_value(dev, "ID_NET_LINK_FILE");
@@ -572,7 +576,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         _cleanup_(addresses_unref) Addresses *addr = NULL;
         _cleanup_(routes_free) Routes *route = NULL;
-        _cleanup_(link_unref) Link *l = NULL;
+        _cleanup_(link_unrefp) Link *l = NULL;
         int r;
 
         assert(p);
@@ -685,116 +689,116 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 steal_pointer(ja);
         }
 
-         r = manager_get_one_link_route(l->ifindex, &route);
-         if (r >= 0 && route && g_list_length(route->routes) > 0) {
-                 _cleanup_(json_object_putp) json_object *ja = NULL;
-                 GList *i;
+        r = manager_get_one_link_route(l->ifindex, &route);
+        if (r >= 0 && route && g_list_length(route->routes) > 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+                GList *i;
 
-                 ja = json_object_new_array();
-                 if (!ja)
-                         return log_oom();
+                ja = json_object_new_array();
+                if (!ja)
+                        return log_oom();
 
-                 for (i = route->routes; i; i = i->next) {
-                         _auto_cleanup_ char *c = NULL;
-                         Route *a = NULL;
+                for (i = route->routes; i; i = i->next) {
+                        _auto_cleanup_ char *c = NULL;
+                        Route *a = NULL;
 
-                         a = i->data;
-                         r = ip_to_string(a->family, &a->address, &c);
-                         if (r >= 0) {
-                                 _cleanup_(json_object_putp) json_object *js = NULL;
+                        a = i->data;
+                        r = ip_to_string(a->family, &a->address, &c);
+                        if (r >= 0) {
+                                _cleanup_(json_object_putp) json_object *js = NULL;
 
-                                 js = json_object_new_string(c);
-                                 if (!js)
-                                         return log_oom();
+                                js = json_object_new_string(c);
+                                if (!js)
+                                        return log_oom();
 
-                                 json_object_array_add(ja, js);
-                                 steal_pointer(js);
-                         }
-                 }
-                 json_object_object_add(jobj, "Routes", ja);
-                 steal_pointer(ja);
-         }
-
-         if (dns) {
-                 _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
-                 char **d;
-
-                 if (!ja)
-                         return log_oom();
-
-                 strv_foreach(d, dns) {
-                         json_object *jdns = json_object_new_string(*d);
-
-                         if (!jdns)
-                                 return log_oom();
-
-                         json_object_array_add(ja, jdns);
-                 }
-
-                 json_object_object_add(jobj, "DNS", ja);
-                 steal_pointer(ja);
-         }
-
-         if (search_domains) {
-                 _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
-                 char **d;
-
-                 if (!ja)
-                         return log_oom();
-
-                 strv_foreach(d, search_domains) {
-                         json_object *jdomains = json_object_new_string(*d);
-                         if (!jdomains)
-                                 return log_oom();
-
-                         json_object_array_add(ja, jdomains);
-                 }
-
-                 json_object_object_add(jobj, "Domains", ja);
-                 steal_pointer(ja);
+                                json_object_array_add(ja, js);
+                                steal_pointer(js);
+                        }
+                }
+                json_object_object_add(jobj, "Routes", ja);
+                steal_pointer(ja);
         }
 
-         if (ntp) {
-                 _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
-                 char **d;
+        if (dns) {
+                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                char **d;
 
-                 if (!ja)
-                         return log_oom();
+                if (!ja)
+                        return log_oom();
 
-                 strv_foreach(d, ntp) {
-                         json_object *jntp = json_object_new_string(*d);
-                         if (!jntp)
-                                 return log_oom();
+                strv_foreach(d, dns) {
+                        json_object *jdns = json_object_new_string(*d);
 
-                         json_object_array_add(ja, jntp);
-                 }
+                        if (!jdns)
+                                return log_oom();
 
-                 json_object_object_add(jobj, "NTP", ja);
-                 steal_pointer(ja);
-         }
+                        json_object_array_add(ja, jdns);
+                }
 
-         (void) network_parse_link_timezone(l->ifindex, &tz);
-         if (tz) {
-                 _cleanup_(json_object_putp) json_object *js = NULL;
+                json_object_object_add(jobj, "DNS", ja);
+                steal_pointer(ja);
+        }
 
-                 js = json_object_new_string(string_na(tz));
-                 if (!js)
-                         return log_oom();
+        if (search_domains) {
+                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                char **d;
 
-                 json_object_object_add(jobj, "TimeZone", js);
-                 steal_pointer(js);
-         }
+                if (!ja)
+                        return log_oom();
 
-         if (ret) {
-                 char *s;
+                strv_foreach(d, search_domains) {
+                        json_object *jdomains = json_object_new_string(*d);
+                        if (!jdomains)
+                                return log_oom();
 
-                 s = strdup(json_object_to_json_string(jobj));
-                 if (!s)
-                         return log_oom();
+                        json_object_array_add(ja, jdomains);
+                }
 
-                 *ret = steal_pointer(s);
-         } else
-                 printf("%s\n", json_object_to_json_string(jobj));
+                json_object_object_add(jobj, "Domains", ja);
+                steal_pointer(ja);
+        }
 
-         return 0;
+        if (ntp) {
+                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                char **d;
+
+                if (!ja)
+                        return log_oom();
+
+                strv_foreach(d, ntp) {
+                        json_object *jntp = json_object_new_string(*d);
+                        if (!jntp)
+                                return log_oom();
+
+                        json_object_array_add(ja, jntp);
+                }
+
+                json_object_object_add(jobj, "NTP", ja);
+                steal_pointer(ja);
+        }
+
+        (void) network_parse_link_timezone(l->ifindex, &tz);
+        if (tz) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(string_na(tz));
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "TimeZone", js);
+                steal_pointer(js);
+        }
+
+        if (ret) {
+                char *s;
+
+                s = strdup(json_object_to_json_string(jobj));
+                if (!s)
+                        return log_oom();
+
+                *ret = steal_pointer(s);
+        } else
+                printf("%s\n", json_object_to_json_string(jobj));
+
+        return 0;
 }
