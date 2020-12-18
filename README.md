@@ -27,17 +27,19 @@ Introspect
  - DNS and Domains.
  - Hostname.
  - nftable
+ 
+   JSON format is supported.
 
 ### Dependencies
 
- `meson, ninja-build, systemd-devel, libudev-devel, libyaml-devel, glib-devel, python3-sphinx libmnl-devel libnftnl-devel libnftables-devel`
+ `meson, ninja-build, systemd-devel, libudev-devel, libyaml-devel, glib-devel, python3-sphinx libmnl-devel libnftnl-devel libnftables-devel json-c-devel`
 
 ### Building from source.
 
 On Photon OS
 ```bash
 ➜  ~ tdnf install -y build-essential
-➜  ~ tdnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib-devel libmnl-devel libnftnl-devel libnftables-devel
+➜  ~ tdnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib-devel libmnl-devel libnftnl-devel libnftables-devel json-c-devel
 ➜  ~ meson build
 ➜  ~ ninja -C build
 ➜  ~ sudo ninja -C build install
@@ -45,7 +47,7 @@ On Photon OS
 On Fedora/CentOS/RHEL
 ```bash
 ➜  ~ sudo dnf group install 'Development Tools'
-➜  ~ sudo dnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel python3-sphinx libmnl-devel libnftnl-devel libnftables-devel
+➜  ~ sudo dnf install meson ninja-build systemd-devel libudev-devel libyaml-devel glib2-devel python3-sphinx libmnl-devel libnftnl-devel libnftables-devel json-c-devel
 ➜  ~ meson build
 ➜  ~ ninja -C build
 ➜  ~ sudo ninja -C build install
