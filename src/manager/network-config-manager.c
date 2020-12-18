@@ -1214,7 +1214,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
 }
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
-        _cleanup_(dns_servers_free) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
+        _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *setup = NULL;
         char buf[IF_NAMESIZE + 1] = {};
@@ -1300,7 +1300,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 }
 
 _public_ int ncm_get_dns_server(char ***ret) {
-        _cleanup_(dns_servers_free) DNSServers *dns = NULL;
+        _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         GSequenceIter *i;
         DNSServer *d;
@@ -1342,7 +1342,7 @@ _public_ int ncm_get_dns_server(char ***ret) {
 }
 
 _public_ int ncm_add_dns_server(int argc, char *argv[]) {
-        _cleanup_(dns_servers_free) DNSServers *dns = NULL;
+        _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false;
         int r, i;
@@ -1427,7 +1427,7 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
 }
 
 _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
-        _cleanup_(dns_domains_free) DNSDomains *domains = NULL;
+        _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
         _auto_cleanup_ char *config_domain = NULL, *setup = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buffer[LINE_MAX] = {};
@@ -1560,7 +1560,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
 }
 
 _public_ int ncm_get_dns_domains(char ***ret) {
-        _cleanup_(dns_domains_free) DNSDomains *domains = NULL;
+        _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         GSequenceIter *i;
         int r;

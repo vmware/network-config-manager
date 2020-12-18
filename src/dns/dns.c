@@ -28,14 +28,14 @@ static void dns_server_data_destroy(gpointer data) {
         free(data);
 }
 
-void dns_servers_free(DNSServers **d) {
-        if (!d || !*d)
+void dns_servers_free(DNSServers *d) {
+        if (!d)
                 return;
 
-        if ((*d)->dns_servers)
-                g_sequence_free((*d)->dns_servers);
+        if (d->dns_servers)
+                g_sequence_free(d->dns_servers);
 
-        g_free(*d);
+        g_free(d);
 }
 
 int dns_servers_new(DNSServers **ret) {
@@ -118,7 +118,7 @@ int dns_domain_new(DNSDomain **ret) {
         return 0;
 }
 
-void dns_domain_freep(void *d) {
+void dns_domain_free(void *d) {
         DNSDomain *p = (DNSDomain *) d;
 
         if (!d)
@@ -135,7 +135,7 @@ int dns_domains_new(DNSDomains **ret) {
         if (!h)
                 return -ENOMEM;
 
-        h->dns_domains = g_sequence_new(dns_domain_freep);
+        h->dns_domains = g_sequence_new(dns_domain_free);
         if (!h->dns_domains)
                 return -ENOMEM;
 
@@ -144,14 +144,14 @@ int dns_domains_new(DNSDomains **ret) {
         return 0;
 }
 
-void dns_domains_free(DNSDomains **d) {
-        if (!d || !*d)
+void dns_domains_free(DNSDomains *d) {
+        if (!d)
                 return;
 
-        if ((*d)->dns_domains)
-                g_sequence_free((*d)->dns_domains);
+        if (d->dns_domains)
+                g_sequence_free(d->dns_domains);
 
-        g_free(*d);
+        g_free(d);
 }
 
 static int dns_domain_compare_func(gconstpointer x, gconstpointer y, gpointer user_data) {
