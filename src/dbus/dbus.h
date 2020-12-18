@@ -9,12 +9,8 @@
 
 #pragma once
 
-static inline void sd_bus_freep(sd_bus **bus) {
-        if (bus && *bus) {
-                sd_bus_close(*bus);
-                *bus = sd_bus_unref(*bus);
-        }
-}
+void sd_bus_free(sd_bus *bus);
+DEFINE_CLEANUP(sd_bus *, sd_bus_free);
 
 int dbus_get_string_systemd_manager(const char *p, char **ret);
 int dbus_get_property_from_hostnamed(const char *p, char **ret);
