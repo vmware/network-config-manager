@@ -196,7 +196,7 @@ static int list_one_link(char *argv[]) {
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
         _cleanup_(addresses_unrefp) Addresses *addr = NULL;
-        _cleanup_(routes_free) Routes *route = NULL;
+        _cleanup_(routes_unrefp) Routes *route = NULL;
         _cleanup_(link_unrefp) Link *l = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t iaid;
@@ -353,7 +353,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
-        _cleanup_(routes_free) Routes *routes = NULL;
+        _cleanup_(routes_unrefp) Routes *routes = NULL;
         _cleanup_(addresses_unrefp) Addresses *h = NULL;
         sd_id128_t machine_id = {};
         Route *rt;
@@ -1085,7 +1085,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
-        _cleanup_(routes_free) Routes *route = NULL;
+        _cleanup_(routes_unrefp) Routes *route = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         GList *i;

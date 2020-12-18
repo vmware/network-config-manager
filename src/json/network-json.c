@@ -140,7 +140,7 @@ int json_system_status(char **ret) {
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **domains = NULL, **ntp = NULL;
-        _cleanup_(routes_free) Routes *routes = NULL;
+        _cleanup_(routes_unrefp) Routes *routes = NULL;
         _cleanup_(addresses_unrefp) Addresses *h = NULL;
         sd_id128_t machine_id = {};
         GList *i;
@@ -575,7 +575,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         _cleanup_(addresses_unrefp) Addresses *addr = NULL;
-        _cleanup_(routes_free) Routes *route = NULL;
+        _cleanup_(routes_unrefp) Routes *route = NULL;
         _cleanup_(link_unrefp) Link *l = NULL;
         int r;
 
