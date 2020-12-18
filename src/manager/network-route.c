@@ -47,6 +47,14 @@ int route_new(Route **ret) {
         return 0;
 }
 
+void routes_unref(Routes *rt) {
+        if (!rt)
+                return;
+
+        g_list_free_full(rt->routes, g_free);
+        g_free(rt);
+}
+
 static int route_add(Routes **h, Route *rt) {
         int r;
 

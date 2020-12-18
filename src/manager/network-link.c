@@ -84,6 +84,24 @@ static int link_new(Link **ret) {
         return 0;
 }
 
+void link_unref(Link *l) {
+        if (!l)
+                return;
+
+        if (l->alt_names)
+                g_ptr_array_free(l->alt_names, true);
+
+        g_free(l);
+}
+
+void links_unref(Links *l) {
+        if (!l)
+                return;
+
+        g_list_free_full(g_list_first(l->links), g_free);
+        g_free(l);
+}
+
 static int link_add(Links **h, Link *link) {
         int r;
 

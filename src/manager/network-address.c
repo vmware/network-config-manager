@@ -50,16 +50,16 @@ int address_new(Address **ret) {
         return 0;
 }
 
-void addresses_unref(Addresses **a) {
+void addresses_unref(Addresses *a) {
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
         Address *addr;
 
-        if (!a || !*a)
+        if (!a)
                 return;
 
-        g_hash_table_iter_init(&iter, (*a)->addresses->hash);
+        g_hash_table_iter_init(&iter, a->addresses->hash);
 
         while (g_hash_table_iter_next(&iter, &key, &value)) {
 
@@ -70,10 +70,9 @@ void addresses_unref(Addresses **a) {
                 g_hash_table_iter_remove(&iter);
         }
 
-        set_unrefp(&(*a)->addresses);
-        free(*a);
+        set_unrefp(&a->addresses);
+        free(a);
 }
-
 
 int address_add(Addresses **h, Address *a) {
         GBytes *b = NULL;

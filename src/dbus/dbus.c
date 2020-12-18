@@ -7,6 +7,14 @@
 #include "log.h"
 #include "string-util.h"
 
+void sd_bus_free(sd_bus *bus) {
+        if (!bus)
+                return;
+
+        sd_bus_close(bus);
+        bus = sd_bus_unref(bus);
+}
+
 int dbus_get_string_systemd_manager(const char *p, char **ret) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
         _cleanup_(sd_bus_message_unrefp) sd_bus_message *m = NULL;

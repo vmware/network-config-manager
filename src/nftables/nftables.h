@@ -77,22 +77,29 @@ typedef struct NFTNLRule {
         int family;
 } NFTNLRule;
 
-void nft_ctx_unbuffer_output_unrefp(nft_ctx **t);
+void nft_ctx_unbuffer_output_unref(nft_ctx *t);
+DEFINE_CLEANUP(nft_ctx*, nft_ctx_unbuffer_output_unref);
 
-void nft_table_unrefp(NFTNLTable **t);
 int nft_table_new(int family, const char *name, NFTNLTable **ret);
 int nft_add_table(int family, const char *name);
 int nft_get_tables(int family, const char *name, GPtrArray **ret);
 int nft_delete_table(int family, const char *name);
 
-void nft_chain_unrefp(NFTNLChain **c);
+void nft_table_unref(NFTNLTable *t);
+DEFINE_CLEANUP(NFTNLTable *, nft_table_unref);
+
 int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **ret);
 int nft_add_chain(int family, const char *table, const char *name);
 int nft_get_chains(int family, const char *table, const char *chain, GPtrArray **ret);
 int nft_delete_chain(int family, const char *table, const char *name);
 
-void nft_rule_unrefp(NFTNLRule **c);
+void nft_chain_unref(NFTNLChain *c);
+DEFINE_CLEANUP(NFTNLChain*, nft_chain_unref);
+
 int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **ret);
+void nft_rule_unref(NFTNLRule *c);
+DEFINE_CLEANUP(NFTNLRule*, nft_rule_unref);
+
 int nft_configure_rule_port(int family, const char *table, const char *chain,
                             IPPacketProtocol protocol, IPPacketPort port_type,
                             uint16_t port, NFPacketAction action);

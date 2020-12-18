@@ -40,6 +40,11 @@ int dns_domain_add(DNSDomains **h, DNSDomain *a);
 int dns_read_resolv_conf(char ***dns, char ***domains);
 int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains);
 
-void dns_servers_free(DNSServers **d);
-void dns_domain_freep(void *d);
-void dns_domains_free(DNSDomains **d);
+void dns_servers_free(DNSServers *d);
+DEFINE_CLEANUP(DNSServers*, dns_servers_free);
+
+void dns_domain_free(void *d);
+DEFINE_CLEANUP(void *, dns_domain_free);
+
+void dns_domains_free(DNSDomains *d);
+DEFINE_CLEANUP(DNSDomains*, dns_domains_free);

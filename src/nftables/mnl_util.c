@@ -13,11 +13,12 @@
 #include "mnl_util.h"
 #include "log.h"
 
-void mnl_unrefp(Mnl **m) {
-        if (m && *m) {
-                free((*m)->buf);
-                free(*m);
-        }
+void mnl_unref(Mnl *m) {
+        if (!m)
+                return;
+
+        free(m->buf);
+        free(m);
 }
 
 int mnl_new(Mnl **ret) {
@@ -38,13 +39,15 @@ int mnl_new(Mnl **ret) {
         return 0;
 }
 
-void unref_mnl_socket(struct mnl_socket **nl) {
-        if (nl && *nl)
-                mnl_socket_close(*nl);
+void unref_mnl_socket(struct mnl_socket *nl) {
+        if (!nl)
+                return;
+
+        mnl_socket_close(nl);
 }
 
 int mnl_send(Mnl *m, mnl_cb_t cb, void *d) {
-        _cleanup_(unref_mnl_socket) struct mnl_socket *nl = NULL;
+        _cleanup_(unref_mnl_socketp) struct mnl_socket *nl = NULL;
         uint32_t port_id;
         size_t k;
         int r;

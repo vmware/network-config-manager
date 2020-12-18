@@ -141,11 +141,12 @@ const char *ip_packet_protocol_type_to_name(int id) {
         return ip_packet_protocol_table[id];
 }
 
-void nft_ctx_unbuffer_output_unrefp(nft_ctx **t) {
-        if (t && *t) {
-                nft_ctx_unbuffer_output(*t);
-                nft_ctx_free(*t);
-        }
+void nft_ctx_unbuffer_output_unref(nft_ctx *t) {
+        if (!t)
+                return;
+
+        nft_ctx_unbuffer_output(t);
+        nft_ctx_free(t);
 }
 
 int ip_packet_protcol_name_to_type(char *name) {
@@ -160,12 +161,13 @@ int ip_packet_protcol_name_to_type(char *name) {
         return _IP_PACKET_PROTOCOL_INVALID;
 }
 
-void nft_table_unrefp(NFTNLTable **t) {
-        if (t && *t) {
-                nftnl_table_free((*t)->table);
-                free((*t)->name);
-                free(*t);
-        }
+void nft_table_unref(NFTNLTable *t) {
+        if (!t)
+                return;
+
+        nftnl_table_free(t->table);
+        free(t->name);
+        free(t);
 }
 
 int nft_table_new(int family, const char *name, NFTNLTable **ret) {
@@ -196,14 +198,15 @@ int nft_table_new(int family, const char *name, NFTNLTable **ret) {
         return 0;
 }
 
-void nft_chain_unrefp(NFTNLChain **c) {
-        if (c && *c) {
-                nftnl_chain_free((*c)->chain);
+void nft_chain_unref(NFTNLChain *c) {
+        if (!c)
+                return;
 
-                free((*c)->name);
-                free((*c)->table);
-                free(*c);
-        }
+        nftnl_chain_free(c->chain);
+
+        free(c->name);
+        free(c->table);
+        free(c);
 }
 
 int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **ret) {
@@ -239,13 +242,14 @@ int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **
         return 0;
 }
 
-void nft_rule_unrefp(NFTNLRule **r) {
-        if (r && *r) {
-                nftnl_rule_free((*r)->rule);
-                free((*r)->table);
-                free((*r)->chain);
-                free(*r);
-        }
+void nft_rule_unref(NFTNLRule *r) {
+        if (!r)
+                return;
+
+        nftnl_rule_free(r->rule);
+        free(r->table);
+        free(r->chain);
+        free(r);
 }
 
 int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **ret) {

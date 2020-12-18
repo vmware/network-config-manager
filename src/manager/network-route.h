@@ -34,14 +34,10 @@ typedef struct Routes {
         GList *routes;
 } Routes;
 
-static inline void routes_free(Routes **rt) {
-        if (rt && *rt) {
-                g_list_free_full((*rt)->routes, g_free);
-                g_free(*rt);
-        }
-}
-
 int route_new(Route **ret);
+void routes_unref(Routes *rt);
+
+DEFINE_CLEANUP(Routes *, routes_unref);
 
 int manager_link_get_routes(Routes **ret);
 int manager_get_one_link_route(int ifindex, Routes **ret);

@@ -23,7 +23,8 @@ typedef struct CliManager {
         Cli *commands;
 } CliManager;
 
-void cli_unrefp(CliManager **m);
+void cli_unref(CliManager *m);
+DEFINE_CLEANUP(CliManager*, cli_unref);
 
 int cli_manager_new(const Cli *cli_commands, CliManager **ret);
 int cli_run_command(const CliManager *m, int argc, char *argv[]);

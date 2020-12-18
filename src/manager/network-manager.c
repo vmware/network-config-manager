@@ -1023,7 +1023,7 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
 
         n = manager_no_interface_name(networks);
         if (n) {
-                _cleanup_(links_free) Links *h = NULL;
+                _cleanup_(links_unrefp) Links *h = NULL;
                 GList *i;
 
                 r = link_get_links(&h);
