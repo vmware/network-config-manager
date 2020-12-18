@@ -32,11 +32,12 @@ int cli_manager_new(const Cli *cli_commands, CliManager **ret) {
         return 0;
 }
 
-void cli_unrefp(CliManager **m) {
-        if (m && *m) {
-                g_hash_table_unref((*m)->hash);
-                free(*m);
-        }
+void cli_unref(CliManager *m) {
+        if (!m)
+                return;
+
+        g_hash_table_unref(m->hash);
+        free(m);
 }
 
 static Cli *cli_get_command(const CliManager *m, const char *name) {
