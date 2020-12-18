@@ -35,7 +35,8 @@ typedef struct Addresses {
        Set *addresses;
 } Addresses;
 
-void addresses_unref(Addresses **a);
+void addresses_unref(Addresses *a);
+DEFINE_CLEANUP(Addresses*, addresses_unref);
 
 int address_new(Address **ret);
 int address_add(Addresses **h, Address *a);

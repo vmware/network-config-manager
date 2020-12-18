@@ -195,7 +195,7 @@ static int list_one_link(char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
-        _cleanup_(addresses_unref) Addresses *addr = NULL;
+        _cleanup_(addresses_unrefp) Addresses *addr = NULL;
         _cleanup_(routes_free) Routes *route = NULL;
         _cleanup_(link_unrefp) Link *l = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -354,7 +354,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
         _cleanup_(routes_free) Routes *routes = NULL;
-        _cleanup_(addresses_unref) Addresses *h = NULL;
+        _cleanup_(addresses_unrefp) Addresses *h = NULL;
         sd_id128_t machine_id = {};
         Route *rt;
         GList *i;
@@ -938,7 +938,7 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
-        _cleanup_(addresses_unref) Addresses *addr = NULL;
+        _cleanup_(addresses_unrefp) Addresses *addr = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         GHashTableIter iter;
