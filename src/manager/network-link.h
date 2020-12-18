@@ -15,12 +15,27 @@ typedef enum LinkState {
 } LinkState;
 
 typedef struct Link {
-        char name[IFNAMSIZ+1];
-        int ifindex;
-        unsigned short iftype;
-        uint8_t operstate;
         struct ether_addr mac_address;
+
+        unsigned short iftype;
+
+        char name[IFNAMSIZ+1];
+        char *qdisc;
+
+        int ifindex;
+
+        uint8_t operstate;
+
         uint32_t mtu;
+        uint32_t master;
+        uint32_t min_mtu;
+        uint32_t max_mtu;
+        uint32_t n_tx_queues;
+        uint32_t n_rx_queues;
+        uint32_t gso_max_size;
+        uint32_t gso_max_segments;
+        uint32_t flags;
+
         GPtrArray *alt_names;
 
         bool contains_mac_address:1;
