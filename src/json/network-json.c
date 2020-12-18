@@ -661,14 +661,186 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 steal_pointer(js);
         }
 
-        if (string_na(operational_state)) {
+        if (string_na(link_operstates_to_name(l->operstate))) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                js = json_object_new_string(string_na(operational_state));
+                js = json_object_new_string(string_na(link_operstates_to_name(l->operstate)));
                 if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "State", js);
+                json_object_object_add(jobj, "OperState", js);
+                steal_pointer(js);
+        }
+
+        if (l->flags > 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL, *js = NULL;
+
+                ja = json_object_new_array();
+                if (!ja)
+                        return log_oom();
+
+                if (l->flags & IFF_UP) {
+                        js = json_object_new_string("UP");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                if (l->flags & IFF_BROADCAST) {
+                        js = json_object_new_string("BROADCAST");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                if (l->flags & IFF_RUNNING) {
+                        js = json_object_new_string("RUNNING");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                if (l->flags & IFF_NOARP) {
+                        js = json_object_new_string("NOARP");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                if (l->flags & IFF_MASTER) {
+                        js = json_object_new_string("MASTER");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                if (l->flags & IFF_SLAVE) {
+                        js = json_object_new_string("SLAVE");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                if (l->flags & IFF_MULTICAST) {
+                        js = json_object_new_string("MULTICAST");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                if (l->flags & IFF_LOWER_UP) {
+                        js = json_object_new_string("LOWERUP");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                if (l->flags & IFF_DORMANT) {
+                        js = json_object_new_string("DORMANT");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                json_object_object_add(jobj, "Flags", ja);
+                steal_pointer(ja);
+        }
+
+        if (l->master > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+                char ifname[IFNAMSIZ] = {};
+
+                if (if_indextoname(l->master, ifname)) {
+                        js = json_object_new_string(ifname);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_object_add(jobj, "Master", js);
+                        steal_pointer(js);
+                }
+        }
+
+        if (l->min_mtu > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_int(l->min_mtu);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "MinMTU", js);
+                steal_pointer(js);
+        }
+
+        if (l->max_mtu > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_int(l->max_mtu);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "MaxMTU", js);
+                steal_pointer(js);
+        }
+
+        if (l->n_tx_queues > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_int(l->n_tx_queues);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "NTXQueues", js);
+                steal_pointer(js);
+        }
+
+        if (l->n_rx_queues > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_int(l->n_rx_queues);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "NRXQueues", js);
+                steal_pointer(js);
+        }
+
+        if (l->gso_max_size > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_int(l->gso_max_size);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "GSOMaxSize", js);
+                steal_pointer(js);
+        }
+
+        if (l->gso_max_segments > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_int(l->gso_max_segments);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "GSOMaxSegments", js);
                 steal_pointer(js);
         }
 

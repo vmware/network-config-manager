@@ -27,8 +27,7 @@ Introspect
  - DNS and Domains.
  - Hostname.
  - nftable
- 
-   JSON format is supported.
+ - JSON format is supported.
 
 ### Dependencies
 

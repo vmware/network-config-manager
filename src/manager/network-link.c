@@ -144,6 +144,7 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
 
         n->ifindex = iface->ifi_index;
         n->iftype = iface->ifi_type;
+        n->flags = iface->ifi_flags;
 
         if (rta_tb[IFLA_IFNAME])
                 memcpy(n->name, rtnl_message_read_attribute_string(rta_tb[IFLA_IFNAME]), IFNAMSIZ);
@@ -152,6 +153,27 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                 n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MTU]);
                 n->contains_mtu = true;
         }
+
+        if (rta_tb[IFLA_MASTER])
+                n->master = rtnl_message_read_attribute_u32(rta_tb[IFLA_MASTER]);
+
+        if (rta_tb[IFLA_MIN_MTU])
+                n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MIN_MTU]);
+
+        if (rta_tb[IFLA_MAX_MTU])
+                n->max_mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MAX_MTU]);
+
+        if (rta_tb[IFLA_NUM_TX_QUEUES])
+                n->n_tx_queues = rtnl_message_read_attribute_u32(rta_tb[IFLA_NUM_TX_QUEUES]);
+
+        if (rta_tb[IFLA_NUM_RX_QUEUES])
+                n->n_rx_queues = rtnl_message_read_attribute_u32(rta_tb[IFLA_NUM_RX_QUEUES]);
+
+        if (rta_tb[IFLA_GSO_MAX_SIZE])
+                n->gso_max_size = rtnl_message_read_attribute_u32(rta_tb[IFLA_GSO_MAX_SIZE]);
+
+        if (rta_tb[IFLA_GSO_MAX_SEGS])
+                n->gso_max_segments = rtnl_message_read_attribute_u32(rta_tb[IFLA_GSO_MAX_SEGS]);
 
         if (rta_tb[IFLA_OPERSTATE])
                 n->operstate = rtnl_message_read_attribute_u8(rta_tb[IFLA_OPERSTATE]);
