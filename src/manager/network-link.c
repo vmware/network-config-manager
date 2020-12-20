@@ -183,6 +183,15 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                 n->contains_mac_address = true;
         }
 
+        if (rta_tb[IFLA_STATS64]) {
+                rtnl_message_read_attribute(rta_tb[IFLA_STATS64], &n->stats64, sizeof(struct rtnl_link_stats64));
+                n->contains_stats64 = true;
+        }
+        if (rta_tb[IFLA_STATS]) {
+                rtnl_message_read_attribute(rta_tb[IFLA_STATS], &n->stats, sizeof(struct rtnl_link_stats));
+                n->contains_stats = true;
+        }
+
         if (rta_tb[IFLA_PROP_LIST]) {
                 struct rtattr *i, *j = rta_tb[IFLA_PROP_LIST];
                 int k = RTA_PAYLOAD(j);

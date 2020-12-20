@@ -51,3 +51,4 @@ const char *rtnl_message_read_attribute_string(const struct rtattr *rta);
 int rtnl_message_read_attribute_ether_address(const struct rtattr *rta, struct ether_addr *data);
 int rtnl_message_read_in_addr(const struct rtattr *rta, struct in_addr *data);
 int rtnl_message_read_in6_addr(const struct rtattr *rta, struct in6_addr *data);
+int rtnl_message_read_attribute(const struct rtattr *rta, void *p, size_t size);

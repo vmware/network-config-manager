@@ -108,6 +108,13 @@ struct rtattr *rtnl_message_parse_rtattr_one(int type, struct rtattr *rta, int l
         return NULL;
 }
 
+int rtnl_message_read_attribute(const struct rtattr *rta, void *p, size_t size) {
+       assert(rta);
+
+       memcpy(p, RTA_DATA(rta), size);
+       return size;
+}
+
 uint8_t rtnl_message_read_attribute_u8(const struct rtattr *rta) {
         assert(rta);
 

@@ -366,13 +366,13 @@ int json_system_status(char **ret) {
         if (ret) {
                 char *s;
 
-                s = strdup(json_object_to_json_string(jobj));
+                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
                 if (!s)
                         return log_oom();
 
                 *ret = steal_pointer(s);
         } else
-                printf("%s\n", json_object_to_json_string(jobj));
+                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
 
         return r;
 }
@@ -844,6 +844,210 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 steal_pointer(js);
         }
 
+        if (l->contains_stats || l->contains_stats64) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_bytes);
+                else
+                        js = json_object_new_double(l->stats64.rx_bytes);
+
+                json_object_object_add(jobj, "RXBytes", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_bytes);
+                else
+                        js = json_object_new_double(l->stats64.tx_bytes);
+
+                json_object_object_add(jobj, "TXBytes", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_packets);
+                else
+                        js = json_object_new_double(l->stats64.rx_packets);
+
+                json_object_object_add(jobj, "RXPackets", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_packets);
+                else
+                        js = json_object_new_double(l->stats64.tx_packets);
+
+                json_object_object_add(jobj, "TXPackets", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_errors);
+                else
+                        js = json_object_new_double(l->stats64.tx_errors);
+
+                json_object_object_add(jobj, "TXErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_errors);
+                else
+                        js = json_object_new_double(l->stats64.rx_errors);
+
+                json_object_object_add(jobj, "RXErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_dropped);
+                else
+                        js = json_object_new_double(l->stats64.rx_dropped);
+
+                json_object_object_add(jobj, "TXDropped", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_dropped);
+                else
+                        js = json_object_new_double(l->stats64.tx_dropped);
+
+                json_object_object_add(jobj, "RXDropped", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_over_errors);
+                else
+                        js = json_object_new_double(l->stats64.rx_over_errors);
+
+                json_object_object_add(jobj, "RXOverErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.multicast);
+                else
+                        js = json_object_new_double(l->stats64.multicast);
+
+                json_object_object_add(jobj, "MulticastPackets", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.collisions);
+                else
+                        js = json_object_new_double(l->stats64.collisions);
+
+                json_object_object_add(jobj, "Collisions", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_length_errors);
+                else
+                        js = json_object_new_double(l->stats64.rx_length_errors);
+
+                json_object_object_add(jobj, "RXLengthErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_over_errors);
+                else
+                        js = json_object_new_double(l->stats64.rx_over_errors);
+
+                json_object_object_add(jobj, "RXOverErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_crc_errors);
+                else
+                        js = json_object_new_double(l->stats64.rx_crc_errors);
+
+                json_object_object_add(jobj, "RXCRCErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_frame_errors);
+                else
+                        js = json_object_new_double(l->stats64.rx_frame_errors);
+
+                json_object_object_add(jobj, "RXFrameErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_fifo_errors);
+                else
+                        js = json_object_new_double(l->stats64.rx_fifo_errors);
+
+                json_object_object_add(jobj, "RXFIFOErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_missed_errors);
+                else
+                        js = json_object_new_double(l->stats64.rx_missed_errors);
+
+                json_object_object_add(jobj, "RXMissedErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_aborted_errors);
+                else
+                        js = json_object_new_double(l->stats64.tx_aborted_errors);
+
+                json_object_object_add(jobj, "TXAbortedErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_carrier_errors);
+                else
+                        js = json_object_new_double(l->stats64.tx_carrier_errors);
+
+                json_object_object_add(jobj, "TXCarrierErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_fifo_errors);
+                else
+                        js = json_object_new_double(l->stats64.tx_fifo_errors);
+
+                json_object_object_add(jobj, "TXFIFOErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_heartbeat_errors);
+                else
+                        js = json_object_new_double(l->stats64.tx_heartbeat_errors);
+
+                json_object_object_add(jobj, "TXHeartBeatErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_window_errors);
+                else
+                        js = json_object_new_double(l->stats64.tx_window_errors);
+
+                json_object_object_add(jobj, "TXWindowErrors", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_compressed);
+                else
+                        js = json_object_new_double(l->stats64.rx_compressed);
+
+                json_object_object_add(jobj, "RXCompressed", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.tx_compressed);
+                else
+                        js = json_object_new_double(l->stats64.tx_compressed);
+
+                json_object_object_add(jobj, "TXCompressed", js);
+                steal_pointer(js);
+
+                if (l->contains_stats)
+                        js = json_object_new_int(l->stats.rx_nohandler);
+                else
+                        js = json_object_new_double(l->stats64.rx_nohandler);
+
+                json_object_object_add(jobj, "RXNoHandler", js);
+                steal_pointer(js);
+        }
+
         (void) network_parse_link_dns(l->ifindex, &dns);
         (void) network_parse_link_search_domains(l->ifindex, &search_domains);
         (void) network_parse_link_route_domains(l->ifindex, &route_domains);
@@ -964,13 +1168,13 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         if (ret) {
                 char *s;
 
-                s = strdup(json_object_to_json_string(jobj));
+                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
                 if (!s)
                         return log_oom();
 
                 *ret = steal_pointer(s);
         } else
-                printf("%s\n", json_object_to_json_string(jobj));
+                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
 
         return 0;
 }
