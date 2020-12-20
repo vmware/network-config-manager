@@ -366,13 +366,13 @@ int json_system_status(char **ret) {
         if (ret) {
                 char *s;
 
-                s = strdup(json_object_to_json_string(jobj));
+                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
                 if (!s)
                         return log_oom();
 
                 *ret = steal_pointer(s);
         } else
-                printf("%s\n", json_object_to_json_string(jobj));
+                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
 
         return r;
 }
@@ -1044,7 +1044,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 else
                         js = json_object_new_double(l->stats64.rx_nohandler);
 
-                json_object_object_add(jobj, "RXNohandler", js);
+                json_object_object_add(jobj, "RXNoHandler", js);
                 steal_pointer(js);
         }
 
@@ -1168,13 +1168,13 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         if (ret) {
                 char *s;
 
-                s = strdup(json_object_to_json_string(jobj));
+                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
                 if (!s)
                         return log_oom();
 
                 *ret = steal_pointer(s);
         } else
-                printf("%s\n", json_object_to_json_string(jobj));
+                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
 
         return 0;
 }
