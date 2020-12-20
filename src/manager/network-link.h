@@ -36,10 +36,17 @@ typedef struct Link {
         uint32_t gso_max_segments;
         uint32_t flags;
 
+        union {
+                struct rtnl_link_stats64 stats64;
+                struct rtnl_link_stats stats;
+        };
+
         GPtrArray *alt_names;
 
         bool contains_mac_address:1;
         bool contains_mtu:1;
+        bool contains_stats:1;
+        bool contains_stats64:1;
 } Link;
 
 typedef struct Links {
