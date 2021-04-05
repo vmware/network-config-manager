@@ -1166,28 +1166,43 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = parse_ip_from_string(argv[2], &a);
-        if (r < 0) {
-                log_warning("Failed to parse address : %s", argv[2]);
-                return r;
-        }
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "address")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &a);
+                        if (r < 0) {
+                                log_warning("Failed to parse address : %s", argv[i]);
+                                return r;
+                        }
+                }
 
-        r = parse_ip_from_string(argv[3], &gw);
-        if (r < 0) {
-                log_warning("Failed to parse address : %s", argv[3]);
-                return r;
-        }
+                if (string_equal(argv[i], "route")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &gw);
+                        if (r < 0) {
+                                log_warning("Failed to parse route address : %s", argv[i]);
+                                return r;
+                        }
 
-        r = parse_ip_from_string(argv[4], &destination);
-        if (r < 0) {
-                log_warning("Failed to parse address : %s", argv[4]);
-                return r;
-        }
+                }
 
-        r = parse_uint32(argv[5], &table);
-        if (r < 0) {
-                log_warning("Failed to parse address : %s", argv[5]);
-                return r;
+                if (string_equal(argv[i], "gw")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &destination);
+                        if (r < 0) {
+                                log_warning("Failed to parse gw address : %s", argv[i]);
+                                return r;
+                        }
+                }
+
+                if (string_equal(argv[i], "table")) {
+                        i++;
+                        r = parse_uint32(argv[i], &table);
+                        if (r < 0) {
+                                log_warning("Failed to parse table : %s", argv[i]);
+                                return r;
+                        }
+                }
         }
 
         r = route_new(&rt);

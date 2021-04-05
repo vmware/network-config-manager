@@ -125,7 +125,7 @@ static int help(void) {
                "  delete-gateway               [LINK] Removes Gateway from Link\n"
                "  add-route                    [LINK] [GW address] metric [METRIC { number }] Set Link route\n"
                "  delete-route                 [LINK] Removes route from Link\n"
-               "  add-additional-gw            [LINK] [ADDRESS] [ROUTE address] [GW address] [ROUTING POLICY TABLE number] configures additional gateway for"
+               "  add-additional-gw            [LINK] address [ADDRESS] route [ROUTE address] gw [GW address] table [TABLE routing policy table number] configures additional gateway for"
                                                       "\n\t\t\t\t\t\t another NIC with routing policy rules\n"
                "  set-hostname                 [HOSTNAME] Sets hostname\n"
                "  show-dns                            Show DNS Servers\n"
@@ -260,7 +260,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "delete-gateway",               1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-route",                    2,        WORD_ANY, false, ncm_link_add_route },
                 { "delete-route",                 1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
-                { "add-additional-gw",            5,        WORD_ANY, false, ncm_link_add_additional_gw },
+                { "add-additional-gw",            9,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "set-hostname",                 1,        WORD_ANY, false, ncm_set_system_hostname },
                 { "show-dns",                     WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
                 { "add-dns",                      2,        WORD_ANY, false, ncm_add_dns_server },
