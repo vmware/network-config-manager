@@ -694,6 +694,41 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'true')
 
+class TestCLIDHCPv4Server:
+    def setup_method(self):
+        link_remove('test99')
+        link_add_dummy('test99')
+        restart_networkd()
+
+    def teardown_method(self):
+        remove_units_from_netword_unit_path()
+        link_remove('test99')
+
+    def test_cli_configure_dhcpv4_server(self):
+        assert(link_exits('test99') == True)
+
+        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        assert(unit_exits('10-test99.network') == True)
+
+        subprocess.check_call(['nmctl', 'add-dhcpv4-server', 'test99', 'pool-offset',
+                               '10', 'pool-size', '20', 'default-lease-time', '100',
+                               'max-lease-time', '200', 'emit-dns', 'yes', 'dns', '192.168.1.1',
+                               'emit-router', 'yes'])
+
+        subprocess.check_call(['sleep', '3'])
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('DHCPServer', 'PoolOffset') == '10')
+        assert(parser.get('DHCPServer', 'PoolSize') == '20')
+        assert(parser.get('DHCPServer', 'DefaultLeaseTimeSec') == '100')
+        assert(parser.get('DHCPServer', 'MaxLeaseTimeSec') == '200')
+        assert(parser.get('DHCPServer', 'EmitDNS') == 'yes')
+        assert(parser.get('DHCPServer', 'DNS') == '192.168.1.1')
+        assert(parser.get('DHCPServer', 'EmitRouter') == 'yes')
+
 class TestCLINetDev:
     def setup_method(self):
         link_remove('test98')
@@ -746,7 +781,7 @@ class TestCLINetDev:
         assert(unit_exits('10-test98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('macvlan-98') == True)
 
@@ -779,7 +814,7 @@ class TestCLINetDev:
         assert(unit_exits('10-test98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('macvtap-98') == True)
 
@@ -812,7 +847,7 @@ class TestCLINetDev:
         assert(unit_exits('10-test98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('ipvlan-98') == True)
 
@@ -845,7 +880,7 @@ class TestCLINetDev:
         assert(unit_exits('10-test98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('ipvtap-98') == True)
 
@@ -876,7 +911,7 @@ class TestCLINetDev:
         assert(unit_exits('10-vrf-98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('vrf-98') == True)
 
@@ -900,7 +935,7 @@ class TestCLINetDev:
         assert(unit_exits('10-veth-98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('veth-98') == True)
         assert(link_exits('veth-99') == True)
@@ -928,7 +963,7 @@ class TestCLINetDev:
         assert(unit_exits('10-test98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('ipip-98') == True)
 
@@ -962,7 +997,7 @@ class TestCLINetDev:
         assert(unit_exits('10-test98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('gre-98') == True)
 
@@ -996,7 +1031,7 @@ class TestCLINetDev:
         assert(unit_exits('10-test98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('gre-98') == True)
 
@@ -1030,7 +1065,7 @@ class TestCLINetDev:
         assert(unit_exits('10-test98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('vti-98') == True)
 
@@ -1132,7 +1167,7 @@ class TestCLINetDev:
         assert(unit_exits('10-bridge-98.network') == True)
         assert(unit_exits('10-bridge-98.netdev') == True)
 
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('bridge-98') == True)
 
@@ -1173,7 +1208,7 @@ class TestCLINetDev:
         assert(unit_exits('10-bond-98.network') == True)
         assert(unit_exits('10-bond-98.netdev') == True)
 
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '3'])
 
         assert(link_exits('bond-98') == True)
 
