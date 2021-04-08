@@ -55,6 +55,12 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
 
 int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt);
 
+int manager_configure_dhcpv4_server (const IfNameIndex *ifnameidx, IPAddress *dns, IPAddress *ntp,
+                                    uint32_t pool_offset, uint32_t pool_size, uint32_t default_lease_time,
+                                    uint32_t max_lease_time, int emit_dns, int emit_ntp, int emit_router);
+
+int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx);
+
 int manager_create_bridge(const char *bridge, char **interfaces);
 int manager_create_bond(const char *bond, BondMode mode, char **interfaces);
 int manager_create_vxlan(const char *vxlan, uint32_t vni, IPAddress *local,

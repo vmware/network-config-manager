@@ -123,9 +123,9 @@ static int help(void) {
                "  delete-link-address          [LINK] Removes Address from Link\n"
                "  add-default-gateway          [LINK] [GW address] onlink [ONLINK { yes | no | on | off | 1 | 0}] Add Link Default Gateway\n"
                "  delete-gateway               [LINK] Removes Gateway from Link\n"
-               "  add-route                    [LINK] [GW address] metric [METRIC { number }] Set Link route\n"
+               "  add-route                    [LINK] [GW address] metric [METRIC { NUMBER }] Set Link route\n"
                "  delete-route                 [LINK] Removes route from Link\n"
-               "  add-additional-gw            [LINK] address [ADDRESS] route [ROUTE address] gw [GW address] table [TABLE routing policy table number] configures additional gateway for"
+               "  add-additional-gw            [LINK] address [ADDRESS] route [ROUTE address] gw [GW address] table [TABLE routing policy table NUMBER] configures additional gateway for"
                                                       "\n\t\t\t\t\t\t another NIC with routing policy rules\n"
                "  set-hostname                 [HOSTNAME] Sets hostname\n"
                "  show-dns                            Show DNS Servers\n"
@@ -156,6 +156,11 @@ static int help(void) {
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
                "  delete-ntp                   [LINK] Delete Link NTP server addresses.\n"
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
+               "  add-dhcpv4-server             [LINK] pool-offset [PoolOffset NUMBER] pool-size [PoolSize NUMBER] default-lease-time [DefaultLeaseTimeSec NUMBER]"
+                                                "\n\t\t\t\t max-lease-time [MaxLeaseTimeSec NUMBER] emit-dns [EmitDNS { yes | no | on | off | 1 | 0}]"
+                                                "\n\t\t\t\t dns [DNS ADDRESS] emit-ntp [EmitNTP { yes | no | on | off | 1 | 0}] ntp [NTP ADDRESS]"
+                                                "\n\t\t\t\t emit-router [EmitRouter { yes | no | on | off | 1 | 0}] Configures DHCPv4 server.\n"
+               "  remove-dhcpv4-server         [LINK] Removes DHCPv4 server.\n"
                "  disable-ipv6                 [LINK] Disables IPv6 on the interface.\n"
                "  enable-ipv6                  [LINK] Enables IPv6 on the interface.\n"
                "  create-vlan                  [VLAN name] dev [LINK master] id [ID INTEGER] Creates vlan netdev and sets master to device\n"
@@ -284,6 +289,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp4-use-routes",         2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp6-use-dns",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "set-dhcp6-use-ntp",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
+                { "add-dhcpv4-server",            1,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
+                { "remove-dhcpv4-server",         1,        WORD_ANY, false, ncm_link_remove_dhcpv4_server },
                 { "add-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "set-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "delete-ntp",                   1,        WORD_ANY, false, ncm_link_delete_ntp },

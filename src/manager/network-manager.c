@@ -504,7 +504,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
 
         r = create_network_conf_file(ifnameidx->ifname, &network);
         if (r < 0) {
-                log_warning("Failed to get create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to get or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -552,6 +552,104 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
         g_string_append_printf(config, "From=%s\n", address);
 
         r = write_to_conf(network, config);
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
+int manager_configure_dhcpv4_server(const IfNameIndex *ifnameidx,
+                                    IPAddress *dns_address,
+                                    IPAddress *ntp_address,
+                                    uint32_t pool_offset,
+                                    uint32_t pool_size,
+                                    uint32_t default_lease_time,
+                                    uint32_t max_lease_time,
+                                    int emit_dns,
+                                    int emit_ntp,
+                                    int emit_router) {
+
+        _auto_cleanup_ char *network = NULL, *dns = NULL, *ntp = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to get or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                return r;
+        }
+
+        r = load_config_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        if (dns_address) {
+                r = ip_to_string(dns_address->family, dns_address, &dns);
+                if (r < 0)
+                        return r;
+        }
+
+        if (ntp_address) {
+                r = ip_to_string(ntp_address->family, ntp_address, &ntp);
+                if (r < 0)
+                        return r;
+        }
+
+        if (pool_offset > 0)
+                g_key_file_set_integer(key_file, "DHCPServer", "PoolOffset", pool_offset);
+
+        if (pool_size > 0)
+                g_key_file_set_integer(key_file, "DHCPServer", "PoolSize", pool_size);
+
+        if (default_lease_time > 0)
+                g_key_file_set_integer(key_file, "DHCPServer", "DefaultLeaseTimeSec", default_lease_time);
+
+        if (max_lease_time > 0)
+                g_key_file_set_integer(key_file, "DHCPServer", "MaxLeaseTimeSec", max_lease_time);
+
+        if (dns)
+                g_key_file_set_string(key_file, "DHCPServer", "DNS", dns);
+
+        if (emit_dns >= 0)
+                g_key_file_set_string(key_file, "DHCPServer", "EmitDNS", bool_to_string(emit_dns));
+
+        if (ntp)
+                g_key_file_set_string(key_file, "DHCPServer", "NTP", ntp);
+
+        if (emit_ntp >= 0)
+                g_key_file_set_string(key_file, "DHCPServer", "EmitNTP", bool_to_string(emit_ntp));
+
+        if (emit_router >= 0)
+                g_key_file_set_string(key_file, "DHCPServer", "EmitRouter", bool_to_string(emit_router));
+
+        if (!g_key_file_save_to_file (key_file, network, &e)) {
+                log_warning("Failed to write to '%s': %s", network, e->message);
+                return -e->code;
+        }
+
+        r = set_file_permisssion(network, "systemd-network");
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
+int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to get create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                return r;
+        }
+
+       r = remove_section_from_config(network, "DHCPServer");
         if (r < 0)
                 return r;
 
