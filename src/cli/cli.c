@@ -74,7 +74,7 @@ int cli_run_command(const CliManager *m, int argc, char *argv[]) {
 
         command = cli_get_command(m, name);
         if (!command) {
-                log_warning("Unknown cli command %s.", name);
+                log_warning("Unknown cli command '%s'.", name);
                 return -EINVAL;
         }
 

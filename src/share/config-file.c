@@ -8,6 +8,7 @@
 #include "config-file.h"
 #include "config-parser.h"
 #include "file-util.h"
+#include <gio/gio.h>
 #include "log.h"
 #include "string-util.h"
 
@@ -148,6 +149,32 @@ int write_to_conf(const char *path, const GString *s) {
         e = NULL;
         return 0;
 }
+
+int append_to_conf(const char *path, const GString *s) {
+        _cleanup_(g_object_unref) GFileOutputStream *stream = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
+        _cleanup_(g_object_unref) GFile *f = NULL;
+        ssize_t k;
+        int r;
+
+        assert(path);
+        assert(s);
+
+        f = g_file_new_for_path(path);
+
+        stream = g_file_append_to(f, G_FILE_CREATE_NONE, NULL, &e);
+        if(!stream)
+                return -e->code;
+
+        k = g_output_stream_write(G_OUTPUT_STREAM(stream), s->str, s->len, NULL, &e);
+
+        r = g_output_stream_close(G_OUTPUT_STREAM (stream), NULL, &e);
+        if (r < 0)
+                return -e->code;
+
+        return 0;
+}
+
 
 int write_to_resolv_conf(char **dns, char **domains) {
         _auto_cleanup_ char *p = NULL;

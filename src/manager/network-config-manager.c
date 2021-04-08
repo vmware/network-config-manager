@@ -1174,6 +1174,8 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                                 log_warning("Failed to parse address : %s", argv[i]);
                                 return r;
                         }
+
+                        continue;
                 }
 
                 if (string_equal(argv[i], "route")) {
@@ -1184,6 +1186,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                                 return r;
                         }
 
+                        continue;
                 }
 
                 if (string_equal(argv[i], "gw")) {
@@ -1193,6 +1196,8 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                                 log_warning("Failed to parse gw address : %s", argv[i]);
                                 return r;
                         }
+
+                        continue;
                 }
 
                 if (string_equal(argv[i], "table")) {
@@ -1222,6 +1227,154 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
         r = manager_configure_additional_gw(p, rt);
         if (r < 0) {
                 log_warning("Failed to add route to link '%s': %s\n", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
+        uint32_t pool_offset = 0, pool_size = 0, max_lease_time = 0, default_lease_time = 0;
+        int emit_dns = -1, emit_ntp = -1, emit_router = -1;
+        _auto_cleanup_ IPAddress *dns = NULL, *ntp = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "dns")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &dns);
+                        if (r < 0) {
+                                log_warning("Failed to parse dns address : %s", argv[i]);
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "ntp")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &ntp);
+                        if (r < 0) {
+                                log_warning("Failed to parse ntp address : %s", argv[i]);
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "pool-offset")) {
+                        i++;
+                        r = parse_uint32(argv[i], &pool_offset);
+                        if (r < 0) {
+                                log_warning("Failed to parse pool offset : %s", argv[i]);
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "pool-size")) {
+                        i++;
+                        r = parse_uint32(argv[i], &pool_size);
+                        if (r < 0) {
+                                log_warning("Failed to parse pool size : %s", argv[i]);
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "default-lease-time")) {
+                        i++;
+                        r = parse_uint32(argv[i], &default_lease_time);
+                        if (r < 0) {
+                                log_warning("Failed to parse default lease time : %s", argv[i]);
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "max-lease-time")) {
+                        i++;
+                        r = parse_uint32(argv[i], &max_lease_time);
+                        if (r < 0) {
+                                log_warning("Failed to parse maximum lease time : %s", argv[i]);
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "emit-dns")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse emit dns %s : %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        emit_dns = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "emit-ntp")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse emit ntp %s : %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        emit_ntp = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "emit-router")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse emit router %s : %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        emit_router = r;
+                }
+        }
+
+        r = manager_configure_dhcpv4_server(p, dns, ntp, pool_offset, pool_size, default_lease_time, max_lease_time,
+                                            emit_dns, emit_ntp, emit_router);
+        if (r < 0) {
+                log_warning("Failed to configure DHCPv4 server on link '%s': %s\n", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = manager_remove_dhcpv4_server(p);
+        if (r < 0) {
+                log_warning("Failed to remove DHCPv4 server on link '%s': %s\n", argv[1], g_strerror(-r));
                 return r;
         }
 
