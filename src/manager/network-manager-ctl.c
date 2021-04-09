@@ -183,6 +183,7 @@ static int help(void) {
                                                "\n\t\t\t\t\t\t allowed-ips [IP,IP ...] endpoint [IP:PORT] Creates a wireguard tunnel.\n"
                "  reload                       Reload .network and .netdev files.\n"
                "  reconfigure                  [LINK] Reconfigure Link.\n"
+               "  show-network-config          [LINK] Displays network configuration of link.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
                "  apply-yaml-config            Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
                "  generate-config-from-cmdline [FILE | COMMAND LINE] Generates network file configuration from command kernel command line or command line.\n"
@@ -313,6 +314,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-wg",                    3,        WORD_ANY, false, ncm_create_wireguard_tunnel },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
+                { "show-network-config",          1,        WORD_ANY, false, ncm_link_show_network_config },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply-yaml-config"           , WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "generate-config-from-cmdline", WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
