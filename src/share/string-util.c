@@ -98,7 +98,7 @@ int skip_first_word_and_split(char *line, const char *first_word, const char *se
         return 0;
 }
 
-char **strv_new(char *x) {
+char **strv_new(const char *x) {
         _auto_cleanup_strv_ char **a = NULL;
 
         assert(x);
@@ -114,7 +114,7 @@ char **strv_new(char *x) {
          return steal_pointer(a);
 }
 
-int strv_add(char ***l, char *value) {
+int strv_add(char ***l, const char *value) {
         char **c;
         size_t n, m;
 
@@ -128,7 +128,10 @@ int strv_add(char ***l, char *value) {
         if (!c)
                 return -ENOMEM;
 
-        c[n] = value;
+        c[n] = strdup(value);
+        if (!c[n])
+                return -ENOMEM;
+
         c[n+1] = NULL;
 
         *l = c;
