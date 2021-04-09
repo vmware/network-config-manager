@@ -2475,6 +2475,27 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_show_network_config(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *config = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = manager_show_link_network_config(p, &config);
+        if (r < 0) {
+                log_warning("Failed to show configuration of link '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        printf("%s\n", config);
+        return 0;
+}
+
 _public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");

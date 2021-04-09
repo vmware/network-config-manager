@@ -247,7 +247,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
         if (!domain_config && domains)
                 domain_config = domains;
 
-        r = write_to_resolv_conf(dns_config, domain_config);
+        r = write_to_resolv_conf_file(dns_config, domain_config);
         if (r < 0)
                 return r;
 

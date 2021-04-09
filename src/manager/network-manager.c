@@ -374,7 +374,7 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx) {
                 return r;
         }
 
-        r = remove_section_from_config(network, "Address");
+        r = remove_section_from_config_file(network, "Address");
         if (r < 0) {
                 log_warning("Failed to write to config file '%s': %s", network, g_strerror(-r));
                 return r;
@@ -472,23 +472,23 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
         if (gateway) {
                 r = parse_config_file(network, "Route", "Gateway", &config);
                 if (r >= 0) {
-                        r = remove_key_from_config(network, "Route", "Gateway");
+                        r = remove_key_from_config_file(network, "Route", "Gateway");
                         if (r < 0)
                                 return r;
 
-                        (void) remove_key_from_config(network, "Route", "GatewayOnlink");
+                        (void) remove_key_from_config_file(network, "Route", "GatewayOnlink");
                 }
         } else {
                 r = parse_config_file(network, "Route", "Destination", &config);
                 if (r >= 0) {
-                        r = remove_key_from_config(network, "Route", "Destination");
+                        r = remove_key_from_config_file(network, "Route", "Destination");
                         if (r < 0)
                                 return r;
                 }
 
                 r = parse_config_file(network, "Route", "Metric", &config);
                 if (r >= 0)
-                        (void) remove_key_from_config(network, "Route", "Metric");
+                        (void) remove_key_from_config_file(network, "Route", "Metric");
         }
 
         return dbus_network_reload();
@@ -551,7 +551,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
         g_string_append_printf(config, "Table=%d\n", rt->table);
         g_string_append_printf(config, "From=%s\n", address);
 
-        r = write_to_conf(network, config);
+        r = write_to_conf_file(network, config);
         if (r < 0)
                 return r;
 
@@ -649,7 +649,7 @@ int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx) {
                 return r;
         }
 
-       r = remove_section_from_config(network, "DHCPServer");
+       r = remove_section_from_config_file(network, "DHCPServer");
         if (r < 0)
                 return r;
 
@@ -781,14 +781,14 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx) {
 
         r = parse_config_file(network, "Network", "DNS", &config);
         if (r >= 0) {
-                r = remove_key_from_config(network, "Network", "DNS");
+                r = remove_key_from_config_file(network, "Network", "DNS");
                 if (r < 0)
                         return r;
         }
 
         r = parse_config_file(network, "Network", "Domains", &config);
         if (r >= 0) {
-                r = remove_key_from_config(network, "Network", "Domains");
+                r = remove_key_from_config_file(network, "Network", "Domains");
                 if (r < 0)
                         return r;
         }
@@ -883,7 +883,7 @@ int manager_remove_ntp_addresses(const IfNameIndex *ifnameidx) {
         if (r < 0)
                 return r;
 
-        r = remove_key_from_config(network, "Network", "NTP");
+        r = remove_key_from_config_file(network, "Network", "NTP");
         if (r < 0) {
                 log_warning("Failed to write to config file '%s': %s", network, g_strerror(-r));
                 return r;
@@ -1840,4 +1840,26 @@ int manager_create_wireguard_tunnel(char *wireguard,
         (void) manager_write_network_config(v, wireguard_network_config);
 
         return dbus_network_reload();
+}
+
+int manager_show_link_network_config(const IfNameIndex *ifnameidx, char **ret) {
+        _auto_cleanup_ char *network = NULL, *config = NULL, *c = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = network_parse_link_network_file(ifnameidx->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = read_conf_file(network, &config);
+        if (r < 0)
+                return r;
+
+        c = string_join("\n\n", network, config, NULL);
+        if (!c)
+                return log_oom();
+
+        *ret = steal_pointer(c);
+        return 0;
 }
