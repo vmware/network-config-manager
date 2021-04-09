@@ -84,7 +84,7 @@ int set_config_file_integer(const char *path, const char *section, const char *k
          return set_file_permisssion(path, "systemd-network");
 }
 
-int remove_key_from_config(const char *path, const char *section, const char *k) {
+int remove_key_from_config_file(const char *path, const char *section, const char *k) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         _cleanup_(g_error_freep) GError *e = NULL;
         int r;
@@ -111,7 +111,7 @@ int remove_key_from_config(const char *path, const char *section, const char *k)
         return set_file_permisssion(path, "systemd-network");
 }
 
-int remove_section_from_config(const char *path, const char *section) {
+int remove_section_from_config_file(const char *path, const char *section) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         _cleanup_(g_error_freep) GError *e = NULL;
         int r;
@@ -137,7 +137,7 @@ int remove_section_from_config(const char *path, const char *section) {
         return set_file_permisssion(path, "systemd-network");
 }
 
-int write_to_conf(const char *path, const GString *s) {
+int write_to_conf_file(const char *path, const GString *s) {
         _cleanup_(g_error_freep) GError *e = NULL;
 
         assert(path);
@@ -150,7 +150,7 @@ int write_to_conf(const char *path, const GString *s) {
         return 0;
 }
 
-int append_to_conf(const char *path, const GString *s) {
+int append_to_conf_file(const char *path, const GString *s) {
         _cleanup_(g_object_unref) GFileOutputStream *stream = NULL;
         _cleanup_(g_error_freep) GError *e = NULL;
         _cleanup_(g_object_unref) GFile *f = NULL;
@@ -167,6 +167,8 @@ int append_to_conf(const char *path, const GString *s) {
                 return -e->code;
 
         k = g_output_stream_write(G_OUTPUT_STREAM(stream), s->str, s->len, NULL, &e);
+        if (k == 0)
+                return -e->code;
 
         r = g_output_stream_close(G_OUTPUT_STREAM (stream), NULL, &e);
         if (r < 0)
@@ -175,8 +177,22 @@ int append_to_conf(const char *path, const GString *s) {
         return 0;
 }
 
+int read_conf_file(const char *path, char **s) {
+        _cleanup_(g_error_freep) GError *e = NULL;
+        _auto_cleanup_ char *c = NULL;
+        size_t sz;
 
-int write_to_resolv_conf(char **dns, char **domains) {
+        assert(path);
+        assert(s);
+
+        if (!g_file_get_contents(path, &c, &sz, &e))
+                return -e->code;
+
+        *s = steal_pointer(c);
+        return 0;
+}
+
+int write_to_resolv_conf_file(char **dns, char **domains) {
         _auto_cleanup_ char *p = NULL;
         GString *c = NULL;
         size_t len;
