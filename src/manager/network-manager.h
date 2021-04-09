@@ -77,5 +77,6 @@ int manager_create_wireguard_tunnel(char *wireguard, char *private_key, char *pu
                                     char *endpoint, char *allowed_ips, uint16_t listen_port);
 
 int manager_show_link_network_config(const IfNameIndex *ifnameidx, char **ret);
+int manager_edit_link_network_config(const IfNameIndex *ifnameidx);
 
 void set_json(bool k);

@@ -1863,3 +1863,50 @@ int manager_show_link_network_config(const IfNameIndex *ifnameidx, char **ret) {
         *ret = steal_pointer(c);
         return 0;
 }
+
+int manager_edit_link_network_config(const IfNameIndex *ifnameidx) {
+        _auto_cleanup_ char *network = NULL;
+        pid_t pid;
+        int r;
+
+        assert(ifnameidx);
+
+        r = network_parse_link_network_file(ifnameidx->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        pid = fork();
+        if (pid < 0)
+                return -errno;
+
+        if (pid == 0) {
+                _auto_cleanup_strv_ char **editors = NULL;
+                char **d;
+
+                editors = strv_new("vim");
+                if (!editors)
+                        return -ENOMEM;
+
+                r = strv_add(&editors, "vi");
+                if (r < 0)
+                        return r;
+
+                strv_foreach(d, editors) {
+                        const char *args[] = {*d, network, NULL};
+
+                        execvp(*d, (char* const*) args);
+                        if (errno != ENOENT) {
+                                log_warning("Failed to edit %s via editor %s: %s",  network, *d, g_strerror(-errno));
+                                _exit(EXIT_FAILURE);
+                        }
+                }
+
+                _exit(EXIT_SUCCESS);
+        } else {
+                int status;
+
+                waitpid(pid, &status, 0);
+        }
+
+        return 0;
+}

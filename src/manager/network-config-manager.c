@@ -2488,11 +2488,30 @@ _public_ int ncm_link_show_network_config(int argc, char *argv[]) {
 
         r = manager_show_link_network_config(p, &config);
         if (r < 0) {
-                log_warning("Failed to show configuration of link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to show network configuration of link '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         printf("%s\n", config);
+        return 0;
+}
+
+_public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = manager_edit_link_network_config(p);
+        if (r < 0) {
+                log_warning("Failed to edit network configuration of link '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
         return 0;
 }
 

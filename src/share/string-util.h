@@ -36,12 +36,12 @@ char *string_strip(char *s);
 #define strv_foreach(s, l)                      \
         for ((s) = (l); (s) && *(s); (s)++)
 
-char **strv_new(char *x);
+char **strv_new(const char *x);
 #define strv_join(s, t) g_strjoinv(s, t)
 #define strv_contains(s, t) g_strv_contains(s, t)
 #define strv_length(s) g_strv_length(s)
 
-int strv_add(char ***l, char *value);
+int strv_add(char ***l, const char *value);
 
 #define strv_parse_shell g_shell_parse_argv
 int skip_first_word_and_split(char *line, const char *first_word, const char *sep, char ***ret);
