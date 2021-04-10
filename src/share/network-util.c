@@ -4,6 +4,7 @@
 
 #include <arpa/inet.h>
 #include <assert.h>
+#include <ctype.h>
 #include <glib.h>
 #include <net/if.h>
 #include <linux/if.h>
@@ -115,7 +116,7 @@ int parse_ipv4(const char *s, IPAddress **ret) {
         if (inet_pton(AF_INET, s, &buffer) <= 0)
                 return errno > 0 ? -errno : -EINVAL;
 
-        memcpy(b, &buffer, sizeof(IPAddress));
+        memcpy(&b->in, &buffer, sizeof(IPAddress));
         b->family = AF_INET;
 
         *ret = steal_pointer(b);
@@ -125,7 +126,7 @@ int parse_ipv4(const char *s, IPAddress **ret) {
 
 int parse_ipv6(const char *s, IPAddress **ret) {
         _auto_cleanup_ struct IPAddress *b = NULL;
-        struct in_addr buffer;
+        struct in6_addr buffer;
 
         assert(s);
 
@@ -137,7 +138,7 @@ int parse_ipv6(const char *s, IPAddress **ret) {
         if (inet_pton(AF_INET6, s, &buffer) <= 0)
                 return errno > 0 ? -errno : -EINVAL;
 
-        memcpy(b, &buffer, sizeof(IPAddress));
+        memcpy(&b->in6, &buffer, sizeof(IPAddress));
         b->family = AF_INET6;
 
         *ret = steal_pointer(b);
@@ -294,4 +295,20 @@ int parse_mtu(char *mtu, uint32_t *ret) {
         *ret = j;
 
         return 0;
+}
+
+bool valid_hostname(const char *host)  {
+        const char *p;
+
+        p = host;
+
+        if (*p == '-')
+                return 0;
+
+        for (;*p != 0;) {
+                if (!(isalnum(*p)) && !(*p == '-') && !(*p == '.'))
+                        return false;
+                p++;
+        }
+        return true;
 }
