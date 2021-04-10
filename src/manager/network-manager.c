@@ -559,15 +559,15 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
 }
 
 int manager_configure_dhcpv4_server(const IfNameIndex *ifnameidx,
-                                    IPAddress *dns_address,
-                                    IPAddress *ntp_address,
-                                    uint32_t pool_offset,
-                                    uint32_t pool_size,
-                                    uint32_t default_lease_time,
-                                    uint32_t max_lease_time,
-                                    int emit_dns,
-                                    int emit_ntp,
-                                    int emit_router) {
+                                    const IPAddress *dns_address,
+                                    const IPAddress *ntp_address,
+                                    const uint32_t pool_offset,
+                                    const uint32_t pool_size,
+                                    const uint32_t default_lease_time,
+                                    const uint32_t max_lease_time,
+                                    const int emit_dns,
+                                    const int emit_ntp,
+                                    const int emit_router) {
 
         _auto_cleanup_ char *network = NULL, *dns = NULL, *ntp = NULL;
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
@@ -597,6 +597,8 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifnameidx,
                 if (r < 0)
                         return r;
         }
+
+        g_key_file_set_string(key_file, "Network", "DHCPServer", "yes");
 
         if (pool_offset > 0)
                 g_key_file_set_integer(key_file, "DHCPServer", "PoolOffset", pool_offset);
@@ -649,7 +651,113 @@ int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx) {
                 return r;
         }
 
-       r = remove_section_from_config_file(network, "DHCPServer");
+        r = remove_key_from_config_file(network, "Network", "DHCPServer");
+        if (r < 0)
+                return r;
+
+        r = remove_section_from_config_file(network, "DHCPServer");
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
+int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifnameidx,
+                                                const IPAddress *prefix,
+                                                const IPAddress *route_prefix,
+                                                const IPAddress *dns,
+                                                const char *domain,
+                                                const uint32_t pref_lifetime,
+                                                const uint32_t valid_lifetime,
+                                                const uint32_t dns_lifetime,
+                                                const uint32_t route_lifetime,
+                                                IPv6RAPreference preference,
+                                                const int managed,
+                                                const int other,
+                                                const int emit_dns,
+                                                const int emit_domain,
+                                                const int assign) {
+
+        _auto_cleanup_ char *network = NULL, *d = NULL, *p = NULL, *rt = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                return r;
+        }
+
+        r = load_config_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        if (prefix) {
+                r = ip_to_string_prefix(dns->family, prefix, &p);
+                if (r < 0)
+                        return r;
+        }
+
+        if (route_prefix) {
+                r = ip_to_string_prefix(dns->family, route_prefix, &rt);
+                if (r < 0)
+                        return r;
+        }
+
+        if (dns) {
+                r = ip_to_string(dns->family, dns, &d);
+                if (r < 0)
+                        return r;
+        }
+
+        /* [Network] section */
+        g_key_file_set_string(key_file, "Network", "IPv6SendRA", "yes");
+
+        if (p)
+                g_key_file_set_string(key_file, "IPv6Prefix", "Prefix", p);
+
+        if (pref_lifetime > 0)
+                g_key_file_set_integer(key_file, "IPv6Prefix", "PreferredLifetimeSec", pref_lifetime);
+
+        if (valid_lifetime > 0)
+                g_key_file_set_integer(key_file, "IPv6Prefix", "ValidLifetimeSec", valid_lifetime);
+
+
+        /* [IPv6SendRA] section */
+        if (preference != _IPV6_RA_PREFERENCE_INVALID)
+                g_key_file_set_string(key_file, "IPv6SendRA", "RouterPreference", ipv6_ra_preference_type_to_name(preference));
+
+        if (dns)
+                g_key_file_set_string(key_file, "IPv6SendRA", "DNS", d);
+
+        if (emit_dns >= 0)
+                g_key_file_set_string(key_file, "IPv6SendRA", "EmitDNS", bool_to_string(emit_dns));
+
+        if (dns_lifetime > 0)
+                g_key_file_set_integer(key_file, "IPv6SendRA", "DNSLifetimeSec", dns_lifetime);
+
+        if (domain)
+                g_key_file_set_string(key_file, "IPv6SendRA", "Domains", domain);
+
+        if (assign >= 0)
+                g_key_file_set_string(key_file, "IPv6SendRA", "Assign", bool_to_string(assign));
+
+        /* [IPv6RoutePrefix] section */
+        if (rt)
+                g_key_file_set_string(key_file, "IPv6RoutePrefix", "Route", rt);
+
+        if (route_lifetime > 0)
+                g_key_file_set_integer(key_file, "IPv6RoutePrefix", "LifetimeSec", route_lifetime);
+
+        if (!g_key_file_save_to_file (key_file, network, &e)) {
+                log_warning("Failed to write to '%s': %s", network, e->message);
+                return -e->code;
+        }
+
+        r = set_file_permisssion(network, "systemd-network");
         if (r < 0)
                 return r;
 
@@ -1026,136 +1134,6 @@ static int manager_write_netdev_config(const NetDev *n, const GString *config) {
         return 0;
 }
 
-int manager_generate_network_config_from_yaml(const char *file) {
-        _cleanup_(g_string_unrefp) GString *config = NULL, *wifi_config = NULL;
-        _cleanup_(network_unrefp) Network *n = NULL;
-        int r;
-
-        assert(file);
-
-        r = parse_yaml_network_file(file, &n);
-        if (r < 0) {
-                log_warning("Failed to parse config file '%s': %s", file, g_strerror(-r));
-                return r;
-        }
-
-        r = generate_network_config(n, &config);
-        if (r < 0) {
-                log_warning("Failed to generate network configs for file '%s': %s", file, g_strerror(-r));
-                return r;
-        }
-
-        r = manager_write_network_config(n, config);
-        if (r < 0)
-                return r;
-
-        if (n->access_points) {
-                r = generate_wifi_config(n, &wifi_config);
-                if (r < 0)
-                        return r;
-
-                return manager_write_wifi_config(n, wifi_config);
-        }
-
-        return dbus_network_reload();
-}
-
-static void manager_command_line_config_generator(void *key, void *value, void *user_data) {
-        _cleanup_(g_string_unrefp) GString *config = NULL;
-        Network *n;
-        int r;
-
-        assert(key);
-        assert(value);
-
-        n = (Network *) value;
-
-        r = generate_network_config(n, &config);
-        if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
-                return;
-         }
-
-        (void) manager_write_network_config(n, config);
-}
-
-static Network *manager_no_interface_name(GHashTable *networks) {
-        GList *l;
-        Network *n;
-
-        assert(networks);
-
-        if (g_hash_table_size(networks) > 1)
-                return NULL;
-
-        l = g_hash_table_get_values(networks);
-        if (!l)
-                return NULL;
-
-        n = l->data;
-        if (n->ifname)
-                return NULL;
-
-        return n;
-}
-
-int manager_generate_networkd_config_from_command_line(const char *file, const char *command_line) {
-        _auto_cleanup_hash_ GHashTable *networks = NULL;
-        _auto_cleanup_ char *line = NULL;
-        Network *n;
-        int r = 0;
-
-        if (file) {
-                r = read_one_line(file, &line);
-                if (r < 0)
-                        return r;
-
-                (void) truncate_newline(line);
-
-                r = parse_proc_command_line(line, &networks);
-        } else if (command_line)
-                r = parse_proc_command_line(command_line, &networks);
-
-        if (r < 0)
-                return r;
-
-        n = manager_no_interface_name(networks);
-        if (n) {
-                _cleanup_(links_unrefp) Links *h = NULL;
-                GList *i;
-
-                r = link_get_links(&h);
-                if (r < 0)
-                        return r;
-
-                for (i = h->links; i; i = i->next) {
-                        _cleanup_(g_string_unrefp) GString *config = NULL;
-                        Link *link = NULL;
-
-                        link = i->data;
-
-                        if (string_equal(link->name, "lo"))
-                                continue;
-
-                        n->ifname = g_strdup(link->name);
-                        if (!n->ifname)
-                                return log_oom();
-
-                        r = generate_network_config(n, &config);
-                        if (r < 0) {
-                                log_warning("Failed to generate network configs : %s", g_strerror(-r));
-                                return r;
-                        }
-
-                        (void) manager_write_network_config(n, config);
-                        n->ifname = mfree(n->ifname);
-                }
-
-        } else
-                g_hash_table_foreach(networks, manager_command_line_config_generator, NULL);
-
-        return dbus_network_reload();
-}
 
 int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vlan_network_config = NULL, *dev_network_config = NULL;
@@ -1802,13 +1780,13 @@ int manager_create_wireguard_tunnel(char *wireguard,
         if (endpoint) {
                 netdev->wg_endpoint = strdup(endpoint);
                 if (!netdev->wg_endpoint)
-                        return -ENOMEM;
+                        return log_oom();
         }
 
         if (allowed_ips) {
                 netdev->wg_allowed_ips = strdup(allowed_ips);
                 if (!netdev->wg_allowed_ips)
-                        return -ENOMEM;
+                        return log_oom();
         }
 
         r = generate_netdev_config(netdev, &netdev_config);
@@ -1885,7 +1863,7 @@ int manager_edit_link_network_config(const IfNameIndex *ifnameidx) {
 
                 editors = strv_new("vim");
                 if (!editors)
-                        return -ENOMEM;
+                        return log_oom();
 
                 r = strv_add(&editors, "vi");
                 if (r < 0)
@@ -1909,4 +1887,135 @@ int manager_edit_link_network_config(const IfNameIndex *ifnameidx) {
         }
 
         return 0;
+}
+
+int manager_generate_network_config_from_yaml(const char *file) {
+        _cleanup_(g_string_unrefp) GString *config = NULL, *wifi_config = NULL;
+        _cleanup_(network_unrefp) Network *n = NULL;
+        int r;
+
+        assert(file);
+
+        r = parse_yaml_network_file(file, &n);
+        if (r < 0) {
+                log_warning("Failed to parse config file '%s': %s", file, g_strerror(-r));
+                return r;
+        }
+
+        r = generate_network_config(n, &config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs for file '%s': %s", file, g_strerror(-r));
+                return r;
+        }
+
+        r = manager_write_network_config(n, config);
+        if (r < 0)
+                return r;
+
+        if (n->access_points) {
+                r = generate_wifi_config(n, &wifi_config);
+                if (r < 0)
+                        return r;
+
+                return manager_write_wifi_config(n, wifi_config);
+        }
+
+        return dbus_network_reload();
+}
+
+static void manager_command_line_config_generator(void *key, void *value, void *user_data) {
+        _cleanup_(g_string_unrefp) GString *config = NULL;
+        Network *n;
+        int r;
+
+        assert(key);
+        assert(value);
+
+        n = (Network *) value;
+
+        r = generate_network_config(n, &config);
+        if (r < 0) {
+                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                return;
+         }
+
+        (void) manager_write_network_config(n, config);
+}
+
+static Network *manager_no_interface_name(GHashTable *networks) {
+        GList *l;
+        Network *n;
+
+        assert(networks);
+
+        if (g_hash_table_size(networks) > 1)
+                return NULL;
+
+        l = g_hash_table_get_values(networks);
+        if (!l)
+                return NULL;
+
+        n = l->data;
+        if (n->ifname)
+                return NULL;
+
+        return n;
+}
+
+int manager_generate_networkd_config_from_command_line(const char *file, const char *command_line) {
+        _auto_cleanup_hash_ GHashTable *networks = NULL;
+        _auto_cleanup_ char *line = NULL;
+        Network *n;
+        int r = 0;
+
+        if (file) {
+                r = read_one_line(file, &line);
+                if (r < 0)
+                        return r;
+
+                (void) truncate_newline(line);
+
+                r = parse_proc_command_line(line, &networks);
+        } else if (command_line)
+                r = parse_proc_command_line(command_line, &networks);
+
+        if (r < 0)
+                return r;
+
+        n = manager_no_interface_name(networks);
+        if (n) {
+                _cleanup_(links_unrefp) Links *h = NULL;
+                GList *i;
+
+                r = link_get_links(&h);
+                if (r < 0)
+                        return r;
+
+                for (i = h->links; i; i = i->next) {
+                        _cleanup_(g_string_unrefp) GString *config = NULL;
+                        Link *link = NULL;
+
+                        link = i->data;
+
+                        if (string_equal(link->name, "lo"))
+                                continue;
+
+                        n->ifname = g_strdup(link->name);
+                        if (!n->ifname)
+                                return log_oom();
+
+                        r = generate_network_config(n, &config);
+                        if (r < 0) {
+                                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                                return r;
+                        }
+
+                        (void) manager_write_network_config(n, config);
+                        n->ifname = mfree(n->ifname);
+                }
+
+        } else
+                g_hash_table_foreach(networks, manager_command_line_config_generator, NULL);
+
+        return dbus_network_reload();
 }

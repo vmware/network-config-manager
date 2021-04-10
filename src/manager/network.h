@@ -45,6 +45,14 @@ typedef enum LinkLocalAddress {
        _LINK_LOCAL_ADDRESS_INVALID = -1,
 } LinkLocalAddress;
 
+typedef enum IPv6RAPreference {
+        IPV6_RA_PREFERENCE_LOW,
+        IPV6_RA_PREFERENCE_MEDIUM,
+        IPV6_RA_PREFERENCE_HIGH,
+       _IPV6_RA_PREFERENCE_MAX,
+       _IPV6_RA_PREFERENCE_INVALID = -1,
+} IPv6RAPreference;
+
 typedef enum AuthKeyManagement {
         AUTH_KEY_MANAGEMENT_NONE,
         AUTH_KEY_MANAGEMENT_WPA_PSK,
@@ -141,6 +149,9 @@ int dhcp_client_identifier_to_mode(char *name);
 
 const char *dhcp_client_duid_type_to_name(int id);
 int dhcp_client_duid_type_to_mode(char *name);
+
+const char *ipv6_ra_preference_type_to_name(int id);
+int ipv6_ra_preference_type_to_mode(const char *name);
 
 const char *auth_key_management_type_to_name(int id);
 int auth_key_management_type_to_mode(const char *name);

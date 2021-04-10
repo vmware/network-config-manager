@@ -132,6 +132,34 @@ int link_local_address_type_to_mode(const char *name) {
         return _LINK_LOCAL_ADDRESS_INVALID;
 }
 
+static const char *const ipv6_ra_preference_type[_IPV6_RA_PREFERENCE_MAX] =  {
+        [IPV6_RA_PREFERENCE_LOW]    = "low",
+        [IPV6_RA_PREFERENCE_MEDIUM] = "medium",
+        [IPV6_RA_PREFERENCE_HIGH]   = "high",
+};
+
+const char *ipv6_ra_preference_type_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(ipv6_ra_preference_type))
+                return NULL;
+
+        return ipv6_ra_preference_type[id];
+}
+
+int ipv6_ra_preference_type_to_mode(const char *name) {
+        int i;
+
+        assert(name);
+
+        for (i = AUTH_KEY_MANAGEMENT_NONE; i < (int) ELEMENTSOF(ipv6_ra_preference_type); i++)
+                if (string_equal_fold(name, ipv6_ra_preference_type[i]))
+                        return i;
+
+        return _IPV6_RA_PREFERENCE_INVALID;
+}
+
 static const char *const auth_key_management_type[_AUTH_KEY_MANAGEMENT_MAX] =  {
         [AUTH_KEY_MANAGEMENT_NONE]    = "password",
         [AUTH_KEY_MANAGEMENT_WPA_PSK] = "psk",

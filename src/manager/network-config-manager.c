@@ -1362,6 +1362,202 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
+        uint32_t pref_lifetime = 0, valid_lifetime = 0, route_lifetime = 0, dns_lifetime = 0;
+        _auto_cleanup_ IPAddress *prefix = NULL, *dns = NULL, *route_prefix = NULL;
+        int emit_dns = -1, emit_domain, assign = -1, managed = -1, other = -1;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *domain = NULL;
+        IPv6RAPreference preference;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "prefix")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &prefix);
+                        if (r < 0) {
+                                log_warning("Failed to parse prefix address '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "route-prefix")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &route_prefix);
+                        if (r < 0) {
+                                log_warning("Failed to parse route prefix address '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "dns")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &dns);
+                        if (r < 0) {
+                                log_warning("Failed to parse dns address '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "domain")) {
+                        i++;
+
+                        if (!valid_hostname(argv[i])) {
+                                log_warning("Failed to parse domain '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        domain = strdup(argv[i]);
+                        if (!domain)
+                                log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "pref-lifetime")) {
+                        i++;
+                        r = parse_uint32(argv[i], &pref_lifetime);
+                        if (r < 0) {
+                                log_warning("Failed to parse pref-lifetime '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "valid-lifetime")) {
+                        i++;
+                        r = parse_uint32(argv[i], &valid_lifetime);
+                        if (r < 0) {
+                                log_warning("Failed to parse valid-lifetime '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "route-lifetime")) {
+                        i++;
+                        r = parse_uint32(argv[i], &route_lifetime);
+                        if (r < 0) {
+                                log_warning("Failed to parse default route-lifetime '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "dns-lifetime")) {
+                        i++;
+                        r = parse_uint32(argv[i], &dns_lifetime);
+                        if (r < 0) {
+                                log_warning("Failed to parse default dns-lifetime '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "assign")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse assign '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        assign = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "managed")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse managed '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        managed = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "other")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse other '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        other = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "emit-dns")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse emit-dns '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        emit_dns = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "emit-domain")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse emit-domain '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        emit_domain = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "router-pref")) {
+                        i++;
+
+                        r = ipv6_ra_preference_type_to_mode(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse router preference '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        preference = r;
+                }
+        }
+
+        r = manager_configure_ipv6_router_advertisement(p, prefix, route_prefix, dns, domain, pref_lifetime, valid_lifetime,
+                                                        dns_lifetime, route_lifetime, preference, managed, other, emit_dns, emit_domain, assign);
+        if (r < 0) {
+                log_warning("Failed to configure IPv6 RA on link '%s': %s\n", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;

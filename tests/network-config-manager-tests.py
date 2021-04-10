@@ -721,6 +721,9 @@ class TestCLIDHCPv4Server:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
+
+        assert(parser.get('Network', 'DHCPServer') == 'yes')
+
         assert(parser.get('DHCPServer', 'PoolOffset') == '10')
         assert(parser.get('DHCPServer', 'PoolSize') == '20')
         assert(parser.get('DHCPServer', 'DefaultLeaseTimeSec') == '100')
@@ -728,6 +731,50 @@ class TestCLIDHCPv4Server:
         assert(parser.get('DHCPServer', 'EmitDNS') == 'yes')
         assert(parser.get('DHCPServer', 'DNS') == '192.168.1.1')
         assert(parser.get('DHCPServer', 'EmitRouter') == 'yes')
+
+class TestCLIIPv6RA:
+    def setup_method(self):
+        link_remove('test99')
+        link_add_dummy('test99')
+        restart_networkd()
+
+    def teardown_method(self):
+        remove_units_from_netword_unit_path()
+        link_remove('test99')
+
+    def test_cli_configure_ipv6ra(self):
+        assert(link_exits('test99') == True)
+
+        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        assert(unit_exits('10-test99.network') == True)
+
+        subprocess.check_call(['nmctl', 'add-ipv6-ra', 'test99', 'prefix', '2002:da8:1:0::/64',
+                               'pref-lifetime', '100', 'valid-lifetime', '200', 'assign', 'yes',
+                               'managed', 'yes', 'emit-dns', 'yes', 'dns', '2002:da8:1:0::1',
+                               'domain', 'test.com', 'emit-domain', 'yes', 'dns-lifetime', '100', 'router-pref', 'medium',
+                               'route-prefix', '2001:db1:fff::/64', 'route-lifetime', '1000'])
+
+        subprocess.check_call(['sleep', '3'])
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+        assert(parser.get('Network', 'IPv6SendRA') == 'yes')
+
+        assert(parser.get('IPv6Prefix', 'PreferredLifetimeSec') == '100')
+        assert(parser.get('IPv6Prefix', 'ValidLifetimeSec') == '200')
+
+        assert(parser.get('IPv6SendRA', 'RouterPreference') == 'medium')
+        assert(parser.get('IPv6SendRA', 'DNS') == '2002:da8:1::1')
+        assert(parser.get('IPv6SendRA', 'EmitDNS') == 'yes')
+        assert(parser.get('IPv6SendRA', 'Assign') == 'yes')
+        assert(parser.get('IPv6SendRA', 'DNSLifetimeSec') == '100')
+        assert(parser.get('IPv6SendRA', 'Domains') == 'test.com')
+
+        assert(parser.get('IPv6RoutePrefix', 'LifetimeSec') == '1000')
+        assert(parser.get('IPv6RoutePrefix', 'Route') == '2001:db1:fff::/64')
 
 class TestCLINetDev:
     def setup_method(self):

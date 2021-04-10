@@ -69,6 +69,8 @@ int ncm_get_system_hostname(char **ret);
 int ncm_link_add_dhcpv4_server(int argc, char *argv[]);
 int ncm_link_remove_dhcpv4_server(int argc, char *argv[]);
 
+int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]);
+
 int ncm_show_version(void);
 
 int ncm_create_vlan(int argc, char *argv[]);

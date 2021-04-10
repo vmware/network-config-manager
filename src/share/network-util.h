@@ -54,3 +54,5 @@ int parse_ifname_or_index(const char *s, IfNameIndex **ret);
 char *ether_addr_to_string(const struct ether_addr *addr, char *s);
 bool ether_addr_is_not_null(const struct ether_addr *addr);
 int parse_mtu(char *mtu, uint32_t *ret);
+
+bool valid_hostname(const char *host);
