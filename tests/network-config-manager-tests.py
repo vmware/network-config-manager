@@ -748,7 +748,7 @@ class TestCLIIPv6RA:
         subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
         assert(unit_exits('10-test99.network') == True)
 
-        subprocess.check_call(['nmctl', 'add-ipv6-ra', 'test99', 'prefix', '2002:da8:1:0::/64',
+        subprocess.check_call(['nmctl', 'add-ipv6ra', 'test99', 'prefix', '2002:da8:1:0::/64',
                                'pref-lifetime', '100', 'valid-lifetime', '200', 'assign', 'yes',
                                'managed', 'yes', 'emit-dns', 'yes', 'dns', '2002:da8:1:0::1',
                                'domain', 'test.com', 'emit-domain', 'yes', 'dns-lifetime', '100', 'router-pref', 'medium',
@@ -763,6 +763,7 @@ class TestCLIIPv6RA:
 
         assert(parser.get('Network', 'IPv6SendRA') == 'yes')
 
+        assert(parser.get('IPv6Prefix', 'Prefix') == '2002:da8:1::/64')
         assert(parser.get('IPv6Prefix', 'PreferredLifetimeSec') == '100')
         assert(parser.get('IPv6Prefix', 'ValidLifetimeSec') == '200')
 

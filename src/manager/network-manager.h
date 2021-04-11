@@ -59,13 +59,15 @@ int manager_configure_dhcpv4_server (const IfNameIndex *ifnameidx, const IPAddre
                                     const uint32_t pool_offset, const uint32_t pool_size, const uint32_t default_lease_time,
                                     const uint32_t max_lease_time, const int emit_dns, const int emit_ntp, const int emit_router);
 
+int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx);
+
 int manager_configure_ipv6_router_advertisement(const IfNameIndex *p, const IPAddress *prefix, const IPAddress *route_prefix,
                                                 const IPAddress *dns, const char *domain, const uint32_t pref_lifetime,
                                                 const uint32_t valid_lifetime, const uint32_t dns_lifetime, const uint32_t route_lifetime,
                                                 IPv6RAPreference preference, const int managed, const int other, const int emit_dns,
                                                 const int emit_domain, const int assign);
 
-int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx);
+int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifnameidx);
 
 int manager_create_bridge(const char *bridge, char **interfaces);
 int manager_create_bond(const char *bond, BondMode mode, char **interfaces);
