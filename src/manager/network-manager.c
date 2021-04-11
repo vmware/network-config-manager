@@ -764,6 +764,37 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifnameidx,
         return dbus_network_reload();
 }
 
+int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifnameidx) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to get create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                return r;
+        }
+
+        r = remove_key_from_config_file(network, "Network", "IPv6SendRA");
+        if (r < 0)
+                return r;
+
+        r = remove_section_from_config_file(network, "IPv6SendRA");
+        if (r < 0)
+                return r;
+
+        r = remove_section_from_config_file(network, "IPv6Prefix");
+        if (r < 0)
+                return r;
+
+        r = remove_section_from_config_file(network, "IPv6RoutePrefix");
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
 int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config_dns = NULL, *a = NULL;
         GSequenceIter *i;

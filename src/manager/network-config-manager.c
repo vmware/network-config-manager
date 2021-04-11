@@ -1362,6 +1362,25 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = manager_remove_dhcpv4_server(p);
+        if (r < 0) {
+                log_warning("Failed to remove DHCPv4 server on link '%s': %s\n", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
         uint32_t pref_lifetime = 0, valid_lifetime = 0, route_lifetime = 0, dns_lifetime = 0;
         _auto_cleanup_ IPAddress *prefix = NULL, *dns = NULL, *route_prefix = NULL;
@@ -1558,7 +1577,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
+_public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1568,9 +1587,9 @@ _public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = manager_remove_dhcpv4_server(p);
+        r = manager_remove_ipv6_router_advertisement(p);
         if (r < 0) {
-                log_warning("Failed to remove DHCPv4 server on link '%s': %s\n", argv[1], g_strerror(-r));
+                log_warning("Failed to remove IPv6 router advertisement on link '%s': %s\n", argv[1], g_strerror(-r));
                 return r;
         }
 
