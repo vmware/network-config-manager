@@ -191,7 +191,6 @@ void netdev_unrefp(NetDev **n) {
 
 int generate_netdev_config(NetDev *n, GString **ret) {
         _cleanup_(g_string_unrefp) GString *config = NULL;
-        _auto_cleanup_ char *gateway = NULL;
 
         assert(n);
 

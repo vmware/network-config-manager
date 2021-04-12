@@ -1756,8 +1756,6 @@ _public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_ char *setup = NULL;
         char buf[IF_NAMESIZE + 1] = {};
         GSequenceIter *i;
         DNSServer *d;
