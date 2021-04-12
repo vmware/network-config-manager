@@ -1233,6 +1233,116 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL, *oif = NULL, *iif = NULL;
+        _auto_cleanup_ IPAddress *to = NULL, *from = NULL;
+        _auto_cleanup_ char *tos = NULL;
+        uint32_t table = 0, priority = 0;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "iif")) {
+                        i++;
+
+                        r = parse_ifname_or_index(argv[i], &iif);
+                        if (r < 0) {
+                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
+                                return -errno;
+                        }
+                }
+
+                if (string_equal(argv[i], "oif")) {
+                        i++;
+
+                        r = parse_ifname_or_index(argv[i], &oif);
+                        if (r < 0) {
+                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
+                                return -errno;
+                        }
+                }
+
+                if (string_equal(argv[i], "from")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &from);
+                        if (r < 0) {
+                                log_warning("Failed to parse from address '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "to")) {
+                        i++;
+                        r = parse_ip_from_string(argv[i], &to);
+                        if (r < 0) {
+                                log_warning("Failed to parse ntp address '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "table")) {
+                        i++;
+                        r = parse_uint32(argv[i], &table);
+                        if (r < 0) {
+                                log_warning("Failed to parse table '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "prio")) {
+                        i++;
+                        r = parse_uint32(argv[i], &priority);
+                        if (r < 0) {
+                                log_warning("Failed to parse priority '%s': %s", argv[i], g_strerror(EINVAL));
+                                return -EINVAL;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "tos")) {
+                        uint32_t k;
+
+                        i++;
+                        r = parse_uint32(argv[i], &k);
+                        if (r < 0) {
+                                log_warning("Failed to parse tos '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        if (k > 255) {
+                                log_warning("TOS is out of range '%s': %s", g_strerror(EINVAL), argv[i]);
+                                return -EINVAL;
+                        }
+
+                        tos = strdup(argv[i]);
+                        if (!tos)
+                                return log_oom();
+
+                        continue;
+                }
+        }
+
+        r = manager_configure_routing_policy_rules(p, iif, oif, to, from, table, priority, tos);
+        if (r < 0) {
+                log_warning("Failed to configure routing policy rules on link '%s': %s\n", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
         uint32_t pool_offset = 0, pool_size = 0, max_lease_time = 0, default_lease_time = 0;
         int emit_dns = -1, emit_ntp = -1, emit_router = -1;
