@@ -43,6 +43,8 @@ int manager_enable_ipv6(const IfNameIndex *ifnameidx, bool enable);
 int manager_reload_network(void);
 int manager_reconfigure_link(const IfNameIndex *ifnameidx);
 
+int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu);
+
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v);
 int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v, bool dhcp4);
 

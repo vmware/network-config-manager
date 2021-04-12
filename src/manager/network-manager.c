@@ -260,6 +260,26 @@ int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
         return 0;
 }
 
+int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(mtu > 0);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_integer(network, "Network", "IPv6MTUBytes", mtu);
+        if (r < 0) {
+                log_warning("Failed to update IPv6MTUBytes= to config file '%s' = %s", network, g_strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
 int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac) {
         _auto_cleanup_ char *p = NULL, *network = NULL, *config_mac = NULL, *config_update_mac = NULL;
         int r;

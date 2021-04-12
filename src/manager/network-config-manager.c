@@ -587,6 +587,35 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        uint32_t mtu;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link: %s", argv[1]);
+                return -errno;
+        }
+
+        r = parse_mtu(argv[2], &mtu);
+        if (r < 0)
+                return r;
+
+        if (mtu < 1280) {
+                log_warning("MTU must be greater than or equal to 1280 bytes. Failed to update MTU for '%s': %s", p->ifname, g_strerror(EINVAL));
+                return r;
+        }
+
+        r = manager_link_set_network_ipv6_mtu(p, mtu);
+        if (r < 0) {
+                log_warning("Failed to update MTU for '%s': %s", p->ifname, g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int mode, r;
