@@ -63,6 +63,8 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
                                            const uint32_t priority,
                                            const char *tos);
 
+int manager_remove_routing_policy_rules(const IfNameIndex *ifnameidx);
+
 int manager_configure_dhcpv4_server (const IfNameIndex *ifnameidx,
                                      const IPAddress *dns,
                                      const IPAddress *ntp,

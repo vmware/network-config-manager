@@ -127,6 +127,9 @@ static int help(void) {
                "  delete-route                 [LINK] Removes route from Link\n"
                "  add-additional-gw            [LINK] address [ADDRESS] route [ROUTE address] gw [GW address] table [TABLE routing policy table NUMBER] Configure additional"
                                                       "\n\t\t\t\t      gateway for another NIC with routing policy rules\n"
+               "  add-rule                     [LINK] table [TABLE NUMBER] from [ADDRESS] to [ADDRESS] oif [LINK] iif [LINK] priority [NUMBER] tos [NUMBER]"
+                                                      "\n\t\t\t\t      Configures Routing Policy Rule.\n"
+               "  remove-rule                         [LINK] Removes Routing Policy Rule.\n"
                "  set-hostname                 [HOSTNAME] Sets hostname\n"
                "  show-dns                            Show DNS Servers\n"
                "  add-dns                      [LINK | system] [ADDRESS] Set Link DNS servers\n"
@@ -156,8 +159,6 @@ static int help(void) {
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
                "  delete-ntp                   [LINK] Delete Link NTP server addresses.\n"
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
-               "  add-rule                     [LINK] table [TABLE NUMBER] from [ADDRESS] to [ADDRESS] oif [LINK] iif [LINK] priority [NUMBER] tos [NUMBER]"
-                                                      "\n\t\t\t\t      Configures Routing Policy Rule.\n"
                "  add-dhcpv4-server            [LINK] pool-offset [PoolOffset NUMBER] pool-size [PoolSize NUMBER] default-lease-time [DefaultLeaseTimeSec NUMBER]"
                                                       "\n\t\t\t\t      max-lease-time [MaxLeaseTimeSec NUMBER] emit-dns [EmitDNS {yes|no|on|off|1|0}]"
                                                       "\n\t\t\t\t      dns [DNS ADDRESS] emit-ntp [EmitNTP {yes|no|on|off|1|0}] ntp [NTP ADDRESS]"
@@ -279,6 +280,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "delete-route",                 1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-additional-gw",            9,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "add-rule",                     3,        WORD_ANY, false, ncm_link_add_routing_policy_rules },
+                { "remove-rule",                  1,        WORD_ANY, false, ncm_link_remove_routing_policy_rules },
                 { "set-hostname",                 1,        WORD_ANY, false, ncm_set_system_hostname },
                 { "show-dns",                     WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
                 { "add-dns",                      2,        WORD_ANY, false, ncm_add_dns_server },

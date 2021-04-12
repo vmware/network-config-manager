@@ -1343,6 +1343,25 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_remove_routing_policy_rules(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = manager_remove_routing_policy_rules(p);
+        if (r < 0) {
+                log_warning("Failed to remove routing policy rules on link '%s': %s\n", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
         uint32_t pool_offset = 0, pool_size = 0, max_lease_time = 0, default_lease_time = 0;
         int emit_dns = -1, emit_ntp = -1, emit_router = -1;

@@ -559,6 +559,25 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
         return dbus_network_reload();
 }
 
+int manager_remove_routing_policy_rules(const IfNameIndex *ifnameidx) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to create or parse network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                return r;
+        }
+
+        r = remove_section_from_config_file(network, "RoutingPolicyRule");
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
 int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL, *destination = NULL, *pref_source = NULL;
         _cleanup_(g_string_unrefp) GString *config = NULL;
