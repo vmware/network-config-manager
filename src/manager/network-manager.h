@@ -54,18 +54,45 @@ int manager_write_wifi_config(const Network *n, const GString *config);
 int manager_generate_networkd_config_from_command_line(const char *file, const char *command_line);
 
 int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt);
+int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
+                                           const IfNameIndex *iif,
+                                           const IfNameIndex *oif,
+                                           const IPAddress *to_addr,
+                                           const IPAddress *from_addr,
+                                           const uint32_t table,
+                                           const uint32_t priority,
+                                           const char *tos);
 
-int manager_configure_dhcpv4_server (const IfNameIndex *ifnameidx, const IPAddress *dns, const IPAddress *ntp,
-                                    const uint32_t pool_offset, const uint32_t pool_size, const uint32_t default_lease_time,
-                                    const uint32_t max_lease_time, const int emit_dns, const int emit_ntp, const int emit_router);
+int manager_remove_routing_policy_rules(const IfNameIndex *ifnameidx);
+
+int manager_configure_dhcpv4_server (const IfNameIndex *ifnameidx,
+                                     const IPAddress *dns,
+                                     const IPAddress *ntp,
+                                     const uint32_t pool_offset,
+                                     const uint32_t pool_size,
+                                     const uint32_t default_lease_time,
+                                     const uint32_t max_lease_time,
+                                     const int emit_dns,
+                                     const int emit_ntp,
+                                     const int emit_router);
 
 int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx);
 
-int manager_configure_ipv6_router_advertisement(const IfNameIndex *p, const IPAddress *prefix, const IPAddress *route_prefix,
-                                                const IPAddress *dns, const char *domain, const uint32_t pref_lifetime,
-                                                const uint32_t valid_lifetime, const uint32_t dns_lifetime, const uint32_t route_lifetime,
-                                                IPv6RAPreference preference, const int managed, const int other, const int emit_dns,
-                                                const int emit_domain, const int assign);
+int manager_configure_ipv6_router_advertisement(const IfNameIndex *p,
+                                                const IPAddress *prefix,
+                                                const IPAddress *route_prefix,
+                                                const IPAddress *dns,
+                                                const char *domain,
+                                                const uint32_t pref_lifetime,
+                                                const uint32_t valid_lifetime,
+                                                const uint32_t dns_lifetime,
+                                                const uint32_t route_lifetime,
+                                                IPv6RAPreference preference,
+                                                const int managed,
+                                                const int other,
+                                                const int emit_dns,
+                                                const int emit_domain,
+                                                const int assign);
 
 int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifnameidx);
 

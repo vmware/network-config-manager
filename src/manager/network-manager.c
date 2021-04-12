@@ -36,7 +36,7 @@ int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode) {
                 return r;
 
         if (!network) {
-                log_warning("Failed to get network file for '%s'. systemd-networkd is configuring. Please try in a while.", ifnameidx->ifname);
+                log_warning("Failed to find network file for '%s'. systemd-networkd is configuring. Please try in a while.", ifnameidx->ifname);
                 return -ENODATA;
         }
 
@@ -58,7 +58,7 @@ int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
                 return r;
 
         if (!network) {
-                log_warning("Failed to get network file for '%s'. systemd-networkd is configuring. Please try after a while.", ifnameidx->ifname);
+                log_warning("Failed to find network file for '%s'. systemd-networkd is configuring. Please try after a while.", ifnameidx->ifname);
                 return -ENODATA;
         }
 
@@ -364,13 +364,13 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx) {
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to get link setup '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find link setup '%s': %s", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
         r = network_parse_link_network_file(ifnameidx->ifindex, &network);
         if (r < 0) {
-                log_warning("Failed to get .network file for '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find .network file for '%s': %s", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -461,7 +461,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to get link setup '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find link setup '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -494,6 +494,90 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
         return dbus_network_reload();
 }
 
+int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
+                                           const IfNameIndex *iif,
+                                           const IfNameIndex *oif,
+                                           const IPAddress *to_addr,
+                                           const IPAddress *from_addr,
+                                           const uint32_t table,
+                                           const uint32_t priority,
+                                           const char *tos) {
+        _auto_cleanup_ char *network = NULL, *to = NULL, *from = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                return r;
+        }
+
+        r = load_config_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = ip_to_string_prefix(to_addr->family, to_addr, &to);
+        if (r < 0)
+                return r;
+
+        r = ip_to_string_prefix(from_addr->family, from_addr, &from);
+        if (r < 0)
+                return r;
+
+        if (tos)
+                g_key_file_set_string(key_file, "RoutingPolicyRule", "TypeOfService", tos);
+
+        g_key_file_set_integer(key_file, "RoutingPolicyRule", "Table", table);
+
+        if (priority > 0)
+                g_key_file_set_integer(key_file, "RoutingPolicyRule", "Priority", priority);
+
+        if (from)
+                g_key_file_set_string(key_file, "RoutingPolicyRule", "From", from);
+
+        if (to)
+                g_key_file_set_string(key_file, "RoutingPolicyRule", "To", to);
+
+        if (iif)
+                g_key_file_set_string(key_file, "RoutingPolicyRule", "IncomingInterface", iif->ifname);
+
+        if (oif)
+                g_key_file_set_string(key_file, "RoutingPolicyRule", "OutgoingInterface", oif->ifname);
+
+        if (!g_key_file_save_to_file (key_file, network, &e)) {
+                log_warning("Failed to write to '%s': %s", network, e->message);
+                return -e->code;
+        }
+
+        r = set_file_permisssion(network, "systemd-network");
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
+int manager_remove_routing_policy_rules(const IfNameIndex *ifnameidx) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to create or parse network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                return r;
+        }
+
+        r = remove_section_from_config_file(network, "RoutingPolicyRule");
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
 int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL, *destination = NULL, *pref_source = NULL;
         _cleanup_(g_string_unrefp) GString *config = NULL;
@@ -504,7 +588,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
 
         r = create_network_conf_file(ifnameidx->ifname, &network);
         if (r < 0) {
-                log_warning("Failed to get or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -578,7 +662,7 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifnameidx,
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to get or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -647,7 +731,7 @@ int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx) {
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to get create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -772,7 +856,7 @@ int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifnameidx) {
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to get create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
