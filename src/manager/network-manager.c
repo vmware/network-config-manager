@@ -260,6 +260,26 @@ int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
         return 0;
 }
 
+int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(mtu > 0);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_integer(network, "Network", "IPv6MTUBytes", mtu);
+        if (r < 0) {
+                log_warning("Failed to update IPv6MTUBytes= to config file '%s' = %s", network, g_strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
 int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac) {
         _auto_cleanup_ char *p = NULL, *network = NULL, *config_mac = NULL, *config_update_mac = NULL;
         int r;
@@ -1251,9 +1271,9 @@ static int manager_write_netdev_config(const NetDev *n, const GString *config) {
 
 
 int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vlan_network_config = NULL, *dev_network_config = NULL;
-        _auto_cleanup_ char *vlan_netdev = NULL, *vlan_network = NULL, *network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vlan_network_config = NULL;
+        _auto_cleanup_ char *vlan_network = NULL, *network = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         int r;
 
@@ -1313,10 +1333,10 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
 }
 
 int manager_create_bridge(const char *bridge, char **interfaces) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *bridge_network_config = NULL, *dev_network_config = NULL;
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *bridge_network_config = NULL;
         _auto_cleanup_ char *bridge_netdev = NULL, *bridge_network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         char **s;
         int r;
 
@@ -1382,10 +1402,10 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
 }
 
 int manager_create_bond(const char *bond, BondMode mode, char **interfaces) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *bond_network_config = NULL, *dev_network_config = NULL;
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *bond_network_config = NULL;
         _auto_cleanup_ char *bond_netdev = NULL, *bond_network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         char **s;
         int r;
 
@@ -1460,10 +1480,10 @@ int manager_create_vxlan(const char *vxlan,
                          const char *dev,
                          bool independent) {
 
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vxlan_network_config = NULL, *dev_network_config = NULL;
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vxlan_network_config = NULL;
         _auto_cleanup_ char *vxlan_netdev = NULL, *vxlan_network = NULL, *network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
         assert(vxlan);
@@ -1676,10 +1696,10 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
 }
 
 int manager_create_veth(const char *veth, const char *veth_peer) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *veth_network_config = NULL, *dev_network_config = NULL;
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *veth_network_config = NULL;
         _auto_cleanup_ char *veth_netdev = NULL, *veth_network = NULL, *network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
         assert(veth);
@@ -1737,10 +1757,10 @@ int manager_create_tunnel(const char *tunnel,
                           const char *dev,
                           bool independent) {
 
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *tunnel_network_config = NULL, *dev_network_config = NULL;
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *tunnel_network_config = NULL;
         _auto_cleanup_ char *tunnel_netdev = NULL, *tunnel_network = NULL, *network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
         assert(tunnel);
@@ -1809,10 +1829,10 @@ int manager_create_tunnel(const char *tunnel,
 }
 
 int manager_create_vrf(const char *vrf, uint32_t table) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vrf_network_config = NULL, *dev_network_config = NULL;
-        _auto_cleanup_ char *vrf_netdev = NULL, *vrf_network = NULL, *network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vrf_network_config = NULL;
+        _auto_cleanup_ char *vrf_netdev = NULL, *vrf_network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
         assert(vrf);
@@ -1868,10 +1888,10 @@ int manager_create_wireguard_tunnel(char *wireguard,
                                     char *allowed_ips,
                                     uint16_t listen_port) {
 
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *wireguard_network_config = NULL, *dev_network_config = NULL;
-        _auto_cleanup_ char *wireguard_netdev = NULL, *wireguard_network = NULL, *network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL, *n = NULL;
+        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *wireguard_network_config = NULL;
+        _auto_cleanup_ char *wireguard_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
         assert(wireguard);
