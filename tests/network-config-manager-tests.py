@@ -428,6 +428,26 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Route', 'Destination') == '10.10.10.10')
 
+    def test_cli_add_routing_policy_rule(self):
+        assert(link_exits('test99') == True)
+
+        subprocess.check_call(['nmctl', 'add-rule', 'test99', 'table', '10', 'to', '192.168.1.2/24', 'from', '192.168.1.3/24',
+                               'oif', 'test99', 'iif', 'test99', 'tos','0x12'])
+        assert(unit_exits('10-test99.network') == True)
+
+        subprocess.check_call(['sleep', '5'])
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+        assert(parser.get('RoutingPolicyRule', 'Table') == '10')
+        assert(parser.get('RoutingPolicyRule', 'From') == '192.168.1.3/24')
+        assert(parser.get('RoutingPolicyRule', 'To') == '192.168.1.2/24')
+        assert(parser.get('RoutingPolicyRule', 'TypeOfService') == '0x12')
+        assert(parser.get('RoutingPolicyRule', 'OutgoingInterface') == 'test99')
+        assert(parser.get('RoutingPolicyRule', 'IncomingInterface') == 'test99')
+
     def test_cli_add_dns(self):
         assert(link_exits('test99') == True)
 
