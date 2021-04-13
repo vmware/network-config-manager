@@ -374,13 +374,21 @@ class TestCLINetwork:
         assert(unit_exits('10-test99.network') == True)
 
         subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'add-link-address', 'test99', '192.168.1.45/24'])
+        subprocess.check_call(['nmctl', 'add-link-address', 'test99', 'address', '192.168.1.45/24', 'peer',
+                               '192.168.1.46/24', 'dad', 'ipv4', 'scope', 'link', 'pref-lifetime', 'forever',
+                               'prefix-route', 'yes', 'label', '3434'])
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Address', 'Address') == '192.168.1.45/24')
+        assert(parser.get('Address', 'Peer') == '192.168.1.46/24')
+        assert(parser.get('Address', 'Scope') == 'link')
+        assert(parser.get('Address', 'PreferredLifetime') == 'forever')
+        assert(parser.get('Address', 'AddPrefixRoute') == 'yes')
+        assert(parser.get('Address', 'DuplicateAddressDetection') == 'ipv4')
+        assert(parser.get('Address', 'Label') == '3434')
 
     def test_cli_add_default_gateway(self):
         assert(link_exits('test99') == True)
@@ -389,7 +397,10 @@ class TestCLINetwork:
         assert(unit_exits('10-test99.network') == True)
 
         subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'add-link-address', 'test99', '192.168.1.45/24'])
+
+        subprocess.check_call(['nmctl', 'add-link-address', 'test99', 'address', '192.168.1.45/24', 'peer',
+                               '192.168.1.46/24', 'dad', 'ipv4', 'scope', 'link', 'pref-lifetime', 'forever',
+                               'prefix-route', 'yes', 'label', '3434'])
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -412,8 +423,11 @@ class TestCLINetwork:
         subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
         assert(unit_exits('10-test99.network') == True)
 
+        subprocess.check_call(['nmctl', 'add-link-address', 'test99', 'address', '192.168.1.45/24', 'peer',
+                               '192.168.1.46/24', 'dad', 'ipv4', 'scope', 'link', 'pref-lifetime', 'forever',
+                               'prefix-route', 'yes', 'label', '3434'])
         subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'add-link-address', 'test99', '192.168.1.45/24'])
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
