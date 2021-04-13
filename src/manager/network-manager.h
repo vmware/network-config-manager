@@ -26,7 +26,15 @@ int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *ia
 
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system);
 
-int manager_configure_link_address(const IfNameIndex *ifnameidx, IPAddress *address, IPAddress *peer);
+int manager_configure_link_address(const IfNameIndex *ifnameidx,
+                                   IPAddress *address,
+                                   IPAddress *peer,
+                                   char *scope,
+                                   char *pref_lft,
+                                   IPDuplicateAddressDetection dad,
+                                   int prefix_route,
+                                   uint32_t label);
+
 int manager_delete_link_address(const IfNameIndex *ifnameidx);
 
 int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt);

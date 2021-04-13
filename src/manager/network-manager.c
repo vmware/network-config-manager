@@ -322,56 +322,77 @@ int manager_set_link_state(const IfNameIndex *ifnameidx, LinkState state) {
         return link_set_state(ifnameidx, state);
 }
 
-int manager_configure_link_address(const IfNameIndex *ifnameidx, IPAddress *address, IPAddress *peer) {
-        _auto_cleanup_ char *network = NULL, *config_address = NULL, *a = NULL;
+int manager_configure_link_address(const IfNameIndex *ifnameidx,
+                                   IPAddress *address,
+                                   IPAddress *peer,
+                                   char *scope,
+                                   char *pref_lft,
+                                   IPDuplicateAddressDetection dad,
+                                   int prefix_route,
+                                   uint32_t label) {
+
+        _auto_cleanup_ char *network = NULL, *config_address = NULL, *a = NULL, *p = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
         int r;
 
         assert(ifnameidx);
-        assert(address);
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)
                 return r;
 
-        if (!address->prefix_len)
-                r = ip_to_string(address->family, address, &a);
-        else
-                r = ip_to_string_prefix(address->family, address, &a);
+        r = load_config_file(network, &key_file);
         if (r < 0)
                 return r;
 
-        r = parse_config_file(network, "Address", "Address", &config_address);
-        if (r >= 0) {
-                if (string_equal(a, config_address))
-                        return 0;
-        }
-
-        r = set_config_file_string(network, "Address", "Address", a);
-        if (r < 0) {
-                log_warning("Failed to write to config file: '%s': %s", network, g_strerror(-r));
-                return r;
+        if (address) {
+                if (!address->prefix_len)
+                        r = ip_to_string(address->family, address, &a);
+                else
+                        r = ip_to_string_prefix(address->family, address, &a);
+                if (r < 0)
+                        return r;
         }
 
         if (peer) {
                 if (!peer->prefix_len)
-                        r = ip_to_string(peer->family, peer, &a);
+                        r = ip_to_string(peer->family, peer, &p);
                 else
-                        r = ip_to_string_prefix(peer->family, peer, &a);
+                        r = ip_to_string_prefix(peer->family, peer, &p);
                 if (r < 0)
                         return r;
-
-                r = parse_config_file(network, "Address", "Peer", &config_address);
-                if (r >= 0) {
-                        if (string_equal(a, config_address))
-                                return 0;
-                }
-
-                r = set_config_file_string(network, "Address", "Peer", a);
-                if (r < 0) {
-                        log_warning("Failed to write to config file '%s': %s", network, g_strerror(-r));
-                        return r;
-                }
         }
+
+        if (a)
+                g_key_file_set_string(key_file, "Address", "Address", a);
+
+        if (p)
+                g_key_file_set_string(key_file, "Address", "Peer", p);
+
+        if (scope)
+                g_key_file_set_string(key_file, "Address", "Scope", scope);
+
+        if (pref_lft)
+                g_key_file_set_string(key_file, "Address", "PreferredLifetime", pref_lft);
+
+        if (label > 0)
+                g_key_file_set_integer(key_file, "Address", "Label", label);
+
+        if (prefix_route >= 0)
+                g_key_file_set_string(key_file, "Address", "AddPrefixRoute", bool_to_string(prefix_route));
+
+        if (dad != _IP_DUPLICATE_ADDRESS_DETECTION_INVALID)
+                g_key_file_set_string(key_file, "Address", "DuplicateAddressDetection", ip_duplicate_address_detection_type_to_name(dad));
+
+        if (!g_key_file_save_to_file (key_file, network, &e)) {
+                log_warning("Failed to write to '%s': %s", network, e->message);
+                return -e->code;
+        }
+
+        r = set_file_permisssion(network, "systemd-network");
+        if (r < 0)
+                return r;
 
         return dbus_network_reload();
 }

@@ -45,6 +45,15 @@ typedef enum LinkLocalAddress {
        _LINK_LOCAL_ADDRESS_INVALID = -1,
 } LinkLocalAddress;
 
+typedef enum IPDuplicateAddressDetection {
+        IP_DUPLICATE_ADDRESS_DETECTION_NONE,
+        IP_DUPLICATE_ADDRESS_DETECTION_IPV4,
+        IP_DUPLICATE_ADDRESS_DETECTION_IPV6,
+        IP_DUPLICATE_ADDRESS_DETECTION_BOTH,
+       _IP_DUPLICATE_ADDRESS_DETECTION_MAX,
+       _IP_DUPLICATE_ADDRESS_DETECTION_INVALID = -1,
+} IPDuplicateAddressDetection;
+
 typedef enum IPv6RAPreference {
         IPV6_RA_PREFERENCE_LOW,
         IPV6_RA_PREFERENCE_MEDIUM,
@@ -161,6 +170,9 @@ int auth_eap_method_to_mode(const char *name);
 
 const char *link_local_address_type_to_name(int id);
 int link_local_address_type_to_mode(const char *name);
+
+const char *ip_duplicate_address_detection_type_to_name(int id);
+int ip_duplicate_address_detection_type_to_mode(const char *name);
 
 int generate_network_config(Network *n, GString **ret);
 int generate_wifi_config(Network *n, GString **ret);

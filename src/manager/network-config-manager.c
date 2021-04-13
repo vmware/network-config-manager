@@ -874,7 +874,7 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
 
         d = dhcp_client_duid_type_to_mode(argv[2]);
         if (d == _DHCP_CLIENT_DUID_TYPE_INVALID) {
-                log_warning("Failed to parse DHCPv4 DUID type: %s", argv[2]);
+                log_warning("Failed to parse DHCPv4 DUID type '%s': %s", argv[2], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -900,13 +900,13 @@ _public_ int ncm_link_update_state(int argc, char *argv[]) {
 
         state = link_name_to_state(argv[2]);
         if (state < 0) {
-                log_warning("Failed to find link state : %s", argv[2]);
+                log_warning("Failed to find link state '%s': %s", argv[2], g_strerror(EINVAL));
                 return r;
         }
 
         r = manager_set_link_state(p, state);
         if (r < 0) {
-                log_warning("Failed to set link state '%s': %s\n", p->ifname, g_strerror(r));
+                log_warning("Failed to set link state '%s': %s\n", p->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -914,9 +914,12 @@ _public_ int ncm_link_update_state(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_add_address(int argc, char *argv[]) {
+        IPDuplicateAddressDetection dad = _IP_DUPLICATE_ADDRESS_DETECTION_INVALID;
         _auto_cleanup_ IPAddress *address = NULL, *peer = NULL;
+        _auto_cleanup_ char *scope = NULL, *pref_lft = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        int r;
+        int r, prefix_route = -1;
+        uint32_t label = 0;
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
@@ -924,23 +927,112 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = parse_ip_from_string(argv[2], &address);
-        if (r < 0) {
-                log_warning("Failed to parse address : %s", argv[2]);
-                return r;
-        }
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "address")) {
+                        i++;
 
-        if (argc > 3) {
-                r = parse_ip_from_string(argv[3], &peer);
-                if (r < 0) {
-                        log_warning("Failed to parse peer address: %s", argv[3]);
-                        return r;
+                        r = parse_ip_from_string(argv[i], &address);
+                        if (r < 0) {
+                                log_warning("Failed to parse address '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                }
+
+                if (string_equal(argv[i], "peer")) {
+                        i++;
+
+                        r = parse_ip_from_string(argv[i], &peer);
+                        if (r < 0) {
+                                log_warning("Failed to parse peer address '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                }
+
+                if (string_equal(argv[i], "label")) {
+                        i++;
+
+                        r = parse_uint32(argv[i], &label);
+                        if (r < 0) {
+                                log_warning("Failed to parse label '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "pref-lifetime")) {
+                        uint32_t lft;
+                        i++;
+
+                        if (!string_equal(argv[i], "forever") && !string_equal(argv[i], "infinity")) {
+                                r = parse_uint32(argv[i], &lft);
+                                if (r < 0) {
+                                        log_warning("Failed to parse pref-lifetime '%s': %s", argv[i], g_strerror(-r));
+                                        return r;
+                                }
+                        }
+
+                        pref_lft = strdup(argv[i]);
+                        if (!pref_lft)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "scope")) {
+                        i++;
+
+                        if (!string_equal(argv[i], "global") && !string_equal(argv[i], "link") && !string_equal(argv[i], "host")) {
+                                uint32_t k;
+
+                                r = parse_uint32(argv[i], &k);
+                                if (r < 0) {
+                                        log_warning("Failed to parse scope '%s': %s", argv[i], g_strerror(-r));
+                                        return r;
+                                }
+
+                                if (k > 255) {
+                                        log_warning("Scope '%s' is out of range [0-255]: %s", argv[i], g_strerror(EINVAL));
+                                        return r;
+                                }
+                        }
+
+                        scope = strdup(argv[i]);
+                        if (!scope)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "dad")) {
+                        i++;
+
+                        r = ip_duplicate_address_detection_type_to_mode(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse dad '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        dad = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "prefix-route")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse prefix-route '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        prefix_route = r;
                 }
         }
 
-        r = manager_configure_link_address(p, address, peer);
+        r = manager_configure_link_address(p, address, peer, scope, pref_lft, dad, prefix_route, label);
         if (r < 0) {
-                log_warning("Failed to set link address '%s': %s\n", argv[1], g_strerror(-r));
+                log_warning("Failed to configure link address: %s", g_strerror(-r));
                 return r;
         }
 
@@ -959,7 +1051,7 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
 
         r = manager_delete_link_address(p);
         if (r < 0) {
-                log_warning("Failed to set link address '%s': %s\n", p->ifname, g_strerror(-r));
+                log_warning("Failed to remove link address '%s': %s\n", p->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -1200,7 +1292,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         i++;
                         r = parse_ip_from_string(argv[i], &a);
                         if (r < 0) {
-                                log_warning("Failed to parse address : %s", argv[i]);
+                                log_warning("Failed to parse address '%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
 
@@ -1211,7 +1303,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         i++;
                         r = parse_ip_from_string(argv[i], &gw);
                         if (r < 0) {
-                                log_warning("Failed to parse route address : %s", argv[i]);
+                                log_warning("Failed to parse route address '%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
 
@@ -1222,7 +1314,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         i++;
                         r = parse_ip_from_string(argv[i], &destination);
                         if (r < 0) {
-                                log_warning("Failed to parse gw address : %s", argv[i]);
+                                log_warning("Failed to parse gateway address '%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
 
@@ -1233,7 +1325,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         i++;
                         r = parse_uint32(argv[i], &table);
                         if (r < 0) {
-                                log_warning("Failed to parse table : %s", argv[i]);
+                                log_warning("Failed to parse table '%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
                 }
@@ -1409,7 +1501,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         i++;
                         r = parse_ip_from_string(argv[i], &dns);
                         if (r < 0) {
-                                log_warning("Failed to parse dns address : %s", argv[i]);
+                                log_warning("Failed to parse dns address '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
 
@@ -1420,7 +1512,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         i++;
                         r = parse_ip_from_string(argv[i], &ntp);
                         if (r < 0) {
-                                log_warning("Failed to parse ntp address : %s", argv[i]);
+                                log_warning("Failed to parse ntp address '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
 
@@ -1431,7 +1523,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         i++;
                         r = parse_uint32(argv[i], &pool_offset);
                         if (r < 0) {
-                                log_warning("Failed to parse pool offset : %s", argv[i]);
+                                log_warning("Failed to parse pool offset '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
 
@@ -1442,7 +1534,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         i++;
                         r = parse_uint32(argv[i], &pool_size);
                         if (r < 0) {
-                                log_warning("Failed to parse pool size : %s", argv[i]);
+                                log_warning("Failed to parse pool size '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
 
@@ -1453,7 +1545,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         i++;
                         r = parse_uint32(argv[i], &default_lease_time);
                         if (r < 0) {
-                                log_warning("Failed to parse default lease time : %s", argv[i]);
+                                log_warning("Failed to parse default lease time '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
 
@@ -1464,7 +1556,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         i++;
                         r = parse_uint32(argv[i], &max_lease_time);
                         if (r < 0) {
-                                log_warning("Failed to parse maximum lease time : %s", argv[i]);
+                                log_warning("Failed to parse maximum lease time '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
 
@@ -1476,7 +1568,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse emit dns %s : %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to parse emit dns '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
 
@@ -1489,7 +1581,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse emit ntp %s : %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to parse emit ntp '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
 
@@ -1502,7 +1594,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse emit router %s : %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to parse emit router '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
 
@@ -2716,7 +2808,6 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                                 return r;
                         }
                         independent = r;
-                        continue;
                 }
         }
 
@@ -2828,7 +2919,6 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 log_warning("Failed to parse listen port '%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
-                        continue;
                 }
         }
 

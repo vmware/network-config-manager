@@ -153,11 +153,40 @@ int ipv6_ra_preference_type_to_mode(const char *name) {
 
         assert(name);
 
-        for (i = AUTH_KEY_MANAGEMENT_NONE; i < (int) ELEMENTSOF(ipv6_ra_preference_type); i++)
+        for (i = IPV6_RA_PREFERENCE_LOW; i < (int) ELEMENTSOF(ipv6_ra_preference_type); i++)
                 if (string_equal_fold(name, ipv6_ra_preference_type[i]))
                         return i;
 
         return _IPV6_RA_PREFERENCE_INVALID;
+}
+
+static const char *const ip_duplicate_address_detection_type[_IP_DUPLICATE_ADDRESS_DETECTION_MAX] =  {
+        [IP_DUPLICATE_ADDRESS_DETECTION_NONE] = "none",
+        [IP_DUPLICATE_ADDRESS_DETECTION_IPV4] = "ipv4",
+        [IP_DUPLICATE_ADDRESS_DETECTION_IPV6] = "ipv6",
+        [IP_DUPLICATE_ADDRESS_DETECTION_BOTH] = "both",
+};
+
+const char *ip_duplicate_address_detection_type_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(ip_duplicate_address_detection_type))
+                return NULL;
+
+        return ip_duplicate_address_detection_type[id];
+}
+
+int ip_duplicate_address_detection_type_to_mode(const char *name) {
+        int i;
+
+        assert(name);
+
+        for (i = IP_DUPLICATE_ADDRESS_DETECTION_NONE; i < (int) ELEMENTSOF(ip_duplicate_address_detection_type); i++)
+                if (string_equal_fold(name, ip_duplicate_address_detection_type[i]))
+                        return i;
+
+        return _IP_DUPLICATE_ADDRESS_DETECTION_INVALID;
 }
 
 static const char *const auth_key_management_type[_AUTH_KEY_MANAGEMENT_MAX] =  {
@@ -236,8 +265,13 @@ int create_network_conf_file(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
+        r = set_file_permisssion(network, "systemd-network");
+        if (r < 0)
+                 return r;
+
         if (ret)
                 *ret = steal_pointer(network);
+
 
         return dbus_network_reload();
 }
