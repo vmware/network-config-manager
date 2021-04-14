@@ -152,6 +152,9 @@ static int help(void) {
                "  set-ipv6acceptra             [LINK] [IPv6AcceptRA BOOLEAN] Configures Link IPv6 Router Advertisement (RA) reception support for the interface.\n"
                "  set-ipv6mtu                  [LINK] [MTU NUMBER] Configures IPv6 maximum transmission unit (MTU).\n"
                "  set-ipmasquerade             [LINK] [IPMasquerade BOOLEAN] Configures IP masquerading for the network interface.\n"
+               "  set-ipv4proxyarp             [LINK] [IPv4ProxyARP BOOLEAN] Configures Link proxy ARP for IPv4.\n"
+               "  set-ipv6proxyndp             [LINK] [IPv6ProxyNDP BOOLEAN] Configures Link proxy NDP for IPv6.\n"
+               "  set-conf-without-carrier     [LINK] [ConfigureWithoutCarrier BOOLEAN] Allows networkd to configure link even if it has no carrier.\n"
                "  set-dhcp4-use-dns            [LINK] [UseDNS BOOLEAN] Configures Link DHCP4 Use DNS.\n"
                "  set-dhcp4-use-domains        [LINK] [UseDomains BOOLEAN] Configures Link DHCP4 Use Domains.\n"
                "  set-dhcp4-use-mtu            [LINK] [UseMTU BOOLEAN] Configures Link DHCP4 Use MTU.\n"
@@ -303,6 +306,9 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-ipforward",                2,        WORD_ANY, false, ncm_link_set_network_section_bool },
                 { "set-ipv6acceptra",             2,        WORD_ANY, false, ncm_link_set_network_section_bool },
                 { "set-ipmasquerade",             2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-ipv4proxyarp",             2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-ipv6proxyndp",             2,        WORD_ANY, false, ncm_link_set_network_section_bool },
+                { "set-conf-without-carrier",     2,        WORD_ANY, false, ncm_link_set_network_section_bool },
                 { "set-dhcp4-use-dns",            2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp4-use-domains",        2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp4-use-ntp",            2,        WORD_ANY, false, ncm_link_set_dhcp4_section },

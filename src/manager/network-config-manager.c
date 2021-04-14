@@ -776,6 +776,12 @@ _public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
                 k = "IPv6AcceptRA";
         else if (string_equal(argv[0], "set-ipmasquerade"))
                 k = "IPMasquerade";
+        else if (string_equal(argv[0], "set-proxyarp"))
+                k = "IPv4ProxyARP";
+        else if (string_equal(argv[0], "set-proxyndp"))
+                k = "IPv6ProxyNDP";
+        else if (string_equal(argv[0], "set-conf-without-carrier"))
+                k = "ConfigureWithoutCarrier";
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
