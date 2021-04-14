@@ -1483,9 +1483,14 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
         (void) manager_write_network_config(v, bridge_network_config);
 
         strv_foreach(s, interfaces) {
+                _auto_cleanup_ IfNameIndex *p = NULL;
                 _auto_cleanup_ char *network = NULL;
 
-                r = create_network_conf_file(*s, &network);
+                r = parse_ifname_or_index(*s, &p);
+                if (r < 0)
+                        return r;
+
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
 
@@ -1640,7 +1645,13 @@ int manager_create_vxlan(const char *vxlan,
         (void) manager_write_network_config(v, vxlan_network_config);
 
         if (!independent) {
-                r = create_network_conf_file(dev, &network);
+                _auto_cleanup_ IfNameIndex *p = NULL;
+
+                r = parse_ifname_or_index(dev, &p);
+                if (r < 0)
+                        return r;
+
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
 
@@ -1657,6 +1668,7 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
         _auto_cleanup_ char *macvlan_netdev = NULL, *macvlan_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         assert(macvlan);
@@ -1706,7 +1718,11 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
 
         (void) manager_write_network_config(v, macvlan_network_config);
 
-        r = create_network_conf_file(dev, &network);
+        r = parse_ifname_or_index(dev, &p);
+        if (r < 0)
+                return r;
+
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1726,6 +1742,7 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
         _auto_cleanup_ char *ipvlan_netdev = NULL, *ipvlan_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         assert(ipvlan);
@@ -1775,7 +1792,11 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
 
         (void) manager_write_network_config(v, ipvlan_network_config);
 
-        r = create_network_conf_file(dev, &network);
+        r = parse_ifname_or_index(dev, &p);
+        if (r < 0)
+                return r;
+
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1912,7 +1933,13 @@ int manager_create_tunnel(const char *tunnel,
         (void) manager_write_network_config(v, tunnel_network_config);
 
         if (!independent) {
-                r = create_network_conf_file(dev, &network);
+                _auto_cleanup_ IfNameIndex *p = NULL;
+
+                r = parse_ifname_or_index(dev, &p);
+                if (r < 0)
+                        return r;
+
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
 
