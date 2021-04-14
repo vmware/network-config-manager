@@ -39,11 +39,9 @@ const char *netdev_kind_to_name(NetDevKind id) {
 }
 
 int netdev_name_to_kind(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = NET_DEV_KIND_VLAN; i < (int) ELEMENTSOF(netdev_kind); i++)
+        for (int i = NET_DEV_KIND_VLAN; i < (int) ELEMENTSOF(netdev_kind); i++)
                 if (netdev_kind[i] && string_equal_fold(name, netdev_kind[i]))
                         return i;
 
@@ -71,11 +69,9 @@ const char *bond_mode_to_name(BondMode id) {
 }
 
 int bond_name_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = BOND_MODE_ROUNDROBIN; i < (int) ELEMENTSOF(bond_mode); i++)
+        for (int i = BOND_MODE_ROUNDROBIN; i < (int) ELEMENTSOF(bond_mode); i++)
                 if (bond_mode[i] && string_equal_fold(name, bond_mode[i]))
                         return i;
 
@@ -101,11 +97,9 @@ const char *macvlan_mode_to_name(MACVLanMode id) {
 }
 
 int macvlan_name_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = MAC_VLAN_MODE_PRIVATE; i < (int) ELEMENTSOF(macvlan_mode); i++)
+        for (int i= MAC_VLAN_MODE_PRIVATE; i < (int) ELEMENTSOF(macvlan_mode); i++)
                 if (macvlan_mode[i] && string_equal_fold(name, macvlan_mode[i]))
                         return i;
 
@@ -129,11 +123,9 @@ const char *ipvlan_mode_to_name(IPVLanMode id) {
 }
 
 int ipvlan_name_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = IP_VLAN_MODE_L2; i < (int) ELEMENTSOF(ipvlan_mode); i++)
+        for (int i = IP_VLAN_MODE_L2; i < (int) ELEMENTSOF(ipvlan_mode); i++)
                 if (ipvlan_mode[i] && string_equal_fold(name, ipvlan_mode[i]))
                         return i;
 
