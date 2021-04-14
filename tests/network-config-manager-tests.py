@@ -407,15 +407,14 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Address', 'Address') == '192.168.1.45/24')
 
-        subprocess.check_call(['nmctl', 'set-link-state', 'test99', 'up'])
-
-        subprocess.check_call(['nmctl', 'add-default-gateway', 'test99', '192.168.1.1', 'onlink', 'true'])
+        subprocess.check_call(['nmctl', 'add-default-gateway', 'test99', 'gw', '192.168.1.1', 'onlink', 'true'])
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Route', 'Gateway') == '192.168.1.1')
+        assert(parser.get('Route', 'GatewayOnLink') == 'yes')
 
     def test_cli_add_route(self):
         assert(link_exits('test99') == True)
