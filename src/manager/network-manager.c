@@ -451,8 +451,8 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
                 return r;
         }
 
-        if (rt->onlink) {
-                r = set_config_file_string(network, "Route", "GatewayOnlink", "yes");
+        if (rt->onlink > 0) {
+                r = set_config_file_string(network, "Route", "GatewayOnlink", bool_to_string(rt->onlink));
                 if (r < 0) {
                         log_warning("Failed to write to config file: %s", network);
                         return r;

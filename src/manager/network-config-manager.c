@@ -1107,10 +1107,10 @@ _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
 }
 
 _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
-        _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ IPAddress *gw = NULL;
         _auto_cleanup_ Route *rt = NULL;
-        int r, onlink = 0;
+        int r, onlink = -1;
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
@@ -1118,20 +1118,25 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = parse_ip_from_string(argv[2], &address);
-        if (r < 0) {
-                log_warning("Failed to parse address : %s", argv[2]);
-                return r;
-        }
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "gateway") || string_equal(argv[i], "gw")) {
+                        i++;
 
-        if (argc > 4) {
-                if (string_equal(argv[3], "onlink")) {
-                        onlink = parse_boolean(argv[4]);
-                        if (onlink < 0)
-                                log_warning("Failed to parse onlink '%s': %s\n", argv[1], argv[4]);
-                } else {
-                        log_warning("Failed to parse unknow option: '%s'\n", argv[3]);
-                        return -EINVAL;
+                        r = parse_ip_from_string(argv[i], &gw);
+                        if (r < 0) {
+                                log_warning("Failed to parse gateway address '%s': %s", argv[2], g_strerror(-r));
+                                return r;
+                        }
+                }
+
+                if (string_equal(argv[i], "onlink")) {
+                        i++;
+
+                        onlink = parse_boolean(argv[i]);
+                        if (onlink < 0) {
+                                log_warning("Failed to parse onlink '%s': %s\n", argv[1], g_strerror(EINVAL));
+                                return -EINVAL;
+                        }
                 }
         }
 
@@ -1142,13 +1147,13 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
         *rt = (Route) {
                   .onlink = onlink,
                   .ifindex = p->ifindex,
-                  .family = address->family,
-                  .gw = *address,
+                  .family = gw->family,
+                  .gw = *gw,
         };
 
         r = manager_configure_default_gateway(p, rt);
         if (r < 0) {
-                log_warning("Failed to set link default gateway '%s': %s\n", argv[1], g_strerror(-r));
+                log_warning("Failed to configure link default gateway on link '%s': %s\n", argv[1], g_strerror(-r));
                 return r;
         }
 

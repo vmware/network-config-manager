@@ -23,7 +23,7 @@ typedef struct Route {
         uint32_t metric;
         uint32_t table;
 
-        bool onlink;
+        int onlink;
 
         IPAddress gw;
         IPAddress address;
