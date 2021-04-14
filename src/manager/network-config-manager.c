@@ -1156,10 +1156,15 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_add_route(int argc, char *argv[]) {
-        _auto_cleanup_ IPAddress *address = NULL;
+        _auto_cleanup_ IPAddress *gw = NULL, *dst = NULL, *source = NULL, *pref_source = NULL;
+        IPv6RoutePreference rt_pref = _IPV6_ROUTE_PREFERENCE_INVALID;
+        RouteProtocol protocol = _ROUTE_PROTOCOL_INVALID;
+        RouteScope scope = _ROUTE_SCOPE_INVALID;
+        RouteTable table = _ROUTE_TABLE_INVALID;
+        RouteType type = _ROUTE_TYPE_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_ Route *rt = NULL;
-        int r, metric = 0;
+        uint32_t metric = 0, mtu = 0;
+        int onlink = -1, r;
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
@@ -1167,38 +1172,159 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = parse_ip_from_string(argv[2], &address);
-        if (r < 0) {
-                log_warning("Failed to parse address : %s", argv[2]);
-                return r;
-        }
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "gateway") || string_equal(argv[i], "gw")) {
+                        i++;
 
-        if (argc > 4) {
-                if (string_equal(argv[3], "metric")) {
-                        r = parse_integer(argv[4], &metric);
-                        if (r < 0)
-                                log_warning("Failed to parse metric '%s': %s\n", argv[1], argv[4]);
-                } else {
-                        log_warning("Failed to parse unknow option: '%s'\n", argv[3]);
-                        return -EINVAL;
+                        r = parse_ip_from_string(argv[i], &gw);
+                        if (r < 0) {
+                                log_warning("Failed to parse route gateway address '%s': %s", argv[2], g_strerror(-r));
+                                return r;
+                        }
+                }
+
+                if (string_equal(argv[i], "destination") || string_equal(argv[i], "dest")) {
+                        i++;
+
+                        r = parse_ip_from_string(argv[i], &dst);
+                        if (r < 0) {
+                                log_warning("Failed to parse route destination address '%s': %s", argv[2], g_strerror(-r));
+                                return r;
+                        }
+                }
+
+                if (string_equal(argv[i], "source") || string_equal(argv[i], "src")) {
+                        i++;
+
+                        r = parse_ip_from_string(argv[i], &source);
+                        if (r < 0) {
+                                log_warning("Failed to parse route source address '%s': %s", argv[2], g_strerror(-r));
+                                return r;
+                        }
+                }
+
+                if (string_equal(argv[i], "pref-source") || string_equal(argv[i], "pfsrc")) {
+                        i++;
+
+                        r = parse_ip_from_string(argv[i], &pref_source);
+                        if (r < 0) {
+                                log_warning("Failed to parse route preferred source address '%s': %s", argv[2], g_strerror(-r));
+                                return r;
+                        }
+                }
+
+                if (string_equal(argv[i], "metric") || string_equal(argv[i], "mt")) {
+                        i++;
+
+                        r = parse_uint32(argv[i], &metric);
+                        if (r < 0) {
+                                log_warning("Failed to parse route metric '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "ipv6-preference") || string_equal(argv[i], "ipv6-pref")) {
+                        i++;
+
+
+                        r = ipv6_route_preference_type_to_mode(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse route IPv6 preference '%s': %s", argv[i], g_strerror(EINVAL));
+                                return -EINVAL;
+                        }
+
+                        rt_pref = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "protocol") || string_equal(argv[i], "proto")) {
+                        i++;
+
+                        protocol = route_protocol_to_mode(argv[i]);
+                        if (r < 0) {
+                                r = parse_integer(argv[i], &protocol);
+                                if (r < 0) {
+                                        log_warning("Failed to parse route protocol '%s': %s", argv[i], g_strerror(-r));
+                                        return r;
+                                }
+
+                                if (protocol == 0 || protocol > 255) {
+                                        log_warning("Route protocol is out of rance [1-255] '%s': %s", argv[i], g_strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "type")) {
+                        i++;
+
+                        r = route_type_to_mode(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse route type '%s': %s", argv[i], g_strerror(EINVAL));
+                                return -EINVAL;
+                        }
+
+                        type = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "scope")) {
+                        i++;
+
+                        r = route_scope_type_to_mode(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse route scope '%s': %s", argv[i], g_strerror(EINVAL));
+                                return -EINVAL;
+                        }
+
+                        scope = r;
+                        continue;
+                }
+
+                if (string_equal(argv[i], "table")) {
+                        i++;
+
+                        table = route_table_to_mode(argv[i]);
+                        if (table < 0) {
+                                r = parse_integer(argv[i], &table);
+                                if (r < 0) {
+                                        log_warning("Failed to parse route table '%s': %s", argv[i], g_strerror(-r));
+                                        return r;
+                                }
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "mtu")) {
+                        i++;
+                        r = parse_mtu(argv[i], &mtu);
+                        if (r < 0) {
+                                log_warning("Failed to parse route mtu '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "onlink")) {
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse route onlink '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        onlink = r;
                 }
         }
 
-        r = route_new(&rt);
-        if (r < 0)
-                return log_oom();
-
-        *rt = (Route) {
-                 .metric = metric,
-                 .family = address->family,
-                 .ifindex = p->ifindex,
-                 .dst_prefixlen = address->prefix_len,
-                 .destination = *address,
-        };
-
-        r = manager_configure_route(p, rt);
+        r = manager_configure_route(p, gw, dst, source , pref_source, rt_pref, protocol, scope, type, table, mtu, metric, onlink);
         if (r < 0) {
-                log_warning("Failed to add route to link '%s': %s\n", argv[1], g_strerror(-r));
+                log_warning("Failed to configure route on link '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -1442,7 +1568,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 return r;
                         }
 
-                        if (k > 255) {
+                        if (k == 0 || k > 255) {
                                 log_warning("TOS is out of range '%s': %s", g_strerror(EINVAL), argv[i]);
                                 return -EINVAL;
                         }
