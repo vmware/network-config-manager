@@ -1483,9 +1483,14 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
         (void) manager_write_network_config(v, bridge_network_config);
 
         strv_foreach(s, interfaces) {
+                _auto_cleanup_ IfNameIndex *p = NULL;
                 _auto_cleanup_ char *network = NULL;
 
-                r = create_network_conf_file(*s, &network);
+                r = parse_ifname_or_index(*s, &p);
+                if (r < 0)
+                        return r;
+
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
 

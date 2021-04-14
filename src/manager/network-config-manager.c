@@ -2562,6 +2562,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **links = NULL;
         bool have_mode = false;
         BondMode mode;
+        char **s;
         int r;
 
         if (string_equal(argv[2], "mode")) {
@@ -2578,6 +2579,16 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         if (r < 0) {
                 log_warning("Failed to parse links: %s", g_strerror(-r));
                 return r;
+        }
+
+        strv_foreach(s, links) {
+                _auto_cleanup_ IfNameIndex *p = NULL;
+
+                r = parse_ifname_or_index(*s, &p);
+                if (r < 0) {
+                        log_warning("Failed to find link '%s': %s", *s, g_strerror(-r));
+                        return r;
+                }
         }
 
         if (!have_mode) {
@@ -2797,11 +2808,11 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
         int r, i;
 
         for (i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev")) {
+                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         i++;
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
                                 return -errno;
                         }
                         have_dev = true;
@@ -2824,7 +2835,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
         }
 
         if (!have_dev) {
-                log_warning("Missing dev: %s", g_strerror(EINVAL));
+                log_warning("Missing device: %s", g_strerror(EINVAL));
                 return -EINVAL;
         }
 
