@@ -2541,12 +2541,23 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
 
 _public_ int ncm_create_bridge(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **links = NULL;
+        char **s;
         int r;
 
         r = argv_to_strv(argc - 2, argv + 2, &links);
         if (r < 0) {
                 log_warning("Failed to parse links: %s", g_strerror(-r));
                 return r;
+        }
+
+        strv_foreach(s, links) {
+                _auto_cleanup_ IfNameIndex *p = NULL;
+
+                r = parse_ifname_or_index(*s, &p);
+                if (r < 0) {
+                        log_warning("Failed to find link '%s': %s", *s, g_strerror(-r));
+                        return r;
+                }
         }
 
         r = manager_create_bridge(argv[1], links);
