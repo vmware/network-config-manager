@@ -122,7 +122,7 @@ static int help(void) {
                "  add-link-address             [LINK] address [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime [{forever|infinity|0}] scope {global|link|host|NUMBER}]"
                                                       "\n\t\t\t\t      dad [DAD {none|ipv4|ipv6|both}] prefix-route [PREFIXROUTE BOOLEAN] Configures Link Address.\n"
                "  delete-link-address          [LINK] Removes Address from Link.\n"
-               "  add-default-gateway          [LINK] [GW ADDRESS] onlink [ONLINK BOOLEAN] Configures Link Default Gateway.\n"
+               "  add-default-gateway          [LINK] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures Link Default Gateway.\n"
                "  delete-gateway               [LINK] Removes Gateway from Link.\n"
                "  add-route                    [LINK] gw [GATEWAY ADDRESS] dest [DESTINATION ADDRESS] src [SOURCE ADDRESS] pref-src [PREFFREDSOURCE ADDRESS]"
                                                      "\n\t\t\t\t      metric [METRIC NUMBER] scope [SCOPE {global|site|link|host|nowhere}] mtu [MTU NUMBER]"
