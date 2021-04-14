@@ -434,13 +434,24 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Address', 'Address') == '192.168.1.45/24')
 
-        subprocess.check_call(['nmctl', 'add-route', 'test99', '10.10.10.10'])
+        subprocess.check_call(['nmctl', 'add-route', 'test99', 'gw', '192.168.1.1', 'dest', '192.168.1.2', 'metric', '111', 'scope',
+                               'link', 'mtu', '1400', 'table', 'local', 'proto', 'static', 'type', 'unicast', 'onlink', 'yes', 'ipv6-pref',
+                               'medium', 'src', '192.168.1.4'])
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Route', 'Destination') == '10.10.10.10')
+        assert(parser.get('Route', 'Destination') == '192.168.1.2')
+        assert(parser.get('Route', 'Gateway') == '192.168.1.1')
+        assert(parser.get('Route', 'GatewayOnLink') == 'yes')
+        assert(parser.get('Route', 'Metric') == '111')
+        assert(parser.get('Route', 'MTUBytes') == '1400')
+        assert(parser.get('Route', 'Protocol') == 'static')
+        assert(parser.get('Route', 'Scope') == 'link')
+        assert(parser.get('Route', 'Table') == 'local')
+        assert(parser.get('Route', 'IPv6Preference') == 'medium')
+        assert(parser.get('Route', 'Source') == '192.168.1.4')
 
     def test_cli_add_routing_policy_rule(self):
         assert(link_exits('test99') == True)
