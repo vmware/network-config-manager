@@ -33,11 +33,9 @@ const char *dhcp_modes_to_name(int id) {
 }
 
 int dhcp_name_to_mode(char *name) {
-        int i;
-
         assert(name);
 
-        for (i = DHCP_MODE_NO; i < (int) ELEMENTSOF(dhcp_modes); i++)
+        for (int i = DHCP_MODE_NO; i < (int) ELEMENTSOF(dhcp_modes); i++)
                 if (string_equal_fold(name, dhcp_modes[i]))
                         return i;
 
@@ -61,11 +59,9 @@ const char *dhcp_client_identifier_to_name(int id) {
 }
 
 int dhcp_client_identifier_to_mode(char *name) {
-        int i;
-
         assert(name);
 
-        for (i = DHCP_CLIENT_IDENTIFIER_MAC; i < (int) ELEMENTSOF(dhcp_client_identifier); i++)
+        for (int i = DHCP_CLIENT_IDENTIFIER_MAC; i < (int) ELEMENTSOF(dhcp_client_identifier); i++)
                 if (string_equal_fold(name, dhcp_client_identifier[i]))
                         return i;
 
@@ -90,11 +86,9 @@ const char *dhcp_client_duid_type_to_name(int id) {
 }
 
 int dhcp_client_duid_type_to_mode(char *name) {
-        int i;
-
         assert(name);
 
-        for (i = DHCP_CLIENT_DUID_TYPE_LINK_LAYER_TIME; i < (int) ELEMENTSOF(dhcp_client_duid_type); i++)
+        for (int i = DHCP_CLIENT_DUID_TYPE_LINK_LAYER_TIME; i < (int) ELEMENTSOF(dhcp_client_duid_type); i++)
                 if (string_equal_fold(name, dhcp_client_duid_type[i]))
                         return i;
 
@@ -121,11 +115,9 @@ const char *link_local_address_type_to_name(int id) {
 }
 
 int link_local_address_type_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = LINK_LOCAL_ADDRESS_YES; i < (int) ELEMENTSOF(link_local_address_type); i++)
+        for (int i = LINK_LOCAL_ADDRESS_YES; i < (int) ELEMENTSOF(link_local_address_type); i++)
                 if (string_equal_fold(name, link_local_address_type[i]))
                         return i;
 
@@ -149,11 +141,9 @@ const char *ipv6_ra_preference_type_to_name(int id) {
 }
 
 int ipv6_ra_preference_type_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = IPV6_RA_PREFERENCE_LOW; i < (int) ELEMENTSOF(ipv6_ra_preference_type); i++)
+        for (int i = IPV6_RA_PREFERENCE_LOW; i < (int) ELEMENTSOF(ipv6_ra_preference_type); i++)
                 if (string_equal_fold(name, ipv6_ra_preference_type[i]))
                         return i;
 
@@ -178,15 +168,154 @@ const char *ip_duplicate_address_detection_type_to_name(int id) {
 }
 
 int ip_duplicate_address_detection_type_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = IP_DUPLICATE_ADDRESS_DETECTION_NONE; i < (int) ELEMENTSOF(ip_duplicate_address_detection_type); i++)
+        for (int i = IP_DUPLICATE_ADDRESS_DETECTION_NONE; i < (int) ELEMENTSOF(ip_duplicate_address_detection_type); i++)
                 if (string_equal_fold(name, ip_duplicate_address_detection_type[i]))
                         return i;
 
         return _IP_DUPLICATE_ADDRESS_DETECTION_INVALID;
+}
+
+static const char *const route_scope_type[_ROUTE_SCOPE_MAX] =  {
+        [ROUTE_SCOPE_UNIVERSE] = "global",
+        [ROUTE_SCOPE_SITE]     = "site",
+        [ROUTE_SCOPE_LINK]     = "link",
+        [ROUTE_SCOPE_HOST]     = "host",
+        [ROUTE_SCOPE_NOWHERE]  = "nowhere",
+};
+
+const char *route_scope_type_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(route_scope_type))
+                return NULL;
+
+        return route_scope_type[id];
+}
+
+int route_scope_type_to_mode(const char *name) {
+        assert(name);
+
+        for (int i = ROUTE_SCOPE_UNIVERSE; i < (int) ELEMENTSOF(route_scope_type); i++)
+                if (string_equal_fold(name, route_scope_type[i]))
+                        return i;
+
+        return _ROUTE_SCOPE_INVALID;
+}
+
+static const char * const route_type[_ROUTE_TYPE_MAX] = {
+        [ROUTE_TYPE_UNICAST]     = "unicast",
+        [ROUTE_TYPE_LOCAL]       = "local",
+        [ROUTE_TYPE_BROADCAST]   = "broadcast",
+        [ROUTE_TYPE_ANYCAST]     = "anycast",
+        [ROUTE_TYPE_MULTICAST]   = "multicast",
+        [ROUTE_TYPE_BLACKHOLE]   = "blackhole",
+        [ROUTE_TYPE_UNREACHABLE] = "unreachable",
+        [ROUTE_TYPE_PROHIBIT]    = "prohibit",
+        [ROUTE_TYPE_THROW]       = "throw",
+        [ROUTE_TYPE_NAT]         = "nat",
+        [ROUTE_TYPE_XRESOLVE]    = "xresolve",
+};
+
+const char *route_type_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(route_type))
+                return NULL;
+
+        return route_type[id];
+}
+
+int route_type_to_mode(const char *name) {
+        assert(name);
+
+        for (int i = ROUTE_TYPE_UNICAST; i < (int) ELEMENTSOF(route_type); i++)
+                if (string_equal_fold(name, route_type[i]))
+                        return i;
+
+        return _ROUTE_TYPE_INVALID;
+}
+
+static const char * const ipv6_route_preference_type[_IPV6_ROUTE_PREFERENCE_MAX] = {
+        [IPV6_ROUTE_PREFERENCE_LOW]     = "low",
+        [IPV6_ROUTE_PREFERENCE_MEDIUM]  = "medium",
+        [IPV6_ROUTE_PREFERENCE_HIGH]    = "high",
+};
+
+const char *ipv6_route_preference_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(ipv6_route_preference_type))
+                return NULL;
+
+        return ipv6_route_preference_type[id];
+}
+
+int ipv6_route_preference_type_to_mode(const char *name) {
+        assert(name);
+
+        for (int i = IPV6_ROUTE_PREFERENCE_LOW; i < (int) ELEMENTSOF(ipv6_route_preference_type); i++)
+                if (string_equal_fold(name, ipv6_route_preference_type[i]))
+                        return i;
+
+        return _IPV6_ROUTE_PREFERENCE_INVALID;
+}
+
+static const char * const route_protocol_type[_ROUTE_PROTOCOL_MAX] = {
+       [ROUTE_PROTOCOL_KERNEL]  = "kernel",
+       [ROUTE_PROTOCOL_BOOT]    = "boot",
+       [ROUTE_PROTOCOL_STATIC]  = "static",
+       [ROUTE_PRTOCOL_DHCP]     = "dhcp",
+};
+
+const char *route_protocol_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(route_protocol_type))
+                return NULL;
+
+        return route_protocol_type[id];
+}
+
+int route_protocol_to_mode(const char *name) {
+        assert(name);
+
+        for (int i = IPV6_ROUTE_PREFERENCE_LOW; i < (int) ELEMENTSOF(route_protocol_type); i++)
+                if (string_equal_fold(name, route_protocol_type[i]))
+                        return i;
+
+        return _ROUTE_PROTOCOL_INVALID;
+}
+
+static const char * const route_table_type[_ROUTE_TABLE_MAX] = {
+       [ROUTE_TABLE_LOCAL]    = "local",
+       [ROUTE_TABLE_MAIN]     = "main",
+       [ROUTE_TABLE_DEFAULT]  = "default",
+};
+
+const char *route_table_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(route_table_type))
+                return NULL;
+
+        return route_table_type[id];
+}
+
+int route_table_to_mode(const char *name) {
+        assert(name);
+
+        for (int i = ROUTE_TABLE_DEFAULT; i < (int) ELEMENTSOF(route_table_type); i++)
+                if (string_equal_fold(name, route_table_type[i]))
+                        return i;
+
+        return _ROUTE_TABLE_INVALID;
 }
 
 static const char *const auth_key_management_type[_AUTH_KEY_MANAGEMENT_MAX] =  {
@@ -207,11 +336,9 @@ const char *auth_key_management_type_to_name(int id) {
 }
 
 int auth_key_management_type_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = AUTH_KEY_MANAGEMENT_NONE; i < (int) ELEMENTSOF(auth_key_management_type); i++)
+        for (int i = AUTH_KEY_MANAGEMENT_NONE; i < (int) ELEMENTSOF(auth_key_management_type); i++)
                 if (string_equal_fold(name, auth_key_management_type[i]))
                         return i;
 
@@ -236,11 +363,9 @@ const char *auth_eap_method_to_name(int id) {
 }
 
 int auth_eap_method_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = AUTH_EAP_METHOD_NONE; i < (int) ELEMENTSOF(auth_eap_method_type); i++)
+        for (int i = AUTH_EAP_METHOD_NONE; i < (int) ELEMENTSOF(auth_eap_method_type); i++)
                 if (string_equal_fold(name, auth_eap_method_type[i]))
                         return i;
 

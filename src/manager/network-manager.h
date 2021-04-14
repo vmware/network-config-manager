@@ -38,7 +38,21 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx,
 int manager_delete_link_address(const IfNameIndex *ifnameidx);
 
 int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt);
-int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt);
+
+int manager_configure_route(const IfNameIndex *ifnameidx,
+                            IPAddress *gateway,
+                            IPAddress *destination,
+                            IPAddress *source,
+                            IPAddress *pref_source,
+                            IPv6RoutePreference rt_pref,
+                            RouteProtocol protocol,
+                            RouteScope scope,
+                            RouteType type,
+                            RouteTable table,
+                            uint32_t mtu,
+                            int metric,
+                            int onlink);
+
 int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway);
 
 int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system);

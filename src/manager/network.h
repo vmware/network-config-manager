@@ -62,6 +62,59 @@ typedef enum IPv6RAPreference {
        _IPV6_RA_PREFERENCE_INVALID = -1,
 } IPv6RAPreference;
 
+typedef enum RouteScope {
+        ROUTE_SCOPE_UNIVERSE,
+        ROUTE_SCOPE_SITE,
+        ROUTE_SCOPE_LINK,
+        ROUTE_SCOPE_HOST,
+        ROUTE_SCOPE_NOWHERE,
+       _ROUTE_SCOPE_MAX,
+       _ROUTE_SCOPE_INVALID = -1,
+} RouteScope;
+
+typedef enum IPv6RoutePreference {
+        IPV6_ROUTE_PREFERENCE_LOW,
+        IPV6_ROUTE_PREFERENCE_MEDIUM,
+        IPV6_ROUTE_PREFERENCE_HIGH,
+        _IPV6_ROUTE_PREFERENCE_MAX,
+        _IPV6_ROUTE_PREFERENCE_INVALID = -1,
+} IPv6RoutePreference;
+
+typedef enum RouteProtcol {
+       ROUTE_PROTOCOL_KERNEL,
+       ROUTE_PROTOCOL_BOOT,
+       ROUTE_PROTOCOL_STATIC,
+       ROUTE_PRTOCOL_DHCP,
+       _ROUTE_PROTOCOL_MAX,
+       _ROUTE_PROTOCOL_INVALID = -1,
+} RouteProtocol;
+
+typedef enum RouteType {
+       ROUTE_TYPE_UNICAST,
+       ROUTE_TYPE_LOCAL,
+       ROUTE_TYPE_BROADCAST,
+       ROUTE_TYPE_ANYCAST,
+       ROUTE_TYPE_MULTICAST,
+       ROUTE_TYPE_BLACKHOLE,
+       ROUTE_TYPE_UNREACHABLE,
+       ROUTE_TYPE_PROHIBIT,
+       ROUTE_TYPE_THROW,
+       ROUTE_TYPE_NAT,
+       ROUTE_TYPE_XRESOLVE,
+       _ROUTE_TYPE_MAX,
+       _ROUTE_TYPE_INVALID = -1
+} RouteType;
+
+/* iproute */
+typedef enum RouteTable {
+       ROUTE_TABLE_UNSPEC,
+       ROUTE_TABLE_DEFAULT  = 253,
+       ROUTE_TABLE_MAIN     = 254,
+       ROUTE_TABLE_LOCAL    = 255,
+       _ROUTE_TABLE_MAX,
+       _ROUTE_TABLE_INVALID = -1
+} RouteTable;
+
 typedef enum AuthKeyManagement {
         AUTH_KEY_MANAGEMENT_NONE,
         AUTH_KEY_MANAGEMENT_WPA_PSK,
@@ -173,6 +226,21 @@ int link_local_address_type_to_mode(const char *name);
 
 const char *ip_duplicate_address_detection_type_to_name(int id);
 int ip_duplicate_address_detection_type_to_mode(const char *name);
+
+const char *route_scope_type_to_name(int id);
+int route_scope_type_to_mode(const char *name);
+
+const char *route_type_to_name(int id);
+int route_type_to_mode(const char *name);
+
+const char *ipv6_route_preference_to_name(int id);
+int ipv6_route_preference_type_to_mode(const char *name);
+
+const char *route_protocol_to_name(int id);
+int route_protocol_to_mode(const char *name);
+
+const char *route_table_to_name(int id);
+int route_table_to_mode(const char *name);
 
 int generate_network_config(Network *n, GString **ret);
 int generate_wifi_config(Network *n, GString **ret);

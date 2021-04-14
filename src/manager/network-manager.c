@@ -462,34 +462,108 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
         return dbus_network_reload();
 }
 
-int manager_configure_route(const IfNameIndex *ifnameidx, Route *rt) {
-        _auto_cleanup_ char *network = NULL, *a = NULL;
+int manager_configure_route(const IfNameIndex *ifnameidx,
+                            IPAddress *gateway,
+                            IPAddress *destination,
+                            IPAddress *source,
+                            IPAddress *pref_source,
+                            IPv6RoutePreference rt_pref,
+                            RouteProtocol protocol,
+                            RouteScope scope,
+                            RouteType type,
+                            RouteTable table,
+                            uint32_t mtu,
+                            int metric,
+                            int onlink) {
+
+        _auto_cleanup_ char *network = NULL, *gw = NULL, *dest = NULL, *src = NULL, *pref_src = NULL;
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
         int r;
 
         assert(ifnameidx);
-        assert(rt);
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)
                 return r;
 
-        r = ip_to_string(rt->destination.family, &rt->destination, &a);
+        r = load_config_file(network, &key_file);
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Route", "Destination", a);
-        if (r < 0) {
-                log_warning("Failed to write to config file: %s", network);
-                return r;
+        if (gateway) {
+                r = ip_to_string(gateway->family, gateway, &gw);
+                if (r < 0)
+                        return r;
+
+                g_key_file_set_string(key_file, "Route", "Gateway", gw);
         }
 
-        if (rt->metric) {
-                r = set_config_file_integer(network, "Route", "Metric", rt->metric);
-                if (r < 0) {
-                        log_warning("Failed to write to config file: %s", network);
+        if (onlink >= 0)
+                g_key_file_set_string(key_file, "Route", "GatewayOnLink", bool_to_string(onlink));
+
+        if (source) {
+                r = ip_to_string_prefix(gateway->family, source, &src);
+                if (r < 0)
                         return r;
-                }
+
+                g_key_file_set_string(key_file, "Route", "Source", src);
         }
+
+        if (pref_source) {
+                r = ip_to_string_prefix(pref_source->family, pref_source, &pref_src);
+                if (r < 0)
+                        return r;
+
+                g_key_file_set_string(key_file, "Route", "PreferredSource", pref_src);
+        }
+
+        if (destination) {
+                r = ip_to_string(destination->family, destination, &dest);
+                if (r < 0)
+                        return r;
+
+                g_key_file_set_string(key_file, "Route", "Destination", dest);
+        }
+
+        if (metric > 0)
+                g_key_file_set_integer(key_file, "Route", "Metric", metric);
+
+        if (mtu > 0)
+                g_key_file_set_integer(key_file, "Route", "MTUBytes", mtu);
+
+        if (protocol > 0) {
+                if (route_protocol_to_name(protocol))
+                        g_key_file_set_string(key_file, "Route", "Protocol", route_protocol_to_name(protocol));
+                else
+                        g_key_file_set_integer(key_file, "Route", "Protocol", protocol);
+        }
+
+        if (rt_pref >= 0)
+                g_key_file_set_string(key_file, "Route", "IPv6Preference", ipv6_route_preference_to_name(rt_pref));
+
+        if (scope > 0)
+                g_key_file_set_string(key_file, "Route", "Scope", route_scope_type_to_name(scope));
+
+        if (type > 0)
+                g_key_file_set_string(key_file, "Route", "Type", route_type_to_name(type));
+
+
+        if (table > 0) {
+                if (route_table_to_name(table))
+                        g_key_file_set_string(key_file, "Route", "Table", route_table_to_name(table));
+                else
+                        g_key_file_set_integer(key_file, "Route", "Table", table);
+        }
+
+        if (!g_key_file_save_to_file (key_file, network, &e)) {
+                log_warning("Failed to write to '%s': %s", network, e->message);
+                return -e->code;
+        }
+
+        r = set_file_permisssion(network, "systemd-network");
+        if (r < 0)
+                return r;
 
         return dbus_network_reload();
 }
@@ -543,6 +617,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
                                            const uint32_t table,
                                            const uint32_t priority,
                                            const char *tos) {
+
         _auto_cleanup_ char *network = NULL, *to = NULL, *from = NULL;
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         _cleanup_(g_error_freep) GError *e = NULL;
