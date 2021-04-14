@@ -2623,18 +2623,20 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
         int r, i;
 
         for (i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev")) {
+                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         i++;
+
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
-                                return -errno;
+                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
+                                return r;
                         }
                         continue;
                 }
 
                 if (string_equal(argv[i], "mode")) {
                         i++;
+
                         r = macvlan_name_to_mode(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse MacVLan/MacVTap mode '%s' : %s", argv[i], g_strerror(EINVAL));
@@ -2670,8 +2672,9 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
         int r, i;
 
         for (i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev")) {
+                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         i++;
+
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
                                 log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
@@ -2720,11 +2723,12 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
         int r, i;
 
         for (i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev")) {
+                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         i++;
+
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
                                 return -errno;
                         }
                         continue;
@@ -2800,6 +2804,11 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
         if (!have_vni) {
                 log_warning("Missing VxLan vni: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!independent && !p) {
+                log_warning("Missing device: %s", g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -2926,11 +2935,12 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
         }
 
         for (i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev")) {
+                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         i++;
+
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
                                 return -errno;
                         }
                         continue;
