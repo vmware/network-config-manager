@@ -457,6 +457,24 @@ int link_set_state(const IfNameIndex *ifnameidx, LinkState state) {
         return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
 }
 
+int link_remove(const IfNameIndex *ifnameidx) {
+        _auto_cleanup_ IPlinkMessage *m = NULL;
+        _auto_cleanup_close_ int s = -1;
+        int r;
+
+        assert(ifnameidx);
+
+        r = ip_link_message_new(RTM_DELLINK, AF_UNSPEC, ifnameidx->ifindex, &m);
+        if (r < 0)
+                return r;
+
+        r = rtnl_socket_open(0, &s);
+        if (r < 0)
+                return r;
+
+        return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
+}
+
 int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **ret) {
         _auto_cleanup_ char *line = NULL, *path = NULL;
         int r;

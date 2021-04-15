@@ -2868,6 +2868,46 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_remove_netdev(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        const char *k = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        if (argv[2] && string_equal(argv[2], "kind") && argv[3]) {
+                if (string_equal(argv[3], "vlan"))
+                        k = "VLAN";
+                else if (string_equal(argv[3], "bridge"))
+                        k = "Bridge";
+                else if (string_equal(argv[3], "bond"))
+                        k = "Bond";
+                else if (string_equal(argv[3], "vxlan"))
+                        k = "VXLAN";
+                else if (string_equal(argv[3], "macvlan") || string_equal(argv[3], "remove-macvtap"))
+                        k = "MACVLAN";
+                else if (string_equal(argv[3], "ipvlan"))
+                        k = "IPVLAN";
+                else if (string_equal(argv[3], "vrf"))
+                        k = "VRF";
+                else if (string_equal(argv[3], "ipip") || string_equal(argv[3], "gre") || string_equal(argv[3], "sit") ||
+                         string_equal(argv[3], "vti"))
+                        k = "Tunnel";
+        }
+
+        r = manager_remove_netdev(p, k);
+        if (r < 0) {
+                log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_create_veth(int argc, char *argv[]) {
         _auto_cleanup_ char *peer = NULL;
         int r, i;

@@ -113,3 +113,23 @@ int write_one_line(const char *path, const char *v) {
 
         return 0;
 }
+
+int glob_files(const char *path, int flags, glob_t *ret) {
+        int r;
+
+        assert(path);
+
+        errno = 0;
+        r = glob(path, flags, NULL, ret);
+        if (r == GLOB_NOSPACE)
+                return -ENOMEM;
+        if (r == GLOB_NOMATCH)
+                return -ENOENT;
+        if (r != 0)
+                return -EIO;
+
+        if (g_strv_length(ret->gl_pathv))
+                return -ENOENT;
+
+        return 0;
+}

@@ -1365,6 +1365,32 @@ static int manager_write_netdev_config(const NetDev *n, const GString *config) {
         return 0;
 }
 
+int manager_remove_netdev(const IfNameIndex *ifnameidx, const char *kind) {
+        int r;
+
+        assert(ifnameidx);
+
+        /* remove .netdev file  */
+        (void) remove_config_files_glob("/etc/systemd/network/*.netdev", "NetDev", "Name", ifnameidx->ifname);
+        (void) remove_config_files_glob("/lib/systemd/network/*.netdev", "NetDev", "Name", ifnameidx->ifname);
+
+        /* remove .network */
+        (void) remove_config_files_glob("/etc/systemd/network/*.network", "Match", "Name", ifnameidx->ifname);
+        (void) remove_config_files_glob("/lib/systemd/network/*.network", "Match", "Name", ifnameidx->ifname);
+
+        /* Remove [Network] section */
+        if (kind) {
+                (void) remove_config_files_section_glob("/etc/systemd/network/*.network", "Network", kind, ifnameidx->ifname);
+                (void) remove_config_files_section_glob("/lib/systemd/network/*.network", "Network", kind, ifnameidx->ifname);
+        }
+
+        /* Finally remove the link */
+        r = link_remove(ifnameidx);
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
 
 int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vlan_network_config = NULL;
@@ -1407,7 +1433,7 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
 
         r = generate_network_config(v, &vlan_network_config);
         if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                log_warning("Failed to generate network configs: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1472,7 +1498,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
 
         r = generate_network_config(v, &bridge_network_config);
         if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1547,7 +1573,7 @@ int manager_create_bond(const char *bond, BondMode mode, char **interfaces) {
 
         r = generate_network_config(v, &bond_network_config);
         if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                log_warning("Failed to generate network configs: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1634,7 +1660,7 @@ int manager_create_vxlan(const char *vxlan,
 
         r = generate_network_config(v, &vxlan_network_config);
         if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                log_warning("Failed to generate network configs: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1854,7 +1880,7 @@ int manager_create_veth(const char *veth, const char *veth_peer) {
 
         r = generate_network_config(v, &veth_network_config);
         if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                log_warning("Failed to generate network configs: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1922,7 +1948,7 @@ int manager_create_tunnel(const char *tunnel,
 
         r = generate_network_config(v, &tunnel_network_config);
         if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                log_warning("Failed to generate network configs: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1990,7 +2016,7 @@ int manager_create_vrf(const char *vrf, uint32_t table) {
 
         r = generate_network_config(v, &vrf_network_config);
         if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                log_warning("Failed to generate network configs: %s", g_strerror(-r));
                 return r;
         }
 
@@ -2065,7 +2091,7 @@ int manager_create_wireguard_tunnel(char *wireguard,
 
         r = generate_network_config(v, &wireguard_network_config);
         if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                log_warning("Failed to generate network configs: %s", g_strerror(-r));
                 return r;
         }
 
@@ -2193,7 +2219,7 @@ static void manager_command_line_config_generator(void *key, void *value, void *
 
         r = generate_network_config(n, &config);
         if (r < 0) {
-                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                log_warning("Failed to generate network configs: %s", g_strerror(-r));
                 return;
          }
 
@@ -2264,7 +2290,7 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
 
                         r = generate_network_config(n, &config);
                         if (r < 0) {
-                                log_warning("Failed to generate network configs : %s", g_strerror(-r));
+                                log_warning("Failed to generate network configs: %s", g_strerror(-r));
                                 return r;
                         }
 

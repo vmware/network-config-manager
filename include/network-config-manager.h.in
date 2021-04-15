@@ -90,6 +90,9 @@ int ncm_create_veth(int argc, char *argv[]);
 int ncm_create_tunnel(int argc, char *argv[]);
 int ncm_create_wireguard_tunnel(int argc, char *argv[]);
 
+
+int ncm_remove_netdev(int argc, char *argv[]);
+
 int ncm_link_show_network_config(int argc, char *argv[]);
 int ncm_link_edit_network_config(int argc, char *argv[]);
 
