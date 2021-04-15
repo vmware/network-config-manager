@@ -192,6 +192,62 @@ int read_conf_file(const char *path, char **s) {
         return 0;
 }
 
+int remove_config_files_glob(const char *path, const char *section, const char *k, const char *v) {
+        _cleanup_(globfree) glob_t g = {};
+        int r;
+
+        assert(path);
+        assert(section);
+        assert(k);
+        assert(v);
+
+        r = glob_files(path, 0, &g);
+        if (r != -ENOENT)
+                return r;
+
+        for (size_t i = 0; i < g.gl_pathc; i++) {
+                _auto_cleanup_ char *s = NULL;
+
+                r = parse_config_file(g.gl_pathv[i], section, k, &s);
+                if (r < 0)
+                        return r;
+
+                if (string_equal(s, v))
+                        unlink(g.gl_pathv[i]);
+
+        }
+
+        return 0;
+}
+
+int remove_config_files_section_glob(const char *path, const char *section, const char *k, const char *v) {
+        _cleanup_(globfree) glob_t g = {};
+        int r;
+
+        assert(path);
+        assert(section);
+        assert(k);
+        assert(v);
+
+        r = glob_files(path, 0, &g);
+        if (r != -ENOENT)
+                return r;
+
+        for (size_t i = 0; i < g.gl_pathc; i++) {
+                _auto_cleanup_ char *s = NULL;
+
+                r = parse_config_file(g.gl_pathv[i], section, k, &s);
+                if (r < 0)
+                        return r;
+
+                if (string_equal(s, v))
+                        (void) remove_key_from_config_file(g.gl_pathv[i], section, k);
+       }
+
+        return 0;
+}
+
+
 int write_to_resolv_conf_file(char **dns, char **domains) {
         _auto_cleanup_ char *p = NULL;
         GString *c = NULL;
