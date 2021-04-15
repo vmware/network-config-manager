@@ -182,7 +182,7 @@ static int help(void) {
                "  remove-ipv6ra                [LINK] Removes Ipv6 Router Advertisement.\n"
                "  disable-ipv6                 [LINK] Disables IPv6 on the link.\n"
                "  enable-ipv6                  [LINK] Enables IPv6 on the link.\n"
-               "  create-vlan                  [VLAN name] dev [LINK MASTER] id [ID INTEGER] Creates vlan netdev and sets master to device\n"
+               "  create-vlan                  [VLAN name] dev [LINK MASTER] id [ID INTEGER] Creates vlan netdev and network file\n"
                "  create-bridge                [BRIDGE name] [LINK] [LINK] ... Creates bridge netdev and sets master to device\n"
                "  create-bond                  [BOND name] mode [MODE {balance-rr|active-backup|balance-xor|broadcast|802.3ad|balance-tlb|balance-alb}]"
                                                "\n\t\t\t\t[LINK] [LINK] ... Creates bond netdev and sets master to device\n"
@@ -201,6 +201,7 @@ static int help(void) {
                "  create-gre                   [GRE name] [dev LINK] local [ADDRESS] remote [ADDRESS] [independent BOOLEAN] Creates gre tunnel.\n"
                "  create-wg                    [WIREGUARD name] private-key [PRIVATEKEY] listen-port [PORT INTEGER] public-key [PUBLICKEY] preshared-key [PRESHAREDKEY]"
                                                "\n\t\t\t\t\t\t allowed-ips [IP,IP ...] endpoint [IP:PORT] Creates a wireguard tunnel.\n"
+               "  remove-netdev                [LINK] kind [KIND {vlan|bridge|bond|vxlan|macvlan|macvtap|ipvlan|ipvtap|vrf|veth|ipip|sit|vti|gre|wg] vlan netdev and network files.\n"
                "  reload                       Reload .network and .netdev files.\n"
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  show-network-config          [LINK] Displays network configuration of link.\n"
@@ -341,6 +342,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-gre",                   3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-vti",                   3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-wg",                    3,        WORD_ANY, false, ncm_create_wireguard_tunnel },
+                { "remove-netdev",                1,        WORD_ANY, false, ncm_remove_netdev },
                 { "reload",                       WORD_ANY, WORD_ANY, false, ncm_network_reload },
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "show-network-config",          1,        WORD_ANY, false, ncm_link_show_network_config },
