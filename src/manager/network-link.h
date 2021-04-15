@@ -71,6 +71,8 @@ int link_get_mac_address(const char *ifname, char **mac);
 int link_set_state(const IfNameIndex *ifnameidx, LinkState state);
 int link_get_operstate(const char *ifname, char **operstate);
 
+int link_remove(const IfNameIndex *ifnameidx);
+
 const char *link_operstates_to_name(int id);
 
 const char *link_state_to_name(int id);
