@@ -24,3 +24,10 @@
 #define OFFSETOF(x,y) __builtin_offsetof(x,y)
 
 #define _public_ __attribute__((visibility("default")))
+
+static inline void parse_next_arg(char **argv, int argc,int i) {
+        if (i + 1 >= argc) {
+                printf("Missing argument: %s\n", argv[i]);
+                _exit(-EINVAL);
+        }
+}
