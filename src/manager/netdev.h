@@ -69,6 +69,8 @@ typedef struct NetDev {
         char *wg_endpoint;      /* ip:port */
         char *wg_allowed_ips;
 
+        char *proto;
+
         bool independent;
 
         IPAddress local;

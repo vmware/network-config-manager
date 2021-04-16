@@ -176,6 +176,9 @@ void netdev_unrefp(NetDev **n) {
                 g_free((*n)->wg_preshared_key);
                 g_free((*n)->wg_endpoint);
                 g_free((*n)->wg_allowed_ips);
+                g_free((*n)->wg_allowed_ips);
+
+                g_free((*n)->proto);
 
                 g_free(*n);
         }
@@ -202,6 +205,9 @@ int generate_netdev_config(NetDev *n, GString **ret) {
         if (n->kind == NET_DEV_KIND_VLAN) {
                 g_string_append(config, "[VLAN]\n");
                 g_string_append_printf(config, "Id=%d\n", n->id);
+
+                if (n->proto)
+                        g_string_append_printf(config, "Protocol=%s\n", n->proto);
         }
 
         if (n->kind == NET_DEV_KIND_BOND) {
