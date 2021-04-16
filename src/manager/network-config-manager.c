@@ -2822,14 +2822,16 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_vlan(int argc, char *argv[]) {
-        _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_id = false, have_dev = false;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *proto = NULL;
         uint16_t id;
         int r, i;
 
         for (i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         i++;
+
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
                                 log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
@@ -2840,12 +2842,26 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 
                 if (string_equal(argv[i], "id")) {
                         i++;
+
                         r = parse_uint16(argv[i], &id);
                         if (r < 0) {
                                 log_warning("Failed to parse VLan id '%s': %s", argv[i], g_strerror(EINVAL));
                                 return r;
                         }
                         have_id = true;
+                }
+
+                if (string_equal(argv[i], "proto") || string_equal(argv[i], "protocol")) {
+                        i++;
+
+                        if (string_equal(argv[i], "802.1q") || string_equal(argv[i], "802.1ad")) {
+                                proto = strdup(argv[i]);
+                                if (!proto)
+                                        return log_oom();
+                        } else {
+                                log_warning("Failed to parse VLan proto '%s': %s", argv[i], g_strerror(EINVAL));
+                                return r;
+                        }
                 }
         }
 
@@ -2859,7 +2875,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_create_vlan(p, argv[1], id);
+        r = manager_create_vlan(p, argv[1], id, proto);
         if (r < 0) {
                 log_warning("Failed to create vlan '%s': %s", argv[2], g_strerror(-r));
                 return r;
