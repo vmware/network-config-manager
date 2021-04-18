@@ -1022,7 +1022,7 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
                 _auto_cleanup_ char *pretty = NULL;
                 DNSServer *d = g_sequence_get(i);
 
-                r = ip_to_string(d->family, &d->address, &pretty);
+                r = ip_to_string(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
                         a = string_join(" ", pretty, a, NULL);
                         if (!a)

@@ -175,25 +175,107 @@ int dbus_restart_unit(const char *unit) {
         return 0;
 }
 
+int dbus_get_current_dns_servers_from_resolved(DNSServers **ret) {
+        _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+        _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
+        _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
+        _auto_cleanup_ DNSServer *i = NULL;
+        int r, ifindex = 0, family = 0;
+        DNSServers *serv = NULL;
+        const void *a;
+        size_t sz;
+
+        r = sd_bus_open_system(&bus);
+        if (r < 0)
+                return r;
+
+        r = sd_bus_get_property(bus,
+                                "org.freedesktop.resolve1",
+                                "/org/freedesktop/resolve1",
+                                "org.freedesktop.resolve1.Manager",
+                                "CurrentDNSServer",
+                                &bus_error,
+                                &reply,
+                                "(iiay)");
+        if (r < 0) {
+                log_warning("Failed to get D-Bus property 'CurrentDNSServer': %s", bus_error.message);
+                return r;
+        }
+
+        r = dns_servers_new(&serv);
+        if (r < 0)
+                return r;
+
+        r = sd_bus_message_enter_container(reply, 'r', "iiay");
+        if (r < 0) {
+                log_warning("Failed to enter bus message container: %s", g_strerror(-r));
+                return r;
+        }
+
+        r = sd_bus_message_read(reply, "i", &ifindex);
+        if (r < 0) {
+                log_warning("Failed to read integer bus message: %s", g_strerror(-r));
+                return r;
+        }
+
+        r = sd_bus_message_read(reply, "i", &family);
+        if (r < 0) {
+                log_warning("Failed to read integer bus message: %s", g_strerror(-r));
+                return r;
+        }
+
+        r = sd_bus_message_read_array(reply, 'y', &a, &sz);
+        if (r < 0) {
+                log_warning("Failed to read array bus message: %s", g_strerror(-r));
+                return r;
+        }
+
+        r = sd_bus_message_exit_container(reply);
+        if (r < 0) {
+                log_warning("Failed to exit container bus message: %s", g_strerror(-r));
+                return r;
+        }
+
+        r = dns_server_new(&i);
+        if (r < 0)
+                return r;
+
+        i->address.family = family;
+        i->ifindex = ifindex;
+
+        switch (i->address.family) {
+                case AF_INET:
+                        memcpy(&i->address.in, a, sz);
+                        break;
+                case AF_INET6:
+                        memcpy(&i->address.in6, a, sz);
+                        break;
+                default:
+                      return -ENODATA;
+        }
+
+        r = dns_server_add(&serv, i);
+        if (r < 0)
+                return r;
+
+        steal_pointer(i);
+
+        *ret = steal_pointer(serv);
+        return 0;
+}
+
 int dbus_get_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
         _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
         _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
-        const char *type = "a(iiay)";
-        int ifindex, family, r;
         DNSServers *serv = NULL;
-        DNSServer *i = NULL;
-        const void *a;
-        size_t sz;
+        int r;
 
         assert(dns);
 
         r = sd_bus_open_system(&bus);
         if (r < 0)
                 return r;
-
-        if (string_equal(dns, "CurrentDNSServer"))
-                type = "(iiay)";
 
         r = sd_bus_get_property(bus,
                                 "org.freedesktop.resolve1",
@@ -202,7 +284,7 @@ int dbus_get_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
                                 dns,
                                 &bus_error,
                                 &reply,
-                                type);
+                                "a(iiay)");
         if (r < 0) {
                 log_warning("Failed to get D-Bus property '%s': %s", dns, bus_error.message);
                 return r;
@@ -212,23 +294,27 @@ int dbus_get_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
         if (r < 0)
                 return r;
 
-        if (!string_equal(dns, "CurrentDNSServer")) {
-                r = sd_bus_message_enter_container(reply, 'a', "(iiay)");
-                if (r < 0) {
-                        log_warning("Failed to enter variant container of '%s': %s", dns, g_strerror(-r));
-                        return r;
-                }
+        r = sd_bus_message_enter_container(reply, 'a', "(iiay)");
+        if (r < 0) {
+                log_warning("Failed to enter variant container of '%s': %s", dns, g_strerror(-r));
+                return r;
         }
 
         for (;;) {
+               _auto_cleanup_ DNSServer *i = NULL;
+               int ifindex, family;
+               const void *a;
+               size_t sz;
+
                 r = sd_bus_message_enter_container(reply, 'r', "iiay");
                 if (r < 0) {
                         if (r == -ENXIO)
                                 break;
 
-                        log_warning("Failed to create bus message: %s", g_strerror(-r));
+                        log_warning("Failed to enter bus message container: %s", g_strerror(-r));
                         return r;
                 }
+
 
                 r = sd_bus_message_read(reply, "i", &ifindex);
                 if (r < 0) {
@@ -258,19 +344,31 @@ int dbus_get_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
                 if (r < 0)
                         return r;
 
-                memcpy(&i->address, a, sz);
-                i->family = family;
+                i->address.family = family;
                 i->ifindex = ifindex;
+
+                if (sz == 0)
+                        continue;
+
+                switch (family) {
+                        case AF_INET:
+                                memcpy(&i->address.in, a, sz);
+                                break;
+                        case  AF_INET6:
+                                memcpy(&i->address.in6, a, sz);
+                                break;
+                        default:
+                                continue;
+                }
 
                 r = dns_server_add(&serv, i);
                 if (r < 0)
                         return r;
 
-                i = NULL;
+                steal_pointer(i);
         }
 
         *ret = steal_pointer(serv);
-
         return 0;
 }
 
@@ -320,13 +418,13 @@ int dbus_add_dns_server(int ifindex, DNSServers *dns) {
                         return r;
                 }
 
-                r = sd_bus_message_append(m, "i", d->family);
+                r = sd_bus_message_append(m, "i", d->address.family);
                 if (r < 0) {
                         log_warning("Failed to create bus message: %s", g_strerror(-r));
                         return r;
                 }
 
-                if (d->family == AF_INET)
+                if (d->address.family == AF_INET)
                         r = sd_bus_message_append_array(m, 'y', &d->address.in, sizeof(d->address.in));
                 else
                         r = sd_bus_message_append_array(m, 'y', &d->address.in6, sizeof(d->address.in6));
@@ -504,7 +602,6 @@ int dbus_get_dns_domains_from_resolved(DNSDomains **domains) {
                 return r;
 
         *domains = steal_pointer(serv);
-
         return 0;
 }
 
