@@ -63,13 +63,13 @@ static int dns_compare_func(gconstpointer x, gconstpointer y, gpointer user_data
         a = x;
         b = y;
 
-        if (a->family != b->family)
-                return a->family - b->family;
+        if (a->address.family != b->address.family)
+                return a->address.family - b->address.family;
 
         if (a->ifindex != b->ifindex)
                 return a->ifindex - b->ifindex;
 
-        switch(a->family) {
+        switch(a->address.family) {
         case AF_INET:
                 return memcmp(&a->address.in, &b->address.in, sizeof(struct in_addr));
         case AF_INET6:
@@ -211,7 +211,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
                         _auto_cleanup_ char *pretty = NULL;
                         DNSServer *d =  g_sequence_get(i);
 
-                        r = ip_to_string(d->family, &d->address, &pretty);
+                        r = ip_to_string(d->address.family, &d->address, &pretty);
                         if (r < 0)
                                 continue;
 

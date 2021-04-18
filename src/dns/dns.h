@@ -9,7 +9,6 @@
 #include "network-util.h"
 
 typedef struct DNSServer {
-        int family;
         int ifindex;
 
         IPAddress address;
