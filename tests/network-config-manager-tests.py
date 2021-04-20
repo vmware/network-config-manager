@@ -1331,6 +1331,27 @@ class TestCLINetDev:
         link_remove('bond-98')
         link_remove('test-99')
 
+class TestCLIGlobalDNSDomain:
+    def test_cli_configure_global_dns_server(self):
+        subprocess.check_call(['nmctl', 'add-dns', 'global', '8.8.4.4', '8.8.8.8', '8.8.8.1', '8.8.8.2'])
+
+        subprocess.check_call(['sleep', '3'])
+
+        parser = configparser.ConfigParser()
+        parser.read('/etc/systemd/resolved.conf')
+
+        assert(parser.get('Resolve', 'DNS') == '8.8.4.4 8.8.8.1 8.8.8.2 8.8.8.8')
+
+    def test_cli_configure_global_domain_server(self):
+        subprocess.check_call(['nmctl', 'add-domain', 'global', 'test1', 'test2'])
+
+        subprocess.check_call(['sleep', '3'])
+
+        parser = configparser.ConfigParser()
+        parser.read('/etc/systemd/resolved.conf')
+
+        assert(parser.get('Resolve', 'Domains') == 'test1 test2')
+
 class TestWifiWPASupplicantConf:
     yaml_configs = [
         "name-password-wifi-dhcp.yaml",
