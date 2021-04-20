@@ -2115,7 +2115,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                                 printf("%s ", pretty);
 
                 }
-                printf("\n");
+                printf("\n\n");
         }
 
         if (dns && !g_sequence_is_empty(dns->dns_servers)) {
@@ -2184,11 +2184,13 @@ _public_ int ncm_get_dns_server(char ***ret) {
 _public_ int ncm_add_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool system = false;
+        bool system = false, global = false;
         int r, i;
 
         if (string_equal(argv[1], "system"))
                 system = true;
+        else if (string_equal(argv[1], "global"))
+                global = true;
         else {
                 r = parse_ifname_or_index(argv[1], &p);
                 if (r < 0) {
@@ -2225,7 +2227,7 @@ _public_ int ncm_add_dns_server(int argc, char *argv[]) {
                 steal_pointer(s);
         }
 
-        r = manager_add_dns_server(p, dns, system);
+        r = manager_add_dns_server(p, dns, system, global);
         if (r < 0) {
                 log_warning("Failed to add DNS server %s: %s", argv[1], g_strerror(-r));
                 return r;
@@ -2237,11 +2239,13 @@ _public_ int ncm_add_dns_server(int argc, char *argv[]) {
 _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
        _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool system = false;
+        bool system = false, global = false;
         int r;
 
         if (string_equal(argv[1], "system"))
                 system = true;
+        else if (string_equal(argv[1], "global"))
+                global = true;
         else {
                 r = parse_ifname_or_index(argv[1], &p);
                 if (r < 0) {
@@ -2256,7 +2260,7 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_add_dns_server_domain(p, domains, system);
+        r = manager_add_dns_server_domain(p, domains, system, global);
         if (r < 0) {
                 log_warning("Failed to add DNS domain to resolved '%s': %s", argv[1], g_strerror(-r));
                 return r;

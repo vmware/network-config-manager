@@ -55,8 +55,8 @@ int manager_configure_route(const IfNameIndex *ifnameidx,
 
 int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway);
 
-int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system);
-int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, bool system);
+int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system, bool global);
+int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, bool system, bool global);
 int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx);
 int manager_read_domains_from_system_config(char **domains);
 int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps, bool add);
