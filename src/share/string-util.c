@@ -69,7 +69,9 @@ char *string_strip(char *s) {
         if (!s)
                 return NULL;
 
-        t = g_strescape(s, NULL);
+        t = g_strcompress(s);
+        if (!t)
+                return NULL;
 
         return g_strstrip(t);
 }
