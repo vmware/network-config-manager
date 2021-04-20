@@ -995,7 +995,7 @@ int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifnameidx) {
         return dbus_network_reload();
 }
 
-int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system) {
+int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system, bool global) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config_dns = NULL, *a = NULL;
         GSequenceIter *i;
         int r;
@@ -1004,6 +1004,8 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
 
         if (system)
                 return add_dns_server_and_domain_to_resolv_conf(dns, NULL);
+        else if (global)
+                return add_dns_server_and_domain_to_resolved_conf(dns, NULL);
 
         assert(ifnameidx);
 
@@ -1011,12 +1013,9 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
         if (r < 0 || string_equal(setup, "unmanaged"))
                 return dbus_add_dns_server(ifnameidx->ifindex, dns);
 
-        r = network_parse_link_network_file(ifnameidx->ifindex, &network);
-        if (r < 0) {
-                r = create_network_conf_file(ifnameidx->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
 
         for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                 _auto_cleanup_ char *pretty = NULL;
@@ -1045,7 +1044,7 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
         return 0;
 }
 
-int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, bool system) {
+int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, bool system, bool global) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config_domain = NULL, *a = NULL;
         char **d;
         int r;
@@ -1054,6 +1053,8 @@ int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, 
 
         if (system)
                 return add_dns_server_and_domain_to_resolv_conf(NULL, domains);
+       else if (global)
+               return add_dns_server_and_domain_to_resolved_conf(NULL, domains);
 
         assert(ifnameidx);
 
