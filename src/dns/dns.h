@@ -39,6 +39,8 @@ int dns_domain_add(DNSDomains **h, DNSDomain *a);
 int dns_read_resolv_conf(char ***dns, char ***domains);
 int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains);
 
+int add_dns_server_and_domain_to_resolved_conf(DNSServers *dns, char **domains);
+
 void dns_servers_free(DNSServers *d);
 DEFINE_CLEANUP(DNSServers*, dns_servers_free);
 

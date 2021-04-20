@@ -7,6 +7,7 @@
 #include "config-parser.h"
 #include "dbus.h"
 #include "dns.h"
+#include "file-util.h"
 #include "macros.h"
 #include "string-util.h"
 
@@ -248,6 +249,98 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
                 domain_config = domains;
 
         r = write_to_resolv_conf_file(dns_config, domain_config);
+        if (r < 0)
+                return r;
+
+        return dbus_restart_unit("systemd-resolved.service");
+}
+
+/* write to /etc/systemd/resolved.conf */
+int add_dns_server_and_domain_to_resolved_conf(DNSServers *dns, char **domains) {
+        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
+        int r;
+
+        r = load_config_file("/etc/systemd/resolved.conf", &key_file);
+        if (r < 0)
+                return r;
+
+        if (dns) {
+                _auto_cleanup_ char *dns_line = NULL, *l = NULL;
+                _auto_cleanup_strv_ char **s = NULL;
+
+                dns_line = g_key_file_get_string(key_file, "Resolve", "DNS", &e);
+                if (e && e->code > 0) {
+                        if (e->code == ESRCH) {
+                                g_error_free(e);
+                                e = NULL;
+                        } else
+                                return -e->code;
+                }
+
+                if (dns_line)
+                        s = strsplit(dns_line, " ", -1);
+
+                for (GSequenceIter *i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                        _auto_cleanup_ char *pretty = NULL;
+                        DNSServer *d =  g_sequence_get(i);
+
+                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        if (r < 0)
+                                continue;
+
+                        if (!s || strv_length(s) == 0) {
+                                s = strv_new(pretty);
+                                if (!s)
+                                        return -ENOMEM;
+
+                        } else if (!strv_contains((const char **) s, pretty)) {
+                                r = strv_add(&s, pretty);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        steal_pointer(pretty);
+                }
+
+                g_key_file_set_string(key_file, "Resolve", "DNS", strv_join(" ", s));
+        }
+
+        if (domains) {
+                _auto_cleanup_ char *domain_line = NULL, *l = NULL;
+                _auto_cleanup_strv_ char **s = NULL;
+                char **j;
+
+                domain_line = g_key_file_get_string(key_file, "Resolve", "Domains", &e);
+                if (e && e->code > 0) {
+                        if (e->code == ESRCH) {
+                                g_error_free(e);
+                                e = NULL;
+                        } else
+                                return -e->code;
+                }
+
+                if (domain_line)
+                        s = strsplit(domain_line, " ", -1);
+
+                strv_foreach(j, domains) {
+                        if (!s || strv_length(s) == 0) {
+                                s = strv_new(*j);
+                                if (!s)
+                                        return -ENOMEM;
+                        } else if (!strv_contains((const char **) s, *j)) {
+                                r = strv_add(&s, *j);
+                                if (r < 0)
+                                        return r;
+                        }
+                }
+                g_key_file_set_string(key_file, "Resolve", "Domains", strv_join(" ", s));
+        }
+
+        if (!g_key_file_save_to_file (key_file, "/etc/systemd/resolved.conf", &e))
+                return -e->code;
+
+        r = set_file_permisssion("/etc/systemd/resolved.conf", "systemd-resolve");
         if (r < 0)
                 return r;
 
