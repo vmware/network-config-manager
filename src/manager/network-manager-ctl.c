@@ -206,7 +206,7 @@ static int help(void) {
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  show-network-config          [LINK] Displays network configuration of link.\n"
                "  edit-network-config          [LINK] Edit network configuration of link.\n"
-               "  set-proxy                    [http|https|ftp|gopher|socks|socks5|noproxy] [CONFIGURATION | none] Configure proxy.\n"
+               "  set-proxy                    [enable {BOOLEAN}] [http|https|ftp|gopher|socks|socks5|noproxy] [CONFIGURATION | none] Configure proxy.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
                "  apply-yaml-config            Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
                "  generate-config-from-cmdline [FILE | COMMAND LINE] Generates network file configuration from command kernel command line or command line.\n"

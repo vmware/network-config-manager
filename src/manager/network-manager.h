@@ -140,7 +140,8 @@ int manager_edit_link_network_config(const IfNameIndex *ifnameidx);
 
 int manager_remove_netdev(const IfNameIndex *ifnameidx, const char *kind);
 
-int manager_configure_proxy(const char *http,
+int manager_configure_proxy(int enable,
+                            const char *http,
                             const char *https,
                             const char *ftp,
                             const char *gopher,

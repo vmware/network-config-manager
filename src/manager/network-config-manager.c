@@ -3307,9 +3307,23 @@ _public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
 
 _public_ int ncm_configure_proxy(int argc, char *argv[]) {
         _auto_cleanup_  char *http = NULL, *https = NULL, *ftp = NULL, *gopher = NULL, *socks = NULL, *socks5 = NULL, *no_proxy = NULL;
-        int r;
+        int r, enable = -1;
 
         for (int i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "enable")) {
+                        parse_next_arg(argv, argc, i);
+                        i++;
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse enable '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        enable = r;
+                        continue;
+                }
+
                 if (string_equal(argv[i], "http") || string_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
                         i++;
@@ -3409,7 +3423,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                 }
         }
 
-        r = manager_configure_proxy(http, https, ftp, gopher, socks, socks5, no_proxy);
+        r = manager_configure_proxy(enable, http, https, ftp, gopher, socks, socks5, no_proxy);
         if (r < 0) {
                 log_warning("Failed to configure proxy settings: %s", g_strerror(-r));
                 return r;
