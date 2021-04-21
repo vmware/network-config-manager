@@ -149,5 +149,6 @@ int manager_configure_proxy(int enable,
                             const char *socks5,
                             const char *no_proxy);
 
+int manager_parse_proxy_config(GHashTable **c);
 
 void set_json(bool k);

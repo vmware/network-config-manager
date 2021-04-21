@@ -2226,7 +2226,7 @@ int manager_configure_proxy(int enable,
                 if (!s)
                         return log_oom();
 
-                k = strdup("FTP_PROXY");
+                k = strdup("HTTPS_PROXY");
                 if (!k)
                         return log_oom();
 
@@ -2339,6 +2339,20 @@ int manager_configure_proxy(int enable,
         }
 
         return write_to_proxy_conf_file(table);
+}
+
+int manager_parse_proxy_config(GHashTable **c) {
+        _auto_cleanup_hash_ GHashTable *table = NULL;
+        int r;
+
+        assert(c);
+
+        r = parse_state_file("/etc/sysconfig/proxy", NULL, NULL, &table);
+        if (r < 0)
+                return r;
+
+        *c = steal_pointer(table);
+        return 0;
 }
 
 int manager_generate_network_config_from_yaml(const char *file) {

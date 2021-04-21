@@ -3432,6 +3432,54 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
           return 0;
 }
 
+_public_ int ncm_show_proxy(int argc, char *argv[]) {
+        _auto_cleanup_hash_ GHashTable *table = NULL;
+        char *v;
+        int r;
+
+        r = manager_parse_proxy_config(&table);
+        if (r < 0) {
+                log_warning("Failed to parse proxy settings: %s", g_strerror(-r));
+                return r;
+        }
+
+        printf("%sProxy Settings %s\n", ansi_color_blue_header(), ansi_color_reset());
+
+        v = g_hash_table_lookup(table, "PROXY_ENABLED");
+        if(v)
+                printf("      Enabled: %s\n", (char *) v);
+
+        v = g_hash_table_lookup(table, "HTTP_PROXY");
+        if(v)
+                printf("         HTTP: %s\n", (char *) v);
+
+        v = g_hash_table_lookup(table, "HTTPS_PROXY");
+        if(v)
+                printf("        HTTPS: %s\n", (char *) v);
+
+        v = g_hash_table_lookup(table, "FTP_PROXY");
+        if(v)
+                printf("          FTP: %s\n", (char *) v);
+
+        v = g_hash_table_lookup(table, "GOPHER_PROXY");
+        if(v)
+                printf("       Gopher: %s\n", (char *) v);
+
+        v = g_hash_table_lookup(table, "SOCKS_PROXY");
+        if(v)
+                printf("        Socks: %s\n", (char *) v);
+
+        v = g_hash_table_lookup(table, "SOCKS5_SERVER");
+        if(v)
+                printf("Socks5 Server: %s\n", (char *) v);
+
+        v = g_hash_table_lookup(table, "NO_PROXY");
+        if(v)
+                printf("     No Proxy: %s\n", (char *) v);
+
+        return 0;
+}
+
 _public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");
