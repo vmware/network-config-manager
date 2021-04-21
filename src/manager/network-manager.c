@@ -2180,6 +2180,149 @@ int manager_edit_link_network_config(const IfNameIndex *ifnameidx) {
         return 0;
 }
 
+int manager_configure_proxy(const char *http,
+                            const char *https,
+                            const char *ftp,
+                            const char *gopher,
+                            const char *socks,
+                            const char *socks5,
+                            const char *no_proxy) {
+
+        _auto_cleanup_hash_ GHashTable *table = NULL;
+        int r;
+
+        r = parse_state_file("/etc/sysconfig/proxy", NULL, NULL, &table);
+        if (r < 0) {
+                if (r == -ENOENT) {
+                        table = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+                        if (!table)
+                                return log_oom();
+                } else
+                        return r;
+        }
+
+        if (http) {
+                _auto_cleanup_ char *s = NULL, *k = NULL;
+
+                s = strdup(http);
+                if (!s)
+                        return log_oom();
+
+                k = strdup("HTTP_PROXY");
+                if (!k)
+                        return log_oom();
+
+                g_hash_table_replace(table, k, s);
+
+                steal_pointer(s);
+                steal_pointer(k);
+        }
+
+        if (https)  {
+                _auto_cleanup_ char *s = NULL, *k = NULL;
+
+                s = strdup(https);
+                if (!s)
+                        return log_oom();
+
+                k = strdup("FTP_PROXY");
+                if (!k)
+                        return log_oom();
+
+                g_hash_table_replace(table, k, s);
+
+                steal_pointer(s);
+                steal_pointer(k);
+        }
+
+        if (ftp) {
+                _auto_cleanup_ char *s = NULL, *k = NULL;
+
+                s = strdup(ftp);
+                if (!s)
+                        return log_oom();
+
+                k = strdup("FTP_PROXY");
+                if (!k)
+                        return log_oom();
+
+                g_hash_table_replace(table, k, s);
+
+                steal_pointer(s);
+                steal_pointer(k);
+        }
+
+        if (gopher) {
+                 _auto_cleanup_ char *s = NULL, *k = NULL;
+
+                s = strdup(gopher);
+                if (!s)
+                        return log_oom();
+
+                k = strdup("GOPHER_PROXY");
+                if (!k)
+                        return log_oom();
+
+                g_hash_table_replace(table, k, s);
+
+                steal_pointer(s);
+                steal_pointer(k);
+        }
+
+        if (socks) {
+                _auto_cleanup_ char *s = NULL, *k = NULL;
+
+                s = strdup(socks);
+                if (!s)
+                        return log_oom();
+
+                k = strdup("SOCKS_PROXY");
+                if (!k)
+                        return log_oom();
+
+                g_hash_table_replace(table, k, s);
+
+                steal_pointer(s);
+                steal_pointer(k);
+        }
+
+        if (socks5) {
+                 _auto_cleanup_ char *s = NULL, *k = NULL;
+
+                s = strdup(socks5);
+                if (!s)
+                        return log_oom();
+
+                k = strdup("SOCKS5_SERVER");
+                if (!k)
+                        return log_oom();
+
+                g_hash_table_replace(table, k, s);
+
+                steal_pointer(s);
+                steal_pointer(k);
+        }
+
+        if (no_proxy) {
+                 _auto_cleanup_ char *s = NULL, *k = NULL;
+
+                s = strdup(no_proxy);
+                if (!s)
+                        return log_oom();
+
+                k = strdup("NO_PROXY");
+                if (!k)
+                        return log_oom();
+
+                g_hash_table_replace(table, k, s);
+
+                steal_pointer(s);
+                steal_pointer(k);
+        }
+
+        return write_to_proxy_conf_file(table);
+}
+
 int manager_generate_network_config_from_yaml(const char *file) {
         _cleanup_(g_string_unrefp) GString *config = NULL, *wifi_config = NULL;
         _cleanup_(network_unrefp) Network *n = NULL;

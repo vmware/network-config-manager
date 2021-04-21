@@ -140,4 +140,13 @@ int manager_edit_link_network_config(const IfNameIndex *ifnameidx);
 
 int manager_remove_netdev(const IfNameIndex *ifnameidx, const char *kind);
 
+int manager_configure_proxy(const char *http,
+                            const char *https,
+                            const char *ftp,
+                            const char *gopher,
+                            const char *socks,
+                            const char *socks5,
+                            const char *no_proxy);
+
+
 void set_json(bool k);
