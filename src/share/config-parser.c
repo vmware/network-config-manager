@@ -22,7 +22,7 @@ int load_config_file(const char *path, GKeyFile **ret) {
         if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
                 log_warning("Failed to open config file '%s'. \n Seems systemd-networkd state files and configuration "
                             "files are not in sync. \nPlease restart syetemd-networkd to apply the new configurations.", path);
-                return -EEXIST;
+                return -ENOENT;
         }
 
         key_file = g_key_file_new();
@@ -107,24 +107,23 @@ int parse_line(const char *line, char **key, char **value) {
        return 0;
 }
 
-int parse_state_file(const char *path, const char *key, char **ret) {
+int parse_state_file(const char *path, const char *key, char **value, GHashTable **table) {
         _auto_cleanup_hash_ GHashTable *hash = NULL;
-        _auto_cleanup_ char *contents = NULL;
+        _cleanup_(g_error_freep) GError *e = NULL;
         _auto_cleanup_strv_ char **lines = NULL;
-        GError *e = NULL;
+        _auto_cleanup_ char *contents = NULL;
         char **l = NULL;
         char *p = NULL;
         size_t n;
         int r;
 
         assert(path);
-        assert(key);
 
         if (!g_file_test(path, G_FILE_TEST_EXISTS))
-                return -EEXIST;
+                return -ENOENT;
 
         if (!g_file_get_contents(path, &contents, &n , &e))
-                return -ENODATA;
+                return -e->code;
 
         hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
         if (!hash)
@@ -135,8 +134,7 @@ int parse_state_file(const char *path, const char *key, char **ret) {
                 return log_oom();
 
         strv_foreach(l, lines) {
-                _auto_cleanup_ char *t = NULL, *s = NULL;
-                char *k = NULL, *v = NULL;
+                _auto_cleanup_ char *t = NULL, *s = NULL, *k = NULL, *v = NULL;
 
                 t = g_strdup(*l);
                 if (!t)
@@ -152,17 +150,23 @@ int parse_state_file(const char *path, const char *key, char **ret) {
                         if (!g_hash_table_insert(hash, k, v))
                                 continue;
                 }
+
+                steal_pointer(k);
+                steal_pointer(v);
         }
 
-        p = g_hash_table_lookup(hash, key);
-        if (p) {
-                *ret = g_strdup(p);
-                if (!*ret)
-                        return log_oom();
+        if (key && value) {
+                p = g_hash_table_lookup(hash, key);
+                if (p) {
+                        *value = g_strdup(p);
+                        if (!*value)
+                                return log_oom();
+                } else
+                        return -ENOENT;
+        }
 
-                p = NULL;
-        } else
-                return -ENOENT;
+        if (table)
+                *table = steal_pointer(hash);
 
         return 0;
 }
@@ -180,7 +184,7 @@ int parse_resolv_conf(char ***dns, char ***domains) {
 
         if (!g_file_test("/etc/resolv.conf", G_FILE_TEST_EXISTS)) {
                 log_warning("Failed to open /etc/resolv.conf. File does not exists.");
-                return -EEXIST;
+                return -ENOENT;
         }
 
         if (!g_file_get_contents("/etc/resolv.conf", &contents, &n , &e)) {
