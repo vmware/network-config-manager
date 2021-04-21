@@ -17,6 +17,8 @@ int remove_config_files_section_glob(const char *path, const char *section, cons
 
 int write_to_conf_file_file(const char *path, const GString *s);
 int append_to_conf_file(const char *path, const GString *s);
+int write_to_proxy_conf_file(GHashTable *table);
+
 int read_conf_file(const char *path, char **s);
 
 int write_to_resolv_conf_file(char **dns, char **domains);
