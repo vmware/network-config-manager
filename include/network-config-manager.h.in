@@ -96,6 +96,8 @@ int ncm_link_show_network_config(int argc, char *argv[]);
 int ncm_link_edit_network_config(int argc, char *argv[]);
 
 int ncm_configure_proxy(int argc, char *argv[]);
+int ncm_show_proxy(int argc, char *argv[]);
+int ncm_get_proxy(char ***proxy);
 
 int ncm_system_status(int argc, char *argv[]);
 bool ncm_is_netword_running(void);

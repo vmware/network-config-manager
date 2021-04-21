@@ -2180,7 +2180,8 @@ int manager_edit_link_network_config(const IfNameIndex *ifnameidx) {
         return 0;
 }
 
-int manager_configure_proxy(const char *http,
+int manager_configure_proxy(int enable,
+                            const char *http,
                             const char *https,
                             const char *ftp,
                             const char *gopher,
@@ -2225,7 +2226,7 @@ int manager_configure_proxy(const char *http,
                 if (!s)
                         return log_oom();
 
-                k = strdup("FTP_PROXY");
+                k = strdup("HTTPS_PROXY");
                 if (!k)
                         return log_oom();
 
@@ -2320,7 +2321,38 @@ int manager_configure_proxy(const char *http,
                 steal_pointer(k);
         }
 
+        if (enable != -1) {
+                _auto_cleanup_ char *p = NULL, *t = NULL;
+
+                t = strdup(bool_to_string(enable));
+                if (!t)
+                        return log_oom();
+
+                p = strdup("PROXY_ENABLED");
+                if (!p)
+                        return log_oom();
+
+                g_hash_table_replace(table, p, t);
+
+                steal_pointer(t);
+                steal_pointer(p);
+        }
+
         return write_to_proxy_conf_file(table);
+}
+
+int manager_parse_proxy_config(GHashTable **c) {
+        _auto_cleanup_hash_ GHashTable *table = NULL;
+        int r;
+
+        assert(c);
+
+        r = parse_state_file("/etc/sysconfig/proxy", NULL, NULL, &table);
+        if (r < 0)
+                return r;
+
+        *c = steal_pointer(table);
+        return 0;
 }
 
 int manager_generate_network_config_from_yaml(const char *file) {
