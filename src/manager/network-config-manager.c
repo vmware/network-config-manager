@@ -3480,6 +3480,44 @@ _public_ int ncm_show_proxy(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_get_proxy(char ***proxy) {
+        _auto_cleanup_hash_ GHashTable *table = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        char *k = NULL, *v = NULL;
+        GHashTableIter iter;
+        int r;
+
+        assert(proxy);
+
+        r = manager_parse_proxy_config(&table);
+        if (r < 0)
+                return r;
+
+        g_hash_table_iter_init (&iter, table);
+        for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+                _auto_cleanup_ char *p = NULL;
+
+                p = string_join(":", k, v, NULL);
+                if (!p)
+                        return log_oom();
+
+                if (!s) {
+                        s = strv_new(p);
+                        if (!s)
+                                return log_oom();
+                } else {
+                        r = strv_add(&s, p);
+                        if (r < 0)
+                                return r;
+                }
+
+                steal_pointer(p);
+        }
+
+        *proxy = steal_pointer(s);
+        return 0;
+}
+
 _public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");
