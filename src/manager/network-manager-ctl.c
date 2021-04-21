@@ -206,6 +206,7 @@ static int help(void) {
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  show-network-config          [LINK] Displays network configuration of link.\n"
                "  edit-network-config          [LINK] Edit network configuration of link.\n"
+               "  set-proxy                    [http|https|ftp|gopher|socks|socks5|noproxy] [CONFIGURATION | none] Configure proxy.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
                "  apply-yaml-config            Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
                "  generate-config-from-cmdline [FILE | COMMAND LINE] Generates network file configuration from command kernel command line or command line.\n"
@@ -347,6 +348,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "show-network-config",          1,        WORD_ANY, false, ncm_link_show_network_config },
                 { "edit-network-config",          1,        WORD_ANY, false, ncm_link_edit_network_config },
+                { "set-proxy",                    1,        WORD_ANY, false, ncm_configure_proxy },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply-yaml-config"           , WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "generate-config-from-cmdline", WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },

@@ -3305,6 +3305,119 @@ _public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_configure_proxy(int argc, char *argv[]) {
+        _auto_cleanup_  char *http = NULL, *https = NULL, *ftp = NULL, *gopher = NULL, *socks = NULL, *socks5 = NULL, *no_proxy = NULL;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "http") || string_equal(argv[i], "none")) {
+                        parse_next_arg(argv, argc, i);
+                        i++;
+
+                        if (string_equal(argv[i], "none"))
+                                http = strdup("");
+                        else
+                                http = strdup(argv[i]);
+                        if (!http)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "https") || string_equal(argv[i], "none")) {
+                        parse_next_arg(argv, argc, i);
+                        i++;
+
+                        if (string_equal(argv[i], "none"))
+                                https = strdup("");
+                        else
+                                https = strdup(argv[i]);
+                        if (!https)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "ftp") || string_equal(argv[i], "none")) {
+                        parse_next_arg(argv, argc, i);
+                        i++;
+
+                        if (string_equal(argv[i], "none"))
+                                ftp = strdup("");
+                        else
+                                ftp = strdup(argv[i]);
+                        if (!ftp)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "gopher") || string_equal(argv[i], "none")) {
+                        parse_next_arg(argv, argc, i);
+                        i++;
+
+                        if (string_equal(argv[i], "none"))
+                                gopher = strdup("");
+                        else
+                                gopher = strdup(argv[i]);
+                        if (!gopher)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "socks") || string_equal(argv[i], "none")) {
+                        parse_next_arg(argv, argc, i);
+                        i++;
+
+                        if (string_equal(argv[i], "none"))
+                                socks = strdup("");
+                        else
+                                socks = strdup(argv[i]);
+                        if (!socks)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "socks5") || string_equal(argv[i], "none")) {
+                        parse_next_arg(argv, argc, i);
+                        i++;
+
+                        if (string_equal(argv[i], "none"))
+                                socks5 = strdup("");
+                        else
+                                socks5 = strdup(argv[i]);
+                        if (!socks5)
+                                return log_oom();
+
+                        continue;
+                }
+
+                if (string_equal(argv[i], "noproxy") || string_equal(argv[i], "none")) {
+                        parse_next_arg(argv, argc, i);
+                        i++;
+
+                        if (string_equal(argv[i], "none"))
+                                no_proxy = strdup("");
+                        else
+                                no_proxy = strdup(argv[i]);
+                        if (!no_proxy)
+                                return log_oom();
+
+                        continue;
+                }
+        }
+
+        r = manager_configure_proxy(http, https, ftp, gopher, socks, socks5, no_proxy);
+        if (r < 0) {
+                log_warning("Failed to configure proxy settings: %s", g_strerror(-r));
+                return r;
+        }
+
+          return 0;
+}
+
 _public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");
@@ -3331,7 +3444,7 @@ _public_ int ncm_nft_add_tables(int argc, char *argv[]) {
         r = nft_add_table(f, argv[2]);
         if (r < 0) {
                 log_warning("Failed to add table  %s : %s", argv[2], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         return r;

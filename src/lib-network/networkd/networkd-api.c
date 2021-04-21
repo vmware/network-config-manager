@@ -13,7 +13,7 @@ int network_parse_operational_state(char **state) {
 
         assert(state);
 
-        r = parse_state_file("/run/systemd/netif/state", "OPER_STATE", &s);
+        r = parse_state_file("/run/systemd/netif/state", "OPER_STATE", &s, NULL);
         if (r < 0)
                 return r;
 
@@ -30,7 +30,7 @@ static int network_parse_strv(const char *key, char ***ret) {
 
         assert(ret);
 
-        r = parse_state_file("/run/systemd/netif/state", key, &s);
+        r = parse_state_file("/run/systemd/netif/state", key, &s, NULL);
         if (r < 0)
                 return r;
 
@@ -67,7 +67,7 @@ static int network_parse_link_strv(int ifindex, const char *key, char ***ret) {
         assert(ret);
 
         asprintf(&path, "/run/systemd/netif/links/%i", ifindex);
-        r = parse_state_file(path, key, &s);
+        r = parse_state_file(path, key, &s, NULL);
         if (r < 0)
                 return r;
 
@@ -89,7 +89,7 @@ static int network_parse_link_string(int ifindex, const char *key, char **ret) {
         assert(ret);
 
         asprintf(&path, "/run/systemd/netif/links/%i", ifindex);
-        r = parse_state_file(path, key, &s);
+        r = parse_state_file(path, key, &s, NULL);
         if (r < 0)
                 return r;
 

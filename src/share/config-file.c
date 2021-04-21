@@ -27,10 +27,8 @@ int set_config_file_string(const char *path, const char *section, const char *k,
 
         g_key_file_set_string(key_file, section, k, v);
 
-        if (!g_key_file_save_to_file (key_file, path, &e)) {
-                log_warning("Failed to write to '%s': %s", path, e->message);
+        if (!g_key_file_save_to_file (key_file, path, &e))
                 return -e->code;
-        }
 
         e = NULL;
         return set_file_permisssion(path, "systemd-network");
@@ -51,12 +49,9 @@ int set_config_file_bool(const char *path, const char *section, const char *k, b
 
         g_key_file_set_boolean(key_file, section, k, b);
 
-        if (!g_key_file_save_to_file (key_file, path, &e)) {
-                log_warning("Failed to write to '%s': %s", path, e->message);
+        if (!g_key_file_save_to_file (key_file, path, &e))
                 return -e->code;
-        }
 
-        e = NULL;
         return set_file_permisssion(path, "systemd-network");
 }
 
@@ -75,12 +70,9 @@ int set_config_file_integer(const char *path, const char *section, const char *k
 
         g_key_file_set_integer(key_file, section, k, v);
 
-        if (!g_key_file_save_to_file (key_file, path, &e)) {
-                log_warning("Failed to write to '%s': %s", path, e->message);
+        if (!g_key_file_save_to_file (key_file, path, &e))
                 return -e->code;
-        }
 
-        e = NULL;
          return set_file_permisssion(path, "systemd-network");
 }
 
@@ -97,17 +89,12 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
         if (r < 0)
                 return r;
 
-        if (!g_key_file_remove_key(key_file, section, k, &e)) {
-                g_debug("Failed to remove key from '%s': section %s key %s", path, section, k);
+        if (!g_key_file_remove_key(key_file, section, k, &e))
                 return -e->code;
-        }
 
-        if (!g_key_file_save_to_file(key_file, path, &e)) {
-                g_debug("Failed to write to '%s': %s", path, e->message);
+        if (!g_key_file_save_to_file(key_file, path, &e))
                 return -e->code;
-        }
 
-        e = NULL;
         return set_file_permisssion(path, "systemd-network");
 }
 
@@ -123,17 +110,12 @@ int remove_section_from_config_file(const char *path, const char *section) {
         if (r < 0)
                 return r;
 
-        if (!g_key_file_remove_group(key_file, section, &e)) {
-                g_debug("Failed to remove key from '%s': section %s", path, section);
+        if (!g_key_file_remove_group(key_file, section, &e))
                 return -e->code;
-        }
 
-        if (!g_key_file_save_to_file(key_file, path, &e)) {
-                log_warning("Failed to write to '%s': %s", path, e->message);
+        if (!g_key_file_save_to_file(key_file, path, &e))
                 return -e->code;
-        }
 
-        e = NULL;
         return set_file_permisssion(path, "systemd-network");
 }
 
@@ -247,7 +229,6 @@ int remove_config_files_section_glob(const char *path, const char *section, cons
         return 0;
 }
 
-
 int write_to_resolv_conf_file(char **dns, char **domains) {
         _auto_cleanup_ char *p = NULL;
         GString *c = NULL;
@@ -280,5 +261,36 @@ int write_to_resolv_conf_file(char **dns, char **domains) {
         p = g_string_free(c, FALSE);
 
         g_file_set_contents("/etc/resolv.conf", p, len, NULL);
+        return 0;
+}
+
+int write_to_proxy_conf_file(GHashTable *table) {
+        _auto_cleanup_ char *p = NULL;
+        GHashTableIter iter;
+        GString *c = NULL;
+        char *k, *v;
+        size_t len;
+
+        c = g_string_new(NULL);
+        if (!c)
+                return log_oom();
+
+        g_hash_table_iter_init (&iter, table);
+        for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+
+                if (v) {
+                        if (*v != '"')
+                                g_string_append_printf(c, "%s=\"%s\"\n", k , v);
+                        else
+                                g_string_append_printf(c, "%s=%s\n", k , v);
+                } else
+                        g_string_append_printf(c, "%s=\n", k);
+        }
+
+        len = c->len;
+        p = g_string_free(c, FALSE);
+
+        g_file_set_contents("/etc/sysconfig/proxy", p, len, NULL);
+
         return 0;
 }
