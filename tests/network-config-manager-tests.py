@@ -1352,6 +1352,35 @@ class TestCLIGlobalDNSDomain:
 
         assert(parser.get('Resolve', 'Domains') == 'test1 test2')
 
+class TestCLINetworkProxy:
+    def test_cli_configure_network_proxy(self):
+
+        if not os.path.exists("/etc/sysconfig/"):
+                os.mkdir("/etc/sysconfig/")
+
+        f = open("/etc/sysconfig/proxy", "w")
+        f.write("PROXY_ENABLED=\"no\"\nHTTP_PROXY=""\nHTTPS_PROXY=""\nNO_PROXY=\"localhost, 127.0.0.1\"\n")
+        f.close()
+
+        subprocess.check_call(['nmctl', 'set-proxy', 'enable', 'yes', 'http', 'http://test.com:123', 'https', 'https://test.com:123'])
+
+        dictionary = {}
+        file = open("/etc/sysconfig/proxy")
+
+        lines = file.read().split('\n')
+
+        for line in lines:
+            if line == '':
+                 continue
+            pair = line.split('=')
+            dictionary[pair[0].strip('\'\'\"\"')] = pair[1].strip('\'\'\"\"')
+
+        assert(dictionary["HTTP_PROXY"] == "http://test.com:123")
+        assert(dictionary["HTTPS_PROXY"] == "https://test.com:123")
+        assert(dictionary["PROXY_ENABLED"] == "yes")
+
+        subprocess.check_call(['nmctl', 'set-proxy', 'enable', 'yes', 'http', 'http://test.com:123', 'ftp', 'https://test.com123'])
+
 class TestWifiWPASupplicantConf:
     yaml_configs = [
         "name-password-wifi-dhcp.yaml",
