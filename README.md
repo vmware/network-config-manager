@@ -8,13 +8,19 @@ The network-config-manager `nmctl` allows to configure and introspect the state 
 
 Configure
   - Static IPv4 and IPv6 Address, Routes, Gateway.
-  - DHCP type (IPv4/IPv6), DHCP4 Client Identifier, UseMTU/UseDNS/UseDomains/UseNTP/UseRoutes.
+  - DHCPv4/DHCPv6 Client (DHCP4 Client Identifier, UseMTU/UseDNS/UseDomains/UseNTP/UseRoutes).
   - LLDP, Link Local Addressing, IPv4LLRoute, LLMNR.
-  - DNS, Domains and NTP.
+  - Per Link and global DNS, Domains
+  - NTP
+  - Routing Policy Rule
+  - Multiple default gateway with routing policy rules.
   - Link's MAC, MTU.
   - Create netdevs, vlan, vxlan, bridge, bond, veth, macvlan/macvtap, ipvlap/ipvtap, veth, tunnels(ipip, sit, gre, sit, vti), wireguard.
   - Hostname.
+  - DHCPv4 Server.
+  - IPv6 Router Advertisements.
   - Add delete and view nftables table, chains and rules.
+  - Edit network configuration via vim/vi.
 
   Please see [systemd.network](https://www.freedesktop.org/software/systemd/man/systemd.network.html) for more information.
 
@@ -27,7 +33,7 @@ Introspect
  - DNS and Domains.
  - Hostname.
  - nftable
- - JSON format is supported.
+ - Supports JSON format.
 
 ### Dependencies
 
