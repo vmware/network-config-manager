@@ -161,18 +161,6 @@ int json_system_status(char **ret) {
                 steal_pointer(js);
         }
 
-        (void) dbus_get_property_from_hostnamed("KernelRelease", &kernel_release);
-        if (kernel) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
-
-                js = json_object_new_string(kernel_release);
-                if (!js)
-                        return log_oom();
-
-                json_object_object_add(jobj,"KernelRelease", js);
-                steal_pointer(js);
-        }
-
         (void) dbus_get_property_from_hostnamed("KernelName", &kernel);
         if (kernel) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
@@ -182,6 +170,18 @@ int json_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj,"KernelName", js);
+                steal_pointer(js);
+        }
+
+        (void) dbus_get_property_from_hostnamed("KernelRelease", &kernel_release);
+        if (kernel_release) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(kernel_release);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj,"KernelRelease", js);
                 steal_pointer(js);
         }
 
@@ -365,13 +365,13 @@ int json_system_status(char **ret) {
         if (ret) {
                 char *s;
 
-                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
+                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
                 if (!s)
                         return log_oom();
 
                 *ret = steal_pointer(s);
         } else
-                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
+                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
 
         return r;
 }
@@ -1166,13 +1166,13 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         if (ret) {
                 char *s;
 
-                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
+                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
                 if (!s)
                         return log_oom();
 
                 *ret = steal_pointer(s);
         } else
-                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE));
+                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
 
         return 0;
 }
