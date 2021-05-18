@@ -260,13 +260,11 @@ Created symlink /etc/systemd/system/network.target.wants/network-config-manager-
 
 ```
 
-**Note**: Only IPv4 configuration is supported for static configs.
-
 ### Contributing
 
 The network-config-manager project team welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
 
-Please join #photon https://code.vmware.com/web/code/join
+Please join [#photon](https://code.vmware.com/web/code/join).
 
 License
 ----
