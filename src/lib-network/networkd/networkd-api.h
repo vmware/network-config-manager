@@ -1,7 +1,6 @@
-/* SPDX-License-Identifier: Apache-2.0
- * Copyright © 2021 VMware, Inc.
+/* Copyright 2021 VMware, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 #pragma once
 
 int network_parse_operational_state(char **state);
