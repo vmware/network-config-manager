@@ -1,5 +1,5 @@
+# Copyright 2021 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
-# Copyright © 2020 VMware, Inc.
 
 [Unit]
 Description=network-config-manager generate network units from kernel command line
