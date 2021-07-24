@@ -754,7 +754,7 @@ _public_ int ncm_link_get_dhcp_client_iaid(char *ifname, uint32_t *ret) {
 
 _public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        const char *k;
+        const char *k = NULL;
         bool v;
         int r;
 
@@ -801,7 +801,7 @@ _public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        const char *k;
+        const char *k = NULL;
         bool v;
         int r;
 
@@ -836,7 +836,7 @@ _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        const char *k;
+        const char *k = NULL;
         bool v;
         int r;
 
@@ -1828,10 +1828,10 @@ _public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
 _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
         uint32_t pref_lifetime = 0, valid_lifetime = 0, route_lifetime = 0, dns_lifetime = 0;
         _auto_cleanup_ IPAddress *prefix = NULL, *dns = NULL, *route_prefix = NULL;
-        int emit_dns = -1, emit_domain, assign = -1, managed = -1, other = -1;
+        int emit_dns = -1, emit_domain = -1, assign = -1, managed = -1, other = -1;
+        IPv6RAPreference preference = _IPV6_RA_PREFERENCE_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *domain = NULL;
-        IPv6RAPreference preference;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -2912,7 +2912,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *proto = NULL;
         uint16_t id;
-        int r, i;
+        int r = 0, i;
 
         for (i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {

@@ -115,7 +115,7 @@ int parse_ipv4(const char *s, IPAddress **ret) {
         if (inet_pton(AF_INET, s, &buffer) <= 0)
                 return errno > 0 ? -errno : -EINVAL;
 
-        memcpy(&b->in, &buffer, sizeof(IPAddress));
+        memcpy(&b->in, &buffer, sizeof(struct in_addr));
         b->family = AF_INET;
 
         *ret = steal_pointer(b);
@@ -137,7 +137,7 @@ int parse_ipv6(const char *s, IPAddress **ret) {
         if (inet_pton(AF_INET6, s, &buffer) <= 0)
                 return errno > 0 ? -errno : -EINVAL;
 
-        memcpy(&b->in6, &buffer, sizeof(IPAddress));
+        memcpy(&b->in6, &buffer, sizeof(struct in6_addr));
         b->family = AF_INET6;
 
         *ret = steal_pointer(b);

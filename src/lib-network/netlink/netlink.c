@@ -39,7 +39,7 @@ struct rtattr *rtnl_message_add_attribute_nested(struct nlmsghdr *hdr, int type,
 
         nest = NLMSG_TAIL(hdr);
 
-        r = rtnl_message_add_attribute(hdr, type, NULL, len);
+        r = rtnl_message_add_attribute(hdr, type, 0, len);
         if (r < 0)
                 return NULL;
 
