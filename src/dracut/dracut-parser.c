@@ -125,7 +125,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
         _auto_cleanup_ IPAddress *peer = NULL, *prefix = NULL;
         _auto_cleanup_ Address *a = NULL;
         _auto_cleanup_strv_ char **s = NULL;
-        int r;
+        int r = 0;
 
         s = strsplit(line, ":", 9);
         if (!s)
