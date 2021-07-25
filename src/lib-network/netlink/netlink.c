@@ -23,7 +23,7 @@ int rtnl_message_add_attribute(struct nlmsghdr *hdr, int type, const void *data,
         attr = NLMSG_TAIL(hdr);
         attr->rta_type = type;
         attr->rta_len = l;
-        if (len)
+        if (len && data)
                 memcpy(RTA_DATA(attr), data, len);
 
         hdr->nlmsg_len = NLMSG_ALIGN(hdr->nlmsg_len) + RTA_ALIGN(l);
