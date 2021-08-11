@@ -127,8 +127,8 @@ int write_to_conf_file(const char *path, const GString *s) {
         if (!g_file_set_contents(path, s->str, s->len, &e))
                 return -e->code;
 
-        e = NULL;
-        return 0;
+        steal_pointer(e);
+        return set_file_permisssion(path, "systemd-network");
 }
 
 int append_to_conf_file(const char *path, const GString *s) {
