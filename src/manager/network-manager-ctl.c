@@ -130,7 +130,7 @@ static int help(void) {
                                                      "\n\t\t\t\t      type [TYPE {unicast|local|broadcast|anycast|multicast|blackhole|unreachable|prohibit|throw|nat|resolve}]"
                                                      "\n\t\t\t\t      ipv6-pref [IPV6PREFERENCE {low|medium|high}] onlink [{ONLINK BOOLEN}] Configures Link route.\n"
                "  delete-route                 [LINK] Removes route from Link\n"
-               "  add-additional-gw            [LINK] address [ADDRESS] route [ROUTE address] gw [GW address] table [TABLE routing policy table NUMBER] Configures additional"
+               "  add-additional-gw            [LINK] address [ADDRESS] destination [DESTINATION address] gw [GW address] table [TABLE routing policy table NUMBER] Configures additional"
                                                       "\n\t\t\t\t      gateway for another NIC with routing policy rules.\n"
                "  add-rule                     [LINK] table [TABLE NUMBER] from [ADDRESS] to [ADDRESS] oif [LINK] iif [LINK] priority [NUMBER] tos [NUMBER]"
                                                       "\n\t\t\t\t      Configures Routing Policy Rule.\n"

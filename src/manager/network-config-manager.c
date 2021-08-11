@@ -1447,7 +1447,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
         }
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "address")) {
+                if (string_equal(argv[i], "address") || string_equal(argv[i], "addr")) {
                         parse_next_arg(argv, argc, i);
                         i++;
 
@@ -1460,13 +1460,13 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         continue;
                 }
 
-                if (string_equal(argv[i], "route")) {
+                if (string_equal(argv[i], "destination") || string_equal(argv[i], "dest")) {
                         parse_next_arg(argv, argc, i);
                         i++;
 
-                        r = parse_ip_from_string(argv[i], &gw);
+                        r = parse_ip_from_string(argv[i], &destination);
                         if (r < 0) {
-                                log_warning("Failed to parse route address '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse destination '%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
 
@@ -1477,9 +1477,9 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         parse_next_arg(argv, argc, i);
                         i++;
 
-                        r = parse_ip_from_string(argv[i], &destination);
+                        r = parse_ip_from_string(argv[i], &gw);
                         if (r < 0) {
-                                log_warning("Failed to parse gateway address '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse gateway '%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
 
@@ -1495,8 +1495,14 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                                 log_warning("Failed to parse table '%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
+
+                        continue;
                 }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                return -EINVAL;
         }
+
 
         r = route_new(&rt);
         if (r < 0)
