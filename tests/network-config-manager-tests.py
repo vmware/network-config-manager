@@ -452,6 +452,16 @@ class TestCLINetwork:
         assert(parser.get('Route', 'IPv6Preference') == 'medium')
         assert(parser.get('Route', 'Source') == '192.168.1.4')
 
+    def test_cli_add_additional_gateway(self):
+        assert(link_exits('test99') == True)
+
+        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        assert(unit_exits('10-test99.network') == True)
+
+        subprocess.check_call(['sleep', '5'])
+
+        subprocess.check_call(['nmctl', 'add-additional-gw', 'test99', 'address', '192.168.10.5/24', 'dest', '0.0.0.0', 'gw','172.16.85.1', 'table', '100'])
+
     def test_cli_add_routing_policy_rule(self):
         assert(link_exits('test99') == True)
 
