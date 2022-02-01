@@ -12,15 +12,19 @@
 #include "network-route.h"
 #include "network-util.h"
 
-static int route_news(Routes **ret) {
-        Routes *h;
+static int routes_new(Routes **ret) {
+        Routes *rt;
+        int r;
 
-        h = new0(Routes, 1);
-        if (!h)
+        rt = new0(Routes, 1);
+        if (!rt)
                 return log_oom();
 
-        *ret = h;
+        r = set_new(&rt->routes, g_bytes_hash, g_bytes_equal);
+        if (r < 0)
+                return r;
 
+        *ret = steal_pointer(rt);
         return 0;
 }
 
@@ -42,33 +46,53 @@ int route_new(Route **ret) {
         };
 
         *ret = route;
-
         return 0;
 }
 
-void routes_unref(Routes *rt) {
-        if (!rt)
+void routes_unref(Routes *routes) {
+        GHashTableIter iter;
+        gpointer key, value;
+        unsigned long size;
+
+        if (!routes)
                 return;
 
-        g_list_free_full(rt->routes, g_free);
-        g_free(rt);
+        g_hash_table_iter_init(&iter, routes->routes->hash);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+                Route *rt;
+
+                rt = (Route *) g_bytes_get_data(key, &size);
+                free(rt);
+
+                g_bytes_unref(key);
+                g_hash_table_iter_remove(&iter);
+        }
+
+        set_unrefp(&routes->routes);
+        free(routes);
 }
 
-static int route_add(Routes **h, Route *rt) {
+static int route_add(Routes **rts, Route *rt) {
+        GBytes *b = NULL;
         int r;
 
-        assert(h);
+        assert(rts);
         assert(rt);
 
-        if (!*h) {
-                r = route_news(h);
+        if (!*rts) {
+                r = routes_new(rts);
                 if (r < 0)
                         return r;
         }
 
-        (*h)->routes = g_list_append((*h)->routes, rt);
+        b = g_bytes_new_with_free_func(rt, sizeof(Route), g_free, NULL);
+        if (!b)
+                return log_oom();
 
-        return 0;
+        if (!set_contains((*rts)->routes, b))
+                return set_add((*rts)->routes, b);
+
+        return -EEXIST;
 }
 
 static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes **ret) {

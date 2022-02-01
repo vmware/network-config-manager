@@ -9,6 +9,7 @@
 #include "netlink.h"
 #include "network-link.h"
 #include "network-util.h"
+#include "set.h"
 
 typedef struct Route {
         int family;
@@ -31,7 +32,7 @@ typedef struct Route {
 } Route;
 
 typedef struct Routes {
-        GList *routes;
+        Set *routes;
 } Routes;
 
 int route_new(Route **ret);
