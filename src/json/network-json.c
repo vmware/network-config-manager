@@ -81,17 +81,21 @@ static void json_list_link_addresses(gpointer key, gpointer value, gpointer user
         steal_pointer(jifindex);
 }
 
-static void json_list_link_gateways(Route *route, json_object *jobj) {
+static void json_list_link_gateways(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *jip = NULL, *jname = NULL, *jfamily = NULL,
                 *jifindex = NULL, *jobj_address = NULL;
+        json_object *jobj = (json_object *) userdata;
         _auto_cleanup_ char *c = NULL;
         char buf[IF_NAMESIZE + 1] = {};
+        size_t size;
+        Route *route;
         int r;
 
         jobj_address = json_object_new_object();
         if (!jobj_address)
                 return;
 
+        route = (Route *) g_bytes_get_data(key, &size);
         if_indextoname(route->ifindex, buf);
 
         r = ip_to_string_prefix(route->family, &route->address, &c);
@@ -141,7 +145,6 @@ int json_system_status(char **ret) {
         _cleanup_(routes_unrefp) Routes *routes = NULL;
         _cleanup_(addresses_unrefp) Addresses *h = NULL;
         sd_id128_t machine_id = {};
-        GList *i;
         int r;
 
         jobj = json_object_new_object();
@@ -284,17 +287,12 @@ int json_system_status(char **ret) {
         steal_pointer(jaddress);
 
         r = manager_link_get_routes(&routes);
-        if (r >= 0 && g_list_length(routes->routes) > 0) {
-                Route *rt;
-
+        if (r >= 0 && set_size(routes->routes) > 0) {
                 jroutes = json_object_new_object();
                 if (!jroutes)
                         return log_oom();
 
-                for (i = routes->routes; i; i = i->next) {
-                        rt = i->data;
-                        json_list_link_gateways(rt, jroutes);
-                }
+                set_foreach(routes->routes, json_list_link_gateways, jroutes);
         }
 
         json_object_object_add(jobj, "Gateways", jroutes);
@@ -386,6 +384,27 @@ static void json_list_one_link_addresses(gpointer key, gpointer value, gpointer 
         a = (Address *) g_bytes_get_data(key, &size);
 
         r = ip_to_string_prefix(a->family, &a->address, &c);
+        if (r < 0)
+                return;
+
+        js = json_object_new_string(c);
+        if (!js)
+                return;
+
+        json_object_array_add(ja, js);
+        steal_pointer(js);
+}
+
+static void json_list_one_link_routes(gpointer key, gpointer value, gpointer userdata) {
+        _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object *ja = (json_object *) userdata;
+        _auto_cleanup_ char *c = NULL;
+        unsigned long size;
+        Route *rt = NULL;
+        int r;
+
+        rt = (Route *) g_bytes_get_data(key, &size);
+        r = ip_to_string(rt->family, &rt->address, &c);
         if (r < 0)
                 return;
 
@@ -1063,31 +1082,15 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         }
 
         r = manager_get_one_link_route(l->ifindex, &route);
-        if (r >= 0 && route && g_list_length(route->routes) > 0) {
+        if (r >= 0 && route && set_size(route->routes) > 0) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
-                GList *i;
 
                 ja = json_object_new_array();
                 if (!ja)
                         return log_oom();
 
-                for (i = route->routes; i; i = i->next) {
-                        _auto_cleanup_ char *c = NULL;
-                        Route *a = NULL;
+                set_foreach(route->routes, json_list_one_link_routes, ja);
 
-                        a = i->data;
-                        r = ip_to_string(a->family, &a->address, &c);
-                        if (r >= 0) {
-                                _cleanup_(json_object_putp) json_object *js = NULL;
-
-                                js = json_object_new_string(c);
-                                if (!js)
-                                        return log_oom();
-
-                                json_object_array_add(ja, js);
-                                steal_pointer(js);
-                        }
-                }
                 json_object_object_add(jobj, "Routes", ja);
                 steal_pointer(ja);
         }

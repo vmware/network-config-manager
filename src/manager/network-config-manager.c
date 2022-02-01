@@ -116,6 +116,22 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 printf("\n");
 }
 
+static void list_one_link_routes(gpointer key, gpointer value, gpointer userdata) {
+        _auto_cleanup_strv_ char **dhcp = NULL;
+        _auto_cleanup_ char *c = NULL;
+        static bool first = true;
+        unsigned long size;
+        Route *rt = NULL;
+
+        rt = (Route *) g_bytes_get_data(key, &size);
+        (void) ip_to_string(rt->family, &rt->address, &c);
+        if (first) {
+                printf("%s\n", c);
+                first = false;
+        } else
+                printf("                   %s\n", c);
+}
+
 static int display_one_link_udev(Link *l, bool display, char **link_file) {
         _auto_cleanup_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
         const char *link, *driver, *path, *vendor, *model;
@@ -260,23 +276,9 @@ static int list_one_link(char *argv[]) {
          }
 
          r = manager_get_one_link_route(l->ifindex, &route);
-         if (r >= 0 && route && g_list_length(route->routes) > 0) {
-                 bool first = true;
-                 GList *i;
-
+         if (r >= 0 && route && set_size(route->routes) > 0) {
                  printf("          %sGateway%s: ", ansi_color_bold_cyan(), ansi_color_reset());
-                 for (i = route->routes; i; i = i->next) {
-                         _auto_cleanup_ char *c = NULL;
-                         Route *a = NULL;
-
-                         a = i->data;
-                         (void) ip_to_string(a->family, &a->address, &c);
-                         if (first) {
-                                 printf("%s\n", c);
-                                 first = false;
-                         } else
-                                 printf("                  %s\n", c);
-                 }
+                 set_foreach(route->routes, list_one_link_routes, NULL);
          }
 
          if (dns) {
@@ -349,6 +351,26 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
                 printf("                      %-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
 }
 
+static void list_link_routes(gpointer key, gpointer value, gpointer userdata) {
+        _auto_cleanup_ char *c = NULL;
+        char buf[IF_NAMESIZE + 1] = {};
+        static bool first = true;
+        unsigned long size;
+        Route *rt;
+
+        rt = (Route *) g_bytes_get_data(key, &size);
+
+        if_indextoname(rt->ifindex, buf);
+
+        (void) ip_to_string_prefix(rt->family, &rt->address, &c);
+        if (first) {
+                printf("%-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
+                first = false;
+        } else
+                printf("                      %-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
+
+}
+
 _public_ int ncm_system_status(int argc, char *argv[]) {
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
@@ -356,8 +378,6 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         _cleanup_(routes_unrefp) Routes *routes = NULL;
         _cleanup_(addresses_unrefp) Addresses *h = NULL;
         sd_id128_t machine_id = {};
-        Route *rt;
-        GList *i;
         int r;
 
         if (arg_json)
@@ -412,24 +432,9 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         }
 
         r = manager_link_get_routes(&routes);
-        if (r >= 0 && g_list_length(routes->routes) > 0) {
-                bool first = true;
-
+        if (r >= 0 && set_size(routes->routes) > 0) {
                 printf("             %sGateway%s: ", ansi_color_bold_cyan(), ansi_color_reset());
-                for (i = routes->routes; i; i = i->next) {
-                        _auto_cleanup_ char *c = NULL;
-                        char buf[IF_NAMESIZE + 1] = {};
-
-                        rt = i->data;
-                        if_indextoname(rt->ifindex, buf);
-
-                        (void) ip_to_string_prefix(rt->family, &rt->address, &c);
-                        if (first) {
-                                printf("%-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
-                                first = false;
-                        } else
-                                printf("                      %-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
-                }
+                set_foreach(routes->routes, list_link_routes, NULL);
         }
 
         (void) network_parse_dns(&dns);
@@ -1368,7 +1373,9 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
         _cleanup_(routes_unrefp) Routes *route = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_strv_ char **s = NULL;
-        GList *i;
+        GHashTableIter iter;
+        gpointer key, value;
+        unsigned long size;
         int r;
 
         assert(ifname);
@@ -1381,14 +1388,13 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
         if (r < 0)
                 return r;
 
-        if (g_list_length(route->routes) <= 0)
+        if (set_size(route->routes) <= 0)
                 return -ENODATA;
 
-        for (i = route->routes; i; i = i->next) {
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+                Route *a = (Route *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL;
-                Route *a = NULL;
 
-                a = i->data;
                 ip_to_string(a->family, &a->address, &c);
                 if (r < 0)
                         return r;
