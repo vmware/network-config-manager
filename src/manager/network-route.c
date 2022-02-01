@@ -12,7 +12,7 @@
 #include "network-route.h"
 #include "network-util.h"
 
-static int route_news(Routes **ret) {
+static int routes_new(Routes **ret) {
         Routes *h;
 
         h = new0(Routes, 1);
@@ -61,7 +61,7 @@ static int route_add(Routes **h, Route *rt) {
         assert(rt);
 
         if (!*h) {
-                r = route_news(h);
+                r = routes_new(h);
                 if (r < 0)
                         return r;
         }
