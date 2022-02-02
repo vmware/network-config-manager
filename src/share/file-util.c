@@ -68,7 +68,6 @@ int create_conf_file(const char *path, const char *ifname, const char *extension
                 return r;
 
         *ret = steal_pointer(p);
-
         return 0;
 }
 
@@ -94,7 +93,6 @@ int read_one_line(const char *path, char **v) {
                 return -errno;
 
         *v = steal_pointer(line);
-
         return 0;
 }
 

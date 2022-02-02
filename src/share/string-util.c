@@ -52,7 +52,6 @@ int split_pair(const char *s, const char *sep, char **l, char **r) {
 
         *l = steal_pointer(a);
         *r = steal_pointer(b);
-
         return 0;
 }
 
@@ -96,7 +95,6 @@ int skip_first_word_and_split(char *line, const char *first_word, const char *se
         }
 
         *ret = steal_pointer(a);
-
         return 0;
 }
 
@@ -142,12 +140,12 @@ int strv_add(char ***l, const char *value) {
 
 int argv_to_strv(int argc, char *argv[], char ***ret) {
         _auto_cleanup_strv_ char **s = NULL;
-        int r, i;
+        int r;
 
         assert(argc);
         assert(argv);
 
-        for (i = 0; i < argc; i++) {
+        for (int i = 0; i < argc; i++) {
                 if (!s) {
                         s = strv_new(string_strip(argv[i]));
                         if (!s)
@@ -162,6 +160,5 @@ int argv_to_strv(int argc, char *argv[], char ***ret) {
         }
 
         *ret = steal_pointer(s);
-
         return 0;
 }

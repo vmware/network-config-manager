@@ -375,7 +375,6 @@ int dbus_add_dns_server(int ifindex, DNSServers *dns) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
         _cleanup_(sd_bus_message_unrefp) sd_bus_message *m = NULL;
         _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
-        GSequenceIter *i;
         int r;
 
         assert(dns);
@@ -408,7 +407,7 @@ int dbus_add_dns_server(int ifindex, DNSServers *dns) {
                 return r;
         }
 
-        for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+        for (GSequenceIter *i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                 DNSServer *d = g_sequence_get(i);
 
                 r = sd_bus_message_open_container(m, 'r', "iay");

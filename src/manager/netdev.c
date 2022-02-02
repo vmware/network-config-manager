@@ -70,7 +70,7 @@ const char *bond_mode_to_name(BondMode id) {
 int bond_name_to_mode(const char *name) {
         assert(name);
 
-        for (size_t i = BOND_MODE_ROUNDROBIN; i < (int) ELEMENTSOF(bond_mode); i++)
+        for (size_t i = BOND_MODE_ROUNDROBIN; i < (size_t) ELEMENTSOF(bond_mode); i++)
                 if (bond_mode[i] && string_equal_fold(name, bond_mode[i]))
                         return i;
 
@@ -98,7 +98,7 @@ const char *macvlan_mode_to_name(MACVLanMode id) {
 int macvlan_name_to_mode(const char *name) {
         assert(name);
 
-        for (int i= MAC_VLAN_MODE_PRIVATE; i < (int) ELEMENTSOF(macvlan_mode); i++)
+        for (size_t i= MAC_VLAN_MODE_PRIVATE; i < (size_t) ELEMENTSOF(macvlan_mode); i++)
                 if (macvlan_mode[i] && string_equal_fold(name, macvlan_mode[i]))
                         return i;
 

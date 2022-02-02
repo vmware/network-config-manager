@@ -29,7 +29,6 @@ int set_new(Set **ret, GHashFunc hash_func, GEqualFunc compare_func) {
                 return log_oom();
 
         *ret = steal_pointer(s);
-
         return 0;
 }
 

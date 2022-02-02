@@ -20,7 +20,6 @@ int nf_expr_new(const char *kind, struct nftnl_expr **ret) {
                 return -ENOMEM;
 
         *ret = steal_pointer(e);
-
         return 0;
 }
 

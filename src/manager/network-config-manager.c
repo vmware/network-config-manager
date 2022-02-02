@@ -469,10 +469,7 @@ _public_ int ncm_link_status(int argc, char *argv[]) {
         else
                 r = list_one_link(argv + 1);
 
-        if (r < 0)
-                return r;
-
-        return 0;
+        return r;
 }
 
 _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
@@ -558,7 +555,6 @@ _public_ int ncm_link_get_mac(const char *ifname, char **ret) {
                 return r;
 
         *ret = mac;
-
         return 0;
 }
 
@@ -658,7 +654,6 @@ _public_ int ncm_link_get_dhcp_mode(const char *ifname, int *ret) {
                 return r;
 
         *ret = mode;
-
         return 0;
 }
 
@@ -750,7 +745,6 @@ _public_ int ncm_link_get_dhcp_client_iaid(char *ifname, uint32_t *ret) {
                 return r;
 
         *ret = v;
-
         return 0;
 }
 
@@ -2132,7 +2126,6 @@ _public_ int ncm_get_dns_server(char ***ret) {
         _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         DNSServer *d;
-
         int r;
 
         assert(ret);
@@ -2555,7 +2548,6 @@ _public_ int ncm_link_get_ntp(const char *ifname, char ***ret) {
                 return r;
 
         *ret = ntp;
-
         return 0;
 }
 
@@ -3428,7 +3420,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                 return r;
         }
 
-          return 0;
+        return 0;
 }
 
 _public_ int ncm_show_proxy(int argc, char *argv[]) {
@@ -3831,7 +3823,6 @@ _public_ int ncm_nft_show_rules(int argc, char *argv[]) {
                 return -errno;
 
         g_print("%s", s->str);
-
         return 0;
 }
 

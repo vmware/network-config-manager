@@ -27,7 +27,6 @@ int rtnl_message_add_attribute(struct nlmsghdr *hdr, int type, const void *data,
                 memcpy(RTA_DATA(attr), data, len);
 
         hdr->nlmsg_len = NLMSG_ALIGN(hdr->nlmsg_len) + RTA_ALIGN(l);
-
         return 0;
 }
 
@@ -261,7 +260,6 @@ int rtnl_socket_open(unsigned int group, int *ret) {
                 return -EINVAL;
 
         *ret = steal_fd(fd);
-
         return 0;
 }
 

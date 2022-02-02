@@ -34,7 +34,6 @@ int mnl_new(Mnl **ret) {
         m->seq = time(NULL);
 
         *ret = steal_pointer(m);
-
         return 0;
 }
 

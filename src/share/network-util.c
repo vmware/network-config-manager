@@ -70,7 +70,6 @@ int ip_to_string(int family, const struct IPAddress *u, char **ret) {
         }
 
         *ret = steal_pointer(x);
-
         return 0;
 }
 
@@ -97,7 +96,6 @@ int ip_to_string_prefix(int family, const struct IPAddress *u, char **ret) {
         }
 
         *ret = steal_pointer(y);
-
         return 0;
 }
 
@@ -119,7 +117,6 @@ int parse_ipv4(const char *s, IPAddress **ret) {
         b->family = AF_INET;
 
         *ret = steal_pointer(b);
-
         return 0;
 }
 
@@ -141,7 +138,6 @@ int parse_ipv6(const char *s, IPAddress **ret) {
         b->family = AF_INET6;
 
         *ret = steal_pointer(b);
-
         return 0;
 }
 
@@ -220,11 +216,7 @@ int parse_ip_port(const char *s, IPAddress **ret, uint16_t *port) {
                 *port = k;
         }
 
-        r = parse_ip_from_string(c, ret);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return parse_ip_from_string(c, ret);
 }
 
 int parse_ifname_or_index(const char *s, IfNameIndex **ret) {
@@ -253,7 +245,6 @@ int parse_ifname_or_index(const char *s, IfNameIndex **ret) {
         }
 
         *ret = steal_pointer(p);
-
         return 0;
 }
 
@@ -292,7 +283,6 @@ int parse_mtu(char *mtu, uint32_t *ret) {
                 return r;
 
         *ret = j;
-
         return 0;
 }
 
@@ -300,7 +290,6 @@ bool valid_hostname(const char *host)  {
         const char *p;
 
         p = host;
-
         if (*p == '-')
                 return 0;
 

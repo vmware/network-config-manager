@@ -80,21 +80,14 @@ static int parse_dhcp_type(const char *s, Network *n) {
         assert(n);
 
         n->dhcp_type = dracut_dhcp_mode_to_mode(s);
-
         return 0;
 }
 
 static int dracut_parse_mtu(char *mtu, Network *n) {
-        int r;
-
         assert(mtu);
         assert(n);
 
-        r = parse_mtu(mtu, &n->mtu);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return parse_mtu(mtu, &n->mtu);
 }
 
 static int dracut_parse_mac(char *mac, Network *n) {
@@ -423,7 +416,7 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
                 if (!g_hash_table_insert(networks, n, n))
                         return log_oom();
 
-                n = NULL;
+                steal_pointer(n);
         }
 
         *ret = steal_pointer(networks);

@@ -27,7 +27,6 @@ int parse_integer(const char *c, int *val) {
                 return -ERANGE;
 
         *val = r;
-
         return 0;
 }
 
@@ -48,7 +47,6 @@ int parse_uint32(const char *c, unsigned *val) {
                 return -ERANGE;
 
         *val = r;
-
         return 0;
 }
 
@@ -69,7 +67,6 @@ int parse_uint16(const char *c, uint16_t *val) {
                 return -ERANGE;
 
         *val = r;
-
         return 0;
 }
 
