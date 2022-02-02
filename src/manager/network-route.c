@@ -96,17 +96,17 @@ static int route_add(Routes **rts, Route *rt) {
 }
 
 static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes **ret) {
-        struct nlmsghdr *p;
-        struct rtmsg *rt;
-        int r, l;
+        int r;
 
         assert(h);
         assert(ret);
         assert(len);
 
-        for (p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
+        for (struct nlmsghdr *p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
                 _auto_cleanup_ struct rtattr **rta_tb = NULL;
                 _auto_cleanup_ Route *a = NULL;
+                struct rtmsg *rt;
+                int l;
 
                 rt = NLMSG_DATA(p);
 
@@ -134,7 +134,6 @@ static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes *
 
                 if (ifindex > 0 && ifindex != (int) a->ifindex)
                         continue;
-
 
                 if (rt->rtm_dst_len != 0)
                         continue;
@@ -191,7 +190,7 @@ static int acquire_link_route(int s, int ifindex, Routes **ret) {
                  return r;
 
         reply = (struct nlmsghdr *) m->buf;
-        for(; r > 0;) {
+        for(;;) {
                 fill_link_route(reply, r, ifindex, ret);
 
                 r = rtnl_receive_message(s, m->buf, sizeof(m->buf), 0);

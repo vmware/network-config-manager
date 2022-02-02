@@ -1096,7 +1096,6 @@ int manager_read_domains_from_system_config(char **domains) {
                 return r;
 
         *domains = steal_pointer(config_domains);
-
         return 0;
 }
 
@@ -1295,8 +1294,7 @@ int manager_write_wifi_config(const Network *n, const GString *config) {
         if (r < 0)
                 return -errno;
 
-        chmod(path, 0600);
-
+        chmod(path, 0644);
         return 0;
 }
 

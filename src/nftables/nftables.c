@@ -56,11 +56,9 @@ const char *nft_family_to_name(int id) {
 }
 
 int nft_family_name_to_type(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = NF_PROTO_FAMILY_INET; i < (int) ELEMENTSOF(nft_family_table); i++)
+        for (size_t i = NF_PROTO_FAMILY_INET; i < (size_t) ELEMENTSOF(nft_family_table); i++)
                 if (nft_family_table[i] && string_equal_fold(name, nft_family_table[i]))
                         return i;
 
@@ -87,11 +85,9 @@ const char *nft_packet_action_to_name(int id) {
 }
 
 int nft_packet_action_name_to_type(char *name) {
-        int i;
-
         assert(name);
 
-        for (i = NF_PACKET_ACTION_DROP; i < (int) ELEMENTSOF(nft_packet_action_table); i++)
+        for (size_t i = NF_PACKET_ACTION_DROP; i < (size_t) ELEMENTSOF(nft_packet_action_table); i++)
                 if (nft_packet_action_table[i] && string_equal_fold(name, nft_packet_action_table[i]))
                         return i;
 
@@ -149,11 +145,9 @@ void nft_ctx_unbuffer_output_unref(nft_ctx *t) {
 }
 
 int ip_packet_protcol_name_to_type(char *name) {
-        int i;
-
         assert(name);
 
-        for (i = IP_PACKET_PROTOCOL_TCP; i < (int) ELEMENTSOF(ip_packet_protocol_table); i++)
+        for (size_t i = IP_PACKET_PROTOCOL_TCP; i < (size_t) ELEMENTSOF(ip_packet_protocol_table); i++)
                 if (ip_packet_protocol_table[i] && string_equal_fold(name, ip_packet_protocol_table[i]))
                         return i;
 

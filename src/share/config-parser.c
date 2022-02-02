@@ -33,7 +33,6 @@ int load_config_file(const char *path, GKeyFile **ret) {
                 return -ENODATA;
 
         *ret = steal_pointer(key_file);
-
         return 0;
 }
 
@@ -79,13 +78,11 @@ int parse_config_file_integer(const char *path, const char *section, const char 
                 return -error->code;
 
         *ret = v;
-
         return 0;
 }
 
 int parse_line(const char *line, char **key, char **value) {
         _auto_cleanup_ char *p = NULL, *s = NULL;
-        int r;
 
         assert(line);
 
@@ -100,11 +97,7 @@ int parse_line(const char *line, char **key, char **value) {
         if (isempty_string(s) || *s == '#')
                 return -ENODATA;
 
-        r = split_pair(s, "=", key, value);
-        if (r < 0)
-                return r;
-
-       return 0;
+        return split_pair(s, "=", key, value);
 }
 
 int parse_state_file(const char *path, const char *key, char **value, GHashTable **table) {
@@ -226,6 +219,5 @@ int parse_resolv_conf(char ***dns, char ***domains) {
 
         *dns = steal_pointer(a);
         *domains = steal_pointer(b);
-
         return 0;
 }

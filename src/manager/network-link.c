@@ -111,7 +111,6 @@ static int link_add(Links **h, Link *link) {
         }
 
         (*h)->links = g_list_append((*h)->links, link);
-
         return 0;
 }
 
@@ -346,7 +345,6 @@ static int acquire_link_info(int s, Links **ret) {
          }
 
         *ret = steal_pointer(links);
-
         return 0;
 }
 
@@ -358,11 +356,7 @@ int link_get_links(Links **ret) {
         if (r < 0)
                 return r;
 
-        r = acquire_link_info(s, ret);
-        if (r < 0)
-                return r;
-
-        return 0;
+        return acquire_link_info(s, ret);
 }
 
 int link_update_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
@@ -488,7 +482,6 @@ int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **
         truncate_newline(line);
 
         *ret = steal_pointer(line);
-
         return 0;
 }
 

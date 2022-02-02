@@ -87,8 +87,8 @@ static void json_list_link_gateways(gpointer key, gpointer value, gpointer userd
         json_object *jobj = (json_object *) userdata;
         _auto_cleanup_ char *c = NULL;
         char buf[IF_NAMESIZE + 1] = {};
-        size_t size;
         Route *route;
+        size_t size;
         int r;
 
         jobj_gw = json_object_new_object();

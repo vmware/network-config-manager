@@ -29,7 +29,7 @@ int set_config_file_string(const char *path, const char *section, const char *k,
         if (!g_key_file_save_to_file (key_file, path, &e))
                 return -e->code;
 
-        e = NULL;
+        steal_pointer(e);
         return set_file_permisssion(path, "systemd-network");
 }
 
@@ -72,7 +72,7 @@ int set_config_file_integer(const char *path, const char *section, const char *k
         if (!g_key_file_save_to_file (key_file, path, &e))
                 return -e->code;
 
-         return set_file_permisssion(path, "systemd-network");
+        return set_file_permisssion(path, "systemd-network");
 }
 
 int remove_key_from_config_file(const char *path, const char *section, const char *k) {
@@ -290,6 +290,5 @@ int write_to_proxy_conf_file(GHashTable *table) {
         p = g_string_free(c, FALSE);
 
         g_file_set_contents("/etc/sysconfig/proxy", p, len, NULL);
-
         return 0;
 }

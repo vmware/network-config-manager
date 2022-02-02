@@ -21,7 +21,6 @@ int dns_server_new(DNSServer **ret) {
                 return -ENOMEM;
 
         *ret = steal_pointer(a);
-
         return 0;
 }
 

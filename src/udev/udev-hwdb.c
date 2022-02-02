@@ -80,6 +80,5 @@ int hwdb_get_manufacturer(const uint8_t *ether_address, char **manufacturer) {
         }
 
         *manufacturer = steal_pointer(s);
-
         return 0;
 }
