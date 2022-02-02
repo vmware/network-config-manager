@@ -2406,8 +2406,8 @@ static void manager_command_line_config_generator(void *key, void *value, void *
 }
 
 static Network *manager_no_interface_name(GHashTable *networks) {
-        GList *l;
         Network *n;
+        GList *l;
 
         assert(networks);
 
@@ -2419,7 +2419,7 @@ static Network *manager_no_interface_name(GHashTable *networks) {
                 return NULL;
 
         n = l->data;
-        if (n->ifname)
+        if (!n || !n->ifname)
                 return NULL;
 
         return n;
@@ -2441,7 +2441,6 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
                 r = parse_proc_command_line(line, &networks);
         } else if (command_line)
                 r = parse_proc_command_line(command_line, &networks);
-
         if (r < 0)
                 return r;
 
