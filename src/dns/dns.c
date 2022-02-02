@@ -115,7 +115,6 @@ int dns_domain_new(DNSDomain **ret) {
                 return -ENOMEM;
 
         *ret = steal_pointer(a);
-
         return 0;
 }
 
@@ -141,7 +140,6 @@ int dns_domains_new(DNSDomains **ret) {
                 return -ENOMEM;
 
         *ret = steal_pointer(h);
-
         return 0;
 }
 
@@ -199,7 +197,6 @@ int dns_read_resolv_conf(char ***dns, char ***domains) {
 
 int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
         _auto_cleanup_strv_ char **dns_config = NULL, **domain_config = NULL;
-        GSequenceIter *i;
         char **j;
         int r;
 
@@ -208,7 +205,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
                 return r;
 
         if (dns) {
-                for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                for (GSequenceIter *i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL;
                         DNSServer *d =  g_sequence_get(i);
 

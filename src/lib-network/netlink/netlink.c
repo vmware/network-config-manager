@@ -86,9 +86,9 @@ int rtnl_message_add_attribute_string(struct nlmsghdr *hdr, int type, const char
 }
 
 int rtnl_message_parse_rtattr(struct rtattr **tb, int max, struct rtattr *rta, int len) {
-        unsigned short type;
-
         for (;RTA_OK(rta, len); rta = RTA_NEXT(rta, len)) {
+                unsigned short type;
+
                 type = rta->rta_type & ~NLA_F_NESTED;
 
                 if ((type <= max) && (tb + type))

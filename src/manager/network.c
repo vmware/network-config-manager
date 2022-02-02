@@ -34,7 +34,7 @@ const char *dhcp_modes_to_name(int id) {
 int dhcp_name_to_mode(char *name) {
         assert(name);
 
-        for (int i = DHCP_MODE_NO; i < (int) ELEMENTSOF(dhcp_modes); i++)
+        for (size_t i = DHCP_MODE_NO; i < (size_t) ELEMENTSOF(dhcp_modes); i++)
                 if (string_equal_fold(name, dhcp_modes[i]))
                         return i;
 
@@ -60,7 +60,7 @@ const char *dhcp_client_identifier_to_name(int id) {
 int dhcp_client_identifier_to_mode(char *name) {
         assert(name);
 
-        for (int i = DHCP_CLIENT_IDENTIFIER_MAC; i < (int) ELEMENTSOF(dhcp_client_identifier); i++)
+        for (size_t i = DHCP_CLIENT_IDENTIFIER_MAC; i < (size_t) ELEMENTSOF(dhcp_client_identifier); i++)
                 if (string_equal_fold(name, dhcp_client_identifier[i]))
                         return i;
 
@@ -87,7 +87,7 @@ const char *dhcp_client_duid_type_to_name(int id) {
 int dhcp_client_duid_type_to_mode(char *name) {
         assert(name);
 
-        for (int i = DHCP_CLIENT_DUID_TYPE_LINK_LAYER_TIME; i < (int) ELEMENTSOF(dhcp_client_duid_type); i++)
+        for (size_t i = DHCP_CLIENT_DUID_TYPE_LINK_LAYER_TIME; i < (size_t) ELEMENTSOF(dhcp_client_duid_type); i++)
                 if (string_equal_fold(name, dhcp_client_duid_type[i]))
                         return i;
 
@@ -116,7 +116,7 @@ const char *link_local_address_type_to_name(int id) {
 int link_local_address_type_to_mode(const char *name) {
         assert(name);
 
-        for (int i = LINK_LOCAL_ADDRESS_YES; i < (int) ELEMENTSOF(link_local_address_type); i++)
+        for (size_t i = LINK_LOCAL_ADDRESS_YES; i < (size_t) ELEMENTSOF(link_local_address_type); i++)
                 if (string_equal_fold(name, link_local_address_type[i]))
                         return i;
 
@@ -142,7 +142,7 @@ const char *ipv6_ra_preference_type_to_name(int id) {
 int ipv6_ra_preference_type_to_mode(const char *name) {
         assert(name);
 
-        for (int i = IPV6_RA_PREFERENCE_LOW; i < (int) ELEMENTSOF(ipv6_ra_preference_type); i++)
+        for (size_t i = IPV6_RA_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(ipv6_ra_preference_type); i++)
                 if (string_equal_fold(name, ipv6_ra_preference_type[i]))
                         return i;
 
@@ -169,7 +169,7 @@ const char *ip_duplicate_address_detection_type_to_name(int id) {
 int ip_duplicate_address_detection_type_to_mode(const char *name) {
         assert(name);
 
-        for (int i = IP_DUPLICATE_ADDRESS_DETECTION_NONE; i < (int) ELEMENTSOF(ip_duplicate_address_detection_type); i++)
+        for (size_t i = IP_DUPLICATE_ADDRESS_DETECTION_NONE; i < (size_t) ELEMENTSOF(ip_duplicate_address_detection_type); i++)
                 if (string_equal_fold(name, ip_duplicate_address_detection_type[i]))
                         return i;
 
@@ -197,7 +197,7 @@ const char *route_scope_type_to_name(int id) {
 int route_scope_type_to_mode(const char *name) {
         assert(name);
 
-        for (int i = ROUTE_SCOPE_UNIVERSE; i < (int) ELEMENTSOF(route_scope_type); i++)
+        for (size_t i = ROUTE_SCOPE_UNIVERSE; i < (size_t) ELEMENTSOF(route_scope_type); i++)
                 if (string_equal_fold(name, route_scope_type[i]))
                         return i;
 
@@ -231,7 +231,7 @@ const char *route_type_to_name(int id) {
 int route_type_to_mode(const char *name) {
         assert(name);
 
-        for (int i = ROUTE_TYPE_UNICAST; i < (int) ELEMENTSOF(route_type); i++)
+        for (size_t i = ROUTE_TYPE_UNICAST; i < (size_t) ELEMENTSOF(route_type); i++)
                 if (string_equal_fold(name, route_type[i]))
                         return i;
 
@@ -257,7 +257,7 @@ const char *ipv6_route_preference_to_name(int id) {
 int ipv6_route_preference_type_to_mode(const char *name) {
         assert(name);
 
-        for (int i = IPV6_ROUTE_PREFERENCE_LOW; i < (int) ELEMENTSOF(ipv6_route_preference_type); i++)
+        for (size_t i = IPV6_ROUTE_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(ipv6_route_preference_type); i++)
                 if (string_equal_fold(name, ipv6_route_preference_type[i]))
                         return i;
 
@@ -284,7 +284,7 @@ const char *route_protocol_to_name(int id) {
 int route_protocol_to_mode(const char *name) {
         assert(name);
 
-        for (int i = IPV6_ROUTE_PREFERENCE_LOW; i < (int) ELEMENTSOF(route_protocol_type); i++)
+        for (size_t i = IPV6_ROUTE_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(route_protocol_type); i++)
                 if (string_equal_fold(name, route_protocol_type[i]))
                         return i;
 
@@ -310,7 +310,7 @@ const char *route_table_to_name(int id) {
 int route_table_to_mode(const char *name) {
         assert(name);
 
-        for (int i = ROUTE_TABLE_DEFAULT; i < (int) ELEMENTSOF(route_table_type); i++)
+        for (size_t i = ROUTE_TABLE_DEFAULT; i < (size_t) ELEMENTSOF(route_table_type); i++)
                 if (string_equal_fold(name, route_table_type[i]))
                         return i;
 
@@ -337,7 +337,7 @@ const char *auth_key_management_type_to_name(int id) {
 int auth_key_management_type_to_mode(const char *name) {
         assert(name);
 
-        for (int i = AUTH_KEY_MANAGEMENT_NONE; i < (int) ELEMENTSOF(auth_key_management_type); i++)
+        for (size_t i = AUTH_KEY_MANAGEMENT_NONE; i < (size_t) ELEMENTSOF(auth_key_management_type); i++)
                 if (string_equal_fold(name, auth_key_management_type[i]))
                         return i;
 
@@ -364,7 +364,7 @@ const char *auth_eap_method_to_name(int id) {
 int auth_eap_method_to_mode(const char *name) {
         assert(name);
 
-        for (int i = AUTH_EAP_METHOD_NONE; i < (int) ELEMENTSOF(auth_eap_method_type); i++)
+        for (size_t i = AUTH_EAP_METHOD_NONE; i < (size_t) ELEMENTSOF(auth_eap_method_type); i++)
                 if (string_equal_fold(name, auth_eap_method_type[i]))
                         return i;
 
@@ -421,7 +421,6 @@ int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret) {
         }
 
         *ret = steal_pointer(network);
-
         return 0;
 }
 
@@ -462,7 +461,6 @@ int network_new(Network **ret) {
                 return r;
 
         *ret = steal_pointer(n);
-
         return 0;
 }
 
@@ -533,7 +531,6 @@ int parse_address_from_string_and_add(const char *s, Set *a) {
         (void) set_add(a, p);
 
         steal_pointer(p);
-
         return 0;
 }
 
@@ -630,7 +627,6 @@ int generate_wifi_config(Network *n, GString **ret) {
         g_hash_table_foreach(n->access_points, append_access_points, config);
 
         *ret = steal_pointer(config);
-
         return 0;
 }
 
@@ -787,6 +783,5 @@ int generate_network_config(Network *n, GString **ret) {
                 g_hash_table_foreach(n->routes, append_routes, config);
 
         *ret = steal_pointer(config);
-
         return 0;
 }

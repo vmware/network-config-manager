@@ -95,7 +95,6 @@ int manager_get_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode *mode) {
                 return r;
 
         *mode = r;
-
         return 0;
 }
 
@@ -139,7 +138,6 @@ int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
                 return r;
 
         *ret = dhcp_client_identifier_to_mode(config);
-
         return 0;
 }
 

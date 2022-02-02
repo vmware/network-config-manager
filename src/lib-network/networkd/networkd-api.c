@@ -77,7 +77,6 @@ static int network_parse_link_strv(int ifindex, const char *key, char ***ret) {
         }
 
         *ret = strsplit(s, " ", -1);
-
         return r;
 }
 
