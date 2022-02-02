@@ -14,7 +14,7 @@
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         _cleanup_(g_dir_closep) GDir *dir = NULL;
         const char *file = NULL;
-        int r, i;
+        int r;
 
         if (string_equal(argv[0], "apply-yaml-config")) {
                 dir = g_dir_open("/etc/network-config-manager/yaml", 0, NULL);
@@ -39,7 +39,7 @@ static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
                                 return r;
                 }
         } else {
-                for (i = 1; i < argc; i++) {
+                for (int i = 1; i < argc; i++) {
                         r = manager_generate_network_config_from_yaml(argv[i]);
                         if (r < 0)
                                 return r;
@@ -83,7 +83,6 @@ static bool runs_without_networkd(char *c) {
                 "delete-nft-rule",
                 "nft-run"
         };
-        uint32_t i;
 
         h = g_hash_table_new(g_str_hash, g_str_equal);
         if (!h) {
@@ -91,7 +90,7 @@ static bool runs_without_networkd(char *c) {
                 return false;
         }
 
-        for (i = 0; i < ELEMENTSOF(cli_commands); i++)
+        for (size_t i = 0; i < ELEMENTSOF(cli_commands); i++)
                 if (!g_hash_table_insert(h, (gpointer *) cli_commands[i], (gpointer *) c))
                         continue;
 

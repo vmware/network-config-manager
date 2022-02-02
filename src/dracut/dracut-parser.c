@@ -36,11 +36,9 @@ const char *dracut_dhcp_mode_to_name(int id) {
 }
 
 int dracut_dhcp_mode_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = DRACUT_DHCP_MODE_NONE; i < (int) ELEMENTSOF(dracut_dhcp_mode_table); i++)
+        for (size_t i = DRACUT_DHCP_MODE_NONE; i < (int) ELEMENTSOF(dracut_dhcp_mode_table); i++)
                 if (string_equal_fold(name, dracut_dhcp_mode_table[i]))
                         return i;
 
@@ -67,11 +65,9 @@ const char *dracut_to_networkd_dhcp_mode_to_name(int id) {
 }
 
 int dracut_to_networkd_dhcp_name_to_mode(const char *name) {
-        int i;
-
         assert(name);
 
-        for (i = DRACUT_DHCP_MODE_NONE; i < (int) ELEMENTSOF(dracut_to_networkd_dhcp_mode_table); i++)
+        for (size_t i = DRACUT_DHCP_MODE_NONE; i < (int) ELEMENTSOF(dracut_to_networkd_dhcp_mode_table); i++)
                 if (string_equal_fold(name, dracut_to_networkd_dhcp_mode_table[i]))
                         return i;
 
@@ -123,8 +119,8 @@ static int dracut_parse_mac(char *mac, Network *n) {
  */
  static int parse_command_line_ip_interface(const char *line, Network *n) {
         _auto_cleanup_ IPAddress *peer = NULL, *prefix = NULL;
-        _auto_cleanup_ Address *a = NULL;
         _auto_cleanup_strv_ char **s = NULL;
+        _auto_cleanup_ Address *a = NULL;
         int r = 0;
 
         s = strsplit(line, ":", 9);
@@ -145,7 +141,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
                 a->peer = *peer;
         }
 
-        a = NULL;
+        steal_pointer(a);
 
         if (strv_length(s) >= 2 && !isempty_string(s[2])) {
                 r = parse_ip_from_string(s[2], &n->gateway);
@@ -431,6 +427,5 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
         }
 
         *ret = steal_pointer(networks);
-
         return 0;
 }

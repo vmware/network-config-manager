@@ -89,7 +89,6 @@ static int list_links(int argc, char *argv[]) {
                ansi_color_header_reset());
 
         g_list_foreach(h->links, display_links_info, NULL);
-
         return 0;
 }
 
@@ -368,7 +367,6 @@ static void list_link_routes(gpointer key, gpointer value, gpointer userdata) {
                 first = false;
         } else
                 printf("                      %-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
-
 }
 
 _public_ int ncm_system_status(int argc, char *argv[]) {
@@ -517,7 +515,6 @@ _public_ int ncm_link_get_mtu(const char *ifname, uint32_t *ret) {
                 return r;
 
         *ret = mtu;
-
         return 0;
 }
 
@@ -2134,7 +2131,6 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 _public_ int ncm_get_dns_server(char ***ret) {
         _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_strv_ char **s = NULL;
-        GSequenceIter *i;
         DNSServer *d;
 
         int r;
@@ -2145,7 +2141,7 @@ _public_ int ncm_get_dns_server(char ***ret) {
         if (r < 0)
                 return r;
 
-        for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+        for (GSequenceIter *i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                 _auto_cleanup_ char *k = NULL;
 
                 d = g_sequence_get(i);
@@ -2177,7 +2173,7 @@ _public_ int ncm_add_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false, global = false;
-        int r, i;
+        int r;
 
         if (string_equal(argv[1], "system"))
                 system = true;
@@ -2191,7 +2187,7 @@ _public_ int ncm_add_dns_server(int argc, char *argv[]) {
                 }
         }
 
-        for (i = 2; i < argc; i++) {
+        for (int i = 2; i < argc; i++) {
                 _auto_cleanup_ IPAddress *a = NULL;
                 _auto_cleanup_ DNSServer *s = NULL;
 
@@ -2395,7 +2391,6 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
 _public_ int ncm_get_dns_domains(char ***ret) {
         _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
         _auto_cleanup_strv_ char **s = NULL;
-        GSequenceIter *i;
         int r;
 
         assert(ret);
@@ -2407,7 +2402,7 @@ _public_ int ncm_get_dns_domains(char ***ret) {
         if (!domains || g_sequence_is_empty(domains->dns_domains))
                 return -ENODATA;
         else
-                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                for (GSequenceIter *i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *k = NULL;
                         DNSDomain *d;
 
@@ -2685,9 +2680,9 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_mode = false;
         MACVLanMode mode;
-        int r, i;
+        int r;
 
-        for (i = 1; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
@@ -2741,9 +2736,9 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_mode = false;
         IPVLanMode mode;
-        int r, i;
+        int r;
 
-        for (i = 1; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
@@ -2799,9 +2794,9 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint16_t port;
         uint32_t vni;
-        int r, i;
+        int r;
 
-        for (i = 1; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
@@ -2912,9 +2907,9 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *proto = NULL;
         uint16_t id;
-        int r = 0, i;
+        int r = 0;
 
-        for (i = 1; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
@@ -3021,9 +3016,9 @@ _public_ int ncm_remove_netdev(int argc, char *argv[]) {
 
 _public_ int ncm_create_veth(int argc, char *argv[]) {
         _auto_cleanup_ char *peer = NULL;
-        int r, i;
+        int r;
 
-        for (i = 1; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "peer")) {
                         parse_next_arg(argv, argc, i);
 
@@ -3075,8 +3070,8 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool independent = false;
         NetDevKind kind;
-        int r, i;
         char *c;
+        int r;
 
         c = strchr(argv[0], '-');
         kind = netdev_name_to_kind(++c);
@@ -3085,7 +3080,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        for (i = 1; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
@@ -3150,9 +3145,9 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
         _auto_cleanup_ char *private_key = NULL, *public_key = NULL, *preshared_key = NULL, *endpoint = NULL, *allowed_ips = NULL;
         bool have_private_key = false, have_public_key = false;
         uint16_t listen_port;
-        int r, i;
+        int r;
 
-        for (i = 1; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "private-key")) {
                         parse_next_arg(argv, argc, i);
 
@@ -3602,7 +3597,6 @@ _public_ int ncm_nft_get_tables(const char *family, const char *table, char ***r
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _auto_cleanup_strv_ char **p = NULL;
         int r, f = AF_UNSPEC;
-        guint i;
 
         if (family) {
                 f = nft_family_name_to_type(family);
@@ -3614,7 +3608,7 @@ _public_ int ncm_nft_get_tables(const char *family, const char *table, char ***r
         if (r < 0)
                 return r;
 
-        for (i = 0; i < s->len; i++) {
+        for (guint i = 0; i < s->len; i++) {
                 _cleanup_(g_string_unrefp) GString *v = NULL;
                 NFTNLTable *t = g_ptr_array_index(s, i);
                 _auto_cleanup_ char *a = NULL;
@@ -3734,7 +3728,6 @@ _public_ int ncm_nft_get_chains(char *family, const char *table, const char *cha
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
         _auto_cleanup_strv_ char **p = NULL;
         int r, f = AF_UNSPEC;
-        guint i;
 
         if (family) {
                 f = nft_family_name_to_type(family);
@@ -3746,7 +3739,7 @@ _public_ int ncm_nft_get_chains(char *family, const char *table, const char *cha
         if (r < 0)
                 return r;
 
-        for (i = 0; i < s->len; i++) {
+        for (guint i = 0; i < s->len; i++) {
                 _cleanup_(g_string_unrefp) GString *v = NULL;
                 NFTNLChain *c= g_ptr_array_index(s, i);
                 _auto_cleanup_ char *a = NULL;

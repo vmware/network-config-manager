@@ -32,7 +32,6 @@ static int addresses_new(Addresses **ret) {
                 return r;
 
         *ret = steal_pointer(h);
-
         return 0;
 }
 
@@ -46,7 +45,6 @@ int address_new(Address **ret) {
                 return log_oom();
 
         *ret = a;
-
         return 0;
 }
 
@@ -100,13 +98,12 @@ int address_add(Addresses **h, Address *a) {
 static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addresses **ret) {
         _auto_cleanup_ Address *a = NULL;
         struct ifaddrmsg *ifm;
-        struct nlmsghdr *p;
         int r, l;
 
         assert(h);
         assert(ret);
 
-        for (p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
+        for (struct nlmsghdr *p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
                 _auto_cleanup_ struct rtattr **rta_tb = NULL;
                 ifm = NLMSG_DATA(p);
 

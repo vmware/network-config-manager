@@ -9,7 +9,6 @@
 
 int cli_manager_new(const Cli *cli_commands, CliManager **ret) {
         _auto_cleanup_ CliManager *m = NULL;
-        size_t i;
 
         assert(cli_commands);
         assert(ret);
@@ -25,7 +24,7 @@ int cli_manager_new(const Cli *cli_commands, CliManager **ret) {
         if (!m->hash)
                 return log_oom();
 
-        for (i = 0; cli_commands[i].name; i++)
+        for (size_t i = 0; cli_commands[i].name; i++)
                 g_hash_table_insert(m->hash, (gpointer *) cli_commands[i].name, (gpointer *) &cli_commands[i]);
 
         *ret = steal_pointer(m);
@@ -62,9 +61,7 @@ int cli_run_command(const CliManager *m, int argc, char *argv[]) {
 
         /* run default if no command specified */
         if (!name) {
-                int i;
-
-                for (i = 0;; i++) {
+                for (size_t i = 0;; i++) {
                         if (m->commands[i].default_command)
                                 command = m->commands;
                         remaining_argc = 1;

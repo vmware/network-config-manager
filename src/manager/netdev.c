@@ -40,7 +40,7 @@ const char *netdev_kind_to_name(NetDevKind id) {
 int netdev_name_to_kind(const char *name) {
         assert(name);
 
-        for (int i = NET_DEV_KIND_VLAN; i < (int) ELEMENTSOF(netdev_kind); i++)
+        for (size_t i = NET_DEV_KIND_VLAN; i < (int) ELEMENTSOF(netdev_kind); i++)
                 if (netdev_kind[i] && string_equal_fold(name, netdev_kind[i]))
                         return i;
 
@@ -70,7 +70,7 @@ const char *bond_mode_to_name(BondMode id) {
 int bond_name_to_mode(const char *name) {
         assert(name);
 
-        for (int i = BOND_MODE_ROUNDROBIN; i < (int) ELEMENTSOF(bond_mode); i++)
+        for (size_t i = BOND_MODE_ROUNDROBIN; i < (int) ELEMENTSOF(bond_mode); i++)
                 if (bond_mode[i] && string_equal_fold(name, bond_mode[i]))
                         return i;
 
@@ -124,7 +124,7 @@ const char *ipvlan_mode_to_name(IPVLanMode id) {
 int ipvlan_name_to_mode(const char *name) {
         assert(name);
 
-        for (int i = IP_VLAN_MODE_L2; i < (int) ELEMENTSOF(ipvlan_mode); i++)
+        for (size_t i = IP_VLAN_MODE_L2; i < (int) ELEMENTSOF(ipvlan_mode); i++)
                 if (ipvlan_mode[i] && string_equal_fold(name, ipvlan_mode[i]))
                         return i;
 

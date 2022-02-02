@@ -49,11 +49,9 @@ const char *link_state_to_name(int id) {
 }
 
 int link_name_to_state(char *name) {
-        int i;
-
         assert(name);
 
-        for (i = LINK_STATE_DOWN; i < (int) ELEMENTSOF(link_states); i++)
+        for (size_t i = LINK_STATE_DOWN; i < (int) ELEMENTSOF(link_states); i++)
                 if (string_equal_fold(name, link_states[i]))
                         return i;
 
@@ -68,7 +66,6 @@ static int links_new(Links **ret) {
                 return log_oom();
 
         *ret = h;
-
         return 0;
 }
 
@@ -80,7 +77,6 @@ static int link_new(Link **ret) {
                 return log_oom();
 
         *ret = link;
-
         return 0;
 }
 
@@ -213,7 +209,6 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
         }
 
         *ret = steal_pointer(n);
-
         return 0;
 }
 
@@ -308,7 +303,7 @@ static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
                 if (r < 0)
                         return r;
 
-                n = NULL;
+                steal_pointer(n);
         }
 
         return 0;
@@ -508,7 +503,6 @@ int link_get_mtu(const char *ifname, uint32_t *mtu) {
                 return r;
 
         *mtu = k;
-
         return 0;
 }
 
