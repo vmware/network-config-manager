@@ -229,7 +229,6 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'Gateway') == '192.168.1.1/24')
         assert(parser.get('Route', 'GatewayOnlink') == 'yes')
 
-    @pytest.mark.skip(reason="skipping")
     def test_network_static_route_configuration(self):
         self.copy_yaml_file_to_netmanager_yaml_path('static-route-network.yaml')
 
