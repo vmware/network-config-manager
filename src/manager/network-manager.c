@@ -2445,13 +2445,12 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
         n = manager_no_interface_name(networks);
         if (n) {
                 _cleanup_(links_unrefp) Links *h = NULL;
-                GList *i;
 
                 r = link_get_links(&h);
                 if (r < 0)
                         return r;
 
-                for (i = h->links; i; i = i->next) {
+                for (GList *i = h->links; i; i = i->next) {
                         _cleanup_(g_string_unrefp) GString *config = NULL;
                         Link *link = NULL;
 

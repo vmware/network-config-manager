@@ -281,7 +281,6 @@ void yaml_manager_unrefp(YAMLManager **p) {
 
 int new_yaml_manager(YAMLManager **ret) {
         _cleanup_(yaml_manager_unrefp) YAMLManager *m = NULL;
-        int i;
 
         m = new0(YAMLManager, 1);
         if (!m)
@@ -296,21 +295,21 @@ int new_yaml_manager(YAMLManager **ret) {
         if (!m->network_config || !m->route_config || !m->wifi_config)
                 return log_oom();
 
-        for (i = 0; parser_network_vtable[i].key; i++) {
+        for (size_t i = 0; parser_network_vtable[i].key; i++) {
                if (!g_hash_table_insert(m->network_config, (void *) parser_network_vtable[i].key, &parser_network_vtable[i])) {
                         log_warning("Failed add key to network table");
                         return -EINVAL;
                 }
         }
 
-        for (i = 0; parser_wifi_vtable[i].key; i++) {
+        for (size_t i = 0; parser_wifi_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->wifi_config, (void *) parser_wifi_vtable[i].key, &parser_wifi_vtable[i])) {
                         log_warning("Failed add key to wifi table");
                         return -EINVAL;
                 }
         }
 
-        for (i = 0; parser_route_vtable[i].key; i++) {
+        for (size_t i = 0; parser_route_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->route_config, (void *) parser_route_vtable[i].key, &parser_route_vtable[i])) {
                         log_warning("Failed add key to route table");
                         return -EINVAL;
@@ -318,6 +317,5 @@ int new_yaml_manager(YAMLManager **ret) {
         }
 
         *ret = steal_pointer(m);
-
         return 0;
 }

@@ -36,7 +36,6 @@ int parse_yaml_bool(const char *key,
                 return r;
 
         *p = r;
-
         return 0;
 }
 
@@ -191,7 +190,6 @@ int parse_yaml_dhcp_client_identifier(const char *key,
         n = data;
 
         n->dhcp_client_identifier_type = dhcp_client_identifier_to_mode((char *) value);
-
         return 0;
 }
 
@@ -212,7 +210,6 @@ int parse_yaml_dhcp_type(const char *key,
         n = data;
 
         n->dhcp_type = dhcp_name_to_mode((char *) value);
-
         return 0;
 }
 
