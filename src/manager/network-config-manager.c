@@ -2052,8 +2052,8 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         int r;
 
         r = dbus_get_dns_servers_from_resolved("DNS", &dns);
-        if (r >= 0 && dns && g_sequence_is_empty(dns->dns_servers)) {
-                printf("                 %sDNS%s:", ansi_color_bold_cyan(), ansi_color_reset());
+        if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
+                printf("                 %sDNS%s:  ", ansi_color_bold_cyan(), ansi_color_reset());
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL;
@@ -2065,7 +2065,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
                         r = ip_to_string(d->address.family, &d->address, &pretty);
                         if (r >= 0)
-                                printf(" %s", string_na(pretty));
+                                printf("%s ", string_strip(pretty));
                 }
                 printf("\n");
         }
