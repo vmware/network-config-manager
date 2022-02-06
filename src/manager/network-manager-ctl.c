@@ -6,7 +6,7 @@
 #include <network-config-manager.h>
 
 #include "alloc-util.h"
-#include "cli.h"
+#include "ctl.h"
 #include "log.h"
 #include "macros.h"
 #include "network-manager.h"
@@ -272,10 +272,10 @@ static int parse_argv(int argc, char *argv[]) {
 }
 
 static int cli_run(int argc, char *argv[]) {
-        _cleanup_(cli_unrefp) CliManager *m = NULL;
+        _cleanup_(ctl_unrefp) CtlManager *m = NULL;
         int r;
 
-        static const Cli commands[] = {
+        static const Ctl commands[] = {
                 { "status",                       WORD_ANY, WORD_ANY, true,  ncm_system_status },
                 { "show",                         WORD_ANY, WORD_ANY, false, ncm_link_status },
                 { "set-mtu",                      2,        WORD_ANY, false, ncm_link_set_mtu },
@@ -378,11 +378,11 @@ static int cli_run(int argc, char *argv[]) {
                 if (!ncm_is_netword_running())
                         exit(-1);
 
-        r = cli_manager_new(commands, &m);
+        r = ctl_manager_new(commands, &m);
         if (r < 0)
                 return r;
 
-        return cli_run_command(m, argc, argv);
+        return ctl_run_command(m, argc, argv);
 }
 
 int main(int argc, char *argv[]) {

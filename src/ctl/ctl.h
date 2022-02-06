@@ -8,22 +8,22 @@
 
 typedef int (*CommandRunFunction)(int argc, char **argv);
 
-typedef struct Cli {
+typedef struct Ctl {
         const char *name;
         unsigned min_args, max_args;
         bool default_command;
 
         CommandRunFunction run;
-} Cli;
+} Ctl;
 
-typedef struct CliManager {
+typedef struct CtlManager {
         GHashTable *hash;
 
-        Cli *commands;
-} CliManager;
+        Ctl *commands;
+} CtlManager;
 
-void cli_unref(CliManager *m);
-DEFINE_CLEANUP(CliManager*, cli_unref);
+void ctl_unref(CtlManager *m);
+DEFINE_CLEANUP(CtlManager*, ctl_unref);
 
-int cli_manager_new(const Cli *cli_commands, CliManager **ret);
-int cli_run_command(const CliManager *m, int argc, char *argv[]);
+int ctl_manager_new(const Ctl *ctl_commands, CtlManager **ret);
+int ctl_run_command(const CtlManager *m, int argc, char *argv[]);

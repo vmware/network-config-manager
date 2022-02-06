@@ -126,7 +126,7 @@ libnftnl_dep = dependency('libnftnl')
 libnnft_dep = dependency('libnftables')
 libjson_dep = dependency('json-c')
 
-includes = include_directories('src/cli',
+includes = include_directories('src/ctl',
                                'src/dbus',
                                'src/dns',
                                'src/dracut',

@@ -1,6 +1,6 @@
 network_config_manager_sources = files('''
-        cli/cli.h
-        cli/cli.c
+        ctl/ctl.h
+        ctl/ctl.c
         dbus/dbus.h
         dbus/dbus.c
         dns/dns.h

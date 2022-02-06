@@ -7,7 +7,7 @@
 #include "alloc-util.h"
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
-#include "cli.h"
+#include "ctl.h"
 #include "dbus.h"
 #include "dns.h"
 #include "log.h"
