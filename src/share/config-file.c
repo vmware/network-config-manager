@@ -34,7 +34,7 @@ int config_manager_new(const Config *configs, ConfigManager **ret) {
         return 0;
 }
 
-void config_unref(ConfigManager *m) {
+void config_manager_unref(ConfigManager *m) {
         if (!m)
                 return;
 

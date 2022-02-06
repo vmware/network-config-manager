@@ -3317,23 +3317,23 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
         }
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "rx")) {
+                if (string_equal(argv[i], "rxcsumo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse rx='%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse rxcsumo='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
                         n->receive_checksum_offload = r;
                         continue;
                 }
-                if (string_equal(argv[i], "tx")) {
+                if (string_equal(argv[i], "txcsumo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse tx='%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse txcsumo='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
                         n->transmit_checksum_offload = r;
@@ -3392,6 +3392,82 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                                 return r;
                         }
                         n->large_receive_offload = r;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                return -EINVAL;
+        }
+
+        r = netdev_link_configure(p, n);
+        if (r < 0) {
+                log_warning("Failed to configure link: %s", g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
+        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = netdev_link_new(&n);
+        if (r < 0) {
+                log_warning("Failed to set link feature: %s", g_strerror(-r));
+                return -errno;
+        }
+
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "rxbuf")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (!is_uint32_or_max(argv[i])) {
+                                log_warning("Failed to parse rxbuf='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        n->rx_buf = strdup(argv[i]);
+                        if (!n->rx_buf) {
+                                return log_oom();
+                        }
+                        continue;
+                }
+                if (string_equal(argv[i], "rxminbuf")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (!is_uint32_or_max(argv[i])) {
+                                log_warning("Failed to parse rxminbuf='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        n->rx_mini_buf = strdup(argv[i]);
+                        continue;
+                }
+                if (string_equal(argv[i], "rxjumbobuf")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (!is_uint32_or_max(argv[i])) {
+                                log_warning("Failed to parse rxjumbobuf='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        n->rx_jumbo_buf = strdup(argv[i]);
+                        continue;
+                }
+                if (string_equal(argv[i], "txbuf")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (!is_uint32_or_max(argv[i])) {
+                                log_warning("Failed to parse txbuf='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        n->tx_buf = strdup(argv[i]);
                         continue;
                 }
 

@@ -12,14 +12,17 @@
 #include "string-util.h"
 
 static const Config link_ctl_to_config_table[] = {
-                { "rx",   "ReceiveChecksumOffload"},
-                { "tx",   "TransmitChecksumOffload"},
-                { "tso",  "TCPSegmentationOffload" },
-                { "t6so", "TCP6SegmentationOffload" },
-                { "gso",  "GenericSegmentationOffload"},
-                { "grso", "GenericReceiveOffload"},
-                { "groh", "GenericReceiveOffloadHardware"},
-                { "lro",  "LargeReceiveOffload" },
+                { "rxcsumo",    "ReceiveChecksumOffload"},
+                { "txcsumo",    "TransmitChecksumOffload"},
+                { "tso",        "TCPSegmentationOffload" },
+                { "t6so",       "TCP6SegmentationOffload" },
+                { "gso",        "GenericSegmentationOffload"},
+                { "grso",       "GenericReceiveOffload"},
+                { "groh",       "GenericReceiveOffloadHardware"},
+                { "rxbuf",      "RxBufferSize" },
+                { "rxminbuf",   "RxMiniBufferSize" },
+                { "rxjumbobuf", "RxJumboBufferSize" },
+                { "txbuf",      "TxBufferSize" },
                 {},
 };
 
@@ -54,7 +57,13 @@ void netdev_link_unref(NetDevLink *n) {
         if (!n)
                 return;
 
-        config_unref(n->m);
+        config_manager_unref(n->m);
+
+        free(n->rx_buf);
+        free(n->rx_mini_buf);
+        free(n->rx_jumbo_buf);
+        free(n->tx_buf);
+
         g_free(n);
 }
 
@@ -138,6 +147,26 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                         return r;
         }
 
+        if (n->rx_buf) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxbuf"), n->rx_buf);
+                if (r < 0)
+                        return r;
+        }
+        if(n->rx_mini_buf) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxminbuf"), n->rx_mini_buf);
+                if (r < 0)
+                    return r;
+        }
+        if(n->rx_jumbo_buf) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxjumbobuf"), n->rx_jumbo_buf);
+                if (r < 0)
+                    return r;
+        }
+        if(n->tx_buf) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txbuf"), n->tx_buf);
+                if (r < 0)
+                    return r;
+        }
 
         return 0;
 }

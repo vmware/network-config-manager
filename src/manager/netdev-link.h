@@ -13,6 +13,11 @@
 typedef struct NetDevLink {
         ConfigManager *m;
 
+        char *rx_buf;
+        char *rx_mini_buf;
+        char *rx_jumbo_buf;
+        char *tx_buf;
+
         int receive_checksum_offload;
         int transmit_checksum_offload;
         int tcp_segmentation_offload;
