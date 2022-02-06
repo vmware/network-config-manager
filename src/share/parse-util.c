@@ -70,6 +70,23 @@ int parse_uint16(const char *c, uint16_t *val) {
         return 0;
 }
 
+bool is_uint32_or_max(const char *c) {
+        unsigned v;
+        int r;
+
+        assert(c);
+
+        if (string_equal(c, "max"))
+            return true;
+
+        r = parse_uint32(c, &v);
+        if (r < 0) {
+                return false;
+        }
+
+        return true;
+}
+
 int parse_boolean(const char *v) {
         if (!v)
                 return -EINVAL;
