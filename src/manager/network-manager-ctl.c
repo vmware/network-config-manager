@@ -206,6 +206,8 @@ static int help(void) {
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  show-network-config          [LINK] Displays network configuration of link.\n"
                "  edit-network-config          [LINK] Edit network configuration of link.\n"
+               "  set-link-feature             [LINK] [rx BOOLEAN]  [tx BOOLEAN]  [tso BOOLEAN] [gso BOOLEAN] [gro BOOLEAN] [lro BOOLEAN]\n"
+                                                      "Configure devices's offload parameters and other features.\n"
                "  set-proxy                    [enable {BOOLEAN}] [http|https|ftp|gopher|socks|socks5|noproxy] [CONFIGURATION | none] Configure proxy.\n"
                "  show-proxy                   Shows proxy configuration.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -349,6 +351,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "show-network-config",          1,        WORD_ANY, false, ncm_link_show_network_config },
                 { "edit-network-config",          1,        WORD_ANY, false, ncm_link_edit_network_config },
+                { "set-link-feature",             1,        WORD_ANY, false, ncm_configure_link_features },
                 { "set-proxy",                    1,        WORD_ANY, false, ncm_configure_proxy },
                 { "show-proxy",                   WORD_ANY, WORD_ANY, false, ncm_show_proxy },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
