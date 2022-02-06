@@ -11,6 +11,8 @@ network_config_manager_sources = files('''
         json/network-json.c
         manager/netdev.h
         manager/netdev.c
+        manager/netdev-link.c
+        manager/netdev-link.h
         manager/network-link.h
         manager/network-link.c
         manager/network-address.h

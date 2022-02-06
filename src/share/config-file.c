@@ -11,6 +11,44 @@
 #include "log.h"
 #include "string-util.h"
 
+int config_manager_new(const Config *configs, ConfigManager **ret) {
+        _auto_cleanup_ ConfigManager *m = NULL;
+
+        assert(configs);
+        assert(ret);
+
+        m = new0(ConfigManager, 1);
+        if (!m)
+                return log_oom();
+
+        *m = (ConfigManager) {
+               .ctl_to_config_table = g_hash_table_new(g_str_hash, g_str_equal),
+        };
+        if (!m->ctl_to_config_table)
+                return log_oom();
+
+        for (size_t i = 0; configs[i].ctl_name; i++) 
+                g_hash_table_insert(m->ctl_to_config_table, (gpointer *) configs[i].ctl_name, (gpointer *) configs[i].config);
+
+        *ret = steal_pointer(m);
+        return 0;
+}
+
+void config_unref(ConfigManager *m) {
+        if (!m)
+                return;
+
+        g_hash_table_unref(m->ctl_to_config_table);
+        free(m);
+}
+
+const char *ctl_to_config(const ConfigManager *m, const char *name) {
+        assert(m);
+        assert(name);
+
+        return g_hash_table_lookup(m->ctl_to_config_table, name);
+}
+
 int set_config_file_string(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         _cleanup_(g_error_freep) GError *e = NULL;
