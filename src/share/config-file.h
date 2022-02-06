@@ -5,6 +5,22 @@
 
 #pragma once
 
+#include "macros.h"
+#include "string-util.h"
+
+typedef struct Config {
+        const char *ctl_name;
+        const char *config;
+} Config;
+
+typedef struct ConfigManager {
+        GHashTable *ctl_to_config_table;
+} ConfigManager;
+
+int config_manager_new(const Config *configs, ConfigManager **ret);
+void config_unref(ConfigManager *m);
+const char *ctl_to_config(const ConfigManager *m, const char *name);
+
 int set_config_file_string(const char *path, const char *section, const char *k, const char *v);
 int set_config_file_bool(const char *path, const char *section, const char *k, bool b);
 int set_config_file_integer(const char *path, const char *section, const char *k, int v);
