@@ -59,14 +59,18 @@ void netdev_link_unref(NetDevLink *n) {
 }
 
 int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
-        _auto_cleanup_ char *file = NULL, *link = NULL, *path = NULL;
+        _auto_cleanup_ char *file = NULL, *link = NULL, *path = NULL, *s = NULL;
         int r;
 
         assert(ifname);
 
-        file = string_join("-", "10", ifname, NULL);
+        s = string_join("-", "10", ifname, NULL);
+        if (!s)
+                return -ENOMEM;
+
+        file = string_join(".", s, "link", NULL);
         if (!file)
-                return log_oom();
+                return -ENOMEM;
 
         path = g_build_path("/", "/etc/systemd/network", file, NULL);
         if (!path)
@@ -77,7 +81,7 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
                    return 0;
         }
 
-        r = create_conf_file("/etc/systemd/network", file, "link", &path);
+        r = create_conf_file("/etc/systemd/network", s, "link", &file);
         if (r < 0)
                 return r;
 
@@ -103,6 +107,37 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                  if (r < 0)
                          return r;
         }
+        if (n->transmit_checksum_offload != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "tx"), bool_to_string(n->transmit_checksum_offload));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->tcp_segmentation_offload != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "tso"), bool_to_string(n->tcp_segmentation_offload));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->tcp6_segmentation_offload!= -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "t6so"), bool_to_string(n->tcp6_segmentation_offload));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->generic_checksum_offload != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gso"), bool_to_string(n->generic_checksum_offload));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->generic_receive_offload != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gro"), bool_to_string(n->generic_receive_offload));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->large_receive_offload != -1) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "lro"), bool_to_string(n->large_receive_offload));
+                if (r < 0)
+                        return r;
+        }
+
 
         return 0;
 }

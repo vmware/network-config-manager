@@ -3312,7 +3312,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
 
         r = netdev_link_new(&n);
         if (r < 0) {
-                log_warning("Failed to se link feature: %s", g_strerror(-r));
+                log_warning("Failed to set link feature: %s", g_strerror(-r));
                 return -errno;
         }
 
@@ -3326,6 +3326,72 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                                 return r;
                         }
                         n->receive_checksum_offload = r;
+                        continue;
+                }
+                if (string_equal(argv[i], "tx")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse tx='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        n->transmit_checksum_offload = r;
+                        continue;
+                }
+                if (string_equal(argv[i], "tso")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse tso='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        n->tcp_segmentation_offload = r;
+                        continue;
+                }
+                if (string_equal(argv[i], "tso6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse tso6='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        n->tcp6_segmentation_offload = r;
+                        continue;
+                }
+                if (string_equal(argv[i], "gso")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse gso='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        n->generic_checksum_offload = r;
+                        continue;
+                }
+                if (string_equal(argv[i], "gro")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse gro='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        n->generic_receive_offload = r;
+                        continue;
+                }
+                if (string_equal(argv[i], "lro")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse lro='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        n->large_receive_offload = r;
                         continue;
                 }
 
