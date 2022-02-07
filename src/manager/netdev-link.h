@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <linux/if_link.h>
+
 #include "alloc-util.h"
 #include "config-file.h"
 #include "macros.h"
