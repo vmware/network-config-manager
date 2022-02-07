@@ -750,40 +750,21 @@ _public_ int ncm_link_get_dhcp_client_iaid(char *ifname, uint32_t *ret) {
 }
 
 _public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        const char *k = NULL;
         bool v;
         int r;
-
-        if (string_equal(argv[0], "set-link-local-address"))
-                k = "LinkLocalAddressing";
-        else if (string_equal(argv[0], "set-ipv4ll-route"))
-                k = "IPv4LLRoute";
-        else if (string_equal(argv[0], "set-llmnr"))
-                k = "LLMNR";
-        else if (string_equal(argv[0], "set-multicast-dns"))
-                k = "MulticastDNS";
-        else if (string_equal(argv[0], "set-lldp"))
-                k = "LLDP";
-        else if (string_equal(argv[0], "set-emit-lldp"))
-                k = "EmitLLDP";
-        else if (string_equal(argv[0], "set-ipforward"))
-                k = "IPForward";
-        else if (string_equal(argv[0], "set-ipv6acceptra"))
-                k = "IPv6AcceptRA";
-        else if (string_equal(argv[0], "set-ipmasquerade"))
-                k = "IPMasquerade";
-        else if (string_equal(argv[0], "set-proxyarp"))
-                k = "IPv4ProxyARP";
-        else if (string_equal(argv[0], "set-proxyndp"))
-                k = "IPv6ProxyNDP";
-        else if (string_equal(argv[0], "set-conf-without-carrier"))
-                k = "ConfigureWithoutCarrier";
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
                 return -errno;
+        }
+
+        r = manager_network_section_bool_configs_new(&m);
+        if (r < 0) {
+                log_warning("Failed to set network section '%s'", g_strerror(-r));
+                return r;
         }
 
         r = parse_boolean(argv[2]);
@@ -793,7 +774,7 @@ _public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
         }
 
         v = r;
-        return manager_set_network_section_bool(p, k, v);
+        return manager_set_network_section_bool(p, ctl_to_config(m, argv[0]), v);
 }
 
 _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {

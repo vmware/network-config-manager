@@ -19,6 +19,8 @@ typedef struct ConfigManager {
 
 int config_manager_new(const Config *configs, ConfigManager **ret);
 void config_manager_unref(ConfigManager *m);
+DEFINE_CLEANUP(ConfigManager*, config_manager_unref);
+
 const char *ctl_to_config(const ConfigManager *m, const char *name);
 
 int set_config_file_string(const char *path, const char *section, const char *k, const char *v);

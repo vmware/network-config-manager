@@ -24,6 +24,22 @@
 #include "string-util.h"
 #include "yaml-network-parser.h"
 
+static const Config network_ctl_to_network_section_config_table[] = {
+                { "set-link-local-address",   "LinkLocalAddressing"},
+                { "set-ipv4ll-route",         "IPv4LLRoute"},
+                { "set-llmnr",                "LLMNR"},
+                { "set-multicast-dns",        "MulticastDNS" },
+                { "set-lldp",                 "LLDP"},
+                { "set-emit-lldp",            "EmitLLDP"},
+                { "set-ipforward",            "IPForward"},
+                { "set-ipv6acceptra",         "IPv6AcceptRA"},
+                { "set-ipmasquerade",         "IPMasquerade"},
+                { "set-proxyarp",             "IPv4ProxyARP"},
+                { "set-proxyndp",             "IPv6ProxyNDP"},
+                { "set-conf-without-carrier", "ConfigureWithoutCarrier"},
+                {},
+};
+
 int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode) {
         _auto_cleanup_ char *network = NULL;
         int r;
@@ -1129,6 +1145,18 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx) {
                         return r;
         }
 
+        return 0;
+}
+
+int manager_network_section_bool_configs_new(ConfigManager **ret) {
+        ConfigManager *m;
+        int r;
+
+        r = config_manager_new(network_ctl_to_network_section_config_table, &m);
+        if (r < 0)
+                return r;
+
+        *ret = m;
         return 0;
 }
 
