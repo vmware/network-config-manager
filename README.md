@@ -23,6 +23,12 @@ Configure
   - Edit network configuration via vim/vi.
 
   Please see [systemd.network](https://www.freedesktop.org/software/systemd/man/systemd.network.html) for more information.
+  
+  - Devices's offload parameters and other features
+  - Devices's the maximum number of pending packets receive buffer
+  - Devices's the maximum nummber or queue
+
+Please see [systemd.link](https://www.freedesktop.org/software/systemd/man/systemd.link.html) for more information.
 
 Gererates networkd unit configs from
  - [YML](https://yaml.org) file.
