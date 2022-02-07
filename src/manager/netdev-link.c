@@ -10,6 +10,7 @@
 #include "network-util.h"
 #include "parse-util.h"
 #include "string-util.h"
+#include "network-link.h"
 
 static const Config link_ctl_to_config_table[] = {
                 { "rxcsumo",    "ReceiveChecksumOffload"},
@@ -70,7 +71,7 @@ void netdev_link_unref(NetDevLink *n) {
 }
 
 int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
-        _auto_cleanup_ char *file = NULL, *link = NULL, *path = NULL, *s = NULL;
+        _auto_cleanup_ char *file = NULL, *link = NULL, *path = NULL, *s = NULL, *mac = NULL;
         int r;
 
         assert(ifname);
@@ -96,10 +97,13 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(path, "Match", "Name", ifname);
+        r = link_get_mac_address(ifname, &mac);
         if (r < 0)
                 return r;
 
+        r = set_config_file_string(path, "Match", "MACAddress", mac);
+        if (r < 0)
+                return r;
 
         *ret = steal_pointer(path);
         return 0;
