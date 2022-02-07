@@ -48,9 +48,8 @@ int netdev_link_new(NetDevLink **ret) {
         };
 
         r = config_manager_new(link_ctl_to_config_table, &n->m);
-        if (r < 0) {
+        if (r < 0)
                 return r;
-        }
 
         *ret = n;
         return 0;
