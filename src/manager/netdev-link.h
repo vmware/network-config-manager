@@ -25,7 +25,12 @@ typedef struct NetDevLink {
         int generic_checksum_offload;
         int generic_receive_offload;
         int large_receive_offload;
-}NetDevLink;
+
+        int tx_queues;
+        int rx_queues;
+
+        unsigned tx_queue_len;
+} NetDevLink;
 
 int netdev_link_new(NetDevLink **ret);
 
