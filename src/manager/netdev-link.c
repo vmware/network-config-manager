@@ -19,10 +19,13 @@ static const Config link_ctl_to_config_table[] = {
                 { "gso",        "GenericSegmentationOffload"},
                 { "grso",       "GenericReceiveOffload"},
                 { "groh",       "GenericReceiveOffloadHardware"},
-                { "rxbuf",      "RxBufferSize" },
-                { "rxminbuf",   "RxMiniBufferSize" },
-                { "rxjumbobuf", "RxJumboBufferSize" },
-                { "txbuf",      "TxBufferSize" },
+                { "rxbuf",      "RxBufferSize"},
+                { "rxminbuf",   "RxMiniBufferSize"},
+                { "rxjumbobuf", "RxJumboBufferSize"},
+                { "txbuf",      "TxBufferSize"},
+                { "txq",        "TransmitQueues"},
+                { "rxq",        "ReceiveQueues"},
+                { "rxqlen",     "TransmitQueueLength"},
                 {},
 };
 
@@ -166,6 +169,22 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txbuf"), n->tx_buf);
                 if (r < 0)
                     return r;
+        }
+
+        if (n->tx_queues > 0) {
+                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "txq"), n->tx_queues);
+                if (r < 0)
+                        return r;
+        }
+        if (n->rx_queues > 0) {
+                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "rxq"), n->rx_queues);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_queue_len > 0) {
+                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "rxqlen"), n->tx_queue_len);
+                if (r < 0)
+                        return r;
         }
 
         return 0;

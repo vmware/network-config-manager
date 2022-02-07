@@ -87,6 +87,21 @@ bool is_uint32_or_max(const char *c) {
         return true;
 }
 
+bool parse_link_queue(const char *c, unsigned *ret) {
+        unsigned v;
+        int r;
+
+        assert(c);
+
+        r = parse_uint32(c, &v);
+        if (r < 0 || v > 4096) {
+                return false;
+        }
+        *ret = v;
+
+        return true;
+}
+
 int parse_boolean(const char *v) {
         if (!v)
                 return -EINVAL;
