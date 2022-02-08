@@ -40,6 +40,40 @@ static const Config network_ctl_to_network_section_config_table[] = {
                 {},
 };
 
+static const Config network_ctl_to_dhcp4_section_config_table[] = {
+                { "set-dhcp4-use-dns",      "UseDNS"},
+                { "set-dhcp4-use-ntp",      "UseNTP"},
+                { "set-dhcp4-use-domains",  "UseDomains"},
+                { "set-dhcp4-use-mtu",      "UseMTU"},
+                { "set-dhcp4-use-routes",   "UseRoutes"},
+                { "set-dhcp4-use-timezone", "UseTimezone"},
+                {},
+};
+
+int manager_network_section_bool_configs_new(ConfigManager **ret) {
+        ConfigManager *m;
+        int r;
+
+        r = config_manager_new(network_ctl_to_network_section_config_table, &m);
+        if (r < 0)
+                return r;
+
+        *ret = m;
+        return 0;
+}
+
+int manager_network_dhcp4_section_configs_new(ConfigManager **ret) {
+        ConfigManager *m;
+        int r;
+
+        r = config_manager_new(network_ctl_to_dhcp4_section_config_table, &m);
+        if (r < 0)
+                return r;
+
+        *ret = m;
+        return 0;
+}
+
 int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode) {
         _auto_cleanup_ char *network = NULL;
         int r;
@@ -1148,17 +1182,6 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx) {
         return 0;
 }
 
-int manager_network_section_bool_configs_new(ConfigManager **ret) {
-        ConfigManager *m;
-        int r;
-
-        r = config_manager_new(network_ctl_to_network_section_config_table, &m);
-        if (r < 0)
-                return r;
-
-        *ret = m;
-        return 0;
-}
 
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v) {
         _auto_cleanup_ char *network = NULL;

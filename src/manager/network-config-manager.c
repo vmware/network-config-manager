@@ -778,23 +778,10 @@ _public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        const char *k = NULL;
         bool v;
         int r;
-
-        if (string_equal(argv[0], "set-dhcp4-use-dns"))
-                k = "UseDNS";
-        else if (string_equal(argv[0], "set-dhcp4-use-ntp"))
-                k = "UseNTP";
-        else if (string_equal(argv[0], "set-dhcp4-use-domains"))
-                k = "UseDomains";
-        else if (string_equal(argv[0], "set-dhcp4-use-mtu"))
-                k = "UseMTU";
-        else if (string_equal(argv[0], "set-dhcp4-use-routes"))
-                k = "UseRoutes";
-        else if (string_equal(argv[0], "set-dhcp4-use-timezone"))
-                k = "UseTimezone";
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
@@ -807,9 +794,15 @@ _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
                 log_warning("Failed to parse %s=%s for link '%s': %s", argv[0], argv[2], argv[1], g_strerror(-r));
                 return r;
         }
-
         v = r;
-        return manager_set_dhcp_section(p, k, v, true);
+
+        r = manager_network_dhcp4_section_configs_new(&m);
+        if (r < 0) {
+                log_warning("Failed to set dhcp4 section for link '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return manager_set_dhcp_section(p, ctl_to_config(m, argv[0]), v, true);
 }
 
 _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
@@ -3509,7 +3502,8 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
                 if (string_equal(argv[i], "txqlen")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (!is_uint32_or_max(argv[i]), &v) {
+                        r = parse_uint32(argv[i], &v);
+                        if (r < 0) {
                                 log_warning("Failed to parse txqlen='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
