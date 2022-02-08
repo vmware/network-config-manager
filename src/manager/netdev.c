@@ -133,7 +133,7 @@ int ipvlan_name_to_mode(const char *name) {
 
 
 static const Config netdev_ctl_name_to_config_table[] = {
-                { "vlan",     "VLAN"},
+                { "vlan",    "VLAN"},
                 { "bridge",  "Bridge"},
                 { "bond",    "Bond"},
                 { "vxlan",   "VXLAN"},

@@ -486,23 +486,24 @@ static int wifi_access_point_unref (void *key, void *value, void *user_data) {
 }
 
 void network_unrefp(Network **n) {
-        if (n && *n) {
-                set_unrefp(&(*n)->addresses);
-                set_unrefp(&(*n)->ntps);
-                set_unrefp(&(*n)->nameservers);
+        if (!n || !*n)
+                return;
 
-                if ((*n)->access_points) {
-                        g_hash_table_foreach_steal((*n)->access_points, wifi_access_point_unref, NULL);
-                        g_hash_table_destroy((*n)->access_points);
-                }
+        set_unrefp(&(*n)->addresses);
+        set_unrefp(&(*n)->ntps);
+        set_unrefp(&(*n)->nameservers);
 
-                g_free((*n)->ifname);
-                g_free((*n)->mac);
-                g_free((*n)->match_mac);
-                g_free((*n)->hostname);
-                g_free((*n)->gateway);
-                g_free(*n);
+        if ((*n)->access_points) {
+                g_hash_table_foreach_steal((*n)->access_points, wifi_access_point_unref, NULL);
+                g_hash_table_destroy((*n)->access_points);
         }
+
+        g_free((*n)->ifname);
+        g_free((*n)->mac);
+        g_free((*n)->match_mac);
+        g_free((*n)->hostname);
+        g_free((*n)->gateway);
+        g_free(*n);
 }
 
 void g_network_free (gpointer data) {

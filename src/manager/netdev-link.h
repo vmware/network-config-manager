@@ -27,6 +27,9 @@ typedef struct NetDevLink {
         int generic_checksum_offload;
         int generic_receive_offload;
         int large_receive_offload;
+        int tx_flow_ctrl;
+        int rx_flow_ctrl;
+        int auto_flow_ctrl;
 
         int tx_queues;
         int rx_queues;
