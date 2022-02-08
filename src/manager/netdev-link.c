@@ -13,20 +13,23 @@
 #include "network-link.h"
 
 static const Config link_ctl_to_config_table[] = {
-                { "rxcsumo",    "ReceiveChecksumOffload"},
-                { "txcsumo",    "TransmitChecksumOffload"},
-                { "tso",        "TCPSegmentationOffload" },
-                { "t6so",       "TCP6SegmentationOffload" },
-                { "gso",        "GenericSegmentationOffload"},
-                { "grso",       "GenericReceiveOffload"},
-                { "groh",       "GenericReceiveOffloadHardware"},
-                { "rxbuf",      "RxBufferSize"},
-                { "rxminbuf",   "RxMiniBufferSize"},
-                { "rxjumbobuf", "RxJumboBufferSize"},
-                { "txbuf",      "TxBufferSize"},
-                { "txq",        "TransmitQueues"},
-                { "rxq",        "ReceiveQueues"},
-                { "rxqlen",     "TransmitQueueLength"},
+                { "rxcsumo",      "ReceiveChecksumOffload"},
+                { "txcsumo",      "TransmitChecksumOffload"},
+                { "tso",          "TCPSegmentationOffload" },
+                { "t6so",         "TCP6SegmentationOffload" },
+                { "gso",          "GenericSegmentationOffload"},
+                { "grso",         "GenericReceiveOffload"},
+                { "groh",         "GenericReceiveOffloadHardware"},
+                { "rxbuf",        "RxBufferSize"},
+                { "rxminbuf",     "RxMiniBufferSize"},
+                { "rxjumbobuf",   "RxJumboBufferSize"},
+                { "txbuf",        "TxBufferSize"},
+                { "txq",          "TransmitQueues"},
+                { "rxq",          "ReceiveQueues"},
+                { "rxqlen",       "TransmitQueueLength"},
+                { "rxflowctrl",   "RxFlowControl"},
+                { "txflowctrl",   "TxFlowControl"},
+                { "autoflowctrl", "AutoNegotiationFlowControl"},
                 {},
 };
 
@@ -46,6 +49,9 @@ int netdev_link_new(NetDevLink **ret) {
                 .generic_checksum_offload =-1,
                 .generic_receive_offload = -1,
                 .large_receive_offload = -1,
+                .tx_flow_ctrl = -1,
+                .rx_flow_ctrl = -1,
+                .auto_flow_ctrl = -1,
         };
 
         r = config_manager_new(link_ctl_to_config_table, &n->m);
@@ -152,6 +158,23 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
+        if (n->tx_flow_ctrl != -1) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txflowctrl"), bool_to_string(n->tx_flow_ctrl));
+                if (r < 0)
+                        return r;
+        }
+        if (n->rx_flow_ctrl != -1) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxflowctrl"), bool_to_string(n->rx_flow_ctrl));
+                if (r < 0)
+                        return r;
+        }
+        if (n->auto_flow_ctrl != -1) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "autoflowctrl"), bool_to_string(n->auto_flow_ctrl));
+                if (r < 0)
+                        return r;
+        }
+
 
         if (n->rx_buf) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxbuf"), n->rx_buf);
