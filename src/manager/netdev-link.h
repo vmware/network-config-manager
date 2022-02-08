@@ -20,19 +20,21 @@ typedef struct NetDevLink {
         char *rx_jumbo_buf;
         char *tx_buf;
 
-        int receive_checksum_offload;
-        int transmit_checksum_offload;
-        int tcp_segmentation_offload;
-        int tcp6_segmentation_offload;
-        int generic_checksum_offload;
-        int generic_receive_offload;
-        int large_receive_offload;
+        int rcv_csum_off;
+        int tx_csum_off;
+        int tcp_seg_off;
+        int tcp6_seg_off;
+        int gen_csum_off;
+        int ggen_rcv_off;
+        int large_rcv_off;
         int tx_flow_ctrl;
         int rx_flow_ctrl;
         int auto_flow_ctrl;
 
         int tx_queues;
         int rx_queues;
+        int gen_seg_off_bytes;
+        int gen_seg_off_seg;
 
         unsigned tx_queue_len;
 } NetDevLink;
