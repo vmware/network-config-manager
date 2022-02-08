@@ -2939,8 +2939,8 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_remove_netdev(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        const char *k = NULL;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -2949,27 +2949,13 @@ _public_ int ncm_remove_netdev(int argc, char *argv[]) {
                 return -errno;
         }
 
-        if (argv[2] && string_equal(argv[2], "kind") && argv[3]) {
-                if (string_equal(argv[3], "vlan"))
-                        k = "VLAN";
-                else if (string_equal(argv[3], "bridge"))
-                        k = "Bridge";
-                else if (string_equal(argv[3], "bond"))
-                        k = "Bond";
-                else if (string_equal(argv[3], "vxlan"))
-                        k = "VXLAN";
-                else if (string_equal(argv[3], "macvlan") || string_equal(argv[3], "remove-macvtap"))
-                        k = "MACVLAN";
-                else if (string_equal(argv[3], "ipvlan"))
-                        k = "IPVLAN";
-                else if (string_equal(argv[3], "vrf"))
-                        k = "VRF";
-                else if (string_equal(argv[3], "ipip") || string_equal(argv[3], "gre") || string_equal(argv[3], "sit") ||
-                         string_equal(argv[3], "vti"))
-                        k = "Tunnel";
+        r = netdev_ctl_name_to_configs_new(&m);
+        if (r < 0) {
+                log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
+                return r;
         }
 
-        r = manager_remove_netdev(p, k);
+        r = manager_remove_netdev(p, ctl_to_config(m, argv[3]));
         if (r < 0) {
                 log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
                 return r;
