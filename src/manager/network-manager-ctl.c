@@ -207,13 +207,15 @@ static int help(void) {
                "  show-network-config          [LINK] Displays network configuration of link.\n"
                "  edit-network-config          [LINK] Edit network configuration of link.\n"
                "  set-link-feature             [LINK] [rxcsumo BOOLEAN]  [txcsumo BOOLEAN]  [tso BOOLEAN] [gso BOOLEAN] [gro BOOLEAN] [lro BOOLEAN]\n"
-                                                      "\t\t\t\tConfigure devices's offload parameters and other features.\n"
+                                                      "\t\t\t\tConfigure device's offload parameters and other features.\n"
                "  set-link-buf                 [LINK] [rxbuf NUMBER] [rxminbuf NUMBER | max] [rxjumbobuf NUMBER | max] [txbuf NUMBER | max]\n"
-                                                      "\t\t\t\tConfigure devices's the maximum number of pending packets receive buffer. [1…4294967295 | \"max\"]\n"
+                                                      "\t\t\t\tConfigure device's the maximum number of pending packets receive buffer. [1…4294967295 | \"max\"]\n"
                "  set-link-queue               [LINK] [rxq NUMBER] [txq NUMBER] [rxqlen NUMBER]\n"
                                                       "\t\t\t\tConfigure devices's the maximum number or queue\n"
                "  set-link-flow-control        [LINK] [rxflowctrl BOOLEAN] [txflowctrl BOOLEAN] [autoflowctrl BOOLEAN]\n"
-                                                      "\t\t\t\tConfigure devices's the flow control\n"
+                                                      "\t\t\t\tConfigure device's the flow control\n"
+               "  set-link-gso                 [LINK] [gsob NUMBER] [gsos NUMBER]\n"
+                                                      "\t\t\t\tConfigure device's Generic Segment Offload (GSO)\n"
                "  set-proxy                    [enable {BOOLEAN}] [http|https|ftp|gopher|socks|socks5|noproxy] [CONFIGURATION | none] Configure proxy.\n"
                "  show-proxy                   Shows proxy configuration.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -361,6 +363,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-link-buf",                 2,        WORD_ANY, false, ncm_configure_link_buf_size },
                 { "set-link-queue",               2,        WORD_ANY, false, ncm_configure_link_queue_size },
                 { "set-link-flow-control",        2,        WORD_ANY, false, ncm_configure_link_flow_control },
+                { "set-link-gso",                 2,        WORD_ANY, false, ncm_configure_link_gso },
                 { "set-proxy",                    1,        WORD_ANY, false, ncm_configure_proxy },
                 { "show-proxy",                   WORD_ANY, WORD_ANY, false, ncm_show_proxy },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },

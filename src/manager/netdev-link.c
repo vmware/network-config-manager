@@ -20,6 +20,8 @@ static const Config link_ctl_to_config_table[] = {
                 { "gso",          "GenericSegmentationOffload"},
                 { "grso",         "GenericReceiveOffload"},
                 { "groh",         "GenericReceiveOffloadHardware"},
+                { "gsob",         "GenericSegmentOffloadMaxBytes"},
+                { "gsos",         "GenericSegmentOffloadMaxSegments"},
                 { "rxbuf",        "RxBufferSize"},
                 { "rxminbuf",     "RxMiniBufferSize"},
                 { "rxjumbobuf",   "RxJumboBufferSize"},
@@ -42,13 +44,13 @@ int netdev_link_new(NetDevLink **ret) {
                 return log_oom();
 
         *n = (NetDevLink) {
-                .receive_checksum_offload = -1,
-                .transmit_checksum_offload = -1,
-                .tcp_segmentation_offload = -1,
-                .tcp6_segmentation_offload = -1,
-                .generic_checksum_offload =-1,
-                .generic_receive_offload = -1,
-                .large_receive_offload = -1,
+                .rcv_csum_off = -1,
+                .tx_csum_off = -1,
+                .tcp_seg_off = -1,
+                .tcp6_seg_off = -1,
+                .gen_csum_off =-1,
+                .ggen_rcv_off = -1,
+                .large_rcv_off = -1,
                 .tx_flow_ctrl = -1,
                 .rx_flow_ctrl = -1,
                 .auto_flow_ctrl = -1,
@@ -123,38 +125,38 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
         if (r < 0)
                 return r;
 
-        if (n->receive_checksum_offload != -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rx"), bool_to_string(n->receive_checksum_offload));
+        if (n->rcv_csum_off != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rx"), bool_to_string(n->rcv_csum_off));
                  if (r < 0)
                          return r;
         }
-        if (n->transmit_checksum_offload != -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "tx"), bool_to_string(n->transmit_checksum_offload));
+        if (n->tx_csum_off != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "tx"), bool_to_string(n->tx_csum_off));
                  if (r < 0)
                          return r;
         }
-        if (n->tcp_segmentation_offload != -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "tso"), bool_to_string(n->tcp_segmentation_offload));
+        if (n->tcp_seg_off != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "tso"), bool_to_string(n->tcp_seg_off));
                  if (r < 0)
                          return r;
         }
-        if (n->tcp6_segmentation_offload!= -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "t6so"), bool_to_string(n->tcp6_segmentation_offload));
+        if (n->tcp6_seg_off!= -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "t6so"), bool_to_string(n->tcp6_seg_off));
                  if (r < 0)
                          return r;
         }
-        if (n->generic_checksum_offload != -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gso"), bool_to_string(n->generic_checksum_offload));
+        if (n->gen_csum_off != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gso"), bool_to_string(n->gen_csum_off));
                  if (r < 0)
                          return r;
         }
-        if (n->generic_receive_offload != -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gro"), bool_to_string(n->generic_receive_offload));
+        if (n->ggen_rcv_off != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gro"), bool_to_string(n->ggen_rcv_off));
                  if (r < 0)
                          return r;
         }
-        if (n->large_receive_offload != -1) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "lro"), bool_to_string(n->large_receive_offload));
+        if (n->large_rcv_off != -1) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "lro"), bool_to_string(n->large_rcv_off));
                 if (r < 0)
                         return r;
         }
@@ -213,5 +215,15 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                         return r;
         }
 
+        if (n->gen_seg_off_bytes > 0) {
+                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "gsob"), n->gen_seg_off_bytes);
+                if (r < 0)
+                        return r;
+        }
+        if (n->gen_seg_off_seg > 0) {
+                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "gsos"), n->gen_seg_off_seg);
+                if (r < 0)
+                        return r;
+        }
         return 0;
 }
