@@ -3285,7 +3285,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                                 log_warning("Failed to parse rxcsumo='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
-                        n->receive_checksum_offload = r;
+                        n->rcv_csum_off = r;
                         continue;
                 }
                 if (string_equal(argv[i], "txcsumo")) {
@@ -3296,7 +3296,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                                 log_warning("Failed to parse txcsumo='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
-                        n->transmit_checksum_offload = r;
+                        n->tx_csum_off = r;
                         continue;
                 }
                 if (string_equal(argv[i], "tso")) {
@@ -3307,7 +3307,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                                 log_warning("Failed to parse tso='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
-                        n->tcp_segmentation_offload = r;
+                        n->tcp_seg_off = r;
                         continue;
                 }
                 if (string_equal(argv[i], "tso6")) {
@@ -3318,7 +3318,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                                 log_warning("Failed to parse tso6='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
-                        n->tcp6_segmentation_offload = r;
+                        n->tcp6_seg_off = r;
                         continue;
                 }
                 if (string_equal(argv[i], "gso")) {
@@ -3329,7 +3329,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                                 log_warning("Failed to parse gso='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
-                        n->generic_checksum_offload = r;
+                        n->gen_csum_off = r;
                         continue;
                 }
                 if (string_equal(argv[i], "gro")) {
@@ -3340,7 +3340,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                                 log_warning("Failed to parse gro='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
-                        n->generic_receive_offload = r;
+                        n->ggen_rcv_off = r;
                         continue;
                 }
                 if (string_equal(argv[i], "lro")) {
@@ -3351,7 +3351,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                                 log_warning("Failed to parse lro='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
-                        n->large_receive_offload = r;
+                        n->large_rcv_off = r;
                         continue;
                 }
 
@@ -3559,6 +3559,60 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                                 return r;
                         }
                         n->auto_flow_ctrl = r;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                return -EINVAL;
+        }
+
+        r = netdev_link_configure(p, n);
+        if (r < 0) {
+                log_warning("Failed to configure link: %s", g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_configure_link_gso(int argc, char *argv[]) {
+        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                return -errno;
+        }
+
+        r = netdev_link_new(&n);
+        if (r < 0) {
+                log_warning("Failed to set link gso: %s", g_strerror(-r));
+                return -errno;
+        }
+
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "gsob")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_link_gso(argv[i], &n->gen_seg_off_bytes);
+                        if (r < 0) {
+                                log_warning("Failed to parse gsob='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+                if (string_equal(argv[i], "gsos")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_link_gso(argv[i], &n->gen_seg_off_seg);
+                        if (r < 0) {
+                                log_warning("Failed to parse gsos='%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
                         continue;
                 }
 
