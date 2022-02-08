@@ -5,6 +5,7 @@
 
 #include <linux/if_link.h>
 
+#include "config-file.h"
 #include "network-util.h"
 
 typedef enum NetDevKind {
@@ -106,3 +107,5 @@ int macvlan_name_to_mode(const char *name);
 
 const char *ipvlan_mode_to_name(IPVLanMode id);
 int ipvlan_name_to_mode(const char *name);
+
+int netdev_ctl_name_to_configs_new(ConfigManager **ret);

@@ -131,6 +131,35 @@ int ipvlan_name_to_mode(const char *name) {
         return _IP_VLAN_MODE_INVALID;
 }
 
+
+static const Config netdev_ctl_name_to_config_table[] = {
+                { "vlan",     "VLAN"},
+                { "bridge",  "Bridge"},
+                { "bond",    "Bond"},
+                { "vxlan",   "VXLAN"},
+                { "macvlan", "MACVLAN"},
+                { "macvtap", "MACVLAN"},
+                { "vrf",     "VRF"},
+                { "ipvlan",  "IPVLAN"},
+                { "ipip",    "Tunnel"},
+                { "gre",     "Tunnel"},
+                { "sit",     "Tunnel"},
+                { "vti",     "Tunnel"},
+                {},
+};
+
+int netdev_ctl_name_to_configs_new(ConfigManager **ret) {
+        ConfigManager *m;
+        int r;
+
+        r = config_manager_new(netdev_ctl_name_to_config_table, &m);
+        if (r < 0)
+                return r;
+
+        *ret = m;
+        return 0;
+}
+
 int create_netdev_conf_file(const char *ifname, char **ret) {
         _auto_cleanup_ char *file = NULL, *netdev = NULL;
         int r;
