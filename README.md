@@ -24,9 +24,12 @@ Configure
 
   Please see [systemd.network](https://www.freedesktop.org/software/systemd/man/systemd.network.html) for more information.
   
-  - Devices's offload parameters and other features
-  - Devices's the maximum number of pending packets receive buffer
-  - Devices's the maximum nummber or queue
+  Device's
+  - Offload parameters and other features
+  - Pending packets receive buffer
+  - Queue size
+  - Flow control
+  - GSO
 
 Please see [systemd.link](https://www.freedesktop.org/software/systemd/man/systemd.link.html) for more information.
 
