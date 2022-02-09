@@ -15,18 +15,73 @@
 typedef struct NetDevLink {
         ConfigManager *m;
 
+        char *alias;
+        char *desc;
+        char *macpolicy;
+        char *macaddr;
+        char *namepolicy;
+        char *name;
+        char *altnamepolicy;
+        char *altname;
+
+        char *mtub;
+        char *bps;
+        char *duplex;
+        char *wol;
+        char *wolp;
+        char *port;
+        char *advertise;
+
+        char *rx_chnl;
+        char *tx_chnl;
+        char *otr_chnl;
+        char *comb_chnl;
+
+        char *rx_coal_sec;
+        char *rx_coal_irq_sec;
+        char *rx_coal_low_sec;
+        char *rx_coal_high_sec;
+        char *tx_coal_sec;
+        char *tx_coal_irq_sec;
+        char *tx_coal_low_sec;
+        char *tx_coal_high_sec;
+
+        char *rx_coald_frames;
+        char *rx_coald_irq_frames;
+        char *rx_coald_low_frames;
+        char *rx_coald_high_frames;
+        char *tx_coald_frames;
+        char *tx_coald_irq_frames;
+        char *tx_coald_low_frames;
+        char *tx_coald_high_frames;
+
+
+        char *coal_pkt_rate_low;
+        char *coal_pkt_rate_high;
+        char *coal_pkt_rate_smpl_itrvl;
+        char *sts_blk_coal_sec;
+ 
         char *rx_buf;
         char *rx_mini_buf;
         char *rx_jumbo_buf;
         char *tx_buf;
 
-        int rcv_csum_off;
+        int auto_nego;
+        int rx_csum_off;
         int tx_csum_off;
         int tcp_seg_off;
         int tcp6_seg_off;
-        int gen_csum_off;
-        int ggen_rcv_off;
-        int large_rcv_off;
+        int gen_seg_off;
+        int gen_rx_off;
+        int gen_rx_off_hw;
+        int large_rx_off;
+        int rx_vlan_ctag_hw_acl;
+        int tx_vlan_ctag_hw_acl;
+        int rx_vlan_ctag_fltr;
+        int tx_vlan_stag_hw_acl;
+        int n_tpl_fltr;
+        int use_adpt_rx_coal;
+        int use_adpt_tx_coal;
         int tx_flow_ctrl;
         int rx_flow_ctrl;
         int auto_flow_ctrl;

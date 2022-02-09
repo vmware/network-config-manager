@@ -13,25 +13,73 @@
 #include "network-link.h"
 
 static const Config link_ctl_to_config_table[] = {
-                { "rxcsumo",      "ReceiveChecksumOffload"},
-                { "txcsumo",      "TransmitChecksumOffload"},
-                { "tso",          "TCPSegmentationOffload" },
-                { "t6so",         "TCP6SegmentationOffload" },
-                { "gso",          "GenericSegmentationOffload"},
-                { "grso",         "GenericReceiveOffload"},
-                { "groh",         "GenericReceiveOffloadHardware"},
-                { "gsob",         "GenericSegmentOffloadMaxBytes"},
-                { "gsos",         "GenericSegmentOffloadMaxSegments"},
-                { "rxbuf",        "RxBufferSize"},
-                { "rxminbuf",     "RxMiniBufferSize"},
-                { "rxjumbobuf",   "RxJumboBufferSize"},
-                { "txbuf",        "TxBufferSize"},
-                { "txq",          "TransmitQueues"},
-                { "rxq",          "ReceiveQueues"},
-                { "rxqlen",       "TransmitQueueLength"},
-                { "rxflowctrl",   "RxFlowControl"},
-                { "txflowctrl",   "TxFlowControl"},
-                { "autoflowctrl", "AutoNegotiationFlowControl"},
+                { "alias",           "Alias" },
+                { "desc",            "Description" },
+                { "macpolicy",       "MACAddressPolicy" },
+                { "macaddr",         "MACAddress" },
+                { "namepolicy",      "NamePolicy" },
+                { "name",            "Name" },
+                { "altnamepolicy",   "AlternativeNamesPolicy" },
+                { "altname",         "AlternativeName" },
+                { "mtub",            "MTUBytes" },
+                { "bps",             "BitsPerSecond" },
+                { "duplex",          "Duplex" },
+                { "wol",             "WakeOnLan" },
+                { "wolp",            "WakeOnLanPassword" },
+                { "port",            "Port" },
+                { "advertise",       "Advertise" },
+                { "auton",           "AutoNegotiation" },
+                { "rxcsumo",         "ReceiveChecksumOffload" },
+                { "txcsumo",         "TransmitChecksumOffload" },
+                { "tso",             "TCPSegmentationOffload" },
+                { "t6so",            "TCP6SegmentationOffload" },
+                { "gso",             "GenericSegmentationOffload"},
+                { "grxo",            "GenericReceiveOffload" },
+                { "grxoh",           "GenericReceiveOffloadHardware" },
+                { "lrxo",            "LargeReceiveOffload" },
+                { "rxvtha",          "ReceiveVLANCTAGHardwareAcceleration" },
+                { "txvtha",          "TransmitVLANCTAGHardwareAcceleration" },
+                { "rxvtf",           "ReceiveVLANCTAGFilter" },
+                { "txvstha",         "TransmitVLANSTAGHardwareAcceleration" },
+                { "ntf",             "NTupleFilter" },
+                { "uarxc",           "UseAdaptiveRxCoalesce" },
+                { "uatxc",           "UseAdaptiveTxCoalesce" },
+                { "gsob",            "GenericSegmentOffloadMaxBytes" },
+                { "gsos",            "GenericSegmentOffloadMaxSegments" },
+                { "rxch",            "RxChannels" },
+                { "txch",            "TxChannels" },
+                { "otrch",           "OtherChannels" },
+                { "combch",          "CombinedChannels" },
+                { "rxbuf",           "RxBufferSize" },
+                { "rxminbuf",        "RxMiniBufferSize" },
+                { "rxjumbobuf",      "RxJumboBufferSize" },
+                { "txbuf",           "TxBufferSize" },
+                { "txq",             "TransmitQueues" },
+                { "rxq",             "ReceiveQueues" },
+                { "rxqlen",          "TransmitQueueLength" },
+                { "rxflowctrl",      "RxFlowControl" },
+                { "txflowctrl",      "TxFlowControl" },
+                { "autoflowctrl",    "AutoNegotiationFlowControl" },
+                { "rxcs",            "RxCoalesceSec" },
+                { "rxcsirq",         "RxCoalesceIrqSec" },
+                { "rxcslow",         "RxCoalesceLowSec" },
+                { "rxcshigh",        "RxCoalesceHighSec" },
+                { "txcs",            "RxCoalesceSec" },
+                { "txcsirq",         "RxCoalesceIrqSec" },
+                { "txcslow",         "RxCoalesceLowSec" },
+                { "txcshigh",        "RxCoalesceHighSec" },
+                { "rxmcf",           "RxMaxCoalescedFrames" },
+                { "rxmcfirq",        "RxMaxCoalescedIrqFrames" },
+                { "rxmcflow",        "RxMaxCoalescedLowFrames" },
+                { "rxmcfhigh",       "RxMaxCoalescedHighFrames" },
+                { "txmcf",           "TxMaxCoalescedFrames" },
+                { "txmcfirq",        "TxMaxCoalescedIrqFrames" },
+                { "txmcflow",        "TxMaxCoalescedLowFrames" },
+                { "txmcfhigh",       "TxMaxCoalescedHighFrames" },
+                { "cprlow",          "CoalescePacketRateLow" },
+                { "cprhigh",         "CoalescePacketRateHigh" },
+                { "cprsis",          "CoalescePacketRateSampleIntervalSec" },
+                { "sbcs",            "StatisticsBlockCoalesceSec" },
                 {},
 };
 
@@ -44,13 +92,22 @@ int netdev_link_new(NetDevLink **ret) {
                 return log_oom();
 
         *n = (NetDevLink) {
-                .rcv_csum_off = -1,
+                .auto_nego = -1,
+                .rx_csum_off = -1,
                 .tx_csum_off = -1,
                 .tcp_seg_off = -1,
                 .tcp6_seg_off = -1,
-                .gen_csum_off =-1,
-                .ggen_rcv_off = -1,
-                .large_rcv_off = -1,
+                .gen_seg_off = -1,
+                .gen_rx_off = -1,
+                .gen_rx_off_hw = -1,
+                .large_rx_off = -1,
+                .rx_vlan_ctag_hw_acl = -1,
+                .tx_vlan_ctag_hw_acl = -1,
+                .rx_vlan_ctag_fltr = -1,
+                .tx_vlan_stag_hw_acl = -1,
+                .n_tpl_fltr = -1,
+                .use_adpt_rx_coal = -1,
+                .use_adpt_tx_coal = -1,
                 .tx_flow_ctrl = -1,
                 .rx_flow_ctrl = -1,
                 .auto_flow_ctrl = -1,
@@ -69,7 +126,52 @@ void netdev_link_unref(NetDevLink *n) {
                 return;
 
         config_manager_unref(n->m);
+ 
+        free(n->alias);
+        free(n->desc);
+        free(n->macpolicy);
+        free(n->macaddr);
+        free(n->namepolicy);
+        free(n->name);
+        free(n->altnamepolicy);
+        free(n->altname);
 
+        free(n->mtub);
+        free(n->bps);
+        free(n->duplex);
+        free(n->wol);
+        free(n->wolp);
+        free(n->port);
+        free(n->advertise);
+
+        free(n->rx_chnl);
+        free(n->tx_chnl);
+        free(n->otr_chnl);
+        free(n->comb_chnl);
+
+        free(n->rx_coal_sec);
+        free(n->rx_coal_irq_sec);
+        free(n->rx_coal_low_sec);
+        free(n->rx_coal_high_sec);
+        free(n->tx_coal_sec);
+        free(n->tx_coal_irq_sec);
+        free(n->tx_coal_low_sec);
+        free(n->tx_coal_high_sec);
+
+        free(n->rx_coald_frames);
+        free(n->rx_coald_irq_frames);
+        free(n->rx_coald_low_frames);
+        free(n->rx_coald_high_frames);
+        free(n->tx_coald_frames);
+        free(n->tx_coald_irq_frames);
+        free(n->tx_coald_low_frames);
+        free(n->tx_coald_high_frames);
+
+        free(n->coal_pkt_rate_low);
+        free(n->coal_pkt_rate_high);
+        free(n->coal_pkt_rate_smpl_itrvl);
+        free(n->sts_blk_coal_sec);
+ 
         free(n->rx_buf);
         free(n->rx_mini_buf);
         free(n->rx_jumbo_buf);
@@ -125,13 +227,98 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
         if (r < 0)
                 return r;
 
-        if (n->rcv_csum_off != -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rx"), bool_to_string(n->rcv_csum_off));
+        if (n->alias) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "alias"), n->alias);
+                if (r < 0)
+                        return r;
+        }
+        if (n->desc) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "desc"), n->desc);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->macpolicy) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "macpolicy"), n->macpolicy);
+                if (r < 0)
+                        return r;
+        }
+        if(n->macaddr) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "macaddr"), n->macaddr);
+                if (r < 0)
+                    return r;
+        }
+
+        if (n->namepolicy) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "namepolicy"), n->namepolicy);
+                if (r < 0)
+                        return r;
+        }
+        if(n->name) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "name"), n->name);
+                if (r < 0)
+                    return r;
+        }
+
+        if (n->altnamepolicy) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "altnamepolicy"), n->altnamepolicy);
+                if (r < 0)
+                        return r;
+        }
+        if(n->altname) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "altname"), n->altname);
+                if (r < 0)
+                    return r;
+        }
+
+        if(n->mtub) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "mtub"), n->mtub);
+                if (r < 0)
+                    return r;
+        }
+        if(n->bps) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "bps"), n->bps);
+                if (r < 0)
+                    return r;
+        }
+        if(n->duplex) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "duplex"), n->duplex);
+                if (r < 0)
+                    return r;
+        }
+        if(n->wol) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "wol"), n->wol);
+                if (r < 0)
+                    return r;
+        }
+        if(n->wolp) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "wolp"), n->wolp);
+                if (r < 0)
+                    return r;
+        }
+        if(n->port) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "port"), n->port);
+                if (r < 0)
+                    return r;
+        }
+        if(n->advertise) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "advertise"), n->advertise);
+                if (r < 0)
+                    return r;
+        }
+
+        if (n->auto_nego != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "auton"), bool_to_string(n->auto_nego));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->rx_csum_off != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcsumo"), bool_to_string(n->rx_csum_off));
                  if (r < 0)
                          return r;
         }
         if (n->tx_csum_off != -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "tx"), bool_to_string(n->tx_csum_off));
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcsumo"), bool_to_string(n->tx_csum_off));
                  if (r < 0)
                          return r;
         }
@@ -145,18 +332,58 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                  if (r < 0)
                          return r;
         }
-        if (n->gen_csum_off != -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gso"), bool_to_string(n->gen_csum_off));
+        if (n->gen_seg_off != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gso"), bool_to_string(n->gen_seg_off));
                  if (r < 0)
                          return r;
         }
-        if (n->ggen_rcv_off != -1) {
-                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gro"), bool_to_string(n->ggen_rcv_off));
+        if (n->gen_rx_off != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "grxo"), bool_to_string(n->gen_rx_off));
                  if (r < 0)
                          return r;
         }
-        if (n->large_rcv_off != -1) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "lro"), bool_to_string(n->large_rcv_off));
+        if (n->gen_rx_off_hw != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "grxoh"), bool_to_string(n->gen_rx_off_hw));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->large_rx_off != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "lrxo"), bool_to_string(n->large_rx_off));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->rx_vlan_ctag_hw_acl != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxvtha"), bool_to_string(n->rx_vlan_ctag_hw_acl));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->tx_vlan_ctag_hw_acl != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txvtha"), bool_to_string(n->tx_vlan_ctag_hw_acl));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->rx_vlan_ctag_fltr != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxvtf"), bool_to_string(n->rx_vlan_ctag_fltr));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->tx_vlan_stag_hw_acl != -1) {
+                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txvstha"), bool_to_string(n->tx_vlan_stag_hw_acl));
+                 if (r < 0)
+                         return r;
+        }
+        if (n->n_tpl_fltr != -1) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "ntf"), bool_to_string(n->n_tpl_fltr));
+                if (r < 0)
+                        return r;
+        }
+        if (n->use_adpt_rx_coal != -1) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "uarxc"), bool_to_string(n->use_adpt_rx_coal));
+                if (r < 0)
+                        return r;
+        }
+        if (n->use_adpt_tx_coal != -1) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "uatxc"), bool_to_string(n->use_adpt_tx_coal));
                 if (r < 0)
                         return r;
         }
@@ -177,6 +404,27 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                         return r;
         }
 
+
+        if (n->rx_chnl) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxch"), n->rx_chnl);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_chnl) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txch"), n->tx_chnl);
+                if (r < 0)
+                        return r;
+        }
+        if (n->otr_chnl) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "otrch"), n->otr_chnl);
+                if (r < 0)
+                        return r;
+        }
+        if (n->comb_chnl) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "combch"), n->comb_chnl);
+                if (r < 0)
+                        return r;
+        }
 
         if (n->rx_buf) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxbuf"), n->rx_buf);
@@ -222,6 +470,109 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
         }
         if (n->gen_seg_off_seg > 0) {
                 r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "gsos"), n->gen_seg_off_seg);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->rx_coal_sec) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcs"), n->rx_coal_sec);
+                if (r < 0)
+                        return r;
+        }
+        if (n->rx_coal_irq_sec) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcsirq"), n->rx_coal_irq_sec);
+                if (r < 0)
+                        return r;
+        }
+        if (n->rx_coal_low_sec) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcslow"), n->rx_coal_low_sec);
+                if (r < 0)
+                        return r;
+        }
+        if (n->rx_coal_high_sec) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcshigh"), n->rx_coal_high_sec);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_coal_sec) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcs"), n->tx_coal_sec);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_coal_irq_sec) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcsirq"), n->tx_coal_irq_sec);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_coal_low_sec) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcslow"), n->tx_coal_low_sec);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_coal_high_sec) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcshigh"), n->tx_coal_high_sec);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->rx_coald_frames) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxmcf"), n->rx_coald_frames);
+                if (r < 0)
+                        return r;
+        }
+        if (n->rx_coald_irq_frames) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxmcfirq"), n->rx_coald_irq_frames);
+                if (r < 0)
+                        return r;
+        }
+        if (n->rx_coald_low_frames) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxmcflow"), n->rx_coald_low_frames);
+                if (r < 0)
+                        return r;
+        }
+        if (n->rx_coald_high_frames) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxmcfhigh"), n->rx_coald_high_frames);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_coald_frames) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txmcf"), n->tx_coald_frames);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_coald_irq_frames) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txmcfirq"), n->tx_coald_irq_frames);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_coald_low_frames) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txmcflow"), n->tx_coald_low_frames);
+                if (r < 0)
+                        return r;
+        }
+        if (n->tx_coald_high_frames) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txmcfhigh"), n->tx_coald_high_frames);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->coal_pkt_rate_low) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "cprlow"), n->coal_pkt_rate_low);
+                if (r < 0)
+                        return r;
+        }
+        if (n->coal_pkt_rate_high) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "cprhigh"), n->coal_pkt_rate_high);
+                if (r < 0)
+                        return r;
+        }
+        if (n->coal_pkt_rate_smpl_itrvl) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "cprsis"), n->coal_pkt_rate_smpl_itrvl);
+                if (r < 0)
+                        return r;
+        }
+        if (n->sts_blk_coal_sec) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "sbcs"), n->sts_blk_coal_sec);
                 if (r < 0)
                         return r;
         }
