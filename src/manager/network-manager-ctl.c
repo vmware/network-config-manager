@@ -206,8 +206,16 @@ static int help(void) {
                "  reconfigure                  [LINK] Reconfigure Link.\n"
                "  show-network-config          [LINK] Displays network configuration of link.\n"
                "  edit-network-config          [LINK] Edit network configuration of link.\n"
-               "  set-link-feature             [LINK] [rxcsumo BOOLEAN]  [txcsumo BOOLEAN]  [tso BOOLEAN] [gso BOOLEAN] [gro BOOLEAN] [lro BOOLEAN]\n"
-                                                      "\t\t\t\tConfigure device's offload parameters and other features.\n"
+               "  set-link                     [LINK] [alias STRING] [desc STRING] [mtub STRING]  [bps STRING]  [duplex STRING] [wol STRING | List] [wolp STRING] [port STRING] [advertise STRING | List] \n"
+                                                      "\t\t\t\tConfigure device's other parameters like mtubytes, bitspersecond, duplex, wakeonlan, wakeonlanpassword, port and advertise.\n"
+               "  set-link-feature             [LINK] [auton BOOLEAN] [rxcsumo BOOLEAN]  [txcsumo BOOLEAN]  [tso BOOLEAN] [tso6 BOOLEAN] [gso BOOLEAN] [grxo BOOLEAN] [grxoh BOOLEAN] [lrxo BOOLEAN] [rxvtha BOOLEAN] [txvtha BOOLEAN] [rxvtf BOOLEAN] [txvstha BOOLEAN] [ntf BOOLEAN] [uarxc BOOLEAN] [uatxc BOOLEAN]\n"
+                                                      "\t\t\t\tConfigure device's enable or disable features like autonegotiation, checksum offload, tcpsegmentation, genericoffload, largeoffload, vlantag acceleration, tuple filter, useadaptive coalesce.\n"
+               "  set-link-mac                 [LINK] [macpolicy STRING | List]  [macaddr STRING]\n"
+                                                      "\t\t\t\tConfigure device's macaddress policy or macaddress.\n"
+               "  set-link-name                [LINK] [namepolicy STRING | List]  [name STRING]\n"
+                                                      "\t\t\t\tConfigure device's name policy or name.\n"
+               "  set-link-altname             [LINK] [altnamepolicy STRING | List]  [name STRING]\n"
+                                                      "\t\t\t\tConfigure device's alternative name policy or alternative name.\n"
                "  set-link-buf                 [LINK] [rxbuf NUMBER] [rxminbuf NUMBER | max] [rxjumbobuf NUMBER | max] [txbuf NUMBER | max]\n"
                                                       "\t\t\t\tConfigure device's the maximum number of pending packets receive buffer. [1…4294967295 | \"max\"]\n"
                "  set-link-queue               [LINK] [rxq NUMBER] [txq NUMBER] [rxqlen NUMBER]\n"
@@ -216,6 +224,14 @@ static int help(void) {
                                                       "\t\t\t\tConfigure device's the flow control\n"
                "  set-link-gso                 [LINK] [gsob NUMBER] [gsos NUMBER]\n"
                                                       "\t\t\t\tConfigure device's Generic Segment Offload (GSO)\n"
+               "  set-link-channel             [LINK] [rxch NUMBER | max] [txch NUMBER | max] [otrch NUMBER | max] [combch NUMBER | max]\n"
+                                                      "\t\t\t\tConfigure device's specifies the number of receive, transmit, other, or combined channels, respectively\n"
+               "  set-link-coalesce            [LINK] [rxcs NUMBER | max] [rxcsirq NUMBER | max] [rxcslow NUMBER | max] [rxcshigh NUMBER | max] [txcs NUMBER | max] [txcsirq NUMBER | max] [txcslow NUMBER | max] [txcshigh NUMBER | max]\n"
+                                                      "\t\t\t\tConfigure device's delay before Rx/Tx interrupts are generated after a packet is sent/received.\n"
+               "  set-link-coald-frames        [LINK] [rxmcf NUMBER | max] [rxmcfirq NUMBER | max] [rxmcflow NUMBER | max] [rxmcfhigh NUMBER | max] [txmcf NUMBER | max] [txmcfirq NUMBER | max] [txmcflow NUMBER | max] [txmcfhigh NUMBER | max]\n"
+                                                      "\t\t\t\tConfigure device's maximum number of frames that are sent/received before a Rx/Tx interrupt is generated.\n"
+               "  set-link-coal-pkt            [LINK] [cprlow NUMBER | max] [cprhigh NUMBER | max] [cprsis NUMBER | max] [sbcs NUMBER | max]\n"
+                                                      "\t\t\t\tConfigure device's low and high packet rate, sampleinterval packet rate and statistics block updates.\n"
                "  set-proxy                    [enable {BOOLEAN}] [http|https|ftp|gopher|socks|socks5|noproxy] [CONFIGURATION | none] Configure proxy.\n"
                "  show-proxy                   Shows proxy configuration.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -359,11 +375,19 @@ static int cli_run(int argc, char *argv[]) {
                 { "reconfigure",                  1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "show-network-config",          1,        WORD_ANY, false, ncm_link_show_network_config },
                 { "edit-network-config",          1,        WORD_ANY, false, ncm_link_edit_network_config },
+                { "set-link",                     2,        WORD_ANY, false, ncm_configure_link },
                 { "set-link-feature",             2,        WORD_ANY, false, ncm_configure_link_features },
+                { "set-link-mac",                 2,        WORD_ANY, false, ncm_configure_link_mac },
+                { "set-link-name",                2,        WORD_ANY, false, ncm_configure_link_name },
+                { "set-link-altname",             2,        WORD_ANY, false, ncm_configure_link_altname },
                 { "set-link-buf",                 2,        WORD_ANY, false, ncm_configure_link_buf_size },
                 { "set-link-queue",               2,        WORD_ANY, false, ncm_configure_link_queue_size },
                 { "set-link-flow-control",        2,        WORD_ANY, false, ncm_configure_link_flow_control },
                 { "set-link-gso",                 2,        WORD_ANY, false, ncm_configure_link_gso },
+                { "set-link-channel",             2,        WORD_ANY, false, ncm_configure_link_channel },
+                { "set-link-coalesce",            2,        WORD_ANY, false, ncm_configure_link_coalesce },
+                { "set-link-coald-frames",        2,        WORD_ANY, false, ncm_configure_link_coald_frames },
+                { "set-link-coal-pkt",            2,        WORD_ANY, false, ncm_configure_link_coal_pkt },
                 { "set-proxy",                    1,        WORD_ANY, false, ncm_configure_proxy },
                 { "show-proxy",                   WORD_ANY, WORD_ANY, false, ncm_show_proxy },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },

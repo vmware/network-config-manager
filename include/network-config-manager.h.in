@@ -95,11 +95,19 @@ int ncm_remove_netdev(int argc, char *argv[]);
 int ncm_link_show_network_config(int argc, char *argv[]);
 int ncm_link_edit_network_config(int argc, char *argv[]);
 
+int ncm_configure_link(int argc, char *argv[]);
 int ncm_configure_link_features(int argc, char *argv[]);
 int ncm_configure_link_buf_size(int argc, char *argv[]);
 int ncm_configure_link_queue_size(int argc, char *argv[]);
 int ncm_configure_link_flow_control(int argc, char *argv[]);
 int ncm_configure_link_gso(int argc, char *argv[]);
+int ncm_configure_link_mac(int argc, char *argv[]);
+int ncm_configure_link_name(int argc, char *argv[]);
+int ncm_configure_link_altname(int argc, char *argv[]);
+int ncm_configure_link_channel(int argc, char *argv[]);
+int ncm_configure_link_coalesce(int argc, char *argv[]);
+int ncm_configure_link_coald_frames(int argc, char *argv[]);
+int ncm_configure_link_coal_pkt(int argc, char *argv[]);
 
 int ncm_configure_proxy(int argc, char *argv[]);
 int ncm_show_proxy(int argc, char *argv[]);
