@@ -25,11 +25,19 @@ Configure
   Please see [systemd.network](https://www.freedesktop.org/software/systemd/man/systemd.network.html) for more information.
   
   Device's
-  - Offload parameters and other features
-  - Pending packets receive buffer
-  - Queue size
-  - Flow control
-  - GSO
+  - Alias, Description, MTUBytes, WakeOnLan, WakeOnLanPassword, Port, BitsPerSecond, Duplex and Advertise.
+  - Offload parameters and other features.
+  - MACAddressPolicy or MACAddress.
+  - NamePolicy or Name.
+  - AlternativeNamesPolicy or AlternativeName.
+  - Pending packets receive buffer.
+  - Queue size.
+  - Flow control.
+  - GSO.
+  - Channels.
+  - Coalesce.
+  - Coalesced frames.
+  - Coalesce packet rate.
 
 Please see [systemd.link](https://www.freedesktop.org/software/systemd/man/systemd.link.html) for more information.
 
