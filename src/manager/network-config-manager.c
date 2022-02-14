@@ -3863,7 +3863,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                                 log_warning("Failed to parse rxflowctrl='%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
-                        n->rx_flow_ctrl = r;
+                        n->tx_flow_ctrl = r;
                         continue;
                 }
                 if (string_equal(argv[i], "autoflowctrl")) {
