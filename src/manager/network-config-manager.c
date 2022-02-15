@@ -485,8 +485,10 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         }
 
         r = parse_mtu(argv[2], &mtu);
-        if (r < 0)
+        if (r < 0) {
+                log_warning("Failed to parse link mtu '%s': %s", argv[2], g_strerror(-r));
                 return r;
+        }
 
         r = manager_set_link_mtu(p, mtu);
         if (r < 0) {
@@ -577,7 +579,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
         }
 
         k = r;
-        r = manager_set_link_mode(p, !k);
+        r = manager_set_link_flag(p, k, "Unmanaged");
         if (r < 0) {
                 printf("Failed to set link mode '%s': %s\n", p->ifname, g_strerror(-r));
                 return r;
@@ -585,6 +587,190 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
 
         return 0;
 }
+
+_public_ int ncm_link_set_option(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        bool k;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link: %s", argv[1]);
+                return -errno;
+        }
+
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "arp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link arp '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        k = r;
+                        r = manager_set_link_flag(p, k, "ARP");
+                        if (r < 0) {
+                                printf("Failed to set link arp '%s': %s\n", p->ifname, g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+                if (string_equal(argv[i], "mc")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link multicast '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        k = r;
+                        r = manager_set_link_flag(p, k, "Multicast");
+                        if (r < 0) {
+                                printf("Failed to set link multicast '%s': %s\n", p->ifname, g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+                if (string_equal(argv[i], "amc")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link allmulticast '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        k = r;
+                        r = manager_set_link_flag(p, k, "AllMulticast");
+                        if (r < 0) {
+                                printf("Failed to set link allmulticast '%s': %s\n", p->ifname, g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+                if (string_equal(argv[i], "pcs")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link promiscuous '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        k = r;
+                        r = manager_set_link_flag(p, k, "Promiscuous");
+                        if (r < 0) {
+                                printf("Failed to set link promiscuous '%s': %s\n", p->ifname, g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+                if (string_equal(argv[i], "rfo")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link RequiredForOnline '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        k = r;
+                        r = manager_set_link_flag(p, k, "RequiredForOnline");
+                        if (r < 0) {
+                                printf("Failed to set link RequiredForOnline '%s': %s\n", p->ifname, g_strerror(-r));
+                                return r;
+                        }
+
+                        continue;
+                }
+        }
+
+        return 0;
+}
+
+_public_ int ncm_link_set_group(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        uint32_t group;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link: %s", argv[1]);
+                return -errno;
+        }
+
+        r = parse_group(argv[2], &group);
+        if (r < 0) {
+                log_warning("Failed to parse link group '%s': %s", argv[2], g_strerror(-r));
+                return r;
+        }
+
+        r = manager_set_link_group(p, group);
+        if (r < 0) {
+                log_warning("Failed to update Group for '%s': %s", p->ifname, g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link: %s", argv[1]);
+                return -errno;
+        }
+
+        r = parse_link_rf_online(argv[2]);
+        if (r < 0) {
+               log_warning("Failed to parse RequiredFamilyForOnline '%s': %s", argv[2], g_strerror(EINVAL));
+               return r;
+        }
+
+        r = manager_set_link_rf_online(p, argv[2]);
+        if (r < 0) {
+                log_warning("Failed to update RequiredFamilyForOnline for '%s': %s", p->ifname, g_strerror(-r) );
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_link_set_act_policy(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link: %s", argv[1]);
+                return -errno;
+        }
+
+        r = parse_link_act_policy(argv[2]);
+        if (r < 0) {
+               log_warning("Failed to parse ActivationPolicy '%s': %s", argv[2], g_strerror(EINVAL));
+               return r;
+        }
+
+        r = manager_set_link_act_policy(p, argv[2]);
+        if (r < 0) {
+                log_warning("Failed to update ActivationPolicy for '%s': %s", p->ifname, g_strerror(-r) );
+                return r;
+        }
+
+        return 0;
+}
+
 
 _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;

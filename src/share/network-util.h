@@ -55,4 +55,8 @@ char *ether_addr_to_string(const struct ether_addr *addr, char *s);
 bool ether_addr_is_not_null(const struct ether_addr *addr);
 int parse_mtu(char *mtu, uint32_t *ret);
 
+int parse_group(char *mtu, uint32_t *ret);
+int parse_link_rf_online(const char *c);
+int parse_link_act_policy(const char *c);
+
 bool valid_hostname(const char *host);

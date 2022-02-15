@@ -112,6 +112,10 @@ static int help(void) {
                "  set-mtu                      [LINK] [MTU NUMBER] Configures Link MTU.\n"
                "  set-mac                      [LINK] [MAC] Configures Link MAC address.\n"
                "  set-link-mode                [LINK] [MODE BOOLEAN] Configures Link managed by networkd.\n"
+               "  set-link-option              [LINK] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN] [rfo BOOLEAN] Configures Link arp, multicast, allmulticast, promiscuous and requiredforonline managed by networkd.\n"
+               "  set-link-group               [LINK] [GROUP NUMBER] Configures Link Group.\n"
+               "  set-link-rf-online           [LINK] [GROUP NUMBER] Configures Link RequiredFamilyForOnline.\n"
+               "  set-link-act-policy          [LINK] [GROUP NUMBER] Configures Link ActivationPolicy.\n"
                "  set-dhcp-mode                [LINK] [DHCP-MODE {yes|no|ipv4|ipv6}] Configures Link DHCP setting.\n"
                "  set-dhcp4-client-identifier  [LINK] [IDENTIFIER {mac|duid|duid-only} Configures Link DHCPv4 identifier.\n"
                "  set-dhcp-iaid                [LINK] [IAID] Configures the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
@@ -305,6 +309,10 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-mtu",                      2,        WORD_ANY, false, ncm_link_set_mtu },
                 { "set-mac",                      2,        WORD_ANY, false, ncm_link_set_mac },
                 { "set-link-mode",                2,        WORD_ANY, false, ncm_link_set_mode },
+                { "set-link-option",              2,        WORD_ANY, false, ncm_link_set_option },
+                { "set-link-group",               2,        WORD_ANY, false, ncm_link_set_group },
+                { "set-link-rf-online",           2,        WORD_ANY, false, ncm_link_set_rf_online },
+                { "set-link-act-policy",          2,        WORD_ANY, false, ncm_link_set_act_policy },
                 { "set-dhcp-mode",                2,        WORD_ANY, false, ncm_link_set_dhcp_mode },
                 { "set-dhcp4-client-identifier",  2,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
                 { "set-dhcp-iaid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
