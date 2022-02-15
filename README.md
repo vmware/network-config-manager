@@ -14,7 +14,7 @@ Configure
   - NTP
   - Routing Policy Rule
   - Multiple default gateway with routing policy rules.
-  - Link's MAC, MTU.
+  - Link's MAC, MTU, ARP, Multicast, AllMulticast, Promiscuous, Unmanaged, Group, RequiredForOnline, RequiredFamilyForOnline, and ActivationPolicy.
   - Create netdevs, vlan, vxlan, bridge, bond, veth, macvlan/macvtap, ipvlap/ipvtap, veth, tunnels(ipip, sit, gre, sit, vti), wireguard.
   - Hostname.
   - DHCPv4 Server.

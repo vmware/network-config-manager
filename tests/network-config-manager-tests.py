@@ -332,6 +332,70 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'MACAddress') == '00:0c:29:3a:bc:11')
+    
+    def test_cli_set_option(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        assert(unit_exist('10-test99.network') == True)
+
+        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['nmctl', 'set-link-option', 'test99', 'arp', 'yes', 'mc', 'yes', 'amc', '0', 'pcs', 'false', 'rfo', 'no'])
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'ARP') == 'true')
+        assert(parser.get('Link', 'Multicast') == 'true')
+        assert(parser.get('Link', 'AllMulticast') == 'false')
+        assert(parser.get('Link', 'Promiscuous') == 'false')
+        assert(parser.get('Link', 'RequiredForOnline') == 'false')
+    
+    def test_cli_set_group(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        assert(unit_exist('10-test99.network') == True)
+
+        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['nmctl', 'set-link-group', 'test99', '2147483647'])
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'Group') == '2147483647')
+
+    def test_cli_set_rf_online(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        assert(unit_exist('10-test99.network') == True)
+
+        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['nmctl', 'set-link-rf-online', 'test99', 'ipv4'])
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'RequiredFamilyForOnline') == 'ipv4')
+
+    def test_cli_set_act_policy(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        assert(unit_exist('10-test99.network') == True)
+
+        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['nmctl', 'set-link-act-policy', 'test99', 'always-up'])
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'ActivationPolicy') == 'always-up')
 
     def test_cli_set_dhcp_type(self):
         assert(link_exist('test99') == True)
