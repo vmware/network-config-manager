@@ -579,7 +579,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
         }
 
         k = r;
-        r = manager_set_link_flag(p, k, "Unmanaged");
+        r = manager_set_link_flag(p, !k, "Unmanaged");
         if (r < 0) {
                 printf("Failed to set link mode '%s': %s\n", p->ifname, g_strerror(-r));
                 return r;
