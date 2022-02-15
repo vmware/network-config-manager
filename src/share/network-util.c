@@ -278,11 +278,47 @@ int parse_mtu(char *mtu, uint32_t *ret) {
         uint32_t j;
         int r;
 
+        assert(mtu);
+        
         r = parse_uint32(mtu, &j);
         if (r < 0)
                 return r;
 
         *ret = j;
+        return 0;
+}
+
+int parse_group(char *group, uint32_t *ret) {
+        uint32_t j;
+        int r;
+
+        assert(group);
+        
+        r = parse_uint32(group, &j);
+        if (r < 0)
+                return r;
+
+        *ret = j;
+        return 0;
+}
+
+int parse_link_rf_online(const char *c) {
+        assert(c);
+
+        if((!string_equal(c, "ipv4")) && (!string_equal(c, "ipv6")) &&
+           (!string_equal(c, "both")) && (!string_equal(c, "any")))
+                return -EINVAL;
+
+        return 0;
+}
+
+int parse_link_act_policy(const char *c) {
+        assert(c);
+
+        if((!string_equal(c, "up")) && (!string_equal(c, "always-up")) && (!string_equal(c, "down")) &&
+           (!string_equal(c, "always-down")) && (!string_equal(c, "manual")) && (!string_equal(c, "bound")))
+                return -EINVAL;
+
         return 0;
 }
 

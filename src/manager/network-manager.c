@@ -74,11 +74,12 @@ int manager_network_dhcp4_section_configs_new(ConfigManager **ret) {
         return 0;
 }
 
-int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode) {
+int manager_set_link_flag(const IfNameIndex *ifnameidx, bool mode, const char* key) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
+        assert(key);
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)
@@ -89,7 +90,7 @@ int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode) {
                 return -ENODATA;
         }
 
-        r = set_config_file_bool(network, "Link", "Unmanaged", mode);
+        r = set_config_file_bool(network, "Link", key, mode);
         if (r < 0)
                 return r;
 
@@ -301,6 +302,70 @@ int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
         r = set_config_file_string(network, "Link", "MTUBytes", config_update_mtu);
         if (r < 0) {
                 log_warning("Failed to update MTUBytes= to configuration file '%s' = %s", network, g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group) {
+        _auto_cleanup_ char *network = NULL, *config_update_group = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(group > 0);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        asprintf(&config_update_group, "%u", group);
+
+        r = set_config_file_string(network, "Link", "Group", config_update_group);
+        if (r < 0) {
+                log_warning("Failed to update Group= to configuration file '%s' = %s", network, g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+int manager_set_link_rf_online(const IfNameIndex *ifnameidx, const char *addrfamily) {
+        _auto_cleanup_ char *p = NULL, *network = NULL, *config_update_family = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(addrfamily);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        asprintf(&config_update_family, "%s", addrfamily);
+        r = set_config_file_string(network, "Link", "RequiredFamilyForOnline", config_update_family);
+        if (r < 0) {
+                log_warning("Failed to write to configuration file: %s", network);
+                return r;
+        }
+
+        return 0;
+}
+
+int manager_set_link_act_policy(const IfNameIndex *ifnameidx, const char *actpolicy) {
+        _auto_cleanup_ char *p = NULL, *network = NULL, *config_update_policy = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(actpolicy);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        asprintf(&config_update_policy, "%s", actpolicy);
+        r = set_config_file_string(network, "Link", "ActivationPolicy", config_update_policy);
+        if (r < 0) {
+                log_warning("Failed to write to configuration file: %s", network);
                 return r;
         }
 

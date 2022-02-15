@@ -15,8 +15,12 @@ int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac);
 int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode);
 int manager_get_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode *mode);
 
-int manager_set_link_mode(const IfNameIndex *ifnameidx, bool mode);
+int manager_set_link_flag(const IfNameIndex *ifnameidx, bool mode, const char* key);
 int manager_set_link_state(const IfNameIndex *ifnameidx, LinkState state);
+
+int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group);
+int manager_set_link_rf_online(const IfNameIndex *ifnameidx, const char *addrfamily);
+int manager_set_link_act_policy(const IfNameIndex *ifnameidx, const char *actpolicy);
 
 int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier);
 int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret);

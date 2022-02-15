@@ -51,6 +51,11 @@ int ncm_link_set_mac(int argc, char *argv[]);
 int ncm_link_get_mac(const char *ifname, char **ret);
 
 int ncm_link_set_mode(int argc, char *argv[]);
+int ncm_link_set_option(int argc, char *argv[]);
+
+int ncm_link_set_group(int argc, char *argv[]);
+int ncm_link_set_rf_online(int argc, char *argv[]);
+int ncm_link_set_act_policy(int argc, char *argv[]);
 
 int ncm_link_set_mtu(int argc, char *argv[]);
 int ncm_link_get_mtu(const char *ifname, uint32_t *ret);
