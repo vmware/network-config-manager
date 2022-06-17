@@ -11,9 +11,14 @@
 #include "macros.h"
 #include "network-util.h"
 #include "string-util.h"
+#include "network.h"
 
 typedef struct NetDevLink {
         ConfigManager *m;
+
+        ParserType parser_type;
+
+        char *ifname;
 
         char *alias;
         char *desc;
