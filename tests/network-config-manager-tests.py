@@ -122,6 +122,106 @@ def read_wpa_supplicant_conf(conf_file):
 
     return networks
 
+class TestLinkConfigManagerYAML:
+    yaml_configs = [
+        "link.yaml",
+    ]
+
+    def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
+        shutil.copy(os.path.join(network_config_manager_ci_yaml_path, config_file), network_config_manager_yaml_config_path)
+
+    def remove_units_from_netmanager_yaml_path(self):
+        for config_file in self.yaml_configs:
+            if (os.path.exists(os.path.join(network_config_manager_yaml_config_path, config_file))):
+                os.remove(os.path.join(network_config_manager_yaml_config_path, config_file))
+
+    def setup_method(self):
+        link_remove('test99')
+        link_add_dummy('test99')
+        restart_networkd()
+
+    def teardown_method(self):
+        self.remove_units_from_netmanager_yaml_path()
+        remove_units_from_netword_unit_path()
+
+    def test_link(self):
+        assert(link_exist('test99') == True)
+        self.copy_yaml_file_to_netmanager_yaml_path('link.yaml')
+
+        subprocess.check_call(['nmctl', 'apply-yaml-config'])
+        assert(unit_exist('10-test99.link') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
+
+        assert(parser.get('Link', 'Alias') == 'ifalias')
+        assert(parser.get('Link', 'Description') == 'testconf')
+        assert(parser.get('Link', 'MTUBytes') == '10M')
+        assert(parser.get('Link', 'BitsPerSecond') == '5G')
+        assert(parser.get('Link', 'Duplex') == 'full')
+        assert(parser.get('Link', 'WakeOnLan') == 'phy unicast broadcast multicast arp magic secureon')
+        assert(parser.get('Link', 'WakeOnLanPassword') == 'cb:a9:87:65:43:21')
+        assert(parser.get('Link', 'Port') == 'mii')
+        assert(parser.get('Link', 'Advertise') == '10baset-half 10baset-full 100baset-half 100baset-full 1000baset-half 1000baset-full 10000baset-full 2500basex-full 1000basekx-full 10000basekx4-full 10000basekr-full 10000baser-fec 20000basemld2-full 20000basekr2-full')
+        assert(parser.get('Link', 'AutoNegotiation') == 'no')
+        assert(parser.get('Link', 'ReceiveChecksumOffload') == 'yes')
+        assert(parser.get('Link', 'TransmitChecksumOffload') == 'no')
+        assert(parser.get('Link', 'TCPSegmentationOffload') == 'no')
+        assert(parser.get('Link', 'TCP6SegmentationOffload') == 'yes')
+        assert(parser.get('Link', 'GenericSegmentationOffload') == 'no')
+        assert(parser.get('Link', 'GenericReceiveOffload') == 'no')
+        assert(parser.get('Link', 'GenericReceiveOffloadHardware') == 'no')
+        assert(parser.get('Link', 'LargeReceiveOffload') == 'yes')
+        assert(parser.get('Link', 'ReceiveVLANCTAGHardwareAcceleration') == 'yes')
+        assert(parser.get('Link', 'TransmitVLANCTAGHardwareAcceleration') == 'no')
+        assert(parser.get('Link', 'ReceiveVLANCTAGFilter') == 'no')
+        assert(parser.get('Link', 'TransmitVLANSTAGHardwareAcceleration') == 'yes')
+        assert(parser.get('Link', 'NTupleFilter') == 'no')
+        assert(parser.get('Link', 'UseAdaptiveRxCoalesce') == 'yes')
+        assert(parser.get('Link', 'UseAdaptiveTxCoalesce') == 'yes')
+        assert(parser.get('Link', 'MACAddressPolicy') == 'none')
+        assert(parser.get('Link', 'MACAddress') == '00:0c:29:3a:bc:11')
+        assert(parser.get('Link', 'NamePolicy') == 'kernel database onboard slot path mac keep')
+        assert(parser.get('Link', 'Name') == 'dm1')
+        assert(parser.get('Link', 'AlternativeNamesPolicy') == 'database onboard slot path mac')
+        assert(parser.get('Link', 'AlternativeName') == 'demo1')
+        assert(parser.get('Link', 'RxBufferSize') == 'max')
+        assert(parser.get('Link', 'RxMiniBufferSize') == '65335')
+        assert(parser.get('Link', 'RxJumboBufferSize') == '88776555')
+        assert(parser.get('Link', 'TxBufferSize') == 'max')
+        assert(parser.get('Link', 'TransmitQueues') == '4096')
+        assert(parser.get('Link', 'ReceiveQueues') == '4096')
+        assert(parser.get('Link', 'TransmitQueueLength') == '1024')
+        assert(parser.get('Link', 'RxFlowControl') == 'yes')
+        assert(parser.get('Link', 'TxFlowControl') == 'no')
+        assert(parser.get('Link', 'AutoNegotiationFlowControl') == 'yes')
+        assert(parser.get('Link', 'GenericSegmentOffloadMaxBytes') == '65535')
+        assert(parser.get('Link', 'GenericSegmentOffloadMaxSegments') == '1024')
+        assert(parser.get('Link', 'RxChannels') == 'max')
+        assert(parser.get('Link', 'TxChannels') == '656756677')
+        assert(parser.get('Link', 'OtherChannels') == '429496729')
+        assert(parser.get('Link', 'CombinedChannels') == 'max')
+        assert(parser.get('Link', 'RxCoalesceSec') == 'max')
+        assert(parser.get('Link', 'RxCoalesceIrqSec') == '123456')
+        assert(parser.get('Link', 'RxCoalesceLowSec') == '997654')
+        assert(parser.get('Link', 'RxCoalesceHighSec') == '87654322')
+        assert(parser.get('Link', 'TxCoalesceSec') == 'max')
+        assert(parser.get('Link', 'TxCoalesceIrqSec') == '123456')
+        assert(parser.get('Link', 'TxCoalesceLowSec') == '997654')
+        assert(parser.get('Link', 'TxCoalesceHighSec') == '87654322')
+        assert(parser.get('Link', 'RxMaxCoalescedFrames') == 'max')
+        assert(parser.get('Link', 'RxMaxCoalescedIrqFrames') == '123456')
+        assert(parser.get('Link', 'RxMaxCoalescedLowFrames') == '997654')
+        assert(parser.get('Link', 'RxMaxCoalescedHighFrames') == '87654322')
+        assert(parser.get('Link', 'TxMaxCoalescedFrames') == '65532')
+        assert(parser.get('Link', 'TxMaxCoalescedIrqFrames') == '987654')
+        assert(parser.get('Link', 'TxMaxCoalescedLowFrames') == '12345')
+        assert(parser.get('Link', 'TxMaxCoalescedHighFrames') == '98776555')
+        assert(parser.get('Link', 'CoalescePacketRateLow') == '123456789')
+        assert(parser.get('Link', 'CoalescePacketRateHigh') == 'max')
+        assert(parser.get('Link', 'CoalescePacketRateSampleIntervalSec') == '99877761')
+        assert(parser.get('Link', 'StatisticsBlockCoalesceSec') == '987766555')
+
 class TestNetworkConfigManagerYAML:
     yaml_configs = [
         "dhcp.yaml",

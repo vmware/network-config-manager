@@ -67,6 +67,34 @@ int parse_yaml_uint32(const char *key,
         return 0;
 }
 
+int parse_yaml_uint32_or_max(const char *key,
+                      const char *value,
+                      void *data,
+                      void *userdata,
+                      yaml_document_t *doc,
+                      yaml_node_t *node) {
+        char **p;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        p = (char **) userdata;
+
+        if (!is_uint32_or_max(value)) { 
+                log_warning("Failed to parse parameter='%s': %s", value, g_strerror(EINVAL));
+                return -EINVAL;
+        }
+    
+        *p = g_strdup(value);
+        if (!*p)
+                return log_oom();
+
+        return 0;
+}
+
 int parse_yaml_mac_address(const char *key,
                            const char *value,
                            void *data,

@@ -6,13 +6,16 @@
 #include <yaml.h>
 
 #include "network.h"
+#include "netdev-link.h"
 
 typedef struct YAMLManager {
         GHashTable *network_config;
         GHashTable *route_config;
         GHashTable *wifi_config;
+        GHashTable *link_config;
 
         Network *n;
+        NetDevLink *l;
 } YAMLManager;
 
 int new_yaml_manager(YAMLManager **ret);
