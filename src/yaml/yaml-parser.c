@@ -123,6 +123,34 @@ int parse_yaml_mac_address(const char *key,
         return 0;
 }
 
+int parse_yaml_rf_online(const char *key,
+                           const char *value,
+                           void *data,
+                           void *userdata,
+                           yaml_document_t *doc,
+                           yaml_node_t *node) {
+        char **family;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        family = (char **) userdata;
+
+        if(parse_link_rf_online(value)) {
+                log_warning("Failed to parse RequiredFamilyForOnline: %s", value);
+                return -EINVAL;
+        }
+
+        *family =  g_strdup(value);
+        if (!*family)
+                return log_oom();
+
+        return 0;
+}
+
 int parse_yaml_string(const char *key,
                       const char *value,
                       void *data,

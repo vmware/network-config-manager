@@ -164,13 +164,20 @@ typedef struct Network {
         char *mac;
         char *match_mac;
         char *hostname;
-
-        uint32_t mtu;
+        char *req_family_for_online;
 
         ParserType parser_type;
         DHCPMode dhcp_type;
         DHCPClientIdentifier dhcp_client_identifier_type;
         LinkLocalAddress link_local;
+
+        int unmanaged;
+        int arp;
+        int multicast;
+        int all_multicast;
+        int promiscuous;
+        int req_for_online;
+        uint32_t mtu;
 
         int dhcp4_use_mtu;
         int dhcp4_use_dns;

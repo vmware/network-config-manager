@@ -224,6 +224,10 @@ class TestLinkConfigManagerYAML:
 
 class TestNetworkConfigManagerYAML:
     yaml_configs = [
+        "network_set_mac.yaml",
+        "network_set_mtu.yaml",
+        "network_set_option.yaml",
+        "network_set_rf_online.yaml",
         "dhcp.yaml",
         "dhcp-client-identifier.yaml",
         "network-section-dhcp-section.yaml",
@@ -247,6 +251,58 @@ class TestNetworkConfigManagerYAML:
     def teardown_method(self):
         self.remove_units_from_netmanager_yaml_path()
         remove_units_from_netword_unit_path()
+
+    def test_cli_yaml_set_mac(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('network_set_mac.yaml')
+
+        subprocess.check_call(['nmctl', 'apply-yaml-config'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'MACAddress') == '00:0c:29:3a:bc:11')
+
+    def test_cli_yaml_set_mtu(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('network_set_mtu.yaml')
+
+        subprocess.check_call(['nmctl', 'apply-yaml-config'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'MTUBytes') == '1400')
+    
+    def test_cli_yaml_set_option(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('network_set_option.yaml')
+
+        subprocess.check_call(['nmctl', 'apply-yaml-config'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'ARP') == 'yes')
+        assert(parser.get('Link', 'Multicast') == 'yes')
+        assert(parser.get('Link', 'AllMulticast') == 'no')
+        assert(parser.get('Link', 'Promiscuous') == 'no')
+        assert(parser.get('Link', 'RequiredForOnline') == 'no')
+    
+    def test_cli_yaml_set_rf_online(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('network_set_rf_online.yaml')
+
+        subprocess.check_call(['nmctl', 'apply-yaml-config'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'RequiredFamilyForOnline') == 'ipv4')
 
     def test_basic_dhcp(self):
         self.copy_yaml_file_to_netmanager_yaml_path('dhcp.yaml')
