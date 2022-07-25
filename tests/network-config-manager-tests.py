@@ -275,7 +275,7 @@ class TestNetworkConfigManagerYAML:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'MTUBytes') == '1400')
-    
+
     def test_cli_yaml_set_option(self):
         self.copy_yaml_file_to_netmanager_yaml_path('network_set_option.yaml')
 
@@ -291,7 +291,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Link', 'AllMulticast') == 'no')
         assert(parser.get('Link', 'Promiscuous') == 'no')
         assert(parser.get('Link', 'RequiredForOnline') == 'no')
-    
+
     def test_cli_yaml_set_rf_online(self):
         self.copy_yaml_file_to_netmanager_yaml_path('network_set_rf_online.yaml')
 
@@ -488,7 +488,7 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'MACAddress') == '00:0c:29:3a:bc:11')
-    
+
     def test_cli_set_option(self):
         assert(link_exist('test99') == True)
 
@@ -507,7 +507,7 @@ class TestCLINetwork:
         assert(parser.get('Link', 'AllMulticast') == 'false')
         assert(parser.get('Link', 'Promiscuous') == 'false')
         assert(parser.get('Link', 'RequiredForOnline') == 'false')
-    
+
     def test_cli_set_group(self):
         assert(link_exist('test99') == True)
 
@@ -1616,20 +1616,20 @@ class TestWifiWPASupplicantConf:
         "wpa-eap-ttls.yaml",
     ]
 
-    def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
+    def copy_yaml_file_to_network_config_manager_yaml_path(self, config_file):
         shutil.copy(os.path.join(network_config_manager_ci_yaml_path, config_file), network_config_manager_yaml_config_path)
 
-    def remove_units_from_netmanager_yaml_path(self):
+    def remove_units_from_network_config_manager_yaml_path(self):
         for config_file in self.yaml_configs:
             if (os.path.exists(os.path.join(network_config_manager_yaml_config_path, config_file))):
                 os.remove(os.path.join(network_config_manager_yaml_config_path, config_file))
 
     def teardown_method(self):
         remove_units_from_netword_unit_path()
-        self.remove_units_from_netmanager_yaml_path()
+        self.remove_units_from_network_config_manager_yaml_path()
 
     def test_wifi_wpa_supplicant_name_password_dhcp(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('name-password-wifi-dhcp.yaml')
+        self.copy_yaml_file_to_network_config_manager_yaml_path('name-password-wifi-dhcp.yaml')
 
         subprocess.check_call(['nmctl', 'apply-yaml-config'])
         assert(unit_exist('10-wlan1.network') == True)
@@ -1647,7 +1647,7 @@ class TestWifiWPASupplicantConf:
         assert(network["password"] == "test123")
 
     def test_wifi_wpa_supplicant_name_password_static(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('name-password-wifi-static.yaml')
+        self.copy_yaml_file_to_network_config_manager_yaml_path('name-password-wifi-static.yaml')
 
         subprocess.check_call(['nmctl', 'apply-yaml-config'])
         assert(unit_exist('10-wlan1.network') == True)
@@ -1670,7 +1670,7 @@ class TestWifiWPASupplicantConf:
 
     @pytest.mark.skip(reason="skipping")
     def test_wifi_wpa_supplicant_eap_tls_dhcp(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('wpa-eap-tls-wifi.yaml')
+        self.copy_yaml_file_to_network_config_manager_yaml_path('wpa-eap-tls-wifi.yaml')
 
         subprocess.check_call(['nmctl', 'apply-yaml-config'])
         assert(unit_exist('10-wlan1.network') == True)
@@ -1697,7 +1697,7 @@ class TestWifiWPASupplicantConf:
         assert(network["private_key_passwd"] == "QZTrSEtq:h_d.W7_")
 
     def test_wifi_wpa_supplicant_eap_ttls_dhcp(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('wpa-eap-ttls.yaml')
+        self.copy_yaml_file_to_network_config_manager_yaml_path('wpa-eap-ttls.yaml')
 
         subprocess.check_call(['nmctl', 'apply-yaml-config'])
         assert(unit_exist('10-wlan0.network') == True)
@@ -1960,7 +1960,7 @@ class TestCLILink:
 
         subprocess.check_call(['nmctl', 'set-link', 'test99', 'alias', 'ifalias', 'desc', 'testconf', 'mtub', '10M', 'bps', '5G', 'duplex', 'full', 'wol', 'phy,unicast,broadcast,multicast,arp,magic,secureon', 'wolp', 'cb:a9:87:65:43:21', 'port', 'mii', 'advertise', '10baset-half,10baset-full,100baset-half,100baset-full,1000baset-half,1000baset-full,10000baset-full,2500basex-full,1000basekx-full,10000basekx4-full,10000basekr-full,10000baser-fec,20000basemld2-full,20000basekr2-full'])
         assert(unit_exist('10-test99.link') == True)
-        
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
 
@@ -1973,13 +1973,13 @@ class TestCLILink:
         assert(parser.get('Link', 'WakeOnLanPassword') == 'cb:a9:87:65:43:21')
         assert(parser.get('Link', 'Port') == 'mii')
         assert(parser.get('Link', 'Advertise') == '10baset-half 10baset-full 100baset-half 100baset-full 1000baset-half 1000baset-full 10000baset-full 2500basex-full 1000basekx-full 10000basekx4-full 10000basekr-full 10000baser-fec 20000basemld2-full 20000basekr2-full')
-  
+
     def test_cli_set_link_feature(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call(['nmctl', 'set-link-feature', 'test99', 'auton', 'no', 'rxcsumo', 'yes', 'txcsumo', 'no', 'tso', 'no', 'tso6', '1', 'gso', '0', 'grxo', 'false', 'grxoh', 'no', 'lrxo', '1', 'rxvtha', 'true', 'txvtha', '0', 'rxvtf', 'no', 'txvstha', 'yes', 'ntf', 'false', 'uarxc', '1', 'uatxc', 'yes'])
         assert(unit_exist('10-test99.link') == True)
-        
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
 
@@ -1999,10 +1999,10 @@ class TestCLILink:
         assert(parser.get('Link', 'NTupleFilter') == 'no')
         assert(parser.get('Link', 'UseAdaptiveRxCoalesce') == 'yes')
         assert(parser.get('Link', 'UseAdaptiveTxCoalesce') == 'yes')
-    
+
     def test_cli_set_link_mac_policy(self):
         assert(link_exist('test99') == True)
-        
+
         subprocess.check_call(['nmctl', 'set-link-mac', 'test99', 'macpolicy', 'none'])
         subprocess.check_call(['sleep', '5'])
         subprocess.check_call(['nmctl', 'set-link-mac', 'test99', 'macaddr', '00:0c:29:3a:bc:11'])
@@ -2019,31 +2019,31 @@ class TestCLILink:
 
         subprocess.check_call(['nmctl', 'set-link-name', 'test99', 'namepolicy', 'kernel,database,onboard,slot,path,mac,keep', 'name', 'dm1'])
         assert(unit_exist('10-test99.link') == True)
-     
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
 
         assert(parser.get('Link', 'NamePolicy') == 'kernel database onboard slot path mac keep')
         assert(parser.get('Link', 'Name') == 'dm1')
-    
+
     def test_cli_set_link_alt_name(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call(['nmctl', 'set-link-altname', 'test99', 'altnamepolicy', 'database,onboard,slot,path,mac', 'altname', 'demo1'])
         assert(unit_exist('10-test99.link') == True)
-        
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
 
         assert(parser.get('Link', 'AlternativeNamesPolicy') == 'database onboard slot path mac')
         assert(parser.get('Link', 'AlternativeName') == 'demo1')
-    
+
     def test_cli_set_link_buff(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call(['nmctl', 'set-link-buf', 'test99', 'rxbuf', 'max', 'rxminbuf', '65335', 'rxjumbobuf', '88776555', 'txbuf', 'max'])
         assert(unit_exist('10-test99.link') == True)
-        
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
 
@@ -2051,51 +2051,51 @@ class TestCLILink:
         assert(parser.get('Link', 'RxMiniBufferSize') == '65335')
         assert(parser.get('Link', 'RxJumboBufferSize') == '88776555')
         assert(parser.get('Link', 'TxBufferSize') == 'max')
-    
+
     def test_cli_set_link_queue(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call(['nmctl', 'set-link-queue', 'test99', 'rxq', '4096', 'txq', '4096', 'txqlen', '1024'])
         assert(unit_exist('10-test99.link') == True)
-        
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
 
         assert(parser.get('Link', 'TransmitQueues') == '4096')
         assert(parser.get('Link', 'ReceiveQueues') == '4096')
         assert(parser.get('Link', 'TransmitQueueLength') == '1024')
-    
+
     def test_cli_set_link_flow_control(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call(['nmctl', 'set-link-flow-control', 'test99', 'rxflowctrl', 'yes', 'txflowctrl', 'no', 'autoflowctrl', 'yes'])
         assert(unit_exist('10-test99.link') == True)
-        
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
 
         assert(parser.get('Link', 'RxFlowControl') == 'yes')
         assert(parser.get('Link', 'TxFlowControl') == 'no')
         assert(parser.get('Link', 'AutoNegotiationFlowControl') == 'yes')
-    
+
     def test_cli_set_link_gso(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call(['nmctl', 'set-link-gso', 'test99', 'gsob', '65535', 'gsos', '1024'])
         assert(unit_exist('10-test99.link') == True)
-        
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
 
         assert(parser.get('Link', 'GenericSegmentOffloadMaxBytes') == '65535')
         assert(parser.get('Link', 'GenericSegmentOffloadMaxSegments') == '1024')
-    
+
     def test_cli_set_link_channel(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call(['nmctl', 'set-link-channel', 'test99', 'rxch', 'max', 'txch', '656756677', 'otrch', '429496729', 'combch', 'max'])
         assert(unit_exist('10-test99.link') == True)
-        
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
 
@@ -2103,7 +2103,7 @@ class TestCLILink:
         assert(parser.get('Link', 'TxChannels') == '656756677')
         assert(parser.get('Link', 'OtherChannels') == '429496729')
         assert(parser.get('Link', 'CombinedChannels') == 'max')
-    
+
     def test_cli_set_link_coalesce(self):
         assert(link_exist('test99') == True)
 
@@ -2121,7 +2121,7 @@ class TestCLILink:
         assert(parser.get('Link', 'TxCoalesceIrqSec') == '123456')
         assert(parser.get('Link', 'TxCoalesceLowSec') == '997654')
         assert(parser.get('Link', 'TxCoalesceHighSec') == '87654322')
-    
+
     def test_cli_set_link_coald_frames(self):
         assert(link_exist('test99') == True)
 
@@ -2139,7 +2139,7 @@ class TestCLILink:
         assert(parser.get('Link', 'TxMaxCoalescedIrqFrames') == '987654')
         assert(parser.get('Link', 'TxMaxCoalescedLowFrames') == '12345')
         assert(parser.get('Link', 'TxMaxCoalescedHighFrames') == '98776555')
-    
+
     def test_cli_set_link_coal_pkt_rate(self):
         assert(link_exist('test99') == True)
 
