@@ -232,13 +232,14 @@ int parse_ifname_or_index(const char *s, IfNameIndex **ret) {
         r = (int) if_nametoindex(s);
         if (r <= 0) {
                 char *n;
+
                 r = parse_integer(s, &ifindex);
                 if (r < 0)
-                        return r;
+                        return -ENOENT;
 
                 n = if_indextoname(ifindex, p->ifname);
                 if (!n)
-                        return -errno;
+                        return -ENOENT;
         } else {
                 p->ifindex = r;
                 memcpy(p->ifname, s, IFNAMSIZ);
