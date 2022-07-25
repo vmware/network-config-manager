@@ -1,0 +1,9 @@
+ network:
+  link:
+     name: test99
+     unmanaged: false
+     arp: true
+     multicast: true
+     allmulticast: false
+     promiscuous: false
+     requiredforonline: false
