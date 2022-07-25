@@ -2482,13 +2482,13 @@ int manager_generate_network_config_from_yaml(const char *file) {
                         log_warning("Failed to parse configuration file '%s': %s", file, g_strerror(-r));
                         return r;
                 }
-    
+
                 r = parse_ifname_or_index(l->ifname, &p);
                 if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", n->ifname, g_strerror(-r));
+                        log_warning("Failed to find link: %s", g_strerror(-r));
                         return r;
                 }
-        
+
                 r = netdev_link_configure(p, l);
                 if (r < 0) {
                         log_warning("Failed to configure link from yaml file '%s': %s", file, g_strerror(-r));
@@ -2500,22 +2500,22 @@ int manager_generate_network_config_from_yaml(const char *file) {
                         log_warning("Failed to parse configuration file '%s': %s", file, g_strerror(-r));
                         return r;
                 }
-                
+
                 r = generate_network_config(n, &config);
                 if (r < 0) {
                         log_warning("Failed to generate network configuration for file '%s': %s", file, g_strerror(-r));
                         return r;
                 }
-                
+
                 r = manager_write_network_config(n, config);
                 if (r < 0)
                         return r;
-                
+
                 if (n->access_points) {
                         r = generate_wifi_config(n, &wifi_config);
                         if (r < 0)
                                 return r;
-                
+
                         return manager_write_wifi_config(n, wifi_config);
                 }
         }
