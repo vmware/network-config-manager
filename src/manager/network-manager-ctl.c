@@ -163,6 +163,7 @@ static int help(void) {
                "  set-dhcp4-use-mtu            [LINK] [UseMTU BOOLEAN] Configures Link DHCP4 Use MTU.\n"
                "  set-dhcp4-use-ntp            [LINK] [UseNTP BOOLEAN] Configures Link DHCP4 Use NTP.\n"
                "  set-dhcp4-use-dns            [LINK] [UseDNS BOOLEAN] Configures Link DHCP4 Use DNS.\n"
+               "  set-dhcp4-send-release       [LINK] [SendRelease BOOLEAN] When true, DHCPv4 client sends a DHCP release packet when it stops.\n"
                "  set-dhcp6-use-dns            [LINK] [UseDNS BOOLEAN] Configures Link DHCP6 Use DNS.\n"
                "  set-dhcp6-use-ntp            [LINK] [UseNTP BOOLEAN] Configures Link DHCP6 Use NTP.\n"
                "  add-ntp                      [LINK] [NTP] Add Link NTP server address. This option may be specified more than once.\n"
@@ -352,6 +353,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp4-use-mtu",            2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp4-use-timezone",       2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp4-use-routes",         2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
+                { "set-dhcp4-send-release",       2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp6-use-dns",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "set-dhcp6-use-ntp",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "add-dhcpv4-server",            1,        WORD_ANY, false, ncm_link_add_dhcpv4_server },

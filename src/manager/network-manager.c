@@ -48,6 +48,7 @@ static const Config network_ctl_to_dhcp4_section_config_table[] = {
                 { "set-dhcp4-use-mtu",      "UseMTU"},
                 { "set-dhcp4-use-routes",   "UseRoutes"},
                 { "set-dhcp4-use-timezone", "UseTimezone"},
+                { "set-dhcp4-send-release", "SendRelease"},
                 {},
 };
 
