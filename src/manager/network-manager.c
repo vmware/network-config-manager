@@ -633,7 +633,7 @@ int manager_configure_route(const IfNameIndex *ifnameidx,
         }
 
         if (destination) {
-                r = ip_to_string(destination->family, destination, &dest);
+                r = ip_to_string_prefix(destination->family, destination, &dest);
                 if (r < 0)
                         return r;
 
