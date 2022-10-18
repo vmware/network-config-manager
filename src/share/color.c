@@ -41,6 +41,14 @@ void enable_color(void)
                 color_is_enabled = true;
 }
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+
 int cprintf(FILE *fp, color_t clr, const char *fmt, ...)
 {
         int ret = 0;
@@ -61,3 +69,9 @@ end:
         va_end(args);
         return ret;
 }
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#endif
