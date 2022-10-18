@@ -10,6 +10,7 @@
 #include "log.h"
 #include "macros.h"
 #include "network-manager.h"
+#include "color.h"
 
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         _cleanup_(g_dir_closep) GDir *dir = NULL;
@@ -269,6 +270,7 @@ static int parse_argv(int argc, char *argv[]) {
                 { "help",      no_argument,       NULL, 'h'   },
                 { "version",   no_argument,       NULL, 'v'   },
                 { "json",      no_argument,       NULL, 'j'   },
+                { "color",     no_argument,       NULL, 'c'   },
                 {}
         };
         int c;
@@ -287,6 +289,10 @@ static int parse_argv(int argc, char *argv[]) {
                         return ncm_show_version();
                 case 'j':
                         set_json(true);
+                        break;
+
+                case 'c':
+                        enable_color();
                         break;
 
                 case '?':
@@ -415,7 +421,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "nft-run",                      WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
                 {}
         };
-
+                
         r = parse_argv(argc, argv);
         if (r <= 0)
                 return r;

@@ -4,7 +4,7 @@
 #include <json-c/json.h>
 
 #include "alloc-util.h"
-#include "ansi-color.h"
+#include "color.h"
 #include "arphrd-to-name.h"
 #include "ctl.h"
 #include "dbus.h"

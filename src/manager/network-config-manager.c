@@ -5,7 +5,7 @@
 #include <network-config-manager.h>
 
 #include "alloc-util.h"
-#include "ansi-color.h"
+#include "color.h"
 #include "arphrd-to-name.h"
 #include "ctl.h"
 #include "dbus.h"
@@ -26,28 +26,40 @@
 
 bool arg_json = false;
 
-static void link_state_to_color(const char *state, const char **on) {
-        if (string_equal(state, "routable") || string_equal(state, "configured") || string_equal(state,"up"))
-                *on = ansi_color_green();
-        else if (string_equal(state, "failed") || string_equal(state,"down") || string_equal(state,"no-carrier") ||
-                 string_equal(state,"off")|| string_equal(state, "lower-layerdown"))
-                *on = ansi_color_red();
-        else if (string_equal(state, "configuring") || string_equal(state, "carrier"))
-                *on = ansi_color_yellow();
-        else if (string_equal(state, "degraded") || string_equal(state, "dormant"))
-                *on = ansi_color_bold_yellow();
-        else if (string_equal(state, "unmanaged"))
-                *on = ansi_color_blue();
-        else
-                *on = ansi_color_reset();
+static color_t link_state_to_color(const char *state) {
+        if (string_equal(state, "routable") ||
+             string_equal(state, "configured") ||
+             string_equal(state,"up"))
+                return C_GREEN;
+
+        if (string_equal(state, "failed") ||
+             string_equal(state,"down") ||
+             string_equal(state,"no-carrier") ||
+             string_equal(state,"off") ||
+             string_equal(state, "lower-layerdown"))
+                return C_RED;
+
+        if (string_equal(state, "configuring") ||
+             string_equal(state, "carrier"))
+                return C_YELLOW;
+
+        if (string_equal(state, "degraded") ||
+             string_equal(state, "dormant"))
+                return C_BOLD_YELLOW;
+
+        if (string_equal(state, "unmanaged"))
+                return C_BLUE;
+
+        return C_CLEAR;
 }
 
 static void display_links_info(gpointer data_ptr, gpointer ignored) {
-        const char *setup_color, *operational_color, *operstates, *operstates_color;
+        color_t setup_color, operational_color, operstates_color;
+        const char *operstates = NULL;
         _auto_cleanup_ char *setup = NULL, *operational = NULL;
         Link *link = NULL;
 
-        setup_color = operational_color = operstates = operstates_color = ansi_color_reset();
+        setup_color = operational_color = operstates_color = C_CLEAR;
 
         link = data_ptr;
 
@@ -56,19 +68,18 @@ static void display_links_info(gpointer data_ptr, gpointer ignored) {
         operstates = link_operstates_to_name(link->operstate);
 
         if (setup)
-                link_state_to_color(setup, &setup_color);
+                setup_color = link_state_to_color(setup);
         if (operational)
-                link_state_to_color(operational, &operational_color);
+                operational_color = link_state_to_color(operational);
         if (operstates)
-                link_state_to_color(operstates, &operstates_color);
+                operstates_color = link_state_to_color(operstates);
 
-        printf("%s%5i%s %s%-20s%s %s%-18s%s %s%-16s%s %s%-16s%s %s%-10s%s\n",
-               ansi_color_bold(), link->ifindex, ansi_color_reset(),
-               ansi_color_bold_cyan(), link->name, ansi_color_reset(),
-               ansi_color_blue_magenta(), arphrd_to_name(link->iftype), ansi_color_reset(),
-               operstates_color, operstates, ansi_color_reset(),
-               operational_color, string_na(operational), ansi_color_reset(),
-               setup_color, string_na(setup), ansi_color_reset());
+        cprout(C_BOLD, "%5i ", link->ifindex);
+        cprout(C_BOLD_CYAN, "%-20s ", link->name);
+        cprout(C_BLUE_MAGENTA, "%-18s ", arphrd_to_name(link->iftype));
+        cprout(operstates_color, "%-16s ", operstates);
+        cprout(operational_color, "%-16s ", string_na(operational));
+        cprout(setup_color, "%-10s\n", string_na(setup));
 }
 
 static int list_links(int argc, char *argv[]) {
@@ -79,15 +90,13 @@ static int list_links(int argc, char *argv[]) {
         if (r < 0)
                return r;
 
-        printf("%s %5s %-20s %-18s %-16s %-16s %-10s %s\n",
-               ansi_color_blue_header(),
+        cprout(C_BLUE, "%5s %-20s %-18s %-16s %-16s %-10s\n",
                "INDEX",
                "LINK",
                "TYPE",
                "STATE",
                "OPERATIONAL",
-               "SETUP",
-               ansi_color_header_reset());
+               "SETUP");
 
         g_list_foreach(h->links, display_links_info, NULL);
         return 0;
@@ -111,7 +120,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
 
         r = network_parse_link_dhcp4_addresses(a->ifindex, &dhcp);
         if (r >= 0 && strv_contains((const char **) dhcp, c))
-                printf(" %s(DHCPv4)%s\n", ansi_color_bold_yellow(), ansi_color_reset());
+                cprout(C_BOLD_YELLOW, " (DHCPv4)\n");
         else
                 printf("\n");
 }
@@ -166,18 +175,28 @@ static int display_one_link_udev(Link *l, bool display, char **link_file) {
         if (!display)
                 return 0;
 
-        if (path)
-                printf("             %sPath%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), path);
-        if (driver)
-                printf("           %sDriver%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), driver);
-        if (vendor)
-                printf("           %sVendor%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), vendor);
-        if (model)
-                printf("            %sModel%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), model);
+        if (path) {
+                cprout(C_BOLD_CYAN, "             Path: ");
+                printf("%s\n", path);
+        }
+        if (driver) {
+                cprout(C_BOLD_CYAN, "           Driver: ");
+                printf("%s\n", driver);
+        }
+        if (vendor) {
+                cprout(C_BOLD_CYAN, "           Vendor: ");
+                printf("%s\n", vendor);
+        }
+        if (model) {
+                cprout(C_BOLD_CYAN, "            Model: ");
+                printf("%s\n", model);
+        }
 
         hwdb_get_manufacturer((uint8_t *) &l->mac_address.ether_addr_octet, &manufacturer);
-        if (manufacturer)
-                printf("     %sManufacturer%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), manufacturer);
+        if (manufacturer) {
+                cprout(C_BOLD_CYAN, "     Manufacturer: ");
+                printf("%s\n", manufacturer);
+        }
 
         return 0;
 }
@@ -190,15 +209,23 @@ static void list_link_sysfs_attributes(Link *l) {
         (void) link_read_sysfs_attribute(l->name, "address", &ether);
         (void) link_read_sysfs_attribute(l->name, "mtu", &mtu);
 
-        if (ether)
-                printf("       %sHW Address%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), ether);
-        if (mtu)
-                printf("              %sMTU%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), mtu);
+        if (ether) {
+                cprout(C_BOLD_CYAN, "       HW Address: ");
+                printf("%s\n", ether);
+        }
+        if (mtu) {
+                cprout(C_BOLD_CYAN, "              MTU: ");
+                printf("%s\n", mtu);
+        }
 
-        if (duplex)
-                printf("           %sDuplex%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), duplex);
-        if (speed)
-                printf("            %sSpeed%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), speed);
+        if (duplex) {
+                cprout(C_BOLD_CYAN, "           Duplex: ");
+                printf("%s\n", duplex);
+        }
+        if (speed) {
+                cprout(C_BOLD_CYAN, "            Speed: ");
+                printf("%s\n", speed);
+        }
 }
 
 static void display_alterative_names(gpointer data, gpointer user_data) {
@@ -210,7 +237,7 @@ static void display_alterative_names(gpointer data, gpointer user_data) {
 static int list_one_link(char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
-        const char *operational_state_color, *setup_set_color;
+        color_t operational_state_color, setup_set_color;
         _cleanup_(addresses_unrefp) Addresses *addr = NULL;
         _cleanup_(routes_unrefp) Routes *route = NULL;
         _cleanup_(link_unrefp) Link *l = NULL;
@@ -232,7 +259,7 @@ static int list_one_link(char *argv[]) {
                 return r;
 
         if (l->alt_names) {
-                printf("%sAlternative names%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                cprout(C_BOLD_CYAN, "Alternative names: ");
                 g_ptr_array_foreach(l->alt_names, display_alterative_names, NULL);
                 printf("\n");
         }
@@ -246,8 +273,8 @@ static int list_one_link(char *argv[]) {
                         return log_oom();
         }
 
-        link_state_to_color(operational_state, &operational_state_color);
-        link_state_to_color(setup_state, &setup_set_color);
+        operational_state_color = link_state_to_color(operational_state);
+        setup_set_color = link_state_to_color(setup_state);
 
         (void) network_parse_link_dns(l->ifindex, &dns);
         (void) network_parse_link_search_domains(l->ifindex, &search_domains);
@@ -255,29 +282,29 @@ static int list_one_link(char *argv[]) {
         (void) network_parse_link_ntp(l->ifindex, &ntp);
 
         (void) network_parse_link_network_file(l->ifindex, &network);
-        (void)  display_one_link_udev(l, false, &link);
-         printf("        %sLink File%s: %s\n"
-                "     %sNetwork File%s: %s\n"
-                "             %sType%s: %s\n"
-                "            %sState%s: %s%s%s %s(%s)%s\n",
-                ansi_color_bold_cyan(), ansi_color_reset(), string_na(link),
-                ansi_color_bold_cyan(), ansi_color_reset(), string_na(network),
-                ansi_color_bold_cyan(), ansi_color_reset(), string_na(arphrd_to_name(l->iftype)),
-                ansi_color_bold_cyan(), ansi_color_reset(), operational_state_color, string_na(operational_state), ansi_color_reset(),
-                setup_set_color, string_na(setup_state), ansi_color_reset());
+        (void) display_one_link_udev(l, false, &link);
+        cprout(C_BOLD_CYAN, "        Link File: ");
+        printf("%s\n", string_na(link));
+        cprout(C_BOLD_CYAN, "     Network File: ");
+        printf("%s\n", string_na(network));
+        cprout(C_BOLD_CYAN, "             Type: ");
+        printf("%s\n", string_na(arphrd_to_name(l->iftype)));
+        cprout(C_BOLD_CYAN, "            State: ");
+        cprout(operational_state_color, "%s ", string_na(operational_state));
+        cprout(setup_set_color, "(%s)\n", string_na(setup_state));
 
          (void)  display_one_link_udev(l, true, NULL);
          list_link_sysfs_attributes(l);
 
         r = manager_get_one_link_address(l->ifindex, &addr);
          if (r >= 0 && addr && set_size(addr->addresses) > 0) {
-                 printf("          %sAddress%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                 cprout(C_BOLD_CYAN, "          Address: ");
                  set_foreach(addr->addresses, list_one_link_addresses, NULL);
          }
 
          r = manager_get_one_link_route(l->ifindex, &route);
          if (r >= 0 && route && set_size(route->routes) > 0) {
-                 printf("          %sGateway%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                 cprout(C_BOLD_CYAN, "          Gateway: ");
                  set_foreach(route->routes, list_one_link_routes, NULL);
          }
 
@@ -288,7 +315,8 @@ static int list_one_link(char *argv[]) {
                  if (!s)
                          return log_oom();
 
-                 printf("              %sDNS%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                 cprout(C_BOLD_CYAN, "              DNS: ");
+                 printf("%s\n", s);
          }
 
          if (search_domains) {
@@ -298,7 +326,8 @@ static int list_one_link(char *argv[]) {
                  if (!s)
                          return log_oom();
 
-                 printf("   %sSearch Domains%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                 cprout(C_BOLD_CYAN, "   Search Domains: ");
+                 printf("%s\n", s);
         }
 
          if (route_domains) {
@@ -308,7 +337,8 @@ static int list_one_link(char *argv[]) {
                  if (!s)
                          return log_oom();
 
-                 printf("              %sRoute Domains%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                 cprout(C_BOLD_CYAN, "              Route Domains: ");
+                 printf("%s\n", s);
          }
 
          if (ntp) {
@@ -318,16 +348,21 @@ static int list_one_link(char *argv[]) {
                  if (!s)
                          return log_oom();
 
-                 printf("              %sNTP%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                 cprout(C_BOLD_CYAN, "              NTP: ");
+                 printf("%s\n", s);
          }
 
          (void) network_parse_link_timezone(l->ifindex, &tz);
-         if (tz)
-                 printf("        %sTime Zone%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), tz);
+         if (tz) {
+                 cprout(C_BOLD_CYAN, "        Time Zone: ");
+                 printf("%s\n", tz);
+         }
 
          r = manager_get_link_dhcp_client_iaid(p, &iaid);
-         if (r >= 0)
-                 printf("      %sDHCPv4 IAID%s: %d\n", ansi_color_bold_cyan(), ansi_color_reset(), iaid);
+         if (r >= 0) {
+                 cprout(C_BOLD_CYAN, "      DHCPv4 IAID: ");
+                 printf("%u\n", iaid);
+         }
 
         return 0;
 }
@@ -345,10 +380,13 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
 
         (void) ip_to_string_prefix(a->family, &a->address, &c);
         if (first) {
-                printf("%-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
+                printf("%-30s on link ", c);
+                cprout(C_BOLD_BLUE, "%s\n", buf);
                 first = false;
-        } else
-                printf("                      %-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
+        } else {
+                printf("                      %-30s on link ", c);
+        }
+        cprout(C_BOLD_BLUE, "%s\n", buf);
 }
 
 static void list_link_routes(gpointer key, gpointer value, gpointer userdata) {
@@ -364,10 +402,13 @@ static void list_link_routes(gpointer key, gpointer value, gpointer userdata) {
 
         (void) ip_to_string_prefix(rt->family, &rt->address, &c);
         if (first) {
-                printf("%-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
+                printf("%-30s on link ", c);
+                cprout(C_BOLD_BLUE, "%s\n", buf);
                 first = false;
-        } else
-                printf("                      %-30s on link %s%s%s \n", c, ansi_color_bold_blue(), buf, ansi_color_reset());
+        } else {
+                printf("                      %-30s on link ", c);
+        }
+        cprout(C_BOLD_BLUE, "%s\n", buf);
 }
 
 _public_ int ncm_system_status(int argc, char *argv[]) {
@@ -383,56 +424,71 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 return json_system_status(NULL);
 
         (void) dbus_get_property_from_hostnamed("StaticHostname", &hostname);
-        if (hostname)
-                printf("         %sSystem Name%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), hostname);
+        if (hostname) {
+                cprout(C_BOLD_CYAN, "         System Name: ");
+                printf("%s\n", hostname);
+        }
 
         (void) dbus_get_property_from_hostnamed("KernelRelease", &kernel_release);
         (void) dbus_get_property_from_hostnamed("KernelName", &kernel);
-        if (kernel)
-                printf("              %sKernel%s: %s (%s) \n", ansi_color_bold_cyan(), ansi_color_reset(), kernel, string_na(kernel_release));
+        if (kernel) {
+                cprout(C_BOLD_CYAN, "              Kernel: ");
+                printf("%s (%s)\n", kernel, string_na(kernel_release));
+        }
 
         (void) dbus_get_string_systemd_manager("Version", &systemd);
-        if (systemd)
-                printf("     %ssystemd version%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), systemd);
+        if (systemd) {
+                cprout(C_BOLD_CYAN, "     Systemd Version: ");
+                printf("%s\n", systemd);
+        }
 
         (void) dbus_get_string_systemd_manager("Architecture", &arch);
-        if (arch)
-                printf("        %sArchitecture%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), arch);
+        if (arch) {
+                cprout(C_BOLD_CYAN, "        Architecture: ");
+                printf("%s\n", arch);
+        }
 
         (void) dbus_get_string_systemd_manager("Virtualization", &virt);
-        if (virt)
-                printf("      %sVirtualization%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), virt);
+        if (virt) {
+                cprout(C_BOLD_CYAN, "      Virtualization: ");
+                printf("%s\n", virt);
+        }
 
         (void) dbus_get_property_from_hostnamed("OperatingSystemPrettyName", &os);
-        if (os)
-                printf("    %sOperating System%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), os);
+        if (os) {
+                cprout(C_BOLD_CYAN, "    Operating System: ");
+                printf("%s\n", os);
+        }
 
         r = sd_id128_get_machine(&machine_id);
-        if (r >= 0)
-                printf("          %sMachine ID%s: " SD_ID128_FORMAT_STR "\n", ansi_color_bold_cyan(),  ansi_color_reset(), SD_ID128_FORMAT_VAL(machine_id));
+        if (r >= 0) {
+                cprout(C_BOLD_CYAN, "          Machine ID: ");
+                printf(SD_ID128_FORMAT_STR "\n", SD_ID128_FORMAT_VAL(machine_id));
+        }
 
         r = dbus_get_system_property_from_networkd("OperationalState", &state);
         if (r >= 0) {
-                const char *state_color, *carrier_color;
+                color_t state_color, carrier_color;
 
                 (void) dbus_get_system_property_from_networkd("CarrierState", &carrier_state);
 
-                link_state_to_color(state, &state_color);
-                link_state_to_color(carrier_state, &carrier_color);
+                state_color = link_state_to_color(state);
+                carrier_color = link_state_to_color(carrier_state);
 
-                printf("        %sSystem State%s: %s%s%s (%s%s%s)\n", ansi_color_bold_cyan(), ansi_color_reset(), state_color,  state, ansi_color_reset(),
-                       carrier_color, carrier_state, ansi_color_reset());
+                cprout(C_BOLD_CYAN, "        System State: ");
+                cprout(state_color, "%s ", state);
+                cprout(carrier_color, "(%s)\n", carrier_state);
         }
 
         r = manager_link_get_address(&h);
         if (r >= 0 && set_size(h->addresses) > 0) {
-                printf("           %sAddresses%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                cprout(C_BOLD_CYAN, "           Addresses: ");
                 set_foreach(h->addresses, list_link_addresses, NULL);
         }
 
         r = manager_link_get_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
-                printf("             %sGateway%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                cprout(C_BOLD_CYAN, "             Gateway: ");
                 set_foreach(routes->routes, list_link_routes, NULL);
         }
 
@@ -446,7 +502,8 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 if (!s)
                         return log_oom();
 
-                printf("                 %sDNS%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                cprout(C_BOLD_CYAN, "                 DNS: ");
+                printf("%s\n", s);
         }
 
         if (ntp) {
@@ -456,7 +513,8 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 if (!s)
                         return log_oom();
 
-                printf("                 %sNTP%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), s);
+                cprout(C_BOLD_CYAN, "                 NTP: ");
+                printf("%s\n", s);
         }
 
         return r;
@@ -2214,7 +2272,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         r = dbus_get_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
-                printf("                 %sDNS%s:  ", ansi_color_bold_cyan(), ansi_color_reset());
+                cprout(C_BOLD_CYAN, "DNS: ");
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL;
@@ -2238,8 +2296,8 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 d = g_sequence_get(i);
                 r = ip_to_string(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
-                        printf("    %sCurrentDNSServer%s: ", ansi_color_bold_cyan(), ansi_color_reset());
-                        printf(" %s\n", pretty);
+                        cprout(C_BOLD_CYAN, "CurrentDNSServer: ");
+                        printf("%s\n", pretty);
                 }
         }
 
@@ -2247,7 +2305,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
                 _auto_cleanup_ char *s = NULL;
 
-                printf("    %sFallbackDNS%s:       ", ansi_color_bold_cyan(), ansi_color_reset());
+                cprout(C_BOLD_CYAN, "FallbackDNS: ");
                 for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL, *t = NULL;
 
@@ -2262,7 +2320,8 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         }
 
         if (dns && !g_sequence_is_empty(dns->dns_servers)) {
-                printf("%s%5s %-20s %-14s%s\n", ansi_color_blue_header(), "INDEX", "LINK", "DNS", ansi_color_reset());
+                cprout(C_BLUE_HDR, "%5s %-20s %-14s", "INDEX", "LINK", "DNS");
+                printf("\n");
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL;
@@ -2274,8 +2333,11 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
                         if_indextoname(d->ifindex, buf);
                         r = ip_to_string(d->address.family, &d->address, &pretty);
-                        if (r >= 0)
-                                printf("%5d%5s %-16s %s%s\n", d->ifindex, ansi_color_bold_cyan(), buf, ansi_color_reset(), pretty);
+                        if (r >= 0) {
+                                printf("%5d ", d->ifindex);
+                                cprout(C_BOLD_CYAN, "%-16s", buf);
+                                printf("%s\n", pretty);
+                        }
                 }
         }
 
@@ -2478,7 +2540,8 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 i = g_sequence_get_begin_iter(domains->dns_domains);
                 d = g_sequence_get(i);
 
-                printf("%sDNS Domain%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), d->domain);
+                cprout(C_BOLD_CYAN, "DNS Domain: ");
+                printf("%s\n", d->domain);
         } else {
                 _cleanup_(set_unrefp) Set *all_domains = NULL;
                 bool first = true;
@@ -2489,7 +2552,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                         return r;
                 }
 
-                printf("%sDNS Domain%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                cprout(C_BOLD_CYAN, "DNS Domain: ");
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i))  {
                         char *s;
 
@@ -2517,7 +2580,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                                 printf("            %s\n", d->domain);
                 }
 
-                printf("%s%5s %-20s %-18s%s\n", ansi_color_blue_header(), "INDEX", "LINK", "Domain", ansi_color_reset());
+                cprout(C_BLUE_HDR, "%5s %-20s %-18s\n", "INDEX", "LINK", "Domain");
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         d = g_sequence_get(i);
 
@@ -2531,8 +2594,9 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                                 log_warning("Failed to find link '%d': %s", d->ifindex, g_strerror(-r));
                                 return -errno;
                         }
-                        printf("%5d %s%-20s%s %-18s\n", d->ifindex, ansi_color_bold_cyan(),p->ifname, ansi_color_reset(),
-                                *d->domain == '.' ? "~." : d->domain);
+                        printf("%5d ", d->ifindex);
+                        cprout(C_BOLD_CYAN, "%-20s ", p->ifname);
+                        printf("%-18s\n", *d->domain == '.' ? "~." : d->domain);
                 }
         }
 
@@ -4996,7 +5060,7 @@ _public_ int ncm_show_proxy(int argc, char *argv[]) {
                 return r;
         }
 
-        printf("%sProxy Settings %s\n", ansi_color_blue_header(), ansi_color_reset());
+        cprout(C_BLUE_HDR, "Proxy Settings\n");
 
         v = g_hash_table_lookup(table, "PROXY_ENABLED");
         if(v)
@@ -5123,11 +5187,12 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
                         return r;
                 }
 
-                printf("%sFamily   Tables %s\n", ansi_color_blue_header(), ansi_color_reset());
+                cprout(C_BLUE_HDR, "Family   Tables\n");
                 for (i = 0; i < s->len; i++) {
                         NFTNLTable *t = g_ptr_array_index(s, i);
 
-                        printf("%s%-5s : %-3s %s\n", ansi_color_blue(), nft_family_to_name(t->family), ansi_color_reset(), t->name);
+                        cprout(C_BLUE, "%-5s : ", nft_family_to_name(t->family));
+                        printf("%s\n", t->name);
                 }
         } else {
                 _cleanup_(g_string_unrefp) GString *rl = NULL;
@@ -5140,7 +5205,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
                 if (!rl)
                         return -errno;
 
-                printf("%sTable :  %s %s\n", ansi_color_blue_header(), argv[2], ansi_color_reset());
+                cprout(C_BLUE_HDR, "Table :  %s\n", argv[2]);
                 g_print("%s", rl->str);
         }
 
@@ -5249,11 +5314,12 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
                 return r;
         }
 
-        printf("%sFamily  Tables   Chains%s\n", ansi_color_blue_header(), ansi_color_reset());
+        cprout(C_BLUE_HDR, "Family  Tables   Chains%s\n");
         for (i = 0; i < s->len; i++) {
                 NFTNLChain *c = g_ptr_array_index(s, i);
 
-                printf("%s%-5s : %s%-8s %-8s\n", ansi_color_blue(), nft_family_to_name(c->family), ansi_color_reset(), c->table, c->name);
+                cprout(C_BLUE, "%-5s : ", nft_family_to_name(c->family));
+                printf("%-8s %-8s\n", c->table, c->name);
         }
 
         return 0;
