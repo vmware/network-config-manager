@@ -293,7 +293,7 @@ static int list_one_link(char *argv[]) {
         cprout(operational_state_color, "%s ", string_na(operational_state));
         cprout(setup_set_color, "(%s)\n", string_na(setup_state));
 
-         (void)  display_one_link_udev(l, true, NULL);
+         (void) display_one_link_udev(l, true, NULL);
          list_link_sysfs_attributes(l);
 
         r = manager_get_one_link_address(l->ifindex, &addr);
