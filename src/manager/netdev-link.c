@@ -181,7 +181,7 @@ void netdev_link_unref(NetDevLink *n) {
 }
 
 int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
-        _auto_cleanup_ char *file = NULL, *link = NULL, *path = NULL, *s = NULL, *mac = NULL;
+        _auto_cleanup_ char *file = NULL, *path = NULL, *s = NULL, *mac = NULL;
         int r;
 
         assert(ifname);

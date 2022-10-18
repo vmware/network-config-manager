@@ -262,7 +262,7 @@ int add_dns_server_and_domain_to_resolved_conf(DNSServers *dns, char **domains) 
                 return r;
 
         if (dns) {
-                _auto_cleanup_ char *dns_line = NULL, *l = NULL;
+                _auto_cleanup_ char *dns_line = NULL;
                 _auto_cleanup_strv_ char **s = NULL;
 
                 dns_line = g_key_file_get_string(key_file, "Resolve", "DNS", &e);
@@ -303,7 +303,7 @@ int add_dns_server_and_domain_to_resolved_conf(DNSServers *dns, char **domains) 
         }
 
         if (domains) {
-                _auto_cleanup_ char *domain_line = NULL, *l = NULL;
+                _auto_cleanup_ char *domain_line = NULL;
                 _auto_cleanup_strv_ char **s = NULL;
                 char **j;
 

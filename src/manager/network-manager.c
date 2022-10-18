@@ -333,7 +333,7 @@ int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group) {
 }
 
 int manager_set_link_rf_online(const IfNameIndex *ifnameidx, const char *addrfamily) {
-        _auto_cleanup_ char *p = NULL, *network = NULL, *config_update_family = NULL;
+        _auto_cleanup_ char *network = NULL, *config_update_family = NULL;
         int r;
 
         assert(ifnameidx);
@@ -354,7 +354,7 @@ int manager_set_link_rf_online(const IfNameIndex *ifnameidx, const char *addrfam
 }
 
 int manager_set_link_act_policy(const IfNameIndex *ifnameidx, const char *actpolicy) {
-        _auto_cleanup_ char *p = NULL, *network = NULL, *config_update_policy = NULL;
+        _auto_cleanup_ char *network = NULL, *config_update_policy = NULL;
         int r;
 
         assert(ifnameidx);
@@ -445,7 +445,7 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx,
                                    int prefix_route,
                                    uint32_t label) {
 
-        _auto_cleanup_ char *network = NULL, *config_address = NULL, *a = NULL, *p = NULL;
+        _auto_cleanup_ char *network = NULL, *a = NULL, *p = NULL;
         _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
         _cleanup_(g_error_freep) GError *e = NULL;
         int r;
@@ -1960,7 +1960,7 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
 
 int manager_create_veth(const char *veth, const char *veth_peer) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *veth_network_config = NULL;
-        _auto_cleanup_ char *veth_netdev = NULL, *veth_network = NULL, *network = NULL;
+        _auto_cleanup_ char *veth_network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         int r;
@@ -2099,7 +2099,7 @@ int manager_create_tunnel(const char *tunnel,
 
 int manager_create_vrf(const char *vrf, uint32_t table) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vrf_network_config = NULL;
-        _auto_cleanup_ char *vrf_netdev = NULL, *vrf_network = NULL;
+        _auto_cleanup_ char *vrf_network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         int r;
@@ -2158,7 +2158,7 @@ int manager_create_wireguard_tunnel(char *wireguard,
                                     uint16_t listen_port) {
 
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *wireguard_network_config = NULL;
-        _auto_cleanup_ char *wireguard_network = NULL, *network = NULL;
+        _auto_cleanup_ char *wireguard_network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         int r;
