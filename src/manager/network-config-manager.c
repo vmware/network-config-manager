@@ -521,14 +521,10 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_status(int argc, char *argv[]) {
-        int r;
-
         if (argc <= 1)
                 return list_links(argc, argv);
-        else
-                r = list_one_link(argv + 1);
 
-        return r;
+         return list_one_link(argv + 1);
 }
 
 _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
