@@ -37,3 +37,4 @@ configure
 stamp-*
 cscope.out
 /build
+tags
