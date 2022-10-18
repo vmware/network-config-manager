@@ -1324,7 +1324,9 @@ int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps, bool ad
         }
 
         (void) dbus_restart_unit("systemd-networkd.service");
-        return dbus_restart_unit("systemd-timesyncd.service");
+        (void) dbus_restart_unit("systemd-timesyncd.service");
+
+        return 0;
 }
 
 int manager_remove_ntp_addresses(const IfNameIndex *ifnameidx) {
@@ -1344,7 +1346,9 @@ int manager_remove_ntp_addresses(const IfNameIndex *ifnameidx) {
         }
 
         (void) dbus_restart_unit("systemd-networkd.service");
-        return dbus_restart_unit("systemd-timesyncd.service");
+        (void) dbus_restart_unit("systemd-timesyncd.service");
+
+        return 0;
 }
 
 int manager_enable_ipv6(const IfNameIndex *ifnameidx, bool enable) {
