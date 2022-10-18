@@ -170,8 +170,10 @@ int dbus_restart_unit(const char *unit) {
                                "ss",
                                unit,
                                "replace");
-        if (r < 0)
+        if (r < 0) {
                 log_warning("Failed to issue method call: %s\n", bus_error.message);
+                return r;
+        }
 
         return 0;
 }
