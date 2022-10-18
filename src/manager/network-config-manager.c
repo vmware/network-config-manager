@@ -2274,7 +2274,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                         _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(i);
-                        if (d->ifindex != 0)
+                        if (!d->ifindex)
                                 continue;
 
                         r = ip_to_string(d->address.family, &d->address, &pretty);
