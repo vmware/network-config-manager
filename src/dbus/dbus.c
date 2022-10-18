@@ -142,8 +142,10 @@ int dbus_stop_unit(const char *unit) {
                                "ss",
                                unit,
                                "fail");
-        if (r < 0)
+        if (r < 0){
                 log_warning("Failed to issue method call: %s\n", bus_error.message);
+                return r;
+        }
 
         return 0;
 }
