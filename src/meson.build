@@ -31,6 +31,7 @@ network_config_manager_sources = files('''
         nftables/nft_util.h
         nftables/nft_util.c
         share/ansi-color.h
+        share/ansi-color.c
         share/alloc-util.h
         share/arphrd-to-name.h
         share/arphrd-list.c

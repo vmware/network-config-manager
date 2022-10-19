@@ -266,9 +266,10 @@ static int parse_argv(int argc, char *argv[]) {
         };
 
         static const struct option options[] = {
-                { "help",      no_argument,       NULL, 'h'   },
-                { "version",   no_argument,       NULL, 'v'   },
-                { "json",      no_argument,       NULL, 'j'   },
+                { "help",       no_argument,       NULL, 'h'   },
+                { "version",    no_argument,       NULL, 'v'   },
+                { "json",       no_argument,       NULL, 'j'   },
+                { "no-beautify", no_argument,       NULL, 'b'   },
                 {}
         };
         int c;
@@ -288,7 +289,9 @@ static int parse_argv(int argc, char *argv[]) {
                 case 'j':
                         set_json(true);
                         break;
-
+                case 'b':
+                        set_beautify(false);
+                        break;
                 case '?':
                         return -EINVAL;
 
