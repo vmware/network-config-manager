@@ -149,6 +149,12 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                 n->contains_mtu = true;
         }
 
+        if (rta_tb[IFLA_QDISC]) {
+                n->qdisc = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_QDISC]));
+                if (!n->qdisc)
+                        return log_oom();
+        }
+
         if (rta_tb[IFLA_MASTER])
                 n->master = rtnl_message_read_attribute_u32(rta_tb[IFLA_MASTER]);
 
