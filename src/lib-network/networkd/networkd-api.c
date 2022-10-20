@@ -101,6 +101,27 @@ static int network_parse_link_string(int ifindex, const char *key, char **ret) {
         return r;
 }
 
+static int network_parse_link_lease_string(int ifindex, const char *key, char **ret) {
+        _auto_cleanup_ char *s = NULL, *path = NULL;
+        int r;
+
+        assert(ifindex);
+        assert(ret);
+
+        asprintf(&path, "/run/systemd/netif/leases/%i", ifindex);
+        r = parse_state_file(path, key, &s, NULL);
+        if (r < 0)
+                return r;
+
+        if (isempty_string(s)) {
+                *ret = NULL;
+                return 0;
+        }
+
+        *ret = steal_pointer(s);
+        return r;
+}
+
 int network_parse_link_setup_state(int ifindex, char **state) {
         return network_parse_link_string(ifindex, "ADMIN_STATE", state);
 }
@@ -153,6 +174,6 @@ int network_parse_link_addresses(int ifindex, char ***ret) {
         return network_parse_link_strv(ifindex, "ADDRESSES", ret);
 }
 
-int network_parse_link_dhcp4_addresses(int ifindex, char ***ret) {
-        return network_parse_link_strv(ifindex, "DHCP4_ADDRESS", ret);
+int network_parse_link_dhcp4_address(int ifindex, char **ret) {
+        return network_parse_link_lease_string(ifindex, "ADDRESS", ret);
 }
