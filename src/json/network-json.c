@@ -514,7 +514,7 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
         return 0;
 }
 
-static int json_list_link_sysfs_attributes(json_object *jobj, Link *l) {
+static int json_list_link_attributes(json_object *jobj, Link *l) {
         _auto_cleanup_ char *duplex = NULL, *speed = NULL, *ether = NULL, *mtu = NULL;
         int r;
 
@@ -636,7 +636,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 steal_pointer(js);
         }
 
-        r = json_list_link_sysfs_attributes(jobj, l);
+        r = json_list_link_attributes(jobj, l);
         if (r < 0)
                 return r;
 
