@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright 2021 VMware, Inc.
+# Copyright 2022 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
 import os
