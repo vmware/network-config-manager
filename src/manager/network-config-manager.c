@@ -193,20 +193,19 @@ static int display_one_link_udev(Link *l, bool show, char **link_file) {
 }
 
 static void list_link_sysfs_attributes(Link *l) {
-        _auto_cleanup_ char *duplex = NULL, *speed = NULL, *ether = NULL, *mtu = NULL;
+        _auto_cleanup_ char *duplex = NULL, *speed = NULL, *ether = NULL;
 
         (void) link_read_sysfs_attribute(l->name, "speed", &speed);
         (void) link_read_sysfs_attribute(l->name, "duplex", &duplex);
         (void) link_read_sysfs_attribute(l->name, "address", &ether);
-        (void) link_read_sysfs_attribute(l->name, "mtu", &mtu);
 
         if (ether) {
                 display(arg_beautify, ansi_color_bold_cyan(), "         HW Address: ");
                 printf("%s\n", ether);
         }
-        if (mtu) {
+        if (l->contains_mtu) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                MTU: ");
-                printf("%s\n", mtu);
+                printf("%d (min: %d max: %d) \n", l->mtu, l->min_mtu, l->max_mtu);
         }
         if (duplex) {
                 display(arg_beautify, ansi_color_bold_cyan(), "             Duplex: ");
