@@ -105,6 +105,8 @@ static int help(void) {
                "Query and control the netmanager subsystem.\n\n"
                "  -h --help                    Show this help message and exit\n"
                "  -v --version                 Show package version\n"
+               "  -j --json                    Show in JSON format\n"
+               "  -b --no-beautify             Show without colors and headers\n"
                "\nCommands:\n"
                "  status                       Show system status\n"
                "  show                         List links.\n"
@@ -266,9 +268,9 @@ static int parse_argv(int argc, char *argv[]) {
         };
 
         static const struct option options[] = {
-                { "help",       no_argument,       NULL, 'h'   },
-                { "version",    no_argument,       NULL, 'v'   },
-                { "json",       no_argument,       NULL, 'j'   },
+                { "help",        no_argument,       NULL, 'h'   },
+                { "version",     no_argument,       NULL, 'v'   },
+                { "json",        no_argument,       NULL, 'j'   },
                 { "no-beautify", no_argument,       NULL, 'b'   },
                 {}
         };

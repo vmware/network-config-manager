@@ -9,6 +9,14 @@
 #include <string.h>
 #include <unistd.h>
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+
 void display_internal(bool enable_color, const char *color, const char *fmt, ...) {
         va_list ap;
 
