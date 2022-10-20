@@ -109,8 +109,8 @@ static int help(void) {
                "  -b --no-beautify             Show without colors and headers\n"
                "\nCommands:\n"
                "  status                       Show system status\n"
-               "  show                         List links.\n"
-               "  show                         [LINK] Show link status.\n"
+               "  status-links                 List links.\n"
+               "  status-link                  [LINK] Show link status.\n"
                "  set-mtu                      [LINK] [MTU NUMBER] Configures Link MTU.\n"
                "  set-mac                      [LINK] [MAC] Configures Link MAC address.\n"
                "  set-link-mode                [LINK] [MODE BOOLEAN] Configures Link managed by networkd.\n"
@@ -311,7 +311,7 @@ static int cli_run(int argc, char *argv[]) {
 
         static const Ctl commands[] = {
                 { "status",                       WORD_ANY, WORD_ANY, true,  ncm_system_status },
-                { "show",                         WORD_ANY, WORD_ANY, false, ncm_link_status },
+                { "status-link",                  WORD_ANY, WORD_ANY, false, ncm_link_status },
                 { "set-mtu",                      2,        WORD_ANY, false, ncm_link_set_mtu },
                 { "set-mac",                      2,        WORD_ANY, false, ncm_link_set_mac },
                 { "set-link-mode",                2,        WORD_ANY, false, ncm_link_set_mode },
@@ -418,6 +418,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "show-nft-rules",               1,        WORD_ANY, false, ncm_nft_show_rules },
                 { "delete-nft-rule",              2,        WORD_ANY, false, ncm_nft_delete_rule },
                 { "nft-run",                      WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
+                /* Deprecated */
+                { "show",                         WORD_ANY, WORD_ANY, false, ncm_link_status },
                 {}
         };
 
