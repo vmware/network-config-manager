@@ -79,13 +79,14 @@ static int list_links(int argc, char *argv[]) {
         if (r < 0)
                return r;
 
-        display(arg_beautify, ansi_color_blue_header(), "%5s %-10s %-10s %-10s %-14s %-16s\n",
-                           "INDEX",
-                           "LINK",
-                           "TYPE",
-                           "STATE",
-                           "OPERATIONAL",
-                           "SETUP");
+        if (arg_beautify)
+                display(arg_beautify, ansi_color_blue_header(), "%5s %-10s %-10s %-10s %-14s %-16s\n",
+                        "INDEX",
+                        "LINK",
+                        "TYPE",
+                        "STATE",
+                        "OPERATIONAL",
+                        "SETUP");
 
         g_list_foreach(h->links, display_links_info, NULL);
         return 0;
