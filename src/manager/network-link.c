@@ -164,6 +164,9 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
         if (rta_tb[IFLA_MAX_MTU])
                 n->max_mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MAX_MTU]);
 
+        if (rta_tb[IFLA_TXQLEN])
+                n->tx_queue_len = rtnl_message_read_attribute_u32(rta_tb[IFLA_TXQLEN]);
+
         if (rta_tb[IFLA_NUM_TX_QUEUES])
                 n->n_tx_queues = rtnl_message_read_attribute_u32(rta_tb[IFLA_NUM_TX_QUEUES]);
 

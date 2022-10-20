@@ -30,6 +30,7 @@ typedef struct Link {
         uint32_t master;
         uint32_t min_mtu;
         uint32_t max_mtu;
+        uint32_t tx_queue_len;
         uint32_t n_tx_queues;
         uint32_t n_rx_queues;
         uint32_t gso_max_size;
