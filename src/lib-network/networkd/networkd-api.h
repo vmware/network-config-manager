@@ -23,4 +23,8 @@ int network_parse_link_ntp(int ifindex, char ***ret);
 int network_parse_link_search_domains(int ifindex, char ***ret);
 int network_parse_link_route_domains(int ifindex, char ***ret);
 int network_parse_link_addresses(int ifindex, char ***ret);
-int network_parse_link_dhcp4_addresses(int ifindex, char ***ret);
+
+int network_parse_link_dhcp4_address(int ifindex, char **ret);
+int network_parse_link_dhcp4_server_address(int ifindex, char **ret);
+int network_parse_link_dhcp4_client_id(int ifindex, char **ret);
+int network_parse_link_dhcp4_address_lifetime(int ifindex, char **ret);

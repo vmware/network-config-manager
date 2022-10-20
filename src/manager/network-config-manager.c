@@ -93,8 +93,7 @@ static int list_links(int argc, char *argv[]) {
 }
 
 static void list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_strv_ char **dhcp = NULL;
-        _auto_cleanup_ char *c = NULL;
+        _auto_cleanup_ char *c = NULL, *dhcp = NULL;
         static bool first = true;
         unsigned long size;
         Address *a = NULL;
@@ -108,10 +107,14 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
         } else
                 printf("                   %s", c);
 
-        r = network_parse_link_dhcp4_addresses(a->ifindex, &dhcp);
-        if (r >= 0 && strv_contains((const char **) dhcp, c))
-                printf("%s", "(DHCPv4)");
-        else
+        r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
+        if (r >= 0 && string_has_prefix(c, dhcp)) {
+                _auto_cleanup_ char *server = NULL, *life_time = NULL;
+                (void) network_parse_link_dhcp4_server_address(a->ifindex, &server);
+                (void) network_parse_link_dhcp4_address_lifetime(a->ifindex, &life_time);
+
+                printf(" (DHCPv4) via %s lifetime: %s seconds\n", server, life_time);
+        } else
                 printf("\n");
 }
 
