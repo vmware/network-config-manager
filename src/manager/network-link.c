@@ -153,7 +153,7 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                 n->master = rtnl_message_read_attribute_u32(rta_tb[IFLA_MASTER]);
 
         if (rta_tb[IFLA_MIN_MTU])
-                n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MIN_MTU]);
+                n->min_mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MIN_MTU]);
 
         if (rta_tb[IFLA_MAX_MTU])
                 n->max_mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MAX_MTU]);
@@ -289,6 +289,12 @@ static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
                         n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MTU]);
                         n->contains_mtu = true;
                 }
+
+                if (rta_tb[IFLA_MIN_MTU])
+                        n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MIN_MTU]);
+
+                if (rta_tb[IFLA_MAX_MTU])
+                        n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MAX_MTU]);
 
                 if (rta_tb[IFLA_OPERSTATE])
                         n->operstate = rtnl_message_read_attribute_u8(rta_tb[IFLA_OPERSTATE]);
