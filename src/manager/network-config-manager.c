@@ -24,8 +24,8 @@
 #include "udev-hwdb.h"
 #include "network-json.h"
 
-bool arg_json = false;
-bool arg_beautify = true;
+static bool arg_json = false;
+static bool arg_beautify = true;
 
 static void link_state_to_color(const char *state, const char **on) {
         if (string_equal(state, "routable") || string_equal(state, "configured") || string_equal(state,"up"))
@@ -80,7 +80,7 @@ static int list_links(int argc, char *argv[]) {
                return r;
 
         if (arg_beautify)
-                display(arg_beautify, ansi_color_blue_header(), "%5s %-10s %-10s %-10s %-14s %-16s\n",
+                printf("%5s %-10s %-10s %-10s %-14s %-16s\n",
                         "INDEX",
                         "LINK",
                         "TYPE",
@@ -110,7 +110,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
 
         r = network_parse_link_dhcp4_addresses(a->ifindex, &dhcp);
         if (r >= 0 && strv_contains((const char **) dhcp, c))
-                display(arg_beautify, ansi_color_bold_yellow(), "%s", "(DHCPv4)")
+                printf("%s", "(DHCPv4)");
         else
                 printf("\n");
 }
@@ -2262,7 +2262,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         r = dbus_get_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
-                printf("                 %sDNS%s:  ", ansi_color_bold_cyan(), ansi_color_reset());
+                display(arg_beautify, ansi_color_bold_cyan(), "                 DNS: ");
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL;
@@ -2286,7 +2286,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 d = g_sequence_get(i);
                 r = ip_to_string(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
-                        printf("    %sCurrentDNSServer%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                        display(arg_beautify, ansi_color_bold_cyan(), "    CurrentDNSServer:");
                         printf(" %s\n", pretty);
                 }
         }
@@ -2295,7 +2295,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
                 _auto_cleanup_ char *s = NULL;
 
-                printf("    %sFallbackDNS%s:       ", ansi_color_bold_cyan(), ansi_color_reset());
+                display(arg_beautify, ansi_color_bold_cyan(), "         FallbackDNS: ");
                 for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL, *t = NULL;
 
@@ -2310,7 +2310,8 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         }
 
         if (dns && !g_sequence_is_empty(dns->dns_servers)) {
-                printf("%s%5s %-20s %-14s%s\n", ansi_color_blue_header(), "INDEX", "LINK", "DNS", ansi_color_reset());
+                if (arg_beautify)
+                        printf("%5s %-20s %-14s\n", "INDEX", "LINK", "DNS");
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL;
@@ -2323,7 +2324,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                         if_indextoname(d->ifindex, buf);
                         r = ip_to_string(d->address.family, &d->address, &pretty);
                         if (r >= 0)
-                                printf("%5d%5s %-16s %s%s\n", d->ifindex, ansi_color_bold_cyan(), buf, ansi_color_reset(), pretty);
+                                printf("%5d %-16s %s\n", d->ifindex, buf, pretty);
                 }
         }
 
@@ -2526,10 +2527,10 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 i = g_sequence_get_begin_iter(domains->dns_domains);
                 d = g_sequence_get(i);
 
-                printf("%sDNS Domain%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), d->domain);
+                display(arg_beautify, ansi_color_bold_cyan(), "DNS Domain: ");
+                printf("%s\n", d->domain);
         } else {
                 _cleanup_(set_unrefp) Set *all_domains = NULL;
-                bool first = true;
 
                 r = set_new(&all_domains, NULL, NULL);
                 if (r < 0) {
@@ -2537,7 +2538,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                         return r;
                 }
 
-                printf("%sDNS Domain%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                display(arg_beautify, ansi_color_bold_cyan(), "DNS Domain: ");
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i))  {
                         char *s;
 
@@ -2558,14 +2559,11 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        if (first) {
-                                printf("%s\n", d->domain);
-                                first = false;
-                        } else
-                                printf("            %s\n", d->domain);
+                        printf("%s ", d->domain);
                 }
 
-                printf("%s%5s %-20s %-18s%s\n", ansi_color_blue_header(), "INDEX", "LINK", "Domain", ansi_color_reset());
+                if (arg_beautify)
+                        printf("\n%5s %-20s %-18s\n", "INDEX", "LINK", "Domain");
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         d = g_sequence_get(i);
 
@@ -2579,8 +2577,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                                 log_warning("Failed to find link '%d': %s", d->ifindex, g_strerror(-r));
                                 return -errno;
                         }
-                        printf("%5d %s%-20s%s %-18s\n", d->ifindex, ansi_color_bold_cyan(),p->ifname, ansi_color_reset(),
-                                *d->domain == '.' ? "~." : d->domain);
+                        printf("%5d %-20s %-18s\n", d->ifindex, p->ifname, *d->domain == '.' ? "~." : d->domain);
                 }
         }
 
@@ -5044,7 +5041,7 @@ _public_ int ncm_show_proxy(int argc, char *argv[]) {
                 return r;
         }
 
-        printf("%sProxy Settings %s\n", ansi_color_blue_header(), ansi_color_reset());
+        printf("Proxy Settings\n");
 
         v = g_hash_table_lookup(table, "PROXY_ENABLED");
         if(v)
@@ -5171,7 +5168,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
                         return r;
                 }
 
-                printf("%sFamily   Tables %s\n", ansi_color_blue_header(), ansi_color_reset());
+                printf("Family   Tables\n");
                 for (i = 0; i < s->len; i++) {
                         NFTNLTable *t = g_ptr_array_index(s, i);
 
@@ -5188,7 +5185,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
                 if (!rl)
                         return -errno;
 
-                printf("%sTable :  %s %s\n", ansi_color_blue_header(), argv[2], ansi_color_reset());
+                printf("Table :  %s\n", argv[2]);
                 g_print("%s", rl->str);
         }
 
@@ -5297,7 +5294,7 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
                 return r;
         }
 
-        printf("%sFamily  Tables   Chains%s\n", ansi_color_blue_header(), ansi_color_reset());
+        printf("Family  Tables   Chains\n");
         for (i = 0; i < s->len; i++) {
                 NFTNLChain *c = g_ptr_array_index(s, i);
 
