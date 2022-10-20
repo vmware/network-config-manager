@@ -24,8 +24,8 @@
 #include "udev-hwdb.h"
 #include "network-json.h"
 
-bool arg_json = false;
-bool arg_beautify = true;
+static bool arg_json = false;
+static bool arg_beautify = true;
 
 static void link_state_to_color(const char *state, const char **on) {
         if (string_equal(state, "routable") || string_equal(state, "configured") || string_equal(state,"up"))
