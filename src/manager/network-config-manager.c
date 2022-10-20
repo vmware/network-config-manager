@@ -2527,7 +2527,8 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 i = g_sequence_get_begin_iter(domains->dns_domains);
                 d = g_sequence_get(i);
 
-                printf("%sDNS Domain%s: %s\n", ansi_color_bold_cyan(), ansi_color_reset(), d->domain);
+                display(arg_beautify, ansi_color_bold_cyan(), "DNS Domain: ");
+                printf("%s\n", d->domain);
         } else {
                 _cleanup_(set_unrefp) Set *all_domains = NULL;
                 bool first = true;
@@ -2538,7 +2539,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                         return r;
                 }
 
-                printf("%sDNS Domain%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                display(arg_beautify, ansi_color_bold_cyan(), "DNS Domain: ");
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i))  {
                         char *s;
 
@@ -2559,14 +2560,11 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        if (first) {
-                                printf("%s\n", d->domain);
-                                first = false;
-                        } else
-                                printf("            %s\n", d->domain);
+                        printf("%s ", d->domain);
                 }
 
-                printf("%s%5s %-20s %-18s%s\n", ansi_color_blue_header(), "INDEX", "LINK", "Domain", ansi_color_reset());
+                if (arg_beautify)
+                        printf("\n%s%5s %-20s %-18s%s\n", ansi_color_blue_header(), "INDEX", "LINK", "Domain", ansi_color_reset());
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         d = g_sequence_get(i);
 
@@ -2580,8 +2578,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                                 log_warning("Failed to find link '%d': %s", d->ifindex, g_strerror(-r));
                                 return -errno;
                         }
-                        printf("%5d %s%-20s%s %-18s\n", d->ifindex, ansi_color_bold_cyan(),p->ifname, ansi_color_reset(),
-                                *d->domain == '.' ? "~." : d->domain);
+                        printf("%5d %-20s %-18s\n", d->ifindex, p->ifname, *d->domain == '.' ? "~." : d->domain);
                 }
         }
 
