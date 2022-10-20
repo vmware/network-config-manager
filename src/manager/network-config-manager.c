@@ -192,7 +192,7 @@ static int display_one_link_udev(Link *l, bool show, char **link_file) {
         return 0;
 }
 
-static void list_link_sysfs_attributes(Link *l) {
+static void list_link_attributes(Link *l) {
         _auto_cleanup_ char *duplex = NULL, *speed = NULL, *ether = NULL;
 
         (void) link_read_sysfs_attribute(l->name, "speed", &speed);
@@ -215,6 +215,15 @@ static void list_link_sysfs_attributes(Link *l) {
                 display(arg_beautify, ansi_color_bold_cyan(), "              Speed: ");
                 printf("%s\n", speed);
         }
+        if (l->qdisc) {
+                display(arg_beautify, ansi_color_bold_cyan(), "              QDISC: ");
+                printf("%s \n", l->qdisc);
+        }
+        display(arg_beautify, ansi_color_bold_cyan(), "     Queues (Tx/Rx): ");
+        printf("%d/%d \n", l->n_tx_queues, l->n_rx_queues);
+
+        display(arg_beautify, ansi_color_bold_cyan(), "    Tx queue length: ");
+        printf("%d \n", l->tx_queue_len);
 }
 
 static void display_alterative_names(gpointer data, gpointer user_data) {
@@ -273,7 +282,7 @@ static int list_one_link(char *argv[]) {
         (void) network_parse_link_ntp(l->ifindex, &ntp);
 
         (void) network_parse_link_network_file(l->ifindex, &network);
-        (void)  display_one_link_udev(l, false, &link);
+        (void) display_one_link_udev(l, false, &link);
 
         display(arg_beautify, ansi_color_bold_cyan(), "          Link File: ");
         printf("%s\n", string_na(link));
@@ -320,7 +329,7 @@ static int list_one_link(char *argv[]) {
         }
 
         (void)  display_one_link_udev(l, true, NULL);
-        list_link_sysfs_attributes(l);
+        list_link_attributes(l);
 
         r = manager_get_one_link_address(l->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0) {
@@ -374,7 +383,7 @@ static int list_one_link(char *argv[]) {
                 if (!s)
                         return log_oom();
 
-                display(arg_beautify, ansi_color_bold_cyan(), "               NTP: ");
+                display(arg_beautify, ansi_color_bold_cyan(), "                NTP: ");
                 printf("%s\n", s);
         }
 
