@@ -3,6 +3,8 @@
  */
 #pragma once
 
+#include <stdbool.h>
+
 #define ANSI_COLOR_RED           "\x1b[31m"
 #define ANSI_COLOR_GREEN         "\x1b[32m"
 #define ANSI_COLOR_YELLOW        "\x1b[33m"
@@ -107,3 +109,6 @@ static inline const char *ansi_color_grey_bold(void) {
 static inline const char *ansi_color_header_reset(void) {
         return ANSI_COLOR_HEADER_RESET;
 }
+
+void display_internal(bool enable_color, const char *color, const char *fmt, ...);
+#define display(enable_color, color, fmt, ...)   display_internal(enable_color, color, fmt, ##__VA_ARGS__);
