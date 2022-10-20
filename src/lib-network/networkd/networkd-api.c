@@ -134,6 +134,30 @@ int network_parse_link_operational_state(int ifindex, char **state) {
         return network_parse_link_string(ifindex, "OPER_STATE", state);
 }
 
+int network_parse_link_address_state(int ifindex, char **state) {
+        return network_parse_link_string(ifindex, "ADDRESS_STATE", state);
+}
+
+int network_parse_link_ipv4_state(int ifindex, char **state) {
+        return network_parse_link_string(ifindex, "IPV4_ADDRESS_STATE", state);
+}
+
+int network_parse_link_ipv6_state(int ifindex, char **state) {
+        return network_parse_link_string(ifindex, "IPV6_ADDRESS_STATE", state);
+}
+
+int network_parse_link_online_state(int ifindex, char **state) {
+        return network_parse_link_string(ifindex, "ONLINE_STATE", state);
+}
+
+int network_parse_link_required_for_online(int ifindex, char **state) {
+        return network_parse_link_string(ifindex, "REQUIRED_FOR_ONLINE", state);
+}
+
+int network_parse_link_activation_policy(int ifindex, char **state) {
+        return network_parse_link_string(ifindex, "ACTIVATION_POLICY", state);
+}
+
 int network_parse_link_llmnr(int ifindex, char **llmnr) {
         return network_parse_link_string(ifindex, "LLMNR", llmnr);
 }
