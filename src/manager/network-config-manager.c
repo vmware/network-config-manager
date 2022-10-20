@@ -113,7 +113,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 (void) network_parse_link_dhcp4_server_address(a->ifindex, &server);
                 (void) network_parse_link_dhcp4_address_lifetime(a->ifindex, &life_time);
 
-                printf(" (DHCPv4) via %s lifetime: %s seconds\n", server, life_time);
+                printf(" (DHCPv4 via %s) lifetime: %s seconds\n", server, life_time);
         } else
                 printf("\n");
 }
