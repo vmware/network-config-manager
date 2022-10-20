@@ -2262,7 +2262,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         r = dbus_get_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
-                printf("                 %sDNS%s:  ", ansi_color_bold_cyan(), ansi_color_reset());
+                display(arg_beautify, ansi_color_bold_cyan(), "                 DNS: ");
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL;
@@ -2286,7 +2286,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 d = g_sequence_get(i);
                 r = ip_to_string(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
-                        printf("    %sCurrentDNSServer%s: ", ansi_color_bold_cyan(), ansi_color_reset());
+                        display(arg_beautify, ansi_color_bold_cyan(), "    CurrentDNSServer:");
                         printf(" %s\n", pretty);
                 }
         }
@@ -2295,7 +2295,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
                 _auto_cleanup_ char *s = NULL;
 
-                printf("    %sFallbackDNS%s:       ", ansi_color_bold_cyan(), ansi_color_reset());
+                display(arg_beautify, ansi_color_bold_cyan(), "         FallbackDNS: ");
                 for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL, *t = NULL;
 
@@ -2310,7 +2310,8 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         }
 
         if (dns && !g_sequence_is_empty(dns->dns_servers)) {
-                printf("%s%5s %-20s %-14s%s\n", ansi_color_blue_header(), "INDEX", "LINK", "DNS", ansi_color_reset());
+                if (arg_beautify)
+                        printf("%s%5s %-20s %-14s%s\n", ansi_color_blue_header(), "INDEX", "LINK", "DNS", ansi_color_reset());
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL;
@@ -2323,7 +2324,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                         if_indextoname(d->ifindex, buf);
                         r = ip_to_string(d->address.family, &d->address, &pretty);
                         if (r >= 0)
-                                printf("%5d%5s %-16s %s%s\n", d->ifindex, ansi_color_bold_cyan(), buf, ansi_color_reset(), pretty);
+                                printf("%5d %-16s %s\n", d->ifindex, buf, pretty);
                 }
         }
 
