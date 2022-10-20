@@ -225,7 +225,8 @@ static void display_alterative_names(gpointer data, gpointer user_data) {
 }
 
 static int list_one_link(char *argv[]) {
-        _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
+        _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *tz = NULL, *network = NULL, *link = NULL,
+                *dhcp4_identifier = NULL, *dhcp6_duid = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
         _cleanup_(addresses_unrefp) Addresses *addr = NULL;
@@ -353,8 +354,22 @@ static int list_one_link(char *argv[]) {
          }
 
          r = manager_get_link_dhcp_client_iaid(p, &iaid);
-         if (r >= 0)
-                 printf("      %sDHCPv4 IAID%s: %d\n", ansi_color_bold_cyan(), ansi_color_reset(), iaid);
+         if (r >= 0) {
+                 display(arg_beautify, ansi_color_bold_cyan(), "      DHCPv4 IAID: ");
+                 printf("%d\n", iaid);
+         }
+
+         r = network_parse_link_dhcp4_client_id(p->ifindex, &dhcp4_identifier);
+         if (r >= 0) {
+                 display(arg_beautify, ansi_color_bold_cyan(), "  DHCP4 Client ID: ");
+                 printf("%s\n", dhcp4_identifier);
+         }
+
+         r = network_parse_link_dhcp6_client_duid(p->ifindex, &dhcp6_duid);
+         if (r >= 0) {
+                 display(arg_beautify, ansi_color_bold_cyan(), "DHCP6 Client DUID: ");
+                 printf("%s\n", dhcp6_duid);
+         }
 
         return 0;
 }
