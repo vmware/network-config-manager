@@ -221,6 +221,9 @@ static void list_link_attributes(Link *l) {
         }
         display(arg_beautify, ansi_color_bold_cyan(), "     Queues (Tx/Rx): ");
         printf("%d/%d \n", l->n_tx_queues, l->n_rx_queues);
+
+        display(arg_beautify, ansi_color_bold_cyan(), "    Tx queue length: ");
+        printf("%d \n", l->tx_queue_len);
 }
 
 static void display_alterative_names(gpointer data, gpointer user_data) {
