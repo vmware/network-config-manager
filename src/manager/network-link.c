@@ -104,6 +104,9 @@ void link_unref(Link *l) {
         if (l->alt_names)
                 g_ptr_array_free(l->alt_names, true);
 
+        g_free(l->qdisc);
+        g_free(l->parent_dev);
+        g_free(l->parent_bus);
         g_free(l);
 }
 
@@ -169,6 +172,18 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
         if (rta_tb[IFLA_QDISC]) {
                 n->qdisc = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_QDISC]));
                 if (!n->qdisc)
+                        return log_oom();
+        }
+
+        if (rta_tb[IFLA_PARENT_DEV_NAME]) {
+                n->parent_dev = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_PARENT_DEV_NAME]));
+                if (!n->parent_dev)
+                        return log_oom();
+        }
+
+        if (rta_tb[IFLA_PARENT_DEV_BUS_NAME]) {
+                n->parent_bus = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_PARENT_DEV_BUS_NAME]));
+                if (!n->parent_bus)
                         return log_oom();
         }
 
