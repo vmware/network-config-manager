@@ -172,6 +172,14 @@ static int display_one_link_udev(Link *l, bool show, char **link_file) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                        Path: ");
                 printf("%s\n", path);
         }
+        if (l->parent_dev) {
+                display(arg_beautify, ansi_color_bold_cyan(), "                  Parent Dev: ");
+                printf("%s\n", l->parent_dev);
+        }
+        if (l->parent_bus) {
+                display(arg_beautify, ansi_color_bold_cyan(), "                  Parent Bus: ");
+                printf("%s\n", l->parent_bus);
+        }
         if (driver) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                      Driver: ");
                 printf("%s\n", driver);
@@ -222,11 +230,15 @@ static void list_link_attributes(Link *l) {
         display(arg_beautify, ansi_color_bold_cyan(), "              Queues (Tx/Rx): ");
         printf("%d/%d \n", l->n_tx_queues, l->n_rx_queues);
 
-        display(arg_beautify, ansi_color_bold_cyan(), "             Tx queue length: ");
+        display(arg_beautify, ansi_color_bold_cyan(), "             Tx Queue Length: ");
         printf("%d \n", l->tx_queue_len);
 
         display(arg_beautify, ansi_color_bold_cyan(), "IPv6 Address Generation Mode: ");
         printf("%s \n", ipv6_address_generation_mode_to_name(l->ipv6_addr_gen_mode));
+        display(arg_beautify, ansi_color_bold_cyan(), "                GSO Max Size: ");
+        printf("%d ", l->gso_max_size);
+        display(arg_beautify, ansi_color_bold_cyan(), "GSO Max Segments: ");
+        printf("%d \n", l->gso_max_segments);
 }
 
 static void display_alterative_names(gpointer data, gpointer user_data) {
@@ -2323,13 +2335,13 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         r = dbus_get_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
-                display(arg_beautify, ansi_color_bold_cyan(), "                 DNS: ");
+                display(arg_beautify, ansi_color_bold_cyan(), "             DNS: ");
 
                 for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(i);
-                        if (d->ifindex != 0)
+                        if (!d->ifindex)
                                 continue;
 
                         r = ip_to_string(d->address.family, &d->address, &pretty);
@@ -2347,7 +2359,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 d = g_sequence_get(i);
                 r = ip_to_string(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
-                        display(arg_beautify, ansi_color_bold_cyan(), "    CurrentDNSServer:");
+                        display(arg_beautify, ansi_color_bold_cyan(), "CurrentDNSServer:");
                         printf(" %s\n", pretty);
                 }
         }
@@ -2356,7 +2368,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
                 _auto_cleanup_ char *s = NULL;
 
-                display(arg_beautify, ansi_color_bold_cyan(), "         FallbackDNS: ");
+                display(arg_beautify, ansi_color_bold_cyan(), "     FallbackDNS: ");
                 for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _auto_cleanup_ char *pretty = NULL, *t = NULL;
 
