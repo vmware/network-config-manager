@@ -1179,7 +1179,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
 
                 set_foreach(route->routes, json_list_one_link_routes, ja);
 
-                json_object_object_add(jobj, "Routes", ja);
+                json_object_object_add(jobj, "Gateway", ja);
                 steal_pointer(ja);
         }
 
