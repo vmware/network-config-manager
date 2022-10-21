@@ -8,11 +8,11 @@
 #include "network-util.h"
 
 #ifndef IFLA_PARENT_DEV_NAME
-#define IFLA_PARENT_DEV_NAME 41
+#define IFLA_PARENT_DEV_NAME __IFLA_MAX - 5
 #endif
 
 #ifndef IFLA_PARENT_DEV_BUS_NAME
-#define IFLA_PARENT_DEV_BUS_NAME 42
+#define IFLA_PARENT_DEV_BUS_NAME __IFLA_MAX - 4
 #endif
 
 typedef enum LinkState {

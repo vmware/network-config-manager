@@ -398,7 +398,7 @@ static int list_one_link(char *argv[]) {
                 if (!s)
                         return log_oom();
 
-                display(arg_beautify, ansi_color_bold_cyan(), "                        NTP: ");
+                display(arg_beautify, ansi_color_bold_cyan(), "                         NTP: ");
                 printf("%s\n", s);
         }
 
