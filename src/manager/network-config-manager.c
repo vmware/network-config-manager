@@ -288,6 +288,38 @@ static int list_one_link(char *argv[]) {
                         return log_oom();
         }
 
+        if (l->flags > 0) {
+                display(arg_beautify, ansi_color_bold_cyan(), "                       Flags: ");
+                if (l->flags & IFF_UP)
+                        printf("UP ");
+
+                if (l->flags & IFF_BROADCAST)
+                        printf("BROADCAST ");
+
+                if (l->flags & IFF_RUNNING)
+                        printf("RUNNING ");
+
+                if (l->flags & IFF_NOARP)
+                        printf("NOARP ");
+
+                if (l->flags & IFF_MASTER)
+                        printf("MASTER ");
+
+                if (l->flags & IFF_SLAVE)
+                        printf("SLAVE ");
+
+                if (l->flags & IFF_MULTICAST)
+                        printf("MULTICAST ");
+
+                if (l->flags & IFF_LOWER_UP)
+                        printf("LOWERUP ");
+
+                if (l->flags & IFF_DORMANT)
+                        printf("DORMANT");
+
+                printf("\n");
+        }
+
         link_state_to_color(operational_state, &operational_state_color);
         link_state_to_color(setup_state, &setup_set_color);
 
