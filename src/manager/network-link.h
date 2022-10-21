@@ -14,6 +14,15 @@ typedef enum LinkState {
         _LINK_STATE_INVALID,
 } LinkState;
 
+typedef enum IPv6AddressGenMode {
+       IPV6_ADDRESSS_GEN_MODE_EUI64          = IN6_ADDR_GEN_MODE_EUI64,
+       IPV6_ADDRESSS_GEN_MODE_NONE           = IN6_ADDR_GEN_MODE_NONE,
+       IPV6_ADDRESSS_GEN_MODE_STABLE_PRIVACY = IN6_ADDR_GEN_MODE_STABLE_PRIVACY,
+       IPV6_ADDRESSS_GEN_MODE_RANDOM         = IN6_ADDR_GEN_MODE_RANDOM,
+       _IPV6_ADDRESS_GEN_MODE_MAX,
+       _IPV6_ADDRESS_GEN_MODE_INVALID        = -EINVAL,
+} IPv6lAddressGenMode;
+
 typedef struct Link {
         struct ether_addr mac_address;
 
@@ -25,6 +34,7 @@ typedef struct Link {
         int ifindex;
 
         uint8_t operstate;
+        uint8_t ipv6_addr_gen_mode;
 
         uint32_t mtu;
         uint32_t master;
@@ -78,3 +88,5 @@ const char *link_operstates_to_name(int id);
 
 const char *link_state_to_name(int id);
 int link_name_to_state(char *name);
+
+const char *ipv6_address_generation_mode_to_name(int mode);

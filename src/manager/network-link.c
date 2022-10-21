@@ -58,6 +58,23 @@ int link_name_to_state(char *name) {
         return _LINK_STATE_INVALID;
 }
 
+static const char* const ipv6_address_generation_mode[] = {
+        [IPV6_ADDRESSS_GEN_MODE_EUI64]          = "eui64",
+        [IPV6_ADDRESSS_GEN_MODE_NONE]           = "none",
+        [IPV6_ADDRESSS_GEN_MODE_STABLE_PRIVACY] = "stable-privacy",
+        [IPV6_ADDRESSS_GEN_MODE_RANDOM]         = "random",
+};
+
+const char *ipv6_address_generation_mode_to_name(int mode) {
+        if (mode < 0)
+                return "n/a";
+
+        if ((size_t) mode >= ELEMENTSOF(ipv6_address_generation_mode))
+                return NULL;
+
+        return ipv6_address_generation_mode[mode];
+}
+
 static int links_new(Links **ret) {
         Links *h = NULL;
 
@@ -181,6 +198,9 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
 
         if (rta_tb[IFLA_OPERSTATE])
                 n->operstate = rtnl_message_read_attribute_u8(rta_tb[IFLA_OPERSTATE]);
+
+        if (rta_tb[IFLA_INET6_ADDR_GEN_MODE])
+                n->ipv6_addr_gen_mode = rtnl_message_read_attribute_u8(rta_tb[IFLA_INET6_ADDR_GEN_MODE]);
 
         if (rta_tb[IFLA_ADDRESS]) {
                 rtnl_message_read_attribute_ether_address(rta_tb[IFLA_ADDRESS], &n->mac_address);
