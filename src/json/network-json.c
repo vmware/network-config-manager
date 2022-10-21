@@ -569,6 +569,18 @@ static int json_list_link_attributes(json_object *jobj, Link *l) {
                 steal_pointer(js);
         }
 
+        if (l->qdisc) {
+                 _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(l->qdisc);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "QDisc", js);
+                steal_pointer(js);
+
+        }
+
         return 0;
 }
 
@@ -591,7 +603,9 @@ static void display_alterative_names(gpointer data, gpointer user_data) {
 int json_list_one_link(IfNameIndex *p, char **ret) {
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jobj_routes = NULL, *jaddress = NULL;
-        _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL, *link = NULL;
+        _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL, *link = NULL, *online_state = NULL,
+                *address_state = NULL, *ipv4_state = NULL, *ipv6_state = NULL, *required_for_online = NULL,
+                *activation_policy = NULL;
         _cleanup_(addresses_unrefp) Addresses *addr = NULL;
         _cleanup_(routes_unrefp) Routes *route = NULL;
         _cleanup_(link_unrefp) Link *l = NULL;
@@ -687,6 +701,78 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "OperState", js);
+                steal_pointer(js);
+        }
+
+        r = network_parse_link_address_state(l->ifindex, &address_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(address_state);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "AddressState", js);
+                steal_pointer(js);
+        }
+
+        r = network_parse_link_ipv4_state(l->ifindex, &ipv4_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(ipv4_state);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "IPv4AddressState", js);
+                steal_pointer(js);
+        }
+
+        r = network_parse_link_ipv6_state(l->ifindex, &ipv6_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                 js = json_object_new_string(ipv6_state);
+                 if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "IPv6AddressState", js);
+                steal_pointer(js);
+        }
+
+        r = network_parse_link_online_state(l->ifindex, &online_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                 js = json_object_new_string(online_state);
+                 if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "OnlineState", js);
+                steal_pointer(js);
+        }
+
+        r = network_parse_link_required_for_online(l->ifindex, &required_for_online);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(required_for_online);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "RequiredforOnline", js);
+                steal_pointer(js);
+        }
+
+        r = network_parse_link_activation_policy(l->ifindex, &activation_policy);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(activation_policy);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "ActivationPolicy", js);
                 steal_pointer(js);
         }
 
