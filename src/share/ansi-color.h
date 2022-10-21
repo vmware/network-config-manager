@@ -32,9 +32,9 @@
 
 bool colors_supported(void);
 
-#define DEFINE_ANSI_COLOR_INLINE_FUNCTION(name, NAME)                            \
+#define DEFINE_ANSI_COLOR_INLINE_FUNCTION(name, NAME)                 \
         static inline const char *ansi_color_##name(void) {           \
-                return colors_supported() ? ANSI_COLOR_##NAME : "";     \
+                return colors_supported() ? ANSI_COLOR_##NAME : "";   \
         }
 
 DEFINE_ANSI_COLOR_INLINE_FUNCTION(red,               RED);
@@ -50,5 +50,4 @@ DEFINE_ANSI_COLOR_INLINE_FUNCTION(bold_cyan,         BOLD_CYAN);
 DEFINE_ANSI_COLOR_INLINE_FUNCTION(bold,              CYAN);
 DEFINE_ANSI_COLOR_INLINE_FUNCTION(reset,             RESET);
 
-void display_internal(bool enable_color, const char *color, const char *fmt, ...);
-#define display(enable_color, color, fmt, ...)   display_internal(enable_color, color, fmt, ##__VA_ARGS__);
+void display(bool enable_color, const char *color, const char *fmt, ...);

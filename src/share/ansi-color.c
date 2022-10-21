@@ -39,7 +39,7 @@ bool colors_supported(void) {
        return true;
 }
 
-void display_internal(bool enable_color, const char *color, const char *fmt, ...) {
+void display(bool enable_color, const char *color, const char *fmt, ...) {
        va_list ap;
 
        va_start(ap, fmt);
