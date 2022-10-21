@@ -10,6 +10,7 @@
 
 #include "ansi-color.h"
 #include "parse-util.h"
+#include "string-util.h"
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
@@ -19,18 +20,31 @@
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
 
-void display_internal(bool enable_color, const char *color, const char *fmt, ...) {
-       bool env_enable = true;
+bool colors_supported(void) {
        const char *e;
-       va_list ap;
+
+       if (isatty(STDOUT_FILENO) < 0 && isatty(STDERR_FILENO) < 0)
+           return false;
+
+       e = getenv("TERM");
+       if (e) {
+           if (string_equal(e, "dumb"))
+               return false;
+       }
 
        e = getenv("NMCTL_BEAUTIFY");
        if (e)
-               env_enable = parse_boolean(e);
+           return parse_boolean(e) ? true : false;
+
+       return true;
+}
+
+void display_internal(bool enable_color, const char *color, const char *fmt, ...) {
+       va_list ap;
 
        va_start(ap, fmt);
 
-       if (!env_enable || !enable_color || (isatty(STDOUT_FILENO) < 0 && isatty(STDERR_FILENO) < 0)) {
+       if (!colors_supported() || !enable_color) {
                vprintf(fmt, ap);
                va_end(ap);
                return;

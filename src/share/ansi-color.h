@@ -30,85 +30,25 @@
 #define ANSI_COLOR_UNDERLINE      "\x1B[0;4m"
 #define ANSI_COLOR_UNDERLINE_BOLD "\x1B[0;1;4m"
 
-static inline const char *ansi_color_red(void) {
-        return ANSI_COLOR_RED;
-}
+bool colors_supported(void);
 
-static inline const char *ansi_color_green(void) {
-        return ANSI_COLOR_GREEN;
-}
+#define DEFINE_ANSI_COLOR_INLINE_FUNCTION(name, NAME)                            \
+        static inline const char *ansi_color_##name(void) {           \
+                return colors_supported() ? ANSI_COLOR_##NAME : "";     \
+        }
 
-static inline const char *ansi_color_yellow(void) {
-        return ANSI_COLOR_YELLOW;
-}
-
-static inline const char *ansi_color_blue(void) {
-        return ANSI_COLOR_BLUE;
-}
-
-static inline const char *ansi_color_magneta(void) {
-        return ANSI_COLOR_MAGENTA;
-}
-
-static inline const char * ansi_color_cyan(void) {
-        return ANSI_COLOR_CYAN;
-}
-
-static inline const char *ansi_color_reset(void) {
-        return ANSI_COLOR_RESET;
-}
-
-static inline const char *ansi_color_bold_red(void) {
-        return ANSI_COLOR_BOLD_RED;
-}
-
-static inline const char *ansi_color_bold_green(void) {
-        return ANSI_COLOR_BOLD_GREEN;
-}
-
-static inline const char *ansi_color_bold_yellow(void) {
-        return ANSI_COLOR_BOLD_YELLOW;
-}
-
-static inline const char *ansi_color_bold_blue(void) {
-        return ANSI_COLOR_BOLD_BLUE;
-}
-
-static inline const char *ansi_color_bold_magneta(void) {
-        return ANSI_COLOR_BOLD_MAGENTA;
-}
-
-static inline const char * ansi_color_bold_cyan(void) {
-        return ANSI_COLOR_BOLD_CYAN;
-}
-
-static inline const char *ansi_color_blue_header(void) {
-        return ANSI_COLOR_BLUE_HEADER;
-}
-
-static inline const char *ansi_color_bold(void) {
-        return ANSI_COLOR_BOLD;
-}
-
-static inline const char *ansi_color_underline(void) {
-        return ANSI_COLOR_UNDERLINE;
-}
-
-static inline const char *ansi_color_underline_bold(void) {
-        return ANSI_COLOR_UNDERLINE_BOLD;
-}
-
-static inline const char *ansi_color_blue_magenta(void) {
-        return ANSI_COLOR_BLUE_MAGENTA;
-}
-
-static inline const char *ansi_color_grey_bold(void) {
-        return ANSI_COLOR_GRAY_BOLD;
-}
-
-static inline const char *ansi_color_header_reset(void) {
-        return ANSI_COLOR_HEADER_RESET;
-}
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(red,               RED);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(green,             GREEN);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(yellow,            YELLOW);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(bold_yellow,       BOLD_YELLOW);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(blue,              BLUE);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(bold_blue,         BOLD_BLUE);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(magenta,           MAGENTA);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(blue_magenta,      BLUE_MAGENTA);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(cyan,              CYAN);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(bold_cyan,         BOLD_CYAN);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(bold,              CYAN);
+DEFINE_ANSI_COLOR_INLINE_FUNCTION(reset,             RESET);
 
 void display_internal(bool enable_color, const char *color, const char *fmt, ...);
 #define display(enable_color, color, fmt, ...)   display_internal(enable_color, color, fmt, ##__VA_ARGS__);
