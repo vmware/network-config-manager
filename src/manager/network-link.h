@@ -7,6 +7,14 @@
 #include "alloc-util.h"
 #include "network-util.h"
 
+#ifndef IFLA_PARENT_DEV_NAME
+#define IFLA_PARENT_DEV_NAME 41
+#endif
+
+#ifndef IFLA_PARENT_DEV_BUS_NAME
+#define IFLA_PARENT_DEV_BUS_NAME 42
+#endif
+
 typedef enum LinkState {
         LINK_STATE_DOWN,
         LINK_STATE_UP,

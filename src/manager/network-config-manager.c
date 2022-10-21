@@ -172,6 +172,14 @@ static int display_one_link_udev(Link *l, bool show, char **link_file) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                        Path: ");
                 printf("%s\n", path);
         }
+        if (l->parent_dev) {
+                display(arg_beautify, ansi_color_bold_cyan(), "                  Parent Dev: ");
+                printf("%s\n", l->parent_dev);
+        }
+        if (l->parent_bus) {
+                display(arg_beautify, ansi_color_bold_cyan(), "                  Parent Bus: ");
+                printf("%s\n", l->parent_bus);
+        }
         if (driver) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                      Driver: ");
                 printf("%s\n", driver);
@@ -222,11 +230,15 @@ static void list_link_attributes(Link *l) {
         display(arg_beautify, ansi_color_bold_cyan(), "              Queues (Tx/Rx): ");
         printf("%d/%d \n", l->n_tx_queues, l->n_rx_queues);
 
-        display(arg_beautify, ansi_color_bold_cyan(), "             Tx queue length: ");
+        display(arg_beautify, ansi_color_bold_cyan(), "             Tx Queue Length: ");
         printf("%d \n", l->tx_queue_len);
 
         display(arg_beautify, ansi_color_bold_cyan(), "IPv6 Address Generation Mode: ");
         printf("%s \n", ipv6_address_generation_mode_to_name(l->ipv6_addr_gen_mode));
+        display(arg_beautify, ansi_color_bold_cyan(), "                GSO Max Size: ");
+        printf("%d ", l->gso_max_size);
+        display(arg_beautify, ansi_color_bold_cyan(), "GSO Max Segments: ");
+        printf("%d \n", l->gso_max_segments);
 }
 
 static void display_alterative_names(gpointer data, gpointer user_data) {
