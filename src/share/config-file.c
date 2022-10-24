@@ -2,14 +2,163 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include <glib.h>
+#include <gio/gio.h>
 
 #include "alloc-util.h"
 #include "config-file.h"
 #include "config-parser.h"
 #include "file-util.h"
-#include <gio/gio.h>
 #include "log.h"
 #include "string-util.h"
+
+int key_new(const char *key, const char *value, Key **ret) {
+        Key *k = NULL;
+
+        assert(key);
+
+        k = new0(Key, 1);
+        if (!k)
+                return -ENOMEM;
+
+        k->name = strdup(key);
+        if (!k->name)
+                return -ENOMEM;
+
+        if (value) {
+                k->v = strdup(value);
+                if (!k->v)
+                        return -ENOMEM;
+        }
+
+        *ret = steal_pointer(k);
+        return 0;
+}
+
+void key_free(void *p) {
+        Key *k = (Key *) p;
+
+        if (!k)
+                return;
+
+        free(k->name);
+        free(k->v);
+        free(k);
+}
+
+int section_new(const char *name, Section **ret) {
+        Section *s = NULL;
+
+        assert(name);
+
+        s = new0(Section, 1);
+        if (!s)
+                return -ENOMEM;
+
+        s->name = strdup(name);
+        if (!s->name)
+                return -ENOMEM;
+
+        *ret = steal_pointer(s);
+        return 0;
+}
+
+void section_free(void *p) {
+        Section *s = (Section *) p;
+
+        if (!s)
+                return;
+
+        g_list_free_full(g_list_first(s->keys), key_free);
+        free(s->name);
+        free(s);
+}
+
+int key_file_new(const char *file_name, KeyFile **ret) {
+        KeyFile *k = NULL;
+
+        assert(file_name);
+
+        k = new0(KeyFile, 1);
+        if (!k)
+                return -ENOMEM;
+
+        k->name = strdup(file_name);
+        if (!k->name)
+                return -ENOMEM;
+
+        *ret = steal_pointer(k);
+        return 0;
+}
+
+void key_file_free(KeyFile *k) {
+        if (!k)
+                return;
+
+        free(k->name);
+        g_list_free_full(g_list_first(k->sections), section_free);
+        free(k);
+}
+
+int key_file_save(KeyFile *key_file) {
+        _cleanup_(g_string_unrefp) GString *config = NULL;
+        GList *iter;
+
+        assert(key_file);
+
+        config = g_string_new(NULL);
+        if (!config)
+                return log_oom();
+
+        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
+
+                if (g_list_length(s->keys) <= 0)
+                        continue;
+
+                g_string_append_printf(config, "[%s]\n", s->name);
+                for (GList *i = s->keys; i; i = g_list_next (i)) {
+                        Key *key = (Key *) i->data;
+                        _auto_cleanup_ char *v = NULL;
+
+                        v = key->v ? strdup(key->v) : strdup("");
+                        g_string_append_printf(config, "%s=%s\n", key->name, v);
+                }
+
+                g_string_append(config, "\n");
+        }
+
+        return write_to_conf_file(key_file->name, config);
+}
+
+int add_key_to_section(Section *s, const char *k, const char *v) {
+        _cleanup_(key_freep) Key *key = NULL;
+        int r;
+
+        assert(s);
+        assert(k);
+
+        r = key_new(k, v, &key);
+        if (r < 0)
+                return r;
+
+        s->keys = g_list_append(s->keys, key);
+        steal_pointer(key);
+        return 0;
+}
+
+int add_key_to_section_integer(Section *s, const char *k, int v) {
+        _cleanup_(key_freep) Key *key = NULL;
+        _auto_cleanup_ gchar *c = NULL;
+
+        assert(s);
+        assert(k);
+
+        c = g_strdup_printf("%i", v);
+        if (!c)
+                return -ENOMEM;
+
+        return add_key_to_section(s, k, c);
+}
 
 int config_manager_new(const Config *configs, ConfigManager **ret) {
         _auto_cleanup_ ConfigManager *m = NULL;
@@ -22,12 +171,12 @@ int config_manager_new(const Config *configs, ConfigManager **ret) {
                 return log_oom();
 
         *m = (ConfigManager) {
-               .ctl_to_config_table = g_hash_table_new(g_str_hash, g_str_equal),
+                    .ctl_to_config_table = g_hash_table_new(g_str_hash, g_str_equal),
         };
         if (!m->ctl_to_config_table)
                 return log_oom();
 
-        for (size_t i = 0; configs[i].ctl_name; i++) 
+        for (size_t i = 0; configs[i].ctl_name; i++)
                 g_hash_table_insert(m->ctl_to_config_table, (gpointer *) configs[i].ctl_name, (gpointer *) configs[i].config);
 
         *ret = steal_pointer(m);
@@ -49,109 +198,404 @@ const char *ctl_to_config(const ConfigManager *m, const char *name) {
         return g_hash_table_lookup(m->ctl_to_config_table, name);
 }
 
-int set_config_file_string(const char *path, const char *section, const char *k, const char *v) {
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+int set_config(KeyFile *key_file, const char *section, const char *k, const char *v) {
+        _cleanup_(section_freep) Section *sec = NULL;
+        GList *iter;
         int r;
 
-        assert(path);
+        assert(key_file);
         assert(section);
         assert(k);
 
-        r = load_config_file(path, &key_file);
+        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
+
+                if (string_equal(s->name, section)) {
+                        for (GList *i = s->keys; i; i = g_list_next (i)) {
+                                Key *key = (Key *) i->data;
+
+                                if (string_equal(key->name, k)) {
+                                        free(key->v);
+                                        if (v) {
+                                                key->v = strdup(v);
+                                                if (!key->v)
+                                                        return -ENOMEM;
+                                        }
+
+                                        return 0;
+                                }
+                        }
+
+                        /* key not found. Add key to section */
+                        r = add_key_to_section(s, k, v);
+                        if (r < 0)
+                                return r;
+
+                        return 0;
+                }
+        }
+
+        /* section not found. create a new section and add the key */
+        r = section_new(section, &sec);
         if (r < 0)
                 return r;
 
-        g_key_file_set_string(key_file, section, k, v);
+        r = add_key_to_section(sec, k, v);
+        if (r < 0)
+                return r;
 
-        if (!g_key_file_save_to_file (key_file, path, &e))
-                return -e->code;
+        r = add_section_to_key_file(key_file, sec);
+        if (r < 0)
+                return r;
 
-        steal_pointer(e);
-        return set_file_permisssion(path, "systemd-network");
+        steal_pointer(sec);
+        return 0;
 }
 
-int set_config_file_bool(const char *path, const char *section, const char *k, bool b) {
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+int set_config_file_string(const char *path, const char *section, const char *k, const char *v) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
         assert(path);
         assert(section);
         assert(k);
 
-        r = load_config_file(path, &key_file);
+        r = parse_key_file(path, &key_file);
         if (r < 0)
                 return r;
 
-        g_key_file_set_boolean(key_file, section, k, b);
+        r = set_config(key_file, section, k, v);
+        if (r < 0)
+                return r;
 
-        if (!g_key_file_save_to_file (key_file, path, &e))
-                return -e->code;
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
 
         return set_file_permisssion(path, "systemd-network");
 }
 
 int set_config_file_integer(const char *path, const char *section, const char *k, int v) {
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ gchar *s = NULL;
         int r;
 
         assert(path);
         assert(section);
         assert(k);
 
-        r = load_config_file(path, &key_file);
+        r = parse_key_file(path, &key_file);
         if (r < 0)
                 return r;
 
-        g_key_file_set_integer(key_file, section, k, v);
+        s = g_strdup_printf("%i", v);
+        if (!s)
+                return -ENOMEM;
 
-        if (!g_key_file_save_to_file (key_file, path, &e))
-                return -e->code;
+        r = key_file_set_string(key_file, section, k, s);
+        if (r < 0)
+                return r;
+
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
 
         return set_file_permisssion(path, "systemd-network");
 }
 
-int remove_key_from_config_file(const char *path, const char *section, const char *k) {
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+int set_config_file_bool(const char *path, const char *section, const char *k, bool b) {
+        assert(path);
+        assert(section);
+        assert(k);
+
+        return set_config_file_string(path, section, k, bool_to_string(b));
+}
+
+int key_file_set_string(KeyFile *key_file, const char *section, const char *k, const char *v) {
+        assert(key_file);
+        assert(section);
+        assert(k);
+
+        return set_config(key_file, section, k, v);
+}
+
+static int add_config(KeyFile *key_file, const char *section, const char *k, const char *v) {
+        _cleanup_(section_freep) Section *sec = NULL;
+        int r;
+
+        assert(key_file);
+        assert(section);
+        assert(k);
+
+        r = section_new(section, &sec);
+        if (r < 0)
+                return r;
+
+        r = add_key_to_section(sec, k, v);
+        if (r < 0)
+                return r;
+
+        r = add_section_to_key_file(key_file, sec);
+        if (r < 0)
+                return r;
+
+        steal_pointer(sec);
+        return 0;
+}
+
+int add_config_file_string(const char *path, const char *section, const char *k, const char *v) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
         assert(path);
         assert(section);
         assert(k);
 
-        r = load_config_file(path, &key_file);
+        r = parse_key_file(path, &key_file);
         if (r < 0)
                 return r;
 
-        if (!g_key_file_remove_key(key_file, section, k, &e))
-                return -e->code;
+        r = add_config(key_file, section, k, v);
+        if (r < 0)
+                return r;
 
-        if (!g_key_file_save_to_file(key_file, path, &e))
-                return -e->code;
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
+
+        return set_file_permisssion(path, "systemd-network");
+}
+
+int add_key_to_section_string(const char *path, const char *section, const char *k, const char *v) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        bool b = false;
+        GList *iter;
+        int r;
+
+        assert(path);
+        assert(section);
+        assert(k);
+        assert(v);
+
+        r = parse_key_file(path, &key_file);
+        if (r < 0)
+                return r;
+
+        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
+
+                if (string_equal(s->name, section)) {
+                        r = add_key_to_section(s, k, v);
+                        if (r < 0)
+                                return r;
+
+                        b = true;
+                        break;
+                }
+        }
+
+        /* section not found. create a new section and add the key */
+        if (!b) {
+                _cleanup_(section_freep) Section *sec = NULL;
+
+                r = section_new(section, &sec);
+                if (r < 0)
+                        return r;
+
+                r = add_key_to_section(sec, k, v);
+                if (r < 0)
+                        return r;
+
+                r = add_section_to_key_file(key_file, sec);
+                if (r < 0)
+                        return r;
+
+                steal_pointer(sec);
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
+
+        return set_file_permisssion(path, "systemd-network");
+}
+
+int key_file_add_string(KeyFile *key_file, const char *section, const char *k, const char *v) {
+        assert(key_file);
+        assert(section);
+        assert(k);
+
+        return add_config(key_file, section, k, v);
+}
+
+int key_file_get_string(KeyFile *key_file, const char *section, const char *k, char **v) {
+        GList *iter;
+
+        assert(key_file);
+        assert(section);
+        assert(k);
+
+        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
+
+                if (string_equal(s->name, section)) {
+                        for (GList *i = s->keys; i; i = g_list_next (i)) {
+                                Key *key = (Key *) i->data;
+
+                                if (string_equal(key->name, k)) {
+                                        *v = strdup(key->v);
+                                        if (!*v)
+                                                return -ENOMEM;
+                                        return 0;
+                                }
+                        }
+                }
+        }
+
+        return -ENOENT;
+}
+
+int key_file_get_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v) {
+        _auto_cleanup_ char *value = NULL;
+        int r;
+
+        assert(key_file);
+        assert(section);
+        assert(k);
+
+        r = key_file_get_string(key_file, section, k, &value);
+        if (r < 0)
+                return r;
+
+        *v = g_ascii_strtoll(value, NULL, 10);
+        return 0;
+}
+
+int key_file_set_integer(KeyFile *key_file, const char *section, const char *k, int v) {
+        _auto_cleanup_ gchar *s = NULL;
+        int r;
+
+        assert(section);
+        assert(k);
+
+        s = g_strdup_printf("%i", v);
+        if (!s)
+                return -ENOMEM;
+
+        r = key_file_set_string(key_file, section, k, s);
+        if (r < 0)
+                return r;
+
+        return set_file_permisssion(key_file->name, "systemd-network");
+}
+
+int remove_key_from_config_file(const char *path, const char *section, const char *k) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _cleanup_ (key_freep) Key *p = NULL;
+        GList *iter, *l = NULL;
+        int r;
+
+        assert(path);
+        assert(section);
+        assert(k);
+
+        r = parse_key_file(path, &key_file);
+        if (r < 0)
+                return r;
+
+        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
+
+                if (string_equal(s->name, section)) {
+                        for (GList *i = s->keys; i; i = g_list_next (i)) {
+                                Key *key = (Key *) i->data;
+
+                                if (string_equal(key->name, k)) {
+                                        l = g_list_remove_link(s->keys, i);
+                                        break;
+                                }
+
+                        }
+                }
+        }
+
+        if (l)
+                p = (Key *) l->data;
+
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
 
         return set_file_permisssion(path, "systemd-network");
 }
 
 int remove_section_from_config_file(const char *path, const char *section) {
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _cleanup_ (section_freep) Section *sec = NULL;
+        GList *iter, *l = NULL;
         int r;
 
         assert(path);
         assert(section);
 
-        r = load_config_file(path, &key_file);
+        r = parse_key_file(path, &key_file);
         if (r < 0)
                 return r;
 
-        if (!g_key_file_remove_group(key_file, section, &e))
-                return -e->code;
+        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
 
-        if (!g_key_file_save_to_file(key_file, path, &e))
-                return -e->code;
+                if (string_equal(s->name, section)) {
+                        l = g_list_remove_link(key_file->sections, iter);
+                        break;
+                }
+
+        }
+
+        if (l)
+                sec = (Section *) l->data;
+
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
+
+        return set_file_permisssion(path, "systemd-network");
+}
+
+int remove_section_from_config_file_key(const char *path, const char *section, const char *k, const char *v) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _cleanup_ (section_freep) Section *sec = NULL;
+        GList *iter, *l = NULL;
+        int r;
+
+        assert(path);
+        assert(section);
+
+        r = parse_key_file(path, &key_file);
+        if (r < 0)
+                return r;
+
+        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
+
+                if (string_equal(s->name, section)) {
+                        for (GList *i = s->keys; i; i = g_list_next (i)) {
+                                Key *key = (Key *) i->data;
+
+                                if (string_equal(key->name, k) && string_equal(key->v, v)) {
+                                        l = g_list_remove_link(key_file->sections, iter);
+                                        break;
+                                }
+                        }
+                }
+        }
+
+        if (l)
+                sec = (Section *) l->data;
+
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
 
         return set_file_permisssion(path, "systemd-network");
 }
@@ -233,7 +677,6 @@ int remove_config_files_glob(const char *path, const char *section, const char *
 
                 if (string_equal(s, v))
                         unlink(g.gl_pathv[i]);
-
         }
 
         return 0;
@@ -242,7 +685,6 @@ int remove_config_files_glob(const char *path, const char *section, const char *
 int remove_config_files_section_glob(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(globfree) glob_t g = {};
         int r;
-
         assert(path);
         assert(section);
         assert(k);
@@ -261,7 +703,7 @@ int remove_config_files_section_glob(const char *path, const char *section, cons
 
                 if (string_equal(s, v))
                         (void) remove_key_from_config_file(g.gl_pathv[i], section, k);
-       }
+        }
 
         return 0;
 }

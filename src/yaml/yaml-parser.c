@@ -286,7 +286,6 @@ int parse_yaml_link_local_type(const char *key,
         n = data;
 
         n->link_local = link_local_address_type_to_mode((const char *) value);
-
         return 0;
 }
 

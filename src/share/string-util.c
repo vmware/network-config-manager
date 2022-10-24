@@ -13,6 +13,49 @@
 #include "macros.h"
 #include "string-util.h"
 
+char *rstrip(char *s) {
+        char *p;
+
+        assert(s);
+
+        for (p = s + strlen(s);p > s && isspace((unsigned char)(*--p));)
+                *p = '\0';
+
+        return s;
+}
+
+char *lskip(const char *s) {
+        assert(s);
+
+        for (;*s && isspace((unsigned char)(*s));)
+                s++;
+
+        return (char *)s;
+}
+
+char *find_chars_or_comment(const char *s, const char *chars) {
+        assert(s);
+
+        for (;*s && (!chars || !strchr(chars, *s));)
+                s++;
+
+        return (char *) s;
+}
+
+char *string_copy(char *dest, const char *src, size_t size) {
+        size_t i;
+
+        assert(dest);
+        assert(src);
+        assert(size > 0);
+
+        for (i = 0; i < size - 1 && src[i]; i++)
+                dest[i] = src[i];
+
+        dest[i] = '\0';
+        return dest;
+}
+
 const char *bool_to_string(bool x) {
         if (x)
                 return "yes";
@@ -73,6 +116,14 @@ char *string_strip(char *s) {
                 return NULL;
 
         return g_strstrip(t);
+}
+
+char *free_and_strdup(char *s, char *t) {
+        if (!s || !t)
+                return NULL;
+
+        free(s);
+        return strdup(t);
 }
 
 int skip_first_word_and_split(char *line, const char *first_word, const char *sep, char ***ret) {

@@ -114,12 +114,6 @@ int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
                 return -ENODATA;
         }
 
-        r = parse_config_file(network, "Network", "DHCP", &config_dhcp);
-        if (r >= 0) {
-                if (string_equal(dhcp_modes_to_name(mode), config_dhcp))
-                        return 0;
-        }
-
         r = set_config_file_string(network, "Network", "DHCP", dhcp_modes_to_name(mode));
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
@@ -161,19 +155,13 @@ int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
         if (r < 0)
                 return r;
 
-        (void) parse_config_file(network, "DHCPv4", "ClientIdentifier", &config);
-        if (config) {
-                if (string_equal(config, dhcp_client_identifier_to_name(identifier)))
-                        return 0;
-        }
-
         r = set_config_file_string(network, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(identifier));
         if (r < 0) {
                 log_warning("Failed to update DHCP4 ClientIdentifier= to configuration file '%s': %s", network, g_strerror(-r));
                 return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret) {
@@ -196,7 +184,6 @@ int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
 
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iaid) {
         _auto_cleanup_ char *network = NULL;
-        unsigned v;
         int r;
 
         assert(ifnameidx);
@@ -204,12 +191,6 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iai
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)
                 return r;
-
-        r = parse_config_file_integer(network, "DHCPv4", "IAID", &v);
-        if (r >= 0) {
-                if (v == iaid)
-                        return 0;
-        }
 
         r = set_config_file_integer(network, "DHCPv4", "IAID", iaid);
         if (r < 0) {
@@ -222,7 +203,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iai
 
 int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *iaid) {
         _auto_cleanup_ char *network = NULL;
-        unsigned v;
+        uint32_t v;
         int r;
 
         assert(ifnameidx);
@@ -274,40 +255,23 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDU
 
 int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
         _auto_cleanup_ char *network = NULL, *config_mtu = NULL, *config_update_mtu = NULL;
-        uint32_t k;
         int r;
 
         assert(ifnameidx);
         assert(mtu > 0);
 
-        r = link_get_mtu(ifnameidx->ifname, &k);
-        if (r < 0)
-                return r;
-
-        r = link_update_mtu(ifnameidx, mtu);
-        if (r < 0)
-                return r;
-
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)
                 return r;
 
-        (void) parse_config_file(network, "Link", "MTUBytes", &config_mtu);
-
         asprintf(&config_update_mtu, "%u", mtu);
-
-        if (config_mtu) {
-                if (string_equal(config_mtu, config_update_mtu))
-                        return 0;
-        }
-
         r = set_config_file_string(network, "Link", "MTUBytes", config_update_mtu);
         if (r < 0) {
                 log_warning("Failed to update MTUBytes= to configuration file '%s' = %s", network, g_strerror(-r));
                 return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group) {
@@ -329,7 +293,7 @@ int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group) {
                 return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_set_link_rf_online(const IfNameIndex *ifnameidx, const char *addrfamily) {
@@ -350,7 +314,7 @@ int manager_set_link_rf_online(const IfNameIndex *ifnameidx, const char *addrfam
                 return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_set_link_act_policy(const IfNameIndex *ifnameidx, const char *actpolicy) {
@@ -371,7 +335,7 @@ int manager_set_link_act_policy(const IfNameIndex *ifnameidx, const char *actpol
                 return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
@@ -405,15 +369,6 @@ int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac) {
         if (r < 0)
                 return r;
 
-        r = link_get_mac_address(ifnameidx->ifname, &p);
-        if (r >= 0) {
-                if (!string_equal(p, mac)) {
-                        r = link_set_mac_address(ifnameidx, mac);
-                       if (r < 0)
-                                log_warning("Failed to set MAC Address to '%s' : %s", ifnameidx->ifname, mac);
-                }
-        }
-
         r = parse_config_file(network, "Link", "MACAddress", &config_mac);
         if (r >= 0) {
                 if (string_equal(config_mac, mac))
@@ -427,7 +382,7 @@ int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac) {
                 return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_set_link_state(const IfNameIndex *ifnameidx, LinkState state) {
@@ -443,11 +398,11 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx,
                                    char *pref_lft,
                                    IPDuplicateAddressDetection dad,
                                    int prefix_route,
-                                   uint32_t label) {
+                                   const char *label) {
 
         _auto_cleanup_ char *network = NULL, *a = NULL, *p = NULL;
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _cleanup_(section_freep) Section *section = NULL;
         int r;
 
         assert(ifnameidx);
@@ -456,7 +411,11 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx,
         if (r < 0)
                 return r;
 
-        r = load_config_file(network, &key_file);
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = section_new("Address", &section);
         if (r < 0)
                 return r;
 
@@ -479,29 +438,36 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx,
         }
 
         if (a)
-                g_key_file_set_string(key_file, "Address", "Address", a);
+                add_key_to_section(section, "Address", a);
 
         if (p)
-                g_key_file_set_string(key_file, "Address", "Peer", p);
+                add_key_to_section(section, "Peer", p);
 
         if (scope)
-                g_key_file_set_string(key_file, "Address", "Scope", scope);
+                add_key_to_section(section, "Scope", scope);
 
         if (pref_lft)
-                g_key_file_set_string(key_file, "Address", "PreferredLifetime", pref_lft);
+                add_key_to_section(section, "PreferredLifetime", pref_lft);
 
-        if (label > 0)
-                g_key_file_set_integer(key_file, "Address", "Label", label);
+        if (label)
+                add_key_to_section(section, "Label", label);
 
         if (prefix_route >= 0)
-                g_key_file_set_string(key_file, "Address", "AddPrefixRoute", bool_to_string(prefix_route));
+                add_key_to_section(section, "AddPrefixRoute", bool_to_string(prefix_route));
 
         if (dad != _IP_DUPLICATE_ADDRESS_DETECTION_INVALID)
-                g_key_file_set_string(key_file, "Address", "DuplicateAddressDetection", ip_duplicate_address_detection_type_to_name(dad));
+                add_key_to_section(section, "DuplicateAddressDetection", ip_duplicate_address_detection_type_to_name(dad));
 
-        if (!g_key_file_save_to_file (key_file, network, &e)) {
-                log_warning("Failed to write to '%s': %s", network, e->message);
-                return -e->code;
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return r;
+
+        steal_pointer(section);
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                return r;
         }
 
         r = set_file_permisssion(network, "systemd-network");
@@ -511,11 +477,12 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx,
         return dbus_network_reload();
 }
 
-int manager_delete_link_address(const IfNameIndex *ifnameidx) {
+int manager_delete_link_address(const IfNameIndex *ifnameidx, const char *a) {
         _auto_cleanup_ char *setup = NULL, *network = NULL;
         int r;
 
         assert(ifnameidx);
+        assert(a);
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
@@ -529,7 +496,7 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx) {
                 return r;
         }
 
-        r = remove_section_from_config_file(network, "Address");
+        r = remove_section_from_config_file_key(network, "Address", "Address", a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, g_strerror(-r));
                 return r;
@@ -551,8 +518,8 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
 
         r = manager_link_add_default_gateway(rt);
         if (r < 0 && r != -EEXIST) {
-               log_warning("Failed to add Gateway to kernel : %s\n", g_strerror(-r));
-               return r;
+                log_warning("Failed to add Gateway to kernel : %s\n", g_strerror(-r));
+                return r;
         }
 
         r = ip_to_string(rt->gw.family, &rt->gw, &a);
@@ -591,8 +558,8 @@ int manager_configure_route(const IfNameIndex *ifnameidx,
                             int onlink) {
 
         _auto_cleanup_ char *network = NULL, *gw = NULL, *dest = NULL, *src = NULL, *pref_src = NULL;
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _cleanup_(section_freep) Section *section = NULL;
         int r;
 
         assert(ifnameidx);
@@ -601,7 +568,11 @@ int manager_configure_route(const IfNameIndex *ifnameidx,
         if (r < 0)
                 return r;
 
-        r = load_config_file(network, &key_file);
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = section_new("Route", &section);
         if (r < 0)
                 return r;
 
@@ -610,18 +581,18 @@ int manager_configure_route(const IfNameIndex *ifnameidx,
                 if (r < 0)
                         return r;
 
-                g_key_file_set_string(key_file, "Route", "Gateway", gw);
+                add_key_to_section(section, "Gateway", gw);
         }
 
         if (onlink >= 0)
-                g_key_file_set_string(key_file, "Route", "GatewayOnLink", bool_to_string(onlink));
+                add_key_to_section(section, "GatewayOnLink", bool_to_string(onlink));
 
         if (source) {
                 r = ip_to_string_prefix(gateway->family, source, &src);
                 if (r < 0)
                         return r;
 
-                g_key_file_set_string(key_file, "Route", "Source", src);
+                add_key_to_section(section, "Source", src);
         }
 
         if (pref_source) {
@@ -629,7 +600,7 @@ int manager_configure_route(const IfNameIndex *ifnameidx,
                 if (r < 0)
                         return r;
 
-                g_key_file_set_string(key_file, "Route", "PreferredSource", pref_src);
+                add_key_to_section(section, "PreferredSource", pref_src);
         }
 
         if (destination) {
@@ -637,42 +608,48 @@ int manager_configure_route(const IfNameIndex *ifnameidx,
                 if (r < 0)
                         return r;
 
-                g_key_file_set_string(key_file, "Route", "Destination", dest);
+                add_key_to_section(section, "Destination", dest);
         }
 
         if (metric > 0)
-                g_key_file_set_integer(key_file, "Route", "Metric", metric);
+                add_key_to_section_integer(section, "Metric", metric);
 
         if (mtu > 0)
-                g_key_file_set_integer(key_file, "Route", "MTUBytes", mtu);
+                add_key_to_section_integer(section, "MTUBytes", mtu);
 
         if (protocol > 0) {
                 if (route_protocol_to_name(protocol))
-                        g_key_file_set_string(key_file, "Route", "Protocol", route_protocol_to_name(protocol));
+                        add_key_to_section(section, "Protocol", route_protocol_to_name(protocol));
                 else
-                        g_key_file_set_integer(key_file, "Route", "Protocol", protocol);
+                        add_key_to_section_integer(section, "Protocol", protocol);
         }
 
         if (rt_pref >= 0)
-                g_key_file_set_string(key_file, "Route", "IPv6Preference", ipv6_route_preference_to_name(rt_pref));
+                add_key_to_section(section, "IPv6Preference", ipv6_route_preference_to_name(rt_pref));
 
         if (scope > 0)
-                g_key_file_set_string(key_file, "Route", "Scope", route_scope_type_to_name(scope));
+                add_key_to_section(section, "Scope", route_scope_type_to_name(scope));
 
         if (type > 0)
-                g_key_file_set_string(key_file, "Route", "Type", route_type_to_name(type));
-
+                add_key_to_section(section, "Type", route_type_to_name(type));
 
         if (table > 0) {
                 if (route_table_to_name(table))
-                        g_key_file_set_string(key_file, "Route", "Table", route_table_to_name(table));
+                        add_key_to_section(section, "Table", route_table_to_name(table));
                 else
-                        g_key_file_set_integer(key_file, "Route", "Table", table);
+                        add_key_to_section_integer(section, "Table", table);
         }
 
-        if (!g_key_file_save_to_file (key_file, network, &e)) {
-                log_warning("Failed to write to '%s': %s", network, e->message);
-                return -e->code;
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return r;
+
+        steal_pointer(section);
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                return r;
         }
 
         r = set_file_permisssion(network, "systemd-network");
@@ -733,8 +710,8 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
                                            const char *tos) {
 
         _auto_cleanup_ char *network = NULL, *to = NULL, *from = NULL;
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _cleanup_(section_freep) Section *section = NULL;
         int r;
 
         assert(ifnameidx);
@@ -745,7 +722,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
                 return r;
         }
 
-        r = load_config_file(network, &key_file);
+        r = parse_key_file(network, &key_file);
         if (r < 0)
                 return r;
 
@@ -757,29 +734,40 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
         if (r < 0)
                 return r;
 
-        if (tos)
-                g_key_file_set_string(key_file, "RoutingPolicyRule", "TypeOfService", tos);
+        r = section_new("RoutingPolicyRule", &section);
+        if (r < 0)
+                return r;
 
-        g_key_file_set_integer(key_file, "RoutingPolicyRule", "Table", table);
+        if (tos)
+                add_key_to_section(section, "TypeOfService", tos);
+
+        add_key_to_section_integer(section, "Table", table);
 
         if (priority > 0)
-                g_key_file_set_integer(key_file, "RoutingPolicyRule", "Priority", priority);
+                add_key_to_section_integer(section, "Priority", priority);
 
         if (from)
-                g_key_file_set_string(key_file, "RoutingPolicyRule", "From", from);
+                add_key_to_section(section, "From", from);
 
         if (to)
-                g_key_file_set_string(key_file, "RoutingPolicyRule", "To", to);
+                add_key_to_section(section, "To", to);
 
         if (iif)
-                g_key_file_set_string(key_file, "RoutingPolicyRule", "IncomingInterface", iif->ifname);
+                add_key_to_section(section, "IncomingInterface", iif->ifname);
 
         if (oif)
-                g_key_file_set_string(key_file, "RoutingPolicyRule", "OutgoingInterface", oif->ifname);
+                add_key_to_section(section, "OutgoingInterface", oif->ifname);
 
-        if (!g_key_file_save_to_file (key_file, network, &e)) {
-                log_warning("Failed to write to '%s': %s", network, e->message);
-                return -e->code;
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return r;
+
+        steal_pointer(section);
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                return r;
         }
 
         r = set_file_permisssion(network, "systemd-network");
@@ -884,8 +872,8 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifnameidx,
                                     const int emit_router) {
 
         _auto_cleanup_ char *network = NULL, *dns = NULL, *ntp = NULL;
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _cleanup_(section_freep) Section *section = NULL;
         int r;
 
         assert(ifnameidx);
@@ -896,7 +884,7 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifnameidx,
                 return r;
         }
 
-        r = load_config_file(network, &key_file);
+        r = parse_key_file(network, &key_file);
         if (r < 0)
                 return r;
 
@@ -912,38 +900,51 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifnameidx,
                         return r;
         }
 
-        g_key_file_set_string(key_file, "Network", "DHCPServer", "yes");
+        r = set_config(key_file, "Network", "DHCPServer", "yes");
+        if (r < 0)
+                return r;
+
+        r = section_new("DHCPServer", &section);
+        if (r < 0)
+                return r;
 
         if (pool_offset > 0)
-                g_key_file_set_integer(key_file, "DHCPServer", "PoolOffset", pool_offset);
+                add_key_to_section_integer(section, "PoolOffset", pool_offset);
 
         if (pool_size > 0)
-                g_key_file_set_integer(key_file, "DHCPServer", "PoolSize", pool_size);
+                add_key_to_section_integer(section, "PoolSize", pool_size);
 
         if (default_lease_time > 0)
-                g_key_file_set_integer(key_file, "DHCPServer", "DefaultLeaseTimeSec", default_lease_time);
+                add_key_to_section_integer(section, "DefaultLeaseTimeSec", default_lease_time);
 
         if (max_lease_time > 0)
-                g_key_file_set_integer(key_file, "DHCPServer", "MaxLeaseTimeSec", max_lease_time);
+                add_key_to_section_integer(section, "MaxLeaseTimeSec", max_lease_time);
 
         if (dns)
-                g_key_file_set_string(key_file, "DHCPServer", "DNS", dns);
+                add_key_to_section(section, "DNS", dns);
 
         if (emit_dns >= 0)
-                g_key_file_set_string(key_file, "DHCPServer", "EmitDNS", bool_to_string(emit_dns));
+                add_key_to_section(section, "EmitDNS", bool_to_string(emit_dns));
 
         if (ntp)
-                g_key_file_set_string(key_file, "DHCPServer", "NTP", ntp);
+                add_key_to_section(section, "NTP", ntp);
 
         if (emit_ntp >= 0)
-                g_key_file_set_string(key_file, "DHCPServer", "EmitNTP", bool_to_string(emit_ntp));
+                add_key_to_section(section, "EmitNTP", bool_to_string(emit_ntp));
 
         if (emit_router >= 0)
-                g_key_file_set_string(key_file, "DHCPServer", "EmitRouter", bool_to_string(emit_router));
+                add_key_to_section(section, "EmitRouter", bool_to_string(emit_router));
 
-        if (!g_key_file_save_to_file (key_file, network, &e)) {
-                log_warning("Failed to write to '%s': %s", network, e->message);
-                return -e->code;
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return r;
+
+        steal_pointer(section);
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                return r;
         }
 
         r = set_file_permisssion(network, "systemd-network");
@@ -992,9 +993,9 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifnameidx,
                                                 const int emit_domain,
                                                 const int assign) {
 
+        _cleanup_(section_freep) Section *ipv6_prefix_section = NULL, *ipv6_sendra_section = NULL, *ipv6_route_prefix_section = NULL;
         _auto_cleanup_ char *network = NULL, *d = NULL, *p = NULL, *rt = NULL;
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        _cleanup_(g_error_freep) GError *e = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
         assert(ifnameidx);
@@ -1005,7 +1006,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifnameidx,
                 return r;
         }
 
-        r = load_config_file(network, &key_file);
+        r = parse_key_file(network, &key_file);
         if (r < 0)
                 return r;
 
@@ -1028,47 +1029,79 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifnameidx,
         }
 
         /* [Network] section */
-        g_key_file_set_string(key_file, "Network", "IPv6SendRA", "yes");
+        r = set_config(key_file, "Network", "IPv6SendRA", "yes");
+        if (r < 0)
+                return r;
+
+        /* [IPv6Prefix] section */
+        r = section_new("IPv6Prefix", &ipv6_prefix_section);
+        if (r < 0)
+                return r;
 
         if (p)
-                g_key_file_set_string(key_file, "IPv6Prefix", "Prefix", p);
+                add_key_to_section(ipv6_prefix_section, "Prefix", p);
 
         if (pref_lifetime > 0)
-                g_key_file_set_integer(key_file, "IPv6Prefix", "PreferredLifetimeSec", pref_lifetime);
+                add_key_to_section_integer(ipv6_prefix_section, "PreferredLifetimeSec", pref_lifetime);
 
         if (valid_lifetime > 0)
-                g_key_file_set_integer(key_file, "IPv6Prefix", "ValidLifetimeSec", valid_lifetime);
+                add_key_to_section_integer(ipv6_prefix_section, "ValidLifetimeSec", valid_lifetime);
 
+
+        r = section_new("IPv6SendRA", &ipv6_sendra_section);
+        if (r < 0)
+                return r;
 
         /* [IPv6SendRA] section */
         if (preference != _IPV6_RA_PREFERENCE_INVALID)
-                g_key_file_set_string(key_file, "IPv6SendRA", "RouterPreference", ipv6_ra_preference_type_to_name(preference));
+                add_key_to_section(ipv6_sendra_section, "RouterPreference", ipv6_ra_preference_type_to_name(preference));
 
         if (dns)
-                g_key_file_set_string(key_file, "IPv6SendRA", "DNS", d);
+                add_key_to_section(ipv6_sendra_section, "DNS", d);
 
         if (emit_dns >= 0)
-                g_key_file_set_string(key_file, "IPv6SendRA", "EmitDNS", bool_to_string(emit_dns));
+                add_key_to_section(ipv6_sendra_section, "EmitDNS", bool_to_string(emit_dns));
 
         if (dns_lifetime > 0)
-                g_key_file_set_integer(key_file, "IPv6SendRA", "DNSLifetimeSec", dns_lifetime);
+                add_key_to_section_integer(ipv6_sendra_section, "DNSLifetimeSec", dns_lifetime);
 
         if (domain)
-                g_key_file_set_string(key_file, "IPv6SendRA", "Domains", domain);
+                add_key_to_section(ipv6_sendra_section, "Domains", domain);
 
         if (assign >= 0)
-                g_key_file_set_string(key_file, "IPv6SendRA", "Assign", bool_to_string(assign));
+                add_key_to_section(ipv6_sendra_section, "Assign", bool_to_string(assign));
+
+        r = section_new("IPv6RoutePrefix", &ipv6_route_prefix_section);
+        if (r < 0)
+                return r;
 
         /* [IPv6RoutePrefix] section */
         if (rt)
-                g_key_file_set_string(key_file, "IPv6RoutePrefix", "Route", rt);
+                add_key_to_section(ipv6_route_prefix_section, "Route", rt);
 
         if (route_lifetime > 0)
-                g_key_file_set_integer(key_file, "IPv6RoutePrefix", "LifetimeSec", route_lifetime);
+                add_key_to_section_integer(ipv6_route_prefix_section, "LifetimeSec", route_lifetime);
 
-        if (!g_key_file_save_to_file (key_file, network, &e)) {
-                log_warning("Failed to write to '%s': %s", network, e->message);
-                return -e->code;
+        r = add_section_to_key_file(key_file, ipv6_sendra_section);
+        if (r < 0)
+                return r;
+
+        r = add_section_to_key_file(key_file, ipv6_prefix_section);
+        if (r < 0)
+                return r;
+
+        r = add_section_to_key_file(key_file, ipv6_route_prefix_section);
+        if (r < 0)
+                return r;
+
+        steal_pointer(ipv6_sendra_section);
+        steal_pointer(ipv6_prefix_section);
+        steal_pointer(ipv6_route_prefix_section);
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                return r;
         }
 
         r = set_file_permisssion(network, "systemd-network");
@@ -1155,7 +1188,7 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
                 return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, bool system, bool global) {
@@ -1167,8 +1200,8 @@ int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, 
 
         if (system)
                 return add_dns_server_and_domain_to_resolv_conf(NULL, domains);
-       else if (global)
-               return add_dns_server_and_domain_to_resolved_conf(NULL, domains);
+        else if (global)
+                return add_dns_server_and_domain_to_resolved_conf(NULL, domains);
 
         assert(ifnameidx);
 
@@ -1201,7 +1234,7 @@ int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, 
                 return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_read_domains_from_system_config(char **domains) {
@@ -1246,9 +1279,8 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx) {
                         return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
-
 
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v) {
         _auto_cleanup_ char *network = NULL;
@@ -1526,9 +1558,9 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
                 return log_oom();
 
         *netdev = (NetDev) {
-                .id = id,
-                .ifname = strdup(vlan),
-                .kind = NET_DEV_KIND_VLAN,
+                        .id = id,
+                        .ifname = strdup(vlan),
+                        .kind = NET_DEV_KIND_VLAN,
         };
         if (!netdev->ifname)
                 return log_oom();
@@ -1571,7 +1603,7 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", "VLAN", vlan);
+        r = add_key_to_section_string(network, "Network", "VLAN", vlan);
         if (r < 0)
                 return r;
 
@@ -1594,9 +1626,9 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
                 return log_oom();
 
         *netdev = (NetDev) {
-                .ifname = strdup(bridge),
-                .kind = NET_DEV_KIND_BRIDGE,
-        };
+                        .ifname = strdup(bridge),
+                        .kind = NET_DEV_KIND_BRIDGE,
+                  };
         if (!netdev->ifname)
                 return log_oom();
 
@@ -1644,7 +1676,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
                 if (r < 0)
                         return r;
 
-                r = set_config_file_string(network, "Network", "Bridge", bridge);
+                r = add_key_to_section_string(network, "Network", "Bridge", bridge);
                 if (r < 0)
                         return r;
         }
@@ -1668,10 +1700,11 @@ int manager_create_bond(const char *bond, BondMode mode, char **interfaces) {
                 return log_oom();
 
         *netdev = (NetDev) {
-                .ifname = strdup(bond),
-                .kind = NET_DEV_KIND_BOND,
-                .bond_mode = mode,
-        };
+                        .ifname = strdup(bond),
+                        .kind = NET_DEV_KIND_BOND,
+                        .bond_mode = mode,
+                  };
+
         if (!netdev->ifname)
                 return log_oom();
 
@@ -1714,7 +1747,7 @@ int manager_create_bond(const char *bond, BondMode mode, char **interfaces) {
                 if (r < 0)
                         return r;
 
-                r = set_config_file_string(network, "Network", "Bond", bond);
+                r = add_key_to_section_string(network, "Network", "Bond", bond);
                 if (r < 0)
                         return r;
         }
@@ -1746,12 +1779,13 @@ int manager_create_vxlan(const char *vxlan,
                 return log_oom();
 
         *netdev = (NetDev) {
-                .ifname = strdup(vxlan),
-                .kind = NET_DEV_KIND_VXLAN,
-                .id = vni,
-                .destination_port = port,
-                .independent = dev ? false : true,
-        };
+                      .ifname = strdup(vxlan),
+                      .kind = NET_DEV_KIND_VXLAN,
+                      .id = vni,
+                      .destination_port = port,
+                      .independent = dev ? false : true,
+                  };
+
         if (!netdev->ifname)
                 return log_oom();
 
@@ -1805,7 +1839,7 @@ int manager_create_vxlan(const char *vxlan,
                 if (r < 0)
                         return r;
 
-                r = set_config_file_string(network, "Network", "VXLAN", vxlan);
+                r = add_key_to_section_string(network, "Network", "VXLAN", vxlan);
                 if (r < 0)
                         return r;
         }
@@ -1829,10 +1863,10 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
                 return log_oom();
 
         *netdev = (NetDev) {
-                .ifname = strdup(macvlan),
-                .kind = kind ? NET_DEV_KIND_MACVLAN : NET_DEV_KIND_MACVTAP,
-                .macvlan_mode = mode,
-        };
+                       .ifname = strdup(macvlan),
+                       .kind = kind ? NET_DEV_KIND_MACVLAN : NET_DEV_KIND_MACVTAP,
+                       .macvlan_mode = mode,
+                };
         if (!netdev->ifname)
                 return log_oom();
 
@@ -1877,9 +1911,9 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
                 return r;
 
         if (kind)
-                r = set_config_file_string(network, "Network", "MACVLAN", macvlan);
+                r = add_key_to_section_string(network, "Network", "MACVLAN", macvlan);
         else
-                r = set_config_file_string(network, "Network", "MACVTAP", macvlan);
+                r = add_key_to_section_string(network, "Network", "MACVTAP", macvlan);
 
         if (r < 0)
                 return r;
@@ -1903,10 +1937,11 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
                 return log_oom();
 
         *netdev = (NetDev) {
-                .ifname = strdup(ipvlan),
-                .kind = kind ? NET_DEV_KIND_IPVLAN : NET_DEV_KIND_IPVTAP,
-                .ipvlan_mode = mode,
-        };
+                          .ifname = strdup(ipvlan),
+                          .kind = kind ? NET_DEV_KIND_IPVLAN : NET_DEV_KIND_IPVTAP,
+                          .ipvlan_mode = mode,
+                 };
+
         if (!netdev->ifname)
                 return log_oom();
 
@@ -1951,13 +1986,12 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
                 return r;
 
         if (kind)
-                r = set_config_file_string(network, "Network", "IPVLAN", ipvlan);
+                r = add_key_to_section_string(network, "Network", "IPVLAN", ipvlan);
         else
-                r = set_config_file_string(network, "Network", "IPVTAP", ipvlan);
+                r = add_key_to_section_string(network, "Network", "IPVTAP", ipvlan);
 
         if (r < 0)
                 return r;
-
 
         return dbus_network_reload();
 }
@@ -1976,10 +2010,10 @@ int manager_create_veth(const char *veth, const char *veth_peer) {
                 return log_oom();
 
         *netdev = (NetDev) {
-                .ifname = strdup(veth),
-                .peer = veth_peer ? strdup(veth_peer) : NULL,
-                .kind = NET_DEV_KIND_VETH,
-        };
+                       .ifname = strdup(veth),
+                       .peer = veth_peer ? strdup(veth_peer) : NULL,
+                       .kind = NET_DEV_KIND_VETH,
+                  };
         if (!netdev->ifname)
                 return log_oom();
 
@@ -2042,6 +2076,7 @@ int manager_create_tunnel(const char *tunnel,
                 .kind = kind,
                 .independent = dev ? false : true,
         };
+
         if (!netdev->ifname)
                 return log_oom();
 
@@ -2093,7 +2128,7 @@ int manager_create_tunnel(const char *tunnel,
                 if (r < 0)
                         return r;
 
-                r = set_config_file_string(network, "Network", "Tunnel", tunnel);
+                r = add_key_to_section_string(network, "Network", "Tunnel", tunnel);
                 if (r < 0)
                         return r;
         }
@@ -2115,10 +2150,10 @@ int manager_create_vrf(const char *vrf, uint32_t table) {
                 return log_oom();
 
         *netdev = (NetDev) {
-                .ifname = strdup(vrf),
-                .kind = NET_DEV_KIND_VRF,
-                .table = table
-        };
+                        .ifname = strdup(vrf),
+                        .kind = NET_DEV_KIND_VRF,
+                        .table = table
+                };
         if (!netdev->ifname)
                 return log_oom();
 
@@ -2176,12 +2211,12 @@ int manager_create_wireguard_tunnel(char *wireguard,
                 return log_oom();
 
         *netdev = (NetDev) {
-                .ifname = strdup(wireguard),
-                .kind = NET_DEV_KIND_WIREGUARD,
-                .wg_private_key = private_key ? strdup(private_key) : private_key,
-                .wg_public_key = public_key ? strdup(public_key) : public_key,
-                .listen_port = listen_port,
-        };
+                         .ifname = strdup(wireguard),
+                         .kind = NET_DEV_KIND_WIREGUARD,
+                         .wg_private_key = private_key ? strdup(private_key) : private_key,
+                         .wg_public_key = public_key ? strdup(public_key) : public_key,
+                         .listen_port = listen_port,
+                 };
         if (!netdev->ifname || !netdev->wg_private_key || !netdev->wg_public_key)
                 return log_oom();
 
@@ -2371,7 +2406,7 @@ int manager_configure_proxy(int enable,
         }
 
         if (gopher) {
-                 _auto_cleanup_ char *s = NULL, *k = NULL;
+                _auto_cleanup_ char *s = NULL, *k = NULL;
 
                 s = strdup(gopher);
                 if (!s)
@@ -2405,7 +2440,7 @@ int manager_configure_proxy(int enable,
         }
 
         if (socks5) {
-                 _auto_cleanup_ char *s = NULL, *k = NULL;
+                _auto_cleanup_ char *s = NULL, *k = NULL;
 
                 s = strdup(socks5);
                 if (!s)
@@ -2422,7 +2457,7 @@ int manager_configure_proxy(int enable,
         }
 
         if (no_proxy) {
-                 _auto_cleanup_ char *s = NULL, *k = NULL;
+                _auto_cleanup_ char *s = NULL, *k = NULL;
 
                 s = strdup(no_proxy);
                 if (!s)
@@ -2542,7 +2577,7 @@ static void manager_command_line_config_generator(void *key, void *value, void *
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return;
-         }
+        }
 
         (void) manager_write_network_config(n, config);
 }

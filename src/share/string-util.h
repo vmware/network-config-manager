@@ -19,6 +19,8 @@
 #define string_has_prefix g_str_has_prefix
 #define string_has_suffix g_str_has_suffix
 
+char *free_and_strdup(char *s, char *t);
+
 static inline const char *string_na(const char *s) {
         return s ?: "n/a";
 }
@@ -26,6 +28,11 @@ static inline const char *string_na(const char *s) {
 static inline bool isempty_string(const char *p) {
         return !p || !p[0];
 }
+
+char *rstrip(char *s);
+char *lskip(const char *s);
+char *find_chars_or_comment(const char *s, const char *chars);
+char *string_copy(char *dest, const char *src, size_t size);
 
 int split_pair(const char *s, const char *sep, char **l, char **r);
 

@@ -1,6 +1,7 @@
 /* Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
+#include <ctype.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <fcntl.h>
@@ -9,35 +10,143 @@
 
 #include "alloc-util.h"
 #include "config-parser.h"
+#include "config-parser.h"
 #include "string-util.h"
 #include "log.h"
 
-int load_config_file(const char *path, GKeyFile **ret) {
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        GError *error = NULL;
+int parse_key_file(const char *path, KeyFile **ret) {
+        _cleanup_(section_freep) Section *section = NULL;
+        _auto_cleanup_ KeyFile *key_file = NULL;
+        _auto_cleanup_fclose_ FILE *fp = NULL;
+        _auto_cleanup_ char *line = NULL;
+        char prev_name[LINE_MAX] = {};
+        char section_name[LINE_MAX] = {};
+        size_t max_line = LINE_MAX;
+        int r = 0, n = 0;
+        char *new_line;
+        char *s, *e;
+        size_t l;
 
         assert(path);
-        assert(ret);
 
-        if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
-                log_warning("Failed to open config file '%s'. \n Seems systemd-networkd state files and configuration "
-                            "files are not in sync. \nPlease restart syetemd-networkd to apply the new configurations.", path);
-                return -ENOENT;
-        }
+        fp = fopen(path, "r");
+        if (!fp)
+                return -errno;
 
-        key_file = g_key_file_new();
-        if (!key_file)
+        line = new0(char, LINE_MAX);
+        if (!line)
                 return -ENOMEM;
 
-        if (!g_key_file_load_from_file(key_file, path, G_KEY_FILE_NONE, &error))
-                return -ENODATA;
+        r = key_file_new(path, &key_file);
+        if (r < 0)
+                return r;
+
+        for ( ; fgets(line, max_line, fp); ) {
+                l = strlen(line);
+                while (l == max_line - 1 && line[l - 1] != '\n') {
+                        max_line *= 2;
+                        if (max_line > LINE_MAX)
+                                max_line = LINE_MAX;
+
+                        new_line = realloc(line, max_line);
+                        if (!new_line)
+                                return -ENOMEM;
+
+                        line = new_line;
+                        if (fgets(line + l, (int)(max_line - l), fp) == NULL)
+                                break;
+                        if (max_line >= LINE_MAX)
+                                break;
+                        l += strlen(line + l);
+                }
+                n++;
+
+                s = line;
+                s = lskip(rstrip(s));
+
+                if (strchr(";#", *s))
+                        continue;
+
+                e = find_chars_or_comment(s, NULL);
+                if (*e)
+                        *e = '\0';
+                rstrip(s);
+                r = n;
+
+                if (*s == '[') {
+                        /* A "[section_name]" line */
+                        e = find_chars_or_comment(s + 1, "]");
+                        if (*e == ']') {
+                                *e = '\0';
+                                string_copy(section_name, s + 1, sizeof(section_name));
+                                *prev_name = '\0';
+
+                                if (section) {
+                                        r = add_section_to_key_file(key_file, section);
+                                        if (r < 0)
+                                                return r;
+
+                                        steal_pointer(section);
+                                }
+
+                                r = section_new(section_name, &section);
+                                if (r < 0)
+                                        return r;
+
+                                r = n;
+                        } else if (!r)
+                                r = n;
+                } else if (*s) {
+                        _auto_cleanup_ char *k = NULL, *v = NULL;
+
+                        r = parse_line(s, &k, &v);
+                        if (r < 0)
+                                continue;
+
+                        r = add_key_to_section(section, k, v);
+                        if (r < 0)
+                                return r;
+
+                        steal_pointer(k);
+                        steal_pointer(v);
+                }
+        }
+
+        if (section) {
+                r = add_section_to_key_file(key_file, section);
+                if (r < 0)
+                        return r;
+                steal_pointer(section);
+        }
 
         *ret = steal_pointer(key_file);
         return 0;
 }
 
+static void display_keys(gpointer data_ptr, gpointer ignored) {
+        Key *k = data_ptr;
+
+        printf("%s=%s\n", k->name, k->v);
+}
+
+static void display_sections(gpointer data_ptr, gpointer ignored) {
+        Section *s = data_ptr;
+
+        printf("\n[%s]\n", s->name);
+        g_list_foreach(s->keys, display_keys, NULL);
+}
+
+int display_key_file(const KeyFile *k) {
+        assert(k);
+
+        printf("File: %s, sections: %ld\n\n", k->name, k->nsections);
+
+        g_list_foreach(k->sections, display_sections, NULL);
+        return 0;
+}
+
 int parse_config_file(const char *path, const char *section, const char *k, char **ret) {
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         gchar *s;
         int r;
 
@@ -45,39 +154,18 @@ int parse_config_file(const char *path, const char *section, const char *k, char
         assert(section);
         assert(k);
 
-        r = load_config_file(path, &key_file);
+        r = parse_key_file(path, &key_file);
         if (r < 0)
                 return r;
 
-        s = g_key_file_get_string(key_file, section, k, NULL);
-        if (!s)
-                return -ENODATA;
+        r = key_file_get_string(key_file, section, k, &s);
+        if (r < 0)
+                return r;
 
         *ret = g_strdup(s);
         if (!*ret)
                 return -ENOMEM;
 
-        return 0;
-}
-
-int parse_config_file_integer(const char *path, const char *section, const char *k, unsigned *ret) {
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
-        GError *error = NULL;
-        int r, v;
-
-        assert(path);
-        assert(section);
-        assert(k);
-
-        r = load_config_file(path, &key_file);
-        if (r < 0)
-                return r;
-
-        v = g_key_file_get_integer(key_file, section, k, &error);
-        if (error)
-                return -error->code;
-
-        *ret = v;
         return 0;
 }
 
@@ -98,6 +186,21 @@ int parse_line(const char *line, char **key, char **value) {
                 return -ENODATA;
 
         return split_pair(s, "=", key, value);
+}
+
+int parse_config_file_integer(const char *path, const char *section, const char *k, unsigned *ret) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert(path);
+        assert(section);
+        assert(k);
+
+        r = parse_key_file(path, &key_file);
+        if (r < 0)
+                return r;
+
+        return key_file_get_integer(key_file, section, k, ret);
 }
 
 int parse_state_file(const char *path, const char *key, char **value, GHashTable **table) {

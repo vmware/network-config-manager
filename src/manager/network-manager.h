@@ -37,9 +37,9 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx,
                                    char *pref_lft,
                                    IPDuplicateAddressDetection dad,
                                    int prefix_route,
-                                   uint32_t label);
+                                   const char *label);
 
-int manager_delete_link_address(const IfNameIndex *ifnameidx);
+int manager_delete_link_address(const IfNameIndex *ifnameidx, const char *a);
 
 int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt);
 

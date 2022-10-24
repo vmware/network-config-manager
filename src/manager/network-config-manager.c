@@ -23,6 +23,7 @@
 #include "parse-util.h"
 #include "udev-hwdb.h"
 #include "network-json.h"
+#include "config-parser.h"
 
 static bool arg_json = false;
 static bool arg_beautify = true;
@@ -1232,10 +1233,9 @@ _public_ int ncm_link_update_state(int argc, char *argv[]) {
 _public_ int ncm_link_add_address(int argc, char *argv[]) {
         IPDuplicateAddressDetection dad = _IP_DUPLICATE_ADDRESS_DETECTION_INVALID;
         _auto_cleanup_ IPAddress *address = NULL, *peer = NULL;
-        _auto_cleanup_ char *scope = NULL, *pref_lft = NULL;
+        _auto_cleanup_ char *scope = NULL, *pref_lft = NULL, *label = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r, prefix_route = -1;
-        uint32_t label = 0;
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
@@ -1269,11 +1269,9 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 if (string_equal(argv[i], "label")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint32(argv[i], &label);
-                        if (r < 0) {
-                                log_warning("Failed to parse label '%s': %s", argv[i], g_strerror(-r));
-                                return r;
-                        }
+                        label = strdup(argv[i]);
+                        if (!label)
+                                return log_oom();
 
                         continue;
                 }
@@ -1363,7 +1361,9 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_delete_address(int argc, char *argv[]) {
+        _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *a = NULL;
         int r;
 
         r = parse_ifname_or_index(argv[1], &p);
@@ -1372,7 +1372,23 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
                 return -errno;
         }
 
-        r = manager_delete_link_address(p);
+        for (int i = 2; i < argc; i++) {
+                if (string_equal(argv[i], "address")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ip_from_string(argv[i], &address);
+                        if (r < 0) {
+                                log_warning("Failed to parse address '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        a = strdup(argv[i]);
+                        if (!a)
+                                return log_oom();
+                        break;
+                }
+        }
+
+        r = manager_delete_link_address(p, a);
         if (r < 0) {
                 log_warning("Failed to remove link address '%s': %s\n", p->ifname, g_strerror(-r));
                 return r;

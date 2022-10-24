@@ -41,7 +41,6 @@ int set_file_permisssion(const char *path, const char *user) {
         return 0;
 }
 
-
 int create_conf_file(const char *path, const char *ifname, const char *extension, char **ret) {
         _auto_cleanup_ char *p = NULL, *f = NULL;
         _auto_cleanup_close_ int fd = -1;
@@ -59,9 +58,11 @@ int create_conf_file(const char *path, const char *ifname, const char *extension
         if (!p)
                 return -ENOMEM;
 
-        fd = creat(p, 0644 | S_ISUID | S_ISGID);
-        if (fd < 0)
-                return -errno;
+        if (!g_file_test(p, G_FILE_TEST_EXISTS)) {
+                fd = creat(p, 0644 | S_ISUID | S_ISGID);
+                if (fd < 0)
+                        return -errno;
+        }
 
         r = set_file_permisssion(path, "systemd-network");
         if (r < 0)
