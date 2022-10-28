@@ -120,7 +120,6 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
 }
 
 static void list_one_link_routes(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_strv_ char **dhcp = NULL;
         _auto_cleanup_ char *c = NULL;
         static bool first = true;
         unsigned long size;
@@ -2414,11 +2413,10 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         r = dbus_get_dns_servers_from_resolved("FallbackDNS", &fallback);
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
-                _auto_cleanup_ char *s = NULL;
 
                 display(arg_beautify, ansi_color_bold_cyan(), "     FallbackDNS: ");
                 for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        _auto_cleanup_ char *pretty = NULL, *t = NULL;
+                        _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(i);
 
