@@ -100,7 +100,7 @@ int manager_set_link_flag(const IfNameIndex *ifnameidx, bool mode, const char* k
 }
 
 int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
-        _auto_cleanup_ char *network = NULL, *config_dhcp = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -146,7 +146,7 @@ int manager_get_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode *mode) {
 }
 
 int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier) {
-        _auto_cleanup_ char *network = NULL, *config = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -254,7 +254,7 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDU
 }
 
 int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
-        _auto_cleanup_ char *network = NULL, *config_mtu = NULL, *config_update_mtu = NULL;
+        _auto_cleanup_ char *network = NULL, *config_update_mtu = NULL;
         int r;
 
         assert(ifnameidx);
@@ -359,7 +359,7 @@ int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu
 }
 
 int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac) {
-        _auto_cleanup_ char *p = NULL, *network = NULL, *config_mac = NULL, *config_update_mac = NULL;
+        _auto_cleanup_ char *network = NULL, *config_mac = NULL, *config_update_mac = NULL;
         int r;
 
         assert(ifnameidx);
@@ -1515,27 +1515,32 @@ static int manager_write_netdev_config(const NetDev *n, const GString *config) {
         return 0;
 }
 
-int manager_remove_netdev(const IfNameIndex *ifnameidx, const char *kind) {
+int manager_remove_netdev(const char *ifname, const char *kind) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        assert(ifnameidx);
+        assert(ifname);
 
         /* remove .netdev file  */
-        (void) remove_config_files_glob("/etc/systemd/network/*.netdev", "NetDev", "Name", ifnameidx->ifname);
-        (void) remove_config_files_glob("/lib/systemd/network/*.netdev", "NetDev", "Name", ifnameidx->ifname);
+        (void) remove_config_files_glob("/etc/systemd/network/*.netdev", "NetDev", "Name", ifname);
+        (void) remove_config_files_glob("/lib/systemd/network/*.netdev", "NetDev", "Name", ifname);
 
         /* remove .network */
-        (void) remove_config_files_glob("/etc/systemd/network/*.network", "Match", "Name", ifnameidx->ifname);
-        (void) remove_config_files_glob("/lib/systemd/network/*.network", "Match", "Name", ifnameidx->ifname);
+        (void) remove_config_files_glob("/etc/systemd/network/*.network", "Match", "Name", ifname);
+        (void) remove_config_files_glob("/lib/systemd/network/*.network", "Match", "Name", ifname);
 
         /* Remove [Network] section */
         if (kind) {
-                (void) remove_config_files_section_glob("/etc/systemd/network/*.network", "Network", kind, ifnameidx->ifname);
-                (void) remove_config_files_section_glob("/lib/systemd/network/*.network", "Network", kind, ifnameidx->ifname);
+                (void) remove_config_files_section_glob("/etc/systemd/network/*.network", "Network", kind, ifname);
+                (void) remove_config_files_section_glob("/lib/systemd/network/*.network", "Network", kind, ifname);
         }
 
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return r;
+
         /* Finally remove the link */
-        r = link_remove(ifnameidx);
+        r = link_remove(p);
         if (r < 0)
                 return r;
 

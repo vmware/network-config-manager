@@ -77,13 +77,15 @@ int add_config_file_string(const char *path, const char *section, const char *k,
 int key_file_set_integer(KeyFile *key_file, const char *section, const char *k, int v);
 int key_file_set_string(KeyFile *key_file, const char *section, const char *k, const char *v);
 
-int key_file_get_string(KeyFile *key_file, const char *section, const char *k, char **v);
-int key_file_get_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v);
+int key_file_parse_string(KeyFile *key_file, const char *section, const char *k, char **v);
+int key_file_parse_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v);
 
 int key_file_add_string(KeyFile *key_file, const char *section, const char *k, const char *v);
 int add_key_to_section_string(const char *path, const char *section, const char *k, const char *v);
 
 int remove_key_from_config_file(const char *path, const char *section, const char *k);
+int remove_key_value_from_config_file(const char *path, const char *section, const char *k, const char *v);
+
 int remove_section_from_config_file(const char *path, const char *section);
 int remove_section_from_config_file_key(const char *path, const char *section, const char *k, const char *v);
 

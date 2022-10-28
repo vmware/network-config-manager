@@ -126,7 +126,7 @@ void netdev_link_unref(NetDevLink *n) {
                 return;
 
         config_manager_unref(n->m);
- 
+
         free(n->alias);
         free(n->desc);
         free(n->macpolicy);
@@ -171,7 +171,7 @@ void netdev_link_unref(NetDevLink *n) {
         free(n->coal_pkt_rate_high);
         free(n->coal_pkt_rate_smpl_itrvl);
         free(n->sts_blk_coal_sec);
- 
+
         free(n->rx_buf);
         free(n->rx_mini_buf);
         free(n->rx_jumbo_buf);
@@ -181,7 +181,7 @@ void netdev_link_unref(NetDevLink *n) {
 }
 
 int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
-        _auto_cleanup_ char *file = NULL, *link = NULL, *path = NULL, *s = NULL, *mac = NULL;
+        _auto_cleanup_ char *file = NULL, *path = NULL, *s = NULL, *mac = NULL;
         int r;
 
         assert(ifname);

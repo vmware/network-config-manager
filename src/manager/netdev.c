@@ -300,7 +300,7 @@ int generate_netdev_config(NetDev *n, GString **ret) {
 
         if (n->kind == NET_DEV_KIND_IPIP_TUNNEL || n->kind == NET_DEV_KIND_SIT_TUNNEL ||
             n->kind == NET_DEV_KIND_GRE_TUNNEL || n->kind == NET_DEV_KIND_VTI_TUNNEL) {
-                _auto_cleanup_ char *local = NULL, *remote = NULL, *group = NULL;
+                _auto_cleanup_ char *local = NULL, *remote = NULL;
 
                 g_string_append(config, "[Tunnel]\n");
 

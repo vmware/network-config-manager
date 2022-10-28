@@ -427,7 +427,7 @@ int key_file_add_string(KeyFile *key_file, const char *section, const char *k, c
         return add_config(key_file, section, k, v);
 }
 
-int key_file_get_string(KeyFile *key_file, const char *section, const char *k, char **v) {
+int key_file_parse_string(KeyFile *key_file, const char *section, const char *k, char **v) {
         GList *iter;
 
         assert(key_file);
@@ -454,7 +454,7 @@ int key_file_get_string(KeyFile *key_file, const char *section, const char *k, c
         return -ENOENT;
 }
 
-int key_file_get_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v) {
+int key_file_parse_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v) {
         _auto_cleanup_ char *value = NULL;
         int r;
 
@@ -462,7 +462,7 @@ int key_file_get_integer(KeyFile *key_file, const char *section, const char *k, 
         assert(section);
         assert(k);
 
-        r = key_file_get_string(key_file, section, k, &value);
+        r = key_file_parse_string(key_file, section, k, &value);
         if (r < 0)
                 return r;
 
@@ -527,6 +527,45 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
 
         return set_file_permisssion(path, "systemd-network");
 }
+
+int remove_key_value_from_config_file(const char *path, const char *section, const char *k, const char *v) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        GList *iter, *l = NULL;
+        int r;
+
+        assert(path);
+        assert(section);
+        assert(k);
+
+        r = parse_key_file(path, &key_file);
+        if (r < 0)
+                return r;
+
+        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
+
+                if (string_equal(s->name, section)) {
+                        for (GList *i = s->keys; i; i = g_list_next (i)) {
+                                Key *key = (Key *) i->data;
+
+                                if (string_equal(key->name, k) && string_equal(key->v, v)) {
+                                        l = g_list_remove_link(s->keys, g_list_nth(s->keys, g_list_position(s->keys, i)));
+                                        break;
+                                }
+
+                        }
+                }
+        }
+
+        (void) l;
+
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
+
+        return set_file_permisssion(path, "systemd-network");
+}
+
 
 int remove_section_from_config_file(const char *path, const char *section) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -693,16 +732,8 @@ int remove_config_files_section_glob(const char *path, const char *section, cons
         if (r != -ENOENT)
                 return r;
 
-        for (size_t i = 0; i < g.gl_pathc; i++) {
-                _auto_cleanup_ char *s = NULL;
-
-                r = parse_config_file(g.gl_pathv[i], section, k, &s);
-                if (r < 0)
-                        return r;
-
-                if (string_equal(s, v))
-                        (void) remove_key_from_config_file(g.gl_pathv[i], section, k);
-        }
+        for (size_t i = 0; i < g.gl_pathc; i++)
+                (void) remove_key_value_from_config_file(g.gl_pathv[i], section, k, v);
 
         return 0;
 }

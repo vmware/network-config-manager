@@ -16,62 +16,51 @@
 
 int parse_key_file(const char *path, KeyFile **ret) {
         _cleanup_(section_freep) Section *section = NULL;
+        _cleanup_(g_error_freep) GError *error = NULL;
         _auto_cleanup_ KeyFile *key_file = NULL;
-        _auto_cleanup_fclose_ FILE *fp = NULL;
-        _auto_cleanup_ char *line = NULL;
-        char prev_name[LINE_MAX] = {};
+        _auto_cleanup_strv_ char **lines = NULL;
+        _auto_cleanup_ char *contents = NULL;
         char section_name[LINE_MAX] = {};
-        size_t max_line = LINE_MAX;
-        int r = 0, n = 0;
-        char *new_line;
+        char **l = NULL;
         char *s, *e;
-        size_t l;
+        size_t n;
+        int r;
 
         assert(path);
 
-        fp = fopen(path, "r");
-        if (!fp)
-                return -errno;
+        if (!g_file_test(path, G_FILE_TEST_EXISTS))
+                return -ENOENT;
 
-        line = new0(char, LINE_MAX);
-        if (!line)
-                return -ENOMEM;
+        if (!g_file_get_contents(path, &contents, &n , &error))
+                return -error->code;
 
         r = key_file_new(path, &key_file);
         if (r < 0)
                 return r;
 
-        for ( ; fgets(line, max_line, fp); ) {
-                l = strlen(line);
-                while (l == max_line - 1 && line[l - 1] != '\n') {
-                        max_line *= 2;
-                        if (max_line > LINE_MAX)
-                                max_line = LINE_MAX;
+        lines = strsplit(contents, "\n", 0);
+        if (!lines)
+                return log_oom();
 
-                        new_line = realloc(line, max_line);
-                        if (!new_line)
-                                return -ENOMEM;
+        strv_foreach(l, lines) {
+                _auto_cleanup_ char *t = NULL;
 
-                        line = new_line;
-                        if (fgets(line + l, (int)(max_line - l), fp) == NULL)
-                                break;
-                        if (max_line >= LINE_MAX)
-                                break;
-                        l += strlen(line + l);
-                }
-                n++;
+                t = g_strdup(*l);
+                if (!t)
+                        return log_oom();
 
-                s = line;
-                s = lskip(rstrip(s));
+                s = string_strip(t);
+                n = (int) strlen(s);
+                if (n <= 0)
+                        continue;
 
-                if (strchr(";#", *s))
+                if (isempty_string(s) || strchr(";#", *s))
                         continue;
 
                 e = find_chars_or_comment(s, NULL);
                 if (*e)
                         *e = '\0';
                 rstrip(s);
-                r = n;
 
                 if (*s == '[') {
                         /* A "[section_name]" line */
@@ -79,7 +68,6 @@ int parse_key_file(const char *path, KeyFile **ret) {
                         if (*e == ']') {
                                 *e = '\0';
                                 string_copy(section_name, s + 1, sizeof(section_name));
-                                *prev_name = '\0';
 
                                 if (section) {
                                         r = add_section_to_key_file(key_file, section);
@@ -92,10 +80,7 @@ int parse_key_file(const char *path, KeyFile **ret) {
                                 r = section_new(section_name, &section);
                                 if (r < 0)
                                         return r;
-
-                                r = n;
-                        } else if (!r)
-                                r = n;
+                        }
                 } else if (*s) {
                         _auto_cleanup_ char *k = NULL, *v = NULL;
 
@@ -158,7 +143,7 @@ int parse_config_file(const char *path, const char *section, const char *k, char
         if (r < 0)
                 return r;
 
-        r = key_file_get_string(key_file, section, k, &s);
+        r = key_file_parse_string(key_file, section, k, &s);
         if (r < 0)
                 return r;
 
@@ -200,7 +185,7 @@ int parse_config_file_integer(const char *path, const char *section, const char 
         if (r < 0)
                 return r;
 
-        return key_file_get_integer(key_file, section, k, ret);
+        return key_file_parse_integer(key_file, section, k, ret);
 }
 
 int parse_state_file(const char *path, const char *key, char **value, GHashTable **table) {

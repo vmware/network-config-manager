@@ -602,7 +602,7 @@ static void display_alterative_names(gpointer data, gpointer user_data) {
 
 int json_list_one_link(IfNameIndex *p, char **ret) {
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
-        _cleanup_(json_object_putp) json_object *jobj = NULL, *jobj_routes = NULL, *jaddress = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL, *link = NULL, *online_state = NULL,
                 *address_state = NULL, *ipv4_state = NULL, *ipv6_state = NULL, *required_for_online = NULL,
                 *activation_policy = NULL;

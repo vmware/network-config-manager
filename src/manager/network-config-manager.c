@@ -3290,14 +3290,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 
 _public_ int ncm_remove_netdev(int argc, char *argv[]) {
         _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
-
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
-        }
 
         r = netdev_ctl_name_to_configs_new(&m);
         if (r < 0) {
@@ -3305,7 +3298,7 @@ _public_ int ncm_remove_netdev(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_remove_netdev(p, ctl_to_config(m, argv[3]));
+        r = manager_remove_netdev(argv[1], ctl_to_config(m, argv[3]));
         if (r < 0) {
                 log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
                 return r;
