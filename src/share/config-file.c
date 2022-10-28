@@ -427,7 +427,7 @@ int key_file_add_string(KeyFile *key_file, const char *section, const char *k, c
         return add_config(key_file, section, k, v);
 }
 
-int key_file_get_string(KeyFile *key_file, const char *section, const char *k, char **v) {
+int key_file_parse_string(KeyFile *key_file, const char *section, const char *k, char **v) {
         GList *iter;
 
         assert(key_file);
@@ -454,7 +454,7 @@ int key_file_get_string(KeyFile *key_file, const char *section, const char *k, c
         return -ENOENT;
 }
 
-int key_file_get_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v) {
+int key_file_parse_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v) {
         _auto_cleanup_ char *value = NULL;
         int r;
 
@@ -462,7 +462,7 @@ int key_file_get_integer(KeyFile *key_file, const char *section, const char *k, 
         assert(section);
         assert(k);
 
-        r = key_file_get_string(key_file, section, k, &value);
+        r = key_file_parse_string(key_file, section, k, &value);
         if (r < 0)
                 return r;
 
