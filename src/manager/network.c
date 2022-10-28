@@ -695,34 +695,38 @@ int generate_network_config(Network *n, GString **ret) {
         if (n->match_mac)
                 g_string_append_printf(config, "MACAddress=%s\n", n->match_mac);
 
-        g_string_append(config, "\n[Link]\n");
-        
-        if (n->unmanaged != -1)
-                g_string_append_printf(config, "Unmanaged=%s\n", bool_to_string(!n->unmanaged));
-        
-        if (n->arp != -1)
-                g_string_append_printf(config, "ARP=%s\n", bool_to_string(n->arp));
-        
-        if (n->multicast != -1)
-                g_string_append_printf(config, "Multicast=%s\n", bool_to_string(n->multicast));
-        
-        if (n->all_multicast != -1)
-                g_string_append_printf(config, "AllMulticast=%s\n", bool_to_string(n->all_multicast));
-        
-        if (n->promiscuous != -1)
-                g_string_append_printf(config, "Promiscuous=%s\n", bool_to_string(n->promiscuous));
-        
-        if (n->req_for_online != -1)
-                g_string_append_printf(config, "RequiredForOnline=%s\n", bool_to_string(n->req_for_online));
-        
-        if (n->mtu > 0)
-                g_string_append_printf(config, "MTUBytes=%d\n", n->mtu);
+        if (n->unmanaged != -1 || n->arp != -1 || n->multicast != -1 || n->all_multicast != -1 || n->promiscuous != -1 ||
+            n->req_for_online != -1 || n->mtu > 0 || n->mac || n->req_family_for_online) {
 
-        if (n->mac)
-                g_string_append_printf(config, "MACAddress=%s\n", n->mac);
+                g_string_append(config, "\n[Link]\n");
 
-        if (n->req_family_for_online)
-                g_string_append_printf(config, "RequiredFamilyForOnline=%s\n", n->req_family_for_online);
+                if (n->unmanaged != -1)
+                        g_string_append_printf(config, "Unmanaged=%s\n", bool_to_string(!n->unmanaged));
+
+                if (n->arp != -1)
+                        g_string_append_printf(config, "ARP=%s\n", bool_to_string(n->arp));
+
+                if (n->multicast != -1)
+                        g_string_append_printf(config, "Multicast=%s\n", bool_to_string(n->multicast));
+
+                if (n->all_multicast != -1)
+                        g_string_append_printf(config, "AllMulticast=%s\n", bool_to_string(n->all_multicast));
+
+                if (n->promiscuous != -1)
+                        g_string_append_printf(config, "Promiscuous=%s\n", bool_to_string(n->promiscuous));
+
+                if (n->req_for_online != -1)
+                        g_string_append_printf(config, "RequiredForOnline=%s\n", bool_to_string(n->req_for_online));
+
+                if (n->mtu > 0)
+                        g_string_append_printf(config, "MTUBytes=%d\n", n->mtu);
+
+                if (n->mac)
+                        g_string_append_printf(config, "MACAddress=%s\n", n->mac);
+
+                if (n->req_family_for_online)
+                        g_string_append_printf(config, "RequiredFamilyForOnline=%s\n", n->req_family_for_online);
+        }
 
         g_string_append(config, "\n[Network]\n");
 
@@ -759,30 +763,35 @@ int generate_network_config(Network *n, GString **ret) {
                                                                         strlen(netdev_kind_to_name(n->netdev->kind))),
                                                                         n->netdev->ifname);
 
-        g_string_append(config, "\n[DHCPv4]\n");
+        if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID || n->dhcp4_use_dns != -1 || n->dhcp4_use_domains != -1 ||
+            n->dhcp4_use_ntp != -1 || n->dhcp4_use_mtu != -1) {
+                g_string_append(config, "\n[DHCPv4]\n");
 
-        if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID)
-                g_string_append_printf(config, "ClientIdentifier=%s\n", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
+                if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID)
+                        g_string_append_printf(config, "ClientIdentifier=%s\n", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
 
-        if (n->dhcp4_use_dns != -1)
-                g_string_append_printf(config, "UseDNS=%s\n", bool_to_string(n->dhcp4_use_dns));
+                if (n->dhcp4_use_dns != -1)
+                        g_string_append_printf(config, "UseDNS=%s\n", bool_to_string(n->dhcp4_use_dns));
 
-        if (n->dhcp4_use_domains != -1)
-                g_string_append_printf(config, "UseDomains=%s\n", bool_to_string(n->dhcp4_use_domains));
+                if (n->dhcp4_use_domains != -1)
+                        g_string_append_printf(config, "UseDomains=%s\n", bool_to_string(n->dhcp4_use_domains));
 
-        if (n->dhcp4_use_ntp != -1)
-                g_string_append_printf(config, "UseNTP=%s\n", bool_to_string(n->dhcp4_use_ntp));
+                if (n->dhcp4_use_ntp != -1)
+                        g_string_append_printf(config, "UseNTP=%s\n", bool_to_string(n->dhcp4_use_ntp));
 
-        if (n->dhcp4_use_mtu != -1)
-                g_string_append_printf(config, "UseMTU=%s\n", bool_to_string(n->dhcp4_use_mtu));
+                if (n->dhcp4_use_mtu != -1)
+                        g_string_append_printf(config, "UseMTU=%s\n", bool_to_string(n->dhcp4_use_mtu));
+        }
 
-        g_string_append(config, "\n[DHCPv6]\n");
+        if ( n->dhcp6_use_dns != -1 || n->dhcp6_use_ntp != -1) {
+                g_string_append(config, "\n[DHCPv6]\n");
 
-        if (n->dhcp6_use_dns != -1)
-                g_string_append_printf(config, "UseDNS=%s\n", bool_to_string(n->dhcp6_use_dns));
+                if (n->dhcp6_use_dns != -1)
+                        g_string_append_printf(config, "UseDNS=%s\n", bool_to_string(n->dhcp6_use_dns));
 
-        if (n->dhcp6_use_ntp != -1)
-                g_string_append_printf(config, "UseNTP=%s\n", bool_to_string(n->dhcp6_use_ntp));
+                if (n->dhcp6_use_ntp != -1)
+                        g_string_append_printf(config, "UseNTP=%s\n", bool_to_string(n->dhcp6_use_ntp));
+        }
 
         if (n->addresses && set_size(n->addresses) > 0)
                 set_foreach(n->addresses, append_addresses, config);

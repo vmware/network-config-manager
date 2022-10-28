@@ -126,7 +126,7 @@ static int help(void) {
                "  set-link-state               [LINK] [STATE {up|down}] Configures Link State.\n"
                "  add-link-address             [LINK] address [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime [{forever|infinity|0}] scope {global|link|host|NUMBER}]"
                                                       "\n\t\t\t\t      dad [DAD {none|ipv4|ipv6|both}] prefix-route [PREFIXROUTE BOOLEAN] Configures Link Address.\n"
-               "  delete-link-address          [LINK] Removes Address from Link.\n"
+               "  delete-link-address          [LINK] address [ADDRESS] Removes Address from Link.\n"
                "  add-default-gateway          [LINK] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures Link Default Gateway.\n"
                "  delete-gateway               [LINK] Removes Gateway from Link.\n"
                "  add-route                    [LINK] gw [GATEWAY ADDRESS] dest [DESTINATION ADDRESS] src [SOURCE ADDRESS] pref-src [PREFFREDSOURCE ADDRESS]"
@@ -325,7 +325,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp-duid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
                 { "set-link-state",               2,        WORD_ANY, false, ncm_link_update_state },
                 { "add-link-address",             2,        WORD_ANY, false, ncm_link_add_address },
-                { "delete-link-address",          1,        WORD_ANY, false, ncm_link_delete_address },
+                { "delete-link-address",          3,        WORD_ANY, false, ncm_link_delete_address },
                 { "add-default-gateway",          2,        WORD_ANY, false, ncm_link_add_default_gateway },
                 { "delete-gateway",               1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-route",                    2,        WORD_ANY, false, ncm_link_add_route },

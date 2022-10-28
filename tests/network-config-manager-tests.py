@@ -506,11 +506,11 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Link', 'ARP') == 'true')
-        assert(parser.get('Link', 'Multicast') == 'true')
-        assert(parser.get('Link', 'AllMulticast') == 'false')
-        assert(parser.get('Link', 'Promiscuous') == 'false')
-        assert(parser.get('Link', 'RequiredForOnline') == 'false')
+        assert(parser.get('Link', 'ARP') == 'yes')
+        assert(parser.get('Link', 'Multicast') == 'yes')
+        assert(parser.get('Link', 'AllMulticast') == 'no')
+        assert(parser.get('Link', 'Promiscuous') == 'no')
+        assert(parser.get('Link', 'RequiredForOnline') == 'no')
 
     def test_cli_set_group(self):
         assert(link_exist('test99') == True)
@@ -773,7 +773,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'IPv6AcceptRA') == 'true')
+        assert(parser.get('Network', 'IPv6AcceptRA') == 'yes')
 
     def test_cli_set_link_local_addressing(self):
         assert(link_exist('test99') == True)
@@ -788,7 +788,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'LinkLocalAddressing') == 'true')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'yes')
 
     def test_cli_set_ipv4_link_local_route(self):
         assert(link_exist('test99') == True);
@@ -803,7 +803,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'IPv4LLRoute') == 'true')
+        assert(parser.get('Network', 'IPv4LLRoute') == 'yes')
 
     def test_cli_set_llmnr(self):
         assert(link_exist('test99') == True);
@@ -817,7 +817,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'LLMNR') == 'true')
+        assert(parser.get('Network', 'LLMNR') == 'yes')
 
     def test_cli_set_multicast_dns(self):
         assert(link_exist('test99') == True);
@@ -833,7 +833,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'MulticastDNS') == 'true')
+        assert(parser.get('Network', 'MulticastDNS') == 'yes')
 
     def test_cli_set_ip_masquerade(self):
         assert(link_exist('test99') == True);
@@ -848,7 +848,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'IPMasquerade') == 'true')
+        assert(parser.get('Network', 'IPMasquerade') == 'yes')
 
 
     def test_cli_set_dhcp4_client_identifier(self):
@@ -879,7 +879,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'UseDNS') == 'true')
+        assert(parser.get('DHCPv4', 'UseDNS') == 'yes')
 
     def test_cli_set_dhcp4_use_mtu(self):
         assert(link_exist('test99') == True)
@@ -908,7 +908,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'UseDomains') == 'true')
+        assert(parser.get('DHCPv4', 'UseDomains') == 'yes')
 
     def test_cli_set_dhcp4_use_ntp(self):
         assert(link_exist('test99') == True)
@@ -923,7 +923,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'UseNTP') == 'true')
+        assert(parser.get('DHCPv4', 'UseNTP') == 'yes')
 
     def test_cli_set_dhcp4_use_routes(self):
         assert(link_exist('test99') == True)
@@ -937,7 +937,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'UseRoutes') == 'true')
+        assert(parser.get('DHCPv4', 'UseRoutes') == 'yes')
 
     def test_cli_set_link_lldp(self):
         assert(link_exist('test99') == True)
@@ -952,7 +952,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'LLDP') == 'true')
+        assert(parser.get('Network', 'LLDP') == 'yes')
 
     def test_cli_set_link_emit_lldp(self):
         assert(link_exist('test99') == True)
@@ -967,7 +967,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'EmitLLDP') == 'true')
+        assert(parser.get('Network', 'EmitLLDP') == 'yes')
 
 class TestCLIDHCPv4Server:
     def setup_method(self):

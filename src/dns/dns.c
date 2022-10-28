@@ -70,12 +70,12 @@ static int dns_compare_func(gconstpointer x, gconstpointer y, gpointer user_data
                 return a->ifindex - b->ifindex;
 
         switch(a->address.family) {
-        case AF_INET:
-                return memcmp(&a->address.in, &b->address.in, sizeof(struct in_addr));
-        case AF_INET6:
-                return memcmp(&a->address.in6, &b->address.in6, sizeof(struct in6_addr));
-        default:
-                break;
+                case AF_INET:
+                        return memcmp(&a->address.in, &b->address.in, sizeof(struct in_addr));
+                case AF_INET6:
+                        return memcmp(&a->address.in6, &b->address.in6, sizeof(struct in6_addr));
+                default:
+                        break;
         }
 
         return 0;
@@ -253,13 +253,16 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
 
 /* write to /etc/systemd/resolved.conf */
 int add_dns_server_and_domain_to_resolved_conf(DNSServers *dns, char **domains) {
-        _cleanup_(key_file_freep) GKeyFile *key_file = NULL;
+        _cleanup_(gkey_file_freep) GKeyFile *key_file = NULL;
         _cleanup_(g_error_freep) GError *e = NULL;
         int r;
 
-        r = load_config_file("/etc/systemd/resolved.conf", &key_file);
-        if (r < 0)
-                return r;
+        key_file = g_key_file_new();
+        if (!key_file)
+                return -ENOMEM;
+
+        if (!g_key_file_load_from_file(key_file, "/etc/systemd/resolved.conf", G_KEY_FILE_NONE, &e))
+                return -ENODATA;
 
         if (dns) {
                 _auto_cleanup_ char *dns_line = NULL, *l = NULL;

@@ -1,9 +1,10 @@
 /* Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-#include <stdbool.h>
-
 #pragma once
+
+#include <stdbool.h>
+#include <glib.h>
 
 #include "macros.h"
 #include "string-util.h"
@@ -17,9 +18,53 @@ typedef struct ConfigManager {
         GHashTable *ctl_to_config_table;
 } ConfigManager;
 
+typedef struct Key {
+        char *name;
+        char *v;
+} Key;
+
+typedef struct Section {
+        char *name;
+
+        GList *keys;
+} Section;
+
+typedef struct KeyFile {
+        size_t nsections;
+        char *name;
+
+        GList *sections;
+} KeyFile;
+
+int key_new(const char *key, const char *value, Key **ret);
+void key_free(void *k);
+DEFINE_CLEANUP(Key*, key_free);
+
+int section_new(const char *name, Section **ret);
+void section_free(void *s);
+DEFINE_CLEANUP(Section*, section_free);
+
+int key_file_new(const char *file_name, KeyFile **ret);
+void key_file_free(KeyFile *k);
+DEFINE_CLEANUP(KeyFile*, key_file_free);
+
 int config_manager_new(const Config *configs, ConfigManager **ret);
 void config_manager_unref(ConfigManager *m);
 DEFINE_CLEANUP(ConfigManager*, config_manager_unref);
+
+int set_config(KeyFile *key_file, const char *section, const char *k, const char *v);
+
+int add_key_to_section(Section *s, const char *k, const char *v);
+int add_key_to_section_integer(Section *s, const char *k, int v);
+
+static inline int add_section_to_key_file(KeyFile *k, Section *s) {
+       assert(k);
+       assert(s);
+
+       k->sections = g_list_append(k->sections, s);
+       k->nsections++;
+       return 0;
+}
 
 const char *ctl_to_config(const ConfigManager *m, const char *name);
 
@@ -27,8 +72,21 @@ int set_config_file_string(const char *path, const char *section, const char *k,
 int set_config_file_bool(const char *path, const char *section, const char *k, bool b);
 int set_config_file_integer(const char *path, const char *section, const char *k, int v);
 
+int add_config_file_string(const char *path, const char *section, const char *k, const char *v);
+
+int key_file_set_integer(KeyFile *key_file, const char *section, const char *k, int v);
+int key_file_set_string(KeyFile *key_file, const char *section, const char *k, const char *v);
+
+int key_file_get_string(KeyFile *key_file, const char *section, const char *k, char **v);
+int key_file_get_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v);
+
+int key_file_add_string(KeyFile *key_file, const char *section, const char *k, const char *v);
+int add_key_to_section_string(const char *path, const char *section, const char *k, const char *v);
+
 int remove_key_from_config_file(const char *path, const char *section, const char *k);
 int remove_section_from_config_file(const char *path, const char *section);
+int remove_section_from_config_file_key(const char *path, const char *section, const char *k, const char *v);
+
 int remove_config_files_glob(const char *path, const char *section, const char *k, const char *v);
 int remove_config_files_section_glob(const char *path, const char *section, const char *k, const char *v);
 
@@ -39,3 +97,5 @@ int write_to_proxy_conf_file(GHashTable *table);
 int read_conf_file(const char *path, char **s);
 
 int write_to_resolv_conf_file(char **dns, char **domains);
+
+int key_file_save(KeyFile *k);
