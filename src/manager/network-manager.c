@@ -1515,27 +1515,32 @@ static int manager_write_netdev_config(const NetDev *n, const GString *config) {
         return 0;
 }
 
-int manager_remove_netdev(const IfNameIndex *ifnameidx, const char *kind) {
+int manager_remove_netdev(const char *ifname, const char *kind) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        assert(ifnameidx);
+        assert(ifname);
 
         /* remove .netdev file  */
-        (void) remove_config_files_glob("/etc/systemd/network/*.netdev", "NetDev", "Name", ifnameidx->ifname);
-        (void) remove_config_files_glob("/lib/systemd/network/*.netdev", "NetDev", "Name", ifnameidx->ifname);
+        (void) remove_config_files_glob("/etc/systemd/network/*.netdev", "NetDev", "Name", ifname);
+        (void) remove_config_files_glob("/lib/systemd/network/*.netdev", "NetDev", "Name", ifname);
 
         /* remove .network */
-        (void) remove_config_files_glob("/etc/systemd/network/*.network", "Match", "Name", ifnameidx->ifname);
-        (void) remove_config_files_glob("/lib/systemd/network/*.network", "Match", "Name", ifnameidx->ifname);
+        (void) remove_config_files_glob("/etc/systemd/network/*.network", "Match", "Name", ifname);
+        (void) remove_config_files_glob("/lib/systemd/network/*.network", "Match", "Name", ifname);
 
         /* Remove [Network] section */
         if (kind) {
-                (void) remove_config_files_section_glob("/etc/systemd/network/*.network", "Network", kind, ifnameidx->ifname);
-                (void) remove_config_files_section_glob("/lib/systemd/network/*.network", "Network", kind, ifnameidx->ifname);
+                (void) remove_config_files_section_glob("/etc/systemd/network/*.network", "Network", kind, ifname);
+                (void) remove_config_files_section_glob("/lib/systemd/network/*.network", "Network", kind, ifname);
         }
 
+        r = parse_ifname_or_index(ifname, &p);
+        if (r < 0)
+                return r;
+
         /* Finally remove the link */
-        r = link_remove(ifnameidx);
+        r = link_remove(p);
         if (r < 0)
                 return r;
 

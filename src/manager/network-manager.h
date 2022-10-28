@@ -145,7 +145,7 @@ int manager_create_wireguard_tunnel(char *wireguard, char *private_key, char *pu
 int manager_show_link_network_config(const IfNameIndex *ifnameidx, char **ret);
 int manager_edit_link_network_config(const IfNameIndex *ifnameidx);
 
-int manager_remove_netdev(const IfNameIndex *ifnameidx, const char *kind);
+int manager_remove_netdev(const char *ifname, const char *kind);
 
 int manager_configure_proxy(int enable,
                             const char *http,
