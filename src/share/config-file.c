@@ -147,7 +147,6 @@ int add_key_to_section(Section *s, const char *k, const char *v) {
 }
 
 int add_key_to_section_integer(Section *s, const char *k, int v) {
-        _cleanup_(key_freep) Key *key = NULL;
         _auto_cleanup_ gchar *c = NULL;
 
         assert(s);
