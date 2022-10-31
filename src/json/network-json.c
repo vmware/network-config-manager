@@ -1383,3 +1383,105 @@ int json_show_dns_server(void) {
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
         return 0;
 }
+
+int json_show_dns_server_domains(void) {
+        _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
+        _auto_cleanup_ char *config_domain = NULL, *setup = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        char buffer[LINE_MAX] = {};
+        GSequenceIter *i;
+        DNSDomain *d;
+        int r;
+
+        r = dbus_acquire_dns_domains_from_resolved(&domains);
+        if (r < 0){
+                log_warning("Failed to fetch DNS domain from resolved: %s", g_strerror(-r));
+                return r;
+        }
+
+        jobj = json_object_new_object();
+        if (!jobj)
+                return log_oom();
+
+        if (!domains || g_sequence_is_empty(domains->dns_domains)) {
+                log_warning("No DNS Domain configured: %s", g_strerror(ENODATA));
+                return -ENODATA;
+        } else {
+                 _cleanup_(json_object_putp) json_object *ja = NULL;
+                _cleanup_(set_unrefp) Set *all_domains = NULL;
+
+                ja = json_object_new_array();
+                if (!ja)
+                        return log_oom();
+
+                r = set_new(&all_domains, NULL, NULL);
+                if (r < 0) {
+                        log_debug("Failed to init set for domains: %s", g_strerror(-r));
+                        return r;
+                }
+
+                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i))  {
+                        json_object *a;
+                        char *s;
+
+                        d = g_sequence_get(i);
+
+                        if (*d->domain == '.')
+                                continue;
+
+                        if (set_contains(all_domains, d->domain))
+                                continue;
+
+                        s = g_strdup(d->domain);
+                        if (!s)
+                                log_oom();
+
+                        if (!set_add(all_domains, s)) {
+                                log_debug("Failed to add domain to set '%s': %s", d->domain, g_strerror(-r));
+                                return -EINVAL;
+                        }
+
+                        a = json_object_new_string(s);
+                        if (!a)
+                                return log_oom();
+
+                        json_object_array_add(ja, a);
+                }
+
+                json_object_object_add(jobj, "DNSDomain", ja);
+                steal_pointer(ja);
+
+                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                        _cleanup_(json_object_putp) json_object *j = NULL;
+                        _auto_cleanup_ char *pretty = NULL;
+
+                        j = json_object_new_array();
+                        if (!j)
+                                return log_oom();
+
+                        d = g_sequence_get(i);
+                        if (!d->ifindex)
+                                continue;
+
+                        sprintf(buffer, "%" PRIu32, d->ifindex);
+                        r = parse_ifname_or_index(buffer, &p);
+                        if (r >= 0) {
+                                _cleanup_(json_object_putp) json_object *a = NULL;
+
+                                 a = json_object_new_string(d->domain);
+                                 if (!a)
+                                         return log_oom();
+
+                                 json_object_array_add(j, a);
+                                 steal_pointer(a);
+
+                        }
+                        json_object_object_add(jobj, p->ifname, j);
+                        steal_pointer(j);
+                }
+        }
+
+        printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+        return 0;
+}
