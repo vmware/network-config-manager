@@ -2380,6 +2380,9 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         DNSServer *d;
         int r;
 
+        if (arg_json)
+                return json_show_dns_server();
+
         r = dbus_get_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
                 display(arg_beautify, ansi_color_bold_cyan(), "             DNS: ");
