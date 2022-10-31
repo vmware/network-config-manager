@@ -20,13 +20,13 @@ int dbus_set_hostname(const char *hostname);
 int dbus_stop_unit(const char *unit);
 int dbus_restart_unit(const char *unit);
 
-int dbus_get_dns_servers_from_resolved(const char *dns, DNSServers **ret);
+int dbus_acquire_dns_servers_from_resolved(const char *dns, DNSServers **ret);
 int dbus_get_current_dns_servers_from_resolved(DNSServers **ret);
 
 int dbus_add_dns_server(int ifindex, DNSServers *serv);
 int dbus_add_dns_domains(int ifindex, char **domains);
 int dbus_revert_resolve_link(int ifindex);
-int dbus_get_dns_domains_from_resolved(DNSDomains **domains);
+int dbus_acquire_dns_domains_from_resolved(DNSDomains **domains);
 int dbus_network_reload(void);
 int dbus_reconfigure_link(int ifindex);
 

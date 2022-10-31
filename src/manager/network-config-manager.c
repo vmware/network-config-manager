@@ -2383,7 +2383,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         if (arg_json)
                 return json_show_dns_server();
 
-        r = dbus_get_dns_servers_from_resolved("DNS", &dns);
+        r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
                 display(arg_beautify, ansi_color_bold_cyan(), "             DNS: ");
 
@@ -2414,7 +2414,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 }
         }
 
-        r = dbus_get_dns_servers_from_resolved("FallbackDNS", &fallback);
+        r = dbus_acquire_dns_servers_from_resolved("FallbackDNS", &fallback);
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
 
                 display(arg_beautify, ansi_color_bold_cyan(), "     FallbackDNS: ");
@@ -2460,7 +2460,7 @@ _public_ int ncm_get_dns_server(char ***ret) {
 
         assert(ret);
 
-        r = dbus_get_dns_servers_from_resolved("DNS", &dns);
+        r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r < 0)
                 return r;
 
@@ -2635,7 +2635,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 return 0;
         }
 
-        r = dbus_get_dns_domains_from_resolved(&domains);
+        r = dbus_acquire_dns_domains_from_resolved(&domains);
         if (r < 0){
                 log_warning("Failed to fetch DNS domain from resolved: %s", g_strerror(-r));
                 return r;
@@ -2713,7 +2713,7 @@ _public_ int ncm_get_dns_domains(char ***ret) {
 
         assert(ret);
 
-        r = dbus_get_dns_domains_from_resolved(&domains);
+        r = dbus_acquire_dns_domains_from_resolved(&domains);
         if (r < 0)
                 return r;
 

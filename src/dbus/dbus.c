@@ -267,7 +267,7 @@ int dbus_get_current_dns_servers_from_resolved(DNSServers **ret) {
         return 0;
 }
 
-int dbus_get_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
+int dbus_acquire_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
         _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
         _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
@@ -518,7 +518,7 @@ int dbus_add_dns_domains(int ifindex, char **domains) {
         return 0;
 }
 
-int dbus_get_dns_domains_from_resolved(DNSDomains **domains) {
+int dbus_acquire_dns_domains_from_resolved(DNSDomains **domains) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
         _cleanup_(sd_bus_message_unrefp) sd_bus_message *m = NULL;
         _cleanup_(sd_bus_freep) sd_bus *bus = NULL;

@@ -1279,7 +1279,7 @@ int json_show_dns_server(void) {
         if (!jobj)
                 return log_oom();
 
-        r = dbus_get_dns_servers_from_resolved("DNS", &dns);
+        r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
                 _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
                 if (!ja)
@@ -1323,7 +1323,7 @@ int json_show_dns_server(void) {
                 }
         }
 
-        r = dbus_get_dns_servers_from_resolved("FallbackDNS", &fallback);
+        r = dbus_acquire_dns_servers_from_resolved("FallbackDNS", &fallback);
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
                 _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
                 if (!ja)
