@@ -2589,6 +2589,9 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
         DNSDomain *d;
         int r;
 
+        if (arg_json)
+                return json_show_dns_server_domains();
+
         if (argc > 1 && string_equal(argv[1], "system")) {
                 r = parse_ifname_or_index(argv[1], &p);
                 if (r < 0) {
@@ -2684,8 +2687,9 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                         printf("%s ", d->domain);
                 }
 
-                if (arg_beautify)
+                if (arg_beautify && g_sequence_get_length(domains->dns_domains) > 0)
                         printf("\n%5s %-20s %-18s\n", "INDEX", "LINK", "Domain");
+
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         d = g_sequence_get(i);
 
