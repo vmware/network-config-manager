@@ -54,7 +54,7 @@ int parse_key_file(const char *path, KeyFile **ret) {
                 if (n <= 0)
                         continue;
 
-                if (isempty_string(s) || strchr(";#", *s))
+                if (isempty_string(s) || strchr(COMMENTS, *s))
                         continue;
 
                 e = find_chars_or_comment(s, NULL);
