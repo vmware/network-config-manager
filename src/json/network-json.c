@@ -1266,3 +1266,120 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
 
         return 0;
 }
+
+int json_show_dns_server(void) {
+        _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        char buf[IF_NAMESIZE + 1] = {};
+        GSequenceIter *i;
+        DNSServer *d;
+        int r;
+
+        jobj = json_object_new_object();
+        if (!jobj)
+                return log_oom();
+
+        r = dbus_get_dns_servers_from_resolved("DNS", &dns);
+        if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
+                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                if (!ja)
+                        return log_oom();
+
+                for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                        _auto_cleanup_ char *pretty = NULL;
+
+                        d = g_sequence_get(i);
+                        if (!d->ifindex)
+                                continue;
+
+                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        if (r >= 0) {
+                                json_object *s = json_object_new_string(pretty);
+                                if (!s)
+                                        return log_oom();
+
+                                json_object_array_add(ja, s);
+                        }
+                }
+
+                json_object_object_add(jobj, "DNS", ja);
+                steal_pointer(ja);
+        }
+
+        r = dbus_get_current_dns_servers_from_resolved(&current);
+        if (r >= 0 && current && !g_sequence_is_empty(current->dns_servers)) {
+                _auto_cleanup_ char *pretty = NULL;
+
+                i = g_sequence_get_begin_iter(current->dns_servers);
+                d = g_sequence_get(i);
+                r = ip_to_string(d->address.family, &d->address, &pretty);
+                if (r >= 0) {
+                        json_object *s = json_object_new_string(pretty);
+                        if (!s)
+                                return log_oom();
+
+                        json_object_object_add(jobj, "CurrentDNSServer", s);
+                        steal_pointer(s);
+                }
+        }
+
+        r = dbus_get_dns_servers_from_resolved("FallbackDNS", &fallback);
+        if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
+                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                if (!ja)
+                        return log_oom();
+
+                for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                        _auto_cleanup_ char *pretty = NULL;
+
+                        d = g_sequence_get(i);
+
+                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        if (r >= 0) {
+                                json_object *s = json_object_new_string(pretty);
+                                if (!s)
+                                        return log_oom();
+
+                                json_object_array_add(ja, s);
+                        }
+                }
+                json_object_object_add(jobj, "FallbackDNS", ja);
+                steal_pointer(ja);
+        }
+
+        if (dns && !g_sequence_is_empty(dns->dns_servers)) {
+                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                if (!ja)
+                        return log_oom();
+
+                for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                        _cleanup_(json_object_putp) json_object *j = json_object_new_array();
+                        _auto_cleanup_ char *pretty = NULL;
+
+                        if (!ja)
+                                return log_oom();
+
+                        d = g_sequence_get(i);
+                        if (!d->ifindex)
+                                continue;
+
+                        if_indextoname(d->ifindex, buf);
+                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        if (r >= 0) {
+                                json_object *a;
+
+                                a = json_object_new_string(pretty);
+                                if (!a)
+                                        return log_oom();
+
+                                json_object_array_add(j, a);
+
+                        }
+                        json_object_object_add(jobj, buf, j);
+                        steal_pointer(j);
+                }
+        }
+
+        printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+        return 0;
+}

@@ -56,15 +56,7 @@ int set_config(KeyFile *key_file, const char *section, const char *k, const char
 
 int add_key_to_section(Section *s, const char *k, const char *v);
 int add_key_to_section_integer(Section *s, const char *k, int v);
-
-static inline int add_section_to_key_file(KeyFile *k, Section *s) {
-       assert(k);
-       assert(s);
-
-       k->sections = g_list_append(k->sections, s);
-       k->nsections++;
-       return 0;
-}
+int add_section_to_key_file(KeyFile *k, Section *s);
 
 const char *ctl_to_config(const ConfigManager *m, const char *name);
 
