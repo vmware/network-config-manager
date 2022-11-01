@@ -7,14 +7,6 @@
 #include "alloc-util.h"
 #include "network-util.h"
 
-#ifndef IFLA_PARENT_DEV_NAME
-#define IFLA_PARENT_DEV_NAME __IFLA_MAX - 5
-#endif
-
-#ifndef IFLA_PARENT_DEV_BUS_NAME
-#define IFLA_PARENT_DEV_BUS_NAME __IFLA_MAX - 4
-#endif
-
 typedef enum LinkState {
         LINK_STATE_DOWN,
         LINK_STATE_UP,
