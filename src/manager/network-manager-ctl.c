@@ -108,7 +108,7 @@ static int help(void) {
                "  -j --json                    Show in JSON format\n"
                "  -b --no-beautify             Show without colors and headers\n"
                "\nCommands:\n"
-               "  status                       Show system status\n"
+               "  status                       [LINK] Show system or link status\n"
                "  status-links                 List links.\n"
                "  status-link                  [LINK] Show link status.\n"
                "  set-mtu                      [LINK] [MTU NUMBER] Configures Link MTU.\n"
