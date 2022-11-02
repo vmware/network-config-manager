@@ -25,3 +25,5 @@ int parse_link_alias(const char *c);
 int  parse_boolean(const char *v);
 
 bool is_uint32_or_max(const char *c);
+
+int parse_sriov_vlanprotocol(const char *c);

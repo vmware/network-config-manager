@@ -19,6 +19,8 @@ network_config_manager_sources = files('''
         manager/network-address.c
         manager/network-route.h
         manager/network-route.c
+        manager/network-sriov.h
+        manager/network-sriov.c
         manager/network-config-manager.c
         manager/network-manager.h
         manager/network-manager.c

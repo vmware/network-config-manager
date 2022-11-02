@@ -57,7 +57,8 @@ units = ["10-test99.network",
          '10-vti-98.netdev',
          '10-vri-98.network'
          '10-wg99.netdev',
-         '10-wg99.network']
+         '10-wg99.network',
+         '10-sriov99.network']
 
 def link_exist(link):
     return os.path.exists(os.path.join('/sys/class/net', link))
@@ -2157,3 +2158,37 @@ class TestCLILink:
         assert(parser.get('Link', 'CoalescePacketRateHigh') == 'max')
         assert(parser.get('Link', 'CoalescePacketRateSampleIntervalSec') == '99877761')
         assert(parser.get('Link', 'StatisticsBlockCoalesceSec') == '987766555')
+
+class TestCLISRIOV:
+    def setup_method(self):
+        link_remove('sriov99')
+        link_add_dummy('sriov99')
+        restart_networkd()
+
+    def teardown_method(self):
+        remove_units_from_netword_unit_path()
+        link_remove('sriov99')
+
+    def test_cli_configure_sr_iov(self):
+        assert(link_exist('sriov99') == True)
+
+        subprocess.check_call(['nmctl', 'add-sr-iov', 'sriov99', 'vf', '5', 'vlanid', '2', 'qos', '1', 'vlanproto',
+                               '802.1Q', 'macspoofck', 'yes', 'qrss', 'true', 'trust', 'yes', 'linkstate', 'yes',
+                               'macaddr', '00:0c:29:3a:bc:11'])
+
+        subprocess.check_call(['sleep', '3'])
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-sriov99.network'))
+
+        assert(parser.get('Match', 'Name') == 'sriov99')
+
+        assert(parser.get('SR-IOV', 'VirtualFunction') == '5')
+        assert(parser.get('SR-IOV', 'VLANId') == '2')
+        assert(parser.get('SR-IOV', 'QualityOfService') == '1')
+        assert(parser.get('SR-IOV', 'VLANProtocol') == '802.1Q')
+        assert(parser.get('SR-IOV', 'MACSpoofCheck') == 'yes')
+        assert(parser.get('SR-IOV', 'QueryReceiveSideScaling') == 'yes')
+        assert(parser.get('SR-IOV', 'Trust') == 'yes')
+        assert(parser.get('SR-IOV', 'LinkState') == 'yes')
+        assert(parser.get('SR-IOV', 'MACAddress') == '00:0c:29:3a:bc:11')

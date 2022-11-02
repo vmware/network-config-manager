@@ -239,6 +239,7 @@ static int help(void) {
                                                       "\t\t\t\tConfigure device's maximum number of frames that are sent/received before a Rx/Tx interrupt is generated.\n"
                "  set-link-coal-pkt            [LINK] [cprlow NUMBER | max] [cprhigh NUMBER | max] [cprsis NUMBER | max] [sbcs NUMBER | max]\n"
                                                       "\t\t\t\tConfigure device's low and high packet rate, sampleinterval packet rate and statistics block updates.\n"
+               "  add-sr-iov                   [LINK] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN] [trust BOOLEAN] [linkstate BOOLEAN or STRING] [macaddr ADDRESS] Configures SR-IOV VirtualFunction, VLANId, QualityOfService, VLANProtocol, MACSpoofCheck, QueryReceiveSideScaling, Trust, LinkState, MACAddress  managed by networkd.\n"
                "  set-proxy                    [enable {BOOLEAN}] [http|https|ftp|gopher|socks|socks5|noproxy] [CONFIGURATION | none] Configure proxy.\n"
                "  show-proxy                   Shows proxy configuration.\n"
                "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
@@ -403,6 +404,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-link-coalesce",            2,        WORD_ANY, false, ncm_configure_link_coalesce },
                 { "set-link-coald-frames",        2,        WORD_ANY, false, ncm_configure_link_coald_frames },
                 { "set-link-coal-pkt",            2,        WORD_ANY, false, ncm_configure_link_coal_pkt },
+                { "add-sr-iov",                   2,        WORD_ANY, false, ncm_configure_sr_iov},
                 { "set-proxy",                    1,        WORD_ANY, false, ncm_configure_proxy },
                 { "show-proxy",                   WORD_ANY, WORD_ANY, false, ncm_show_proxy },
                 { "generate-config-from-yaml",    1,        WORD_ANY, false, generate_networkd_config_from_yaml },
