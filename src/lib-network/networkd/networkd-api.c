@@ -217,3 +217,11 @@ int network_parse_link_dhcp4_client_id(int ifindex, char **ret) {
 int network_parse_link_dhcp4_address_lifetime(int ifindex, char **ret) {
         return network_parse_link_lease_string(ifindex, "LIFETIME", ret);
 }
+
+int network_parse_link_dhcp4_address_lifetime_t1(int ifindex, char **ret) {
+        return network_parse_link_lease_string(ifindex, "T1", ret);
+}
+
+int network_parse_link_dhcp4_address_lifetime_t2(int ifindex, char **ret) {
+        return network_parse_link_lease_string(ifindex, "T2", ret);
+}
