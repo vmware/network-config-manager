@@ -111,11 +111,15 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
 
         r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
         if (r >= 0 && string_has_prefix(c, dhcp)) {
-                _auto_cleanup_ char *server = NULL, *life_time = NULL;
+                _auto_cleanup_ char *server = NULL, *life_time = NULL, *t1 = NULL, *t2 = NULL;
+
                 (void) network_parse_link_dhcp4_server_address(a->ifindex, &server);
                 (void) network_parse_link_dhcp4_address_lifetime(a->ifindex, &life_time);
+                (void) network_parse_link_dhcp4_address_lifetime_t1(a->ifindex, &t1);
+                (void) network_parse_link_dhcp4_address_lifetime_t2(a->ifindex, &t2);
 
-                printf(" (DHCPv4 via %s) lifetime: %s seconds\n", server, life_time);
+                printf(" (DHCPv4 via %s) lease time: %s seconds T1: %s seconds T2: %s seconds\n", string_na(server), string_na(life_time),
+                       string_na(t1), string_na(t2));
         } else
                 printf("\n");
 }
