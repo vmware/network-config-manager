@@ -514,6 +514,9 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         sd_id128_t machine_id = {};
         int r;
 
+        if (argc > 1)
+                return list_one_link(argv + 1);
+
         if (arg_json)
                 return json_system_status(NULL);
 
