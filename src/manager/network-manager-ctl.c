@@ -125,7 +125,7 @@ static int help(void) {
                "  set-dhcp-duid                [LINK | system] [DUID {link-layer-time|vendor|link-layer|uuid}] [RAWDATA] Sets the DHCP Client.\n"
                "                                      Specifies how the DUID should be generated and [RAWDATA] to overides the global DUIDRawData.\n"
                "  set-link-state               [LINK] [STATE {up|down}] Configures Link State.\n"
-               "  show-link-address            [LINK] [family ipv4|ipv6] Show link addresses\n"
+               "  show-link-address            [LINK] [family|f ipv4|ipv6|4|6] Show link addresses\n"
                "  add-link-address             [LINK] address [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime [{forever|infinity|0}] scope {global|link|host|NUMBER}]"
                                                       "\n\t\t\t\t      dad [DAD {none|ipv4|ipv6|both}] prefix-route [PREFIXROUTE BOOLEAN] Configures Link Address.\n"
                "  delete-link-address          [LINK] address [ADDRESS] Removes Address from Link.\n"
