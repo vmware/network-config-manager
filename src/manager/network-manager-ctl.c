@@ -114,7 +114,8 @@ static int help(void) {
                "  set-mtu                      [LINK] [MTU NUMBER] Configures Link MTU.\n"
                "  set-mac                      [LINK] [MAC] Configures Link MAC address.\n"
                "  set-link-mode                [LINK] [MODE BOOLEAN] Configures Link managed by networkd.\n"
-               "  set-link-option              [LINK] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN] [rfo BOOLEAN] Configures Link arp, multicast, allmulticast, promiscuous and requiredforonline managed by networkd.\n"
+               "  set-link-option              [LINK] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN] [rfo BOOLEAN]"
+                                                     "\n\t\t\t\t\tConfigures Link arp, multicast, allmulticast, promiscuous and requiredforonline managed by networkd.\n"
                "  set-link-group               [LINK] [GROUP NUMBER] Configures Link Group.\n"
                "  set-link-rf-online           [LINK] [GROUP NUMBER] Configures Link RequiredFamilyForOnline.\n"
                "  set-link-act-policy          [LINK] [GROUP NUMBER] Configures Link ActivationPolicy.\n"
@@ -124,6 +125,7 @@ static int help(void) {
                "  set-dhcp-duid                [LINK | system] [DUID {link-layer-time|vendor|link-layer|uuid}] [RAWDATA] Sets the DHCP Client.\n"
                "                                      Specifies how the DUID should be generated and [RAWDATA] to overides the global DUIDRawData.\n"
                "  set-link-state               [LINK] [STATE {up|down}] Configures Link State.\n"
+               "  show-link-address            [LINK] [family ipv4|ipv6] Show link addresses\n"
                "  add-link-address             [LINK] address [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime [{forever|infinity|0}] scope {global|link|host|NUMBER}]"
                                                       "\n\t\t\t\t      dad [DAD {none|ipv4|ipv6|both}] prefix-route [PREFIXROUTE BOOLEAN] Configures Link Address.\n"
                "  delete-link-address          [LINK] address [ADDRESS] Removes Address from Link.\n"
@@ -326,6 +328,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp-duid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
                 { "set-link-state",               2,        WORD_ANY, false, ncm_link_update_state },
                 { "add-link-address",             2,        WORD_ANY, false, ncm_link_add_address },
+                { "show-link-address",            1,        WORD_ANY, false, ncm_display_one_link_addresses },
                 { "delete-link-address",          3,        WORD_ANY, false, ncm_link_delete_address },
                 { "add-default-gateway",          2,        WORD_ANY, false, ncm_link_add_default_gateway },
                 { "delete-gateway",               1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
