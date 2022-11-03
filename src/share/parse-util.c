@@ -174,7 +174,7 @@ int parse_link_altnamepolicy(const char *c) {
         assert(c);
 
         if ((!string_equal(c, "database")) && (!string_equal(c, "onboard")) &&
-            (!string_equal(c, "slot")) && (!string_equal(c, "path")) && (!string_equal(c, "mac"))) 
+            (!string_equal(c, "slot")) && (!string_equal(c, "path")) && (!string_equal(c, "mac")))
                 return -EINVAL;
 
         return 0;
@@ -234,6 +234,15 @@ int parse_link_advertise(const char *c) {
            (!string_equal(c, "10000baset-full")) && (!string_equal(c, "2500basex-full")) && (!string_equal(c, "1000basekx-full")) &&
            (!string_equal(c, "10000basekx4-full")) && (!string_equal(c, "10000basekr-full")) && (!string_equal(c, "10000baser-fec")) &&
            (!string_equal(c, "20000basemld2-full")) && (!string_equal(c, "20000basekr2-full")))
+                return -EINVAL;
+
+        return 0;
+}
+
+int parse_sriov_vlanprotocol(const char *c) {
+        assert(c);
+
+        if((!string_equal(c, "802.1Q")) && (!string_equal(c, "802.1ad")))
                 return -EINVAL;
 
         return 0;
