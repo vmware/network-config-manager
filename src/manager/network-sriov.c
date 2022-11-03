@@ -70,9 +70,9 @@ void netdev_sriov_unref(SRIOV *s) {
 }
 
 int netdev_sriov_configure(const IfNameIndex *ifnameidx, SRIOV *s) {
-        _auto_cleanup_ char *network = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
+        _auto_cleanup_ char *network = NULL;
          int r;
 
         assert(ifnameidx);
