@@ -1236,7 +1236,7 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
                 }
 
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -1583,7 +1583,7 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -1779,7 +1779,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -1924,7 +1924,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -2218,7 +2218,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -3341,7 +3341,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
                                 log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
-                                return -errno;
+                                return r;
                         }
                         have_dev = true;
                         continue;
@@ -4386,7 +4386,7 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -4474,7 +4474,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -4762,7 +4762,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -4850,7 +4850,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -5107,7 +5107,7 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -5197,7 +5197,7 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -5286,7 +5286,7 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -5526,7 +5526,7 @@ _public_ int ncm_nft_add_tables(int argc, char *argv[]) {
 
         f = nft_family_name_to_type(argv[1]);
         if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(EINVAL));
                 return -errno;
         }
 
@@ -5547,7 +5547,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
         if (argc > 1) {
                 f = nft_family_name_to_type(argv[1]);
                 if (f < 0) {
-                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -5636,7 +5636,7 @@ _public_ int ncm_nft_delete_table(int argc, char *argv[]) {
 
         f = nft_family_name_to_type(argv[1]);
         if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(EINVAL));
                 return -errno;
         }
 
@@ -5653,7 +5653,7 @@ _public_ int ncm_nft_add_chain(int argc, char *argv[]) {
 
         f = nft_family_name_to_type(argv[1]);
         if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(EINVAL));
                 return -errno;
         }
 
@@ -5674,7 +5674,7 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
         if (argc > 1) {
                 f = nft_family_name_to_type(argv[1]);
                 if (f < 0) {
-                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -5700,7 +5700,7 @@ _public_ int ncm_nft_delete_chain(int argc, char *argv[]) {
 
         f = nft_family_name_to_type(argv[1]);
         if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(EINVAL));
                 return -errno;
         }
 
@@ -5771,38 +5771,38 @@ _public_ int ncm_nft_add_rule_port(int argc, char *argv[]) {
 
         f = nft_family_name_to_type(argv[1]);
         if (f < 0 || f == NF_PROTO_FAMILY_IPV6) {
-                log_warning("Unsupproted family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
+                log_warning("Unsupproted family type %s : %s", argv[1], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         protocol = ip_packet_protcol_name_to_type(argv[4]);
         if (protocol < 0) {
-                log_warning("Failed to parse protocol %s : %s", argv[4], g_strerror(-EINVAL));
-                return -errno;
+                log_warning("Failed to parse protocol %s : %s", argv[4], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         port_type = ip_packet_port_name_to_type(argv[5]);
         if (port_type < 0) {
-                log_warning("Failed to parse IP protocol %s : %s", argv[5], g_strerror(-EINVAL));
-                return -errno;
+                log_warning("Failed to parse IP protocol %s : %s", argv[5], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = parse_uint16(argv[6], &port);
         if (r < 0) {
-                log_warning("Failed to parse port %s : %s", argv[5], g_strerror(r));
-                return -errno;
+                log_warning("Failed to parse port %s : %s", argv[5], g_strerror(-r));
+                return r;
         }
 
         action = nft_packet_action_name_to_type(argv[7]);
         if (action < 0) {
                 log_warning("Failed to parse action %s : %s", argv[6], g_strerror(r));
-                return -errno;
+                return -EINVAL;
         }
 
         r = nft_configure_rule_port(f, argv[2], argv[3], protocol,  port_type , port, action);
         if (r < 0) {
                 log_warning("Failed to add rule for %s port %s : %s", argv[4], argv[3], g_strerror(-r));
-                return -errno;
+                return -EINVAL;
         }
 
         return r;
@@ -5850,8 +5850,8 @@ _public_ int ncm_nft_delete_rule(int argc, char *argv[]) {
 
         f = nft_family_name_to_type(argv[1]);
         if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
+                log_warning("Invalid family type %s : %s", argv[1], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (argc > 4) {
