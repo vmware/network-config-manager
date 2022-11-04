@@ -220,32 +220,30 @@ int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *ia
         return 0;
 }
 
-int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system) {
-        _auto_cleanup_ char *network = NULL;
+int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system, DHCPClient kind) {
+        _auto_cleanup_ char *c = NULL;
         int r;
 
         if (system) {
-                network = g_strdup("/etc/systemd/networkd.conf");
-                if (!network)
+                c = g_strdup("/etc/systemd/networkd.conf");
+                if (!c)
                         return log_oom();
         } else {
-                assert(ifnameidx);
-
-                r = create_or_parse_network_file(ifnameidx, &network);
+                r = create_or_parse_network_file(ifnameidx, &c);
                 if (r < 0)
                         return r;
         }
 
-        r = set_config_file_string(network, "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
+        r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
         if (r < 0) {
-                log_warning("Failed to update DHCP ClientIdentifier= to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to update DHCP ClientIdentifier= to configuration file '%s': %s", c, g_strerror(-r));
                 return r;
         }
 
         if (raw_data) {
-                r = set_config_file_string(network, "DHCPv6", "DUIDRawData", raw_data);
+                r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDRawData", raw_data);
                 if (r < 0) {
-                        log_warning("Failed to update DHCPv6 IAID= to configuration file '%s': %s", network, g_strerror(-r));
+                        log_warning("Failed to update DHCPv6 DUIDRawData= to configuration file '%s': %s", c, g_strerror(-r));
                         return r;
                 }
         }

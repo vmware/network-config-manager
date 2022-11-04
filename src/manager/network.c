@@ -41,6 +41,36 @@ int dhcp_name_to_mode(char *name) {
         return _DHCP_MODE_INVALID;
 }
 
+static const char *const dhcp_client_kind_table[_DHCP_CLIENT_MAX] = {
+        [DHCP_CLIENT_IPV4]   = "ipv4",
+        [DHCP_CLIENT_IPV6]   = "ipv6",
+} ;
+
+const char *dhcp_client_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(dhcp_client_kind_table))
+                return NULL;
+
+        return dhcp_client_kind_table[id];
+}
+
+int dhcp_name_to_client(char *name) {
+        assert(name);
+
+        for (size_t i = DHCP_CLIENT_IPV4; i < (size_t) ELEMENTSOF(dhcp_client_kind_table); i++)
+                if (string_equal_fold(name, dhcp_client_kind_table[i]))
+                        return i;
+
+        if (string_equal(name, "4"))
+                return DHCP_CLIENT_IPV4;
+        else if (string_equal(name, "6"))
+                return DHCP_CLIENT_IPV6;
+
+        return _DHCP_CLIENT_INVALID;
+}
+
 static const char *const dhcp_client_identifier[_DHCP_CLIENT_IDENTIFIER_MAX] = {
         [DHCP_CLIENT_IDENTIFIER_MAC]       = "mac",
         [DHCP_CLIENT_IDENTIFIER_DUID]      = "duid",
