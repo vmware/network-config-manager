@@ -17,6 +17,13 @@ typedef enum DHCPMode {
         _DHCP_MODE_INVALID = -1
 } DHCPMode;
 
+typedef enum DHCPClient {
+        DHCP_CLIENT_IPV4,
+        DHCP_CLIENT_IPV6,
+        _DHCP_CLIENT_MAX,
+        _DHCP_CLIENT_INVALID = -1
+} DHCPClient;
+
 typedef enum {
         DHCP_CLIENT_IDENTIFIER_MAC,
         DHCP_CLIENT_IDENTIFIER_DUID,
@@ -212,6 +219,9 @@ int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret);
 
 const char *dhcp_modes_to_name(int id);
 int dhcp_name_to_mode(char *name);
+
+const char *dhcp_client_to_name(int id);
+int dhcp_name_to_client(char *name);
 
 const char *dhcp_client_identifier_to_name(int id);
 int dhcp_client_identifier_to_mode(char *name);

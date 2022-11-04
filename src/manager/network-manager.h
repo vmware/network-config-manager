@@ -28,7 +28,7 @@ int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t v);
 int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *iaid);
 
-int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system);
+int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system, DHCPClient kind);
 
 int manager_configure_link_address(const IfNameIndex *ifnameidx,
                                    IPAddress *address,
