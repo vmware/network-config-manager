@@ -42,13 +42,21 @@ static const Config network_ctl_to_network_section_config_table[] = {
 };
 
 static const Config network_ctl_to_dhcp4_section_config_table[] = {
-                { "set-dhcp4-use-dns",      "UseDNS"},
-                { "set-dhcp4-use-ntp",      "UseNTP"},
-                { "set-dhcp4-use-domains",  "UseDomains"},
-                { "set-dhcp4-use-mtu",      "UseMTU"},
-                { "set-dhcp4-use-routes",   "UseRoutes"},
-                { "set-dhcp4-use-timezone", "UseTimezone"},
-                { "set-dhcp4-send-release", "SendRelease"},
+                { "use-dns",      "UseDNS"},
+                { "use-ntp",      "UseNTP"},
+                { "use-domains",  "UseDomains"},
+                { "use-mtu",      "UseMTU"},
+                { "use-routes",   "UseRoutes"},
+                { "use-timezone", "UseTimezone"},
+                { "send-release", "SendRelease"},
+                {},
+};
+
+static const Config network_ctl_to_dhcp6_section_config_table[] = {
+                { "use-dns",      "UseDNS"},
+                { "use-ntp",      "UseNTP"},
+                { "use-domains",  "UseDomains"},
+                { "use-mtu",      "UseMTU"},
                 {},
 };
 
@@ -69,6 +77,18 @@ int manager_network_dhcp4_section_configs_new(ConfigManager **ret) {
         int r;
 
         r = config_manager_new(network_ctl_to_dhcp4_section_config_table, &m);
+        if (r < 0)
+                return r;
+
+        *ret = m;
+        return 0;
+}
+
+int manager_network_dhcp6_section_configs_new(ConfigManager **ret) {
+        ConfigManager *m;
+        int r;
+
+        r = config_manager_new(network_ctl_to_dhcp6_section_config_table, &m);
         if (r < 0)
                 return r;
 
@@ -99,7 +119,7 @@ int manager_set_link_flag(const IfNameIndex *ifnameidx, bool mode, const char* k
         return dbus_network_reload();
 }
 
-int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
+int manager_set_link_dhcp_client(const IfNameIndex *ifnameidx, DHCPClient mode) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -114,7 +134,7 @@ int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
                 return -ENODATA;
         }
 
-        r = set_config_file_string(network, "Network", "DHCP", dhcp_modes_to_name(mode));
+        r = set_config_file_string(network, "Network", "DHCP", dhcp_client_modes_to_name(mode));
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
@@ -123,7 +143,7 @@ int manager_set_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode mode) {
         return dbus_network_reload();
 }
 
-int manager_get_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode *mode) {
+int manager_get_link_dhcp_client(const IfNameIndex *ifnameidx, DHCPClient *mode) {
         _auto_cleanup_ char *network = NULL, *config_dhcp = NULL;
         int r;
 
@@ -137,7 +157,7 @@ int manager_get_link_dhcp_mode(const IfNameIndex *ifnameidx, DHCPMode *mode) {
         if (r < 0)
                 return r;
 
-        r = dhcp_name_to_mode(config_dhcp);
+        r = dhcp_client_name_to_mode(config_dhcp);
         if (r < 0)
                 return r;
 
@@ -1297,7 +1317,7 @@ int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k
         return dbus_network_reload();
 }
 
-int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v, bool dhcp4) {
+int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *ifnameidx, const char *k, bool v) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -1307,12 +1327,16 @@ int manager_set_dhcp_section(const IfNameIndex *ifnameidx, const char *k, bool v
         if (r < 0)
                 return r;
 
-        if (dhcp4)
-                r = set_config_file_bool(network, "DHCPv4", k, v);
-        else
-                r = set_config_file_bool(network, "DHCPv6", k, v);
-        if (r < 0)
-                return r;
+        switch(kind) {
+                case DHCP_CLIENT_IPV4:
+                        r = set_config_file_bool(network, "DHCPv4", k, v);
+                        break;
+                case DHCP_CLIENT_IPV6:
+                        r = set_config_file_bool(network, "DHCPv6", k, v);
+                        break;
+                default:
+                        return -EINVAL;
+        }
 
         return dbus_network_reload();
 }

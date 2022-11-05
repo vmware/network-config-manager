@@ -14,37 +14,37 @@
 #include "string-util.h"
 #include "log.h"
 
-static const char *const dhcp_modes[_DHCP_MODE_MAX] = {
-        [DHCP_MODE_NO]   = "no",
-        [DHCP_MODE_YES]  = "yes",
-        [DHCP_MODE_IPV4] = "ipv4",
-        [DHCP_MODE_IPV6] = "ipv6",
+static const char *const dhcp_client_mode_table[_DHCP_CLIENT_MAX] = {
+        [DHCP_CLIENT_NO]   = "no",
+        [DHCP_CLIENT_YES]  = "yes",
+        [DHCP_CLIENT_IPV4] = "ipv4",
+        [DHCP_CLIENT_IPV6] = "ipv6",
 };
 
-const char *dhcp_modes_to_name(int id) {
+const char *dhcp_client_modes_to_name(int id) {
         if (id < 0)
                 return "n/a";
 
-        if ((size_t) id >= ELEMENTSOF(dhcp_modes))
+        if ((size_t) id >= ELEMENTSOF(dhcp_client_mode_table))
                 return NULL;
 
-        return dhcp_modes[id];
+        return dhcp_client_mode_table[id];
 }
 
-int dhcp_name_to_mode(char *name) {
+int dhcp_client_name_to_mode(char *name) {
         assert(name);
 
-        for (size_t i = DHCP_MODE_NO; i < (size_t) ELEMENTSOF(dhcp_modes); i++)
-                if (string_equal_fold(name, dhcp_modes[i]))
+        for (size_t i = DHCP_CLIENT_NO; i < (size_t) ELEMENTSOF(dhcp_client_mode_table); i++)
+                if (string_equal_fold(name, dhcp_client_mode_table[i]))
                         return i;
 
-        return _DHCP_MODE_INVALID;
+        return _DHCP_CLIENT_INVALID;
 }
 
 static const char *const dhcp_client_kind_table[_DHCP_CLIENT_MAX] = {
         [DHCP_CLIENT_IPV4]   = "ipv4",
         [DHCP_CLIENT_IPV6]   = "ipv6",
-} ;
+};
 
 const char *dhcp_client_to_name(int id) {
         if (id < 0)
@@ -469,7 +469,7 @@ int network_new(Network **ret) {
                 .all_multicast = -1,
                 .promiscuous = -1,
                 .req_for_online = -1,
-                .dhcp_type = _DHCP_MODE_INVALID,
+                .dhcp_type = _DHCP_CLIENT_INVALID,
                 .dhcp4_use_mtu = -1,
                 .dhcp4_use_dns = -1,
                 .dhcp4_use_domains = -1,
@@ -760,9 +760,9 @@ int generate_network_config(Network *n, GString **ret) {
 
         g_string_append(config, "\n[Network]\n");
 
-        if (n->dhcp_type != _DHCP_MODE_INVALID) {
+        if (n->dhcp_type != _DHCP_CLIENT_INVALID) {
                 if (n->parser_type == PARSER_TYPE_YAML)
-                        g_string_append_printf(config, "DHCP=%s\n", dhcp_modes_to_name(n->dhcp_type));
+                        g_string_append_printf(config, "DHCP=%s\n", dhcp_client_modes_to_name(n->dhcp_type));
                 else
                         g_string_append_printf(config, "DHCP=%s\n", dracut_to_networkd_dhcp_mode_to_name(n->dhcp_type));
         }

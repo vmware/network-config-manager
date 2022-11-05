@@ -161,14 +161,9 @@ static int help(void) {
                "  set-ipv4proxyarp             [LINK] [IPv4ProxyARP BOOLEAN] Configures Link proxy ARP for IPv4.\n"
                "  set-ipv6proxyndp             [LINK] [IPv6ProxyNDP BOOLEAN] Configures Link proxy NDP for IPv6.\n"
                "  set-conf-without-carrier     [LINK] [ConfigureWithoutCarrier BOOLEAN] Allows networkd to configure link even if it has no carrier.\n"
-               "  set-dhcp4-use-dns            [LINK] [UseDNS BOOLEAN] Configures Link DHCP4 Use DNS.\n"
-               "  set-dhcp4-use-domains        [LINK] [UseDomains BOOLEAN] Configures Link DHCP4 Use Domains.\n"
-               "  set-dhcp4-use-mtu            [LINK] [UseMTU BOOLEAN] Configures Link DHCP4 Use MTU.\n"
-               "  set-dhcp4-use-ntp            [LINK] [UseNTP BOOLEAN] Configures Link DHCP4 Use NTP.\n"
-               "  set-dhcp4-use-dns            [LINK] [UseDNS BOOLEAN] Configures Link DHCP4 Use DNS.\n"
-               "  set-dhcp4-send-release       [LINK] [SendRelease BOOLEAN] When true, DHCPv4 client sends a DHCP release packet when it stops.\n"
-               "  set-dhcp6-use-dns            [LINK] [UseDNS BOOLEAN] Configures Link DHCP6 Use DNS.\n"
-               "  set-dhcp6-use-ntp            [LINK] [UseNTP BOOLEAN] Configures Link DHCP6 Use NTP.\n"
+               "  set-dhcp4                    [LINK] [use-dns BOOLEAN] [use-domains BOOLEAN] [use-mtu BOOLEAN] [use-ntp BOOLEAN] [send-release BOOLEAN]."
+                                                     "\n\t\t\t\t     Configures Link DHCPv4 section\n"
+               "  set-dhcp6                    [LINK] [use-dns BOOLEAN] [use-domains BOOLEAN] Configures Link DHCPv6 client.\n"
                "  add-ntp                      [LINK] [NTP] Add Link NTP server address. This option may be specified more than once.\n"
                "                                      This setting is read by systemd-timesyncd.service(8)\n"
                "  set-ntp                      [LINK] [NTP] Set Link NTP server address. This option may be specified more than once.\n"
@@ -355,15 +350,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-ipv4proxyarp",             2,        WORD_ANY, false, ncm_link_set_network_section_bool },
                 { "set-ipv6proxyndp",             2,        WORD_ANY, false, ncm_link_set_network_section_bool },
                 { "set-conf-without-carrier",     2,        WORD_ANY, false, ncm_link_set_network_section_bool },
-                { "set-dhcp4-use-dns",            2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
-                { "set-dhcp4-use-domains",        2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
-                { "set-dhcp4-use-ntp",            2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
-                { "set-dhcp4-use-mtu",            2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
-                { "set-dhcp4-use-timezone",       2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
-                { "set-dhcp4-use-routes",         2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
-                { "set-dhcp4-send-release",       2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
-                { "set-dhcp6-use-dns",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
-                { "set-dhcp6-use-ntp",            2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
+                { "set-dhcp4",                    2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
+                { "set-dhcp6",                    2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "add-dhcpv4-server",            1,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
                 { "remove-dhcpv4-server",         1,        WORD_ANY, false, ncm_link_remove_dhcpv4_server },
                 { "add-ipv6ra",                   1,        WORD_ANY, false, ncm_link_add_ipv6_router_advertisement },
