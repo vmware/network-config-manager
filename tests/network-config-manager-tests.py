@@ -903,7 +903,7 @@ class TestCLINetwork:
         assert(unit_exist('10-test99.network') == True)
 
         subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'use-domains, ''test99', 'yes'])
+        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-domains', 'yes'])
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))

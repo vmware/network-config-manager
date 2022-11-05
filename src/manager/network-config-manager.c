@@ -1189,7 +1189,6 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
                 if (ctl_to_config(m, argv[i])) {
                         parse_next_arg(argv, argc, i);
 
-                        printf("%s %s\n", argv[i-1], argv[i]);
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse %s=%s for link '%s': %s", argv[i-1], argv[i], argv[1], g_strerror(-r));

@@ -14,7 +14,7 @@ typedef enum DHCPClient {
         DHCP_CLIENT_IPV4,
         DHCP_CLIENT_IPV6,
         _DHCP_CLIENT_MAX,
-        _DHCP_CLIENT_INVALID = -1
+        _DHCP_CLIENT_INVALID = -EINVAL
 } DHCPClient;
 
 typedef enum {
@@ -22,7 +22,7 @@ typedef enum {
         DHCP_CLIENT_IDENTIFIER_DUID,
         DHCP_CLIENT_IDENTIFIER_DUID_ONLY,
         _DHCP_CLIENT_IDENTIFIER_MAX,
-        _DHCP_CLIENT_IDENTIFIER_INVALID = -1,
+        _DHCP_CLIENT_IDENTIFIER_INVALID = -EINVAL,
 } DHCPClientIdentifier;
 
 typedef enum DHCPClientDUIDType {
@@ -31,7 +31,7 @@ typedef enum DHCPClientDUIDType {
        DHCP_CLIENT_DUID_TYPE_LINK_LAYER,
        DHCP_CLIENT_DUID_TYPE_UUID,
        _DHCP_CLIENT_DUID_TYPE_MAX,
-       _DHCP_CLIENT_DUID_TYPE_INVALID = -1,
+       _DHCP_CLIENT_DUID_TYPE_INVALID = -EINVAL,
 } DHCPClientDUIDType;
 
 typedef enum LinkLocalAddress {
@@ -42,7 +42,7 @@ typedef enum LinkLocalAddress {
         LINK_LOCAL_ADDRESS_FALLBACK,
         LINK_LOCAL_ADDRESS_IPV4_FALLBACK,
        _LINK_LOCAL_ADDRESS_MAX,
-       _LINK_LOCAL_ADDRESS_INVALID = -1,
+       _LINK_LOCAL_ADDRESS_INVALID = -EINVAL,
 } LinkLocalAddress;
 
 typedef enum IPDuplicateAddressDetection {
@@ -51,7 +51,7 @@ typedef enum IPDuplicateAddressDetection {
         IP_DUPLICATE_ADDRESS_DETECTION_IPV6,
         IP_DUPLICATE_ADDRESS_DETECTION_BOTH,
        _IP_DUPLICATE_ADDRESS_DETECTION_MAX,
-       _IP_DUPLICATE_ADDRESS_DETECTION_INVALID = -1,
+       _IP_DUPLICATE_ADDRESS_DETECTION_INVALID = -EINVAL,
 } IPDuplicateAddressDetection;
 
 typedef enum IPv6RAPreference {
@@ -59,7 +59,7 @@ typedef enum IPv6RAPreference {
         IPV6_RA_PREFERENCE_MEDIUM,
         IPV6_RA_PREFERENCE_HIGH,
        _IPV6_RA_PREFERENCE_MAX,
-       _IPV6_RA_PREFERENCE_INVALID = -1,
+       _IPV6_RA_PREFERENCE_INVALID = -EINVAL,
 } IPv6RAPreference;
 
 typedef enum RouteScope {
@@ -69,7 +69,7 @@ typedef enum RouteScope {
         ROUTE_SCOPE_HOST,
         ROUTE_SCOPE_NOWHERE,
        _ROUTE_SCOPE_MAX,
-       _ROUTE_SCOPE_INVALID = -1,
+       _ROUTE_SCOPE_INVALID = -EINVAL,
 } RouteScope;
 
 typedef enum IPv6RoutePreference {
@@ -77,7 +77,7 @@ typedef enum IPv6RoutePreference {
         IPV6_ROUTE_PREFERENCE_MEDIUM,
         IPV6_ROUTE_PREFERENCE_HIGH,
         _IPV6_ROUTE_PREFERENCE_MAX,
-        _IPV6_ROUTE_PREFERENCE_INVALID = -1,
+        _IPV6_ROUTE_PREFERENCE_INVALID = -EINVAL,
 } IPv6RoutePreference;
 
 typedef enum RouteProtcol {
@@ -86,7 +86,7 @@ typedef enum RouteProtcol {
        ROUTE_PROTOCOL_STATIC,
        ROUTE_PRTOCOL_DHCP,
        _ROUTE_PROTOCOL_MAX,
-       _ROUTE_PROTOCOL_INVALID = -1,
+       _ROUTE_PROTOCOL_INVALID = -EINVAL,
 } RouteProtocol;
 
 typedef enum RouteType {
@@ -102,7 +102,7 @@ typedef enum RouteType {
        ROUTE_TYPE_NAT,
        ROUTE_TYPE_XRESOLVE,
        _ROUTE_TYPE_MAX,
-       _ROUTE_TYPE_INVALID = -1
+       _ROUTE_TYPE_INVALID = -EINVAL
 } RouteType;
 
 /* iproute */
@@ -112,7 +112,7 @@ typedef enum RouteTable {
        ROUTE_TABLE_MAIN     = 254,
        ROUTE_TABLE_LOCAL    = 255,
        _ROUTE_TABLE_MAX,
-       _ROUTE_TABLE_INVALID = -1
+       _ROUTE_TABLE_INVALID = -EINVAL
 } RouteTable;
 
 typedef enum AuthKeyManagement {
@@ -121,7 +121,7 @@ typedef enum AuthKeyManagement {
         AUTH_KEY_MANAGEMENT_WPA_EAP,
         AUTH_KEY_MANAGEMENT_8021X,
         _AUTH_KEY_MANAGEMENT_MAX,
-        _AUTH_KEY_MANAGEMENT_INVALID = -1,
+        _AUTH_KEY_MANAGEMENT_INVALID = -EINVAL,
 } AuthKeyManagement;
 
 typedef enum AuthEAPMethod {
@@ -130,14 +130,14 @@ typedef enum AuthEAPMethod {
         AUTH_EAP_METHOD_PEAP,
         AUTH_EAP_METHOD_TTLS,
         _AUTH_EAP_METHOD_MAX,
-        _AUTH_EAP_METHOD_INVALID = -1,
+        _AUTH_EAP_METHOD_INVALID = -EINVAL,
 } AuthEAPMethod;
 
 typedef enum ParserType {
         PARSER_TYPE_YAML,
         PARSER_TYPE_DRACUT,
         _PARSER_TYPE_MAX,
-        _PARSER_TYPE_INVALID = -1,
+        _PARSER_TYPE_INVALID = -EINVAL,
 } ParserType;
 
 typedef struct WIFIAuthentication {
