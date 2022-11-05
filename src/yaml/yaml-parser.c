@@ -265,7 +265,7 @@ int parse_yaml_dhcp_type(const char *key,
 
         n = data;
 
-        n->dhcp_type = dhcp_name_to_mode((char *) value);
+        n->dhcp_type = dhcp_client_name_to_mode((char *) value);
         return 0;
 }
 

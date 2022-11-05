@@ -8,16 +8,9 @@
 #include "network-address.h"
 #include "network-route.h"
 
-typedef enum DHCPMode {
-        DHCP_MODE_NO,
-        DHCP_MODE_YES,
-        DHCP_MODE_IPV4,
-        DHCP_MODE_IPV6,
-        _DHCP_MODE_MAX,
-        _DHCP_MODE_INVALID = -1
-} DHCPMode;
-
 typedef enum DHCPClient {
+        DHCP_CLIENT_NO,
+        DHCP_CLIENT_YES,
         DHCP_CLIENT_IPV4,
         DHCP_CLIENT_IPV6,
         _DHCP_CLIENT_MAX,
@@ -174,7 +167,7 @@ typedef struct Network {
         char *req_family_for_online;
 
         ParserType parser_type;
-        DHCPMode dhcp_type;
+        DHCPClient dhcp_type;
         DHCPClientIdentifier dhcp_client_identifier_type;
         LinkLocalAddress link_local;
 
@@ -217,8 +210,8 @@ int parse_address_from_string_and_add(const char *s, Set *a);
 int create_network_conf_file(const char *ifname, char **ret);
 int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret);
 
-const char *dhcp_modes_to_name(int id);
-int dhcp_name_to_mode(char *name);
+const char *dhcp_client_modes_to_name(int id);
+int dhcp_client_name_to_mode(char *name);
 
 const char *dhcp_client_to_name(int id);
 int dhcp_name_to_client(char *name);
