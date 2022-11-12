@@ -1096,6 +1096,76 @@ _public_ int ncm_link_get_dhcp_client_iaid(char *ifname, uint32_t *ret) {
         return 0;
 }
 
+_public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
+        DHCPClient kind = _DHCP_CLIENT_INVALID;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *raw_data = NULL;
+        DHCPClientDUIDType d;
+        bool system = false;
+        int r;
+
+        /* Try to resolve the link name. If not assume this is for the system, i.e. /etc/systemd/networkd.conf */
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                if (string_equal_fold(argv[1], "system") || string_equal_fold(argv[1], "s"))
+                        system = true;
+                else {
+                        log_warning("Failed to resolve link '%s': %s", argv[1], g_strerror(EINVAL));
+                        return -EINVAL;
+                }
+        }
+
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r  = dhcp_name_to_client(argv[i]);
+                        if (r < 0) {
+
+                                log_warning("Failed to determine DHCP client type '%s': %s", argv[i], g_strerror(EINVAL));
+                                return -EINVAL;
+                        }
+                        kind = r;
+
+                        continue;
+                }
+
+                if (string_equal_fold(argv[i], "duid")) {
+                        parse_next_arg(argv, argc, i);
+
+                        d = dhcp_client_duid_type_to_mode(argv[i]);
+                        if (d == _DHCP_CLIENT_DUID_TYPE_INVALID) {
+                                log_warning("Failed to parse DHCPv4 DUID type '%s': %s", argv[2], g_strerror(EINVAL));
+                                return -EINVAL;
+                        }
+
+                        continue;
+                }
+
+                if (string_equal_fold(argv[i], "data") || string_equal_fold(argv[i], "rawdata")) {
+                        parse_next_arg(argv, argc, i);
+
+                        raw_data = strdup(argv[i]);
+                        if (!raw_data)
+                                return log_oom();
+
+                        continue;
+                }
+
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_set_link_dhcp_client_duid(p, d, raw_data, system, kind);
+        if (r < 0) {
+                log_warning("Failed to set link DHCP client DUID for '%s': %s\n", p->ifname, g_strerror(r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
         _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -1207,76 +1277,6 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
                 }
         }
 
-
-        return 0;
-}
-
-_public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
-        DHCPClient kind = _DHCP_CLIENT_INVALID;
-        _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_ char *raw_data = NULL;
-        DHCPClientDUIDType d;
-        bool system = false;
-        int r;
-
-        /* Try to resolve the link name. If not assume this is for the system, i.e. /etc/systemd/networkd.conf */
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                if (string_equal_fold(argv[1], "system") || string_equal_fold(argv[1], "s"))
-                        system = true;
-                else {
-                        log_warning("Failed to resolve link '%s': %s", argv[1], g_strerror(EINVAL));
-                        return -EINVAL;
-                }
-        }
-
-        for (int i = 2; i < argc; i++) {
-                if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
-                        parse_next_arg(argv, argc, i);
-
-                        r  = dhcp_name_to_client(argv[i]);
-                        if (r < 0) {
-
-                                log_warning("Failed to determine DHCP client type '%s': %s", argv[i], g_strerror(EINVAL));
-                                return -EINVAL;
-                        }
-                        kind = r;
-
-                        continue;
-                }
-
-                if (string_equal_fold(argv[i], "duid")) {
-                        parse_next_arg(argv, argc, i);
-
-                        d = dhcp_client_duid_type_to_mode(argv[i]);
-                        if (d == _DHCP_CLIENT_DUID_TYPE_INVALID) {
-                                log_warning("Failed to parse DHCPv4 DUID type '%s': %s", argv[2], g_strerror(EINVAL));
-                                return -EINVAL;
-                        }
-
-                        continue;
-                }
-
-                if (string_equal_fold(argv[i], "data") || string_equal_fold(argv[i], "rawdata")) {
-                        parse_next_arg(argv, argc, i);
-
-                        raw_data = strdup(argv[i]);
-                        if (!raw_data)
-                                return log_oom();
-
-                        continue;
-                }
-
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
-        }
-
-        r = manager_set_link_dhcp_client_duid(p, d, raw_data, system, kind);
-        if (r < 0) {
-                log_warning("Failed to set link DHCP client DUID for '%s': %s\n", p->ifname, g_strerror(r));
-                return r;
-        }
 
         return 0;
 }
