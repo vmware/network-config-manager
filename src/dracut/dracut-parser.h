@@ -14,7 +14,7 @@ typedef enum DracutDHCPMode {
         DRACUT_DHCP_MODE_EITHER6,
         DRACUT_DHCP_MODE_IBFT,
         _DRACUT_DHCP_MODE_MAX,
-        _DRACUT_DHCP_MODE_INVALID = -1
+        _DRACUT_DHCP_MODE_INVALID = -EINVAL
 } DrakutDHCPMode;
 
 typedef enum DracutConfType {
@@ -28,7 +28,7 @@ typedef enum DracutConfType {
         DRACUT_CONF_TYPE_BRIDGE,
         DRACUT_CONF_TYPE_VLAN,
         _DRACUT_CONF_TYPE_MAX,
-        _DRACUT_CONF_TYPE_INVALID = -1
+        _DRACUT_CONF_TYPE_INVALID = -EINVAL
 } DracutConfType;
 
 const char *dracut_dhcp_mode_to_name(int id);
