@@ -193,23 +193,24 @@ int netdev_new(NetDev **ret) {
         return 0;
 }
 
-void netdev_unrefp(NetDev **n) {
-        if (n && *n) {
-                g_free((*n)->ifname);
-                g_free((*n)->peer);
-                g_free((*n)->mac);
+void netdev_unref(NetDev *n) {
+        if (!n)
+                return;
 
-                g_free((*n)->wg_private_key);
-                g_free((*n)->wg_public_key);
-                g_free((*n)->wg_preshared_key);
-                g_free((*n)->wg_endpoint);
-                g_free((*n)->wg_allowed_ips);
-                g_free((*n)->wg_allowed_ips);
+        g_free(n->ifname);
+        g_free(n->peer);
+        g_free(n->mac);
 
-                g_free((*n)->proto);
+        g_free(n->wg_private_key);
+        g_free(n->wg_public_key);
+        g_free(n->wg_preshared_key);
+        g_free(n->wg_endpoint);
+        g_free(n->wg_allowed_ips);
+        g_free(n->wg_allowed_ips);
 
-                g_free(*n);
-        }
+        g_free(n->proto);
+
+        g_free(n);
 }
 
 int generate_netdev_config(NetDev *n, GString **ret) {

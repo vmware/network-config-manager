@@ -91,7 +91,8 @@ typedef struct NetDev {
 } NetDev;
 
 int netdev_new(NetDev **ret);
-void netdev_unrefp(NetDev **n);
+void netdev_unref(NetDev *n);
+DEFINE_CLEANUP(NetDev*, netdev_unref);
 
 int generate_netdev_config(NetDev *n, GString **ret);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);
