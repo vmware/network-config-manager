@@ -114,7 +114,7 @@ const char *dhcp_client_duid_type_to_name(int id) {
         return dhcp_client_duid_type[id];
 }
 
-int dhcp_client_duid_type_to_mode(char *name) {
+int dhcp_client_duid_name_to_type(char *name) {
         assert(name);
 
         for (size_t i = DHCP_CLIENT_DUID_TYPE_LINK_LAYER_TIME; i < (size_t) ELEMENTSOF(dhcp_client_duid_type); i++)
