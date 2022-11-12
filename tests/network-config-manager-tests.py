@@ -875,7 +875,7 @@ class TestCLINetwork:
         assert(unit_exist('10-test99.network') == True)
 
         subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp4-client-identifier', 'test99', 'mac'])
+        subprocess.check_call(['nmctl', 'set-dhcp4-client-id', 'test99', 'mac'])
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
