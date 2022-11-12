@@ -573,7 +573,7 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'yes')
 
-    def test_cli_set_dhcp_iaid(self):
+    def test_cli_set_dhcp4_iaid(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
@@ -588,6 +588,22 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('DHCPv4', 'IAID') == '5555')
+
+    def test_cli_set_dhcp6_iaid(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        assert(unit_exist('10-test99.network') == True)
+
+        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'ipv6'])
+        subprocess.check_call(['nmctl', 'set-dhcp-iaid', 'test99', 'f', '6', 'iaid', '5555'])
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('DHCPv6', 'IAID') == '5555')
 
     def test_cli_add_static_address(self):
         assert(link_exist('test99') == True)
