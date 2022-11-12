@@ -1042,7 +1042,7 @@ _public_ int ncm_link_get_dhcp4_client_identifier(const char *ifname, char **ret
         if (r < 0)
                 return -errno;
 
-        r = manager_get_link_dhcp_client_identifier(p, &d);
+        r = manager_get_link_dhcp4_client_identifier(p, &d);
         if (r < 0)
                 return r;
 
@@ -1309,8 +1309,8 @@ _public_ int ncm_link_update_state(int argc, char *argv[]) {
 
 _public_ int ncm_link_add_address(int argc, char *argv[]) {
         IPDuplicateAddressDetection dad = _IP_DUPLICATE_ADDRESS_DETECTION_INVALID;
-        _auto_cleanup_ IPAddress *address = NULL, *peer = NULL;
         _auto_cleanup_ char *scope = NULL, *pref_lft = NULL, *label = NULL;
+        _auto_cleanup_ IPAddress *address = NULL, *peer = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r, prefix_route = -1;
 

@@ -184,7 +184,7 @@ int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
         return dbus_network_reload();
 }
 
-int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret) {
+int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
@@ -1572,8 +1572,8 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
 int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id, const char *proto) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vlan_network_config = NULL;
         _auto_cleanup_ char *vlan_network = NULL, *network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
         assert(ifnameidx);
