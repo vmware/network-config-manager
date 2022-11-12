@@ -581,7 +581,7 @@ class TestCLINetwork:
 
         subprocess.check_call(['sleep', '5'])
         subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'ipv4'])
-        subprocess.check_call(['nmctl', 'set-dhcp-iaid', 'test99', '5555'])
+        subprocess.check_call(['nmctl', 'set-dhcp-iaid', 'test99', 'f', '4', 'iaid', '5555'])
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
