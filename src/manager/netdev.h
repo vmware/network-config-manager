@@ -25,7 +25,7 @@ typedef enum NetDevKind {
         NET_DEV_KIND_VTI_TUNNEL,
         NET_DEV_KIND_WIREGUARD,
         _NET_DEV_KIND_MAX,
-        _NET_DEV_KIND_INVALID = -1
+        _NET_DEV_KIND_INVALID = -EINVAL
 } NetDevKind;
 
 typedef enum BondMode {
@@ -37,7 +37,7 @@ typedef enum BondMode {
         BOND_MODE_TLB,
         BOND_MODE_ALB,
         _BOND_MODE_MAX,
-        _BOND_MODE_INVALID = -1
+        _BOND_MODE_INVALID = -EINVAL
 } BondMode;
 
 typedef enum MACVLanMode {
@@ -47,7 +47,7 @@ typedef enum MACVLanMode {
         MAC_VLAN_MODE_PASSTHRU = MACVLAN_MODE_PASSTHRU,
         MAC_VLAN_MODE_SOURCE   = MACVLAN_MODE_SOURCE,
         _MAC_VLAN_MODE_MAX,
-        _MAC_VLAN_MODE_INVALID = -1
+        _MAC_VLAN_MODE_INVALID = -EINVAL
 } MACVLanMode;
 
 typedef enum IPVLanMode {
@@ -55,7 +55,7 @@ typedef enum IPVLanMode {
         IP_VLAN_MODE_L3  = IPVLAN_MODE_L3,
         IP_VLAN_MODE_L3S = IPVLAN_MODE_L3S,
         _IP_VLAN_MODE_MAX,
-        _IP_VLAN_MODE_INVALID = -1
+        _IP_VLAN_MODE_INVALID = -EINVAL
 } IPVLanMode;
 
 typedef struct NetDev {
@@ -91,7 +91,8 @@ typedef struct NetDev {
 } NetDev;
 
 int netdev_new(NetDev **ret);
-void netdev_unrefp(NetDev **n);
+void netdev_unref(NetDev *n);
+DEFINE_CLEANUP(NetDev*, netdev_unref);
 
 int generate_netdev_config(NetDev *n, GString **ret);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);
