@@ -1,6 +1,7 @@
 /* Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
+
 #include <net/if.h>
 #include <linux/if.h>
 #include <net/ethernet.h>
@@ -17,22 +18,8 @@
 #include "network-sriov.h"
 #include "network-util.h"
 
-static const Config sriov_ctl_to_config_table[] = {
-                { "vf",           "VirtualFunction" },
-                { "vlanid",       "VLANId" },
-                { "qos",          "QualityOfService" },
-                { "vlanproto",    "VLANProtocol" },
-                { "macspoofck",   "MACSpoofCheck" },
-                { "qrss",         "QueryReceiveSideScaling" },
-                { "trust",        "Trust" },
-                { "linkstate",    "LinkState" },
-                { "macaddr",      "MACAddress" },
-                {},
-};
-
 int netdev_sriov_new(SRIOV **ret) {
-        SRIOV *s = NULL;
-        int r;
+        _cleanup_(netdev_sriov_unrefp) SRIOV *s = NULL;
 
         s = new0(SRIOV, 1);
         if (!s)
@@ -45,19 +32,13 @@ int netdev_sriov_new(SRIOV **ret) {
                 .trust = -1,
         };
 
-        r = config_manager_new(sriov_ctl_to_config_table, &s->m);
-        if (r < 0)
-                return r;
-
-        *ret = s;
+        *ret = steal_pointer(s);
         return 0;
 }
 
 void netdev_sriov_unref(SRIOV *s) {
         if (!s)
                 return;
-
-        config_manager_unref(s->m);
 
         free(s->vf);
         free(s->vlanid);
@@ -66,7 +47,7 @@ void netdev_sriov_unref(SRIOV *s) {
         free(s->macaddr);
         free(s->linkstate);
 
-        g_free(s);
+        free(s);
 }
 
 int netdev_sriov_configure(const IfNameIndex *ifnameidx, SRIOV *s) {

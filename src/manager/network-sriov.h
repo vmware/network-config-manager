@@ -9,8 +9,6 @@
 #include "config-file.h"
 
 typedef struct SRIOV {
-        ConfigManager *m;
-
         int family;
         int ifindex;
 
