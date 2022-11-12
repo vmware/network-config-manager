@@ -165,7 +165,7 @@ int manager_get_link_dhcp_client(const IfNameIndex *ifnameidx, DHCPClient *mode)
         return 0;
 }
 
-int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier) {
+int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -184,7 +184,7 @@ int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
         return dbus_network_reload();
 }
 
-int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret) {
+int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
@@ -202,7 +202,7 @@ int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPCl
         return 0;
 }
 
-int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iaid) {
+int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t iaid) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -212,16 +212,16 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t iai
         if (r < 0)
                 return r;
 
-        r = set_config_file_integer(network, "DHCPv4", "IAID", iaid);
+        r = set_config_file_integer(network, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "IAID", iaid);
         if (r < 0) {
-                log_warning("Failed to update DHCPv4 IAID= to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to update DHCP IAID= to configuration file '%s': %s", network, g_strerror(-r));
                 return r;
         }
 
         return 0;
 }
 
-int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *iaid) {
+int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t *iaid) {
         _auto_cleanup_ char *network = NULL;
         uint32_t v;
         int r;
@@ -232,7 +232,7 @@ int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *ia
         if (r < 0)
                 return r;
 
-        r = parse_config_file_integer(network, "DHCPv4", "IAID", &v);
+        r = parse_config_file_integer(network, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "IAID", &v);
         if (r < 0)
                 return r;
 
@@ -256,14 +256,14 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDU
 
         r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
         if (r < 0) {
-                log_warning("Failed to update DHCP ClientIdentifier= to configuration file '%s': %s", c, g_strerror(-r));
+                log_warning("Failed to update %s DUIDType= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, g_strerror(-r));
                 return r;
         }
 
         if (raw_data) {
                 r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDRawData", raw_data);
                 if (r < 0) {
-                        log_warning("Failed to update DHCPv6 DUIDRawData= to configuration file '%s': %s", c, g_strerror(-r));
+                        log_warning("Failed to update %s DUIDRawData= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, g_strerror(-r));
                         return r;
                 }
         }
@@ -1572,8 +1572,8 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
 int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id, const char *proto) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vlan_network_config = NULL;
         _auto_cleanup_ char *vlan_network = NULL, *network = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
         assert(ifnameidx);

@@ -22,11 +22,11 @@ int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group);
 int manager_set_link_rf_online(const IfNameIndex *ifnameidx, const char *addrfamily);
 int manager_set_link_act_policy(const IfNameIndex *ifnameidx, const char *actpolicy);
 
-int manager_set_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier);
-int manager_get_link_dhcp_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret);
+int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier);
+int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret);
 
-int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t v);
-int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, uint32_t *iaid);
+int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t v);
+int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t *iaid);
 
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system, DHCPClient kind);
 

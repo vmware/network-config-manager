@@ -220,7 +220,7 @@ const char *dhcp_client_identifier_to_name(int id);
 int dhcp_client_identifier_to_mode(char *name);
 
 const char *dhcp_client_duid_type_to_name(int id);
-int dhcp_client_duid_type_to_mode(char *name);
+int dhcp_client_duid_name_to_type(char *name);
 
 const char *ipv6_ra_preference_type_to_name(int id);
 int ipv6_ra_preference_type_to_mode(const char *name);
