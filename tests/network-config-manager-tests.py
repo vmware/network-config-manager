@@ -624,7 +624,8 @@ class TestCLINetwork:
     def test_cli_add_static_address(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope link pref-lifetime forever prefix-route yes label 3434", shell = True)
+        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope "
+                              "link pref-lifetime forever prefix-route yes label 3434", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -639,13 +640,11 @@ class TestCLINetwork:
         assert(parser.get('Address', 'DuplicateAddressDetection') == 'ipv4')
         assert(parser.get('Address', 'Label') == '3434')
 
-"""
     def test_cli_add_default_gateway(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'add-link-address', 'test99', 'address', '192.168.1.45/24', 'peer',
-                               '192.168.1.46/24', 'dad', 'ipv4', 'scope', 'link', 'pref-lifetime', 'forever',
-                               'prefix-route', 'yes', 'label', '3434'])
+        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad "
+                              "ipv4 scope link pref-lifetime forever prefix-route yes label 3434", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -654,7 +653,7 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Address', 'Address') == '192.168.1.45/24')
 
-        subprocess.check_call(['nmctl', 'add-default-gateway', 'test99', 'gw', '192.168.1.1', 'onlink', 'true'])
+        subprocess.check_call("nmctl add-default-gateway dev test99 gw 192.168.1.1 onlink true", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
@@ -666,10 +665,8 @@ class TestCLINetwork:
     def test_cli_add_route(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'add-link-address', 'test99', 'address', '192.168.1.45/24', 'peer',
-                               '192.168.1.46/24', 'dad', 'ipv4', 'scope', 'link', 'pref-lifetime', 'forever',
-                               'prefix-route', 'yes', 'label', '3434'])
-
+        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope link "
+                              "pref-lifetime forever prefix-route yes label 3434", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -678,9 +675,9 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Address', 'Address') == '192.168.1.45/24')
 
-        subprocess.check_call(['nmctl', 'add-route', 'test99', 'gw', '192.168.1.1', 'dest', '192.168.1.2', 'metric', '111', 'scope',
-                               'link', 'mtu', '1400', 'table', 'local', 'proto', 'static', 'type', 'unicast', 'onlink', 'yes', 'ipv6-pref',
-                               'medium', 'src', '192.168.1.4'])
+        subprocess.check_call("nmctl add-route dev test99 gw 192.168.1.1 dest 192.168.1.2 metric 111 scope "
+                               "link mtu 1400 table local proto static type unicast onlink yes ipv6-pref "
+                               "medium src 192.168.1.4", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
@@ -697,6 +694,7 @@ class TestCLINetwork:
         assert(parser.get('Route', 'IPv6Preference') == 'medium')
         assert(parser.get('Route', 'Source') == '192.168.1.4')
 
+"""
     def test_cli_add_additional_gateway(self):
         assert(link_exist('test99') == True)
 
