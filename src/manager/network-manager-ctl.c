@@ -128,15 +128,15 @@ static int help(void) {
                "  add-address                  dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime|pl [{forever|infinity|0}] scope {global|link|host|NUMBER}]"
                                                       "\n\t\t\t\t      dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN] Configures device Address.\n"
                "  delete-address               dev [DEVICE] address|a|addr [ADDRESS] Removes address from device.\n"
-               "  add-default-gateway          [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures Link Default Gateway.\n"
-               "  delete-gateway               [DEVICE] Removes Gateway from Link.\n"
-               "  add-route                    [DEVICE] gw [GATEWAY ADDRESS] dest [DESTINATION ADDRESS] src [SOURCE ADDRESS] pref-src [PREFFREDSOURCE ADDRESS]"
+               "  add-default-gateway          dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures device default Gateway.\n"
+               "  delete-gateway               dev [DEVICE] Removes Gateway from device.\n"
+               "  add-route                    dev [DEVICE] gw [GATEWAY ADDRESS] dest [DESTINATION ADDRESS] src [SOURCE ADDRESS] pref-src [PREFFREDSOURCE ADDRESS]"
                                                      "\n\t\t\t\t      metric [METRIC NUMBER] scope [SCOPE {global|site|link|host|nowhere}] mtu [MTU NUMBER]"
                                                      "\n\t\t\t\t      table [TABLE {default|main|local|NUMBER}] proto [PROTOCOL {boot|static|ra|dhcp|NUMBER}]"
                                                      "\n\t\t\t\t      type [TYPE {unicast|local|broadcast|anycast|multicast|blackhole|unreachable|prohibit|throw|nat|resolve}]"
                                                      "\n\t\t\t\t      ipv6-pref [IPV6PREFERENCE {low|medium|high}] onlink [{ONLINK BOOLEN}] Configures Link route.\n"
-               "  delete-route                 [DEVICE] Removes route from Link\n"
-               "  add-additional-gw            [DEVICE] address [ADDRESS] destination [DESTINATION address] gw [GW address] table [TABLE routing policy table NUMBER] Configures additional"
+               "  delete-route                 dev [DEVICE] Removes route from device\n"
+               "  add-additional-gw            [DEVICE] address|addr|a [ADDRESS] destination|dest [DESTINATION address] gw [GW address] table [TABLE NUMBER] Configures additional"
                                                       "\n\t\t\t\t      gateway for another NIC with routing policy rules.\n"
                "  add-rule                     [DEVICE] table [TABLE NUMBER] from [ADDRESS] to [ADDRESS] oif [DEVICE] iif [DEVICE] priority [NUMBER] tos [NUMBER]"
                                                       "\n\t\t\t\t      Configures Routing Policy Rule.\n"
@@ -324,10 +324,10 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-address",                  4,        WORD_ANY, false, ncm_link_add_address },
                 { "show-address",                 4,        WORD_ANY, false, ncm_display_one_link_addresses },
                 { "delete-address",               4,        WORD_ANY, false, ncm_link_delete_address },
-                { "add-default-gateway",          2,        WORD_ANY, false, ncm_link_add_default_gateway },
-                { "delete-gateway",               1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
-                { "add-route",                    2,        WORD_ANY, false, ncm_link_add_route },
-                { "delete-route",                 1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
+                { "add-default-gateway",          4,        WORD_ANY, false, ncm_link_add_default_gateway },
+                { "delete-gateway",               4,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
+                { "add-route",                    4,        WORD_ANY, false, ncm_link_add_route },
+                { "delete-route",                 4,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-additional-gw",            9,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "add-rule",                     3,        WORD_ANY, false, ncm_link_add_routing_policy_rules },
                 { "remove-rule",                  1,        WORD_ANY, false, ncm_link_remove_routing_policy_rules },
