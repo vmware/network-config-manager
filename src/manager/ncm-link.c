@@ -35,13 +35,13 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link : %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -252,13 +252,13 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link feature: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -460,13 +460,13 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link feature: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -536,13 +536,13 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link queue size: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -602,13 +602,13 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link flow control: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -667,13 +667,13 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link gso: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -721,13 +721,13 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link channel: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -809,13 +809,13 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link coalesce: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -953,13 +953,13 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link coalesce frames: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1097,13 +1097,13 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link coalesce packet rate: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1185,13 +1185,13 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link altname: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1274,13 +1274,13 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link name: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1364,13 +1364,13 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_link_new(&n);
         if (r < 0) {
                 log_warning("Failed to set link mac: %s", g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {

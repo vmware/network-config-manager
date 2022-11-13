@@ -2120,7 +2120,7 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
                 r = parse_ifname_or_index(argv[1], &p);
                 if (r < 0) {
                         log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                        return -errno;
+                        return r;
                 }
         }
 
@@ -2155,7 +2155,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 r = parse_ifname_or_index(argv[1], &p);
                 if (r < 0) {
                         log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                        return -errno;
+                        return r;
                 }
 
                 r = network_parse_link_setup_state(p->ifindex, &setup);
@@ -2260,7 +2260,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                         r = parse_ifname_or_index(buffer, &p);
                         if (r < 0) {
                                 log_warning("Failed to find link '%d': %s", d->ifindex, g_strerror(-r));
-                                return -errno;
+                                return r;
                         }
                         printf("%5d %-20s %-18s\n", d->ifindex, p->ifname, *d->domain == '.' ? "~." : d->domain);
                 }
@@ -2317,7 +2317,7 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_revert_dns_server_and_domain(p);
@@ -2369,7 +2369,7 @@ _public_ int ncm_link_add_ntp(int argc, char *argv[]) {
        r = parse_ifname_or_index(argv[1], &p);
        if (r < 0) {
                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-               return -errno;
+               return r;
        }
 
        r = argv_to_strv(argc - 2, argv + 2, &ntps);
@@ -2407,7 +2407,7 @@ _public_ int ncm_link_delete_ntp(int argc, char *argv[]) {
        r = parse_ifname_or_index(argv[1], &p);
        if (r < 0) {
                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-               return -errno;
+               return r;
        }
 
        r = manager_remove_ntp_addresses(p);
@@ -2429,7 +2429,7 @@ _public_ int ncm_link_get_ntp(const char *ifname, char ***ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         r = network_parse_link_ntp(p->ifindex, &ntp);
         if (r < 0)
@@ -2446,7 +2446,7 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         if (string_equal(argv[0], "enable-ipv6"))
@@ -2473,7 +2473,7 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         return manager_reconfigure_link(p);
@@ -2487,7 +2487,7 @@ _public_ int ncm_link_show_network_config(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_show_link_network_config(p, &config);
@@ -2507,7 +2507,7 @@ _public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_edit_link_network_config(p);

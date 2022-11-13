@@ -285,7 +285,7 @@ static int list_one_link(char *argv[]) {
         r = parse_ifname_or_index(*argv, &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", *argv);
-                return -errno;
+                return r;
         }
 
         if (arg_json)
@@ -673,7 +673,7 @@ _public_ int ncm_get_link_status(const char *ifname, char **ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         return json_list_one_link(p, ret);
 }
