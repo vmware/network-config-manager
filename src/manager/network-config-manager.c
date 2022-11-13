@@ -239,7 +239,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                log_warning("Failed to find device: %s",  g_strerror(ENOENT));
                 return r;
         }
 
@@ -262,6 +262,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
 
                         continue;
                 }
+
                 if (string_equal(argv[i], "mc")) {
                         parse_next_arg(argv, argc, i);
 
@@ -313,26 +314,6 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                                 printf("Failed to set link promiscuous '%s': %s\n", p->ifname, g_strerror(-r));
                                 return r;
                         }
-
-                        continue;
-                }
-                if (string_equal(argv[i], "rfo")) {
-                        parse_next_arg(argv, argc, i);
-
-                        r = parse_boolean(argv[i]);
-                        if (r < 0) {
-                                log_warning("Failed to parse link RequiredForOnline '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
-                                return r;
-                        }
-
-                        k = r;
-                        r = manager_set_link_flag(p, k, "RequiredForOnline");
-                        if (r < 0) {
-                                printf("Failed to set link RequiredForOnline '%s': %s\n", p->ifname, g_strerror(-r));
-                                return r;
-                        }
-
-                        continue;
                 }
         }
 

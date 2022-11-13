@@ -115,7 +115,7 @@ static int help(void) {
                "  set-mac                      dev [DEVICE] mac [MAC] Configures device MAC address.\n"
                "  set-manage                   dev [DEVICE] manage [MANAGE BOOLEAN] Configures device managed by networkd.\n"
                "  set-link-option              dev [DEVICE] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN] [rfo BOOLEAN]"
-                                                     "\n\t\t\t\t\tConfigures device's arp, multicast, allmulticast, promiscuous and requiredforonline managed by networkd.\n"
+                                                     "\n\t\t\t\t\tConfigures device's arp, multicast, allmulticast and promiscuous.\n"
                "  set-link-group               [DEVICE] [GROUP NUMBER] Configures Link Group.\n"
                "  set-link-rf-online           [DEVICE] [GROUP NUMBER] Configures Link RequiredFamilyForOnline.\n"
                "  set-link-act-policy          [DEVICE] [GROUP NUMBER] Configures Link ActivationPolicy.\n"

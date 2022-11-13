@@ -107,11 +107,6 @@ int manager_set_link_flag(const IfNameIndex *ifnameidx, bool mode, const char* k
         if (r < 0)
                 return r;
 
-        if (!network) {
-                log_warning("Failed to find network file for '%s'. systemd-networkd is configuring. Please try in a while.", ifnameidx->ifname);
-                return -ENODATA;
-        }
-
         r = set_config_file_bool(network, "Link", key, mode);
         if (r < 0)
                 return r;
