@@ -531,11 +531,10 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'Group') == '2147483647')
 
-"""
     def test_cli_set_rf_online(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-rf-online', 'test99', 'ipv4'])
+        subprocess.check_call("nmctl set-link-rf-online dev test99 f ipv4", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -544,6 +543,7 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'RequiredFamilyForOnline') == 'ipv4')
 
+"""
     def test_cli_set_act_policy(self):
         assert(link_exist('test99') == True)
 
@@ -556,6 +556,8 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'ActivationPolicy') == 'always-up')
 
+"""
+"""
     def test_cli_set_dhcp_type(self):
         assert(link_exist('test99') == True)
 
