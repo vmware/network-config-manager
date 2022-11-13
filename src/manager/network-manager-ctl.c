@@ -111,7 +111,7 @@ static int help(void) {
                "\nCommands:\n"
                "  status                       [DEVICE] Show system or device status\n"
                "  status-devs                  List all devices.\n"
-               "  set-mtu                      [DEVICE] [MTU NUMBER] Configures Link MTU.\n"
+               "  set-mtu                      dev [DEVICE] mtu [MTU NUMBER] Configures device MTU.\n"
                "  set-mac                      [DEVICE] [MAC] Configures Link MAC address.\n"
                "  set-link-mode                [DEVICE] [MODE BOOLEAN] Configures Link managed by networkd.\n"
                "  set-link-option              [DEVICE] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN] [rfo BOOLEAN]"
