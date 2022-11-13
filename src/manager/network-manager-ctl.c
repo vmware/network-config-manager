@@ -119,7 +119,7 @@ static int help(void) {
                "  set-link-group               dev [DEVICE] group [GROUP NUMBER] Configures device group.\n"
                "  set-link-rf-online           dev [DEVICE] f|family [ipv4|ipv6|ipv6|both|any] Configures device required family for online.\n"
                "  set-link-act-policy          dev [DEVICE] ap|act-policy [up|always-up|manual|always-down|down|bound] Configures device activation policy.\n"
-               "  set-dhcp-mode                [DEVICE] [DHCP-MODE {yes|no|ipv4|ipv6}] Configures Link DHCP setting.\n"
+               "  set-dhcp                     dev [DEVICE] dhcp [DHCP {yes|no|ipv4|ipv6}] Configures Link DHCP setting.\n"
                "  set-dhcp-client-id           [DEVICE] [IDENTIFIER {mac|duid|duid-only} Configures Link DHCPv4 identifier.\n"
                "  set-dhcp-iaid                [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
                "  set-dhcp-duid                [LINK | system] [family|f ipv4|ipv6|4|6] [DUID {link-layer-time|vendor|link-layer|uuid}] [data RAWDATA] Sets DUID of DHCPv4 or DHCPv6 Client.\n"
@@ -316,7 +316,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-link-group",               2,        WORD_ANY, false, ncm_link_set_group },
                 { "set-link-rf-online",           2,        WORD_ANY, false, ncm_link_set_rf_online },
                 { "set-link-act-policy",          2,        WORD_ANY, false, ncm_link_set_act_policy },
-                { "set-dhcp-mode",                2,        WORD_ANY, false, ncm_link_set_dhcp_mode },
+                { "set-dhcp",                     2,        WORD_ANY, false, ncm_link_set_dhcp_mode },
                 { "set-dhcp4-client-id",          2,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
                 { "set-dhcp-iaid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
                 { "set-dhcp-duid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
