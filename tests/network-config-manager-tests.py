@@ -518,11 +518,11 @@ class TestCLINetwork:
         assert(parser.get('Link', 'Multicast') == 'yes')
         assert(parser.get('Link', 'AllMulticast') == 'no')
         assert(parser.get('Link', 'Promiscuous') == 'no')
-"""
+
     def test_cli_set_group(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-group', 'test99', '2147483647'])
+        subprocess.check_call("nmctl set-link-group dev test99 group 2147483647", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -531,6 +531,7 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'Group') == '2147483647')
 
+"""
     def test_cli_set_rf_online(self):
         assert(link_exist('test99') == True)
 
