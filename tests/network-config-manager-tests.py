@@ -698,14 +698,14 @@ class TestCLINetwork:
         assert(link_exist('test99') == True)
 
         subprocess.check_call("nmctl add-additional-gw dev test99 address 192.168.10.5/24 dest 0.0.0.0 gw 172.16.85.1 table 100 ", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
 
-"""
     def test_cli_add_routing_policy_rule(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'add-rule', 'test99', 'table', '10', 'to', '192.168.1.2/24', 'from', '192.168.1.3/24',
-                               'oif', 'test99', 'iif', 'test99', 'tos','0x12'])
+        subprocess.check_call("nmctl add-rule dev test99 table 10 to 192.168.1.2/24 from 192.168.1.3/24 "
+                               "oif test99 iif test99 tos 0x12", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -720,6 +720,7 @@ class TestCLINetwork:
         assert(parser.get('RoutingPolicyRule', 'OutgoingInterface') == 'test99')
         assert(parser.get('RoutingPolicyRule', 'IncomingInterface') == 'test99')
 
+"""
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
 

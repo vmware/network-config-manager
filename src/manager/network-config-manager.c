@@ -1802,15 +1802,28 @@ _public_ int ncm_link_remove_routing_policy_rules(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
         }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
 
         r = manager_remove_routing_policy_rules(p);
         if (r < 0) {
-                log_warning("Failed to remove routing policy rules on link '%s': %s\n", argv[1], g_strerror(-r));
+                log_warning("Failed to remove routing policy rules: %s", g_strerror(-r));
                 return r;
         }
 
