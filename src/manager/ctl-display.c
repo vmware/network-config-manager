@@ -138,6 +138,64 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 printf("\n");
 }
 
+_public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
+        _cleanup_(addresses_unrefp) Addresses *addr = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        bool ipv4 = false, ipv6 = false;
+        GHashTableIter iter;
+        gpointer key, value;
+        unsigned long size;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link: %s", argv[1]);
+                return r;
+        }
+
+        if (argc >= 2) {
+                for (int i = 2; i < argc; i++) {
+                        if (string_equal(argv[i], "family") || string_equal(argv[i], "f")) {
+                                parse_next_arg(argv, argc, i);
+
+                                if (string_equal(argv[i], "ipv4") || string_equal(argv[i], "4"))
+                                        ipv4 = true;
+                                else if (string_equal(argv[i], "ipv6") || string_equal(argv[i], "6"))
+                                        ipv6 = true;
+                        }
+                }
+        }
+
+        r = manager_get_one_link_address(p->ifindex, &addr);
+        if (r < 0)
+                return r;
+
+        if (!set_size(addr->addresses))
+                return -ENODATA;
+
+        printf("Addresses: ");
+        g_hash_table_iter_init(&iter, addr->addresses->hash);
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+                Address *a = (Address *) g_bytes_get_data(key, &size);
+                _auto_cleanup_ char *c = NULL;
+
+                r = ip_to_string_prefix(a->family, &a->address, &c);
+                if (r < 0)
+                        return r;
+
+                if ((a->family == AF_INET && ipv4 ) || (a->family == AF_INET6 && ipv6))
+                        printf("%s ", c);
+
+                if (!ipv4 && !ipv6)
+                        printf("%s ", c);
+        }
+
+        printf("\n");
+
+        return 0;
+}
+
 static void list_one_link_routes(gpointer key, gpointer value, gpointer userdata) {
         _auto_cleanup_ char *c = NULL;
         static bool first = true;

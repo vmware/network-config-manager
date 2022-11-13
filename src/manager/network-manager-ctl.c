@@ -124,10 +124,10 @@ static int help(void) {
                "  set-dhcp-iaid                dev [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
                "  set-dhcp-duid                dev|system [DEVICE] family|f [ipv4|ipv6|4|6] duid [DUID {link-layer-time|vendor|link-layer|uuid}] data [RAWDATA] Sets DUID of DHCPv4 or DHCPv6 Client.\n"
                "  set-link-state               [DEVICE] [STATE {up|down}] Configures Link State.\n"
-               "  show-link-address            [DEVICE] [family|f ipv4|ipv6|4|6] Show link addresses\n"
-               "  add-link-address             [DEVICE] address [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime [{forever|infinity|0}] scope {global|link|host|NUMBER}]"
-                                                      "\n\t\t\t\t      dad [DAD {none|ipv4|ipv6|both}] prefix-route [PREFIXROUTE BOOLEAN] Configures Link Address.\n"
-               "  delete-link-address          [DEVICE] address [ADDRESS] Removes Address from Link.\n"
+               "  show-address                 dev [DEVICE] [family|f ipv4|ipv6|4|6] Show device addresses\n"
+               "  add-address                  dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime|pl [{forever|infinity|0}] scope {global|link|host|NUMBER}]"
+                                                      "\n\t\t\t\t      dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN] Configures device Address.\n"
+               "  delete-address               dev [DEVICE] address|a|addr [ADDRESS] Removes address from device.\n"
                "  add-default-gateway          [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures Link Default Gateway.\n"
                "  delete-gateway               [DEVICE] Removes Gateway from Link.\n"
                "  add-route                    [DEVICE] gw [GATEWAY ADDRESS] dest [DESTINATION ADDRESS] src [SOURCE ADDRESS] pref-src [PREFFREDSOURCE ADDRESS]"
@@ -321,9 +321,9 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp-iaid",                4,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
                 { "set-dhcp-duid",                4,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
                 { "set-link-state",               2,        WORD_ANY, false, ncm_link_update_state },
-                { "add-link-address",             2,        WORD_ANY, false, ncm_link_add_address },
-                { "show-link-address",            1,        WORD_ANY, false, ncm_display_one_link_addresses },
-                { "delete-link-address",          3,        WORD_ANY, false, ncm_link_delete_address },
+                { "add-address",                  4,        WORD_ANY, false, ncm_link_add_address },
+                { "show-address",                 4,        WORD_ANY, false, ncm_display_one_link_addresses },
+                { "delete-address",               4,        WORD_ANY, false, ncm_link_delete_address },
                 { "add-default-gateway",          2,        WORD_ANY, false, ncm_link_add_default_gateway },
                 { "delete-gateway",               1,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-route",                    2,        WORD_ANY, false, ncm_link_add_route },
