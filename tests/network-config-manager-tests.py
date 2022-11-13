@@ -938,7 +938,6 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
 """
-"""
 class TestCLIDHCPv4Server:
     def setup_method(self):
         link_remove('test99')
@@ -952,16 +951,12 @@ class TestCLIDHCPv4Server:
     def test_cli_configure_dhcpv4_server(self):
         assert(link_exist('test99') == True)
 
+        subprocess.check_call("nmctl add-dhcpv4-server dev test99 pool-offset "
+                               "10 pool-size 20 default-lease-time 100 "
+                               "max-lease-time 200 emit-dns yes dns 192.168.1.1 "
+                               "emit-router yes", shell = True )
 
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['nmctl', 'add-dhcpv4-server', 'test99', 'pool-offset',
-                               '10', 'pool-size', '20', 'default-lease-time', '100',
-                               'max-lease-time', '200', 'emit-dns', 'yes', 'dns', '192.168.1.1',
-                               'emit-router', 'yes'])
-
-        subprocess.check_call(['sleep', '3'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -977,6 +972,7 @@ class TestCLIDHCPv4Server:
         assert(parser.get('DHCPServer', 'DNS') == '192.168.1.1')
         assert(parser.get('DHCPServer', 'EmitRouter') == 'yes')
 
+"""
 class TestCLIIPv6RA:
     def setup_method(self):
         link_remove('test99')
