@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "network-util.h"
+
 int json_system_status(char **ret);
 int json_list_one_link(IfNameIndex *p, char **ret);
 

@@ -6,36 +6,23 @@
 
 #include "alloc-util.h"
 #include "ansi-color.h"
-#include "arphrd-to-name.h"
-#include "ctl.h"
-#include "ctl-display.h"
-#include "dbus.h"
-#include "dns.h"
+#include "config-parser.h"
 #include "log.h"
 #include "macros.h"
-#include "netdev-link.h"
-#include "network-address.h"
-#include "network-link.h"
-#include "network-manager.h"
-#include "network-route.h"
-#include "network-sriov.h"
 #include "network-util.h"
-#include "networkd-api.h"
 #include "nftables.h"
 #include "parse-util.h"
-#include "udev-hwdb.h"
-#include "network-json.h"
-#include "config-parser.h"
 
 _public_ int ncm_nft_add_tables(int argc, char *argv[]) {
         int r, f;
 
-        f = nft_family_name_to_type(argv[1]);
-        if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
+        r = nft_family_name_to_type(argv[1]);
+        if (r < 0) {
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
+                return r;
         }
 
+        f = r;
         r = nft_add_table(f, argv[2]);
         if (r < 0) {
                 log_warning("Failed to add table  %s : %s", argv[2], g_strerror(-r));
@@ -51,13 +38,14 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
         guint i;
 
         if (argc > 1) {
-                f = nft_family_name_to_type(argv[1]);
-                if (f < 0) {
-                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                        return -EINVAL;
+                r = nft_family_name_to_type(argv[1]);
+                if (r < 0) {
+                        log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
+                        return r;
                 }
         }
 
+        f = r;
         if (argc <= 2) {
                 r = nft_get_tables(f, NULL, &s);
                 if (r < 0) {
@@ -80,7 +68,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
                         return r;
                 }
                 if (!rl)
-                        return -errno;
+                        return r;
 
                 printf("Table :  %s\n", argv[2]);
                 g_print("%s", rl->str);
@@ -95,11 +83,12 @@ _public_ int ncm_nft_get_tables(const char *family, const char *table, char ***r
         int r, f = AF_UNSPEC;
 
         if (family) {
-                f = nft_family_name_to_type(family);
-                if (f < 0)
-                        return -EINVAL;
+                r = nft_family_name_to_type(family);
+                if (r < 0)
+                        return r;;
         }
 
+        f = r;
         r = nft_get_tables(f, table, &s);
         if (r < 0)
                 return r;
@@ -140,16 +129,17 @@ _public_ int ncm_nft_get_tables(const char *family, const char *table, char ***r
 _public_ int ncm_nft_delete_table(int argc, char *argv[]) {
         int r, f;
 
-        f = nft_family_name_to_type(argv[1]);
-        if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
+        r = nft_family_name_to_type(argv[1]);
+        if (r < 0) {
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
+                return r;
         }
 
+        f = r;
         r = nft_delete_table(f, argv[2]);
         if (r < 0) {
                 log_warning("Failed to delete table  %s : %s", argv[2], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         return r;
@@ -157,16 +147,17 @@ _public_ int ncm_nft_delete_table(int argc, char *argv[]) {
 _public_ int ncm_nft_add_chain(int argc, char *argv[]) {
         int r, f;
 
-        f = nft_family_name_to_type(argv[1]);
-        if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
+        r = nft_family_name_to_type(argv[1]);
+        if (r < 0) {
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
+                return r;
         }
 
+        f = r;
         r = nft_add_chain(f, argv[2], argv[3]);
         if (r < 0) {
                 log_warning("Failed to add chain  %s : %s", argv[3], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         return r;
@@ -178,13 +169,14 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
         guint i;
 
         if (argc > 1) {
-                f = nft_family_name_to_type(argv[1]);
-                if (f < 0) {
-                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                        return -EINVAL;
+                r = nft_family_name_to_type(argv[1]);
+                if (r < 0) {
+                        log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
+                        return r;
                 }
         }
 
+        f = r;
         r = nft_get_chains(f, argc > 3 ? argv[2] : NULL, argc > 3 ? argv[3] : NULL, &s);
         if (r < 0) {
                 log_warning("Failed to get chains %s : %s", argv[2] ? argv[2] : "", g_strerror(-r));
@@ -204,16 +196,17 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
 _public_ int ncm_nft_delete_chain(int argc, char *argv[]) {
         int r, f;
 
-        f = nft_family_name_to_type(argv[1]);
-        if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
+        r = nft_family_name_to_type(argv[1]);
+        if (r < 0) {
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
+                return r;
         }
 
+        f = r;
         r = nft_delete_chain(f, argv[2], argv[3]);
         if (r < 0) {
                 log_warning("Failed to add chain  %s : %s", argv[3], g_strerror(-r));
-                return -errno;
+                return r;
 
         }
 
@@ -226,11 +219,12 @@ _public_ int ncm_nft_get_chains(char *family, const char *table, const char *cha
         int r, f = AF_UNSPEC;
 
         if (family) {
-                f = nft_family_name_to_type(family);
-                if (f < 0)
-                        return -EINVAL;
+                r = nft_family_name_to_type(family);
+                if (r < 0)
+                        return r;
         }
 
+        f = r;
         r = nft_get_chains(f, table, chain, &s);
         if (r < 0)
                 return r;
@@ -275,40 +269,41 @@ _public_ int ncm_nft_add_rule_port(int argc, char *argv[]) {
         uint16_t port;
         int r, f;
 
-        f = nft_family_name_to_type(argv[1]);
-        if (f < 0 || f == NF_PROTO_FAMILY_IPV6) {
-                log_warning("Unsupproted family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
+        r = nft_family_name_to_type(argv[1]);
+        if (r < 0 || r == NF_PROTO_FAMILY_IPV6) {
+                log_warning("Unsupproted family type %s : %s", argv[1], g_strerror(-r));
+                return r;
         }
 
+        f = r;
         protocol = ip_packet_protcol_name_to_type(argv[4]);
         if (protocol < 0) {
-                log_warning("Failed to parse protocol %s : %s", argv[4], g_strerror(-EINVAL));
-                return -errno;
+                log_warning("Failed to parse protocol %s : %s", argv[4], g_strerror(-r));
+                return r;
         }
 
         port_type = ip_packet_port_name_to_type(argv[5]);
         if (port_type < 0) {
-                log_warning("Failed to parse IP protocol %s : %s", argv[5], g_strerror(-EINVAL));
-                return -errno;
+                log_warning("Failed to parse IP protocol %s : %s", argv[5], g_strerror(-r));
+                return r;
         }
 
         r = parse_uint16(argv[6], &port);
         if (r < 0) {
                 log_warning("Failed to parse port %s : %s", argv[5], g_strerror(r));
-                return -errno;
+                return r;
         }
 
         action = nft_packet_action_name_to_type(argv[7]);
         if (action < 0) {
                 log_warning("Failed to parse action %s : %s", argv[6], g_strerror(r));
-                return -errno;
+                return r;
         }
 
         r = nft_configure_rule_port(f, argv[2], argv[3], protocol,  port_type , port, action);
         if (r < 0) {
                 log_warning("Failed to add rule for %s port %s : %s", argv[4], argv[3], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         return r;
@@ -324,7 +319,7 @@ _public_ int ncm_nft_show_rules(int argc, char *argv[]) {
                 return r;
         }
         if (!s)
-                return -errno;
+                return r;
 
         g_print("%s", s->str);
         return 0;
@@ -342,7 +337,7 @@ _public_ int ncm_get_nft_rules(const char *table, char **ret) {
                 return r;
         }
         if (!s)
-                return -errno;
+                return r;
 
         *ret = strdup(s->str);
         if (!*ret)
@@ -354,24 +349,25 @@ _public_ int ncm_get_nft_rules(const char *table, char **ret) {
 _public_ int ncm_nft_delete_rule(int argc, char *argv[]) {
         int r, f, h = 0;
 
-        f = nft_family_name_to_type(argv[1]);
-        if (f < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-EINVAL));
-                return -errno;
+        r = nft_family_name_to_type(argv[1]);
+        if (r < 0) {
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
+                return r;
         }
 
+        f = r;
         if (argc > 4) {
                 r = parse_integer(argv[4], &h);
                 if (r < 0) {
-                        log_warning("Failed to parse handle  %s : %s", argv[4], g_strerror(-r));
-                        return -errno;
+                        log_warning("Failed to parse handle %s : %s", argv[4], g_strerror(-r));
+                        return r;
                 }
         }
 
         r = nft_delete_rule(f, argv[2], argv[3], h);
         if (r < 0) {
                 log_warning("Failed to delete rule family=%s table=%s chain=%s : %s", argv[1], argv[2], argv[3], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         return r;
@@ -391,7 +387,7 @@ _public_ int ncm_nft_run_command(int argc, char *argv[]) {
         r = nft_run_command(c, &s);
         if (r < 0) {
                 log_warning("Failed run command: %s", g_strerror(-r));
-                return -errno;
+                return r;
 
         }
 

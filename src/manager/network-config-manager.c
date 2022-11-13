@@ -7,14 +7,16 @@
 #include "alloc-util.h"
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
-#include "ctl.h"
+#include "config-parser.h"
 #include "ctl-display.h"
+#include "ctl.h"
 #include "dbus.h"
 #include "dns.h"
 #include "log.h"
 #include "macros.h"
 #include "netdev-link.h"
 #include "network-address.h"
+#include "network-json.h"
 #include "network-link.h"
 #include "network-manager.h"
 #include "network-route.h"
@@ -24,8 +26,6 @@
 #include "nftables.h"
 #include "parse-util.h"
 #include "udev-hwdb.h"
-#include "network-json.h"
-#include "config-parser.h"
 
 _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -35,7 +35,7 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", argv[1]);
-                return -errno;
+                return r;
         }
 
         r = parse_mtu(argv[2], &mtu);
@@ -62,7 +62,7 @@ _public_ int ncm_link_get_mtu(const char *ifname, uint32_t *ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         r = link_get_mtu(p->ifname, &mtu);
         if (r < 0)
@@ -79,7 +79,7 @@ _public_ int ncm_link_set_mac(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", argv[1]);
-                return -errno;
+                return r;
         }
 
         if (!parse_ether_address(argv[2])) {
@@ -105,7 +105,7 @@ _public_ int ncm_link_get_mac(const char *ifname, char **ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         r = link_read_sysfs_attribute(p->ifname, "address", &mac);
         if (r < 0)
@@ -123,7 +123,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", argv[1]);
-                return -errno;
+                return r;
         }
 
         r = parse_boolean(argv[2]);
@@ -150,7 +150,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", argv[1]);
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -257,7 +257,7 @@ _public_ int ncm_link_set_group(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", argv[1]);
-                return -errno;
+                return r;
         }
 
         r = parse_group(argv[2], &group);
@@ -282,7 +282,7 @@ _public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", argv[1]);
-                return -errno;
+                return r;
         }
 
         r = parse_link_rf_online(argv[2]);
@@ -307,7 +307,7 @@ _public_ int ncm_link_set_act_policy(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", argv[1]);
-                return -errno;
+                return r;
         }
 
         r = parse_link_act_policy(argv[2]);
@@ -334,7 +334,7 @@ _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", argv[1]);
-                return -errno;
+                return r;
         }
 
         r = parse_mtu(argv[2], &mtu);
@@ -362,7 +362,7 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         mode = dhcp_client_name_to_mode(argv[2]);
@@ -388,7 +388,7 @@ _public_ int ncm_link_get_dhcp_mode(const char *ifname, int *ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         r = manager_get_link_dhcp_client(p, &mode);
         if (r < 0)
@@ -406,7 +406,7 @@ _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         d = dhcp_client_identifier_to_mode(argv[2]);
@@ -433,7 +433,7 @@ _public_ int ncm_link_get_dhcp4_client_identifier(const char *ifname, char **ret
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         r = manager_get_link_dhcp4_client_identifier(p, &d);
         if (r < 0)
@@ -510,7 +510,7 @@ _public_ int ncm_link_get_dhcp_client_iaid(char *ifname, uint32_t *ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         r = manager_get_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV4, &v);
         if (r < 0)
@@ -598,7 +598,7 @@ _public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_network_section_bool_configs_new(&m);
@@ -626,7 +626,7 @@ _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_network_dhcp4_section_configs_new(&m);
@@ -669,7 +669,7 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_network_dhcp6_section_configs_new(&m);
@@ -712,7 +712,7 @@ _public_ int ncm_link_update_state(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         state = link_name_to_state(argv[2]);
@@ -740,7 +740,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -869,7 +869,7 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -910,7 +910,7 @@ _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         r = manager_get_one_link_address(p->ifindex, &addr);
         if (r < 0)
@@ -958,7 +958,7 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", argv[1]);
-                return -errno;
+                return r;
         }
 
         if (argc >= 2) {
@@ -1012,7 +1012,7 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1076,7 +1076,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1260,7 +1260,7 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         r = manager_get_one_link_route(p->ifindex, &route);
         if (r < 0)
@@ -1301,7 +1301,7 @@ _public_ int ncm_link_delete_gateway_or_route(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         if (string_equal(argv[0], "delete-gateway"))
@@ -1327,7 +1327,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1417,7 +1417,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1427,7 +1427,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                         r = parse_ifname_or_index(argv[i], &iif);
                         if (r < 0) {
                                 log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
-                                return -errno;
+                                return r;
                         }
 
                         continue;
@@ -1439,7 +1439,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                         r = parse_ifname_or_index(argv[i], &oif);
                         if (r < 0) {
                                 log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
-                                return -errno;
+                                return r;
                         }
 
                         continue;
@@ -1536,7 +1536,7 @@ _public_ int ncm_link_remove_routing_policy_rules(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_remove_routing_policy_rules(p);
@@ -1558,7 +1558,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1694,7 +1694,7 @@ _public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_remove_dhcpv4_server(p);
@@ -1718,7 +1718,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         for (int i = 2; i < argc; i++) {
@@ -1920,7 +1920,7 @@ _public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_remove_ipv6_router_advertisement(p);
@@ -2120,7 +2120,7 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
                 r = parse_ifname_or_index(argv[1], &p);
                 if (r < 0) {
                         log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                        return -errno;
+                        return r;
                 }
         }
 
@@ -2155,7 +2155,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 r = parse_ifname_or_index(argv[1], &p);
                 if (r < 0) {
                         log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                        return -errno;
+                        return r;
                 }
 
                 r = network_parse_link_setup_state(p->ifindex, &setup);
@@ -2260,7 +2260,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                         r = parse_ifname_or_index(buffer, &p);
                         if (r < 0) {
                                 log_warning("Failed to find link '%d': %s", d->ifindex, g_strerror(-r));
-                                return -errno;
+                                return r;
                         }
                         printf("%5d %-20s %-18s\n", d->ifindex, p->ifname, *d->domain == '.' ? "~." : d->domain);
                 }
@@ -2317,7 +2317,7 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_revert_dns_server_and_domain(p);
@@ -2369,7 +2369,7 @@ _public_ int ncm_link_add_ntp(int argc, char *argv[]) {
        r = parse_ifname_or_index(argv[1], &p);
        if (r < 0) {
                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-               return -errno;
+               return r;
        }
 
        r = argv_to_strv(argc - 2, argv + 2, &ntps);
@@ -2407,7 +2407,7 @@ _public_ int ncm_link_delete_ntp(int argc, char *argv[]) {
        r = parse_ifname_or_index(argv[1], &p);
        if (r < 0) {
                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-               return -errno;
+               return r;
        }
 
        r = manager_remove_ntp_addresses(p);
@@ -2429,7 +2429,7 @@ _public_ int ncm_link_get_ntp(const char *ifname, char ***ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         r = network_parse_link_ntp(p->ifindex, &ntp);
         if (r < 0)
@@ -2446,7 +2446,7 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         if (string_equal(argv[0], "enable-ipv6"))
@@ -2473,7 +2473,7 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         return manager_reconfigure_link(p);
@@ -2487,7 +2487,7 @@ _public_ int ncm_link_show_network_config(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_show_link_network_config(p, &config);
@@ -2507,7 +2507,7 @@ _public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = manager_edit_link_network_config(p);

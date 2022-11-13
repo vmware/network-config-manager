@@ -7,18 +7,15 @@
 #include "alloc-util.h"
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
-#include "ctl.h"
+#include "config-parser.h"
 #include "ctl-display.h"
-#include "dbus.h"
-#include "dns.h"
+#include "ctl.h"
 #include "log.h"
 #include "macros.h"
+#include "network-json.h"
 #include "network-manager.h"
 #include "network-util.h"
-#include "networkd-api.h"
 #include "parse-util.h"
-#include "network-json.h"
-#include "config-parser.h"
 
 _public_ int ncm_configure_proxy(int argc, char *argv[]) {
         _auto_cleanup_  char *http = NULL, *https = NULL, *ftp = NULL, *gopher = NULL, *socks = NULL, *socks5 = NULL, *no_proxy = NULL;

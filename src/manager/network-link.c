@@ -4,8 +4,8 @@
 
 #include "alloc-util.h"
 #include "file-util.h"
-#include "macros.h"
 #include "log.h"
+#include "macros.h"
 #include "netlink-message.h"
 #include "netlink.h"
 #include "network-link.h"

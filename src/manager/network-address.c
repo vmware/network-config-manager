@@ -2,11 +2,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <arpa/inet.h>
-#include <net/if.h>
-#include <linux/if.h>
 #include <linux/netlink.h>
 #include <net/ethernet.h>
+#include <net/if.h>
+#include <arpa/inet.h>
+#include <linux/if.h>
 
 #include "alloc-util.h"
 #include "log.h"

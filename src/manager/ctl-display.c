@@ -7,14 +7,16 @@
 #include "alloc-util.h"
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
-#include "ctl.h"
+#include "config-parser.h"
 #include "ctl-display.h"
+#include "ctl.h"
 #include "dbus.h"
 #include "dns.h"
 #include "log.h"
 #include "macros.h"
 #include "netdev-link.h"
 #include "network-address.h"
+#include "network-json.h"
 #include "network-link.h"
 #include "network-manager.h"
 #include "network-route.h"
@@ -24,8 +26,6 @@
 #include "nftables.h"
 #include "parse-util.h"
 #include "udev-hwdb.h"
-#include "network-json.h"
-#include "config-parser.h"
 
 static bool arg_json = false;
 static bool arg_beautify = true;
@@ -285,7 +285,7 @@ static int list_one_link(char *argv[]) {
         r = parse_ifname_or_index(*argv, &p);
         if (r < 0) {
                 log_warning("Failed to find link: %s", *argv);
-                return -errno;
+                return r;
         }
 
         if (arg_json)
@@ -673,7 +673,7 @@ _public_ int ncm_get_link_status(const char *ifname, char **ret) {
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
-                return -errno;
+                return r;
 
         return json_list_one_link(p, ret);
 }
