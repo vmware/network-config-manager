@@ -543,11 +543,10 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'RequiredFamilyForOnline') == 'ipv4')
 
-"""
     def test_cli_set_act_policy(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-act-policy', 'test99', 'always-up'])
+        subprocess.check_call("nmctl set-link-act-policy dev test99 ap always-up", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -556,7 +555,6 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'ActivationPolicy') == 'always-up')
 
-"""
 """
     def test_cli_set_dhcp_type(self):
         assert(link_exist('test99') == True)
