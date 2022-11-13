@@ -336,18 +336,45 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_group(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        bool have_group = false;
         uint32_t group;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "group")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_group(argv[i], &group);
+                        if (r < 0) {
+                                log_warning("Failed to parse device group '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        have_group = true;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
                 return r;
         }
 
-        r = parse_group(argv[2], &group);
-        if (r < 0) {
-                log_warning("Failed to parse link group '%s': %s", argv[2], g_strerror(-r));
+        if (!have_group) {
+                log_warning("Failed to parse group: %s",  g_strerror(EINVAL));
                 return r;
         }
 
