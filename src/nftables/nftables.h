@@ -24,7 +24,7 @@ typedef enum NfProtoFamily {
         NF_PROTO_FAMILY_IPV6   = NFPROTO_IPV6,
         NF_PROTO_FAMILY_DECNET = NFPROTO_DECNET,
         _NF_PROTO_FAMILY_MAX,
-        _NF_PROTO_FAMILY_INVALID = -1
+        _NF_PROTO_FAMILY_INVALID = -EINVAL
 } NfProtoFamily;
 
 typedef enum NFPacketAction {
@@ -35,21 +35,21 @@ typedef enum NFPacketAction {
         NF_PACKET_ACTION_NF_REPEAT = NF_REPEAT,
         NF_PACKET_ACTION_NF_STOP   = NF_STOP,
         _NF_PACKET_ACTION_MAX,
-        _NF_PACKET_ACTION_INVALID = -1
+        _NF_PACKET_ACTION_INVALID = -EINVAL
 } NFPacketAction;
 
 typedef enum IPPacketPort {
         IP_PACKET_PORT_SPORT,
         IP_PACKET_PORT_DPORT,
         _IP_PACKET_PORT_MAX,
-        _IP_PACKET_PORT_INVALID = -1
+        _IP_PACKET_PORT_INVALID = -EINVAL
 } IPPacketPort;
 
 typedef enum IPPacketProtocol {
         IP_PACKET_PROTOCOL_TCP = IPPROTO_TCP,
         IP_PACKET_PROTOCOL_UDP = IPPROTO_UDP,
         _IP_PACKET_PROTOCOL_MAX,
-        _IP_PACKET_PROTOCOL_INVALID = -1
+        _IP_PACKET_PROTOCOL_INVALID = -EINVAL
 } IPPacketProtocol;
 
 typedef struct NFTNLTable {
