@@ -118,7 +118,7 @@ static int help(void) {
                                                      "\n\t\t\t\t\tConfigures device's arp, multicast, allmulticast and promiscuous.\n"
                "  set-link-group               dev [DEVICE] group [GROUP NUMBER] Configures device group.\n"
                "  set-link-rf-online           dev [DEVICE] f|family [ipv4|ipv6|ipv6|both|any] Configures device required family for online.\n"
-               "  set-link-act-policy          [DEVICE] [GROUP NUMBER] Configures Link ActivationPolicy.\n"
+               "  set-link-act-policy          dev [DEVICE] ap|act-policy [up|always-up|manual|always-down|down|bound] Configures device activation policy.\n"
                "  set-dhcp-mode                [DEVICE] [DHCP-MODE {yes|no|ipv4|ipv6}] Configures Link DHCP setting.\n"
                "  set-dhcp-client-id           [DEVICE] [IDENTIFIER {mac|duid|duid-only} Configures Link DHCPv4 identifier.\n"
                "  set-dhcp-iaid                [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
