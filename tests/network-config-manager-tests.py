@@ -502,12 +502,14 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'Unmanaged') == 'no')
 
-    def test_cli_set_option(self):
+    def test_cli_set_link_option(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-option', 'test99', 'arp', 'yes', 'mc', 'yes', 'amc', '0', 'pcs', 'false', 'rfo', 'no'])
-
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
         assert(unit_exist('10-test99.network') == True)
+
+        subprocess.check_call("nmctl set-link-option dev test99 arp yes mc yes amc 0 pcs false", shell = True)
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -516,8 +518,7 @@ class TestCLINetwork:
         assert(parser.get('Link', 'Multicast') == 'yes')
         assert(parser.get('Link', 'AllMulticast') == 'no')
         assert(parser.get('Link', 'Promiscuous') == 'no')
-        assert(parser.get('Link', 'RequiredForOnline') == 'no')
-
+"""
     def test_cli_set_group(self):
         assert(link_exist('test99') == True)
 
@@ -940,6 +941,7 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
+"""
 """
 class TestCLIDHCPv4Server:
     def setup_method(self):
