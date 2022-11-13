@@ -117,7 +117,7 @@ static int help(void) {
                "  set-link-option              dev [DEVICE] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN]"
                                                      "\n\t\t\t\t\tConfigures device's arp, multicast, allmulticast and promiscuous.\n"
                "  set-link-group               dev [DEVICE] group [GROUP NUMBER] Configures device group.\n"
-               "  set-link-rf-online           [DEVICE] [GROUP NUMBER] Configures Link RequiredFamilyForOnline.\n"
+               "  set-link-rf-online           dev [DEVICE] f|family [ipv4|ipv6|ipv6|both|any] Configures device required family for online.\n"
                "  set-link-act-policy          [DEVICE] [GROUP NUMBER] Configures Link ActivationPolicy.\n"
                "  set-dhcp-mode                [DEVICE] [DHCP-MODE {yes|no|ipv4|ipv6}] Configures Link DHCP setting.\n"
                "  set-dhcp-client-id           [DEVICE] [IDENTIFIER {mac|duid|duid-only} Configures Link DHCPv4 identifier.\n"

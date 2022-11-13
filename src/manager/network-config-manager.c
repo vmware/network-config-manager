@@ -389,23 +389,55 @@ _public_ int ncm_link_set_group(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *family = NULL;
+        bool have_family = false;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "family") || string_equal(argv[i], "f")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_link_rf_online(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse RequiredFamilyForOnline '%s': %s", argv[2], g_strerror(EINVAL));
+                                return r;
+                        }
+                        family = strdup(argv[i]);
+                        if (!family)
+                                return log_oom();
+
+                        have_family = true;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
                 return r;
         }
 
-        r = parse_link_rf_online(argv[2]);
-        if (r < 0) {
-               log_warning("Failed to parse RequiredFamilyForOnline '%s': %s", argv[2], g_strerror(EINVAL));
-               return r;
+        if (!have_family) {
+                log_warning("Failed to parse family: %s",  g_strerror(EINVAL));
+                return r;
         }
 
-        r = manager_set_link_rf_online(p, argv[2]);
+        r = manager_set_link_rf_online(p, family);
         if (r < 0) {
-                log_warning("Failed to update RequiredFamilyForOnline for '%s': %s", p->ifname, g_strerror(-r) );
+                log_warning("Failed to update RequiredFamilyForOnline= for '%s': %s", p->ifname, g_strerror(-r) );
                 return r;
         }
 
