@@ -176,25 +176,45 @@ _public_ int ncm_link_get_mac(const char *ifname, char **ret) {
 
 _public_ int ncm_link_set_mode(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool k;
+        bool k = true;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "manage")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link manage '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        k = r;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
                 return r;
         }
 
-        r = parse_boolean(argv[2]);
-        if (r < 0) {
-                log_warning("Failed to parse link mode '%s' '%s': %s", p->ifname, argv[2], g_strerror(-r));
-                return r;
-        }
-
-        k = r;
         r = manager_set_link_flag(p, !k, "Unmanaged");
         if (r < 0) {
-                printf("Failed to set link mode '%s': %s\n", p->ifname, g_strerror(-r));
+                log_warning("Failed to set link link manage '%s': %s", p->ifname, g_strerror(-r));
                 return r;
         }
 

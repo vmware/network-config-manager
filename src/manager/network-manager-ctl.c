@@ -112,8 +112,8 @@ static int help(void) {
                "  status                       [DEVICE] Show system or device status\n"
                "  status-devs                  List all devices.\n"
                "  set-mtu                      dev [DEVICE] mtu [MTU NUMBER] Configures device MTU.\n"
-               "  set-mac                      [DEVICE] [MAC] Configures Link MAC address.\n"
-               "  set-link-mode                [DEVICE] [MODE BOOLEAN] Configures Link managed by networkd.\n"
+               "  set-mac                      device [DEVICE] mac [MAC] Configures Link MAC address.\n"
+               "  set-manage                   device [DEVICE] manage [MANAGE BOOLEAN] Configures Link managed by networkd.\n"
                "  set-link-option              [DEVICE] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN] [rfo BOOLEAN]"
                                                      "\n\t\t\t\t\tConfigures Link arp, multicast, allmulticast, promiscuous and requiredforonline managed by networkd.\n"
                "  set-link-group               [DEVICE] [GROUP NUMBER] Configures Link Group.\n"
@@ -311,7 +311,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "status-devs",                  WORD_ANY, WORD_ANY, false, ncm_link_status },
                 { "set-mtu",                      2,        WORD_ANY, false, ncm_link_set_mtu },
                 { "set-mac",                      2,        WORD_ANY, false, ncm_link_set_mac },
-                { "set-link-mode",                2,        WORD_ANY, false, ncm_link_set_mode },
+                { "set-manage",                   2,        WORD_ANY, false, ncm_link_set_mode },
                 { "set-link-option",              2,        WORD_ANY, false, ncm_link_set_option },
                 { "set-link-group",               2,        WORD_ANY, false, ncm_link_set_group },
                 { "set-link-rf-online",           2,        WORD_ANY, false, ncm_link_set_rf_online },
