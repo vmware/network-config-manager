@@ -329,7 +329,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-route",                    4,        WORD_ANY, false, ncm_link_add_route },
                 { "delete-route",                 4,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-additional-gw",            9,        WORD_ANY, false, ncm_link_add_additional_gw },
-                { "add-rule",                     3,        WORD_ANY, false, ncm_link_add_routing_policy_rules },
+                { "add-rule",                     4,        WORD_ANY, false, ncm_link_add_routing_policy_rules },
                 { "remove-rule",                  1,        WORD_ANY, false, ncm_link_remove_routing_policy_rules },
                 { "set-hostname",                 1,        WORD_ANY, false, ncm_set_system_hostname },
                 { "show-dns",                     WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
