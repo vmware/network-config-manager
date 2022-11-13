@@ -122,7 +122,7 @@ static int help(void) {
                "  set-dhcp                     dev [DEVICE] dhcp [DHCP {yes|no|ipv4|ipv6}] Configures device DHCP setting.\n"
                "  set-dhcp-client-id           dev [DEVICE] id [IDENTIFIER {mac|duid|duid-only} Configures device DHCPv4 identifier.\n"
                "  set-dhcp-iaid                dev [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
-               "  set-dhcp-duid                [LINK | system] [family|f ipv4|ipv6|4|6] [DUID {link-layer-time|vendor|link-layer|uuid}] [data RAWDATA] Sets DUID of DHCPv4 or DHCPv6 Client.\n"
+               "  set-dhcp-duid                dev|system [DEVICE] family|f [ipv4|ipv6|4|6] duid [DUID {link-layer-time|vendor|link-layer|uuid}] data [RAWDATA] Sets DUID of DHCPv4 or DHCPv6 Client.\n"
                "  set-link-state               [DEVICE] [STATE {up|down}] Configures Link State.\n"
                "  show-link-address            [DEVICE] [family|f ipv4|ipv6|4|6] Show link addresses\n"
                "  add-link-address             [DEVICE] address [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime [{forever|infinity|0}] scope {global|link|host|NUMBER}]"
@@ -319,7 +319,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp",                     4,        WORD_ANY, false, ncm_link_set_dhcp_mode },
                 { "set-dhcp4-client-id",          4,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
                 { "set-dhcp-iaid",                4,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
-                { "set-dhcp-duid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
+                { "set-dhcp-duid",                4,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
                 { "set-link-state",               2,        WORD_ANY, false, ncm_link_update_state },
                 { "add-link-address",             2,        WORD_ANY, false, ncm_link_add_address },
                 { "show-link-address",            1,        WORD_ANY, false, ncm_display_one_link_addresses },

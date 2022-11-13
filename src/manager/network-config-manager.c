@@ -767,18 +767,25 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
         bool system = false;
         int r;
 
-        /* Try to resolve the link name. If not assume this is for the system, i.e. /etc/systemd/networkd.conf */
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                if (string_equal_fold(argv[1], "system") || string_equal_fold(argv[1], "s"))
-                        system = true;
-                else {
-                        log_warning("Failed to resolve link '%s': %s", argv[1], g_strerror(EINVAL));
-                        return -EINVAL;
-                }
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal_fold(argv[i], "system") || string_equal_fold(argv[i], "s")) {
+                        parse_next_arg(argv, argc, i);
+
+                        system = true;
+                        continue;
+                }
+
                 if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
@@ -819,9 +826,14 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!p && !system) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return r;
+        }
+
         r = manager_set_link_dhcp_client_duid(p, d, raw_data, system, kind);
         if (r < 0) {
-                log_warning("Failed to set link DHCP client DUID for '%s': %s\n", p->ifname, g_strerror(r));
+                log_warning("Failed to set device DHCP client DUID for '%s': %s\n", p->ifname, g_strerror(r));
                 return r;
         }
 
