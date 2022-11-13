@@ -119,9 +119,9 @@ static int help(void) {
                "  set-link-group               dev [DEVICE] group [GROUP NUMBER] Configures device group.\n"
                "  set-link-rf-online           dev [DEVICE] f|family [ipv4|ipv6|ipv6|both|any] Configures device required family for online.\n"
                "  set-link-act-policy          dev [DEVICE] ap|act-policy [up|always-up|manual|always-down|down|bound] Configures device activation policy.\n"
-               "  set-dhcp                     dev [DEVICE] dhcp [DHCP {yes|no|ipv4|ipv6}] Configures Link DHCP setting.\n"
-               "  set-dhcp-client-id           [DEVICE] [IDENTIFIER {mac|duid|duid-only} Configures Link DHCPv4 identifier.\n"
-               "  set-dhcp-iaid                [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
+               "  set-dhcp                     dev [DEVICE] dhcp [DHCP {yes|no|ipv4|ipv6}] Configures device DHCP setting.\n"
+               "  set-dhcp-client-id           dev [DEVICE] id [IDENTIFIER {mac|duid|duid-only} Configures device DHCPv4 identifier.\n"
+               "  set-dhcp-iaid                dev [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.\n"
                "  set-dhcp-duid                [LINK | system] [family|f ipv4|ipv6|4|6] [DUID {link-layer-time|vendor|link-layer|uuid}] [data RAWDATA] Sets DUID of DHCPv4 or DHCPv6 Client.\n"
                "  set-link-state               [DEVICE] [STATE {up|down}] Configures Link State.\n"
                "  show-link-address            [DEVICE] [family|f ipv4|ipv6|4|6] Show link addresses\n"
@@ -309,16 +309,16 @@ static int cli_run(int argc, char *argv[]) {
         static const Ctl commands[] = {
                 { "status",                       WORD_ANY, WORD_ANY, true,  ncm_system_status },
                 { "status-devs",                  WORD_ANY, WORD_ANY, false, ncm_link_status },
-                { "set-mtu",                      2,        WORD_ANY, false, ncm_link_set_mtu },
-                { "set-mac",                      2,        WORD_ANY, false, ncm_link_set_mac },
-                { "set-manage",                   2,        WORD_ANY, false, ncm_link_set_mode },
-                { "set-link-option",              2,        WORD_ANY, false, ncm_link_set_option },
-                { "set-link-group",               2,        WORD_ANY, false, ncm_link_set_group },
-                { "set-link-rf-online",           2,        WORD_ANY, false, ncm_link_set_rf_online },
-                { "set-link-act-policy",          2,        WORD_ANY, false, ncm_link_set_act_policy },
-                { "set-dhcp",                     2,        WORD_ANY, false, ncm_link_set_dhcp_mode },
-                { "set-dhcp4-client-id",          2,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
-                { "set-dhcp-iaid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
+                { "set-mtu",                      4,        WORD_ANY, false, ncm_link_set_mtu },
+                { "set-mac",                      4,        WORD_ANY, false, ncm_link_set_mac },
+                { "set-manage",                   4,        WORD_ANY, false, ncm_link_set_mode },
+                { "set-link-option",              4,        WORD_ANY, false, ncm_link_set_option },
+                { "set-link-group",               4,        WORD_ANY, false, ncm_link_set_group },
+                { "set-link-rf-online",           4,        WORD_ANY, false, ncm_link_set_rf_online },
+                { "set-link-act-policy",          4,        WORD_ANY, false, ncm_link_set_act_policy },
+                { "set-dhcp",                     4,        WORD_ANY, false, ncm_link_set_dhcp_mode },
+                { "set-dhcp4-client-id",          4,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
+                { "set-dhcp-iaid",                4,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
                 { "set-dhcp-duid",                2,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
                 { "set-link-state",               2,        WORD_ANY, false, ncm_link_update_state },
                 { "add-link-address",             2,        WORD_ANY, false, ncm_link_add_address },

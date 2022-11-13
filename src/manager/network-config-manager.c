@@ -602,25 +602,51 @@ _public_ int ncm_link_get_dhcp_mode(const char *ifname, int *ret) {
 }
 
 _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
+        DHCPClientIdentifier d = _DHCP_CLIENT_IDENTIFIER_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        DHCPClientIdentifier d;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "id")) {
+                        parse_next_arg(argv, argc, i);
+
+                        d = dhcp_client_identifier_to_mode(argv[i]);
+                        if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
+                                log_warning("Failed to parse DHCP4 client identifier: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
                 return r;
         }
 
-        d = dhcp_client_identifier_to_mode(argv[2]);
         if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
-                log_warning("Failed to parse DHCP4 client identifier: %s", argv[2]);
+                log_warning("Failed to parse DHCP4 client identifier: %s", g_strerror(EINVAL));
                 return -EINVAL;
         }
 
         r = manager_set_link_dhcp4_client_identifier(p, d);
         if (r < 0) {
-                log_warning("Failed to set link DHCP4 client identifier '%s': %s\n", p->ifname, g_strerror(r));
+                log_warning("Failed to set device DHCP4 client identifier '%s': %s", p->ifname, g_strerror(r));
                 return r;
         }
 
@@ -655,13 +681,18 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
         uint32_t v;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
                 if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
@@ -690,6 +721,11 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
 
                 log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return r;
         }
 
         if (kind == _DHCP_CLIENT_INVALID) {
