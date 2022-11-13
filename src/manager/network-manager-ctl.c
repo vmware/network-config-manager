@@ -114,7 +114,7 @@ static int help(void) {
                "  set-mtu                      dev [DEVICE] mtu [MTU NUMBER] Configures device MTU.\n"
                "  set-mac                      dev [DEVICE] mac [MAC] Configures device MAC address.\n"
                "  set-manage                   dev [DEVICE] manage [MANAGE BOOLEAN] Configures device managed by networkd.\n"
-               "  set-link-option              dev [DEVICE] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN] [rfo BOOLEAN]"
+               "  set-link-option              dev [DEVICE] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN]"
                                                      "\n\t\t\t\t\tConfigures device's arp, multicast, allmulticast and promiscuous.\n"
                "  set-link-group               [DEVICE] [GROUP NUMBER] Configures Link Group.\n"
                "  set-link-rf-online           [DEVICE] [GROUP NUMBER] Configures Link RequiredFamilyForOnline.\n"

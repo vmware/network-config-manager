@@ -60,6 +60,15 @@ static const Config network_ctl_to_dhcp6_section_config_table[] = {
                 {},
 };
 
+static const Config network_ctl_to_link_section_config_table[] = {
+                { "manage", "Unmanaged"},
+                { "arp",    "ARP"},
+                { "mc",     "Multicast"},
+                { "amc",    "AllMulticast"},
+                { "pcs",    "Promiscuous"},
+                {},
+};
+
 int manager_network_section_bool_configs_new(ConfigManager **ret) {
         ConfigManager *m;
         int r;
@@ -96,18 +105,32 @@ int manager_network_dhcp6_section_configs_new(ConfigManager **ret) {
         return 0;
 }
 
-int manager_set_link_flag(const IfNameIndex *ifnameidx, bool mode, const char* key) {
+int manager_network_link_section_configs_new(ConfigManager **ret) {
+        ConfigManager *m;
+        int r;
+
+        r = config_manager_new(network_ctl_to_link_section_config_table, &m);
+        if (r < 0)
+                return r;
+
+        *ret = m;
+        return 0;
+}
+
+
+int manager_set_link_flag(const IfNameIndex *ifnameidx, const char *k, const char *v) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
-        assert(key);
+        assert(k);
+        assert(v);
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)
                 return r;
 
-        r = set_config_file_bool(network, "Link", key, mode);
+        r = set_config_file_string(network, "Link", k, v);
         if (r < 0)
                 return r;
 

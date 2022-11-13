@@ -175,9 +175,16 @@ _public_ int ncm_link_get_mac(const char *ifname, char **ret) {
 }
 
 _public_ int ncm_link_set_mode(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool k = true;
         int r;
+
+        r = manager_network_link_section_configs_new(&m);
+        if (r < 0) {
+                log_warning("Failed to set network link section '%s'", g_strerror(-r));
+                return r;
+        }
 
         for (int i = 1; i < argc; i++) {
                 if (string_equal_fold(argv[i], "dev")) {
@@ -212,9 +219,9 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_set_link_flag(p, !k, "Unmanaged");
+        r = manager_set_link_flag(p, ctl_to_config(m, "manage"), bool_to_string(!k));
         if (r < 0) {
-                log_warning("Failed to set link link manage '%s': %s", p->ifname, g_strerror(-r));
+                printf("Failed to set device manage '%s': %s\n", p->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -222,6 +229,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_option(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool k;
         int r;
@@ -243,8 +251,14 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                 return r;
         }
 
+        r = manager_network_link_section_configs_new(&m);
+        if (r < 0) {
+                log_warning("Failed to set network link section '%s'", g_strerror(-r));
+                return r;
+        }
+
         for (int i = 1; i < argc; i++) {
-               if (string_equal(argv[i], "arp")) {
+                if (string_equal(argv[i], "arp")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -254,7 +268,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, k, "ARP");
+                        r = manager_set_link_flag(p, ctl_to_config(m, "arp"), bool_to_string(k));
                         if (r < 0) {
                                 printf("Failed to set link arp '%s': %s\n", p->ifname, g_strerror(-r));
                                 return r;
@@ -273,9 +287,9 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, k, "Multicast");
+                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
                         if (r < 0) {
-                                printf("Failed to set link multicast '%s': %s\n", p->ifname, g_strerror(-r));
+                                printf("Failed to set link arp '%s': %s\n", p->ifname, g_strerror(-r));
                                 return r;
                         }
 
@@ -291,9 +305,9 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, k, "AllMulticast");
+                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
                         if (r < 0) {
-                                printf("Failed to set link allmulticast '%s': %s\n", p->ifname, g_strerror(-r));
+                                printf("Failed to set link arp '%s': %s\n", p->ifname, g_strerror(-r));
                                 return r;
                         }
 
@@ -309,9 +323,9 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, k, "Promiscuous");
+                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
                         if (r < 0) {
-                                printf("Failed to set link promiscuous '%s': %s\n", p->ifname, g_strerror(-r));
+                                printf("Failed to set link arp '%s': %s\n", p->ifname, g_strerror(-r));
                                 return r;
                         }
                 }
