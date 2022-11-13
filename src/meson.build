@@ -12,6 +12,7 @@ network_config_manager_sources = files('''
         manager/ctl-display.h
         manager/ctl-display.c
         manager/ncm-nft.c
+        manager/ncm-netdev.c
         manager/ncm-proxy.c
         manager/ncm-link.c
         manager/netdev.h
