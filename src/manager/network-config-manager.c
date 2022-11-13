@@ -101,22 +101,54 @@ _public_ int ncm_link_get_mtu(const char *ifname, uint32_t *ret) {
 
 _public_ int ncm_link_set_mac(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *mac = NULL;
+        bool have_mac = false;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "mac")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (!parse_ether_address(argv[i])) {
+                                log_warning("Failed to parse MAC address: %s", argv[2]);
+                                return -EINVAL;
+                        }
+                        mac = strdup(argv[i]);
+                        if (!mac)
+                                return log_oom();
+
+                        have_mac = true;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
                 return r;
         }
 
-        if (!parse_ether_address(argv[2])) {
-               log_warning("Failed to parse MAC address: %s", argv[2]);
-               return -EINVAL;
+        if (!have_mac) {
+                log_warning("Failed to parse MAC address: %s", g_strerror(-r));
+                return r;
         }
 
-        r = manager_set_link_mac_addr(p, argv[2]);
+        r = manager_set_link_mac_addr(p, mac);
         if (r < 0) {
-                log_warning("Failed to update MAC Address for '%s': %s", p->ifname, g_strerror(-r) );
+                log_warning("Failed to update MAC address for '%s': %s", p->ifname, g_strerror(-r) );
                 return r;
         }
 
