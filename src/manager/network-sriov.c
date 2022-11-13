@@ -9,17 +9,17 @@
 #include <network-config-manager.h>
 
 #include "alloc-util.h"
-#include "log.h"
-#include "macros.h"
-#include "dbus.h"
-#include "netlink.h"
-#include "file-util.h"
 #include "config-file.h"
 #include "config-parser.h"
-#include "network.h"
-#include "parse-util.h"
+#include "dbus.h"
+#include "file-util.h"
+#include "log.h"
+#include "macros.h"
+#include "netlink.h"
 #include "network-sriov.h"
 #include "network-util.h"
+#include "network.h"
+#include "parse-util.h"
 
 int netdev_sriov_new(SRIOV **ret) {
         _cleanup_(netdev_sriov_unrefp) SRIOV *s = NULL;

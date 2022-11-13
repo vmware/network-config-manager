@@ -1,13 +1,14 @@
 /* Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
+
 #include "alloc-util.h"
 #include "file-util.h"
+#include "log.h"
 #include "macros.h"
 #include "netdev.h"
 #include "parse-util.h"
 #include "string-util.h"
-#include "log.h"
 
 static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_VLAN]        = "vlan",

@@ -4,13 +4,13 @@
 
 #include "alloc-util.h"
 #include "file-util.h"
-#include "macros.h"
 #include "log.h"
+#include "macros.h"
 #include "netdev-link.h"
+#include "network-link.h"
 #include "network-util.h"
 #include "parse-util.h"
 #include "string-util.h"
-#include "network-link.h"
 
 static const Config link_ctl_to_config_table[] = {
                 { "alias",           "Alias" },

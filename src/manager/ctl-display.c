@@ -7,14 +7,16 @@
 #include "alloc-util.h"
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
-#include "ctl.h"
+#include "config-parser.h"
 #include "ctl-display.h"
+#include "ctl.h"
 #include "dbus.h"
 #include "dns.h"
 #include "log.h"
 #include "macros.h"
 #include "netdev-link.h"
 #include "network-address.h"
+#include "network-json.h"
 #include "network-link.h"
 #include "network-manager.h"
 #include "network-route.h"
@@ -24,8 +26,6 @@
 #include "nftables.h"
 #include "parse-util.h"
 #include "udev-hwdb.h"
-#include "network-json.h"
-#include "config-parser.h"
 
 static bool arg_json = false;
 static bool arg_beautify = true;

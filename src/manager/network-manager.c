@@ -10,20 +10,20 @@
 #include "alloc-util.h"
 #include "config-file.h"
 #include "config-parser.h"
+#include "dbus.h"
 #include "dracut-parser.h"
 #include "file-util.h"
 #include "log.h"
 #include "macros.h"
 #include "network-address.h"
-#include "dbus.h"
-#include "network.h"
 #include "network-link.h"
 #include "network-manager.h"
+#include "network.h"
 #include "networkd-api.h"
 #include "parse-util.h"
 #include "string-util.h"
-#include "yaml-network-parser.h"
 #include "yaml-link-parser.h"
+#include "yaml-network-parser.h"
 
 static const Config network_ctl_to_network_section_config_table[] = {
                 { "set-link-local-address",   "LinkLocalAddressing"},

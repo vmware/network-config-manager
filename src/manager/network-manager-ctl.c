@@ -6,8 +6,8 @@
 #include <network-config-manager.h>
 
 #include "alloc-util.h"
-#include "ctl.h"
 #include "ctl-display.h"
+#include "ctl.h"
 #include "log.h"
 #include "macros.h"
 #include "network-manager.h"

@@ -1,18 +1,19 @@
 /* Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
+
 #include "alloc-util.h"
 #include "config-file.h"
 #include "dbus.h"
 #include "dracut-parser.h"
 #include "file-util.h"
+#include "log.h"
 #include "macros.h"
 #include "network-manager.h"
 #include "network.h"
 #include "networkd-api.h"
 #include "parse-util.h"
 #include "string-util.h"
-#include "log.h"
 
 static const char *const dhcp_client_mode_table[_DHCP_CLIENT_MAX] = {
         [DHCP_CLIENT_NO]   = "no",
