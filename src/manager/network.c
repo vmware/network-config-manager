@@ -449,6 +449,13 @@ int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret) {
                         if (r < 0)
                                 return r;
                 }
+
+        }
+
+        if (!g_file_test(network, G_FILE_TEST_EXISTS)) {
+                r = create_network_conf_file(ifnameidx->ifname, &network);
+                if (r < 0)
+                        return r;
         }
 
         *ret = steal_pointer(network);
