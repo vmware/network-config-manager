@@ -32,7 +32,7 @@ _public_ int ncm_nft_add_tables(int argc, char *argv[]) {
 
         r = nft_family_name_to_type(argv[1]);
         if (r < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-r));
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -54,7 +54,7 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
         if (argc > 1) {
                 r = nft_family_name_to_type(argv[1]);
                 if (r < 0) {
-                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(-r));
+                        log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                         return r;
                 }
         }
@@ -145,7 +145,7 @@ _public_ int ncm_nft_delete_table(int argc, char *argv[]) {
 
         r = nft_family_name_to_type(argv[1]);
         if (r < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-r));
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -163,7 +163,7 @@ _public_ int ncm_nft_add_chain(int argc, char *argv[]) {
 
         r = nft_family_name_to_type(argv[1]);
         if (r < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-r));
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -185,7 +185,7 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
         if (argc > 1) {
                 r = nft_family_name_to_type(argv[1]);
                 if (r < 0) {
-                        log_warning("Invalid family type %s : %s", argv[1], g_strerror(-r));
+                        log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                         return r;
                 }
         }
@@ -212,7 +212,7 @@ _public_ int ncm_nft_delete_chain(int argc, char *argv[]) {
 
         r = nft_family_name_to_type(argv[1]);
         if (r < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-r));
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -365,7 +365,7 @@ _public_ int ncm_nft_delete_rule(int argc, char *argv[]) {
 
         r = nft_family_name_to_type(argv[1]);
         if (r < 0) {
-                log_warning("Invalid family type %s : %s", argv[1], g_strerror(-r));
+                log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -373,7 +373,7 @@ _public_ int ncm_nft_delete_rule(int argc, char *argv[]) {
         if (argc > 4) {
                 r = parse_integer(argv[4], &h);
                 if (r < 0) {
-                        log_warning("Failed to parse handle  %s : %s", argv[4], g_strerror(-r));
+                        log_warning("Failed to parse handle %s : %s", argv[4], g_strerror(-r));
                         return r;
                 }
         }
