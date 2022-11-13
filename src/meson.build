@@ -9,6 +9,12 @@ network_config_manager_sources = files('''
         dracut/dracut-parser.c
         json/network-json.h
         json/network-json.c
+        manager/ctl-display.h
+        manager/ctl-display.c
+        manager/ncm-nft.c
+        manager/ncm-netdev.c
+        manager/ncm-proxy.c
+        manager/ncm-link.c
         manager/netdev.h
         manager/netdev.c
         manager/netdev-link.c
