@@ -593,12 +593,11 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('DHCPv6', 'IAID') == '5555')
 
-"""
-    def test_cli_set_dhcp6_duid(self):
+    def test_cli_set_dhcp4_duid(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'ipv4'])
-        subprocess.check_call(['nmctl', 'set-dhcp-duid', 'test99', 'f', '4', 'duid', 'vendor', 'data', '00:00:ab:11:f9:2a:c2:77:29:f9:5c:01',])
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv4", shell = True)
+        subprocess.check_call("nmctl set-dhcp-duid dev test99 f 4 duid vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:01", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -611,8 +610,8 @@ class TestCLINetwork:
     def test_cli_set_dhcp6_duid(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'ipv4'])
-        subprocess.check_call(['nmctl', 'set-dhcp-duid', 'test99', 'f', '6', 'duid', 'vendor', 'data', '00:00:ab:11:f9:2a:c2:77:29:f9:5c:01',])
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv4", shell = True)
+        subprocess.check_call("nmctl set-dhcp-duid dev test99 f 6 duid vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:01", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -622,6 +621,7 @@ class TestCLINetwork:
         assert(parser.get('DHCPv6', 'DUIDType') == 'vendor')
         assert(parser.get('DHCPv6', 'DUIDRawData') == '00:00:ab:11:f9:2a:c2:77:29:f9:5c:01')
 
+"""
     def test_cli_add_static_address(self):
         assert(link_exist('test99') == True)
 
