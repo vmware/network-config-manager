@@ -6,26 +6,12 @@
 
 #include "alloc-util.h"
 #include "ansi-color.h"
-#include "arphrd-to-name.h"
-#include "ctl.h"
-#include "ctl-display.h"
-#include "dbus.h"
-#include "dns.h"
+#include "config-parser.h"
 #include "log.h"
 #include "macros.h"
-#include "netdev-link.h"
-#include "network-address.h"
-#include "network-link.h"
-#include "network-manager.h"
-#include "network-route.h"
-#include "network-sriov.h"
 #include "network-util.h"
-#include "networkd-api.h"
 #include "nftables.h"
 #include "parse-util.h"
-#include "udev-hwdb.h"
-#include "network-json.h"
-#include "config-parser.h"
 
 _public_ int ncm_nft_add_tables(int argc, char *argv[]) {
         int r, f;
