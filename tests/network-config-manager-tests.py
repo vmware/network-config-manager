@@ -555,11 +555,10 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'ActivationPolicy') == 'always-up')
 
-"""
-    def test_cli_set_dhcp_type(self):
+    def test_cli_set_dhcp_client_type(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -568,6 +567,7 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'yes')
 
+"""
     def test_cli_set_dhcp4_iaid(self):
         assert(link_exist('test99') == True)
 
