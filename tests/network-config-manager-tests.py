@@ -467,11 +467,7 @@ class TestCLINetwork:
     def test_cli_set_mtu(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
-        assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-mtu', 'test99', '1400'])
+        subprocess.check_call("nmctl set-mtu dev test99 mtu 1400", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))

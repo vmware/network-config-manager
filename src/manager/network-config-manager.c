@@ -54,6 +54,7 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
                                 return r;
                         }
                         have_mtu = true;
+                        continue;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
