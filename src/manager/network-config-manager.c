@@ -1820,7 +1820,6 @@ _public_ int ncm_link_remove_routing_policy_rules(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-
         r = manager_remove_routing_policy_rules(p);
         if (r < 0) {
                 log_warning("Failed to remove routing policy rules: %s", g_strerror(-r));
@@ -1837,13 +1836,18 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
                 if (string_equal(argv[i], "dns")) {
                         parse_next_arg(argv, argc, i);
 
@@ -1959,6 +1963,11 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_configure_dhcpv4_server(p, dns, ntp, pool_offset, pool_size, default_lease_time, max_lease_time,
                                             emit_dns, emit_ntp, emit_router);
         if (r < 0) {
@@ -1973,10 +1982,22 @@ _public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_remove_dhcpv4_server(p);
