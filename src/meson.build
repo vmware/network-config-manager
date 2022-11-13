@@ -11,6 +11,7 @@ network_config_manager_sources = files('''
         json/network-json.c
         manager/ctl-display.h
         manager/ctl-display.c
+        manager/ncm-nft.c
         manager/netdev.h
         manager/netdev.c
         manager/netdev-link.c
