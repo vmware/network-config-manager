@@ -793,7 +793,100 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'IPMasquerade') == 'yes')
 
+    def test_cli_set_dhcp4_client_identifier(self):
+        assert(link_exist('test99') == True)
 
+        subprocess.check_call("nmctl set-dhcp4-client-id dev test99 id mac", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('DHCPv4', 'ClientIdentifier') == 'mac')
+
+    def test_cli_set_dhcp4_use_dns(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-dns yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('DHCPv4', 'UseDNS') == 'yes')
+
+    def test_cli_set_dhcp4_use_mtu(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-mtu yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+    def test_cli_set_dhcp4_use_domains(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-domains yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('DHCPv4', 'UseDomains') == 'yes')
+
+    def test_cli_set_dhcp4_use_ntp(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-ntp yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('DHCPv4', 'UseNTP') == 'yes')
+
+    def test_cli_set_dhcp4_use_routes(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-routes yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('DHCPv4', 'UseRoutes') == 'yes')
+
+    def test_cli_set_link_lldp(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-lldp dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LLDP') == 'yes')
+
+    def test_cli_set_link_emit_lldp(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-emit-lldp dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'EmitLLDP') == 'yes')
 
 """
     def test_cli_add_dns(self):
@@ -846,103 +939,6 @@ class TestCLINetwork:
 """
 
 
-"""
-    def test_cli_set_dhcp4_client_identifier(self):
-        assert(link_exist('test99') == True)
-
-
-        subprocess.check_call(['nmctl', 'set-dhcp4-client-id', 'test99', 'mac'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'ClientIdentifier') == 'mac')
-
-    def test_cli_set_dhcp4_use_dns(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-dns', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'UseDNS') == 'yes')
-
-    def test_cli_set_dhcp4_use_mtu(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-mtu', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-
-    def test_cli_set_dhcp4_use_domains(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-domains', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'UseDomains') == 'yes')
-
-    def test_cli_set_dhcp4_use_ntp(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-ntp', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'UseNTP') == 'yes')
-
-    def test_cli_set_dhcp4_use_routes(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-routes', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'UseRoutes') == 'yes')
-
-    def test_cli_set_link_lldp(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-lldp', 'test99', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'LLDP') == 'yes')
-
-    def test_cli_set_link_emit_lldp(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-emit-lldp', 'test99', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'EmitLLDP') == 'yes')
-"""
 class TestCLIDHCPv4Server:
     def setup_method(self):
         link_remove('test99')
@@ -959,7 +955,7 @@ class TestCLIDHCPv4Server:
         subprocess.check_call("nmctl add-dhcpv4-server dev test99 pool-offset "
                                "10 pool-size 20 default-lease-time 100 "
                                "max-lease-time 200 emit-dns yes dns 192.168.1.1 "
-                               "emit-router yes", shell = True )
+                               "emit-router yes", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -977,7 +973,7 @@ class TestCLIDHCPv4Server:
         assert(parser.get('DHCPServer', 'DNS') == '192.168.1.1')
         assert(parser.get('DHCPServer', 'EmitRouter') == 'yes')
 
-"""
+
 class TestCLIIPv6RA:
     def setup_method(self):
         link_remove('test99')
@@ -991,17 +987,13 @@ class TestCLIIPv6RA:
     def test_cli_configure_ipv6ra(self):
         assert(link_exist('test99') == True)
 
+        subprocess.check_call("nmctl add-ipv6ra dev test99 prefix 2002:da8:1:0::/64 "
+                              "pref-lifetime 100 valid-lifetime 200 assign yes "
+                              "managed yes emit-dns yes dns 2002:da8:1:0::1 "
+                              "domain test.com emit-domain yes dns-lifetime 100 router-pref medium "
+                              "route-prefix 2001:db1:fff::/64 route-lifetime 1000", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['nmctl', 'add-ipv6ra', 'test99', 'prefix', '2002:da8:1:0::/64',
-                               'pref-lifetime', '100', 'valid-lifetime', '200', 'assign', 'yes',
-                               'managed', 'yes', 'emit-dns', 'yes', 'dns', '2002:da8:1:0::1',
-                               'domain', 'test.com', 'emit-domain', 'yes', 'dns-lifetime', '100', 'router-pref', 'medium',
-                               'route-prefix', '2001:db1:fff::/64', 'route-lifetime', '1000'])
-
-        subprocess.check_call(['sleep', '3'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -1022,7 +1014,7 @@ class TestCLIIPv6RA:
 
         assert(parser.get('IPv6RoutePrefix', 'LifetimeSec') == '1000')
         assert(parser.get('IPv6RoutePrefix', 'Route') == '2001:db1:fff::/64')
-
+"""
 class TestCLINetDev:
     def setup_method(self):
         link_remove('test98')
