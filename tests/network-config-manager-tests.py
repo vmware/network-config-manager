@@ -900,11 +900,11 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
 
-"""
+
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'add-dns', 'test99', '192.168.1.45', '192.168.1.46'])
+        subprocess.check_call("nmctl add-dns dev test99 192.168.1.45 192.168.1.46", Shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -912,7 +912,7 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DNS') == '192.168.1.45 192.168.1.46')
-
+"""
     def test_cli_add_domain(self):
         assert(link_exist('test99') == True)
 
@@ -949,7 +949,6 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
 """
-
 
 class TestCLIDHCPv4Server:
     def setup_method(self):
@@ -2146,12 +2145,11 @@ class TestCLISRIOV:
     def test_cli_configure_sr_iov(self):
         assert(link_exist('sriov99') == True)
 
-        subprocess.check_call(['nmctl', 'add-sr-iov', 'sriov99', 'vf', '5', 'vlanid', '2', 'qos', '1', 'vlanproto',
-                               '802.1Q', 'macspoofck', 'yes', 'qrss', 'true', 'trust', 'yes', 'linkstate', 'yes',
-                               'macaddr', '00:0c:29:3a:bc:11'])
+        subprocess.check_call("nmctl add-sr-iov sriov99 vf 5 vlanid 2 qos 1 vlanproto "
+                               "802.1Q macspoofck yes qrss true trust yes linkstate yes "
+                               "macaddr 00:0c:29:3a:bc:11", shell = True)
 
-        subprocess.check_call(['sleep', '3'])
-
+        assert(unit_exist('10-sriov99.network') == True)
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-sriov99.network'))
 
