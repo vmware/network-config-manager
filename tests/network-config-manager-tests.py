@@ -732,6 +732,68 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'LinkLocalAddressing') == 'ipv6')
 
+    def test_cli_set_ip_v6_router_advertisement(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-ipv6acceptra dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'IPv6AcceptRA') == 'yes')
+
+
+    def test_cli_set_ipv4_link_local_route(self):
+        assert(link_exist('test99') == True);
+
+        subprocess.check_call("nmctl set-ipv4ll-route dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'IPv4LLRoute') == 'yes')
+
+    def test_cli_set_llmnr(self):
+        assert(link_exist('test99') == True);
+
+        subprocess.check_call("nmctl set-llmnr dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LLMNR') == 'yes')
+
+    def test_cli_set_multicast_dns(self):
+        assert(link_exist('test99') == True);
+
+        subprocess.check_call("nmctl set-multicast-dns dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'MulticastDNS') == 'yes')
+
+    def test_cli_set_ip_masquerade(self):
+        assert(link_exist('test99') == True);
+
+        subprocess.check_call("nmctl set-ipmasquerade dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'IPMasquerade') == 'yes')
+
+
 
 """
     def test_cli_add_dns(self):
@@ -781,80 +843,10 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
-
-    def test_cli_set_ip_v6_router_advertisement(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-ipv6acceptra', 'test99', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'IPv6AcceptRA') == 'yes')
-
-    def test_cli_set_link_local_addressing(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-link-local-address', 'test99', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'LinkLocalAddressing') == 'yes')
-
-    def test_cli_set_ipv4_link_local_route(self):
-        assert(link_exist('test99') == True);
-
-        subprocess.check_call(['nmctl', 'set-ipv4ll-route', 'test99', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'IPv4LLRoute') == 'yes')
-
-    def test_cli_set_llmnr(self):
-        assert(link_exist('test99') == True);
-
-        subprocess.check_call(['nmctl', 'set-llmnr', 'test99', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'LLMNR') == 'yes')
-
-    def test_cli_set_multicast_dns(self):
-        assert(link_exist('test99') == True);
-
-        subprocess.check_call(['nmctl', 'set-multicast-dns', 'test99', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'MulticastDNS') == 'yes')
-
-    def test_cli_set_ip_masquerade(self):
-        assert(link_exist('test99') == True);
-
-        subprocess.check_call(['nmctl', 'set-ipmasquerade', 'test99', 'yes'])
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'IPMasquerade') == 'yes')
+"""
 
 
+"""
     def test_cli_set_dhcp4_client_identifier(self):
         assert(link_exist('test99') == True)
 
