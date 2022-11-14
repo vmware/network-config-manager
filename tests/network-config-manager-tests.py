@@ -934,13 +934,11 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
-"""
 
-"""
     def test_cli_add_ntp(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'add-ntp', 'test99', '192.168.1.34', '192.168.1.45'])
+        subprocess.check_call("nmctl add-ntp dev test99 ntp 192.168.1.34 192.168.1.45", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -952,7 +950,7 @@ class TestCLINetwork:
     def test_cli_set_ntp(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-ntp', 'test99', '192.168.1.34', '192.168.1.45'])
+        subprocess.check_call("nmctl set-ntp dev test99 ntp 192.168.1.34 192.168.1.45", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -1549,12 +1547,15 @@ class TestCLINetDev:
 
 class TestCLIGlobalDNSDomain:
     def test_cli_configure_global_dns_server(self):
-        subprocess.check_call("nmctl add-dns global dns 8.8.4.4 8.8.8.8 8.8.8.1 8.8.8.2", shell = True)
+        subprocess.check_call("nmctl add-dns global dns 8.8.4.4 8.8.8.8 8.8.8.1", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read('/etc/systemd/resolved.conf')
 
-        assert(parser.get('Resolve', 'DNS') == '8.8.4.4 8.8.8.1 8.8.8.2 8.8.8.8')
+        dns = parser.get('Resolve', 'DNS')
+        assert(dns.find("8.8.4.4") != -1)
+        assert(dns.find("8.8.8.8") != -1)
+        assert(dns.find("8.8.8.1") != -1)
 
     def test_cli_configure_global_domain_server(self):
         subprocess.check_call("nmctl add-domain global domains test1 test2", shell = True)
@@ -1562,7 +1563,9 @@ class TestCLIGlobalDNSDomain:
         parser = configparser.ConfigParser()
         parser.read('/etc/systemd/resolved.conf')
 
-        assert(parser.get('Resolve', 'Domains') == 'test1 test2')
+        d = parser.get('Resolve', 'Domains')
+        assert(dns.find("test1") != -1)
+        assert(dns.find("test2") != -1)
 
 class TestCLINetworkProxy:
     def test_cli_configure_network_proxy(self):
