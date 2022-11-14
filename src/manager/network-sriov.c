@@ -133,10 +133,8 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
         }
 
         r = netdev_sriov_new(&s);
-        if (r < 0) {
-                log_warning("Failed to configure sriov: %s", g_strerror(-r));
-                return -errno;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 unsigned v;
