@@ -720,6 +720,19 @@ class TestCLINetwork:
         assert(parser.get('RoutingPolicyRule', 'OutgoingInterface') == 'test99')
         assert(parser.get('RoutingPolicyRule', 'IncomingInterface') == 'test99')
 
+    def test_cli_set_link_local_address(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-link-local-address dev test99 ipv6", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'ipv6')
+
+
 """
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
