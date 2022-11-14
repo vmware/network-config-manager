@@ -2481,13 +2481,11 @@ _public_ int ncm_add_dns_server(int argc, char *argv[]) {
 
                 if (string_equal(argv[i], "global"))
                         global = true;
-        }
 
-        for (int j = 1; j < argc; j++) {
-                if (string_equal_fold(argv[j], "dns")) {
-                        parse_next_arg(argv, argc, j);
+                if (string_equal_fold(argv[i], "dns")) {
+                        parse_next_arg(argv, argc, i);
 
-                        r = argv_to_strv(argc - 4, argv + j, &d);
+                        r = argv_to_strv(argc - 4, argv + i, &d);
                         if (r < 0) {
                                 log_warning("Failed to parse dns addresses: %s", g_strerror(-r));
                                 return r;
@@ -2559,9 +2557,7 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
 
                 if (string_equal(argv[i], "global"))
                         global = true;
-        }
 
-        for (int i = 1; i < argc; i++) {
                 if (string_equal_fold(argv[i], "domains")) {
                         parse_next_arg(argv, argc, i);
 
@@ -2571,6 +2567,7 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
                                 return r;
                         }
                 }
+
         }
 
         if (!domains && strv_length(domains) <= 0) {
@@ -2826,27 +2823,42 @@ _public_ int ncm_link_add_ntp(int argc, char *argv[]) {
        char **d;
        int r;
 
-       r = parse_ifname_or_index(argv[1], &p);
-       if (r < 0) {
-               log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-               return r;
-       }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-       r = argv_to_strv(argc - 2, argv + 2, &ntps);
-       if (r < 0) {
-               log_warning("Failed to parse NTP addresses: %s", g_strerror(-r));
-               return r;
-       }
-
-       strv_foreach(d, ntps) {
-               _auto_cleanup_ IPAddress *a = NULL;
-
-               r = parse_ip(*d, &a);
-               if (r < 0) {
-                       log_warning("Failed to parse NTP server address: %s", *d);
-                       return r;
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
                 }
-       }
+
+                if (string_equal_fold(argv[i], "ntp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = argv_to_strv(argc - 4, argv + i, &ntps);
+                        if (r < 0) {
+                                log_warning("Failed to parse NTP addresses: %s", g_strerror(-r));
+                                return r;
+                        }
+                }
+        }
+
+        if (!ntps && strv_length(ntps) <= 0) {
+                log_warning("Failed to parse NTP: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        strv_foreach(d, ntps) {
+                _auto_cleanup_ IPAddress *a = NULL;
+
+                r = parse_ip(*d, &a);
+                if (r < 0) {
+                        log_warning("Failed to parse NTP server address: %s", *d);
+                        return r;
+                }
+        }
 
        if (string_equal(argv[0], "set-ntp"))
                r = manager_add_ntp_addresses(p, ntps, false);
@@ -2864,11 +2876,23 @@ _public_ int ncm_link_delete_ntp(int argc, char *argv[]) {
        _auto_cleanup_ IfNameIndex *p = NULL;
        int r;
 
-       r = parse_ifname_or_index(argv[1], &p);
-       if (r < 0) {
-               log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-               return r;
-       }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
 
        r = manager_remove_ntp_addresses(p);
        if (r < 0) {
