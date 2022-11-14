@@ -1344,6 +1344,7 @@ int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k
         int r;
 
         assert(ifnameidx);
+        assert(k);
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)

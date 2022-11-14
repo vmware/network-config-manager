@@ -884,10 +884,21 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
         bool v;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_network_section_configs_new(&m);
@@ -896,13 +907,13 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
                 return r;
         }
 
-        r = parse_boolean(argv[2]);
+        r = parse_boolean(argv[3]);
         if (r < 0) {
-                log_warning("Failed to parse %s=%s for link '%s': %s", argv[0], argv[2], argv[1], g_strerror(-r));
+                log_warning("Failed to parse link local address for device '%s': %s", p->ifname, g_strerror(-r));
                 return r;
         }
-
         v = r;
+
         return manager_set_network_section_bool(p, ctl_to_config(m, argv[0]), v);
 }
 
