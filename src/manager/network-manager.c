@@ -543,7 +543,7 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx, const char *a) {
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find link setup '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find device setup '%s': %s", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -724,7 +724,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find link setup '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find device setup '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -2592,7 +2592,7 @@ int manager_generate_network_config_from_yaml(const char *file) {
 
                 r = parse_ifname_or_index(l->ifname, &p);
                 if (r < 0) {
-                        log_warning("Failed to find link: %s", g_strerror(-r));
+                        log_warning("Failed to find device: %s", g_strerror(-r));
                         return r;
                 }
 

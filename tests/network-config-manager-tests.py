@@ -124,7 +124,7 @@ def read_wpa_supplicant_conf(conf_file):
             networks[k] = v
 
     return networks
-"""
+
 class TestLinkConfigManagerYAML:
     yaml_configs = [
         "link.yaml",
@@ -455,7 +455,7 @@ class TestKernelCommandLine:
         assert(parser.get('Network', 'DHCP') == 'ipv4')
         assert(parser.get('Route', 'Gateway') == '192.168.1.1/32')
         assert(parser.get('Address', 'Address') == '192.168.1.34')
-"""
+
 class TestCLINetwork:
     def setup_method(self):
         link_remove('test99')
@@ -1026,7 +1026,7 @@ class TestCLIIPv6RA:
 
         assert(parser.get('IPv6RoutePrefix', 'LifetimeSec') == '1000')
         assert(parser.get('IPv6RoutePrefix', 'Route') == '2001:db1:fff::/64')
-"""
+
 class TestCLINetDev:
     def setup_method(self):
         link_remove('test98')
@@ -2166,4 +2166,3 @@ class TestCLISRIOV:
         assert(parser.get('SR-IOV', 'Trust') == 'yes')
         assert(parser.get('SR-IOV', 'LinkState') == 'yes')
         assert(parser.get('SR-IOV', 'MACAddress') == '00:0c:29:3a:bc:11')
-"""
