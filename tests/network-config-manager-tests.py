@@ -466,6 +466,41 @@ class TestCLINetwork:
         remove_units_from_netword_unit_path()
         link_remove('test99')
 
+    def test_cli_add_dns(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        subprocess.check_call("nmctl add-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+        dns = parser.get('Network', 'DNS')
+        print(dns)
+        assert(dns.find("192.168.1.46") != -1)
+        assert(dns.find("192.168.1.45") != -1)
+
+    def test_cli_add_domain(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+        d = parser.get('Network', 'Domains')
+        print(d)
+        assert(d.find("domain1") != -1)
+        assert(d.find("domain2") != -1)
+
+
     def test_cli_set_mtu(self):
         assert(link_exist('test99') == True)
 
@@ -899,30 +934,7 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
-
-    def test_cli_add_dns(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call("nmctl add-dns dev test99 192.168.1.45 192.168.1.46", Shell = True)
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'DNS') == '192.168.1.46 192.168.1.45')
-
-    def test_cli_add_domain(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", Shell = True)
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'Domains') == 'domain2 domain1')
+"""
 
 """
     def test_cli_add_ntp(self):
@@ -948,7 +960,6 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
-"""
 
 class TestCLIDHCPv4Server:
     def setup_method(self):
@@ -1538,9 +1549,7 @@ class TestCLINetDev:
 
 class TestCLIGlobalDNSDomain:
     def test_cli_configure_global_dns_server(self):
-        subprocess.check_call(['nmctl', 'add-dns', 'global', '8.8.4.4', '8.8.8.8', '8.8.8.1', '8.8.8.2'])
-
-        subprocess.check_call(['sleep', '3'])
+        subprocess.check_call("nmctl add-dns global dns 8.8.4.4 8.8.8.8 8.8.8.1 8.8.8.2", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read('/etc/systemd/resolved.conf')
@@ -1548,9 +1557,7 @@ class TestCLIGlobalDNSDomain:
         assert(parser.get('Resolve', 'DNS') == '8.8.4.4 8.8.8.1 8.8.8.2 8.8.8.8')
 
     def test_cli_configure_global_domain_server(self):
-        subprocess.check_call(['nmctl', 'add-domain', 'global', 'test1', 'test2'])
-
-        subprocess.check_call(['sleep', '3'])
+        subprocess.check_call("nmctl add-domain global domains test1 test2", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read('/etc/systemd/resolved.conf')
