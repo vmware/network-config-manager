@@ -124,7 +124,7 @@ static int help(void) {
                "  set-dhcp-iaid                dev [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID)\n"
                "  set-dhcp-duid                dev|system [DEVICE] family|f [ipv4|ipv6|4|6] duid [DUID {link-layer-time|vendor|link-layer|uuid}] data [RAWDATA]"
                                                       "\n\t\t\t\t      Sets DUID of DHCPv4 or DHCPv6 Client.\n"
-               "  set-link-state               [DEVICE] [STATE {up|down}] Configures Link State.\n"
+               "  set-link-state               dev [DEVICE] [STATE {up|down}] Configures device State.\n"
                "  show-address                 dev [DEVICE] [family|f ipv4|ipv6|4|6] Show device addresses\n"
                "  add-address                  dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime|pl [{forever|infinity|0}]"
                                                       "\n\t\t\t\t      scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN]"
@@ -142,13 +142,13 @@ static int help(void) {
                                                       "\n\t\t\t\t Configures additional gateway for another NIC with routing policy rules.\n"
                "  add-rule                     dev [DEVICE] table [TABLE NUMBER] from [ADDRESS] to [ADDRESS] oif [DEVICE] iif [DEVICE] priority [NUMBER] tos [NUMBER]"
                                                       "\n\t\t\t\t      Configures Routing Policy Rule.\n"
-               "  remove-rule                  [DEVICE] Removes Routing Policy Rule.\n"
+               "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
                "  set-hostname                 [HOSTNAME] Configures hostname.\n"
                "  show-dns                            Show DNS Servers.\n"
                "  add-dns                      [LINK|global|system] [ADDRESS] Configures Link or global DNS servers.\n"
                "  add-domain                   [LINK|global|system] [DOMAIN] Configures Link or global Domain.\n"
                "  show-domains                        Show DNS Server Domains.\n"
-               "  revert-resolve-link          [DEVICE] Flushes all DNS server and Domain settings of the link.\n"
+               "  revert-resolve-link          dev [DEVICE] Flushes all DNS server and Domain settings of the link.\n"
                "  set-link-local-address       dev [DEVICE] [LinkLocalAddressing BOOLEAN|ipv6|ipv4] Configures link local address.\n"
                "  set-ipv4ll-route             [DEVICE] [IPv4LLRoute BOOLEAN] Configures the route needed for non-IPv4LL hosts to communicate.\n"
                "                                      with IPv4LL-only hosts.\n"
@@ -209,9 +209,9 @@ static int help(void) {
                "  remove-netdev                [DEVICE] kind [KIND {vlan|bridge|bond|vxlan|macvlan|macvtap|ipvlan|ipvtap|vrf|veth|ipip|sit|vti|gre|wg] \n"
                "                                      Removes .netdev and .network files.\n"
                "  reload                       Reload .network and .netdev files.\n"
-               "  reconfigure                  [DEVICE] Reconfigure Link.\n"
-               "  show-network-config          [DEVICE] Displays network configuration of link.\n"
-               "  edit-network-config          [DEVICE] Edit network configuration of link.\n"
+               "  reconfigure                  dev [DEVICE] Reconfigure device.\n"
+               "  show-network-config          dev [DEVICE] Displays network configuration of device.\n"
+               "  edit-network-config          dev [DEVICE] Edit network configuration of device.\n"
                "  set-link                     [DEVICE] [alias STRING] [desc STRING] [mtub STRING]  [bps STRING]  [duplex STRING] [wol STRING | List] [wolp STRING] [port STRING] [advertise STRING | List] \n"
                                                       "\t\t\t\tConfigure device's other parameters like mtubytes, bitspersecond, duplex, wakeonlan, wakeonlanpassword, port and advertise.\n"
                "  set-link-feature             [DEVICE] [auton BOOLEAN] [rxcsumo BOOLEAN]  [txcsumo BOOLEAN]  [tso BOOLEAN] [tso6 BOOLEAN] [gso BOOLEAN] [grxo BOOLEAN] [grxoh BOOLEAN] [lrxo BOOLEAN] [rxvtha BOOLEAN] [txvtha BOOLEAN] [rxvtf BOOLEAN] [txvstha BOOLEAN] [ntf BOOLEAN] [uarxc BOOLEAN] [uatxc BOOLEAN]\n"
@@ -319,10 +319,10 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-link-rf-online",           4,        WORD_ANY, false, ncm_link_set_rf_online },
                 { "set-link-act-policy",          4,        WORD_ANY, false, ncm_link_set_act_policy },
                 { "set-dhcp",                     4,        WORD_ANY, false, ncm_link_set_dhcp_mode },
-                { "set-dhcp4-client-id",          4,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
+                { "set-dhcp4-client-id",          3,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
                 { "set-dhcp-iaid",                4,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
                 { "set-dhcp-duid",                4,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
-                { "set-link-state",               2,        WORD_ANY, false, ncm_link_update_state },
+                { "set-link-state",               4,        WORD_ANY, false, ncm_link_update_state },
                 { "add-address",                  4,        WORD_ANY, false, ncm_link_add_address },
                 { "show-address",                 4,        WORD_ANY, false, ncm_display_one_link_addresses },
                 { "delete-address",               4,        WORD_ANY, false, ncm_link_delete_address },
@@ -354,15 +354,15 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-conf-without-carrier",     2,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-dhcp4",                    2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp6",                    2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
-                { "add-dhcpv4-server",            4,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
+                { "add-dhcpv4-server",            2,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
                 { "remove-dhcpv4-server",         2,        WORD_ANY, false, ncm_link_remove_dhcpv4_server },
-                { "add-ipv6ra",                   1,        WORD_ANY, false, ncm_link_add_ipv6_router_advertisement },
-                { "remove-ipv6ra",                1,        WORD_ANY, false, ncm_link_remove_ipv6_router_advertisement },
+                { "add-ipv6ra",                   2,        WORD_ANY, false, ncm_link_add_ipv6_router_advertisement },
+                { "remove-ipv6ra",                2,        WORD_ANY, false, ncm_link_remove_ipv6_router_advertisement },
                 { "add-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "set-ntp",                      2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "delete-ntp",                   1,        WORD_ANY, false, ncm_link_delete_ntp },
-                { "disable-ipv6",                 1,        WORD_ANY, false, ncm_link_enable_ipv6 },
-                { "enable-ipv6",                  1,        WORD_ANY, false, ncm_link_enable_ipv6 },
+                { "disable-ipv6",                 2,        WORD_ANY, false, ncm_link_enable_ipv6 },
+                { "enable-ipv6",                  2,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "create-vlan",                  4,        WORD_ANY, false, ncm_create_vlan },
                 { "create-bridge",                2,        WORD_ANY, false, ncm_create_bridge },
                 { "create-bond",                  5,        WORD_ANY, false, ncm_create_bond },
