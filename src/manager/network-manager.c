@@ -69,7 +69,7 @@ static const Config network_ctl_to_link_section_config_table[] = {
                 {},
 };
 
-int manager_network_section_bool_configs_new(ConfigManager **ret) {
+int manager_network_section_configs_new(ConfigManager **ret) {
         ConfigManager *m;
         int r;
 
@@ -388,6 +388,27 @@ int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu
         r = set_config_file_integer(network, "Network", "IPv6MTUBytes", mtu);
         if (r < 0) {
                 log_warning("Failed to update IPv6MTUBytes= to configuration file '%s' = %s", network, g_strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
+int manager_set_link_local_address(const IfNameIndex *ifnameidx, const char *k, const char *v) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(k);
+        assert(v);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_string(network, "Network", k, v);
+        if (r < 0) {
+                log_warning("Failed to update LinkLocalAddressing= to configuration file '%s' = %s", network, g_strerror(-r));
                 return r;
         }
 

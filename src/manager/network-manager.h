@@ -71,11 +71,12 @@ int manager_reconfigure_link(const IfNameIndex *ifnameidx);
 
 int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu);
 
-int manager_network_section_bool_configs_new(ConfigManager **ret);
+int manager_network_section_configs_new(ConfigManager **ret);
 int manager_network_dhcp4_section_configs_new(ConfigManager **ret);
 int manager_network_dhcp6_section_configs_new(ConfigManager **ret);
 int manager_network_link_section_configs_new(ConfigManager **ret);
 
+int manager_set_link_local_address(const IfNameIndex *ifnameidx, const char *k, const char *v);
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v);
 int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *ifnameidx, const char *k, bool v);
 

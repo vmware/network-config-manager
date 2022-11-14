@@ -840,7 +840,45 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
+_public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        const char *s;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        s = parse_boolean_or_ip_family(argv[3]);
+        if (!s) {
+                log_warning("Failed to parse %s=%s for link '%s': %s", argv[0], argv[2], argv[1], g_strerror(-r));
+                return r;
+        }
+
+        r = manager_network_section_configs_new(&m);
+        if (r < 0) {
+                log_warning("Failed to set network section '%s'", g_strerror(-r));
+                return r;
+        }
+
+        return manager_set_link_local_address(p, ctl_to_config(m, argv[0]), s);
+}
+
+_public_ int ncm_link_set_network_section(int argc, char *argv[]) {
         _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool v;
@@ -852,7 +890,7 @@ _public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_network_section_bool_configs_new(&m);
+        r = manager_network_section_configs_new(&m);
         if (r < 0) {
                 log_warning("Failed to set network section '%s'", g_strerror(-r));
                 return r;
