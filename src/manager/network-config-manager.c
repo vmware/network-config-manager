@@ -2460,47 +2460,72 @@ _public_ int ncm_get_dns_server(char ***ret) {
 _public_ int ncm_add_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **d = NULL;
         bool system = false, global = false;
+        char **s;
         int r;
 
-        if (string_equal(argv[1], "system"))
-                system = true;
-        else if (string_equal(argv[1], "global"))
-                global = true;
-        else {
-                r = parse_ifname_or_index(argv[1], &p);
-                if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                        return -EINVAL;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+                if (string_equal(argv[i], "system"))
+                        system = true;
+
+                if (string_equal(argv[i], "global"))
+                        global = true;
+        }
+
+        for (int j = 1; j < argc; j++) {
+                if (string_equal_fold(argv[j], "dns")) {
+                        parse_next_arg(argv, argc, j);
+
+                        r = argv_to_strv(argc - 4, argv + j, &d);
+                        if (r < 0) {
+                                log_warning("Failed to parse dns addresses: %s", g_strerror(-r));
+                                return r;
+                        }
                 }
         }
 
-        for (int i = 2; i < argc; i++) {
-                _auto_cleanup_ IPAddress *a = NULL;
-                _auto_cleanup_ DNSServer *s = NULL;
+        if (!d || strv_length(d) <= 0) {
+                log_warning("Failed to parse dns addresses: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
 
-                r = parse_ip(argv[i], &a);
+        strv_foreach(s, d) {
+                _auto_cleanup_ IPAddress *a = NULL;
+                _auto_cleanup_ DNSServer *t = NULL;
+
+                r = parse_ip(*s, &a);
                 if (r < 0) {
-                        log_warning("Failed to parse DNS server address: %s", argv[i]);
+                        log_warning("Failed to parse DNS server address: %s", *s);
                         return r;
                 }
 
-                r = dns_server_new(&s);
+                r = dns_server_new(&t);
                 if (r < 0)
                         return log_oom();
 
-                *s = (DNSServer) {
+                *t = (DNSServer) {
                         .ifindex = p ? p->ifindex : 0,
                         .address = *a,
                 };
 
-                r = dns_server_add(&dns, s);
+                r = dns_server_add(&dns, t);
                 if (r < 0) {
-                        log_warning("Failed to add DNS server address: %s", argv[i]);
+                        log_warning("Failed to add DNS server address: %s", *s);
                         return r;
                 }
 
-                steal_pointer(s);
+                steal_pointer(t);
         }
 
         r = manager_add_dns_server(p, dns, system, global);
@@ -2518,27 +2543,44 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
         bool system = false, global = false;
         int r;
 
-        if (string_equal(argv[1], "system"))
-                system = true;
-        else if (string_equal(argv[1], "global"))
-                global = true;
-        else {
-                r = parse_ifname_or_index(argv[1], &p);
-                if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                        return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+                if (string_equal(argv[i], "system"))
+                        system = true;
+
+                if (string_equal(argv[i], "global"))
+                        global = true;
+        }
+
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "domains")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = argv_to_strv(argc - 4, argv + i, &domains);
+                        if (r < 0) {
+                                log_warning("Failed to parse domains addresses: %s", g_strerror(-r));
+                                return r;
+                        }
                 }
         }
 
-        r = argv_to_strv(argc - 2, argv + 2, &domains);
-        if (r < 0) {
-                log_warning("Failed to parse domains addresses: %s", g_strerror(-r));
-                return r;
+        if (!domains && strv_length(domains) <= 0) {
+                log_warning("Failed to parse domains: %s", g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_add_dns_server_domain(p, domains, system, global);
         if (r < 0) {
-                log_warning("Failed to add DNS domain to resolved '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to add DNS domain to resolved: %s", g_strerror(-r));
                 return r;
         }
 

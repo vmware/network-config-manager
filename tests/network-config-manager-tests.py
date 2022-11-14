@@ -900,7 +900,6 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
 
-
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
 
@@ -911,12 +910,12 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'DNS') == '192.168.1.45 192.168.1.46')
-"""
+        assert(parser.get('Network', 'DNS') == '192.168.1.46 192.168.1.45')
+
     def test_cli_add_domain(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'add-domain', 'test99', 'domain1', 'domain2'])
+        subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", Shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -925,6 +924,7 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'Domains') == 'domain2 domain1')
 
+"""
     def test_cli_add_ntp(self):
         assert(link_exist('test99') == True)
 
