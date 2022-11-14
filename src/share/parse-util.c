@@ -131,6 +131,22 @@ int parse_boolean(const char *v) {
         return -EINVAL;
 }
 
+const char *parse_boolean_or_ip_family(const char *v) {
+        if (!v)
+                return NULL;
+
+        if (string_equal(v, "1") || string_equal_fold(v, "yes") || string_equal_fold(v, "y") ||
+            string_equal_fold(v, "true") || string_equal_fold(v, "t") || string_equal_fold(v, "on"))
+                return "yes";
+        else if (string_equal(v, "0") || string_equal_fold(v, "no") || string_equal_fold(v, "n") ||
+                 string_equal_fold(v, "false") || string_equal_fold(v, "f") || string_equal_fold(v, "off"))
+                return "no";
+        else if (string_equal(v, "ipv4") || string_equal_fold(v, "ipv6"))
+               return v;
+
+        return NULL;
+}
+
 int parse_link_alias(const char *c) {
         assert(c);
 

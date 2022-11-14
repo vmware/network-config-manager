@@ -60,7 +60,16 @@ static const Config network_ctl_to_dhcp6_section_config_table[] = {
                 {},
 };
 
-int manager_network_section_bool_configs_new(ConfigManager **ret) {
+static const Config network_ctl_to_link_section_config_table[] = {
+                { "manage", "Unmanaged"},
+                { "arp",    "ARP"},
+                { "mc",     "Multicast"},
+                { "amc",    "AllMulticast"},
+                { "pcs",    "Promiscuous"},
+                {},
+};
+
+int manager_network_section_configs_new(ConfigManager **ret) {
         ConfigManager *m;
         int r;
 
@@ -96,23 +105,32 @@ int manager_network_dhcp6_section_configs_new(ConfigManager **ret) {
         return 0;
 }
 
-int manager_set_link_flag(const IfNameIndex *ifnameidx, bool mode, const char* key) {
+int manager_network_link_section_configs_new(ConfigManager **ret) {
+        ConfigManager *m;
+        int r;
+
+        r = config_manager_new(network_ctl_to_link_section_config_table, &m);
+        if (r < 0)
+                return r;
+
+        *ret = m;
+        return 0;
+}
+
+
+int manager_set_link_flag(const IfNameIndex *ifnameidx, const char *k, const char *v) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
-        assert(key);
+        assert(k);
+        assert(v);
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)
                 return r;
 
-        if (!network) {
-                log_warning("Failed to find network file for '%s'. systemd-networkd is configuring. Please try in a while.", ifnameidx->ifname);
-                return -ENODATA;
-        }
-
-        r = set_config_file_bool(network, "Link", key, mode);
+        r = set_config_file_string(network, "Link", k, v);
         if (r < 0)
                 return r;
 
@@ -376,6 +394,27 @@ int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu
         return dbus_network_reload();
 }
 
+int manager_set_link_local_address(const IfNameIndex *ifnameidx, const char *k, const char *v) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(k);
+        assert(v);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_string(network, "Network", k, v);
+        if (r < 0) {
+                log_warning("Failed to update LinkLocalAddressing= to configuration file '%s' = %s", network, g_strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
 int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac) {
         _auto_cleanup_ char *network = NULL, *config_mac = NULL, *config_update_mac = NULL;
         int r;
@@ -504,7 +543,7 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx, const char *a) {
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find link setup '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find device setup '%s': %s", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -685,7 +724,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find link setup '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find device setup '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -1305,6 +1344,7 @@ int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k
         int r;
 
         assert(ifnameidx);
+        assert(k);
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)
@@ -2552,7 +2592,7 @@ int manager_generate_network_config_from_yaml(const char *file) {
 
                 r = parse_ifname_or_index(l->ifname, &p);
                 if (r < 0) {
-                        log_warning("Failed to find link: %s", g_strerror(-r));
+                        log_warning("Failed to find device: %s", g_strerror(-r));
                         return r;
                 }
 

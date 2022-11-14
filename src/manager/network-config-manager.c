@@ -29,19 +29,46 @@
 
 _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        bool have_mtu = false;
         uint32_t mtu;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "mtu")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_mtu(argv[i], &mtu);
+                        if (r < 0) {
+                                log_warning("Failed to parse mtu '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        have_mtu = true;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        r = parse_mtu(argv[2], &mtu);
-        if (r < 0) {
-                log_warning("Failed to parse link mtu '%s': %s", argv[2], g_strerror(-r));
-                return r;
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!have_mtu) {
+                log_warning("Failed to parse mtu: %s", g_strerror(-r));
+                return -EINVAL;
         }
 
         r = manager_set_link_mtu(p, mtu);
@@ -74,22 +101,54 @@ _public_ int ncm_link_get_mtu(const char *ifname, uint32_t *ret) {
 
 _public_ int ncm_link_set_mac(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *mac = NULL;
+        bool have_mac = false;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "mac")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (!parse_ether_address(argv[i])) {
+                                log_warning("Failed to parse MAC address: %s", argv[2]);
+                                return -EINVAL;
+                        }
+                        mac = strdup(argv[i]);
+                        if (!mac)
+                                return log_oom();
+
+                        have_mac = true;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        if (!parse_ether_address(argv[2])) {
-               log_warning("Failed to parse MAC address: %s", argv[2]);
-               return -EINVAL;
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        r = manager_set_link_mac_addr(p, argv[2]);
+        if (!have_mac) {
+                log_warning("Failed to parse MAC address: %s", g_strerror(-r));
+                return -EINVAL;
+        }
+
+        r = manager_set_link_mac_addr(p, mac);
         if (r < 0) {
-                log_warning("Failed to update MAC Address for '%s': %s", p->ifname, g_strerror(-r) );
+                log_warning("Failed to update MAC address for '%s': %s", p->ifname, g_strerror(-r) );
                 return r;
         }
 
@@ -116,26 +175,53 @@ _public_ int ncm_link_get_mac(const char *ifname, char **ret) {
 }
 
 _public_ int ncm_link_set_mode(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool k;
+        bool k = true;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
+        r = manager_network_link_section_configs_new(&m);
         if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
+                log_warning("Failed to set network link section '%s'", g_strerror(-r));
                 return r;
         }
 
-        r = parse_boolean(argv[2]);
-        if (r < 0) {
-                log_warning("Failed to parse link mode '%s' '%s': %s", p->ifname, argv[2], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "manage")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link manage '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        k = r;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        k = r;
-        r = manager_set_link_flag(p, !k, "Unmanaged");
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_set_link_flag(p, ctl_to_config(m, "manage"), bool_to_string(!k));
         if (r < 0) {
-                printf("Failed to set link mode '%s': %s\n", p->ifname, g_strerror(-r));
+                printf("Failed to set device manage '%s': %s\n", p->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -143,17 +229,35 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_option(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool k;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                 }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(ENOENT));
                 return r;
         }
 
-        for (int i = 2; i < argc; i++) {
+        r = manager_network_link_section_configs_new(&m);
+        if (r < 0) {
+                log_warning("Failed to set network link section '%s'", g_strerror(-r));
+                return r;
+        }
+
+        for (int i = 1; i < argc; i++) {
                 if (string_equal(argv[i], "arp")) {
                         parse_next_arg(argv, argc, i);
 
@@ -164,7 +268,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, k, "ARP");
+                        r = manager_set_link_flag(p, ctl_to_config(m, "arp"), bool_to_string(k));
                         if (r < 0) {
                                 printf("Failed to set link arp '%s': %s\n", p->ifname, g_strerror(-r));
                                 return r;
@@ -172,6 +276,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
 
                         continue;
                 }
+
                 if (string_equal(argv[i], "mc")) {
                         parse_next_arg(argv, argc, i);
 
@@ -182,9 +287,9 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, k, "Multicast");
+                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
                         if (r < 0) {
-                                printf("Failed to set link multicast '%s': %s\n", p->ifname, g_strerror(-r));
+                                printf("Failed to set link arp '%s': %s\n", p->ifname, g_strerror(-r));
                                 return r;
                         }
 
@@ -200,9 +305,9 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, k, "AllMulticast");
+                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
                         if (r < 0) {
-                                printf("Failed to set link allmulticast '%s': %s\n", p->ifname, g_strerror(-r));
+                                printf("Failed to set link arp '%s': %s\n", p->ifname, g_strerror(-r));
                                 return r;
                         }
 
@@ -218,31 +323,11 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, k, "Promiscuous");
+                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
                         if (r < 0) {
-                                printf("Failed to set link promiscuous '%s': %s\n", p->ifname, g_strerror(-r));
+                                printf("Failed to set link arp '%s': %s\n", p->ifname, g_strerror(-r));
                                 return r;
                         }
-
-                        continue;
-                }
-                if (string_equal(argv[i], "rfo")) {
-                        parse_next_arg(argv, argc, i);
-
-                        r = parse_boolean(argv[i]);
-                        if (r < 0) {
-                                log_warning("Failed to parse link RequiredForOnline '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
-                                return r;
-                        }
-
-                        k = r;
-                        r = manager_set_link_flag(p, k, "RequiredForOnline");
-                        if (r < 0) {
-                                printf("Failed to set link RequiredForOnline '%s': %s\n", p->ifname, g_strerror(-r));
-                                return r;
-                        }
-
-                        continue;
                 }
         }
 
@@ -251,19 +336,46 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_group(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        bool have_group = false;
         uint32_t group;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "group")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_group(argv[i], &group);
+                        if (r < 0) {
+                                log_warning("Failed to parse device group '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        have_group = true;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        r = parse_group(argv[2], &group);
-        if (r < 0) {
-                log_warning("Failed to parse link group '%s': %s", argv[2], g_strerror(-r));
-                return r;
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!have_group) {
+                log_warning("Failed to parse group: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_set_link_group(p, group);
@@ -277,23 +389,55 @@ _public_ int ncm_link_set_group(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *family = NULL;
+        bool have_family = false;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "family") || string_equal(argv[i], "f")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_link_rf_online(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse RequiredFamilyForOnline '%s': %s", argv[2], g_strerror(EINVAL));
+                                return r;
+                        }
+                        family = strdup(argv[i]);
+                        if (!family)
+                                return log_oom();
+
+                        have_family = true;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        r = parse_link_rf_online(argv[2]);
-        if (r < 0) {
-               log_warning("Failed to parse RequiredFamilyForOnline '%s': %s", argv[2], g_strerror(EINVAL));
-               return r;
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        r = manager_set_link_rf_online(p, argv[2]);
+        if (!have_family) {
+                log_warning("Failed to parse family: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_set_link_rf_online(p, family);
         if (r < 0) {
-                log_warning("Failed to update RequiredFamilyForOnline for '%s': %s", p->ifname, g_strerror(-r) );
+                log_warning("Failed to update RequiredFamilyForOnline= for '%s': %s", p->ifname, g_strerror(-r) );
                 return r;
         }
 
@@ -302,42 +446,85 @@ _public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_act_policy(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *ap = NULL;
+        bool have_ap = false;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "ap") || string_equal(argv[i], "act-policy")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_link_act_policy(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse ActivationPolicy='%s': %s", argv[2], g_strerror(EINVAL));
+                                return r;
+                        }
+
+                        ap = strdup(argv[i]);
+                        if (!ap)
+                                return log_oom();
+
+                        have_ap = true;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        r = parse_link_act_policy(argv[2]);
-        if (r < 0) {
-               log_warning("Failed to parse ActivationPolicy '%s': %s", argv[2], g_strerror(EINVAL));
-               return r;
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        r = manager_set_link_act_policy(p, argv[2]);
+        if (!have_ap) {
+                log_warning("Failed to parse ActivationPolicy=: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_set_link_act_policy(p, ap);
         if (r < 0) {
-                log_warning("Failed to update ActivationPolicy for '%s': %s", p->ifname, g_strerror(-r) );
+                log_warning("Failed to update ActivationPolicy= for '%s': %s", p->ifname, g_strerror(-r) );
                 return r;
         }
 
         return 0;
 }
 
-
 _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t mtu;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
         }
 
-        r = parse_mtu(argv[2], &mtu);
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = parse_mtu(argv[3], &mtu);
         if (r < 0)
                 return r;
 
@@ -357,23 +544,50 @@ _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        int mode, r;
+        DHCPClient dhcp = _DHCP_CLIENT_INVALID;
+        int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "dhcp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        dhcp = dhcp_client_name_to_mode(argv[i]);
+                        if (dhcp < 0) {
+                                log_warning("Failed to parse dhcp: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        mode = dhcp_client_name_to_mode(argv[2]);
-        if (mode < 0) {
-                log_warning("Failed to find DHCP mode : %s", argv[2]);
-                return r;
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        r = manager_set_link_dhcp_client(p, mode);
+        if (dhcp == _DHCP_CLIENT_INVALID) {
+                log_warning("Failed to parse dhcp : %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_set_link_dhcp_client(p, dhcp);
         if (r < 0) {
-                log_warning("Failed to set link mode '%s': %s\n", p->ifname, g_strerror(-r));
+                log_warning("Failed to set device='%s' dhcp: %s\n", p->ifname, g_strerror(-r));
                 return r;
         }
 
@@ -399,25 +613,51 @@ _public_ int ncm_link_get_dhcp_mode(const char *ifname, int *ret) {
 }
 
 _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
+        DHCPClientIdentifier d = _DHCP_CLIENT_IDENTIFIER_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        DHCPClientIdentifier d;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "id")) {
+                        parse_next_arg(argv, argc, i);
+
+                        d = dhcp_client_identifier_to_mode(argv[i]);
+                        if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
+                                log_warning("Failed to parse DHCP4 client identifier: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
         }
 
-        d = dhcp_client_identifier_to_mode(argv[2]);
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
-                log_warning("Failed to parse DHCP4 client identifier: %s", argv[2]);
+                log_warning("Failed to parse DHCP4 client identifier: %s", g_strerror(EINVAL));
                 return -EINVAL;
         }
 
         r = manager_set_link_dhcp4_client_identifier(p, d);
         if (r < 0) {
-                log_warning("Failed to set link DHCP4 client identifier '%s': %s\n", p->ifname, g_strerror(r));
+                log_warning("Failed to set device DHCP4 client identifier '%s': %s", p->ifname, g_strerror(r));
                 return r;
         }
 
@@ -452,13 +692,18 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
         uint32_t v;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
                 if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
@@ -486,6 +731,11 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -528,18 +778,25 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
         bool system = false;
         int r;
 
-        /* Try to resolve the link name. If not assume this is for the system, i.e. /etc/systemd/networkd.conf */
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                if (string_equal_fold(argv[1], "system") || string_equal_fold(argv[1], "s"))
-                        system = true;
-                else {
-                        log_warning("Failed to resolve link '%s': %s", argv[1], g_strerror(EINVAL));
-                        return -EINVAL;
-                }
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal_fold(argv[i], "system") || string_equal_fold(argv[i], "s")) {
+                        parse_next_arg(argv, argc, i);
+
+                        system = true;
+                        continue;
+                }
+
                 if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
@@ -580,40 +837,92 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!p && !system) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_set_link_dhcp_client_duid(p, d, raw_data, system, kind);
         if (r < 0) {
-                log_warning("Failed to set link DHCP client DUID for '%s': %s\n", p->ifname, g_strerror(r));
+                log_warning("Failed to set device DHCP client DUID for '%s': %s\n", p->ifname, g_strerror(r));
                 return r;
         }
 
         return 0;
 }
 
-_public_ int ncm_link_set_network_section_bool(int argc, char *argv[]) {
+_public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
         _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool v;
+        const char *s;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        s = parse_boolean_or_ip_family(argv[3]);
+        if (!s) {
+                log_warning("Failed to parse %s=%s for link '%s': %s", argv[0], argv[2], argv[1], g_strerror(-r));
                 return r;
         }
 
-        r = manager_network_section_bool_configs_new(&m);
+        r = manager_network_section_configs_new(&m);
         if (r < 0) {
                 log_warning("Failed to set network section '%s'", g_strerror(-r));
                 return r;
         }
 
-        r = parse_boolean(argv[2]);
-        if (r < 0) {
-                log_warning("Failed to parse %s=%s for link '%s': %s", argv[0], argv[2], argv[1], g_strerror(-r));
-                return r;
+        return manager_set_link_local_address(p, ctl_to_config(m, argv[0]), s);
+}
+
+_public_ int ncm_link_set_network_section(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        bool v;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_network_section_configs_new(&m);
+        if (r < 0)
+                return log_oom();
+
+        r = parse_boolean(argv[3]);
+        if (r < 0) {
+                log_warning("Failed to set %s for '%s': %s", argv[2], p->ifname, g_strerror(-r));
+                return r;
+        }
         v = r;
+
         return manager_set_network_section_bool(p, ctl_to_config(m, argv[0]), v);
 }
 
@@ -623,37 +932,42 @@ _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
         bool v;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_network_dhcp4_section_configs_new(&m);
-        if (r < 0) {
-                log_warning("Failed to set dhcp4 section for link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
-        for (int i = 2; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 if (ctl_to_config(m, argv[i])) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse %s=%s for link '%s': %s", argv[i-1], argv[i], argv[1], g_strerror(-r));
+                                log_warning("Failed to parse %s=%s for device '%s': %s", argv[i-1], argv[i], p->ifname, g_strerror(-r));
                                 return r;
                         }
                         v = r;
 
                         r = manager_set_dhcp_section(DHCP_CLIENT_IPV4, p, ctl_to_config(m, argv[i-1]), v);
                         if (r < 0) {
-                                log_warning("Failed to dhcp4 section %s=%s for link '%s': %s", argv[i-1], argv[i], argv[1], g_strerror(-r));
+                                log_warning("Failed to set dhcp4 section %s=%s for device '%s': %s", argv[i-1], argv[i], p->ifname, g_strerror(-r));
                                 return r;
                         }
-                } else {
-                        log_warning("Failed to parse %s=%s for link '%s': %s", argv[i-1], argv[i], argv[1], g_strerror(-r));
-                        return r;
                 }
         }
 
@@ -666,10 +980,21 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
         bool v;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_network_dhcp6_section_configs_new(&m);
@@ -678,7 +1003,7 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
                 return r;
         }
 
-        for (int i = 2; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 if (ctl_to_config(m, argv[i])) {
                         parse_next_arg(argv, argc, i);
 
@@ -694,12 +1019,8 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
                                 log_warning("Failed to dhcp4 section %s=%s for link '%s': %s", argv[i-1], argv[i], argv[1], g_strerror(-r));
                                 return r;
                         }
-                } else {
-                        log_warning("Failed to parse %s=%s for link '%s': %s", argv[i-1], argv[i], argv[1], g_strerror(-r));
-                        return r;
                 }
         }
-
 
         return 0;
 }
@@ -709,13 +1030,24 @@ _public_ int ncm_link_update_state(int argc, char *argv[]) {
         LinkState state;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
         }
 
-        state = link_name_to_state(argv[2]);
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        state = link_name_to_state(argv[3]);
         if (state < 0) {
                 log_warning("Failed to find link state '%s': %s", argv[2], g_strerror(EINVAL));
                 return r;
@@ -737,14 +1069,19 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r, prefix_route = -1;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "address")) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "address") || string_equal(argv[i], "a") || string_equal(argv[i], "addr")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &address);
@@ -776,7 +1113,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                         continue;
                 }
 
-                if (string_equal(argv[i], "pref-lifetime")) {
+                if (string_equal(argv[i], "pref-lifetime") || string_equal(argv[i], "pl")) {
                         uint32_t lft;
 
                         parse_next_arg(argv, argc, i);
@@ -834,7 +1171,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                         continue;
                 }
 
-                if (string_equal(argv[i], "prefix-route")) {
+                if (string_equal(argv[i], "prefix-route") || string_equal(argv[i], "pr")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -851,9 +1188,14 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_configure_link_address(p, address, peer, scope, pref_lft, dad, prefix_route, label);
         if (r < 0) {
-                log_warning("Failed to configure link address: %s", g_strerror(-r));
+                log_warning("Failed to configure device address: %s", g_strerror(-r));
                 return r;
         }
 
@@ -866,14 +1208,19 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
         _auto_cleanup_ char *a = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "address")) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "address") || string_equal(argv[i], "a") || string_equal(argv[i], "addr")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &address);
@@ -886,6 +1233,17 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
                                 return log_oom();
                         break;
                 }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!a) {
+
+                log_warning("Failed to parse address: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_delete_link_address(p, a);
@@ -945,77 +1303,24 @@ _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
         return 0;
 }
 
-_public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
-        _cleanup_(addresses_unrefp) Addresses *addr = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_strv_ char **s = NULL;
-        bool ipv4 = false, ipv6 = false;
-        GHashTableIter iter;
-        gpointer key, value;
-        unsigned long size;
-        int r;
-
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
-                return r;
-        }
-
-        if (argc >= 2) {
-                for (int i = 2; i < argc; i++) {
-                        if (string_equal(argv[i], "family") || string_equal(argv[i], "f")) {
-                                parse_next_arg(argv, argc, i);
-
-                                if (string_equal(argv[i], "ipv4") || string_equal(argv[i], "4"))
-                                        ipv4 = true;
-                                else if (string_equal(argv[i], "ipv6") || string_equal(argv[i], "6"))
-                                        ipv6 = true;
-                        }
-                }
-        }
-
-        r = manager_get_one_link_address(p->ifindex, &addr);
-        if (r < 0)
-                return r;
-
-        if (!set_size(addr->addresses))
-                return -ENODATA;
-
-        printf("Addresses: ");
-        g_hash_table_iter_init(&iter, addr->addresses->hash);
-        while (g_hash_table_iter_next (&iter, &key, &value)) {
-                Address *a = (Address *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL;
-
-                r = ip_to_string_prefix(a->family, &a->address, &c);
-                if (r < 0)
-                        return r;
-
-                if ((a->family == AF_INET && ipv4 ) || (a->family == AF_INET6 && ipv6))
-                        printf("%s ", c);
-
-                if (!ipv4 && !ipv6)
-                        printf("%s ", c);
-        }
-
-        printf("\n");
-
-        return 0;
-}
-
 _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ IPAddress *gw = NULL;
         _auto_cleanup_ Route *rt = NULL;
         int r, onlink = -1;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+       for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
                 if (string_equal(argv[i], "gateway") || string_equal(argv[i], "gw")) {
                         parse_next_arg(argv, argc, i);
 
@@ -1039,6 +1344,11 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -1073,13 +1383,18 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
         uint32_t metric = 0, mtu = 0;
         int onlink = -1, r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
                 if (string_equal(argv[i], "gateway") || string_equal(argv[i], "gw")) {
                         parse_next_arg(argv, argc, i);
 
@@ -1238,6 +1553,11 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_configure_route(p, gw, dst, source , pref_source, rt_pref, protocol, scope, type, table, mtu, metric, onlink);
         if (r < 0) {
                 log_warning("Failed to configure route on link '%s': %s", argv[1], g_strerror(-r));
@@ -1298,10 +1618,21 @@ _public_ int ncm_link_delete_gateway_or_route(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (string_equal(argv[0], "delete-gateway"))
@@ -1324,14 +1655,19 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
         uint32_t table;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "address") || string_equal(argv[i], "addr")) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                if (string_equal(argv[i], "address") || string_equal(argv[i], "addr") || string_equal(argv[i], "a")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &a);
@@ -1379,10 +1715,14 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
 
         r = route_new(&rt);
         if (r < 0)
@@ -1414,13 +1754,18 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
         uint32_t table = 0, priority = 0;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
                 if (string_equal(argv[i], "iif")) {
                         parse_next_arg(argv, argc, i);
 
@@ -1520,9 +1865,14 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_configure_routing_policy_rules(p, iif, oif, to, from, table, priority, tos);
         if (r < 0) {
-                log_warning("Failed to configure routing policy rules on link '%s': %s\n", argv[1], g_strerror(-r));
+                log_warning("Failed to configure routing policy rules: %s",  g_strerror(-r));
                 return r;
         }
 
@@ -1533,15 +1883,27 @@ _public_ int ncm_link_remove_routing_policy_rules(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_remove_routing_policy_rules(p);
         if (r < 0) {
-                log_warning("Failed to remove routing policy rules on link '%s': %s\n", argv[1], g_strerror(-r));
+                log_warning("Failed to remove routing policy rules: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1555,13 +1917,18 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
                 if (string_equal(argv[i], "dns")) {
                         parse_next_arg(argv, argc, i);
 
@@ -1677,6 +2044,11 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_configure_dhcpv4_server(p, dns, ntp, pool_offset, pool_size, default_lease_time, max_lease_time,
                                             emit_dns, emit_ntp, emit_router);
         if (r < 0) {
@@ -1691,10 +2063,22 @@ _public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_remove_dhcpv4_server(p);
@@ -1715,13 +2099,18 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
         _auto_cleanup_ char *domain = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-        for (int i = 2; i < argc; i++) {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
                 if (string_equal(argv[i], "prefix")) {
                         parse_next_arg(argv, argc, i);
 
@@ -1903,6 +2292,11 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_configure_ipv6_router_advertisement(p, prefix, route_prefix, dns, domain, pref_lifetime, valid_lifetime,
                                                         dns_lifetime, route_lifetime, preference, managed, other, emit_dns, emit_domain, assign);
         if (r < 0) {
@@ -1917,10 +2311,22 @@ _public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_remove_ipv6_router_advertisement(p);
@@ -2054,47 +2460,70 @@ _public_ int ncm_get_dns_server(char ***ret) {
 _public_ int ncm_add_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **d = NULL;
         bool system = false, global = false;
+        char **s;
         int r;
 
-        if (string_equal(argv[1], "system"))
-                system = true;
-        else if (string_equal(argv[1], "global"))
-                global = true;
-        else {
-                r = parse_ifname_or_index(argv[1], &p);
-                if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                        return -EINVAL;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+                if (string_equal(argv[i], "system"))
+                        system = true;
+
+                if (string_equal(argv[i], "global"))
+                        global = true;
+
+                if (string_equal_fold(argv[i], "dns")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = argv_to_strv(argc - 4, argv + i, &d);
+                        if (r < 0) {
+                                log_warning("Failed to parse dns addresses: %s", g_strerror(-r));
+                                return r;
+                        }
                 }
         }
 
-        for (int i = 2; i < argc; i++) {
-                _auto_cleanup_ IPAddress *a = NULL;
-                _auto_cleanup_ DNSServer *s = NULL;
+        if (!d || strv_length(d) <= 0) {
+                log_warning("Failed to parse dns addresses: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
 
-                r = parse_ip(argv[i], &a);
+        strv_foreach(s, d) {
+                _auto_cleanup_ IPAddress *a = NULL;
+                _auto_cleanup_ DNSServer *t = NULL;
+
+                r = parse_ip(*s, &a);
                 if (r < 0) {
-                        log_warning("Failed to parse DNS server address: %s", argv[i]);
+                        log_warning("Failed to parse DNS server address: %s", *s);
                         return r;
                 }
 
-                r = dns_server_new(&s);
+                r = dns_server_new(&t);
                 if (r < 0)
                         return log_oom();
 
-                *s = (DNSServer) {
+                *t = (DNSServer) {
                         .ifindex = p ? p->ifindex : 0,
                         .address = *a,
                 };
 
-                r = dns_server_add(&dns, s);
+                r = dns_server_add(&dns, t);
                 if (r < 0) {
-                        log_warning("Failed to add DNS server address: %s", argv[i]);
+                        log_warning("Failed to add DNS server address: %s", *s);
                         return r;
                 }
 
-                steal_pointer(s);
+                steal_pointer(t);
         }
 
         r = manager_add_dns_server(p, dns, system, global);
@@ -2112,27 +2541,43 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
         bool system = false, global = false;
         int r;
 
-        if (string_equal(argv[1], "system"))
-                system = true;
-        else if (string_equal(argv[1], "global"))
-                global = true;
-        else {
-                r = parse_ifname_or_index(argv[1], &p);
-                if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                        return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
                 }
+                if (string_equal(argv[i], "system"))
+                        system = true;
+
+                if (string_equal(argv[i], "global"))
+                        global = true;
+
+                if (string_equal_fold(argv[i], "domains")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = argv_to_strv(argc - 4, argv + i, &domains);
+                        if (r < 0) {
+                                log_warning("Failed to parse domains addresses: %s", g_strerror(-r));
+                                return r;
+                        }
+                }
+
         }
 
-        r = argv_to_strv(argc - 2, argv + 2, &domains);
-        if (r < 0) {
-                log_warning("Failed to parse domains addresses: %s", g_strerror(-r));
-                return r;
+        if (!domains && strv_length(domains) <= 0) {
+                log_warning("Failed to parse domains: %s", g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_add_dns_server_domain(p, domains, system, global);
         if (r < 0) {
-                log_warning("Failed to add DNS domain to resolved '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to add DNS domain to resolved: %s", g_strerror(-r));
                 return r;
         }
 
@@ -2314,10 +2759,22 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_revert_dns_server_and_domain(p);
@@ -2366,27 +2823,42 @@ _public_ int ncm_link_add_ntp(int argc, char *argv[]) {
        char **d;
        int r;
 
-       r = parse_ifname_or_index(argv[1], &p);
-       if (r < 0) {
-               log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-               return r;
-       }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
 
-       r = argv_to_strv(argc - 2, argv + 2, &ntps);
-       if (r < 0) {
-               log_warning("Failed to parse NTP addresses: %s", g_strerror(-r));
-               return r;
-       }
-
-       strv_foreach(d, ntps) {
-               _auto_cleanup_ IPAddress *a = NULL;
-
-               r = parse_ip(*d, &a);
-               if (r < 0) {
-                       log_warning("Failed to parse NTP server address: %s", *d);
-                       return r;
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
                 }
-       }
+
+                if (string_equal_fold(argv[i], "ntp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = argv_to_strv(argc - 4, argv + i, &ntps);
+                        if (r < 0) {
+                                log_warning("Failed to parse NTP addresses: %s", g_strerror(-r));
+                                return r;
+                        }
+                }
+        }
+
+        if (!ntps && strv_length(ntps) <= 0) {
+                log_warning("Failed to parse NTP: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        strv_foreach(d, ntps) {
+                _auto_cleanup_ IPAddress *a = NULL;
+
+                r = parse_ip(*d, &a);
+                if (r < 0) {
+                        log_warning("Failed to parse NTP server address: %s", *d);
+                        return r;
+                }
+        }
 
        if (string_equal(argv[0], "set-ntp"))
                r = manager_add_ntp_addresses(p, ntps, false);
@@ -2404,11 +2876,23 @@ _public_ int ncm_link_delete_ntp(int argc, char *argv[]) {
        _auto_cleanup_ IfNameIndex *p = NULL;
        int r;
 
-       r = parse_ifname_or_index(argv[1], &p);
-       if (r < 0) {
-               log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-               return r;
-       }
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
 
        r = manager_remove_ntp_addresses(p);
        if (r < 0) {
@@ -2443,10 +2927,22 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (string_equal(argv[0], "enable-ipv6"))
@@ -2470,11 +2966,23 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
         }
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
 
         return manager_reconfigure_link(p);
 }
@@ -2484,10 +2992,21 @@ _public_ int ncm_link_show_network_config(int argc, char *argv[]) {
         _auto_cleanup_ char *config = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_show_link_network_config(p, &config);
@@ -2504,10 +3023,22 @@ _public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_edit_link_network_config(p);

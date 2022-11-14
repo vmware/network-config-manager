@@ -62,34 +62,6 @@ static void link_state_to_color(const char *state, const char **on) {
                 *on = ansi_color_reset();
 }
 
-static void display_links_info(gpointer data_ptr, gpointer ignored) {
-        const char *setup_color, *operational_color, *operstates, *operstates_color;
-        _auto_cleanup_ char *setup = NULL, *operational = NULL;
-        Link *link = NULL;
-
-        setup_color = operational_color = operstates = operstates_color = ansi_color_reset();
-
-        link = data_ptr;
-
-        (void) network_parse_link_setup_state(link->ifindex, &setup);
-        (void) network_parse_link_operational_state(link->ifindex, &operational);
-        operstates = link_operstates_to_name(link->operstate);
-
-        if (setup)
-                link_state_to_color(setup, &setup_color);
-        if (operational)
-                link_state_to_color(operational, &operational_color);
-        if (operstates)
-                link_state_to_color(operstates, &operstates_color);
-
-        display(arg_beautify, ansi_color_bold(), "%d     ", link->ifindex);
-        display(arg_beautify, ansi_color_bold_cyan(), "%-10s ", link->name);
-        display(arg_beautify, ansi_color_blue_magenta(), "%-10s ", arphrd_to_name(link->iftype));
-        display(arg_beautify, operstates_color, "%-10s ", operstates);
-        display(arg_beautify, operational_color, "%-14s ", string_na(operational));
-        display(arg_beautify, setup_color, "%-16s\n", string_na(setup));
-}
-
 static int list_links(int argc, char *argv[]) {
         _cleanup_(links_unrefp) Links *h = NULL;
         int r;
@@ -99,7 +71,7 @@ static int list_links(int argc, char *argv[]) {
                return r;
 
         if (arg_beautify)
-                printf("%5s %-10s %-10s %-10s %-14s %-16s\n",
+                printf("%s %8s %10s %11s %15s %9s\n",
                         "INDEX",
                         "LINK",
                         "TYPE",
@@ -107,7 +79,32 @@ static int list_links(int argc, char *argv[]) {
                         "OPERATIONAL",
                         "SETUP");
 
-        g_list_foreach(h->links, display_links_info, NULL);
+        for (GList *i = h->links; i; i = g_list_next (i)) {
+                const char *setup_color, *operational_color, *operstates, *operstates_color;
+                _auto_cleanup_ char *setup = NULL, *operational = NULL;
+                Link *link = (Link *) i->data;
+
+                setup_color = operational_color = operstates = operstates_color = ansi_color_reset();
+
+                (void) network_parse_link_setup_state(link->ifindex, &setup);
+                (void) network_parse_link_operational_state(link->ifindex, &operational);
+                operstates = link_operstates_to_name(link->operstate);
+
+                if (setup)
+                        link_state_to_color(setup, &setup_color);
+                if (operational)
+                        link_state_to_color(operational, &operational_color);
+                if (operstates)
+                        link_state_to_color(operstates, &operstates_color);
+
+                display(arg_beautify, ansi_color_bold(), "%-8d", link->ifindex);
+                display(arg_beautify, ansi_color_bold_cyan(), "  %-10s ", link->name);
+                display(arg_beautify, ansi_color_blue_magenta(), "%-10s ", arphrd_to_name(link->iftype));
+                display(arg_beautify, operstates_color, "%-9s ", operstates);
+                display(arg_beautify, operational_color, "%-15s ", string_na(operational));
+                display(arg_beautify, setup_color, "%-20s\n", string_na(setup));
+        }
+
         return 0;
 }
 
@@ -139,6 +136,64 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                        string_na(t1), string_na(t2));
         } else
                 printf("\n");
+}
+
+_public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
+        _cleanup_(addresses_unrefp) Addresses *addr = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_strv_ char **s = NULL;
+        bool ipv4 = false, ipv6 = false;
+        GHashTableIter iter;
+        gpointer key, value;
+        unsigned long size;
+        int r;
+
+        r = parse_ifname_or_index(argv[1], &p);
+        if (r < 0) {
+                log_warning("Failed to find link: %s", argv[1]);
+                return r;
+        }
+
+        if (argc >= 2) {
+                for (int i = 2; i < argc; i++) {
+                        if (string_equal(argv[i], "family") || string_equal(argv[i], "f")) {
+                                parse_next_arg(argv, argc, i);
+
+                                if (string_equal(argv[i], "ipv4") || string_equal(argv[i], "4"))
+                                        ipv4 = true;
+                                else if (string_equal(argv[i], "ipv6") || string_equal(argv[i], "6"))
+                                        ipv6 = true;
+                        }
+                }
+        }
+
+        r = manager_get_one_link_address(p->ifindex, &addr);
+        if (r < 0)
+                return r;
+
+        if (!set_size(addr->addresses))
+                return -ENODATA;
+
+        printf("Addresses: ");
+        g_hash_table_iter_init(&iter, addr->addresses->hash);
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+                Address *a = (Address *) g_bytes_get_data(key, &size);
+                _auto_cleanup_ char *c = NULL;
+
+                r = ip_to_string_prefix(a->family, &a->address, &c);
+                if (r < 0)
+                        return r;
+
+                if ((a->family == AF_INET && ipv4 ) || (a->family == AF_INET6 && ipv6))
+                        printf("%s ", c);
+
+                if (!ipv4 && !ipv6)
+                        printf("%s ", c);
+        }
+
+        printf("\n");
+
+        return 0;
 }
 
 static void list_one_link_routes(gpointer key, gpointer value, gpointer userdata) {

@@ -22,7 +22,8 @@ int parse_link_port(const char *c);
 int parse_link_advertise(const char *c);
 int parse_link_alias(const char *c);
 
-int  parse_boolean(const char *v);
+int parse_boolean(const char *v);
+const char *parse_boolean_or_ip_family(const char *v);
 
 bool is_uint32_or_max(const char *c);
 

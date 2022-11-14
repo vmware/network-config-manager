@@ -15,7 +15,7 @@ int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac);
 int manager_set_link_dhcp_client(const IfNameIndex *ifnameidx, DHCPClient mode);
 int manager_get_link_dhcp_client(const IfNameIndex *ifnameidx, DHCPClient *mode);
 
-int manager_set_link_flag(const IfNameIndex *ifnameidx, bool mode, const char* key);
+int manager_set_link_flag(const IfNameIndex *ifnameidx, const char *k, const char *v);
 int manager_set_link_state(const IfNameIndex *ifnameidx, LinkState state);
 
 int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group);
@@ -71,10 +71,12 @@ int manager_reconfigure_link(const IfNameIndex *ifnameidx);
 
 int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu);
 
-int manager_network_section_bool_configs_new(ConfigManager **ret);
+int manager_network_section_configs_new(ConfigManager **ret);
 int manager_network_dhcp4_section_configs_new(ConfigManager **ret);
 int manager_network_dhcp6_section_configs_new(ConfigManager **ret);
+int manager_network_link_section_configs_new(ConfigManager **ret);
 
+int manager_set_link_local_address(const IfNameIndex *ifnameidx, const char *k, const char *v);
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v);
 int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *ifnameidx, const char *k, bool v);
 

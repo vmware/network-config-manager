@@ -82,8 +82,10 @@ def remove_units_from_netword_unit_path():
             os.remove(os.path.join(networkd_unit_file_path, i))
 
 def restart_networkd():
-    subprocess.call(['systemctl', 'restart', 'systemd-networkd'])
-    subprocess.check_call(['sleep', '5'])
+    subprocess.check_output("systemctl restart systemd-networkd", shell=True)
+    subprocess.check_output("sleep 5", shell=True)
+
+    subprocess.check_output("/lib/systemd/systemd-networkd-wait-online --any", shell=True)
 
 def dequote(s):
     if len(s) < 2:
@@ -464,44 +466,96 @@ class TestCLINetwork:
         remove_units_from_netword_unit_path()
         link_remove('test99')
 
+    def test_cli_add_dns(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        subprocess.check_call("nmctl add-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+        dns = parser.get('Network', 'DNS')
+        print(dns)
+        assert(dns.find("192.168.1.46") != -1)
+        assert(dns.find("192.168.1.45") != -1)
+
+    def test_cli_add_domain(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+        d = parser.get('Network', 'Domains')
+        print(d)
+        assert(d.find("domain1") != -1)
+        assert(d.find("domain2") != -1)
+
+
     def test_cli_set_mtu(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-mtu dev test99 mtu 1400", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-mtu', 'test99', '1400'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'MTUBytes') == '1400')
 
+    def test_cli_set_mtu(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-ipv6mtu  dev test99 1500", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'IPv6MTUBytes') == '1500')
+
     def test_cli_set_mac(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-mac dev test99 mac 00:0c:29:3a:bc:11", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-mac', 'test99', '00:0c:29:3a:bc:11'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'MACAddress') == '00:0c:29:3a:bc:11')
 
-    def test_cli_set_option(self):
+    def test_cli_set_manage(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
         assert(unit_exist('10-test99.network') == True)
 
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-link-option', 'test99', 'arp', 'yes', 'mc', 'yes', 'amc', '0', 'pcs', 'false', 'rfo', 'no'])
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'Unmanaged') == 'no')
+
+    def test_cli_set_link_option(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        assert(unit_exist('10-test99.network') == True)
+
+        subprocess.check_call("nmctl set-link-option dev test99 arp yes mc yes amc 0 pcs false", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
@@ -511,17 +565,13 @@ class TestCLINetwork:
         assert(parser.get('Link', 'Multicast') == 'yes')
         assert(parser.get('Link', 'AllMulticast') == 'no')
         assert(parser.get('Link', 'Promiscuous') == 'no')
-        assert(parser.get('Link', 'RequiredForOnline') == 'no')
 
     def test_cli_set_group(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-link-group dev test99 group 2147483647", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-link-group', 'test99', '2147483647'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -531,12 +581,9 @@ class TestCLINetwork:
     def test_cli_set_rf_online(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-link-rf-online dev test99 f ipv4", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-link-rf-online', 'test99', 'ipv4'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -546,27 +593,21 @@ class TestCLINetwork:
     def test_cli_set_act_policy(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-link-act-policy dev test99 ap always-up", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-link-act-policy', 'test99', 'always-up'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'ActivationPolicy') == 'always-up')
 
-    def test_cli_set_dhcp_type(self):
+    def test_cli_set_dhcp_client_type(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -576,13 +617,10 @@ class TestCLINetwork:
     def test_cli_set_dhcp4_iaid(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv4", shell = True)
+        subprocess.check_call("nmctl set-dhcp-iaid dev test99 f 4 iaid 5555", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'ipv4'])
-        subprocess.check_call(['nmctl', 'set-dhcp-iaid', 'test99', 'f', '4', 'iaid', '5555'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -592,29 +630,23 @@ class TestCLINetwork:
     def test_cli_set_dhcp6_iaid(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv4", shell = True)
+        subprocess.check_call("nmctl set-dhcp-iaid dev test99 f 6 iaid 5555", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'ipv6'])
-        subprocess.check_call(['nmctl', 'set-dhcp-iaid', 'test99', 'f', '6', 'iaid', '5555'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('DHCPv6', 'IAID') == '5555')
 
-    def test_cli_set_dhcp6_duid(self):
+    def test_cli_set_dhcp4_duid(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv4", shell = True)
+        subprocess.check_call("nmctl set-dhcp-duid dev test99 f 4 duid vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:01", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'ipv4'])
-        subprocess.check_call(['nmctl', 'set-dhcp-duid', 'test99', 'f', '4', 'duid', 'vendor', 'data', '00:00:ab:11:f9:2a:c2:77:29:f9:5c:01',])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -625,13 +657,10 @@ class TestCLINetwork:
     def test_cli_set_dhcp6_duid(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv4", shell = True)
+        subprocess.check_call("nmctl set-dhcp-duid dev test99 f 6 duid vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:01", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp-mode', 'test99', 'ipv4'])
-        subprocess.check_call(['nmctl', 'set-dhcp-duid', 'test99', 'f', '6', 'duid', 'vendor', 'data', '00:00:ab:11:f9:2a:c2:77:29:f9:5c:01',])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -642,14 +671,10 @@ class TestCLINetwork:
     def test_cli_add_static_address(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope "
+                              "link pref-lifetime forever prefix-route yes label 3434", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'add-link-address', 'test99', 'address', '192.168.1.45/24', 'peer',
-                               '192.168.1.46/24', 'dad', 'ipv4', 'scope', 'link', 'pref-lifetime', 'forever',
-                               'prefix-route', 'yes', 'label', '3434'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -665,21 +690,17 @@ class TestCLINetwork:
     def test_cli_add_default_gateway(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad "
+                              "ipv4 scope link pref-lifetime forever prefix-route yes label 3434", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-
-        subprocess.check_call(['nmctl', 'add-link-address', 'test99', 'address', '192.168.1.45/24', 'peer',
-                               '192.168.1.46/24', 'dad', 'ipv4', 'scope', 'link', 'pref-lifetime', 'forever',
-                               'prefix-route', 'yes', 'label', '3434'])
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Address', 'Address') == '192.168.1.45/24')
 
-        subprocess.check_call(['nmctl', 'add-default-gateway', 'test99', 'gw', '192.168.1.1', 'onlink', 'true'])
+        subprocess.check_call("nmctl add-default-gateway dev test99 gw 192.168.1.1 onlink true", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
@@ -691,23 +712,19 @@ class TestCLINetwork:
     def test_cli_add_route(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope link "
+                              "pref-lifetime forever prefix-route yes label 3434", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['nmctl', 'add-link-address', 'test99', 'address', '192.168.1.45/24', 'peer',
-                               '192.168.1.46/24', 'dad', 'ipv4', 'scope', 'link', 'pref-lifetime', 'forever',
-                               'prefix-route', 'yes', 'label', '3434'])
-        subprocess.check_call(['sleep', '5'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Address', 'Address') == '192.168.1.45/24')
 
-        subprocess.check_call(['nmctl', 'add-route', 'test99', 'gw', '192.168.1.1', 'dest', '192.168.1.2', 'metric', '111', 'scope',
-                               'link', 'mtu', '1400', 'table', 'local', 'proto', 'static', 'type', 'unicast', 'onlink', 'yes', 'ipv6-pref',
-                               'medium', 'src', '192.168.1.4'])
+        subprocess.check_call("nmctl add-route dev test99 gw 192.168.1.1 dest 192.168.1.2 metric 111 scope "
+                               "link mtu 1400 table local proto static type unicast onlink yes ipv6-pref "
+                               "medium src 192.168.1.4", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
@@ -727,21 +744,17 @@ class TestCLINetwork:
     def test_cli_add_additional_gateway(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl add-additional-gw dev test99 address 192.168.10.5/24 dest 0.0.0.0 gw 172.16.85.1 table 100 ", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-
-        subprocess.check_call(['nmctl', 'add-additional-gw', 'test99', 'address', '192.168.10.5/24', 'dest', '0.0.0.0', 'gw','172.16.85.1', 'table', '100'])
 
     def test_cli_add_routing_policy_rule(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'add-rule', 'test99', 'table', '10', 'to', '192.168.1.2/24', 'from', '192.168.1.3/24',
-                               'oif', 'test99', 'iif', 'test99', 'tos','0x12'])
-        assert(unit_exist('10-test99.network') == True)
+        subprocess.check_call("nmctl add-rule dev test99 table 10 to 192.168.1.2/24 from 192.168.1.3/24 "
+                               "oif test99 iif test99 tos 0x12", shell = True)
 
-        subprocess.check_call(['sleep', '5'])
+        assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -754,102 +767,37 @@ class TestCLINetwork:
         assert(parser.get('RoutingPolicyRule', 'OutgoingInterface') == 'test99')
         assert(parser.get('RoutingPolicyRule', 'IncomingInterface') == 'test99')
 
-    def test_cli_add_dns(self):
+    def test_cli_set_link_local_address(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-link-local-address dev test99 ipv6", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '30'])
-        subprocess.check_call(['nmctl', 'add-dns', 'test99', '192.168.1.45', '192.168.1.46'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-
-    def test_cli_add_domain(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
-        assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'add-domain', 'test99', 'domain1', 'domain2'])
-
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'Domains') == 'domain2 domain1')
-
-    def test_cli_add_ntp(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
-        assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'add-ntp', 'test99', '192.168.1.34', '192.168.1.45'])
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
-
-    def test_cli_set_ntp(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
-        assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-ntp', 'test99', '192.168.1.34', '192.168.1.45'])
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'ipv6')
 
     def test_cli_set_ip_v6_router_advertisement(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-ipv6acceptra dev test99 yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-ipv6acceptra', 'test99', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'IPv6AcceptRA') == 'yes')
 
-    def test_cli_set_link_local_addressing(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
-        assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['nmctl', 'set-link-local-address', 'test99', 'yes'])
-
-        subprocess.check_call(['sleep', '5'])
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'LinkLocalAddressing') == 'yes')
 
     def test_cli_set_ipv4_link_local_route(self):
         assert(link_exist('test99') == True);
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-ipv4ll-route dev test99 yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-ipv4ll-route', 'test99', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -859,11 +807,9 @@ class TestCLINetwork:
     def test_cli_set_llmnr(self):
         assert(link_exist('test99') == True);
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-llmnr dev test99 yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['nmctl', 'set-llmnr', 'test99', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -873,13 +819,9 @@ class TestCLINetwork:
     def test_cli_set_multicast_dns(self):
         assert(link_exist('test99') == True);
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-multicast-dns dev test99 yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-
-        subprocess.check_call(['nmctl', 'set-multicast-dns', 'test99', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -889,28 +831,21 @@ class TestCLINetwork:
     def test_cli_set_ip_masquerade(self):
         assert(link_exist('test99') == True);
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-ipmasquerade dev test99 yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-ipmasquerade', 'test99', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'IPMasquerade') == 'yes')
 
-
     def test_cli_set_dhcp4_client_identifier(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp4-client-id dev test99 id mac", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp4-client-id', 'test99', 'mac'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -920,12 +855,9 @@ class TestCLINetwork:
     def test_cli_set_dhcp4_use_dns(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-dns yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-dns', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -935,12 +867,9 @@ class TestCLINetwork:
     def test_cli_set_dhcp4_use_mtu(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-mtu yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-mtu', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -949,12 +878,9 @@ class TestCLINetwork:
     def test_cli_set_dhcp4_use_domains(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-domains yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-domains', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -964,12 +890,9 @@ class TestCLINetwork:
     def test_cli_set_dhcp4_use_ntp(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-ntp yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-ntp', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -979,11 +902,9 @@ class TestCLINetwork:
     def test_cli_set_dhcp4_use_routes(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-routes yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['nmctl', 'set-dhcp4', 'test99', 'use-routes', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -993,12 +914,9 @@ class TestCLINetwork:
     def test_cli_set_link_lldp(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-lldp dev test99 yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-lldp', 'test99', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -1008,17 +926,38 @@ class TestCLINetwork:
     def test_cli_set_link_emit_lldp(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl set-emit-lldp dev test99 yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['sleep', '5'])
-        subprocess.check_call(['nmctl', 'set-emit-lldp', 'test99', 'yes'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
+
+    def test_cli_add_ntp(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl add-ntp dev test99 ntp 192.168.1.34 192.168.1.45", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
+
+    def test_cli_set_ntp(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-ntp dev test99 ntp 192.168.1.34 192.168.1.45", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
 
 class TestCLIDHCPv4Server:
     def setup_method(self):
@@ -1033,16 +972,12 @@ class TestCLIDHCPv4Server:
     def test_cli_configure_dhcpv4_server(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl add-dhcpv4-server dev test99 pool-offset "
+                               "10 pool-size 20 default-lease-time 100 "
+                               "max-lease-time 200 emit-dns yes dns 192.168.1.1 "
+                               "emit-router yes", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['nmctl', 'add-dhcpv4-server', 'test99', 'pool-offset',
-                               '10', 'pool-size', '20', 'default-lease-time', '100',
-                               'max-lease-time', '200', 'emit-dns', 'yes', 'dns', '192.168.1.1',
-                               'emit-router', 'yes'])
-
-        subprocess.check_call(['sleep', '3'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -1058,6 +993,7 @@ class TestCLIDHCPv4Server:
         assert(parser.get('DHCPServer', 'DNS') == '192.168.1.1')
         assert(parser.get('DHCPServer', 'EmitRouter') == 'yes')
 
+
 class TestCLIIPv6RA:
     def setup_method(self):
         link_remove('test99')
@@ -1071,17 +1007,13 @@ class TestCLIIPv6RA:
     def test_cli_configure_ipv6ra(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-mode', 'test99', 'yes'])
+        subprocess.check_call("nmctl add-ipv6ra dev test99 prefix 2002:da8:1:0::/64 "
+                              "pref-lifetime 100 valid-lifetime 200 assign yes "
+                              "managed yes emit-dns yes dns 2002:da8:1:0::1 "
+                              "domain test.com emit-domain yes dns-lifetime 100 router-pref medium "
+                              "route-prefix 2001:db1:fff::/64 route-lifetime 1000", shell = True)
+
         assert(unit_exist('10-test99.network') == True)
-
-        subprocess.check_call(['nmctl', 'add-ipv6ra', 'test99', 'prefix', '2002:da8:1:0::/64',
-                               'pref-lifetime', '100', 'valid-lifetime', '200', 'assign', 'yes',
-                               'managed', 'yes', 'emit-dns', 'yes', 'dns', '2002:da8:1:0::1',
-                               'domain', 'test.com', 'emit-domain', 'yes', 'dns-lifetime', '100', 'router-pref', 'medium',
-                               'route-prefix', '2001:db1:fff::/64', 'route-lifetime', '1000'])
-
-        subprocess.check_call(['sleep', '3'])
-
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -1615,24 +1547,25 @@ class TestCLINetDev:
 
 class TestCLIGlobalDNSDomain:
     def test_cli_configure_global_dns_server(self):
-        subprocess.check_call(['nmctl', 'add-dns', 'global', '8.8.4.4', '8.8.8.8', '8.8.8.1', '8.8.8.2'])
-
-        subprocess.check_call(['sleep', '3'])
+        subprocess.check_call("nmctl add-dns global dns 8.8.4.4 8.8.8.8 8.8.8.1", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read('/etc/systemd/resolved.conf')
 
-        assert(parser.get('Resolve', 'DNS') == '8.8.4.4 8.8.8.1 8.8.8.2 8.8.8.8')
+        dns = parser.get('Resolve', 'DNS')
+        assert(dns.find("8.8.4.4") != -1)
+        assert(dns.find("8.8.8.8") != -1)
+        assert(dns.find("8.8.8.1") != -1)
 
     def test_cli_configure_global_domain_server(self):
-        subprocess.check_call(['nmctl', 'add-domain', 'global', 'test1', 'test2'])
-
-        subprocess.check_call(['sleep', '3'])
+        subprocess.check_call("nmctl add-domain global domains test1 test2", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read('/etc/systemd/resolved.conf')
 
-        assert(parser.get('Resolve', 'Domains') == 'test1 test2')
+        d = parser.get('Resolve', 'Domains')
+        assert(dns.find("test1") != -1)
+        assert(dns.find("test2") != -1)
 
 class TestCLINetworkProxy:
     def test_cli_configure_network_proxy(self):
@@ -2059,7 +1992,7 @@ class TestCLILink:
         assert(link_exist('test99') == True)
 
         subprocess.check_call(['nmctl', 'set-link-mac', 'test99', 'macpolicy', 'none'])
-        subprocess.check_call(['sleep', '5'])
+
         subprocess.check_call(['nmctl', 'set-link-mac', 'test99', 'macaddr', '00:0c:29:3a:bc:11'])
         assert(unit_exist('10-test99.link') == True)
 
@@ -2222,12 +2155,11 @@ class TestCLISRIOV:
     def test_cli_configure_sr_iov(self):
         assert(link_exist('sriov99') == True)
 
-        subprocess.check_call(['nmctl', 'add-sr-iov', 'sriov99', 'vf', '5', 'vlanid', '2', 'qos', '1', 'vlanproto',
-                               '802.1Q', 'macspoofck', 'yes', 'qrss', 'true', 'trust', 'yes', 'linkstate', 'yes',
-                               'macaddr', '00:0c:29:3a:bc:11'])
+        subprocess.check_call("nmctl add-sr-iov sriov99 vf 5 vlanid 2 qos 1 vlanproto "
+                               "802.1Q macspoofck yes qrss true trust yes linkstate yes "
+                               "macaddr 00:0c:29:3a:bc:11", shell = True)
 
-        subprocess.check_call(['sleep', '3'])
-
+        assert(unit_exist('10-sriov99.network') == True)
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-sriov99.network'))
 
