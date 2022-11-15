@@ -164,8 +164,9 @@ static int help(void) {
                "  set-ipv6proxyndp             dev [DEVICE] [IPv6ProxyNDP BOOLEAN] Configures Link proxy NDP for IPv6.\n"
                "  set-conf-without-carrier     dev [DEVICE] [ConfigureWithoutCarrier BOOLEAN] Allows networkd to configure link even if it has no carrier.\n"
                "  set-dhcp4                    dev [DEVICE] [use-dns BOOLEAN] [use-domains BOOLEAN] [use-mtu BOOLEAN] [use-ntp BOOLEAN] [send-release BOOLEAN]."
-                                                     "\n\t\t\t\t     [use-hostname BOOLEAN] [use-routes BOOLEAN] [use-gw BOOLEAN] [use-tz BOOLEAN] Configures Link DHCPv3 section\n"
-               "  set-dhcp6                    dev [DEVICE] [use-dns BOOLEAN] [use-domains BOOLEAN] Configures Link DHCPv6 client.\n"
+                                                     "\n\t\t\t\t     [use-hostname BOOLEAN] [use-routes BOOLEAN] [use-gw BOOLEAN] [use-tz BOOLEAN] Configures Link DHCPv4\n"
+               "  set-dhcp6                    dev [DEVICE] [use-dns BOOLEAN] [use-domains BOOLEAN] [rapid-commit BOOLEAN] [use-addr BOOLEAN] [use-delegataed-prefix BOOLEAN]"
+                                                     "\n\t\t\t\t     [without-ra BOOLEAN] Configures DHCPv6.\n"
                "  add-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Add Link NTP server address. This option may be specified more than once.\n"
                "  set-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Set Link NTP server address. This option may be specified more than once.\n"
                "  delete-ntp                   dev [DEVICE] Delete Link NTP server addresses.\n"
@@ -344,21 +345,21 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-domain",                   1,        WORD_ANY, false, ncm_add_dns_domains },
                 { "show-domains",                 WORD_ANY, WORD_ANY, false, ncm_show_dns_server_domains },
                 { "revert-resolve-link",          1,        WORD_ANY, false, ncm_revert_resolve_link },
-                { "set-ipv6mtu",                  2,        WORD_ANY, false, ncm_link_set_network_ipv6_mtu },
-                { "set-link-local-address",       2,        WORD_ANY, false, ncm_link_set_link_local_address },
-                { "set-ipv4ll-route",             2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-llmnr",                    2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-multicast-dns",            2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-lldp",                     2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-emit-lldp",                2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-ipforward",                2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-ipv6acceptra",             2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-ipmasquerade",             2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-ipv4proxyarp",             2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-ipv6proxyndp",             2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-conf-without-carrier",     2,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-dhcp4",                    2,        WORD_ANY, false, ncm_link_set_dhcp4_section },
-                { "set-dhcp6",                    2,        WORD_ANY, false, ncm_link_set_dhcp6_section },
+                { "set-ipv6mtu",                  3,        WORD_ANY, false, ncm_link_set_network_ipv6_mtu },
+                { "set-link-local-address",       3,        WORD_ANY, false, ncm_link_set_link_local_address },
+                { "set-ipv4ll-route",             3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-llmnr",                    3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-multicast-dns",            3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-lldp",                     3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-emit-lldp",                3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-ipforward",                3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-ipv6acceptra",             3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-ipmasquerade",             3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-ipv4proxyarp",             3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-ipv6proxyndp",             3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-conf-without-carrier",     3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-dhcp4",                    4,        WORD_ANY, false, ncm_link_set_dhcp4_section },
+                { "set-dhcp6",                    4,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "add-dhcpv4-server",            2,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
                 { "remove-dhcpv4-server",         2,        WORD_ANY, false, ncm_link_remove_dhcpv4_server },
                 { "add-ipv6ra",                   2,        WORD_ANY, false, ncm_link_add_ipv6_router_advertisement },

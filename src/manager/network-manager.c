@@ -57,10 +57,14 @@ static const Config network_ctl_to_dhcp4_section_config_table[] = {
 };
 
 static const Config network_ctl_to_dhcp6_section_config_table[] = {
-                { "use-dns",      "UseDNS"},
-                { "use-ntp",      "UseNTP"},
-                { "use-domains",  "UseDomains"},
-                { "use-mtu",      "UseMTU"},
+                { "use-dns",               "UseDNS"},
+                { "use-ntp",               "UseNTP"},
+                { "use-domains",           "UseDomains"},
+                { "use-mtu",               "UseMTU"},
+                { "rapid-commit",          "RapidCommit"},
+                { "use-addr",              "UseAddress"},
+                { "use-delegataed-prefix", "UseDelegatedPrefix"},
+                { "without-ra",            "WithoutRA"},
                 {},
 };
 
