@@ -1129,8 +1129,8 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 if (string_equal(argv[i], "label")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (strlen(label) > 15) {
-                                log_warning("Invalid label length %s': %s", argv[i], g_strerror(EINVAL));
+                        if (!valid_address_label(argv[i])) {
+                                log_warning("Invalid label %s': %s", argv[i], g_strerror(EINVAL));
                                 return -EINVAL;
                         }
 
