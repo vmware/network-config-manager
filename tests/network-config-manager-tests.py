@@ -513,7 +513,19 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'MTUBytes') == '1400')
 
-    def test_cli_set_mtu(self):
+    def test_cli_set_mtu_without_kind(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-mtu dev test99 1400", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'MTUBytes') == '1400')
+
+    def test_cli_set_ipv6_mtu(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call("nmctl set-ipv6mtu  dev test99 1500", shell = True)
@@ -537,10 +549,34 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'MACAddress') == '00:0c:29:3a:bc:11')
 
+    def test_cli_set_mac_without_kind(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-mac dev test99 00:0c:29:3a:bc:11", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'MACAddress') == '00:0c:29:3a:bc:11')
+
     def test_cli_set_manage(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Link', 'Unmanaged') == 'no')
+
+    def test_cli_set_manage_without_kind(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-manage dev test99 yes", shell = True)
         assert(unit_exist('10-test99.network') == True)
 
         parser = configparser.ConfigParser()
@@ -790,7 +826,6 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'IPv6AcceptRA') == 'yes')
-
 
     def test_cli_set_ipv4_link_local_route(self):
         assert(link_exist('test99') == True);

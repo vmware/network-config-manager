@@ -58,14 +58,18 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         char **s;
         int r;
 
-        if (string_equal(argv[2], "mode")) {
-                r = bond_name_to_mode(argv[3]);
-                if (r < 0) {
-                        log_warning("Failed to parse bond mode '%s' : %s", argv[3], g_strerror(EINVAL));
-                        return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "mode") || string_equal(argv[i], "m")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = bond_name_to_mode(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse bond mode '%s' : %s", argv[3], g_strerror(EINVAL));
+                                return r;
+                        }
+                        have_mode = true;
+                        mode = r;
                 }
-                have_mode = true;
-                mode = r;
         }
 
         r = argv_to_strv(argc - 4, argv + 4, &links);
@@ -443,13 +447,17 @@ _public_ int ncm_create_vrf(int argc, char *argv[]) {
         uint32_t table;
         int r;
 
-        if (string_equal(argv[2], "table")) {
-                r = parse_uint32(argv[3], &table);
-                if (r < 0) {
-                        log_warning("Failed to parse table id '%s' for '%s': %s", argv[3], argv[1], g_strerror(EINVAL));
-                        return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal(argv[i], "table") || string_equal(argv[i], "t")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_uint32(argv[3], &table);
+                        if (r < 0) {
+                                log_warning("Failed to parse table id='%s' for '%s': %s", argv[i], argv[1], g_strerror(-r));
+                                return r;
+                        }
+                        have_table = true;
                 }
-                have_table = true;
         }
 
         if (!have_table) {

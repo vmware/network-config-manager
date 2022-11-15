@@ -1,5 +1,5 @@
 project('network-config-manager', 'c',
-        version : '0.5.2',
+        version : '0.6.0',
         license : 'Apache-2.0',
         default_options: [
                 'c_std=gnu99',
@@ -114,7 +114,7 @@ subdir('units')
 ############################################################
 
 libsystemd = dependency('libsystemd',
-                     version : '>= 230')
+                     version : '>= 245')
 
 glib_dep = dependency('glib-2.0')
 gobj_dep = dependency('gobject-2.0')
