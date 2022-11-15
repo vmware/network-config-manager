@@ -121,9 +121,7 @@ _public_ int ncm_link_set_mac(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "mac")) {
+                } else if (string_equal(argv[i], "mac")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_ether_address(argv[i])) {
@@ -135,7 +133,7 @@ _public_ int ncm_link_set_mac(int argc, char *argv[]) {
                                 return log_oom();
 
                         have_mac = true;
-                        continue;
+                        break;
                 } else {
                         if (!parse_ether_address(argv[i])) {
                                 log_warning("Failed to parse MAC address: %s", argv[2]);
@@ -146,6 +144,7 @@ _public_ int ncm_link_set_mac(int argc, char *argv[]) {
                                 return log_oom();
 
                         have_mac = true;
+                        break;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
