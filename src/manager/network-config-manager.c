@@ -941,7 +941,7 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
 
         r = parse_boolean(argv[3]);
         if (r < 0) {
-                log_warning("Failed to set %s for '%s': %s", argv[2], p->ifname, g_strerror(-r));
+                log_warning("Failed to parse '%s': %s", argv[3], g_strerror(-r));
                 return r;
         }
         v = r;
