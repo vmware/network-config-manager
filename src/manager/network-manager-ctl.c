@@ -117,9 +117,9 @@ static int help(void) {
                "  set-link-option              dev [DEVICE] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN]"
                                                      "\n\t\t\t\t\tConfigures device's arp, multicast, allmulticast and promiscuous.\n"
                "  set-link-group               dev [DEVICE] group [GROUP NUMBER] Configures device group.\n"
-               "  set-link-rf-online           dev [DEVICE] f|family [ipv4|ipv6|ipv6|both|any] Configures device required family for online.\n"
+               "  set-link-rf-online           dev [DEVICE] f|family [ipv4|ipv6|both|any] Configures device required family for online.\n"
                "  set-link-act-policy          dev [DEVICE] ap|act-policy [up|always-up|manual|always-down|down|bound] Configures device activation policy.\n"
-               "  set-dhcp                     dev [DEVICE] dhcp [DHCP {yes|no|ipv4|ipv6}] Configures device DHCP setting.\n"
+               "  set-dhcp                     dev [DEVICE] dhcp [DHCP {yes|no|ipv4|ipv6}] Configures device DHCP kind client.\n"
                "  set-dhcp-client-id           dev [DEVICE] id [IDENTIFIER {mac|duid|duid-only} Configures device DHCPv4 identifier.\n"
                "  set-dhcp-iaid                dev [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID)\n"
                "  set-dhcp-duid                dev|system [DEVICE] family|f [ipv4|ipv6|4|6] duid [DUID {link-layer-time|vendor|link-layer|uuid}] data [RAWDATA]"
@@ -144,10 +144,10 @@ static int help(void) {
                                                       "\n\t\t\t\t      Configures Routing Policy Rule.\n"
                "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
                "  set-hostname                 [HOSTNAME] Configures hostname.\n"
-               "  show-dns                            Show DNS Servers.\n"
+               "  show-dns                            Show DNS servers.\n"
                "  add-dns                      dev|global|system [DEVICE] dns [ADDRESS] Configures Link or global DNS servers.\n"
                "  add-domain                   dev|global|system [DEVICE] domains [DOMAIN] Configures Link or global Domain.\n"
-               "  show-domains                        Show DNS Server Domains.\n"
+               "  show-domains                        Show DNS server Domains.\n"
                "  revert-resolve-link          dev [DEVICE] Flushes all DNS server and Domain settings of the link.\n"
                "  set-link-local-address       dev [DEVICE] [LinkLocalAddressing BOOLEAN|ipv6|ipv4] Configures link local address.\n"
                "  set-ipv4ll-route             [DEVICE] [IPv4LLRoute BOOLEAN] Configures the route needed for non-IPv4LL hosts to communicate.\n"
@@ -316,9 +316,9 @@ static int cli_run(int argc, char *argv[]) {
         static const Ctl commands[] = {
                 { "status",                       WORD_ANY, WORD_ANY, true,  ncm_system_status },
                 { "status-devs",                  WORD_ANY, WORD_ANY, false, ncm_link_status },
-                { "set-mtu",                      4,        WORD_ANY, false, ncm_link_set_mtu },
-                { "set-mac",                      4,        WORD_ANY, false, ncm_link_set_mac },
-                { "set-manage",                   4,        WORD_ANY, false, ncm_link_set_mode },
+                { "set-mtu",                      3,        WORD_ANY, false, ncm_link_set_mtu },
+                { "set-mac",                      3,        WORD_ANY, false, ncm_link_set_mac },
+                { "set-manage",                   3,        WORD_ANY, false, ncm_link_set_mode },
                 { "set-link-option",              4,        WORD_ANY, false, ncm_link_set_option },
                 { "set-link-group",               4,        WORD_ANY, false, ncm_link_set_group },
                 { "set-link-rf-online",           4,        WORD_ANY, false, ncm_link_set_rf_online },

@@ -43,9 +43,7 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "mtu")) {
+                } else if (string_equal(argv[i], "mtu")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_mtu(argv[i], &mtu);
@@ -54,7 +52,15 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
                                 return r;
                         }
                         have_mtu = true;
-                        continue;
+                        break;
+                } else {
+                        r = parse_mtu(argv[i], &mtu);
+                        if (r < 0) {
+                                log_warning("Failed to parse mtu '%s': %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        have_mtu = true;
+                        break;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
@@ -130,6 +136,16 @@ _public_ int ncm_link_set_mac(int argc, char *argv[]) {
 
                         have_mac = true;
                         continue;
+                } else {
+                        if (!parse_ether_address(argv[i])) {
+                                log_warning("Failed to parse MAC address: %s", argv[2]);
+                                return -EINVAL;
+                        }
+                        mac = strdup(argv[i]);
+                        if (!mac)
+                                return log_oom();
+
+                        have_mac = true;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
@@ -207,7 +223,15 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
                                 return r;
                         }
                         k = r;
-                        continue;
+                        break;
+                } else {
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link manage '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                return r;
+                        }
+                        k = r;
+                        break;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
