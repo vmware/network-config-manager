@@ -1751,7 +1751,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
         return dbus_network_reload();
 }
 
-int manager_create_bond(const char *bond, BondMode mode, char **interfaces) {
+int manager_create_bond(const char *bond, const BondMode mode, char **interfaces) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *bond_network_config = NULL;
         _auto_cleanup_ char *bond_netdev = NULL, *bond_network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
@@ -1823,13 +1823,13 @@ int manager_create_bond(const char *bond, BondMode mode, char **interfaces) {
 }
 
 int manager_create_vxlan(const char *vxlan,
-                         uint32_t vni,
-                         IPAddress *local,
-                         IPAddress *remote,
-                         IPAddress *group,
-                         uint16_t port,
+                         const uint32_t vni,
+                         const IPAddress *local,
+                         const IPAddress *remote,
+                         const IPAddress *group,
+                         const uint16_t port,
                          const char *dev,
-                         bool independent) {
+                         const bool independent) {
 
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vxlan_network_config = NULL;
         _auto_cleanup_ char *vxlan_netdev = NULL, *vxlan_network = NULL, *network = NULL;
@@ -2203,7 +2203,7 @@ int manager_create_tunnel(const char *tunnel,
         return dbus_network_reload();
 }
 
-int manager_create_vrf(const char *vrf, uint32_t table) {
+int manager_create_vrf(const char *vrf, const uint32_t table) {
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vrf_network_config = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
