@@ -47,8 +47,12 @@ static const Config network_ctl_to_dhcp4_section_config_table[] = {
                 { "use-domains",  "UseDomains"},
                 { "use-mtu",      "UseMTU"},
                 { "use-routes",   "UseRoutes"},
+                { "use-hostname", "UseHostname"},
                 { "use-timezone", "UseTimezone"},
                 { "send-release", "SendRelease"},
+                { "use-routes",   "UseRoutes"},
+                { "use-gw",       "UseGateway"},
+                { "use-tz",       "UseTimezone"},
                 {},
 };
 

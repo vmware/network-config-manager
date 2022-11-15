@@ -934,10 +934,10 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('DHCPv4', 'UseNTP') == 'yes')
 
-    def test_cli_set_dhcp4_use_routes(self):
+    def test_cli_set_dhcp4_use_section(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-dhcp4 dev test99 use-routes yes", shell = True)
+        subprocess.check_call("nmctl set-dhcp4 dev test99 use-routes yes use-hostname yes use-gw yes use-tz no", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -945,6 +945,10 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('DHCPv4', 'UseRoutes') == 'yes')
+        assert(parser.get('DHCPv4', 'UseHostname') == 'yes')
+        assert(parser.get('DHCPv4', 'UseRoutes') == 'yes')
+        assert(parser.get('DHCPv4', 'UseGateway') == 'yes')
+        assert(parser.get('DHCPv4', 'UseTimezone') == 'no')
 
     def test_cli_set_link_lldp(self):
         assert(link_exist('test99') == True)
