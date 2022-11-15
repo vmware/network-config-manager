@@ -126,7 +126,7 @@ static int help(void) {
                                                       "\n\t\t\t\t      Sets DUID of DHCPv4 or DHCPv6 Client.\n"
                "  set-link-state               dev [DEVICE] [STATE {up|down}] Configures device State.\n"
                "  show-address                 dev [DEVICE] [family|f ipv4|ipv6|4|6] Show device addresses\n"
-               "  add-address                  dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [NUMBER] pref-lifetime|pl [{forever|infinity|0}]"
+               "  add-address                  dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [STRING] pref-lifetime|pl [{forever|infinity|0}]"
                                                       "\n\t\t\t\t      scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN]"
                                                       "\n\t\t\t\t      dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN] Configures device Address.\n"
                "  delete-address               dev [DEVICE] address|a|addr [ADDRESS] Removes address from device.\n"
