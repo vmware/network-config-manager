@@ -2812,6 +2812,7 @@ _public_ int ncm_link_get_ntp(const char *ifname, char ***ret) {
 
 _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        int k = -1;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -2823,7 +2824,14 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
+
                         continue;
+                }
+
+                k = parse_boolean(argv[i]);
+                if (k < 0) {
+                        log_warning("Failed to parse '%s': %s",  argv[i], g_strerror(EINVAL));
+                        return -EINVAL;
                 }
         }
 
@@ -2832,11 +2840,12 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        if (string_equal(argv[0], "enable-ipv6"))
-                r = manager_enable_ipv6(p, true);
-        else
-                r = manager_enable_ipv6(p, false);
+        if (k < 0) {
+                log_warning("Invalid value: %s", g_strerror(EINVAL));
+                return -EINVAL;
+        }
 
+        r = manager_enable_ipv6(p, k);
         if (r < 0) {
                 log_warning("Failed to '%s' IPv6 for on device '%s': %s", argv[0], argv[1], g_strerror(-r));
                 return r;
