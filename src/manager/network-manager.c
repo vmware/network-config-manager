@@ -26,18 +26,18 @@
 #include "yaml-network-parser.h"
 
 static const Config network_ctl_to_network_section_config_table[] = {
-                { "set-link-local-address",   "LinkLocalAddressing"},
-                { "set-ipv4ll-route",         "IPv4LLRoute"},
-                { "set-llmnr",                "LLMNR"},
-                { "set-multicast-dns",        "MulticastDNS" },
-                { "set-lldp",                 "LLDP"},
-                { "set-emit-lldp",            "EmitLLDP"},
-                { "set-ipforward",            "IPForward"},
-                { "set-ipv6acceptra",         "IPv6AcceptRA"},
-                { "set-ipmasquerade",         "IPMasquerade"},
-                { "set-proxyarp",             "IPv4ProxyARP"},
-                { "set-proxyndp",             "IPv6ProxyNDP"},
-                { "set-conf-without-carrier", "ConfigureWithoutCarrier"},
+                { "set-lla",           "LinkLocalAddressing"},
+                { "set-ipv4ll-route",  "IPv4LLRoute"},
+                { "set-llmnr",         "LLMNR"},
+                { "set-mcast-dns",     "MulticastDNS" },
+                { "set-lldp",          "LLDP"},
+                { "set-emit-lldp",     "EmitLLDP"},
+                { "set-ipforward",     "IPForward"},
+                { "set-ipv6acceptra",  "IPv6AcceptRA"},
+                { "set-ipmasquerade",  "IPMasquerade"},
+                { "set-proxyarp",      "IPv4ProxyARP"},
+                { "set-proxyndp",      "IPv6ProxyNDP"},
+                { "set-conf-wc",       "ConfigureWithoutCarrier"},
                 {},
 };
 

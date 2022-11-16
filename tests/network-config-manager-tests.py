@@ -617,7 +617,7 @@ class TestCLINetwork:
     def test_cli_set_rf_online(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-link-rf-online dev test99 f ipv4", shell = True)
+        subprocess.check_call("nmctl set-link-rfo dev test99 f ipv4", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -629,7 +629,7 @@ class TestCLINetwork:
     def test_cli_set_act_policy(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-link-act-policy dev test99 ap always-up", shell = True)
+        subprocess.check_call("nmctl set-link-ap dev test99 ap always-up", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -707,7 +707,7 @@ class TestCLINetwork:
     def test_cli_add_static_address(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope "
+        subprocess.check_call("nmctl add-addr dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope "
                               "link pref-lifetime forever prefix-route yes label test", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
@@ -726,7 +726,7 @@ class TestCLINetwork:
     def test_cli_add_default_gateway(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad "
+        subprocess.check_call("nmctl add-addr dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad "
                               "ipv4 scope link pref-lifetime forever prefix-route yes label 3434", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
@@ -736,7 +736,7 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Address', 'Address') == '192.168.1.45/24')
 
-        subprocess.check_call("nmctl add-default-gateway dev test99 gw 192.168.1.1 onlink true", shell = True)
+        subprocess.check_call("nmctl add-default-gw dev test99 gw 192.168.1.1 onlink True", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
@@ -748,7 +748,7 @@ class TestCLINetwork:
     def test_cli_add_route(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope link "
+        subprocess.check_call("nmctl add-addr dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope link "
                               "pref-lifetime forever prefix-route yes label 3434", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
@@ -780,7 +780,7 @@ class TestCLINetwork:
     def test_cli_add_additional_gateway(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl add-additional-gw dev test99 address 192.168.10.5/24 dest 0.0.0.0 gw 172.16.85.1 table 100 ", shell = True)
+        subprocess.check_call("nmctl add-addl-gw dev test99 address 192.168.10.5/24 dest 0.0.0.0 gw 172.16.85.1 table 100 ", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
 
@@ -806,7 +806,7 @@ class TestCLINetwork:
     def test_cli_set_link_local_address(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-link-local-address dev test99 ipv6", shell = True)
+        subprocess.check_call("nmctl set-lla dev test99 ipv6", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -854,7 +854,7 @@ class TestCLINetwork:
     def test_cli_set_multicast_dns(self):
         assert(link_exist('test99') == True);
 
-        subprocess.check_call("nmctl set-multicast-dns dev test99 yes", shell = True)
+        subprocess.check_call("nmctl set-mcast-dns dev test99 yes", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -878,7 +878,7 @@ class TestCLINetwork:
     def test_cli_set_dhcp4_client_identifier(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-dhcp4-client-id dev test99 id mac", shell = True)
+        subprocess.check_call("nmctl set-dhcp4-cid dev test99 id mac", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -1106,7 +1106,7 @@ class TestCLINetDev:
     def test_cli_create_vlan(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-vlan', 'vlan-98', 'dev', 'test98',  'id', '11'])
+        subprocess.check_call("nmctl create-vlan vlan-98 dev test98 id 11", shell = True)
         assert(unit_exist('10-test98.network') == True)
         assert(unit_exist('10-vlan-98.netdev') == True)
         assert(unit_exist('10-vlan-98.network') == True)
@@ -1139,7 +1139,7 @@ class TestCLINetDev:
     def test_cli_create_macvlan(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-macvlan', 'macvlan-98', 'dev', 'test98', 'mode', 'private'])
+        subprocess.check_call("nmctl create-macvlan macvlan-98 dev test98 mode private", shell = True)
         assert(unit_exist('10-macvlan-98.netdev') == True)
         assert(unit_exist('10-macvlan-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
@@ -1172,7 +1172,7 @@ class TestCLINetDev:
     def test_cli_create_macvtap(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-macvtap', 'macvtap-98', 'dev', 'test98', 'mode', 'private'])
+        subprocess.check_call("nmctl create-macvtap macvtap-98 dev test98 mode private", shell = True)
         assert(unit_exist('10-macvtap-98.netdev') == True)
         assert(unit_exist('10-macvtap-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
@@ -1205,7 +1205,7 @@ class TestCLINetDev:
     def test_cli_create_ipvlan(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-ipvlan', 'ipvlan-98', 'dev', 'test98', 'mode', 'l2'])
+        subprocess.check_call("nmctl create-ipvlan ipvlan-98 dev test98 mode l2", shell = True)
         assert(unit_exist('10-ipvlan-98.netdev') == True)
         assert(unit_exist('10-ipvlan-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
@@ -1238,7 +1238,7 @@ class TestCLINetDev:
     def test_cli_create_ipvtap(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-ipvtap', 'ipvtap-98', 'dev', 'test98', 'mode', 'l2'])
+        subprocess.check_call("nmctl create-ipvtap ipvtap-98 dev test98 mode l2", shell = True)
         assert(unit_exist('10-ipvtap-98.netdev') == True)
         assert(unit_exist('10-ipvtap-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
@@ -1270,7 +1270,7 @@ class TestCLINetDev:
 
     @pytest.mark.skip(reason="skipping")
     def test_cli_create_vrf(self):
-        subprocess.check_call(['nmctl', 'create-vrf', 'vrf-98', 'table', '11'])
+        subprocess.check_call("nmctl create-vrf vrf-98 table 11", shell = True)
         assert(unit_exist('10-vrf-98.netdev') == True)
         assert(unit_exist('10-vrf-98.network') == True)
 
@@ -1294,7 +1294,7 @@ class TestCLINetDev:
         link_remove('vrf-98')
 
     def test_cli_create_veth(self):
-        subprocess.check_call(['nmctl', 'create-veth', 'veth-98', 'peer', 'veth-99'])
+        subprocess.check_call("nmctl create-veth veth-98 peer veth-99" , shell = True)
         assert(unit_exist('10-veth-98.netdev') == True)
         assert(unit_exist('10-veth-98.network') == True)
 
@@ -1321,7 +1321,7 @@ class TestCLINetDev:
     def test_cli_create_ipip(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-ipip', 'ipip-98', 'dev', 'test98', 'local', '192.168.1.2', 'remote', '192.168.1.3'])
+        subprocess.check_call("nmctl create-ipip ipip-98 dev test98 local 192.168.1.2 remote 192.168.1.3", shell = True)
         assert(unit_exist('10-ipip-98.netdev') == True)
         assert(unit_exist('10-ipip-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
@@ -1355,7 +1355,7 @@ class TestCLINetDev:
     def test_cli_create_gre(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-gre', 'gre-98', 'dev', 'test98', 'local', '192.168.1.2', 'remote', '192.168.1.3'])
+        subprocess.check_call("nmctl create-gre gre-98 dev test98 local 192.168.1.2 remote 192.168.1.3", shell = True)
         assert(unit_exist('10-gre-98.netdev') == True)
         assert(unit_exist('10-gre-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
@@ -1389,7 +1389,7 @@ class TestCLINetDev:
     def test_cli_create_gre(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-gre', 'gre-98', 'dev', 'test98', 'local', '192.168.1.2', 'remote', '192.168.1.3'])
+        subprocess.check_call("nmctl create-gre gre-98 dev test98 local 192.168.1.2 remote 192.168.1.3", shell = True)
         assert(unit_exist('10-gre-98.netdev') == True)
         assert(unit_exist('10-gre-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
@@ -1423,7 +1423,7 @@ class TestCLINetDev:
     def test_cli_create_vti(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-vti', 'vti-98', 'dev', 'test98', 'local', '192.168.1.2', 'remote', '192.168.1.3'])
+        subprocess.check_call("nmctl create-vti vti-98 dev test98 local 192.168.1.2 remote 192.168.1.3", shell = True)
         assert(unit_exist('10-vti-98.netdev') == True)
         assert(unit_exist('10-vti-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
@@ -1487,7 +1487,7 @@ class TestCLINetDev:
     def test_cli_create_vxlan(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call(['nmctl', 'create-vxlan', 'vxlan-98', 'dev', 'test98', 'vni', '32', 'local', '192.168.1.2', 'remote', '192.168.1.3', 'port', '7777'])
+        subprocess.check_call("nmctl create-vxlan vxlan-98 dev test98 vni 32 local 192.168.1.2 remote 192.168.1.3 port 7777", shell = True)
         assert(unit_exist('10-test98.network') == True)
         assert(unit_exist('10-vxlan-98.network') == True)
         assert(unit_exist('10-vxlan-98.netdev') == True)
@@ -1566,7 +1566,7 @@ class TestCLINetDev:
         assert(link_exist('test98') == True)
         assert(link_exist('test-99') == True)
 
-        subprocess.check_call(['nmctl', 'create-bond', 'bond-98', 'mode', 'balance-rr', 'test98', 'test-99'])
+        subprocess.check_call("nmctl create-bond bond-98 mode balance-rr test98 test-99", shell = True)
         assert(unit_exist('10-test98.network') == True)
         assert(unit_exist('10-test-99.network') == True)
         assert(unit_exist('10-bond-98.network') == True)
@@ -1637,7 +1637,7 @@ class TestCLINetworkProxy:
         f.write("PROXY_ENABLED=\"no\"\nHTTP_PROXY=""\nHTTPS_PROXY=""\nNO_PROXY=\"localhost, 127.0.0.1\"\n")
         f.close()
 
-        subprocess.check_call(['nmctl', 'set-proxy', 'enable', 'yes', 'http', 'http://test.com:123', 'https', 'https://test.com:123'])
+        subprocess.check_call("nmctl set-proxy enable yes http http://test.com:123 https https://test.com:123")
 
         dictionary = {}
         file = open("/etc/sysconfig/proxy")
@@ -1654,7 +1654,7 @@ class TestCLINetworkProxy:
         assert(dictionary["HTTPS_PROXY"] == "https://test.com:123")
         assert(dictionary["PROXY_ENABLED"] == "yes")
 
-        subprocess.check_call(['nmctl', 'set-proxy', 'enable', 'yes', 'http', 'http://test.com:123', 'ftp', 'https://test.com123'])
+        subprocess.check_call("nmctl set-proxy enable yes http http://test.com:123 ftp https://test.com123")
 
 class TestWifiWPASupplicantConf:
     yaml_configs = [
@@ -2025,7 +2025,7 @@ class TestCLILink:
     def test_cli_set_link_feature(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link-feature', 'test99', 'auton', 'no', 'rxcsumo', 'yes', 'txcsumo', 'no', 'tso', 'no', 'tso6', '1', 'gso', '0', 'grxo', 'false', 'grxoh', 'no', 'lrxo', '1', 'rxvtha', 'true', 'txvtha', '0', 'rxvtf', 'no', 'txvstha', 'yes', 'ntf', 'false', 'uarxc', '1', 'uatxc', 'yes'])
+        subprocess.check_call(['nmctl', 'set-link-feature', 'test99', 'auton', 'no', 'rxcsumo', 'yes', 'txcsumo', 'no', 'tso', 'no', 'tso6', '1', 'gso', '0', 'grxo', 'false', 'grxoh', 'no', 'lrxo', '1', 'rxvtha', 'True', 'txvtha', '0', 'rxvtf', 'no', 'txvstha', 'yes', 'ntf', 'false', 'uarxc', '1', 'uatxc', 'yes'])
         assert(unit_exist('10-test99.link') == True)
 
         parser = configparser.ConfigParser()
@@ -2216,7 +2216,7 @@ class TestCLISRIOV:
         assert(link_exist('sriov99') == True)
 
         subprocess.check_call("nmctl add-sr-iov sriov99 vf 5 vlanid 2 qos 1 vlanproto "
-                               "802.1Q macspoofck yes qrss true trust yes linkstate yes "
+                               "802.1Q macspoofck yes qrss True trust yes linkstate yes "
                                "macaddr 00:0c:29:3a:bc:11", shell = True)
 
         assert(unit_exist('10-sriov99.network') == True)
