@@ -150,7 +150,7 @@ static int help(void) {
                "  show-domains                        Show DNS server Domains.\n"
                "  revert-resolve-link          dev [DEVICE] Flushes all DNS server and Domain settings of the link.\n"
                "  set-link-local-address       dev [DEVICE] [LinkLocalAddressing BOOLEAN|ipv6|ipv4] Configures link local address.\n"
-               "  set-ipv4ll-route             [DEVICE] [IPv4LLRoute BOOLEAN] Configures the route needed for non-IPv4LL hosts to communicate.\n"
+               "  set-ipv4ll-route             dev [DEVICE] [IPv4LLRoute BOOLEAN] Configures the route needed for non-IPv4LL hosts to communicate.\n"
                "                                      with IPv4LL-only hosts.\n"
                "  set-llmnr                    dev [DEVICE] [LLMNR BOOLEAN] Configures Link Local Multicast Name Resolution.\n"
                "  set-multicast-dns            dev [DEVICE] [MulticastDNS BOOLEAN] Configures Link Multicast DNS.\n"
