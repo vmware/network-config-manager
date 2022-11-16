@@ -10,6 +10,7 @@ typedef int (*CommandRunFunction)(int argc, char **argv);
 
 typedef struct Ctl {
         const char *name;
+        const char *alias;
         unsigned min_args, max_args;
         bool default_command;
 
@@ -17,7 +18,8 @@ typedef struct Ctl {
 } Ctl;
 
 typedef struct CtlManager {
-        GHashTable *hash;
+        GHashTable *table;
+        GHashTable *table_alias;
 
         Ctl *commands;
 } CtlManager;
