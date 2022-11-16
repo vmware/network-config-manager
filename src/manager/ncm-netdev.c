@@ -40,6 +40,11 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 }
         }
 
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
+        }
+
         r = manager_create_bridge(argv[1], links);
         if (r < 0) {
                 log_warning("Failed to create bridge '%s': %s", argv[1], g_strerror(-r));
@@ -89,6 +94,11 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         if (!have_mode) {
                 log_warning("Missing Bond mode: %s", g_strerror(EINVAL));
                 return -EINVAL;
+        }
+
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
         }
 
         r = manager_create_bond(argv[1], mode, links);
@@ -141,6 +151,11 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
         if (!have_mode) {
                 log_warning("Missing MacVLan/MacVTap mode: %s", g_strerror(EINVAL));
                 return -EINVAL;
+        }
+
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
         }
 
         if (string_equal(argv[0], "create-macvlan"))
@@ -197,6 +212,11 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
         if (!have_mode) {
                 log_warning("Missing IPVLan/IPVTap mode: %s", g_strerror(EINVAL));
                 return -EINVAL;
+        }
+
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
         }
 
         if (string_equal(argv[0], "create-ipvlan"))
@@ -317,6 +337,11 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
+        }
+
         r = manager_create_vxlan(argv[1], vni, local, remote, group, port, p->ifname, independent);
         if (r < 0) {
                 log_warning("Failed to create vxlan '%s': %s", argv[1], g_strerror(-r));
@@ -389,6 +414,11 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
+        }
+
         r = manager_create_vlan(p, argv[1], id, proto);
         if (r < 0) {
                 log_warning("Failed to create vlan '%s': %s", argv[2], g_strerror(-r));
@@ -431,6 +461,11 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
                 }
         }
 
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_create_veth(argv[1], peer);
         if (r < 0) {
                 log_warning("Failed to create veth '%s': %s", argv[1], g_strerror(-r));
@@ -461,6 +496,11 @@ _public_ int ncm_create_vrf(int argc, char *argv[]) {
         if (!have_table) {
                 log_warning("Missing table id: %s", g_strerror(EINVAL));
                 return -EINVAL;
+        }
+
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
         }
 
         r = manager_create_vrf(argv[1], table);
@@ -537,6 +577,11 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                         log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
                         return -EINVAL;
                 }
+        }
+
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
         }
 
         r = manager_create_tunnel(argv[1], kind, local, remote, p->ifname, independent);
@@ -665,6 +710,11 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
         if (!have_public_key || !have_private_key) {
                 log_warning("Missing public-key or private-key : %s", g_strerror(EINVAL));
                 return -EINVAL;
+        }
+
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
         }
 
         r = manager_create_wireguard_tunnel(argv[1], private_key, public_key, preshared_key, endpoint, allowed_ips, listen_port);

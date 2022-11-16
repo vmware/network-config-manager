@@ -97,9 +97,6 @@ const char *arphrd_to_name(int id) {
         if (id <= 0)
                 return "n/a";
 
-        if ((size_t) id >= ELEMENTSOF(arphrd_names))
-                return "n/a";
-
         for (i = 0; i <= ELEMENTSOF(arphrd_names); i++) {
                 if (id == arphrd_names[i].type)
                         return arphrd_names[i].name;
