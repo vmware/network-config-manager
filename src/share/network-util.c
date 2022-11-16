@@ -280,7 +280,7 @@ int parse_mtu(char *mtu, uint32_t *ret) {
         int r;
 
         assert(mtu);
-        
+
         r = parse_uint32(mtu, &j);
         if (r < 0)
                 return r;
@@ -294,7 +294,7 @@ int parse_group(char *group, uint32_t *ret) {
         int r;
 
         assert(group);
-        
+
         r = parse_uint32(group, &j);
         if (r < 0)
                 return r;
@@ -335,5 +335,31 @@ bool valid_hostname(const char *host)  {
                         return false;
                 p++;
         }
+        return true;
+}
+
+bool valid_ifname(const char *s) {
+        if (!s || !s[0])
+                return false;
+
+        if (!g_utf8_validate(s, -1, NULL))
+                return false;
+
+        if(strlen(s) >= IFNAMSIZ)
+                return false;
+
+        while(*s) {
+                if (*s == ':' || *s == '/' || *s == '%')
+                        return false;
+
+                if ((unsigned char) *s >= 127U)
+                        return false;
+
+                if ((unsigned char) *s <= 32U)
+                        return false;
+
+                s++;
+        }
+
         return true;
 }
