@@ -351,7 +351,7 @@ int generate_netdev_config(NetDev *n, GString **ret) {
                                 g_string_append_printf(config, "AllowedIPs=%s\n\n", n->wg_allowed_ips);
                         break;
                 default:
-                        return -EINVAL;
+                        break;
         }
 
         *ret = steal_pointer(config);
