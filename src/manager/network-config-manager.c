@@ -211,9 +211,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "manage")) {
+                } else if (string_equal(argv[i], "manage")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -298,9 +296,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "mc")) {
+                } else if (string_equal(argv[i], "mc")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -317,8 +313,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-                if (string_equal(argv[i], "amc")) {
+                } else if (string_equal(argv[i], "amc")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -335,8 +330,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-                if (string_equal(argv[i], "pcs")) {
+                } else if (string_equal(argv[i], "pcs")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -373,9 +367,7 @@ _public_ int ncm_link_set_group(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "group")) {
+                } else if (string_equal(argv[i], "group")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_group(argv[i], &group);
@@ -426,9 +418,7 @@ _public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "family") || string_equal(argv[i], "f")) {
+                } else if (string_equal(argv[i], "family") || string_equal(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_rf_online(argv[i]);
@@ -483,9 +473,7 @@ _public_ int ncm_link_set_act_policy(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "ap") || string_equal(argv[i], "act-policy")) {
+                } else if (string_equal(argv[i], "ap") || string_equal(argv[i], "act-policy")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_act_policy(argv[i]);
@@ -580,9 +568,7 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "dhcp")) {
+                } else if (string_equal(argv[i], "dhcp")) {
                         parse_next_arg(argv, argc, i);
 
                         dhcp = dhcp_client_name_to_mode(argv[i]);
@@ -650,9 +636,7 @@ _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "id")) {
+                } else if (string_equal(argv[i], "id")) {
                         parse_next_arg(argv, argc, i);
 
                         d = dhcp_client_identifier_to_mode(argv[i]);
@@ -725,9 +709,7 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
+                } else if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
                         r  = dhcp_name_to_client(argv[i]);
@@ -739,9 +721,7 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
                         kind = r;
 
                         continue;
-                }
-
-                if (string_equal_fold(argv[i], "iaid")) {
+                } else if (string_equal_fold(argv[i], "iaid")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v);
@@ -811,16 +791,12 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal_fold(argv[i], "system") || string_equal_fold(argv[i], "s")) {
+                } else if (string_equal_fold(argv[i], "system") || string_equal_fold(argv[i], "s")) {
                         parse_next_arg(argv, argc, i);
 
                         system = true;
                         continue;
-                }
-
-                if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
+                } else if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
                         r  = dhcp_name_to_client(argv[i]);
@@ -832,9 +808,7 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
                         kind = r;
 
                         continue;
-                }
-
-                if (string_equal_fold(argv[i], "duid")) {
+                } else if (string_equal_fold(argv[i], "duid")) {
                         parse_next_arg(argv, argc, i);
 
                         d = dhcp_client_duid_name_to_type(argv[i]);
@@ -844,9 +818,7 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal_fold(argv[i], "data") || string_equal_fold(argv[i], "rawdata")) {
+                } else if (string_equal_fold(argv[i], "data") || string_equal_fold(argv[i], "rawdata")) {
                         parse_next_arg(argv, argc, i);
 
                         raw_data = strdup(argv[i]);
@@ -1102,9 +1074,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "address") || string_equal(argv[i], "a") || string_equal(argv[i], "addr")) {
+                } else if (string_equal(argv[i], "address") || string_equal(argv[i], "a") || string_equal(argv[i], "addr")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &address);
@@ -1124,9 +1094,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "label")) {
+                } else if (string_equal(argv[i], "label")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!valid_address_label(argv[i])) {
@@ -1139,9 +1107,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "pref-lifetime") || string_equal(argv[i], "pl")) {
+                } else if (string_equal(argv[i], "pref-lifetime") || string_equal(argv[i], "pl")) {
                         uint32_t lft;
 
                         parse_next_arg(argv, argc, i);
@@ -1159,9 +1125,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "scope")) {
+                } else if (string_equal(argv[i], "scope")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!string_equal(argv[i], "global") && !string_equal(argv[i], "link") && !string_equal(argv[i], "host")) {
@@ -1184,9 +1148,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "dad")) {
+                } else if (string_equal(argv[i], "dad")) {
                         parse_next_arg(argv, argc, i);
 
                         r = ip_duplicate_address_detection_type_to_mode(argv[i]);
@@ -1197,9 +1159,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
 
                         dad = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "prefix-route") || string_equal(argv[i], "pr")) {
+                } else if (string_equal(argv[i], "prefix-route") || string_equal(argv[i], "pr")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -1246,9 +1206,7 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "address") || string_equal(argv[i], "a") || string_equal(argv[i], "addr")) {
+                } else if (string_equal(argv[i], "address") || string_equal(argv[i], "a") || string_equal(argv[i], "addr")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &address);
@@ -1347,9 +1305,7 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "gateway") || string_equal(argv[i], "gw")) {
+                } else if (string_equal(argv[i], "gateway") || string_equal(argv[i], "gw")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &gw);
@@ -1358,9 +1314,7 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "onlink")) {
+                } else if (string_equal(argv[i], "onlink")) {
                         parse_next_arg(argv, argc, i);
 
                         onlink = parse_boolean(argv[i]);
@@ -1421,9 +1375,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "gateway") || string_equal(argv[i], "gw")) {
+                } else if (string_equal(argv[i], "gateway") || string_equal(argv[i], "gw")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &gw);
@@ -1432,9 +1384,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "destination") || string_equal(argv[i], "dest")) {
+                } else if (string_equal(argv[i], "destination") || string_equal(argv[i], "dest")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &dst);
@@ -1443,9 +1393,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "source") || string_equal(argv[i], "src")) {
+                } else if (string_equal(argv[i], "source") || string_equal(argv[i], "src")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &source);
@@ -1454,9 +1402,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "pref-source") || string_equal(argv[i], "pfsrc")) {
+                } else if (string_equal(argv[i], "pref-source") || string_equal(argv[i], "pfsrc")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &pref_source);
@@ -1465,9 +1411,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "metric") || string_equal(argv[i], "mt")) {
+                } else if (string_equal(argv[i], "metric") || string_equal(argv[i], "mt")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &metric);
@@ -1476,9 +1420,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "ipv6-preference") || string_equal(argv[i], "ipv6-pref")) {
+                } else if (string_equal(argv[i], "ipv6-preference") || string_equal(argv[i], "ipv6-pref")) {
                         parse_next_arg(argv, argc, i);
 
                         r = ipv6_route_preference_type_to_mode(argv[i]);
@@ -1489,9 +1431,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
                         rt_pref = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "protocol") || string_equal(argv[i], "proto")) {
+                } else if (string_equal(argv[i], "protocol") || string_equal(argv[i], "proto")) {
                         parse_next_arg(argv, argc, i);
 
                         protocol = route_protocol_to_mode(argv[i]);
@@ -1508,9 +1448,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                                 }
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "type")) {
+                } else if (string_equal(argv[i], "type")) {
                         parse_next_arg(argv, argc, i);
 
                         r = route_type_to_mode(argv[i]);
@@ -1521,9 +1459,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
                         type = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "scope")) {
+                } else if (string_equal(argv[i], "scope")) {
                         parse_next_arg(argv, argc, i);
 
                         r = route_scope_type_to_mode(argv[i]);
@@ -1534,9 +1470,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
                         scope = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "table")) {
+                } else if (string_equal(argv[i], "table")) {
                         parse_next_arg(argv, argc, i);
 
                         table = route_table_to_mode(argv[i]);
@@ -1549,9 +1483,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "mtu")) {
+                } else if (string_equal(argv[i], "mtu")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_mtu(argv[i], &mtu);
@@ -1561,9 +1493,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "onlink")) {
+                } else if (string_equal(argv[i], "onlink")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -1693,9 +1623,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "address") || string_equal(argv[i], "addr") || string_equal(argv[i], "a")) {
+                } else if (string_equal(argv[i], "address") || string_equal(argv[i], "addr") || string_equal(argv[i], "a")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &a);
@@ -1705,9 +1633,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "destination") || string_equal(argv[i], "dest")) {
+                } else if (string_equal(argv[i], "destination") || string_equal(argv[i], "dest")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &destination);
@@ -1717,9 +1643,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "gw")) {
+                } else if (string_equal(argv[i], "gw")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &gw);
@@ -1729,9 +1653,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "table")) {
+                } else if (string_equal(argv[i], "table")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &table);
@@ -1792,9 +1714,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "iif")) {
+                } else if (string_equal(argv[i], "iif")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &iif);
@@ -1804,9 +1724,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "oif")) {
+                } else if (string_equal(argv[i], "oif")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &oif);
@@ -1816,9 +1734,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "from")) {
+                } if (string_equal(argv[i], "from")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &from);
@@ -1828,9 +1744,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "to")) {
+                } if (string_equal(argv[i], "to")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &to);
@@ -1840,9 +1754,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "table")) {
+                } if (string_equal(argv[i], "table")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &table);
@@ -1852,9 +1764,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "prio")) {
+                } if (string_equal(argv[i], "prio")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &priority);
@@ -1864,9 +1774,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "tos")) {
+                } if (string_equal(argv[i], "tos")) {
                         uint32_t k;
 
                         parse_next_arg(argv, argc, i);
@@ -1955,9 +1863,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "dns")) {
+                } else if (string_equal(argv[i], "dns")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &dns);
@@ -1967,9 +1873,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "ntp")) {
+                } else if (string_equal(argv[i], "ntp")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &ntp);
@@ -1979,9 +1883,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "pool-offset")) {
+                } else if (string_equal(argv[i], "pool-offset")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &pool_offset);
@@ -1991,9 +1893,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "pool-size")) {
+                } else if (string_equal(argv[i], "pool-size")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &pool_size);
@@ -2003,9 +1903,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "default-lease-time")) {
+                } else if (string_equal(argv[i], "default-lease-time")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &default_lease_time);
@@ -2015,9 +1913,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "max-lease-time")) {
+                } else if (string_equal(argv[i], "max-lease-time")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &max_lease_time);
@@ -2027,9 +1923,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "emit-dns")) {
+                } else if (string_equal(argv[i], "emit-dns")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -2040,9 +1934,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
 
                         emit_dns = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "emit-ntp")) {
+                } else if (string_equal(argv[i], "emit-ntp")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -2053,9 +1945,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
 
                         emit_ntp = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "emit-router")) {
+                } else if (string_equal(argv[i], "emit-router")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -2136,9 +2026,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "prefix")) {
+                } else if (string_equal(argv[i], "prefix")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &prefix);
@@ -2148,9 +2036,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "route-prefix")) {
+                } else if (string_equal(argv[i], "route-prefix")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &route_prefix);
@@ -2160,9 +2046,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "dns")) {
+                } else if (string_equal(argv[i], "dns")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &dns);
@@ -2172,9 +2056,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "domain")) {
+                } else if (string_equal(argv[i], "domain")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!valid_hostname(argv[i])) {
@@ -2187,9 +2069,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                                 log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "pref-lifetime")) {
+                } else if (string_equal(argv[i], "pref-lifetime")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &pref_lifetime);
@@ -2199,9 +2079,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "valid-lifetime")) {
+                } else if (string_equal(argv[i], "valid-lifetime")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &valid_lifetime);
@@ -2211,9 +2089,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "route-lifetime")) {
+                } else if (string_equal(argv[i], "route-lifetime")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &route_lifetime);
@@ -2223,9 +2099,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "dns-lifetime")) {
+                } else if (string_equal(argv[i], "dns-lifetime")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &dns_lifetime);
@@ -2235,9 +2109,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "assign")) {
+                } else if (string_equal(argv[i], "assign")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -2248,9 +2120,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
 
                         assign = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "managed")) {
+                } else if (string_equal(argv[i], "managed")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -2261,9 +2131,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
 
                         managed = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "other")) {
+                } else if (string_equal(argv[i], "other")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -2274,9 +2142,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
 
                         other = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "emit-dns")) {
+                } else if (string_equal(argv[i], "emit-dns")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -2287,9 +2153,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
 
                         emit_dns = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "emit-domain")) {
+                } else if (string_equal(argv[i], "emit-domain")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -2300,9 +2164,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
 
                         emit_domain = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "router-pref")) {
+                } else if (string_equal(argv[i], "router-pref")) {
                         parse_next_arg(argv, argc, i);
 
                         r = ipv6_ra_preference_type_to_mode(argv[i]);
@@ -2502,11 +2364,10 @@ _public_ int ncm_add_dns_server(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-                if (string_equal(argv[i], "system"))
+                } else if (string_equal(argv[i], "system"))
                         system = true;
 
-                if (string_equal(argv[i], "global"))
+                else if (string_equal(argv[i], "global"))
                         global = true;
 
                 if (string_equal_fold(argv[i], "dns")) {
@@ -2578,11 +2439,10 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-                if (string_equal(argv[i], "system"))
+                } else if (string_equal(argv[i], "system"))
                         system = true;
 
-                if (string_equal(argv[i], "global"))
+                else if (string_equal(argv[i], "global"))
                         global = true;
 
                 if (string_equal_fold(argv[i], "domains")) {

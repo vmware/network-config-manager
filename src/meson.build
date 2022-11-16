@@ -17,6 +17,8 @@ network_config_manager_sources = files('''
         manager/ncm-link.c
         manager/netdev.h
         manager/netdev.c
+        manager/netdev-manager.h
+        manager/netdev-manager.c
         manager/netdev-link.c
         manager/netdev-link.h
         manager/network-link.h

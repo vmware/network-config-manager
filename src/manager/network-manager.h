@@ -130,26 +130,6 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *p,
 
 int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifnameidx);
 
-int manager_create_bridge(const char *bridge, char **interfaces);
-int manager_create_bond(const char *bond, const BondMode mode, char **interfaces);
-int manager_create_vxlan(const char *vxlan,
-                         const uint32_t vni,
-                         const IPAddress *local,
-                         const IPAddress *remote,
-                         const IPAddress *group,
-                         const uint16_t port,
-                         const char *dev,
-                         const bool independent);
-
-int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mode, bool kind);
-int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, bool kind);
-int manager_create_veth(const char *veth, const char *veth_peer);
-int manager_create_tunnel(const char *tunnel, NetDevKind kind, IPAddress *local,
-                          IPAddress *remote, const char *dev, bool independent);
-int manager_create_vrf(const char *vrf, const uint32_t table);
-int manager_create_wireguard_tunnel(char *wireguard, char *private_key, char *public_key, char *preshared_key,
-                                    char *endpoint, char *allowed_ips, uint16_t listen_port);
-
 int manager_show_link_network_config(const IfNameIndex *ifnameidx, char **ret);
 int manager_edit_link_network_config(const IfNameIndex *ifnameidx);
 
@@ -165,3 +145,5 @@ int manager_configure_proxy(int enable,
                             const char *no_proxy);
 
 int manager_parse_proxy_config(GHashTable **c);
+
+int manager_write_network_config(const Network *n, const GString *config);
