@@ -1637,7 +1637,7 @@ class TestCLINetworkProxy:
         f.write("PROXY_ENABLED=\"no\"\nHTTP_PROXY=""\nHTTPS_PROXY=""\nNO_PROXY=\"localhost, 127.0.0.1\"\n")
         f.close()
 
-        subprocess.check_call("nmctl set-proxy enable yes http http://test.com:123 https https://test.com:123")
+        subprocess.check_call("nmctl set-proxy enable yes http http://test.com:123 https https://test.com:123", shell = True )
 
         dictionary = {}
         file = open("/etc/sysconfig/proxy")
@@ -1654,7 +1654,7 @@ class TestCLINetworkProxy:
         assert(dictionary["HTTPS_PROXY"] == "https://test.com:123")
         assert(dictionary["PROXY_ENABLED"] == "yes")
 
-        subprocess.check_call("nmctl set-proxy enable yes http http://test.com:123 ftp https://test.com123")
+        subprocess.check_call("nmctl set-proxy enable yes http http://test.com:123 ftp https://test.com123", shell = True)
 
 class TestWifiWPASupplicantConf:
     yaml_configs = [
