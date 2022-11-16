@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <linux/if.h>
 
 #include "macros.h"
 #include "parse-util.h"
@@ -163,6 +164,19 @@ int parse_link_macpolicy(const char *c) {
                 return -EINVAL;
 
         return 0;
+}
+
+bool valid_address_label(char *c) {
+        assert(c);
+
+        if (strlen(c) > IFNAMSIZ)
+                return false;
+
+        for(char *p = c; *p; p++)
+                if (!g_ascii_isprint(*p))
+                        return false;
+
+        return true;
 }
 
 int parse_link_namepolicy(const char *c) {

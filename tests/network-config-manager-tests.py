@@ -708,7 +708,7 @@ class TestCLINetwork:
         assert(link_exist('test99') == True)
 
         subprocess.check_call("nmctl add-address dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad ipv4 scope "
-                              "link pref-lifetime forever prefix-route yes label 3434", shell = True)
+                              "link pref-lifetime forever prefix-route yes label test", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -721,7 +721,7 @@ class TestCLINetwork:
         assert(parser.get('Address', 'PreferredLifetime') == 'forever')
         assert(parser.get('Address', 'AddPrefixRoute') == 'yes')
         assert(parser.get('Address', 'DuplicateAddressDetection') == 'ipv4')
-        assert(parser.get('Address', 'Label') == '3434')
+        assert(parser.get('Address', 'Label') == 'test')
 
     def test_cli_add_default_gateway(self):
         assert(link_exist('test99') == True)

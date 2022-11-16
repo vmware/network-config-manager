@@ -198,20 +198,20 @@ void netdev_unref(NetDev *n) {
         if (!n)
                 return;
 
-        g_free(n->ifname);
-        g_free(n->peer);
-        g_free(n->mac);
+        free(n->ifname);
+        free(n->peer);
+        free(n->mac);
 
-        g_free(n->wg_private_key);
-        g_free(n->wg_public_key);
-        g_free(n->wg_preshared_key);
-        g_free(n->wg_endpoint);
-        g_free(n->wg_allowed_ips);
-        g_free(n->wg_allowed_ips);
+        free(n->wg_private_key);
+        free(n->wg_public_key);
+        free(n->wg_preshared_key);
+        free(n->wg_endpoint);
+        free(n->wg_allowed_ips);
+        free(n->wg_allowed_ips);
 
-        g_free(n->proto);
+        free(n->proto);
 
-        g_free(n);
+        free(n);
 }
 
 int generate_netdev_config(NetDev *n, GString **ret) {
@@ -232,109 +232,126 @@ int generate_netdev_config(NetDev *n, GString **ret) {
 
         g_string_append_printf(config, "Kind=%s\n\n", netdev_kind_to_name(n->kind));
 
-        if (n->kind == NET_DEV_KIND_VLAN) {
-                g_string_append(config, "[VLAN]\n");
-                g_string_append_printf(config, "Id=%d\n", n->id);
+        switch (n->kind) {
+                case NET_DEV_KIND_VLAN:
+                        g_string_append(config, "[VLAN]\n");
+                        g_string_append_printf(config, "Id=%d\n", n->id);
 
-                if (n->proto)
-                        g_string_append_printf(config, "Protocol=%s\n", n->proto);
-        }
+                        if (n->proto)
+                                g_string_append_printf(config, "Protocol=%s\n", n->proto);
 
-        if (n->kind == NET_DEV_KIND_BOND) {
-                g_string_append(config, "[Bond]\n");
-                g_string_append_printf(config, "Mode=%s\n", bond_mode_to_name(n->bond_mode));
-        }
+                        break;
 
-        if (n->kind == NET_DEV_KIND_VXLAN) {
-                _auto_cleanup_ char *local = NULL, *remote = NULL, *group = NULL;
+                case NET_DEV_KIND_BOND:
+                        g_string_append(config, "[Bond]\n");
+                        g_string_append_printf(config, "Mode=%s\n", bond_mode_to_name(n->bond_mode));
 
-                g_string_append(config, "[VXLAN]\n");
-                g_string_append_printf(config, "VNI=%d\n", n->id);
+                        break;
 
-                if (!ip_is_null(&n->local)) {
-                        (void) ip_to_string(n->local.family, &n->local, &local);
-                        g_string_append_printf(config, "Local=%s\n", local);
+                case NET_DEV_KIND_VXLAN: {
+                        _auto_cleanup_ char *local = NULL, *remote = NULL, *group = NULL;
+
+                        g_string_append(config, "[VXLAN]\n");
+                        g_string_append_printf(config, "VNI=%d\n", n->id);
+
+                        if (!ip_is_null(&n->local)) {
+                                (void) ip_to_string(n->local.family, &n->local, &local);
+                                g_string_append_printf(config, "Local=%s\n", local);
+                        }
+
+                        if (!ip_is_null(&n->remote)) {
+                                (void) ip_to_string(n->remote.family, &n->remote, &remote);
+                                g_string_append_printf(config, "Remote=%s\n", remote);
+                        }
+
+                        if (!ip_is_null(&n->group)) {
+                                (void) ip_to_string(n->group.family, &n->group, &group);
+                                g_string_append_printf(config, "Group=%s\n", group);
+                        }
+
+                        if (n->destination_port > 0)
+                                g_string_append_printf(config, "DestinationPort=%d\n", n->destination_port);
                 }
+                        break;
 
-                if (!ip_is_null(&n->remote)) {
-                        (void) ip_to_string(n->remote.family, &n->remote, &remote);
-                        g_string_append_printf(config, "Remote=%s\n", remote);
+                case NET_DEV_KIND_MACVLAN:
+                        g_string_append(config, "[MACVLAN]\n");
+                        g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
+
+                        break;
+
+                case NET_DEV_KIND_MACVTAP:
+                        g_string_append(config, "[MACVTAP]\n");
+                        g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
+
+                        break;
+
+                case NET_DEV_KIND_IPVLAN:
+                        g_string_append(config, "[IPVLAN]\n");
+                        g_string_append_printf(config, "Mode=%s\n", ipvlan_mode_to_name(n->ipvlan_mode));
+
+                        break;
+
+                case NET_DEV_KIND_IPVTAP:
+                        g_string_append(config, "[IPVTAP]\n");
+                        g_string_append_printf(config, "Mode=%s\n", ipvlan_mode_to_name(n->ipvlan_mode));
+
+                        break;
+
+                case NET_DEV_KIND_VETH:
+                        if (n->peer) {
+                                g_string_append(config, "[Peer]\n");
+                                g_string_append_printf(config, "Name=%s\n", n->peer);
+                        }
+                        break;
+
+                case NET_DEV_KIND_VRF:
+                        g_string_append(config, "[VRF]\n");
+                        g_string_append_printf(config, "Table=%d\n", n->table);
+
+                        break;
+
+                case NET_DEV_KIND_IPIP_TUNNEL:
+                case NET_DEV_KIND_SIT_TUNNEL:
+                case NET_DEV_KIND_GRE_TUNNEL:
+                case NET_DEV_KIND_VTI_TUNNEL: {
+                        _auto_cleanup_ char *local = NULL, *remote = NULL;
+
+                        g_string_append(config, "[Tunnel]\n");
+
+                        if (!ip_is_null(&n->local)) {
+                                (void) ip_to_string(n->local.family, &n->local, &local);
+                                g_string_append_printf(config, "Local=%s\n", local);
+                        }
+
+                        if (!ip_is_null(&n->remote)) {
+                                (void) ip_to_string(n->remote.family, &n->remote, &remote);
+                                g_string_append_printf(config, "Remote=%s\n", remote);
+                        }
                 }
+                        break;
 
-                if (!ip_is_null(&n->group)) {
-                        (void) ip_to_string(n->group.family, &n->group, &group);
-                        g_string_append_printf(config, "Group=%s\n", group);
-                }
+                case NET_DEV_KIND_WIREGUARD:
+                        g_string_append(config, "[WireGuard]\n");
+                        g_string_append_printf(config, "PrivateKey=%s\n", n->wg_private_key);
 
-                if (n->destination_port > 0)
-                        g_string_append_printf(config, "DestinationPort=%d\n", n->destination_port);
-        }
+                        if (n->listen_port > 0)
+                                g_string_append_printf(config, "ListenPort=%d\n\n", n->listen_port);
 
-        if (n->kind == NET_DEV_KIND_MACVLAN) {
-                g_string_append(config, "[MACVLAN]\n");
-                g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
-        }
+                        g_string_append(config, "[WireGuardPeer]\n");
+                        g_string_append_printf(config, "PublicKey=%s\n", n->wg_public_key);
 
-        if (n->kind == NET_DEV_KIND_MACVTAP) {
-                g_string_append(config, "[MACVTAP]\n");
-                g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
-        }
+                        if (n->wg_endpoint)
+                                g_string_append_printf(config, "Endpoint=%s\n", n->wg_endpoint);
 
-        if (n->kind == NET_DEV_KIND_IPVLAN) {
-                g_string_append(config, "[IPVLAN]\n");
-                g_string_append_printf(config, "Mode=%s\n", ipvlan_mode_to_name(n->ipvlan_mode));
-        }
+                        if (n->wg_preshared_key)
+                                g_string_append_printf(config, "PresharedKey=%s\n", n->wg_preshared_key);
 
-        if (n->kind == NET_DEV_KIND_IPVTAP) {
-                g_string_append(config, "[IPVTAP]\n");
-                g_string_append_printf(config, "Mode=%s\n", ipvlan_mode_to_name(n->ipvlan_mode));
-        }
-
-        if (n->kind == NET_DEV_KIND_VETH && n->peer) {
-                g_string_append(config, "[Peer]\n");
-                g_string_append_printf(config, "Name=%s\n", n->peer);
-        }
-
-        if (n->kind == NET_DEV_KIND_VRF) {
-                g_string_append(config, "[VRF]\n");
-                g_string_append_printf(config, "Table=%d\n", n->table);
-        }
-
-        if (n->kind == NET_DEV_KIND_IPIP_TUNNEL || n->kind == NET_DEV_KIND_SIT_TUNNEL ||
-            n->kind == NET_DEV_KIND_GRE_TUNNEL || n->kind == NET_DEV_KIND_VTI_TUNNEL) {
-                _auto_cleanup_ char *local = NULL, *remote = NULL;
-
-                g_string_append(config, "[Tunnel]\n");
-
-                if (!ip_is_null(&n->local)) {
-                        (void) ip_to_string(n->local.family, &n->local, &local);
-                        g_string_append_printf(config, "Local=%s\n", local);
-                }
-
-                if (!ip_is_null(&n->remote)) {
-                        (void) ip_to_string(n->remote.family, &n->remote, &remote);
-                        g_string_append_printf(config, "Remote=%s\n", remote);
-                }
-        }
-
-        if (n->kind == NET_DEV_KIND_WIREGUARD) {
-                g_string_append(config, "[WireGuard]\n");
-                g_string_append_printf(config, "PrivateKey=%s\n", n->wg_private_key);
-
-                if (n->listen_port > 0)
-                        g_string_append_printf(config, "ListenPort=%d\n\n", n->listen_port);
-
-                g_string_append(config, "[WireGuardPeer]\n");
-                g_string_append_printf(config, "PublicKey=%s\n", n->wg_public_key);
-
-                if (n->wg_endpoint)
-                        g_string_append_printf(config, "Endpoint=%s\n", n->wg_endpoint);
-
-                if (n->wg_preshared_key)
-                        g_string_append_printf(config, "PresharedKey=%s\n", n->wg_preshared_key);
-
-                if (n->wg_allowed_ips)
-                        g_string_append_printf(config, "AllowedIPs=%s\n\n", n->wg_allowed_ips);
+                        if (n->wg_allowed_ips)
+                                g_string_append_printf(config, "AllowedIPs=%s\n\n", n->wg_allowed_ips);
+                        break;
+                default:
+                        break;
         }
 
         *ret = steal_pointer(config);

@@ -202,7 +202,9 @@ typedef struct Network {
 } Network;
 
 int network_new(Network **ret);
-void network_unrefp(Network **n);
+void network_unref(Network *n);
+DEFINE_CLEANUP(Network*, network_unref);
+
 void g_network_free(gpointer data);
 
 int parse_address_from_string_and_add(const char *s, Set *a);
