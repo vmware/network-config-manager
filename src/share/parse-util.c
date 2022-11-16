@@ -123,10 +123,12 @@ int parse_boolean(const char *v) {
                 return -EINVAL;
 
         if (string_equal(v, "1") || string_equal_fold(v, "yes") || string_equal_fold(v, "y") ||
-            string_equal_fold(v, "true") || string_equal_fold(v, "t") || string_equal_fold(v, "on"))
+            string_equal_fold(v, "true") || string_equal_fold(v, "t") || string_equal_fold(v, "on") ||
+            string_equal_fold(v, "enable"))
                 return 1;
         else if (string_equal(v, "0") || string_equal_fold(v, "no") || string_equal_fold(v, "n") ||
-                 string_equal_fold(v, "false") || string_equal_fold(v, "f") || string_equal_fold(v, "off"))
+                 string_equal_fold(v, "false") || string_equal_fold(v, "f") || string_equal_fold(v, "off") ||
+                 string_equal_fold(v, "disable"))
                 return 0;
 
         return -EINVAL;
