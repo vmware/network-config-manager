@@ -148,10 +148,23 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         unsigned long size;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find link: %s", argv[1]);
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        break;
+                } else  {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find link: %s", argv[1]);
+                                return r;
+                        }
+                }
         }
 
         if (argc >= 2) {

@@ -18,14 +18,21 @@ int ctl_manager_new(const Ctl *ctl_commands, CtlManager **ret) {
                 return log_oom();
 
         *m = (CtlManager) {
-               .hash = g_hash_table_new(g_str_hash, g_str_equal),
+               .table = g_hash_table_new(g_str_hash, g_str_equal),
+               .table_alias = g_hash_table_new(g_str_hash, g_str_equal),
                .commands = (Ctl *) ctl_commands,
         };
-        if (!m->hash)
+        if (!m->table)
+                return log_oom();
+
+        if (!m->table_alias)
                 return log_oom();
 
         for (size_t i = 0; ctl_commands[i].name; i++)
-                g_hash_table_insert(m->hash, (gpointer *) ctl_commands[i].name, (gpointer *) &ctl_commands[i]);
+                g_hash_table_insert(m->table, (gpointer *) ctl_commands[i].name, (gpointer *) &ctl_commands[i]);
+
+        for (size_t i = 0; ctl_commands[i].alias; i++)
+                g_hash_table_insert(m->table_alias, (gpointer *) ctl_commands[i].alias, (gpointer *) &ctl_commands[i]);
 
         *ret = steal_pointer(m);
         return 0;
@@ -35,7 +42,8 @@ void ctl_unref(CtlManager *m) {
         if (!m)
                 return;
 
-        g_hash_table_unref(m->hash);
+        g_hash_table_unref(m->table);
+        g_hash_table_unref(m->table_alias);
         free(m);
 }
 
@@ -43,7 +51,10 @@ static Ctl *ctl_get_command(const CtlManager *m, const char *name) {
         assert(m);
         assert(name);
 
-        return g_hash_table_lookup(m->hash, name);
+        if (g_hash_table_lookup(m->table, name))
+                return g_hash_table_lookup(m->table, name);
+        else
+                return g_hash_table_lookup(m->table_alias, name);
 }
 
 int ctl_run_command(const CtlManager *m, int argc, char *argv[]) {
