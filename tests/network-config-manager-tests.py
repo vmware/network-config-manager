@@ -472,6 +472,12 @@ class TestCLINetwork:
     def test_cli_link_status(self):
         subprocess.check_call("nmctl", text=True, shell = True)
 
+    def test_cli_show_dns(self):
+        subprocess.check_call("nmctl dns", text=True, shell = True)
+
+    def test_cli_show_domains(self):
+        subprocess.check_call("nmctl domain", text=True, shell = True)
+
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
 
@@ -1783,14 +1789,6 @@ class TestNFTable(unittest.TestCase):
         print(output)
 
         self.assertRegex(output, 'table ip testtable99')
-
-    def test_nmctl_show_table(self):
-        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
-
-        output = subprocess.check_output(['nmctl', 'show-nft-tables'], universal_newlines=True).rstrip()
-        print(output)
-
-        self.assertRegex(output, 'testtable99')
 
     def test_nmctl_delete_table(self):
         subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
