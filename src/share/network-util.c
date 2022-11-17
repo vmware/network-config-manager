@@ -360,16 +360,6 @@ int parse_group(char *group, uint32_t *ret) {
         return 0;
 }
 
-int parse_link_act_policy(const char *c) {
-        assert(c);
-
-        if((!string_equal(c, "up")) && (!string_equal(c, "always-up")) && (!string_equal(c, "down")) &&
-           (!string_equal(c, "always-down")) && (!string_equal(c, "manual")) && (!string_equal(c, "bound")))
-                return -EINVAL;
-
-        return 0;
-}
-
 bool valid_hostname(const char *host)  {
         const char *p;
 
