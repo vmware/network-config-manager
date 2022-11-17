@@ -78,6 +78,7 @@ int manager_network_link_section_configs_new(ConfigManager **ret);
 
 int manager_set_link_local_address(const IfNameIndex *ifnameidx, const char *k, const char *v);
 int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v);
+int manager_set_network_section(const IfNameIndex *ifnameidx, const char *k, const char *v);
 int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *ifnameidx, const char *k, bool v);
 
 int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id, const char *proto);

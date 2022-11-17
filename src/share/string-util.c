@@ -170,6 +170,7 @@ int strv_add(char ***l, const char *value) {
         size_t n, m;
 
         assert(l);
+        assert(*l);
         assert(value);
 
         n = g_strv_length(*l);

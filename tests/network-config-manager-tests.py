@@ -889,6 +889,18 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'LLMNR') == 'yes')
 
+    def test_cli_set_llmnr(self):
+        assert(link_exist('test99') == True);
+
+        subprocess.check_call("nmctl llmnr dev test99 resolve", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LLMNR') == 'resolve')
+
     def test_cli_set_multicast_dns(self):
         assert(link_exist('test99') == True);
 
