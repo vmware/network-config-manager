@@ -19,6 +19,7 @@ Configure
   - Hostname.
   - DHCPv4 Server.
   - IPv6 Router Advertisements.
+  - SR-IOV
   - Add delete and view nftables table, chains and rules.
   - Edit network configuration via vim/vi.
 
