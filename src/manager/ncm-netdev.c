@@ -61,8 +61,8 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         char **s;
         int r;
 
-        for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "mode") || string_equal(argv[i], "m")) {
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "mode") || string_equal_fold(argv[i], "m")) {
                         parse_next_arg(argv, argc, i);
 
                         r = bond_name_to_mode(argv[i]);
@@ -116,8 +116,8 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
         MACVLanMode mode;
         int r;
 
-        for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -126,9 +126,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "mode")) {
+                } else if (string_equal_fold(argv[i], "mode")) {
                         parse_next_arg(argv, argc, i);
 
                         r = macvlan_name_to_mode(argv[i]);
@@ -140,12 +138,10 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
                         mode = r;
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-               if (i != 1) {
-                       log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                       return -EINVAL;
-               }
         }
 
         if (!have_mode) {
@@ -158,7 +154,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
                 return r;
         }
 
-        if (string_equal(argv[0], "create-macvlan"))
+        if (string_equal_fold(argv[0], "create-macvlan"))
                 r = manager_create_macvlan(argv[1], p->ifname, mode, true);
         else
                 r = manager_create_macvlan(argv[1], p->ifname, mode, false);
@@ -177,8 +173,8 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
         IPVLanMode mode;
         int r;
 
-        for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -187,9 +183,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
                                 return -errno;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "mode")) {
+                } else if (string_equal_fold(argv[i], "mode")) {
                         parse_next_arg(argv, argc, i);
 
                         r = ipvlan_name_to_mode(argv[i]);
@@ -201,9 +195,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
                         mode = r;
 
                         continue;
-                }
-
-                if (i != 1) {
+                } else {
                         log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
                         return -EINVAL;
                 }
@@ -219,7 +211,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
                 return r;
         }
 
-        if (string_equal(argv[0], "create-ipvlan"))
+        if (string_equal_fold(argv[0], "create-ipvlan"))
                 r = manager_create_ipvlan(argv[1], p->ifname, mode, true);
         else
                 r = manager_create_ipvlan(argv[1], p->ifname, mode, false);
@@ -240,8 +232,8 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
         uint32_t vni;
         int r;
 
-        for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -250,9 +242,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                                 return -errno;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "vni")) {
+                } else if (string_equal_fold(argv[i], "vni")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &vni);
@@ -263,9 +253,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                         have_vni = true;
                         continue;
-                }
-
-                if (string_equal(argv[i], "local")) {
+                } else if (string_equal_fold(argv[i], "local")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &local);
@@ -274,9 +262,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "remote")) {
+                } else if (string_equal_fold(argv[i], "remote")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &remote);
@@ -285,9 +271,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "group")) {
+                } else if (string_equal_fold(argv[i], "group")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &group);
@@ -296,9 +280,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "independent")) {
+                } else if (string_equal_fold(argv[i], "independent")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -308,9 +290,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                         }
                         independent = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "port")) {
+                } else if (string_equal_fold(argv[i], "port")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint16(argv[i], &port);
@@ -319,9 +299,8 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
+                } else {
 
-                if (i != 1) {
                         log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
                         return -EINVAL;
                 }
@@ -358,8 +337,8 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
         uint16_t id;
         int r = 0;
 
-        for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -369,9 +348,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         }
                         have_dev = true;
                         continue;
-                }
-
-                if (string_equal(argv[i], "id")) {
+                } else if (string_equal_fold(argv[i], "id")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint16(argv[i], &id);
@@ -381,12 +358,10 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         }
                         have_id = true;
                         continue;
-                }
-
-                if (string_equal(argv[i], "proto") || string_equal(argv[i], "protocol")) {
+                } else if (string_equal_fold(argv[i], "proto") || string_equal_fold(argv[i], "protocol")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (string_equal(argv[i], "802.1q") || string_equal(argv[i], "802.1ad")) {
+                        if (string_equal_fold(argv[i], "802.1q") || string_equal_fold(argv[i], "802.1ad")) {
                                 proto = strdup(argv[i]);
                                 if (!proto)
                                         return log_oom();
@@ -396,9 +371,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (i != 1) {
+                } else {
                         log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
                         return -EINVAL;
                 }
@@ -451,13 +424,18 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
         _auto_cleanup_ char *peer = NULL;
         int r;
 
-        for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "peer")) {
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "peer")) {
                         parse_next_arg(argv, argc, i);
 
-                        peer = strdup(argv[i]);
-                        if (!peer)
-                                return log_oom();
+                         if (!valid_ifname(argv[i])) {
+                                 log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                                 return -EINVAL;
+                         }
+
+                         peer = strdup(argv[i]);
+                         if (!peer)
+                                 return log_oom();
                 }
         }
 
@@ -481,7 +459,7 @@ _public_ int ncm_create_vrf(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "table") || string_equal(argv[i], "t")) {
+                if (string_equal_fold(argv[i], "table") || string_equal_fold(argv[i], "t")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[3], &table);
@@ -527,8 +505,8 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "dev") || string_equal(argv[i], "device") || string_equal(argv[i], "link")) {
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -537,9 +515,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                                 return -errno;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "local")) {
+                } else if (string_equal_fold(argv[i], "local")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &local);
@@ -548,9 +524,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "remote")) {
+                } else if (string_equal_fold(argv[i], "remote")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &remote);
@@ -559,9 +533,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal(argv[i], "independent")) {
+                } else if (string_equal_fold(argv[i], "independent")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -571,9 +543,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                         }
                         independent = r;
                         continue;
-                }
-
-                if (i != 1) {
+                } else {
                         log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
                         return -EINVAL;
                 }
@@ -598,9 +568,8 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
         bool have_private_key = false, have_public_key = false;
         uint16_t listen_port;
         int r;
-
-        for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "private-key")) {
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "private-key")) {
                         parse_next_arg(argv, argc, i);
 
                         private_key = strdup(argv[i]);
@@ -609,9 +578,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
 
                         have_private_key = true;
                         continue;
-                }
-
-                if (string_equal(argv[i], "public-key")) {
+                } else if (string_equal_fold(argv[i], "public-key")) {
                         parse_next_arg(argv, argc, i);
 
                         public_key = strdup(argv[i]);
@@ -620,18 +587,14 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
 
                         have_public_key = true;
                         continue;
-                }
-
-                if (string_equal(argv[i], "preshared-key")) {
+                } else if (string_equal_fold(argv[i], "preshared-key")) {
                         parse_next_arg(argv, argc, i);
 
                         preshared_key= strdup(argv[i]);
                         if (!preshared_key)
                                 return log_oom();
                         continue;
-                }
-
-                if (string_equal(argv[i], "allowed-ips")) {
+                } else if (string_equal_fold(argv[i], "allowed-ips")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -660,17 +623,14 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 if (r < 0) {
                                         log_warning("Failed to parse allowed ips '%s': %s", argv[i], g_strerror(EINVAL));
                                         return -EINVAL;
-                                }
-                        }
+                                }                        }
 
                         allowed_ips = strdup(argv[i]);
                         if (!allowed_ips)
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "endpoint")) {
+                } else if (string_equal_fold(argv[i], "endpoint")) {
                         _auto_cleanup_ IPAddress *address = NULL;
                         uint16_t port;
 
@@ -687,9 +647,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "listen-port")) {
+                } else if (string_equal_fold(argv[i], "listen-port")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint16(argv[i], &listen_port);
@@ -699,9 +657,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-
-                if (i != 1) {
+                } else {
                         log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
                         return -EINVAL;
                 }
