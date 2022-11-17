@@ -12,6 +12,8 @@
 #include "macros.h"
 #include "network-manager.h"
 
+static bool alias = false;
+
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         _cleanup_(g_dir_closep) GDir *dir = NULL;
         const char *file = NULL;
@@ -108,6 +110,7 @@ static int help(void) {
                "  -v --version                 Show package version\n"
                "  -j --json                    Show in JSON format\n"
                "  -b --no-beautify             Show without colors and headers\n"
+               "  -a --alias                   Show command alias\n"
                "\nCommands:\n"
                "  status                       [DEVICE] Show system or device status\n"
                "  status-devs                  List all devices.\n"
@@ -277,6 +280,7 @@ static int parse_argv(int argc, char *argv[]) {
                 { "version",     no_argument,       NULL, 'v'   },
                 { "json",        no_argument,       NULL, 'j'   },
                 { "no-beautify", no_argument,       NULL, 'b'   },
+                { "alias",       no_argument,       NULL, 'a'   },
                 {}
         };
         int c;
@@ -284,7 +288,7 @@ static int parse_argv(int argc, char *argv[]) {
         assert(argc >= 0);
         assert(argv);
 
-        while ((c = getopt_long(argc, argv, "hvjb", options, NULL)) >= 0) {
+        while ((c = getopt_long(argc, argv, "ahvjb", options, NULL)) >= 0) {
 
                 switch (c) {
 
@@ -298,6 +302,9 @@ static int parse_argv(int argc, char *argv[]) {
                         break;
                 case 'b':
                         set_beautify(false);
+                        break;
+                case 'a':
+                        alias = true;
                         break;
                 case '?':
                         return -EINVAL;
@@ -425,6 +432,16 @@ static int cli_run(int argc, char *argv[]) {
         r = parse_argv(argc, argv);
         if (r <= 0)
                 return r;
+
+        if (alias) {
+                printf("%-25s   %-20s\n", "Command", "Alias");
+                for (size_t i = 0; i < ELEMENTSOF(commands); i++) {
+                        if (!isempty_string(commands[i].alias))
+                                printf("%-25s   %-20s\n", commands[i].name, commands[i].alias);
+                }
+
+                return 0;
+        }
 
         if (!isempty_string(argv[1]) && !runs_without_networkd(argv[1]))
                 if (!ncm_is_netword_running())
