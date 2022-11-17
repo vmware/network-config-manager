@@ -2923,6 +2923,11 @@ _public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
+                } else {
+                         r = parse_ifname_or_index(argv[i], &p);
+                         if (r < 0)
+                                 continue;
+                         break;
                 }
         }
 
