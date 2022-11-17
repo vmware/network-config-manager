@@ -1470,7 +1470,7 @@ int manager_enable_ipv6(const IfNameIndex *ifnameidx, bool enable) {
         }
 
         if (enable)
-                r = set_config_file_string(network, "Network", "LinkLocalAddressing", "yes");
+                r = set_config_file_string(network, "Network", "LinkLocalAddressing", "ipv6");
         else
                 r = set_config_file_string(network, "Network", "LinkLocalAddressing", "no");
 

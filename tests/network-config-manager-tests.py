@@ -472,6 +472,12 @@ class TestCLINetwork:
     def test_cli_link_status(self):
         subprocess.check_call("nmctl", text=True, shell = True)
 
+    def test_cli_show_dns(self):
+        subprocess.check_call("nmctl dns", text=True, shell = True)
+
+    def test_cli_show_domains(self):
+        subprocess.check_call("nmctl domain", text=True, shell = True)
+
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
 
@@ -505,6 +511,33 @@ class TestCLINetwork:
         print(d)
         assert(d.find("domain1") != -1)
         assert(d.find("domain2") != -1)
+
+    def test_cli_enable_ipv6(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl ipv6 dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'ipv6')
+
+    def test_cli_disable_ipv6(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl ipv6 dev test99 no", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'no')
+
+    def test_cli_set_hostname(self):
+        subprocess.check_call("nmctl hostname Zeus", shell = True)
 
     def test_cli_set_mtu(self):
         assert(link_exist('test99') == True)
@@ -1783,14 +1816,6 @@ class TestNFTable(unittest.TestCase):
         print(output)
 
         self.assertRegex(output, 'table ip testtable99')
-
-    def test_nmctl_show_table(self):
-        subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
-
-        output = subprocess.check_output(['nmctl', 'show-nft-tables'], universal_newlines=True).rstrip()
-        print(output)
-
-        self.assertRegex(output, 'testtable99')
 
     def test_nmctl_delete_table(self):
         subprocess.check_call(['nmctl', 'add-nft-table', 'ipv4', 'testtable99'])
