@@ -913,6 +913,12 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
 
         r = parse_boolean(argv[3]);
         if (r < 0) {
+                if (string_equal(argv[0], "set-llmnr") || string_equal(argv[0], "llmnr") ||
+                    string_equal(argv[0], "set-mcast-dns") || string_equal(argv[0], "mcast-dns")) {
+                        if (string_equal(argv[3], "resolve")) {
+                                return manager_set_network_section(p, ctl_to_config(m, argv[0]), "resolve");
+                        }
+                }
                 log_warning("Failed to parse '%s': %s", argv[3], g_strerror(-r));
                 return r;
         }
@@ -2208,7 +2214,6 @@ _public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
-                        continue;
                 }
         }
 
@@ -2654,7 +2659,6 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
-                        continue;
                 }
         }
 
