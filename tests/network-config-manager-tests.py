@@ -512,6 +512,43 @@ class TestCLINetwork:
         assert(d.find("domain1") != -1)
         assert(d.find("domain2") != -1)
 
+    def test_cli_enable_ipv6(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl ipv6 dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'ipv6')
+
+    def test_cli_enable_ipv6(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl ipv6 dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'no')
+
+    def test_cli_enable_ipv6(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl disable-ipv6 dev test99 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'no')
+
+
     def test_cli_set_mtu(self):
         assert(link_exist('test99') == True)
 
