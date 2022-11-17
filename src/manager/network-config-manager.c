@@ -73,7 +73,7 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         }
 
         if (!have_mtu) {
-                log_warning("Failed to parse mtu: %s", g_strerror(-r));
+                log_warning("Failed to parse MTU: %s", g_strerror(-r));
                 return -EINVAL;
         }
 
@@ -284,14 +284,14 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse device arp '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                log_warning("Failed to parse arp='%s' on device '%s': %s", argv[i], p->ifname, g_strerror(-r));
                                 return r;
                         }
 
                         k = r;
                         r = manager_set_link_flag(p, ctl_to_config(m, "arp"), bool_to_string(k));
                         if (r < 0) {
-                                printf("Failed to set device arp '%s': %s\n", p->ifname, g_strerror(-r));
+                                log_warning("Failed to set arp on device='%s': %s", p->ifname, g_strerror(-r));
                                 return r;
                         }
 
@@ -301,14 +301,14 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse device multicast '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                log_warning("Failed to parse device='%s' multicast='%s': %s", p->ifname, argv[i], g_strerror(-r));
                                 return r;
                         }
 
                         k = r;
                         r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
                         if (r < 0) {
-                                printf("Failed to set device multicast '%s': %s\n", p->ifname, g_strerror(-r));
+                                log_warning("Failed to set multicast on device '%s': %s", p->ifname, g_strerror(-r));
                                 return r;
                         }
 
@@ -318,7 +318,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse device allmulticast '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                log_warning("Failed to parse device='%s' allmulticast='%s': %s", p->ifname, argv[i], g_strerror(-r));
                                 return r;
                         }
 
@@ -335,14 +335,14 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse device promiscuous '%s' '%s': %s", p->ifname, argv[i], g_strerror(-r));
+                                log_warning("Failed to parse device='%s' promiscuous='%s': %s", p->ifname, argv[i], g_strerror(-r));
                                 return r;
                         }
 
                         k = r;
                         r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
                         if (r < 0) {
-                                printf("Failed to set device arp '%s': %s\n", p->ifname, g_strerror(-r));
+                                log_warning("Failed to set device arp on device '%s': %s", p->ifname, g_strerror(-r));
                                 return r;
                         }
                 }
@@ -1083,9 +1083,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                }
-
-                if (string_equal_fold(argv[i], "peer")) {
+                } else if (string_equal_fold(argv[i], "peer")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_string(argv[i], &peer);
@@ -1663,10 +1661,10 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
-                return -EINVAL;
         }
 
         if (!p) {
@@ -1795,10 +1793,10 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         if (!p) {
@@ -1956,10 +1954,10 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
 
                         emit_router = r;
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         if (!p) {
@@ -2175,10 +2173,11 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
 
                         preference = r;
                         continue;
-                }
+                } else {
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
+                }
         }
 
         if (!p) {
