@@ -284,7 +284,7 @@ static int parse_argv(int argc, char *argv[]) {
         assert(argc >= 0);
         assert(argv);
 
-        while ((c = getopt_long(argc, argv, "hv", options, NULL)) >= 0) {
+        while ((c = getopt_long(argc, argv, "hvjb", options, NULL)) >= 0) {
 
                 switch (c) {
 
@@ -329,8 +329,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp-iaid",                 "dhcp-iaid",        4,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
                 { "set-dhcp-duid",                 "dhcp-duid",        4,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
                 { "set-link-state",                "link-state",       3,        WORD_ANY, false, ncm_link_update_state },
-                { "add-addr",                      "a",                4,        WORD_ANY, false, ncm_link_add_address },
-                { "show-addr",                     "sa",               1,        WORD_ANY, false, ncm_display_one_link_addresses },
+                { "add-addr",                      "aa",               4,        WORD_ANY, false, ncm_link_add_address },
+                { "show-addr",                     "a",                1,        WORD_ANY, false, ncm_display_one_link_addresses },
                 { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_delete_address },
                 { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_add_default_gateway },
                 { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
@@ -353,18 +353,18 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-lldp",                      "lldp",             3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-emit-lldp",                 "elldp",            3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-ipforward",                 "ipfwd",            3,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-ipv6acceptra",              "pv6acceptra",      3,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-ipmasquerade",              "ipmasquerade",     3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-ipv6acceptra",              "ipv6ara",          3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-ipmasquerade",              "ipmasq",           3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-ipv4proxyarp",              "ipv4proxyarp",     3,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-ipv6proxyndp",              "pv6proxyndp",      3,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-conf-wc",                   "conf-wc",          3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-ipv6proxyndp",              "ipv6proxyndp",     3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-conf-wc",                   "cwc",              3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-dhcp4",                     "dhcp4",            4,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp6",                     "dhcp6",            4,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "add-dhcpv4-server",             "dhcpv4-server" ,   2,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
                 { "remove-dhcpv4-server",          "rdhcpv4-server",   2,        WORD_ANY, false, ncm_link_remove_dhcpv4_server },
                 { "add-ipv6ra",                    "ipv6ra",           2,        WORD_ANY, false, ncm_link_add_ipv6_router_advertisement },
                 { "remove-ipv6ra",                 "ripv6ra",          2,        WORD_ANY, false, ncm_link_remove_ipv6_router_advertisement },
-                { "add-ntp",                       "ntp",              2,        WORD_ANY, false, ncm_link_add_ntp },
+                { "add-ntp",                       "antp",             2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "set-ntp",                       "sntp" ,            2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_delete_ntp },
                 { "enable-ipv6",                   "ipv6",             2,        WORD_ANY, false, ncm_link_enable_ipv6 },
@@ -384,9 +384,9 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-vti",                    "vti",              3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-wg",                     "wg",               3,        WORD_ANY, false, ncm_create_wireguard_tunnel },
                 { "remove-netdev",                 "rnetdev",          1,        WORD_ANY, false, ncm_remove_netdev },
-                { "reload",                        "re" ,              WORD_ANY, WORD_ANY, false, ncm_network_reload },
-                { "reconfigure",                   "rc" ,              1,        WORD_ANY, false, ncm_link_reconfigure },
-                { "show-config",                   "sc" ,              1,        WORD_ANY, false, ncm_link_show_network_config },
+                { "reload",                        "re",               WORD_ANY, WORD_ANY, false, ncm_network_reload },
+                { "reconfigure",                   "rc",               1,        WORD_ANY, false, ncm_link_reconfigure },
+                { "show-config",                   "sc",               1,        WORD_ANY, false, ncm_link_show_network_config },
                 { "edit",                          "e" ,               1,        WORD_ANY, false, ncm_link_edit_network_config },
                 { "set-link",                      "" ,                2,        WORD_ANY, false, ncm_configure_link },
                 { "set-link-feature",              "" ,                2,        WORD_ANY, false, ncm_configure_link_features },
