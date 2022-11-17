@@ -130,6 +130,7 @@ int parse_yaml_rf_online(const char *key,
                            yaml_document_t *doc,
                            yaml_node_t *node) {
         char **family;
+        int r;
 
         assert(key);
         assert(value);
@@ -138,8 +139,8 @@ int parse_yaml_rf_online(const char *key,
         assert(node);
 
         family = (char **) userdata;
-
-        if(parse_link_rf_online(value)) {
+        r = address_family_name_to_type(value);
+        if(r < 0) {
                 log_warning("Failed to parse RequiredFamilyForOnline: %s", value);
                 return -EINVAL;
         }

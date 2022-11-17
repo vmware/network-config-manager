@@ -154,7 +154,7 @@ int network_parse_link_required_for_online(int ifindex, char **state) {
         return network_parse_link_string(ifindex, "REQUIRED_FOR_ONLINE", state);
 }
 
-int network_parse_link_activation_policy(int ifindex, char **state) {
+int network_parse_link_device_activation_policy(int ifindex, char **state) {
         return network_parse_link_string(ifindex, "ACTIVATION_POLICY", state);
 }
 

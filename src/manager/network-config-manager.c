@@ -421,7 +421,7 @@ _public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
                 } else if (string_equal_fold(argv[i], "family") || string_equal_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_link_rf_online(argv[i]);
+                        r = address_family_name_to_type(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse RequiredFamilyForOnline '%s': %s", argv[2], g_strerror(EINVAL));
                                 return r;
@@ -476,7 +476,7 @@ _public_ int ncm_link_set_act_policy(int argc, char *argv[]) {
                 } else if (string_equal_fold(argv[i], "ap") || string_equal_fold(argv[i], "act-policy")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_link_act_policy(argv[i]);
+                        r = device_activation_policy_name_to_type(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse ActivationPolicy='%s': %s", argv[2], g_strerror(EINVAL));
                                 return r;

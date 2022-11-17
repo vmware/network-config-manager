@@ -605,7 +605,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL, *link = NULL, *online_state = NULL,
                 *address_state = NULL, *ipv4_state = NULL, *ipv6_state = NULL, *required_for_online = NULL,
-                *activation_policy = NULL;
+                *device_activation_policy = NULL;
         _cleanup_(addresses_unrefp) Addresses *addr = NULL;
         _cleanup_(routes_unrefp) Routes *route = NULL;
         _cleanup_(link_unrefp) Link *l = NULL;
@@ -764,11 +764,11 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 steal_pointer(js);
         }
 
-        r = network_parse_link_activation_policy(l->ifindex, &activation_policy);
+        r = network_parse_link_device_activation_policy(l->ifindex, &device_activation_policy);
         if (r >= 0) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                js = json_object_new_string(activation_policy);
+                js = json_object_new_string(device_activation_policy);
                 if (!js)
                         return log_oom();
 
