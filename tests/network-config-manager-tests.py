@@ -466,6 +466,12 @@ class TestCLINetwork:
         remove_units_from_netword_unit_path()
         link_remove('test99')
 
+    def test_cli_link_status(self):
+        subprocess.check_call("nmctl status 2", text=True, shell = True)
+
+    def test_cli_link_status(self):
+        subprocess.check_call("nmctl", text=True, shell = True)
+
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
 
@@ -499,7 +505,6 @@ class TestCLINetwork:
         print(d)
         assert(d.find("domain1") != -1)
         assert(d.find("domain2") != -1)
-
 
     def test_cli_set_mtu(self):
         assert(link_exist('test99') == True)
