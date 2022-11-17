@@ -2718,9 +2718,7 @@ _public_ int ncm_link_add_ntp(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
-                }
-
-                if (string_equal_fold(argv[i], "ntp")) {
+                } else if (string_equal_fold(argv[i], "ntp")) {
                         parse_next_arg(argv, argc, i);
 
                         r = argv_to_strv(argc - 4, argv + i, &ntps);
