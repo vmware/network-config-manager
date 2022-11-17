@@ -359,7 +359,7 @@ static int list_one_link(char *argv[]) {
         if (arg_json)
                 return json_list_one_link(p, NULL);
 
-        r = link_get_one_link(*argv, &l);
+        r = link_get_one_link(p->ifname, &l);
         if (r < 0)
                 return r;
 

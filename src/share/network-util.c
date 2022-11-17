@@ -240,6 +240,7 @@ int parse_ifname_or_index(const char *s, IfNameIndex **ret) {
                 n = if_indextoname(ifindex, p->ifname);
                 if (!n)
                         return -ENOENT;
+                p->ifindex = ifindex;
         } else {
                 p->ifindex = r;
                 memcpy(p->ifname, s, IFNAMSIZ);
