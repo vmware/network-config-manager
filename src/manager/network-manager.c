@@ -28,8 +28,10 @@
 static const Config network_ctl_to_network_section_config_table[] = {
                 { "set-lla",           "LinkLocalAddressing"},
                 { "set-ipv4ll-route",  "IPv4LLRoute"},
+                { "llmnr",             "LLMNR"},
                 { "set-llmnr",         "LLMNR"},
                 { "set-mcast-dns",     "MulticastDNS" },
+                { "mcast-dns",         "MulticastDNS" },
                 { "set-lldp",          "LLDP"},
                 { "set-emit-lldp",     "EmitLLDP"},
                 { "set-ipforward",     "IPForward"},
