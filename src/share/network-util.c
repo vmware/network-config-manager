@@ -19,6 +19,33 @@
 #include "parse-util.h"
 #include "string-util.h"
 
+static const char * const address_family_table[_ADDRESS_FAMILY_MAX] = {
+        [ADDRESS_FAMILY_NO]   = "no",
+        [ADDRESS_FAMILY_YES]  = "yes",
+        [ADDRESS_FAMILY_IPV4] = "ipv4",
+        [ADDRESS_FAMILY_IPV6] = "ipv6",
+};
+
+const char *address_family_type_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(address_family_table))
+                return NULL;
+
+        return address_family_table[id];
+}
+
+int address_family_name_to_type(const char *name) {
+        assert(name);
+
+        for (size_t i = ADDRESS_FAMILY_NO; i < (size_t) ELEMENTSOF(address_family_table); i++)
+                if (string_equal_fold(name, address_family_table[i]))
+                        return i;
+
+        return _ADDRESS_FAMILY_INVALID;
+}
+
 bool ip4_addr_is_null(const IPAddress *a) {
         assert(a);
 
@@ -301,16 +328,6 @@ int parse_group(char *group, uint32_t *ret) {
                 return r;
 
         *ret = j;
-        return 0;
-}
-
-int parse_link_rf_online(const char *c) {
-        assert(c);
-
-        if((!string_equal(c, "ipv4")) && (!string_equal(c, "ipv6")) &&
-           (!string_equal(c, "both")) && (!string_equal(c, "any")))
-                return -EINVAL;
-
         return 0;
 }
 

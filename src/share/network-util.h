@@ -22,6 +22,16 @@
 
 #define parse_ether_address(mac) ether_aton(mac)
 
+
+typedef enum AddressFamily {
+        ADDRESS_FAMILY_NO,
+        ADDRESS_FAMILY_IPV4,
+        ADDRESS_FAMILY_IPV6,
+        ADDRESS_FAMILY_YES,
+        _ADDRESS_FAMILY_MAX,
+        _ADDRESS_FAMILY_INVALID = -EINVAL,
+} AddressFamily;
+
 typedef struct IPAddress {
         struct in_addr in;
         struct in6_addr in6;
@@ -61,3 +71,6 @@ int parse_link_act_policy(const char *c);
 
 bool valid_hostname(const char *host);
 bool valid_ifname(const char *s);
+
+const char *address_family_type_to_name(int id);
+int address_family_name_to_type(const char *name);
