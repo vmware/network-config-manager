@@ -1365,6 +1365,25 @@ int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k
         return dbus_network_reload();
 }
 
+int manager_set_network_section(const IfNameIndex *ifnameidx, const char *k, const char *v) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifnameidx);
+        assert(k);
+
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_string(network, "Network", k, v);
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
+
 int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *ifnameidx, const char *k, bool v) {
         _auto_cleanup_ char *network = NULL;
         int r;
