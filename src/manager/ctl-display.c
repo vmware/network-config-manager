@@ -339,7 +339,7 @@ static void display_alterative_names(gpointer data, gpointer user_data) {
 
 static int list_one_link(char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *address_state = NULL, *ipv4_state = NULL,
-                *ipv6_state = NULL, *required_for_online = NULL, *activation_policy = NULL, *tz = NULL, *network = NULL,
+                *ipv6_state = NULL, *required_for_online = NULL, *device_activation_policy = NULL, *tz = NULL, *network = NULL,
                 *online_state = NULL, *link = NULL, *dhcp4_identifier = NULL, *dhcp6_duid = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
@@ -459,10 +459,10 @@ static int list_one_link(char *argv[]) {
                 display(arg_beautify, ansi_color_bold_cyan(), "         Required for Online: ");
                 printf("%s\n", required_for_online);
         }
-        r = network_parse_link_activation_policy(l->ifindex, &activation_policy);
+        r = network_parse_link_device_activation_policy(l->ifindex, &device_activation_policy);
         if (r >= 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "           Activation Policy: ");
-                printf("%s\n", activation_policy);
+                printf("%s\n", device_activation_policy);
         }
 
         (void)  display_one_link_udev(l, true, NULL);

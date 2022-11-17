@@ -32,6 +32,17 @@ typedef enum AddressFamily {
         _ADDRESS_FAMILY_INVALID = -EINVAL,
 } AddressFamily;
 
+typedef enum ActivationPolicy {
+        DEVICE_ACTIVATION_POLICY_UP,
+        DEVICE_ACTIVATION_POLICY_ALWAYS_UP,
+        DEVICE_ACTIVATION_POLICY_MANUAL,
+        DEVICE_ACTIVATION_POLICY_ALWAYS_DOWN,
+        DEVICE_ACTIVATION_POLICY_DOWN,
+        DEVICE_ACTIVATION_POLICY_BOUND,
+        _DEVICE_ACTIVATION_POLICY_MAX,
+        _DEVICE_ACTIVATION_POLICY_INVALID = -EINVAL,
+} ActivationPolicy;
+
 typedef struct IPAddress {
         struct in_addr in;
         struct in6_addr in6;
@@ -74,3 +85,6 @@ bool valid_ifname(const char *s);
 
 const char *address_family_type_to_name(int id);
 int address_family_name_to_type(const char *name);
+
+const char *device_activation_policy_type_to_name(int id);
+int device_activation_policy_name_to_type(const char *name);

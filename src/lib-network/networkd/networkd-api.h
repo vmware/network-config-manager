@@ -16,7 +16,7 @@ int network_parse_link_ipv4_state(int ifindex, char **state);
 int network_parse_link_ipv6_state(int ifindex, char **state);
 int network_parse_link_online_state(int ifindex, char **state);
 int network_parse_link_required_for_online(int ifindex, char **state);
-int network_parse_link_activation_policy(int ifindex, char **state);
+int network_parse_link_device_activation_policy(int ifindex, char **state);
 int network_parse_link_operational_state(int ifindex, char **state);
 int network_parse_link_llmnr(int ifindex, char **llmnr);
 int network_parse_link_mdns(int ifindex, char **mdns);

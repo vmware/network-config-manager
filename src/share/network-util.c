@@ -46,6 +46,35 @@ int address_family_name_to_type(const char *name) {
         return _ADDRESS_FAMILY_INVALID;
 }
 
+static const char* const device_activation_policy_table[_DEVICE_ACTIVATION_POLICY_MAX] = {
+        [DEVICE_ACTIVATION_POLICY_UP] =          "up",
+        [DEVICE_ACTIVATION_POLICY_ALWAYS_UP] =   "always-up",
+        [DEVICE_ACTIVATION_POLICY_MANUAL] =      "manual",
+        [DEVICE_ACTIVATION_POLICY_ALWAYS_DOWN] = "always-down",
+        [DEVICE_ACTIVATION_POLICY_DOWN] =        "down",
+        [DEVICE_ACTIVATION_POLICY_BOUND] =       "bound",
+};
+
+const char *device_activation_policy_type_to_name(int id) {
+        if (id < 0)
+                return "n/a";
+
+        if ((size_t) id >= ELEMENTSOF(device_activation_policy_table))
+                return NULL;
+
+        return address_family_table[id];
+}
+
+int device_activation_policy_name_to_type(const char *name) {
+        assert(name);
+
+        for (size_t i = DEVICE_ACTIVATION_POLICY_UP; i < (size_t) ELEMENTSOF(device_activation_policy_table); i++)
+                if (string_equal_fold(name, device_activation_policy_table[i]))
+                        return i;
+
+        return _DEVICE_ACTIVATION_POLICY_INVALID;
+}
+
 bool ip4_addr_is_null(const IPAddress *a) {
         assert(a);
 
