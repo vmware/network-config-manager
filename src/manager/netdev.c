@@ -318,6 +318,9 @@ int generate_netdev_config(NetDev *n, GString **ret) {
 
                         g_string_append(config, "[Tunnel]\n");
 
+                        if (n->independent)
+                               g_string_append(config, "Independent=yes\n");
+
                         if (!ip_is_null(&n->local)) {
                                 (void) ip_to_string(n->local.family, &n->local, &local);
                                 g_string_append_printf(config, "Local=%s\n", local);

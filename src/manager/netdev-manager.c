@@ -606,7 +606,6 @@ int manager_create_tunnel(const char *tunnel,
         int r;
 
         assert(tunnel);
-        assert(dev);
 
         r = netdev_new(&netdev);
         if (r < 0)
@@ -615,7 +614,7 @@ int manager_create_tunnel(const char *tunnel,
         *netdev = (NetDev) {
                 .ifname = strdup(tunnel),
                 .kind = kind,
-                .independent = dev ? false : true,
+                .independent = independent,
         };
 
         if (!netdev->ifname)

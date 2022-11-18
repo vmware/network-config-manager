@@ -1403,7 +1403,7 @@ class TestCLINetDev:
         link_remove('ipip-98')
 
     def test_cli_create_ipip_without_master_device(self):
-        subprocess.check_call("nmctl create-ipip ipip-98 local 192.168.1.2 remote 192.168.1.3", shell = True)
+        subprocess.check_call("nmctl create-ipip ipip-98 local 192.168.1.2 remote 192.168.1.3 independent yes", shell = True)
         assert(unit_exist('10-ipip-98.netdev') == True)
         assert(unit_exist('10-ipip-98.network') == True)
 
