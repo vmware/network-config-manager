@@ -33,9 +33,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
 
                         enable = r;
                         continue;
-                }
-
-                if (string_equal(argv[i], "http") || string_equal(argv[i], "none")) {
+                } else if (string_equal(argv[i], "http") || string_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
                         if (string_equal(argv[i], "none"))
@@ -46,9 +44,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "https") || string_equal(argv[i], "none")) {
+                } else if (string_equal(argv[i], "https") || string_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
                         if (string_equal(argv[i], "none"))
@@ -59,9 +55,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "ftp") || string_equal(argv[i], "none")) {
+                } else if (string_equal(argv[i], "ftp") || string_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
                         if (string_equal(argv[i], "none"))
@@ -72,9 +66,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "gopher") || string_equal(argv[i], "none")) {
+                } else if (string_equal(argv[i], "gopher") || string_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
                         if (string_equal(argv[i], "none"))
@@ -85,9 +77,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "socks") || string_equal(argv[i], "none")) {
+                } else if (string_equal(argv[i], "socks") || string_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
                         if (string_equal(argv[i], "none"))
@@ -98,9 +88,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "socks5") || string_equal(argv[i], "none")) {
+                } else if (string_equal(argv[i], "socks5") || string_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
                         if (string_equal(argv[i], "none"))
@@ -111,9 +99,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "noproxy") || string_equal(argv[i], "none")) {
+                } else if (string_equal(argv[i], "noproxy") || string_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
                         if (string_equal(argv[i], "none"))
@@ -124,10 +110,10 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = manager_configure_proxy(enable, http, https, ftp, gopher, socks, socks5, no_proxy);
