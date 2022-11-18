@@ -10,7 +10,7 @@
 #include "parse-util.h"
 #include "string-util.h"
 
-static const char *const netdev_kind[_NET_DEV_KIND_MAX] = {
+static const char *const netdev_kind_table[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_VLAN]        = "vlan",
         [NET_DEV_KIND_BRIDGE]      = "bridge",
         [NET_DEV_KIND_BOND]        = "bond",
@@ -32,23 +32,23 @@ const char *netdev_kind_to_name(NetDevKind id) {
         if (id < 0)
                 return "n/a";
 
-        if ((size_t) id >= ELEMENTSOF(netdev_kind))
+        if ((size_t) id >= ELEMENTSOF(netdev_kind_table))
                 return NULL;
 
-        return netdev_kind[id];
+        return netdev_kind_table[id];
 }
 
 int netdev_name_to_kind(const char *name) {
         assert(name);
 
-        for (size_t i = NET_DEV_KIND_VLAN; i < (int) ELEMENTSOF(netdev_kind); i++)
-                if (netdev_kind[i] && string_equal_fold(name, netdev_kind[i]))
+        for (size_t i = NET_DEV_KIND_VLAN; i < (int) ELEMENTSOF(netdev_kind_table); i++)
+                if (netdev_kind_table[i] && string_equal_fold(name, netdev_kind_table[i]))
                         return i;
 
         return _NET_DEV_KIND_INVALID;
 }
 
-static const char *const bond_mode[_BOND_MODE_MAX] = {
+static const char *const bond_mode_table[_BOND_MODE_MAX] = {
         [BOND_MODE_ROUNDROBIN]   = "balance-rr",
         [BOND_MODE_ACTIVEBACKUP] = "active-backup",
         [BOND_MODE_XOR]          = "balance-xor",
@@ -62,23 +62,23 @@ const char *bond_mode_to_name(BondMode id) {
         if (id < 0)
                 return "n/a";
 
-        if ((size_t) id >= ELEMENTSOF(bond_mode))
+        if ((size_t) id >= ELEMENTSOF(bond_mode_table))
                 return NULL;
 
-        return bond_mode[id];
+        return bond_mode_table[id];
 }
 
 int bond_name_to_mode(const char *name) {
         assert(name);
 
-        for (size_t i = BOND_MODE_ROUNDROBIN; i < (size_t) ELEMENTSOF(bond_mode); i++)
-                if (bond_mode[i] && string_equal_fold(name, bond_mode[i]))
+        for (size_t i = BOND_MODE_ROUNDROBIN; i < (size_t) ELEMENTSOF(bond_mode_table); i++)
+                if (bond_mode_table[i] && string_equal_fold(name, bond_mode_table[i]))
                         return i;
 
         return _BOND_MODE_INVALID;
 }
 
-static const char *const macvlan_mode[_MAC_VLAN_MODE_MAX] = {
+static const char *const macvlan_mode_table[_MAC_VLAN_MODE_MAX] = {
         [MAC_VLAN_MODE_PRIVATE]  = "private",
         [MAC_VLAN_MODE_VEPA]     = "vepa",
         [MAC_VLAN_MODE_BRIDGE]   = "bridge",
@@ -90,23 +90,23 @@ const char *macvlan_mode_to_name(MACVLanMode id) {
         if (id < 0)
                 return "n/a";
 
-        if ((size_t) id >= ELEMENTSOF(macvlan_mode))
+        if ((size_t) id >= ELEMENTSOF(macvlan_mode_table))
                 return NULL;
 
-        return macvlan_mode[id];
+        return macvlan_mode_table[id];
 }
 
 int macvlan_name_to_mode(const char *name) {
         assert(name);
 
-        for (size_t i= MAC_VLAN_MODE_PRIVATE; i < (size_t) ELEMENTSOF(macvlan_mode); i++)
-                if (macvlan_mode[i] && string_equal_fold(name, macvlan_mode[i]))
+        for (size_t i= MAC_VLAN_MODE_PRIVATE; i < (size_t) ELEMENTSOF(macvlan_mode_table); i++)
+                if (macvlan_mode_table[i] && string_equal_fold(name, macvlan_mode_table[i]))
                         return i;
 
         return _MAC_VLAN_MODE_INVALID;
 }
 
-static const char *const ipvlan_mode[_IP_VLAN_MODE_MAX] = {
+static const char *const ipvlan_mode_table[_IP_VLAN_MODE_MAX] = {
         [IP_VLAN_MODE_L2]  = "L2",
         [IP_VLAN_MODE_L3]  = "L3",
         [IP_VLAN_MODE_L3S] = "L3S",
@@ -116,22 +116,21 @@ const char *ipvlan_mode_to_name(IPVLanMode id) {
         if (id < 0)
                 return "n/a";
 
-        if ((size_t) id >= ELEMENTSOF(ipvlan_mode))
+        if ((size_t) id >= ELEMENTSOF(ipvlan_mode_table))
                 return NULL;
 
-        return ipvlan_mode[id];
+        return ipvlan_mode_table[id];
 }
 
 int ipvlan_name_to_mode(const char *name) {
         assert(name);
 
-        for (size_t i = IP_VLAN_MODE_L2; i < (int) ELEMENTSOF(ipvlan_mode); i++)
-                if (ipvlan_mode[i] && string_equal_fold(name, ipvlan_mode[i]))
+        for (size_t i = IP_VLAN_MODE_L2; i < (int) ELEMENTSOF(ipvlan_mode_table); i++)
+                if (ipvlan_mode_table[i] && string_equal_fold(name, ipvlan_mode_table[i]))
                         return i;
 
         return _IP_VLAN_MODE_INVALID;
 }
-
 
 static const Config netdev_ctl_name_to_config_table[] = {
                 { "vlan",    "VLAN"},
