@@ -193,7 +193,7 @@ int manager_get_link_dhcp_client(const IfNameIndex *ifnameidx, DHCPClient *mode)
         return 0;
 }
 
-int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier) {
+int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, const DHCPClientIdentifier identifier) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -230,7 +230,7 @@ int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPC
         return 0;
 }
 
-int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t iaid) {
+int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, const DHCPClient kind, const uint32_t iaid) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -249,7 +249,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient k
         return 0;
 }
 
-int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t *iaid) {
+int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, const DHCPClient kind, uint32_t *iaid) {
         _auto_cleanup_ char *network = NULL;
         uint32_t v;
         int r;
@@ -268,7 +268,11 @@ int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient k
         return 0;
 }
 
-int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system, DHCPClient kind) {
+int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx,
+                                      const DHCPClientDUIDType duid,
+                                      const char *raw_data,
+                                      const bool system,
+                                      const DHCPClient kind) {
         _auto_cleanup_ char *c = NULL;
         int r;
 
@@ -459,12 +463,12 @@ int manager_set_link_state(const IfNameIndex *ifnameidx, LinkState state) {
 }
 
 int manager_configure_link_address(const IfNameIndex *ifnameidx,
-                                   IPAddress *address,
-                                   IPAddress *peer,
-                                   char *scope,
-                                   char *pref_lft,
-                                   IPDuplicateAddressDetection dad,
-                                   int prefix_route,
+                                   const IPAddress *address,
+                                   const IPAddress *peer,
+                                   const char *scope,
+                                   const char *pref_lft,
+                                   const IPDuplicateAddressDetection dad,
+                                   const int prefix_route,
                                    const char *label) {
 
         _auto_cleanup_ char *network = NULL, *a = NULL, *p = NULL;
@@ -611,18 +615,18 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
 }
 
 int manager_configure_route(const IfNameIndex *ifnameidx,
-                            IPAddress *gateway,
-                            IPAddress *destination,
-                            IPAddress *source,
-                            IPAddress *pref_source,
-                            IPv6RoutePreference rt_pref,
-                            RouteProtocol protocol,
-                            RouteScope scope,
-                            RouteType type,
-                            RouteTable table,
-                            uint32_t mtu,
-                            int metric,
-                            int onlink) {
+                            const IPAddress *gateway,
+                            const IPAddress *destination,
+                            const IPAddress *source,
+                            const IPAddress *pref_source,
+                            const IPv6RoutePreference rt_pref,
+                            const RouteProtocol protocol,
+                            const RouteScope scope,
+                            const RouteType type,
+                            const RouteTable table,
+                            const uint32_t mtu,
+                            const int metric,
+                            const int onlink) {
 
         _auto_cleanup_ char *network = NULL, *gw = NULL, *dest = NULL, *src = NULL, *pref_src = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;

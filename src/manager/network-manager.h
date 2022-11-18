@@ -22,21 +22,25 @@ int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group);
 int manager_set_link_rf_online(const IfNameIndex *ifnameidx, const char *addrfamily);
 int manager_set_link_act_policy(const IfNameIndex *ifnameidx, const char *actpolicy);
 
-int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier identifier);
+int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, const DHCPClientIdentifier identifier);
 int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret);
 
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t v);
 int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t *iaid);
 
-int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx, DHCPClientDUIDType duid, char *raw_data, bool system, DHCPClient kind);
+int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx,
+                                      const DHCPClientDUIDType duid,
+                                      const char *raw_data,
+                                      const bool system,
+                                      const DHCPClient kind);
 
 int manager_configure_link_address(const IfNameIndex *ifnameidx,
-                                   IPAddress *address,
-                                   IPAddress *peer,
-                                   char *scope,
-                                   char *pref_lft,
-                                   IPDuplicateAddressDetection dad,
-                                   int prefix_route,
+                                   const IPAddress *address,
+                                   const IPAddress *peer,
+                                   const char *scope,
+                                   const char *pref_lft,
+                                   const IPDuplicateAddressDetection dad,
+                                   const int prefix_route,
                                    const char *label);
 
 int manager_delete_link_address(const IfNameIndex *ifnameidx, const char *a);
@@ -44,18 +48,18 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx, const char *a);
 int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt);
 
 int manager_configure_route(const IfNameIndex *ifnameidx,
-                            IPAddress *gateway,
-                            IPAddress *destination,
-                            IPAddress *source,
-                            IPAddress *pref_source,
-                            IPv6RoutePreference rt_pref,
-                            RouteProtocol protocol,
-                            RouteScope scope,
-                            RouteType type,
-                            RouteTable table,
-                            uint32_t mtu,
-                            int metric,
-                            int onlink);
+                            const IPAddress *gateway,
+                            const IPAddress *destination,
+                            const IPAddress *source,
+                            const IPAddress *pref_source,
+                            const IPv6RoutePreference rt_pref,
+                            const RouteProtocol protocol,
+                            const RouteScope scope,
+                            const RouteType type,
+                            const RouteTable table,
+                            const uint32_t mtu,
+                            const int metric,
+                            const int onlink);
 
 int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway);
 
