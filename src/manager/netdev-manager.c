@@ -312,7 +312,6 @@ int manager_create_vxlan(const char *vxlan,
         int r;
 
         assert(vxlan);
-        assert(dev);
         assert(vni > 0);
 
         r = netdev_new(&netdev);
@@ -324,7 +323,7 @@ int manager_create_vxlan(const char *vxlan,
                       .kind = NET_DEV_KIND_VXLAN,
                       .id = vni,
                       .destination_port = port,
-                      .independent = dev ? false : true,
+                      .independent = independent,
                   };
 
         if (!netdev->ifname)

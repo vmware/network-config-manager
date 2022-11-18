@@ -270,6 +270,9 @@ int generate_netdev_config(NetDev *n, GString **ret) {
 
                         if (n->destination_port > 0)
                                 g_string_append_printf(config, "DestinationPort=%d\n", n->destination_port);
+
+                        if (n->independent)
+                               g_string_append(config, "Independent=yes\n");
                 }
                         break;
 
