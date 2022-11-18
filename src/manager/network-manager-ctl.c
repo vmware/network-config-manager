@@ -434,10 +434,10 @@ static int cli_run(int argc, char *argv[]) {
                 return r;
 
         if (alias) {
-                printf("%-25s   %-20s\n", "Command", "Alias");
+                printf("%s   %28s\n", "Command", "Alias");
                 for (size_t i = 0; i < ELEMENTSOF(commands); i++) {
                         if (!isempty_string(commands[i].alias))
-                                printf("%-25s   %-20s\n", commands[i].name, commands[i].alias);
+                                printf("%-30s   %-30s\n", commands[i].name, commands[i].alias);
                 }
 
                 return 0;
