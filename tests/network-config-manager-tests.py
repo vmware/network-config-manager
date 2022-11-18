@@ -1402,6 +1402,30 @@ class TestCLINetDev:
 
         link_remove('ipip-98')
 
+    def test_cli_create_ipip_without_master_device(self):
+        subprocess.check_call("nmctl create-ipip ipip-98 local 192.168.1.2 remote 192.168.1.3", shell = True)
+        assert(unit_exist('10-ipip-98.netdev') == True)
+        assert(unit_exist('10-ipip-98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '3'])
+
+        assert(link_exist('ipip-98') == True)
+
+        ipip_parser = configparser.ConfigParser()
+        ipip_parser.read(os.path.join(networkd_unit_file_path, '10-ipip-98.netdev'))
+
+        assert(ipip_parser.get('NetDev', 'Name') == 'ipip-98')
+        assert(ipip_parser.get('NetDev', 'kind') == 'ipip')
+        assert(ipip_parser.get('Tunnel', 'Local') == '192.168.1.2')
+        assert(ipip_parser.get('Tunnel', 'Remote') == '192.168.1.3')
+
+        ipip_network_parser = configparser.ConfigParser()
+        ipip_network_parser.read(os.path.join(networkd_unit_file_path, '10-ipip-98.network'))
+
+        assert(ipip_network_parser.get('Match', 'Name') == 'ipip-98')
+        link_remove('ipip-98')
+
     def test_cli_create_gre(self):
         assert(link_exist('test98') == True)
 
