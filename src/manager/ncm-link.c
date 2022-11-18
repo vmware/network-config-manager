@@ -32,10 +32,8 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link : %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "alias")) {
@@ -249,10 +247,8 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link feature: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "auton")) {
@@ -457,10 +453,8 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link feature: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "rxbuf")) {
@@ -533,10 +527,8 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link queue size: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 unsigned v;
@@ -599,10 +591,8 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link flow control: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "rxflowctrl")) {
@@ -664,10 +654,8 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link gso: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "gsob")) {
@@ -718,10 +706,8 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link channel: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "rxch")) {
@@ -806,10 +792,8 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link coalesce: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "rxcs")) {
@@ -950,10 +934,8 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link coalesce frames: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "rxmcf")) {
@@ -1094,10 +1076,8 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link coalesce packet rate: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "cprlow")) {
@@ -1182,10 +1162,8 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link altname: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "altnamepolicy")) {
@@ -1271,10 +1249,8 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link name: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "namepolicy")) {
@@ -1361,10 +1337,8 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link mac: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal(argv[i], "macpolicy")) {
