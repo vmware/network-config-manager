@@ -27,18 +27,16 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link : %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "alias")) {
+                if (string_equal_fold(argv[i], "alias")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_alias(argv[i]);
@@ -52,8 +50,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "desc")) {
+                } else if (string_equal_fold(argv[i], "desc")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!argv[i]) {
@@ -66,8 +63,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "mtub")) {
+                } else if (string_equal_fold(argv[i], "mtub")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_link_bytes(argv[i])) {
@@ -80,8 +76,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "bps")) {
+                } else if (string_equal_fold(argv[i], "bps")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_link_bytes(argv[i])) {
@@ -94,8 +89,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "duplex")) {
+                } else if (string_equal_fold(argv[i], "duplex")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_duplex(argv[i]);
@@ -109,8 +103,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "wol")) {
+                } else if (string_equal_fold(argv[i], "wol")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -151,8 +144,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "wolp")) {
+                } else if (string_equal_fold(argv[i], "wolp")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_ether_address(argv[i])) {
@@ -165,8 +157,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "port")) {
+                } else if (string_equal_fold(argv[i], "port")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_port(argv[i]);
@@ -180,8 +171,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "advertise")) {
+                } else if (string_equal_fold(argv[i], "advertise")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -222,15 +212,15 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -244,18 +234,16 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link feature: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "auton")) {
+                if (string_equal_fold(argv[i], "auton")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -265,8 +253,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->auto_nego = r;
                         continue;
-                }
-                if (string_equal(argv[i], "rxcsumo")) {
+                } else if (string_equal_fold(argv[i], "rxcsumo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -276,8 +263,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->rx_csum_off = r;
                         continue;
-                }
-                if (string_equal(argv[i], "txcsumo")) {
+                } else if (string_equal_fold(argv[i], "txcsumo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -287,8 +273,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tx_csum_off = r;
                         continue;
-                }
-                if (string_equal(argv[i], "tso")) {
+                } else if (string_equal_fold(argv[i], "tso")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -298,8 +283,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tcp_seg_off = r;
                         continue;
-                }
-                if (string_equal(argv[i], "tso6")) {
+                } else if (string_equal_fold(argv[i], "tso6")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -309,8 +293,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tcp6_seg_off = r;
                         continue;
-                }
-                if (string_equal(argv[i], "gso")) {
+                } else if (string_equal_fold(argv[i], "gso")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -320,8 +303,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->gen_seg_off = r;
                         continue;
-                }
-                if (string_equal(argv[i], "grxo")) {
+                } else if (string_equal_fold(argv[i], "grxo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -331,8 +313,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->gen_rx_off = r;
                         continue;
-                }
-                if (string_equal(argv[i], "grxoh")) {
+                } else if (string_equal_fold(argv[i], "grxoh")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -342,8 +323,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->gen_rx_off_hw = r;
                         continue;
-                }
-                if (string_equal(argv[i], "lrxo")) {
+                } else if (string_equal_fold(argv[i], "lrxo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -353,8 +333,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->large_rx_off = r;
                         continue;
-                }
-                if (string_equal(argv[i], "rxvtha")) {
+                } else if (string_equal_fold(argv[i], "rxvtha")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -364,8 +343,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->rx_vlan_ctag_hw_acl = r;
                         continue;
-                }
-                if (string_equal(argv[i], "txvtha")) {
+                } else if (string_equal_fold(argv[i], "txvtha")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -375,8 +353,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tx_vlan_ctag_hw_acl = r;
                         continue;
-                }
-                if (string_equal(argv[i], "rxvtf")) {
+                } else if (string_equal_fold(argv[i], "rxvtf")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -386,8 +363,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->rx_vlan_ctag_fltr = r;
                         continue;
-                }
-                if (string_equal(argv[i], "txvstha")) {
+                } else if (string_equal_fold(argv[i], "txvstha")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -397,8 +373,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tx_vlan_stag_hw_acl = r;
                         continue;
-                }
-                if (string_equal(argv[i], "ntf")) {
+                } else if (string_equal_fold(argv[i], "ntf")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -408,8 +383,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->n_tpl_fltr = r;
                         continue;
-                }
-                if (string_equal(argv[i], "uarxc")) {
+                } else if (string_equal_fold(argv[i], "uarxc")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -419,8 +393,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->use_adpt_rx_coal = r;
                         continue;
-                }
-                if (string_equal(argv[i], "uatxc")) {
+                } else if (string_equal_fold(argv[i], "uatxc")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -430,15 +403,15 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->use_adpt_tx_coal = r;
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -452,18 +425,16 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link feature: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "rxbuf")) {
+                if (string_equal_fold(argv[i], "rxbuf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -476,8 +447,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                                 return log_oom();
                         }
                         continue;
-                }
-                if (string_equal(argv[i], "rxminbuf")) {
+                } else if (string_equal_fold(argv[i], "rxminbuf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -486,8 +456,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                         }
                         n->rx_mini_buf = strdup(argv[i]);
                         continue;
-                }
-                if (string_equal(argv[i], "rxjumbobuf")) {
+                } else if (string_equal_fold(argv[i], "rxjumbobuf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -496,8 +465,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                         }
                         n->rx_jumbo_buf = strdup(argv[i]);
                         continue;
-                }
-                if (string_equal(argv[i], "txbuf")) {
+                } else if (string_equal_fold(argv[i], "txbuf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -506,15 +474,15 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                         }
                         n->tx_buf = strdup(argv[i]);
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -528,20 +496,18 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link queue size: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 unsigned v;
 
-                if (string_equal(argv[i], "txq")) {
+                if (string_equal_fold(argv[i], "txq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_link_queue(argv[i], &v)) {
@@ -551,8 +517,7 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
 
                         n->tx_queues = v;
                         continue;
-                }
-                if (string_equal(argv[i], "rxq")) {
+                } else if (string_equal_fold(argv[i], "rxq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_link_queue(argv[i], &v)) {
@@ -561,8 +526,7 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
                         }
                         n->rx_queues = v;
                         continue;
-                }
-                if (string_equal(argv[i], "txqlen")) {
+                } else if (string_equal_fold(argv[i], "txqlen")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v);
@@ -572,15 +536,15 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
                         }
                         n->tx_queue_len = v;
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -594,18 +558,16 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link flow control: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "rxflowctrl")) {
+                if (string_equal_fold(argv[i], "rxflowctrl")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -615,8 +577,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                         }
                         n->rx_flow_ctrl = r;
                         continue;
-                }
-                if (string_equal(argv[i], "txflowctrl")) {
+                } else if (string_equal_fold(argv[i], "txflowctrl")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -626,8 +587,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                         }
                         n->tx_flow_ctrl = r;
                         continue;
-                }
-                if (string_equal(argv[i], "autoflowctrl")) {
+                } else if (string_equal_fold(argv[i], "autoflowctrl")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -637,15 +597,15 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                         }
                         n->auto_flow_ctrl = r;
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -659,18 +619,16 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link gso: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "gsob")) {
+                if (string_equal_fold(argv[i], "gsob")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_gso(argv[i], &n->gen_seg_off_bytes);
@@ -680,8 +638,7 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
                         }
 
                         continue;
-                }
-                if (string_equal(argv[i], "gsos")) {
+                } else if (string_equal_fold(argv[i], "gsos")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_gso(argv[i], &n->gen_seg_off_seg);
@@ -691,15 +648,15 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -713,18 +670,16 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link channel: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "rxch")) {
+                if (string_equal_fold(argv[i], "rxch")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -737,8 +692,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "txch")) {
+                } else if (string_equal_fold(argv[i], "txch")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -751,8 +705,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "otrch")) {
+                } else if (string_equal_fold(argv[i], "otrch")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -765,8 +718,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "combch")) {
+                } else if (string_equal_fold(argv[i], "combch")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -779,15 +731,15 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -801,18 +753,16 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link coalesce: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "rxcs")) {
+                if (string_equal_fold(argv[i], "rxcs")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -825,8 +775,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "rxcsirq")) {
+                } else if (string_equal_fold(argv[i], "rxcsirq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -839,8 +788,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "rxcslow")) {
+                } else if (string_equal_fold(argv[i], "rxcslow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -853,8 +801,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "rxcshigh")) {
+                } else if (string_equal_fold(argv[i], "rxcshigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -867,8 +814,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "txcs")) {
+                } else if (string_equal_fold(argv[i], "txcs")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -881,8 +827,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "txcsirq")) {
+                } else if (string_equal_fold(argv[i], "txcsirq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -895,8 +840,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "txcslow")) {
+                } else if (string_equal_fold(argv[i], "txcslow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -909,8 +853,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "txcshigh")) {
+                } else if (string_equal_fold(argv[i], "txcshigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -923,15 +866,15 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -945,18 +888,16 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link coalesce frames: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "rxmcf")) {
+                if (string_equal_fold(argv[i], "rxmcf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -969,8 +910,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "rxmcfirq")) {
+                } else if (string_equal_fold(argv[i], "rxmcfirq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -983,8 +923,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "rxmcflow")) {
+                } else if (string_equal_fold(argv[i], "rxmcflow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -997,8 +936,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "rxmcfhigh")) {
+                } else if (string_equal_fold(argv[i], "rxmcfhigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1011,8 +949,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "txmcf")) {
+                } else if (string_equal_fold(argv[i], "txmcf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1025,8 +962,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "txmcfirq")) {
+                } else if (string_equal_fold(argv[i], "txmcfirq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1039,8 +975,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "txmcflow")) {
+                } else if (string_equal_fold(argv[i], "txmcflow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1053,8 +988,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "txmcfhigh")) {
+                } else if (string_equal_fold(argv[i], "txmcfhigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1067,15 +1001,15 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1089,18 +1023,16 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link coalesce packet rate: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "cprlow")) {
+                if (string_equal_fold(argv[i], "cprlow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1113,8 +1045,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "cprhigh")) {
+                } else if (string_equal_fold(argv[i], "cprhigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1127,8 +1058,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "cprsis")) {
+                } else if (string_equal_fold(argv[i], "cprsis")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1141,8 +1071,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-                if (string_equal(argv[i], "sbcs")) {
+                } else if (string_equal_fold(argv[i], "sbcs")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1155,15 +1084,15 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1177,18 +1106,16 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link altname: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "altnamepolicy")) {
+                if (string_equal_fold(argv[i], "altnamepolicy")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -1229,9 +1156,7 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "altname")) {
+                } else if (string_equal_fold(argv[i], "altname")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!argv[i]) {
@@ -1244,15 +1169,15 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1266,18 +1191,16 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link name: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "namepolicy")) {
+                if (string_equal_fold(argv[i], "namepolicy")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -1320,7 +1243,7 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
                         continue;
                 }
 
-                if (string_equal(argv[i], "name")) {
+                if (string_equal_fold(argv[i], "name")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_name(argv[i]);
@@ -1342,7 +1265,7 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 
@@ -1356,18 +1279,16 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
         r = netdev_link_new(&n);
-        if (r < 0) {
-                log_warning("Failed to set link mac: %s", g_strerror(-r));
-                return r;
-        }
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (string_equal(argv[i], "macpolicy")) {
+                if (string_equal_fold(argv[i], "macpolicy")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -1408,9 +1329,7 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                }
-
-                if (string_equal(argv[i], "macaddr")) {
+                } else if (string_equal_fold(argv[i], "macaddr") || string_equal_fold(argv[i], "mac")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_ether_address(argv[i])) {
@@ -1423,15 +1342,15 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
                 }
-
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
-                return -EINVAL;
         }
 
         r = netdev_link_configure(p, n);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", g_strerror(-r));
+                log_warning("Failed to configure device: %s", g_strerror(-r));
                 return r;
         }
 

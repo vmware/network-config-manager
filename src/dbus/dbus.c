@@ -685,7 +685,7 @@ int dbus_reconfigure_link(int ifindex) {
                                "i",
                                ifindex);
         if (r < 0) {
-                log_warning("Failed to configure link: %s", bus_error.message);
+                log_warning("Failed to configure device: %s", bus_error.message);
                 return r;
         }
 

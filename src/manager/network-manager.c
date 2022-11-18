@@ -1843,7 +1843,7 @@ int manager_generate_network_config_from_yaml(const char *file) {
 
                 r = netdev_link_configure(p, l);
                 if (r < 0) {
-                        log_warning("Failed to configure link from yaml file '%s': %s", file, g_strerror(-r));
+                        log_warning("Failed to configure device from yaml file '%s': %s", file, g_strerror(-r));
                         return r;
                 }
         } else {

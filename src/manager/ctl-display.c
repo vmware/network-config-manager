@@ -161,7 +161,7 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
                 } else  {
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find link: %s", argv[1]);
+                                log_warning("Failed to find device: %s", argv[1]);
                                 return r;
                         }
                 }
@@ -352,7 +352,7 @@ static int list_one_link(char *argv[]) {
 
         r = parse_ifname_or_index(*argv, &p);
         if (r < 0) {
-                log_warning("Failed to find link: %s", *argv);
+                log_warning("Failed to find device: %s", *argv);
                 return r;
         }
 
