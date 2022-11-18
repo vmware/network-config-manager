@@ -35,7 +35,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
 
                 r = parse_ifname_or_index(*s, &p);
                 if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", *s, g_strerror(-r));
+                        log_warning("Failed to find device '%s': %s", *s, g_strerror(-r));
                         return r;
                 }
         }
@@ -86,7 +86,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
 
                 r = parse_ifname_or_index(*s, &p);
                 if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", *s, g_strerror(-r));
+                        log_warning("Failed to find device '%s': %s", *s, g_strerror(-r));
                         return r;
                 }
         }
@@ -122,7 +122,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find device '%s': %s", argv[i], g_strerror(-r));
                                 return r;
                         }
                         continue;
@@ -238,7 +238,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find device '%s': %s", argv[i], g_strerror(-r));
                                 return -errno;
                         }
                         continue;
@@ -343,7 +343,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find device '%s': %s", argv[i], g_strerror(-r));
                                 return -errno;
                         }
                         have_dev = true;
@@ -511,7 +511,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find link '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find device '%s': %s", argv[i], g_strerror(-r));
                                 return -errno;
                         }
                         continue;

@@ -27,7 +27,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -244,7 +244,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -452,7 +452,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -528,7 +528,7 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -594,7 +594,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -659,7 +659,7 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -713,7 +713,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -801,7 +801,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -945,7 +945,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -1089,7 +1089,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -1177,7 +1177,7 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -1266,7 +1266,7 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
@@ -1356,7 +1356,7 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find link '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
