@@ -191,9 +191,9 @@ static int help(void) {
                                                      "\n\t\t\t\t      [trust BOOLEAN] [linkstate BOOLEAN or STRING] [macaddr ADDRESS] Configures SR-IOV VirtualFunction, "
                                                      "\n\t\t\t\t      VLANId, QualityOfService, VLANProtocol, MACSpoofCheck, QueryReceiveSideScaling, Trust, LinkState, MACAddress \n"
                "  create-vlan                  [VLAN name] dev [MASTER DEVICE] id [ID INTEGER] proto [PROTOCOL {802.1q|802.1ad}] Creates vlan netdev and network file\n"
-               "  create-bridge                [BRIDGE name] [DEVICE] [DEVICE] ... Creates bridge netdev and sets master to device\n"
+               "  create-bridge                [BRIDGE name] dev [DEVICE] [DEVICE] ... Creates bridge netdev and sets master to device\n"
                "  create-bond                  [BOND name] mode [MODE {balance-rr|active-backup|balance-xor|broadcast|802.3ad|balance-tlb|balance-alb}]"
-                                               "\n\t\t\t\t[DEVICE] [DEVICE] ... Creates bond netdev and sets master to device\n"
+                                               "\n\t\t\t\tdev [DEVICE] [DEVICE] ... Creates bond netdev and sets master to device\n"
                "  create-vxlan                 [VXLAN name] [dev DEVICE] vni [INTEGER] [local ADDRESS] [remote ADDRESS] [port PORT] [independent BOOLEAN]."
                                                "\n\t\t\t\tCreates vxlan VXLAN (Virtual eXtensible Local Area Network) tunneling.\n"
                "  create-macvlan               [MACVLAN name] dev [DEVICE] mode [MODE {private|vepa|bridge|passthru|source}] Creates macvlan virtualized bridged networking.\n"
@@ -327,21 +327,21 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-mtu",                       "mtu",              3,        WORD_ANY, false, ncm_link_set_mtu },
                 { "set-mac",                       "mac",              3,        WORD_ANY, false, ncm_link_set_mac },
                 { "set-manage",                    "manage" ,          3,        WORD_ANY, false, ncm_link_set_mode },
-                { "set-link-option",               "link-opt",         4,        WORD_ANY, false, ncm_link_set_option },
-                { "set-link-group",                "link-grp",         4,        WORD_ANY, false, ncm_link_set_group },
-                { "set-link-rfo",                  "link-rfo",         4,        WORD_ANY, false, ncm_link_set_rf_online },
-                { "set-link-ap",                   "link-ap",          4,        WORD_ANY, false, ncm_link_set_act_policy },
+                { "set-link-option",               "lopt",             4,        WORD_ANY, false, ncm_link_set_option },
+                { "set-link-group",                "lgrp",             4,        WORD_ANY, false, ncm_link_set_group },
+                { "set-link-rfo",                  "lrfo",             4,        WORD_ANY, false, ncm_link_set_rf_online },
+                { "set-link-ap",                   "lap",              4,        WORD_ANY, false, ncm_link_set_act_policy },
                 { "set-dhcp",                      "dhcp",             4,        WORD_ANY, false, ncm_link_set_dhcp_mode },
                 { "set-dhcp4-cid",                 "dhcp4-cid",        3,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
                 { "set-dhcp-iaid",                 "dhcp-iaid",        4,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
                 { "set-dhcp-duid",                 "dhcp-duid",        4,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
-                { "set-link-state",                "link-state",       3,        WORD_ANY, false, ncm_link_update_state },
+                { "set-link-state",                "ls",               3,        WORD_ANY, false, ncm_link_update_state },
                 { "add-addr",                      "aa",               4,        WORD_ANY, false, ncm_link_add_address },
                 { "show-addr",                     "a",                1,        WORD_ANY, false, ncm_display_one_link_addresses },
                 { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_delete_address },
                 { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_add_default_gateway },
                 { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
-                { "add-route",                     "r" ,               4,        WORD_ANY, false, ncm_link_add_route },
+                { "add-route",                     "ar" ,              4,        WORD_ANY, false, ncm_link_add_route },
                 { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-addl-gw",                   "agw",              9,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "add-rule",                      "rule",             4,        WORD_ANY, false, ncm_link_add_routing_policy_rules },
@@ -367,8 +367,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-conf-wc",                   "cwc",              3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-dhcp4",                     "dhcp4",            4,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp6",                     "dhcp6",            4,        WORD_ANY, false, ncm_link_set_dhcp6_section },
-                { "add-dhcpv4-server",             "dhcpv4-server" ,   2,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
-                { "remove-dhcpv4-server",          "rdhcpv4-server",   2,        WORD_ANY, false, ncm_link_remove_dhcpv4_server },
+                { "add-dhcpv4-server",             "dhcpv4-srv" ,      2,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
+                { "remove-dhcpv4-server",          "rdhcpv4-srv",      2,        WORD_ANY, false, ncm_link_remove_dhcpv4_server },
                 { "add-ipv6ra",                    "ipv6ra",           2,        WORD_ANY, false, ncm_link_add_ipv6_router_advertisement },
                 { "remove-ipv6ra",                 "ripv6ra",          2,        WORD_ANY, false, ncm_link_remove_ipv6_router_advertisement },
                 { "add-ntp",                       "antp",             2,        WORD_ANY, false, ncm_link_add_ntp },
@@ -376,7 +376,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_delete_ntp },
                 { "enable-ipv6",                   "ipv6",             2,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "create-vlan",                   "vlan",             4,        WORD_ANY, false, ncm_create_vlan },
-                { "create-bridge",                 "bridge",           2,        WORD_ANY, false, ncm_create_bridge },
+                { "create-bridge",                 "bridge",           3,        WORD_ANY, false, ncm_create_bridge },
                 { "create-bond",                   "bond",             5,        WORD_ANY, false, ncm_create_bond },
                 { "create-vxlan",                  "vxlan",            2,        WORD_ANY, false, ncm_create_vxlan },
                 { "create-macvlan",                "macvlan",          5,        WORD_ANY, false, ncm_create_macvlan },
@@ -384,7 +384,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-ipvlan",                 "ipvlan",           5,        WORD_ANY, false, ncm_create_ipvlan },
                 { "create-ipvtap",                 "ipvtap",           5,        WORD_ANY, false, ncm_create_ipvlan },
                 { "create-vrf",                    "vrf",              3,        WORD_ANY, false, ncm_create_vrf },
-                { "create-veth",                   "vrf",              3,        WORD_ANY, false, ncm_create_veth },
+                { "create-veth",                   "veth",             3,        WORD_ANY, false, ncm_create_veth },
                 { "create-ipip",                   "ipip",             3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-sit",                    "sit",              3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-gre",                    "gre",              3,        WORD_ANY, false, ncm_create_tunnel },
@@ -395,35 +395,35 @@ static int cli_run(int argc, char *argv[]) {
                 { "reconfigure",                   "rc",               1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "show-config",                   "sc",               1,        WORD_ANY, false, ncm_link_show_network_config },
                 { "edit",                          "e" ,               1,        WORD_ANY, false, ncm_link_edit_network_config },
-                { "set-link",                      "" ,                2,        WORD_ANY, false, ncm_configure_link },
-                { "set-link-feature",              "" ,                2,        WORD_ANY, false, ncm_configure_link_features },
-                { "set-link-mac",                  "" ,                2,        WORD_ANY, false, ncm_configure_link_mac },
-                { "set-link-name",                 "" ,                2,        WORD_ANY, false, ncm_configure_link_name },
-                { "set-link-altname",              "" ,                2,        WORD_ANY, false, ncm_configure_link_altname },
-                { "set-link-buf",                  "" ,                2,        WORD_ANY, false, ncm_configure_link_buf_size },
-                { "set-link-queue",                "" ,                2,        WORD_ANY, false, ncm_configure_link_queue_size },
-                { "set-link-flow-control",         "" ,                2,        WORD_ANY, false, ncm_configure_link_flow_control },
-                { "set-link-gso",                  "" ,                2,        WORD_ANY, false, ncm_configure_link_gso },
-                { "set-link-channel",              "" ,                2,        WORD_ANY, false, ncm_configure_link_channel },
-                { "set-link-coalesce",             "" ,                2,        WORD_ANY, false, ncm_configure_link_coalesce },
-                { "set-link-coald-frames",         "" ,                2,        WORD_ANY, false, ncm_configure_link_coald_frames },
-                { "set-link-coal-pkt",             "" ,                2,        WORD_ANY, false, ncm_configure_link_coal_pkt },
-                { "add-sr-iov",                    "sriov" ,           2,        WORD_ANY, false, ncm_configure_sr_iov},
+                { "set-link",                      "l",                2,        WORD_ANY, false, ncm_configure_link },
+                { "set-link-feature",              "lf",               2,        WORD_ANY, false, ncm_configure_link_features },
+                { "set-link-mac",                  "lm",               2,        WORD_ANY, false, ncm_configure_link_mac },
+                { "set-link-name",                 "ln",               2,        WORD_ANY, false, ncm_configure_link_name },
+                { "set-link-altname",              "lan",              2,        WORD_ANY, false, ncm_configure_link_altname },
+                { "set-link-buf",                  "lb",               2,        WORD_ANY, false, ncm_configure_link_buf_size },
+                { "set-link-queue",                "lq",               2,        WORD_ANY, false, ncm_configure_link_queue_size },
+                { "set-link-flow-control",         "lfc",              2,        WORD_ANY, false, ncm_configure_link_flow_control },
+                { "set-link-gso",                  "lgso",             2,        WORD_ANY, false, ncm_configure_link_gso },
+                { "set-link-channel",              "lchannel" ,        2,        WORD_ANY, false, ncm_configure_link_channel },
+                { "set-link-coalesce",             "lcoalesce",        2,        WORD_ANY, false, ncm_configure_link_coalesce },
+                { "set-link-coald-frames",         "lcf",              2,        WORD_ANY, false, ncm_configure_link_coald_frames },
+                { "set-link-coal-pkt",             "lcp",              2,        WORD_ANY, false, ncm_configure_link_coal_pkt },
+                { "add-sr-iov",                    "sriov",            2,        WORD_ANY, false, ncm_configure_sr_iov},
                 { "set-proxy",                     "proxy",            1,        WORD_ANY, false, ncm_configure_proxy },
                 { "show-proxy",                    "dsproxy",          WORD_ANY, WORD_ANY, false, ncm_show_proxy },
-                { "generate-config-from-yaml",     "",                 1,        WORD_ANY, false, generate_networkd_config_from_yaml },
-                { "apply-yaml-config",             "",                 WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
-                { "generate-config-from-cmdline",  "",                 WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
-                { "add-nft-table",                 "",                 2,        WORD_ANY, false, ncm_nft_add_tables },
-                { "show-nft-tables",               "",                 WORD_ANY, WORD_ANY, false, ncm_nft_show_tables },
-                { "delete-nft-table",              "",                 2,        WORD_ANY, false, ncm_nft_delete_table },
-                { "add-nft-chain",                 "",                 3,        WORD_ANY, false, ncm_nft_add_chain },
-                { "show-nft-chains",               "",                 WORD_ANY, WORD_ANY, false, ncm_nft_show_chains },
-                { "delete-nft-chain",              "",                 3,        WORD_ANY, false, ncm_nft_delete_chain },
-                { "add-nft-rule",                  "",                 7,        WORD_ANY, false, ncm_nft_add_rule_port },
-                { "show-nft-rules",                "",                 1,        WORD_ANY, false, ncm_nft_show_rules },
-                { "delete-nft-rule",               "",                 2,        WORD_ANY, false, ncm_nft_delete_rule },
-                { "nft-run",                       "",                 WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
+                { "generate-config-from-yaml",     "gcyml",            1,        WORD_ANY, false, generate_networkd_config_from_yaml },
+                { "apply-yaml-config",             "ayml",             WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
+                { "generate-config-from-cmdline",  "gccmd",            WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
+                { "add-nft-table",                 "atable",           2,        WORD_ANY, false, ncm_nft_add_tables },
+                { "show-nft-tables",               "table",            WORD_ANY, WORD_ANY, false, ncm_nft_show_tables },
+                { "delete-nft-table",              "dtable",           2,        WORD_ANY, false, ncm_nft_delete_table },
+                { "add-nft-chain",                 "achain",           3,        WORD_ANY, false, ncm_nft_add_chain },
+                { "show-nft-chains",               "chain",            WORD_ANY, WORD_ANY, false, ncm_nft_show_chains },
+                { "delete-nft-chain",              "dchain",           3,        WORD_ANY, false, ncm_nft_delete_chain },
+                { "add-nft-rule",                  "anft-rule",        7,        WORD_ANY, false, ncm_nft_add_rule_port },
+                { "show-nft-rules",                "nft-rule",         1,        WORD_ANY, false, ncm_nft_show_rules },
+                { "delete-nft-rule",               "dnft-rule",        2,        WORD_ANY, false, ncm_nft_delete_rule },
+                { "nft-run",                       "nftr",             WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
                 /* Deprecated */
                 { "show",                          "",                 WORD_ANY, WORD_ANY, false, ncm_link_status },
                 {}
@@ -434,10 +434,10 @@ static int cli_run(int argc, char *argv[]) {
                 return r;
 
         if (alias) {
-                printf("%-25s   %-20s\n", "Command", "Alias");
+                printf("%s   %28s\n", "Command", "Alias");
                 for (size_t i = 0; i < ELEMENTSOF(commands); i++) {
                         if (!isempty_string(commands[i].alias))
-                                printf("%-25s   %-20s\n", commands[i].name, commands[i].alias);
+                                printf("%-30s   %-30s\n", commands[i].name, commands[i].alias);
                 }
 
                 return 0;

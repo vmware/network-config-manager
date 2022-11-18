@@ -20,17 +20,28 @@
 #include "parse-util.h"
 
 _public_ int ncm_create_bridge(int argc, char *argv[]) {
-        _auto_cleanup_strv_ char **links = NULL;
+        _auto_cleanup_strv_ char **devs = NULL;
         char **s;
         int r;
 
-        r = argv_to_strv(argc - 2, argv + 2, &links);
-        if (r < 0) {
-                log_warning("Failed to parse links: %s", g_strerror(-r));
-                return r;
+       for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = argv_to_strv(argc - i, argv + i, &devs);
+                        if (r < 0) {
+                                log_warning("Failed to parse devices: %s", g_strerror(-r));
+                                return r;
+                        }
+                }
         }
 
-        strv_foreach(s, links) {
+       if (strv_length(devs) <= 0) {
+               log_warning("Failed to parse devices: %s", g_strerror(-r));
+               return r;
+       }
+
+        strv_foreach(s, devs) {
                 _auto_cleanup_ IfNameIndex *p = NULL;
 
                 r = parse_ifname_or_index(*s, &p);
@@ -45,7 +56,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_bridge(argv[1], links);
+        r = manager_create_bridge(argv[1], devs);
         if (r < 0) {
                 log_warning("Failed to create bridge '%s': %s", argv[1], g_strerror(-r));
                 return r;
@@ -55,7 +66,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_bond(int argc, char *argv[]) {
-        _auto_cleanup_strv_ char **links = NULL;
+        _auto_cleanup_strv_ char **devs = NULL;
         bool have_mode = false;
         BondMode mode;
         char **s;
@@ -72,16 +83,24 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                         }
                         have_mode = true;
                         mode = r;
+                } else if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = argv_to_strv(argc - i, argv + i, &devs);
+                        if (r < 0) {
+                                log_warning("Failed to parse devices: %s", g_strerror(-r));
+                                return r;
+                        }
                 }
+
         }
 
-        r = argv_to_strv(argc - 4, argv + 4, &links);
-        if (r < 0) {
-                log_warning("Failed to parse links: %s", g_strerror(-r));
-                return r;
-        }
+        if (strv_length(devs) <= 0) {
+               log_warning("Failed to parse devices: %s", g_strerror(-r));
+               return r;
+       }
 
-        strv_foreach(s, links) {
+        strv_foreach(s, devs) {
                 _auto_cleanup_ IfNameIndex *p = NULL;
 
                 r = parse_ifname_or_index(*s, &p);
@@ -101,7 +120,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_bond(argv[1], mode, links);
+        r = manager_create_bond(argv[1], mode, devs);
         if (r < 0) {
                 log_warning("Failed to create bond '%s': %s", argv[1], g_strerror(-r));
                 return r;
