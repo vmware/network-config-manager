@@ -36,6 +36,11 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 }
         }
 
+       if (strv_length(devs) <= 0) {
+               log_warning("Failed to parse devices: %s", g_strerror(-r));
+               return r;
+       }
+
         strv_foreach(s, devs) {
                 _auto_cleanup_ IfNameIndex *p = NULL;
 
@@ -89,6 +94,11 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                 }
 
         }
+
+        if (strv_length(devs) <= 0) {
+               log_warning("Failed to parse devices: %s", g_strerror(-r));
+               return r;
+       }
 
         strv_foreach(s, devs) {
                 _auto_cleanup_ IfNameIndex *p = NULL;
