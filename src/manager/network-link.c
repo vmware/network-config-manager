@@ -13,7 +13,7 @@
 #include "parse-util.h"
 #include "string-util.h"
 
-static const char* const link_operstates[] = {
+static const char* const link_operstates_table[] = {
         [IF_OPER_UNKNOWN]        = "unknown",
         [IF_OPER_NOTPRESENT]     = "not-present",
         [IF_OPER_DOWN]           = "down",
@@ -27,13 +27,13 @@ const char *link_operstates_to_name(int id) {
         if (id < 0)
                 return "n/a";
 
-        if ((size_t) id >= ELEMENTSOF(link_operstates))
+        if ((size_t) id >= ELEMENTSOF(link_operstates_table))
                 return NULL;
 
-        return link_operstates[id];
+        return link_operstates_table[id];
 }
 
-static const char* const link_states[_LINK_STATE_MAX] = {
+static const char* const link_states_table[_LINK_STATE_MAX] = {
         [LINK_STATE_DOWN] = "down",
         [LINK_STATE_UP]   = "up",
 };
@@ -42,23 +42,23 @@ const char *link_state_to_name(int id) {
         if (id < 0)
                 return "n/a";
 
-        if ((size_t) id >= ELEMENTSOF(link_states))
+        if ((size_t) id >= ELEMENTSOF(link_states_table))
                 return "n/a";
 
-        return link_states[id];
+        return link_states_table[id];
 }
 
 int link_name_to_state(char *name) {
         assert(name);
 
-        for (size_t i = LINK_STATE_DOWN; i < (int) ELEMENTSOF(link_states); i++)
-                if (string_equal_fold(name, link_states[i]))
+        for (size_t i = LINK_STATE_DOWN; i < (int) ELEMENTSOF(link_states_table); i++)
+                if (string_equal_fold(name, link_states_table[i]))
                         return i;
 
         return _LINK_STATE_INVALID;
 }
 
-static const char* const ipv6_address_generation_mode[] = {
+static const char* const ipv6_address_generation_mode_table[] = {
         [IPV6_ADDRESSS_GEN_MODE_EUI64]          = "eui64",
         [IPV6_ADDRESSS_GEN_MODE_NONE]           = "none",
         [IPV6_ADDRESSS_GEN_MODE_STABLE_PRIVACY] = "stable-privacy",
@@ -69,10 +69,10 @@ const char *ipv6_address_generation_mode_to_name(int mode) {
         if (mode < 0)
                 return "n/a";
 
-        if ((size_t) mode >= ELEMENTSOF(ipv6_address_generation_mode))
+        if ((size_t) mode >= ELEMENTSOF(ipv6_address_generation_mode_table))
                 return NULL;
 
-        return ipv6_address_generation_mode[mode];
+        return ipv6_address_generation_mode_table[mode];
 }
 
 static int links_new(Links **ret) {
@@ -104,10 +104,10 @@ void link_unref(Link *l) {
         if (l->alt_names)
                 g_ptr_array_free(l->alt_names, true);
 
-        g_free(l->qdisc);
-        g_free(l->parent_dev);
-        g_free(l->parent_bus);
-        g_free(l);
+        free(l->qdisc);
+        free(l->parent_dev);
+        free(l->parent_bus);
+        free(l);
 }
 
 void links_unref(Links *l) {
@@ -115,7 +115,7 @@ void links_unref(Links *l) {
                 return;
 
         g_list_free_full(g_list_first(l->links), g_free);
-        g_free(l);
+        free(l);
 }
 
 static int link_add(Links **h, Link *link) {

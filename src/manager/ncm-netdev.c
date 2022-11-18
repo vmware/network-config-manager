@@ -144,6 +144,11 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
                 }
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         if (!have_mode) {
                 log_warning("Missing MacVLan/MacVTap mode: %s", g_strerror(EINVAL));
                 return -EINVAL;
@@ -199,6 +204,11 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
                         log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
                         return -EINVAL;
                 }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (!have_mode) {
@@ -321,7 +331,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_vxlan(argv[1], vni, local, remote, group, port, p->ifname, independent);
+        r = manager_create_vxlan(argv[1], vni, local, remote, group, port, p ? p->ifname : NULL, independent);
         if (r < 0) {
                 log_warning("Failed to create vxlan '%s': %s", argv[1], g_strerror(-r));
                 return r;
@@ -375,6 +385,10 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
                         return -EINVAL;
                 }
+        }
+        if (!p) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (!have_id) {
@@ -549,14 +563,19 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                 }
         }
 
+        if (!p && !independent) {
+                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                return -EINVAL;
+        }
+
         if (!valid_ifname(argv[1])) {
                 log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
                 return r;
         }
 
-        r = manager_create_tunnel(argv[1], kind, local, remote, p->ifname, independent);
+        r = manager_create_tunnel(argv[1], kind, local, remote, p ? p->ifname : NULL, independent);
         if (r < 0) {
-                log_warning("Failed to create vxlan '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create tunnel '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 

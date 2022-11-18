@@ -3,7 +3,7 @@ all: build
 .PHONY: all
 
 build:
-	meson --prefix=/usr build
+	meson setup --prefix=/usr build
 
 clean:
 	rm -rf build/

@@ -1402,6 +1402,30 @@ class TestCLINetDev:
 
         link_remove('ipip-98')
 
+    def test_cli_create_ipip_without_master_device(self):
+        subprocess.check_call("nmctl create-ipip ipip-98 local 192.168.1.2 remote 192.168.1.3 independent yes", shell = True)
+        assert(unit_exist('10-ipip-98.netdev') == True)
+        assert(unit_exist('10-ipip-98.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '3'])
+
+        assert(link_exist('ipip-98') == True)
+
+        ipip_parser = configparser.ConfigParser()
+        ipip_parser.read(os.path.join(networkd_unit_file_path, '10-ipip-98.netdev'))
+
+        assert(ipip_parser.get('NetDev', 'Name') == 'ipip-98')
+        assert(ipip_parser.get('NetDev', 'kind') == 'ipip')
+        assert(ipip_parser.get('Tunnel', 'Local') == '192.168.1.2')
+        assert(ipip_parser.get('Tunnel', 'Remote') == '192.168.1.3')
+
+        ipip_network_parser = configparser.ConfigParser()
+        ipip_network_parser.read(os.path.join(networkd_unit_file_path, '10-ipip-98.network'))
+
+        assert(ipip_network_parser.get('Match', 'Name') == 'ipip-98')
+        link_remove('ipip-98')
+
     def test_cli_create_gre(self):
         assert(link_exist('test98') == True)
 
@@ -1569,6 +1593,28 @@ class TestCLINetDev:
         assert(parser.get('Network', 'VXLAN') == 'vxlan-98')
 
         link_remove('vxlan-98')
+
+    def test_cli_create_vxlan_without_master(self):
+        subprocess.check_call("nmctl create-vxlan vxlan-98 vni 32 local 192.168.1.2 remote 192.168.1.3 port 7777 independent yes", shell = True)
+        assert(unit_exist('10-vxlan-98.network') == True)
+        assert(unit_exist('10-vxlan-98.netdev') == True)
+
+        restart_networkd()
+
+        vxlan_parser = configparser.ConfigParser()
+        vxlan_parser.read(os.path.join(networkd_unit_file_path, '10-vxlan-98.netdev'))
+
+        assert(vxlan_parser.get('NetDev', 'Name') == 'vxlan-98')
+        assert(vxlan_parser.get('NetDev', 'kind') == 'vxlan')
+        assert(vxlan_parser.get('VXLAN', 'VNI') == '32')
+        assert(vxlan_parser.get('VXLAN', 'Local') == '192.168.1.2')
+        assert(vxlan_parser.get('VXLAN', 'Remote') == '192.168.1.3')
+        assert(vxlan_parser.get('VXLAN', 'DestinationPort') == '7777')
+
+        vxlan_network_parser = configparser.ConfigParser()
+        vxlan_network_parser.read(os.path.join(networkd_unit_file_path, '10-vxlan-98.network'))
+
+        assert(vxlan_network_parser.get('Match', 'Name') == 'vxlan-98')
 
     def test_cli_create_bridge(self):
         link_add_dummy('test-99')
