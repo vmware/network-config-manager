@@ -20,37 +20,6 @@
 #include "network-util.h"
 #include "parse-util.h"
 
-static int manager_write_netdev_config(const NetDev *n, const GString *config) {
-        _auto_cleanup_ char *netdev = NULL, *config_file = NULL;
-        _auto_cleanup_close_ int fd = -1;
-        int r;
-
-        assert(n);
-        assert(config);
-
-        config_file = string_join("-", "10", n->ifname, NULL);
-        if (!config_file)
-                return log_oom();
-
-        r = create_conf_file("/etc/systemd/network", config_file, "netdev", &netdev);
-        if (r < 0)
-                return r;
-
-        r = open(netdev, O_WRONLY);
-        if (r < 0) {
-                log_warning("Failed to open netdev file '%s': %s", netdev, g_strerror(-r));
-                return r;
-        }
-
-        fd = r;
-        r = write(fd, config->str, config->len);
-        if (r < 0)
-                return -errno;
-
-        (void) set_file_permisssion(netdev, "systemd-network");
-        return 0;
-}
-
 int manager_remove_netdev(const char *ifname, const char *kind) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
@@ -112,11 +81,7 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
                         return log_oom();
         }
 
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
@@ -173,15 +138,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
         if (!netdev->ifname)
                 return log_oom();
 
-        r = create_netdev_conf_file(bridge, &bridge_netdev);
-        if (r < 0)
-                return r;
-
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
@@ -249,15 +206,7 @@ int manager_create_bond(const char *bond, const BondMode mode, char **interfaces
         if (!netdev->ifname)
                 return log_oom();
 
-        r = create_netdev_conf_file(bond, &bond_netdev);
-        if (r < 0)
-                return r;
-
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
@@ -336,15 +285,7 @@ int manager_create_vxlan(const char *vxlan,
         if (group)
                 netdev->group = *group;
 
-        r = create_netdev_conf_file(vxlan, &vxlan_netdev);
-        if (r < 0)
-                return r;
-
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
@@ -410,15 +351,7 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
         if (!netdev->ifname)
                 return log_oom();
 
-        r = create_netdev_conf_file(macvlan, &macvlan_netdev);
-        if (r < 0)
-                return r;
-
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
@@ -485,15 +418,7 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
         if (!netdev->ifname)
                 return log_oom();
 
-        r = create_netdev_conf_file(ipvlan, &ipvlan_netdev);
-        if (r < 0)
-                return r;
-
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
@@ -560,11 +485,7 @@ int manager_create_veth(const char *veth, const char *veth_peer) {
         if (veth_peer && !netdev->peer)
                 return log_oom();
 
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
@@ -624,15 +545,7 @@ int manager_create_tunnel(const char *tunnel,
         if (remote)
                 netdev->remote = *remote;
 
-        r = create_netdev_conf_file(tunnel, &tunnel_netdev);
-        if (r < 0)
-                return r;
-
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
@@ -696,11 +609,7 @@ int manager_create_vrf(const char *vrf, const uint32_t table) {
         if (!netdev->ifname)
                 return log_oom();
 
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
@@ -771,11 +680,7 @@ int manager_create_wireguard_tunnel(char *wireguard,
                         return log_oom();
         }
 
-        r = generate_netdev_config(netdev, &netdev_config);
-        if (r < 0)
-                return r;
-
-        r = manager_write_netdev_config(netdev, netdev_config);
+        r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
