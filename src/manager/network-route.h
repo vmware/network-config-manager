@@ -26,8 +26,8 @@ typedef struct Route {
 
         int onlink;
 
-        IPAddress gw;
         IPAddress address;
+        IPAddress gw;
         IPAddress destination;
 } Route;
 

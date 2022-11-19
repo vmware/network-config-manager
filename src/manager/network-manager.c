@@ -867,9 +867,10 @@ int manager_remove_routing_policy_rules(const IfNameIndex *ifnameidx) {
         return dbus_network_reload();
 }
 
-int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
+int manager_configure_additional_gw(const IfNameIndex *ifnameidx, const IPAddress *a, const Route *rt) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL, *destination = NULL, *pref_source = NULL;
-        _cleanup_(g_string_unrefp) GString *config = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+         _cleanup_(section_freep) Section *section = NULL;
         int r;
 
         assert(ifnameidx);
@@ -877,15 +878,17 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
 
         r = create_network_conf_file(ifnameidx->ifname, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find or create network file '%s': %s", ifnameidx->ifname, g_strerror(-r));
                 return r;
         }
 
-        r = ip_to_string_prefix(rt->address.family, &rt->address, &address);
-        if (r < 0)
+        r = create_or_parse_network_file(ifnameidx, &network);
+        if (r < 0) {
+                log_warning("Failed to find or create network file '%s': %s", ifnameidx->ifname, g_strerror(-r));
                 return r;
+        }
 
-        r = ip_to_string(rt->destination.family, &rt->destination, &destination);
+        r = parse_key_file(network, &key_file);
         if (r < 0)
                 return r;
 
@@ -893,38 +896,141 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, Route *rt) {
         if (r < 0)
                 return r;
 
-        config = g_string_new(NULL);
-        if (!config)
+        if (a) {
+                r = ip_to_string_prefix(a->family, a, &address);
+                if (r < 0)
+                        return r;
+
+                r = key_file_set_string(key_file, "Address", "Address", address);
+                if (r < 0)
+                        return r;
+        } else {
+                r = parse_config_file(network, "Network", "Address", &address);
+                if (r < 0) {
+                        r = parse_config_file(network, "Address", "Address", &address);
+                        if (r < 0) {
+                                log_warning("Failed to find Address= for device '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                                return r;
+                        }
+                }
+        }
+        pref_source = strdup(address);
+        if (!pref_source)
                 return log_oom();
 
-        g_string_append(config, "[Match]\n");
-        g_string_append_printf(config, "Name=%s\n\n", ifnameidx->ifname);
+        if (!ip_is_null(&rt->destination)) {
+                r = ip_to_string(rt->destination.family, &rt->destination, &destination);
+                if (r < 0)
+                        return r;
+        } else {
+                r = parse_config_file(network, "Route", "Destination", &destination);
+                if (r < 0) {
+                        destination = strdup("0.0.0.0");
+                        if (!destination)
+                                return log_oom();
+                }
+        }
 
-        g_string_append(config, "[Address]\n");
-        g_string_append_printf(config, "Address=%s\n\n", address);
+        if (!ip_is_null(&rt->gw)) {
+                r = ip_to_string(rt->gw.family, &rt->gw, &gw);
+                if (r < 0)
+                        return r;
+        } else {
+                r = parse_config_file(network, "Network", "Gateway", &destination);
+                if (r < 0) {
+                        r = parse_config_file(network, "Route", "Gateway", &address);
+                        if (r < 0) {
+                                log_warning("AFailed to find Gateway= for device '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                                return r;
+                        }
+                }
+        }
 
-        r = ip_to_string_prefix(rt->address.family, &rt->address, &pref_source);
+        r = section_new("Route", &section);
         if (r < 0)
                 return r;
 
-        g_string_append(config, "[Route]\n");
-        g_string_append_printf(config, "Table=%d\n", rt->table);
-        g_string_append_printf(config, "PreferredSource=%s\n", pref_source);
-        g_string_append_printf(config, "Destination=%s\n\n", destination);
+        r = add_key_to_section_integer(section, "Table", rt->table);
+        if (r < 0)
+                return r;
 
-        g_string_append(config, "[Route]\n");
-        g_string_append_printf(config, "Table=%d\n", rt->table);
-        g_string_append_printf(config, "Gateway=%s\n\n", gw);
+        r = add_key_to_section(section, "PreferredSource", pref_source);
+        if (r < 0)
+                return r;
 
-        g_string_append(config, "[RoutingPolicyRule]\n");
-        g_string_append_printf(config, "Table=%d\n", rt->table);
-        g_string_append_printf(config, "To=%s\n\n", address);
+        r = add_key_to_section(section, "Destination", destination);
+        if (r < 0)
+                return r;
 
-        g_string_append(config, "[RoutingPolicyRule]\n");
-        g_string_append_printf(config, "Table=%d\n", rt->table);
-        g_string_append_printf(config, "From=%s\n", address);
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return r;
 
-        r = write_to_conf_file(network, config);
+        steal_pointer(section);
+
+        r = section_new("Route", &section);
+        if (r < 0)
+                return r;
+
+        r = add_key_to_section_integer(section, "Table", rt->table);
+        if (r < 0)
+                return r;
+
+        r = add_key_to_section(section, "Gateway", gw);
+        if (r < 0)
+                return r;
+
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return r;
+
+        steal_pointer(section);
+
+        /* To= */
+        r = section_new("RoutingPolicyRule", &section);
+        if (r < 0)
+                return r;
+
+        r = add_key_to_section_integer(section, "Table", rt->table);
+        if (r < 0)
+                return r;
+
+        r = add_key_to_section(section, "To", address);
+        if (r < 0)
+                return r;
+
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return r;
+
+        steal_pointer(section);
+
+        /* From= */
+        r = section_new("RoutingPolicyRule", &section);
+        if (r < 0)
+                return r;
+
+        r = add_key_to_section_integer(section, "Table", rt->table);
+        if (r < 0)
+                return r;
+
+        r = add_key_to_section(section, "From", address);
+        if (r < 0)
+                return r;
+
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return r;
+
+        steal_pointer(section);
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                return r;
+        }
+
+        r = set_file_permisssion(network, "systemd-network");
         if (r < 0)
                 return r;
 

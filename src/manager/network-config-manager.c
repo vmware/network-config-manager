@@ -1614,7 +1614,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *a = NULL, *gw = NULL, *destination = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt = NULL;
-        uint32_t table;
+        uint32_t table = random() % 999;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -1688,11 +1688,10 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                 .table = table,
                 .dst_prefixlen = destination->prefix_len,
                 .destination = *destination,
-                .address = *a,
                 .gw = *gw,
         };
 
-        r = manager_configure_additional_gw(p, rt);
+        r = manager_configure_additional_gw(p, a, rt);
         if (r < 0) {
                 log_warning("Failed to add route to device '%s': %s\n", argv[1], g_strerror(-r));
                 return r;
