@@ -3,6 +3,7 @@
  */
 
 #include "alloc-util.h"
+#include "config-parser.h"
 #include "file-util.h"
 #include "log.h"
 #include "macros.h"
@@ -160,7 +161,8 @@ int netdev_ctl_name_to_configs_new(ConfigManager **ret) {
         return 0;
 }
 
-int create_netdev_conf_file(const char *ifname, char **ret) {
+static int create_or_parse_netdev_conf_file(const char *ifname, KeyFile **ret) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *file = NULL, *netdev = NULL;
         int r;
 
@@ -174,7 +176,11 @@ int create_netdev_conf_file(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(netdev);
+        r = parse_key_file(netdev, &key_file);
+        if (r < 0)
+                return r;
+
+        *ret = steal_pointer(key_file);
         return 0;
 }
 
@@ -213,103 +219,126 @@ void netdev_unref(NetDev *n) {
         free(n);
 }
 
-int generate_netdev_config(NetDev *n, GString **ret) {
-        _cleanup_(g_string_unrefp) GString *config = NULL;
+int generate_netdev_config(NetDev *n) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
 
         assert(n);
 
-        if (!netdev_kind_to_name(n->kind))
-                return -EINVAL;
+        r = create_or_parse_netdev_conf_file(n->ifname, &key_file);
+        if (r < 0)
+                return 0;
 
-        config = g_string_new(NULL);
-        if (!config)
-                return log_oom();
+        r = key_file_set_string(key_file, "NetDev", "Name", n->ifname);
+        if (r < 0)
+                return r;
 
-        g_string_append(config, "[NetDev]\n");
-        if (n->ifname)
-                g_string_append_printf(config, "Name=%s\n", n->ifname);
-
-        g_string_append_printf(config, "Kind=%s\n\n", netdev_kind_to_name(n->kind));
+        r = key_file_set_string(key_file, "NetDev", "Kind", netdev_kind_to_name(n->kind));
+        if (r < 0)
+                return r;
 
         switch (n->kind) {
                 case NET_DEV_KIND_VLAN:
-                        g_string_append(config, "[VLAN]\n");
-                        g_string_append_printf(config, "Id=%d\n", n->id);
+                        r = key_file_set_uint(key_file, "VLAN", "Id", n->id);
+                        if (r < 0)
+                                return r;
 
-                        if (n->proto)
-                                g_string_append_printf(config, "Protocol=%s\n", n->proto);
-
+                        if (n->proto) {
+                                r = key_file_set_string(key_file, "VLAN", "Protocol", n->proto);
+                                if (r < 0)
+                                        return r;
+                        }
                         break;
 
                 case NET_DEV_KIND_BOND:
-                        g_string_append(config, "[Bond]\n");
-                        g_string_append_printf(config, "Mode=%s\n", bond_mode_to_name(n->bond_mode));
+                        r = key_file_set_string(key_file, "Bond", "Mode", bond_mode_to_name(n->bond_mode));
+                        if (r < 0)
+                                return r;
 
                         break;
 
                 case NET_DEV_KIND_VXLAN: {
                         _auto_cleanup_ char *local = NULL, *remote = NULL, *group = NULL;
 
-                        g_string_append(config, "[VXLAN]\n");
-                        g_string_append_printf(config, "VNI=%d\n", n->id);
+                        r = key_file_set_uint(key_file, "VXLAN", "VNI", n->id);
+                        if (r < 0)
+                                return r;
 
                         if (!ip_is_null(&n->local)) {
                                 (void) ip_to_string(n->local.family, &n->local, &local);
-                                g_string_append_printf(config, "Local=%s\n", local);
+                                r = key_file_set_string(key_file, "VXLAN", "Local", local);
+                                if (r < 0)
+                                        return r;
                         }
 
                         if (!ip_is_null(&n->remote)) {
                                 (void) ip_to_string(n->remote.family, &n->remote, &remote);
-                                g_string_append_printf(config, "Remote=%s\n", remote);
+                                r = key_file_set_string(key_file, "VXLAN", "Remote", remote);
+                                if (r < 0)
+                                        return r;
                         }
 
                         if (!ip_is_null(&n->group)) {
                                 (void) ip_to_string(n->group.family, &n->group, &group);
-                                g_string_append_printf(config, "Group=%s\n", group);
+                                r = key_file_set_string(key_file, "VXLAN", "Group", group);
+                                if (r < 0)
+                                        return r;
                         }
 
-                        if (n->destination_port > 0)
-                                g_string_append_printf(config, "DestinationPort=%d\n", n->destination_port);
+                        if (n->destination_port > 0) {
+                                r = key_file_set_uint(key_file, "VXLAN", "DestinationPort", n->destination_port);
+                                if (r < 0)
+                                        return r;
+                        }
 
-                        if (n->independent)
-                               g_string_append(config, "Independent=yes\n");
+                        if (n->independent)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "Independent", n->independent);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
                         break;
 
                 case NET_DEV_KIND_MACVLAN:
-                        g_string_append(config, "[MACVLAN]\n");
-                        g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
+                        r = key_file_set_string(key_file, "MACVLAN", "Mode", macvlan_mode_to_name(n->macvlan_mode));
+                        if (r < 0)
+                                return r;
 
                         break;
 
                 case NET_DEV_KIND_MACVTAP:
-                        g_string_append(config, "[MACVTAP]\n");
-                        g_string_append_printf(config, "Mode=%s\n", macvlan_mode_to_name(n->macvlan_mode));
+                        r = key_file_set_string(key_file, "MACVTAP", "Mode", macvlan_mode_to_name(n->macvlan_mode));
+                        if (r < 0)
+                                return r;
 
                         break;
 
                 case NET_DEV_KIND_IPVLAN:
-                        g_string_append(config, "[IPVLAN]\n");
-                        g_string_append_printf(config, "Mode=%s\n", ipvlan_mode_to_name(n->ipvlan_mode));
+                        r = key_file_set_string(key_file, "IPVLAN", "Mode", ipvlan_mode_to_name(n->ipvlan_mode));
+                        if (r < 0)
+                                return r;
 
                         break;
 
                 case NET_DEV_KIND_IPVTAP:
-                        g_string_append(config, "[IPVTAP]\n");
-                        g_string_append_printf(config, "Mode=%s\n", ipvlan_mode_to_name(n->ipvlan_mode));
+                        r = key_file_set_string(key_file, "IPVTAP", "Mode", ipvlan_mode_to_name(n->ipvlan_mode));
+                        if (r < 0)
+                                return r;
 
                         break;
 
                 case NET_DEV_KIND_VETH:
                         if (n->peer) {
-                                g_string_append(config, "[Peer]\n");
-                                g_string_append_printf(config, "Name=%s\n", n->peer);
+                                r = key_file_set_string(key_file, "Peer", "Name", n->peer);
+                                if (r < 0)
+                                        return r;
                         }
                         break;
 
                 case NET_DEV_KIND_VRF:
-                        g_string_append(config, "[VRF]\n");
-                        g_string_append_printf(config, "Table=%d\n", n->table);
+                        r = key_file_set_uint(key_file, "VRF", "Table", n->table);
+                        if (r < 0)
+                                return r;
 
                         break;
 
@@ -319,46 +348,72 @@ int generate_netdev_config(NetDev *n, GString **ret) {
                 case NET_DEV_KIND_VTI_TUNNEL: {
                         _auto_cleanup_ char *local = NULL, *remote = NULL;
 
-                        g_string_append(config, "[Tunnel]\n");
-
-                        if (n->independent)
-                               g_string_append(config, "Independent=yes\n");
+                        if (n->independent) {
+                                r = key_file_set_bool(key_file, "Tunnel", "Independent", n->independent);
+                                if (r < 0)
+                                        return r;
+                        }
 
                         if (!ip_is_null(&n->local)) {
                                 (void) ip_to_string(n->local.family, &n->local, &local);
-                                g_string_append_printf(config, "Local=%s\n", local);
+                                r = key_file_set_string(key_file, "Tunnel", "Local", local);
+                                if (r < 0)
+                                        return r;
                         }
 
                         if (!ip_is_null(&n->remote)) {
                                 (void) ip_to_string(n->remote.family, &n->remote, &remote);
-                                g_string_append_printf(config, "Remote=%s\n", remote);
+                                r = key_file_set_string(key_file, "Tunnel", "Remote", remote);
+                                if (r < 0)
+                                        return r;
                         }
                 }
                         break;
 
                 case NET_DEV_KIND_WIREGUARD:
-                        g_string_append(config, "[WireGuard]\n");
-                        g_string_append_printf(config, "PrivateKey=%s\n", n->wg_private_key);
+                        r = key_file_set_string(key_file, "WireGuard", "PrivateKey", n->wg_private_key);
+                        if (r < 0)
+                                return r;
 
-                        if (n->listen_port > 0)
-                                g_string_append_printf(config, "ListenPort=%d\n\n", n->listen_port);
+                        if (n->listen_port > 0) {
+                                r = key_file_set_uint(key_file, "WireGuard", "ListenPort", n->listen_port);
+                                if (r < 0)
+                                        return r;
+                        }
 
-                        g_string_append(config, "[WireGuardPeer]\n");
-                        g_string_append_printf(config, "PublicKey=%s\n", n->wg_public_key);
+                        r = key_file_set_string(key_file, "WireGuard", "PublicKey", n->wg_public_key);
+                        if (r < 0)
+                                return r;
 
-                        if (n->wg_endpoint)
-                                g_string_append_printf(config, "Endpoint=%s\n", n->wg_endpoint);
-
-                        if (n->wg_preshared_key)
-                                g_string_append_printf(config, "PresharedKey=%s\n", n->wg_preshared_key);
-
-                        if (n->wg_allowed_ips)
-                                g_string_append_printf(config, "AllowedIPs=%s\n\n", n->wg_allowed_ips);
+                        if (n->wg_endpoint) {
+                                r = key_file_set_string(key_file, "WireGuard", "Endpoint", n->wg_endpoint);
+                                if (r < 0)
+                                        return r;
+                        }
+                        if (n->wg_preshared_key) {
+                                r = key_file_set_string(key_file, "WireGuard", "PresharedKey", n->wg_preshared_key);
+                                if (r < 0)
+                                        return r;
+                        }
+                        if (n->wg_allowed_ips) {
+                                r = key_file_set_string(key_file, "WireGuard", "AllowedIPs", n->wg_allowed_ips);
+                                if (r < 0)
+                                        return r;
+                        }
                         break;
                 default:
                         break;
         }
 
-        *ret = steal_pointer(config);
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                return r;
+        }
+
+        r = set_file_permisssion(key_file->name, "systemd-network");
+        if (r < 0)
+                return r;
+
         return 0;
 }

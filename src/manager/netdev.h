@@ -94,7 +94,7 @@ int netdev_new(NetDev **ret);
 void netdev_unref(NetDev *n);
 DEFINE_CLEANUP(NetDev*, netdev_unref);
 
-int generate_netdev_config(NetDev *n, GString **ret);
+int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);
 
 const char *netdev_kind_to_name(NetDevKind id);

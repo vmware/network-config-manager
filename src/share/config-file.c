@@ -327,6 +327,15 @@ int key_file_set_string(KeyFile *key_file, const char *section, const char *k, c
         return set_config(key_file, section, k, v);
 }
 
+int key_file_set_bool(KeyFile *key_file, const char *section, const char *k, const bool b) {
+        assert(key_file);
+        assert(section);
+        assert(k);
+
+        return set_config(key_file, section, k, bool_to_string(b));
+}
+
+
 static int add_config(KeyFile *key_file, const char *section, const char *k, const char *v) {
         _cleanup_(section_freep) Section *sec = NULL;
         int r;
@@ -479,14 +488,14 @@ int key_file_parse_integer(KeyFile *key_file, const char *section, const char *k
         return 0;
 }
 
-int key_file_set_integer(KeyFile *key_file, const char *section, const char *k, int v) {
+int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, uint v) {
         _auto_cleanup_ gchar *s = NULL;
         int r;
 
         assert(section);
         assert(k);
 
-        s = g_strdup_printf("%i", v);
+        s = g_strdup_printf("%u", v);
         if (!s)
                 return -ENOMEM;
 
