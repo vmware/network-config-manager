@@ -2,6 +2,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <grp.h>
+#include <pwd.h>
+#include <network-config-manager.h>
 #include <network-config-manager.h>
 
 #include "alloc-util.h"
@@ -714,6 +717,109 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
         r = manager_create_wireguard_tunnel(argv[1], private_key, public_key, preshared_key, endpoint, allowed_ips, listen_port);
         if (r < 0) {
                 log_warning("Failed to create wireguard tunnel '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_create_tun_tap(int argc, char *argv[]) {
+        int packet_info = -1, vnet_hdr = -1, keep_carrier = -1, multi_queue = -1;
+        _auto_cleanup_ char *user = NULL, *group = NULL;
+        int r;
+
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "user") || string_equal_fold(argv[i], "usr")) {
+                        struct passwd *pw;
+
+                        parse_next_arg(argv, argc, i);
+
+                        pw = getpwnam(argv[i]);
+                        if (!pw) {
+                                log_warning("Failed to find user '%s': %s", argv[i], g_strerror(-ENOENT));
+                                return -ENOENT;
+                        }
+                        user = strdup(argv[i]);
+                        if (!user)
+                                return log_oom();
+
+                        continue;
+                } else if (string_equal_fold(argv[i], "group") || string_equal_fold(argv[i], "grp")) {
+                        struct group *g;
+                        parse_next_arg(argv, argc, i);
+
+                        g = getgrnam(argv[i]);
+                        if (!g) {
+                                log_warning("Failed to find group '%s': %s", argv[i], g_strerror(-ENOENT));
+                                return -ENOENT;
+                        }
+
+                        group = strdup(argv[i]);
+                        if (!user)
+                                return log_oom();
+
+                        continue;
+                } else if (string_equal_fold(argv[i], "mq")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse multi queue %s: %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        multi_queue = r;
+                        continue;
+                } else if (string_equal_fold(argv[i], "pkt-info")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse packet info %s: %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        packet_info = r;
+                        continue;
+                } else if (string_equal_fold(argv[i], "kc")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep carrier %s: %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        keep_carrier = r;
+                        continue;
+              } else if (string_equal_fold(argv[i], "vnet-hdr")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse vnet header %s: %s", argv[i], g_strerror(-r));
+                                return r;
+                        }
+
+                        vnet_hdr = r;
+                        continue;
+
+                } else {
+
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        return -EINVAL;
+                }
+        }
+
+        if (!valid_ifname(argv[1])) {
+                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                return r;
+        }
+
+        r = manager_create_tun_tap(string_equal(argv[0], "create-tun") ? NET_DEV_KIND_TUN: NET_DEV_KIND_TAP, argv[1],
+                                   user, group, packet_info, vnet_hdr, keep_carrier, multi_queue);
+        if (r < 0) {
+                log_warning("Failed to create tun tap='%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 

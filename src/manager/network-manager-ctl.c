@@ -209,6 +209,10 @@ static int help(void) {
                "  create-gre                   [GRE name] [dev DEVICE] local [ADDRESS] remote [ADDRESS] [independent BOOLEAN] Creates gre tunnel.\n"
                "  create-wg                    [WIREGUARD name] private-key [PRIVATEKEY] listen-port [PORT INTEGER] public-key [PUBLICKEY] preshared-key [PRESHAREDKEY]"
                                                "\n\t\t\t\t\t\t allowed-ips [IP,IP ...] endpoint [IP:PORT] Creates a wireguard tunnel.\n"
+               "  create-tun                   [TUN name] user [USER STRING] group [GROUP string] mq [MULTIQUEUE BOOL] pkt-info [PACKETINFO BOOL] vnet-hdr [VNETHEADER BOOL]"
+                                               "\n\t\t\t\t\t\t kc [KEEPCARRIER bool] Creates tun.\n"
+               "  create-tap                   [TAP name] user [USER STRING] group [GROUP string] mq [MULTIQUEUE BOOL] pkt-info [PACKETINFO BOOL] vnet-hdr [VNETHEADER BOOL]"
+                                               "\n\t\t\t\t\t\t kc [KEEPCARRIER bool] Creates tap.\n"
                "  remove-netdev                [DEVICE] kind [KIND {vlan|bridge|bond|vxlan|macvlan|macvtap|ipvlan|ipvtap|vrf|veth|ipip|sit|vti|gre|wg] \n"
                "                                      Removes .netdev and .network files.\n"
                "  reload                       Reload .network and .netdev files.\n"
@@ -390,6 +394,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "create-gre",                    "gre",              3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-vti",                    "vti",              3,        WORD_ANY, false, ncm_create_tunnel },
                 { "create-wg",                     "wg",               3,        WORD_ANY, false, ncm_create_wireguard_tunnel },
+                { "create-tun",                    "tun",              3,        WORD_ANY, false, ncm_create_tun_tap },
+                { "create-tap",                    "tap",              3,        WORD_ANY, false, ncm_create_tun_tap },
                 { "remove-netdev",                 "rnetdev",          1,        WORD_ANY, false, ncm_remove_netdev },
                 { "reload",                        "re",               WORD_ANY, WORD_ANY, false, ncm_network_reload },
                 { "reconfigure",                   "rc",               1,        WORD_ANY, false, ncm_link_reconfigure },
