@@ -35,7 +35,7 @@ void dns_servers_free(DNSServers *d) {
         if (d->dns_servers)
                 g_sequence_free(d->dns_servers);
 
-        g_free(d);
+        free(d);
 }
 
 int dns_servers_new(DNSServers **ret) {
@@ -123,8 +123,8 @@ void dns_domain_free(void *d) {
         if (!d)
                 return;
 
-        g_free(p->domain);
-        g_free(p);
+        free(p->domain);
+        free(p);
 }
 
 int dns_domains_new(DNSDomains **ret) {
@@ -149,7 +149,7 @@ void dns_domains_free(DNSDomains *d) {
         if (d->dns_domains)
                 g_sequence_free(d->dns_domains);
 
-        g_free(d);
+        free(d);
 }
 
 static int dns_domain_compare_func(gconstpointer x, gconstpointer y, gpointer user_data) {

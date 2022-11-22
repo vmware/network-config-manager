@@ -157,7 +157,7 @@ int netdev_ctl_name_to_configs_new(ConfigManager **ret) {
         if (r < 0)
                 return r;
 
-        *ret = m;
+        *ret = steal_pointer(m);
         return 0;
 }
 

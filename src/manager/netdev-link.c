@@ -177,7 +177,7 @@ void netdev_link_unref(NetDevLink *n) {
         free(n->rx_jumbo_buf);
         free(n->tx_buf);
 
-        g_free(n);
+        free(n);
 }
 
 int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
