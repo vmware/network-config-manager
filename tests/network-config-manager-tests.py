@@ -1374,20 +1374,20 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tap.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '15'])
 
-        assert(link_exist('vtest-tap') == True)
+        assert(link_exist('test-tap') == True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test-tap.netdev'))
 
-        assert(veth_parser.get('NetDev', 'Name') == 'test-tap')
-        assert(veth_parser.get('NetDev', 'kind') == 'tap')
+        assert(parser.get('NetDev', 'Name') == 'test-tap')
+        assert(parser.get('NetDev', 'kind') == 'tap')
 
         tun_network_parser = configparser.ConfigParser()
         tun_network_parser.read(os.path.join(networkd_unit_file_path, '10-test-tap.network'))
 
-        assert(veth_network_parser.get('Match', 'Name') == 'test-tap')
+        assert(tun_network_parser.get('Match', 'Name') == 'test-tap')
 
         link_remove('test-tap')
 
@@ -1397,20 +1397,20 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tun.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '15'])
 
-        assert(link_exist('vtest-tun') == True)
+        assert(link_exist('test-tun') == True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test-tun.netdev'))
 
-        assert(veth_parser.get('NetDev', 'Name') == 'test-tun')
-        assert(veth_parser.get('NetDev', 'kind') == 'tun')
+        assert(parser.get('NetDev', 'Name') == 'test-tun')
+        assert(parser.get('NetDev', 'kind') == 'tun')
 
         tun_network_parser = configparser.ConfigParser()
         tun_network_parser.read(os.path.join(networkd_unit_file_path, '10-test-tun.network'))
 
-        assert(veth_network_parser.get('Match', 'Name') == 'test-tun')
+        assert(tun_network_parser.get('Match', 'Name') == 'test-tun')
 
         link_remove('test-tun')
 
