@@ -18,6 +18,8 @@ typedef enum NetDevKind {
         NET_DEV_KIND_IPVLAN,
         NET_DEV_KIND_IPVTAP,
         NET_DEV_KIND_VRF,
+        NET_DEV_KIND_TUN,
+        NET_DEV_KIND_TAP,
         NET_DEV_KIND_VETH,
         NET_DEV_KIND_IPIP_TUNNEL,
         NET_DEV_KIND_SIT_TUNNEL,
@@ -58,6 +60,16 @@ typedef enum IPVLanMode {
         _IP_VLAN_MODE_INVALID = -EINVAL
 } IPVLanMode;
 
+typedef struct TunTap {
+        char *user;
+        char *group;
+
+        int multi_queue;
+        int packet_info;
+        int vnet_hdr;
+        int keep_carrier;
+} TunTap;
+
 typedef struct NetDev {
         char *ifname;
         char *peer;
@@ -83,6 +95,8 @@ typedef struct NetDev {
 
         uint32_t id;
         uint32_t table;
+
+        TunTap tun_tap;
 
         NetDevKind kind;
         BondMode bond_mode;

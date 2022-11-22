@@ -97,6 +97,7 @@ int ncm_create_vrf(int argc, char *argv[]);
 int ncm_create_veth(int argc, char *argv[]);
 int ncm_create_tunnel(int argc, char *argv[]);
 int ncm_create_wireguard_tunnel(int argc, char *argv[]);
+int ncm_create_tun_tap(int argc, char *argv[]);
 
 int ncm_remove_netdev(int argc, char *argv[]);
 

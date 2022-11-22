@@ -22,6 +22,8 @@ static const char *const netdev_kind_table[_NET_DEV_KIND_MAX] = {
         [NET_DEV_KIND_IPVTAP]      = "ipvtap",
         [NET_DEV_KIND_VRF]         = "vrf",
         [NET_DEV_KIND_VETH]        = "veth",
+        [NET_DEV_KIND_TUN]         = "tun",
+        [NET_DEV_KIND_TAP]         = "tap",
         [NET_DEV_KIND_IPIP_TUNNEL] = "ipip",
         [NET_DEV_KIND_SIT_TUNNEL]  = "sit",
         [NET_DEV_KIND_GRE_TUNNEL]  = "gre",
@@ -157,7 +159,7 @@ int netdev_ctl_name_to_configs_new(ConfigManager **ret) {
         if (r < 0)
                 return r;
 
-        *ret = m;
+        *ret = steal_pointer(m);
         return 0;
 }
 
@@ -193,6 +195,10 @@ int netdev_new(NetDev **ret) {
 
         *n = (NetDev) {
                 .kind = _NET_DEV_KIND_INVALID,
+                .tun_tap.packet_info = -1,
+                .tun_tap.vnet_hdr = -1,
+                .tun_tap.keep_carrier = -1,
+                .tun_tap.multi_queue = -1,
         };
 
         *ret = steal_pointer(n);
@@ -215,6 +221,8 @@ void netdev_unref(NetDev *n) {
         free(n->wg_allowed_ips);
 
         free(n->proto);
+        free(n->tun_tap.user);
+        free(n->tun_tap.group);
 
         free(n);
 }
@@ -339,6 +347,45 @@ int generate_netdev_config(NetDev *n) {
                         r = key_file_set_uint(key_file, "VRF", "Table", n->table);
                         if (r < 0)
                                 return r;
+
+                        break;
+                case NET_DEV_KIND_TUN:
+                case NET_DEV_KIND_TAP:
+                        if (n->tun_tap.user) {
+                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "User", n->tun_tap.user);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->tun_tap.group) {
+                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "Group", n->tun_tap.group);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->tun_tap.packet_info != -1) {
+                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "PacketInfo", bool_to_string(n->tun_tap.packet_info));
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->tun_tap.vnet_hdr != -1) {
+                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "VNetHeader", bool_to_string(n->tun_tap.vnet_hdr));
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->tun_tap.keep_carrier != -1) {
+                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "KeepCarrier", bool_to_string(n->tun_tap.keep_carrier));
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->tun_tap.multi_queue != -1) {
+                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "MultiQueue", bool_to_string(n->tun_tap.multi_queue));
+                                if (r < 0)
+                                        return r;
+                        }
 
                         break;
 

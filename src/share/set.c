@@ -37,7 +37,7 @@ void set_unrefp(Set **s) {
                 return;
 
         g_hash_table_destroy((*s)->hash);
-        g_free(*s);
+        free(*s);
 }
 
 bool set_add(Set *s, void *k) {

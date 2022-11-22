@@ -636,13 +636,13 @@ int manager_create_vrf(const char *vrf, const uint32_t table) {
         return dbus_network_reload();
 }
 
-int manager_create_wireguard_tunnel(char *wireguard,
-                                    char *private_key,
-                                    char *public_key,
-                                    char *preshared_key,
-                                    char *endpoint,
-                                    char *allowed_ips,
-                                    uint16_t listen_port) {
+int manager_create_wireguard_tunnel(const char *wireguard,
+                                    const char *private_key,
+                                    const char *public_key,
+                                    const char *preshared_key,
+                                    const char *endpoint,
+                                    const char *allowed_ips,
+                                    const uint16_t listen_port) {
 
         _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *wireguard_network_config = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
@@ -661,8 +661,8 @@ int manager_create_wireguard_tunnel(char *wireguard,
         *netdev = (NetDev) {
                          .ifname = strdup(wireguard),
                          .kind = NET_DEV_KIND_WIREGUARD,
-                         .wg_private_key = private_key ? strdup(private_key) : private_key,
-                         .wg_public_key = public_key ? strdup(public_key) : public_key,
+                         .wg_private_key = private_key ? strdup(private_key) : NULL,
+                         .wg_public_key = public_key ? strdup(public_key) : NULL,
                          .listen_port = listen_port,
                  };
         if (!netdev->ifname || !netdev->wg_private_key || !netdev->wg_public_key)
@@ -703,6 +703,65 @@ int manager_create_wireguard_tunnel(char *wireguard,
                 return r;
 
         (void) manager_write_network_config(v, wireguard_network_config);
+
+        return dbus_network_reload();
+}
+
+int manager_create_tun_tap(const NetDevKind kind,
+                           const char *ifname,
+                           const char *user,
+                           const char *group,
+                           const int packet_info,
+                           const int vnet_hdr,
+                           const int keep_carrier,
+                           const int multi_queue) {
+
+        _cleanup_(g_string_unrefp) GString *network_config = NULL;
+        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
+        _cleanup_(network_unrefp) Network *n = NULL;
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        r = netdev_new(&netdev);
+        if (r < 0)
+                return log_oom();
+
+        *netdev = (NetDev) {
+                         .ifname = strdup(ifname),
+                         .kind = kind,
+                         .tun_tap.user = user ? strdup(user) : NULL,
+                         .tun_tap.group = group ? strdup(group) : NULL,
+                         .tun_tap.packet_info = packet_info,
+                         .tun_tap.vnet_hdr = vnet_hdr,
+                         .tun_tap.keep_carrier = keep_carrier,
+                         .tun_tap.multi_queue = multi_queue,
+        };
+        if (!netdev->ifname)
+                return log_oom();
+
+        r = generate_netdev_config(netdev);
+        if (r < 0)
+                return r;
+
+        r = network_new(&n);
+        if (r < 0)
+                return r;
+
+        n->ifname = strdup(ifname);
+        if (!n->ifname)
+                return log_oom();
+
+        r = generate_network_config(n, &network_config);
+        if (r < 0) {
+                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                return r;
+        }
+
+        r = create_network_conf_file(ifname, &network);
+        if (r < 0)
+                return r;
+
+        (void) manager_write_network_config(n, network_config);
 
         return dbus_network_reload();
 }
