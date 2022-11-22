@@ -1354,19 +1354,65 @@ class TestCLINetDev:
         assert(link_exist('veth-98') == True)
         assert(link_exist('veth-99') == True)
 
-        vrf_parser = configparser.ConfigParser()
-        vrf_parser.read(os.path.join(networkd_unit_file_path, '10-veth-98.netdev'))
+        veth_parser = configparser.ConfigParser()
+        veth_parser.read(os.path.join(networkd_unit_file_path, '10-veth-98.netdev'))
 
-        assert(vrf_parser.get('NetDev', 'Name') == 'veth-98')
-        assert(vrf_parser.get('NetDev', 'kind') == 'veth')
-        assert(vrf_parser.get('Peer', 'Name') == 'veth-99')
+        assert(veth_parser.get('NetDev', 'Name') == 'veth-98')
+        assert(veth_parser.get('NetDev', 'kind') == 'veth')
+        assert(veth_parser.get('Peer', 'Name') == 'veth-99')
 
-        vrf_network_parser = configparser.ConfigParser()
-        vrf_network_parser.read(os.path.join(networkd_unit_file_path, '10-veth-98.network'))
+        veth_network_parser = configparser.ConfigParser()
+        veth_network_parser.read(os.path.join(networkd_unit_file_path, '10-veth-98.network'))
 
-        assert(vrf_network_parser.get('Match', 'Name') == 'veth-98')
+        assert(veth_network_parser.get('Match', 'Name') == 'veth-98')
 
         link_remove('veth-98')
+
+    def test_cli_create_tap(self):
+        subprocess.check_call("nmctl create-tap test-tap vnet-hdr yes" , shell = True)
+        assert(unit_exist('10-test-tap.netdev') == True)
+        assert(unit_exist('10-test-tap.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exist('vtest-tap') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test-tap.netdev'))
+
+        assert(veth_parser.get('NetDev', 'Name') == 'test-tap')
+        assert(veth_parser.get('NetDev', 'kind') == 'tap')
+
+        tun_network_parser = configparser.ConfigParser()
+        tun_network_parser.read(os.path.join(networkd_unit_file_path, '10-test-tap.network'))
+
+        assert(veth_network_parser.get('Match', 'Name') == 'test-tap')
+
+        link_remove('test-tap')
+
+    def test_cli_create_tun(self):
+        subprocess.check_call("nmctl create-tun test-tun vnet-hdr yes" , shell = True)
+        assert(unit_exist('10-test-tun.netdev') == True)
+        assert(unit_exist('10-test-tun.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '5'])
+
+        assert(link_exist('vtest-tun') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test-tun.netdev'))
+
+        assert(veth_parser.get('NetDev', 'Name') == 'test-tun')
+        assert(veth_parser.get('NetDev', 'kind') == 'tun')
+
+        tun_network_parser = configparser.ConfigParser()
+        tun_network_parser.read(os.path.join(networkd_unit_file_path, '10-test-tun.network'))
+
+        assert(veth_network_parser.get('Match', 'Name') == 'test-tun')
+
+        link_remove('test-tun')
 
     def test_cli_create_ipip(self):
         assert(link_exist('test98') == True)
