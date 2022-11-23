@@ -1386,7 +1386,6 @@ int json_show_dns_server(void) {
 
 int json_show_dns_server_domains(void) {
         _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
-        _auto_cleanup_ char *config_domain = NULL, *setup = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buffer[LINE_MAX] = {};
@@ -1454,7 +1453,6 @@ int json_show_dns_server_domains(void) {
 
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _cleanup_(json_object_putp) json_object *j = NULL;
-                        _auto_cleanup_ char *pretty = NULL;
 
                         j = json_object_new_array();
                         if (!j)

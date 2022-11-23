@@ -141,7 +141,6 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
 _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         _cleanup_(addresses_unrefp) Addresses *addr = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_strv_ char **s = NULL;
         bool ipv4 = false, ipv6 = false;
         GHashTableIter iter;
         gpointer key, value;
