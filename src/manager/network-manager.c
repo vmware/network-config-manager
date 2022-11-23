@@ -1495,7 +1495,6 @@ int manager_set_network_section(const IfNameIndex *ifnameidx, const char *k, con
         return dbus_network_reload();
 }
 
-
 int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *ifnameidx, const char *k, bool v) {
         _auto_cleanup_ char *network = NULL;
         int r;
