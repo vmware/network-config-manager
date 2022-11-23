@@ -4,6 +4,7 @@
 
 #include "alloc-util.h"
 #include "config-file.h"
+#include "config-parser.h"
 #include "dbus.h"
 #include "dracut-parser.h"
 #include "file-util.h"
@@ -677,23 +678,33 @@ int generate_wifi_config(Network *n, GString **ret) {
 
 static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         _auto_cleanup_ char *gateway = NULL, *destination = NULL;
-        GString *config = userdata;
+        _cleanup_(section_freep) Section *section = NULL;
+        KeyFile *key_file = userdata;
         Route *route = value;
+        int r;
 
         if (ip_is_null(&route->destination) && ip_is_null(&route->gw))
                 return;
 
-        g_string_append(config, "\n[Route]\n");
+        r = section_new("Route", &section);
+        if (r < 0)
+                return;
 
         if (!ip_is_null(&route->destination)) {
                 (void) ip_to_string(AF_INET, &route->destination, &destination);
-                g_string_append_printf(config, "Destination=%s\n", destination);
+                (void ) add_key_to_section(section, "Destination", destination);
         }
 
         if (!ip_is_null(&route->gw)) {
                 (void) ip_to_string(AF_INET, &route->gw, &gateway);
-                g_string_append_printf(config, "Gateway=%s\n", gateway);
+                (void) add_key_to_section(section, "Gateway", gateway);
         }
+
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return;
+
+        steal_pointer(section);
 }
 
 static void append_nameservers(gpointer key, gpointer value, gpointer userdata) {
@@ -709,143 +720,248 @@ static void append_ntp(gpointer key, gpointer value, gpointer userdata) {
 }
 
 static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
-        GString *config = userdata;
+        _cleanup_(section_freep) Section *section = NULL;
+        KeyFile *key_file = userdata;
+        int r;
 
-        g_string_append(config, "\n[Address]\n");
-        g_string_append_printf(config, "Address=%s\n", (char *) key);
+        r = section_new("Address", &section);
+        if (r < 0)
+                return;
+
+        (void) add_key_to_section(section, "Address", (char *) key);
+
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return;
+
+        steal_pointer(section);
 }
 
-int generate_network_config(Network *n, GString **ret) {
-        _cleanup_(g_string_unrefp) GString *config = NULL;
-        _auto_cleanup_ char *gateway = NULL;
+int generate_network_config(Network *n) {
+        _auto_cleanup_ char *gateway = NULL, *network = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
 
         assert(n);
 
-        config = g_string_new(NULL);
-        if (!config)
-                return log_oom();
+        r = create_network_conf_file(n->ifname, &network);
+        if (r < 0)
+                return r;
 
-        g_string_append(config, "[Match]\n");
-        if (n->ifname)
-                g_string_append_printf(config, "Name=%s\n", n->ifname);
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
 
-        if (n->match_mac)
-                g_string_append_printf(config, "MACAddress=%s\n", n->match_mac);
+        r = set_config(key_file, "Match", "Name", n->ifname);
+        if (r < 0)
+                return r;
+
+        if (n->match_mac) {
+                r = set_config(key_file, "Match", "MACAddress", n->match_mac);
+                if (r < 0)
+                        return r;
+        }
 
         if (n->unmanaged != -1 || n->arp != -1 || n->multicast != -1 || n->all_multicast != -1 || n->promiscuous != -1 ||
             n->req_for_online != -1 || n->mtu > 0 || n->mac || n->req_family_for_online) {
 
-                g_string_append(config, "\n[Link]\n");
+                if (n->unmanaged != -1) {
+                        r = set_config(key_file, "Link", "Unmanaged", bool_to_string(!n->unmanaged));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->unmanaged != -1)
-                        g_string_append_printf(config, "Unmanaged=%s\n", bool_to_string(!n->unmanaged));
+                if (n->arp != -1) {
+                        r = set_config(key_file, "Link", "ARP", bool_to_string(n->arp));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->arp != -1)
-                        g_string_append_printf(config, "ARP=%s\n", bool_to_string(n->arp));
+                if (n->multicast != -1) {
+                        r = set_config(key_file, "Link", "Multicast", bool_to_string(n->multicast));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->multicast != -1)
-                        g_string_append_printf(config, "Multicast=%s\n", bool_to_string(n->multicast));
+                if (n->all_multicast != -1) {
+                        r = set_config(key_file, "Link", "AllMulticast", bool_to_string(n->all_multicast));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->all_multicast != -1)
-                        g_string_append_printf(config, "AllMulticast=%s\n", bool_to_string(n->all_multicast));
+                if (n->promiscuous != -1) {
+                        r = set_config(key_file, "Link", "Promiscuous", bool_to_string(n->promiscuous));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->promiscuous != -1)
-                        g_string_append_printf(config, "Promiscuous=%s\n", bool_to_string(n->promiscuous));
+                if (n->req_for_online != -1) {
+                        r = set_config(key_file, "Link", "RequiredForOnline", bool_to_string(n->req_for_online));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->req_for_online != -1)
-                        g_string_append_printf(config, "RequiredForOnline=%s\n", bool_to_string(n->req_for_online));
+                if (n->mtu > 0) {
+                        r = key_file_set_uint(key_file, "Link", "MTUBytes", n->mtu);
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->mtu > 0)
-                        g_string_append_printf(config, "MTUBytes=%d\n", n->mtu);
+                if (n->mac) {
+                        r = set_config(key_file, "Link", "MACAddress", n->mac);
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->mac)
-                        g_string_append_printf(config, "MACAddress=%s\n", n->mac);
-
-                if (n->req_family_for_online)
-                        g_string_append_printf(config, "RequiredFamilyForOnline=%s\n", n->req_family_for_online);
+                if (n->req_family_for_online) {
+                        r = set_config(key_file, "Link", "RequiredFamilyForOnline", n->req_family_for_online);
+                        if (r < 0)
+                                return r;
+                }
         }
-
-        g_string_append(config, "\n[Network]\n");
 
         if (n->dhcp_type != _DHCP_CLIENT_INVALID) {
                 if (n->parser_type == PARSER_TYPE_YAML)
-                        g_string_append_printf(config, "DHCP=%s\n", dhcp_client_modes_to_name(n->dhcp_type));
+                        r = set_config(key_file, "Network", "DHCP", dhcp_client_modes_to_name(n->dhcp_type));
                 else
-                        g_string_append_printf(config, "DHCP=%s\n", dracut_to_networkd_dhcp_mode_to_name(n->dhcp_type));
+                        r = set_config(key_file, "Network", "DHCP", dracut_to_networkd_dhcp_mode_to_name(n->dhcp_type));
         }
 
-        if (n->lldp != -1)
-                g_string_append_printf(config, "LLDP=%s\n", bool_to_string(n->lldp));
+        if (n->lldp != -1) {
+                r = set_config(key_file, "Network", "LLDP", bool_to_string(n->lldp));
+                if (r < 0)
+                        return r;
+        }
 
-        if (n->link_local != _LINK_LOCAL_ADDRESS_INVALID)
-                g_string_append_printf(config, "LinkLocalAddressing=%s\n", link_local_address_type_to_name(n->link_local));
+        if (n->link_local != _LINK_LOCAL_ADDRESS_INVALID) {
+                r = set_config(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(n->link_local));
+                if (r < 0)
+                        return r;
 
-        if (n->ipv6_accept_ra != -1)
-                g_string_append_printf(config, "IPv6AcceptRA=%s\n", bool_to_string(n->ipv6_accept_ra));
+        }
+
+        if (n->ipv6_accept_ra != -1) {
+                r = set_config(key_file, "Network", "IPv6AcceptRA", bool_to_string(n->ipv6_accept_ra));
+                if (r < 0)
+                        return r;
+        }
 
         if (n->nameservers && set_size(n->nameservers) > 0) {
-                g_string_append(config, "DNS=");
-                set_foreach(n->nameservers, append_nameservers, config);
-                g_string_append(config, "\n");
-       }
+                _cleanup_(g_string_unrefp) GString *c = NULL;
 
-        if (n->ntps && set_size(n->ntps) > 0) {
-                g_string_append(config, "NTP=");
-                set_foreach(n->ntps, append_ntp, config);
-                g_string_append(config, "\n");
+                c = g_string_new(NULL);
+                if (!c)
+                        return log_oom();
+
+                set_foreach(n->nameservers, append_nameservers, c);
+                r = set_config(key_file, "Network", "DNS", c->str);
+                if (r < 0)
+                        return r;
         }
 
-        if (n->netdev)
-                g_string_append_printf(config, "%s=%s\n", g_ascii_strup(netdev_kind_to_name(n->netdev->kind),
-                                                                        strlen(netdev_kind_to_name(n->netdev->kind))),
-                                                                        n->netdev->ifname);
+        if (n->ntps && set_size(n->ntps) > 0) {
+                _cleanup_(g_string_unrefp) GString *c = NULL;
+
+                c = g_string_new(NULL);
+                if (!c)
+                        return log_oom();
+
+                set_foreach(n->ntps, append_ntp, c);
+                r = set_config(key_file, "Network", "NTP", c->str);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->netdev) {
+                r = set_config(key_file, "Network", netdev_kind_to_name(n->netdev->kind), n->netdev->ifname);
+                if (r < 0)
+                        return r;
+        }
 
         if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID || n->dhcp4_use_dns != -1 || n->dhcp4_use_domains != -1 ||
             n->dhcp4_use_ntp != -1 || n->dhcp4_use_mtu != -1) {
-                g_string_append(config, "\n[DHCPv4]\n");
 
-                if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID)
-                        g_string_append_printf(config, "ClientIdentifier=%s\n", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
+                if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID) {
+                        r = set_config(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->dhcp4_use_dns != -1)
-                        g_string_append_printf(config, "UseDNS=%s\n", bool_to_string(n->dhcp4_use_dns));
+                if (n->dhcp4_use_dns != -1) {
+                        r = set_config(key_file, "DHCPv4", "UseDNS", bool_to_string(n->dhcp4_use_dns));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->dhcp4_use_domains != -1)
-                        g_string_append_printf(config, "UseDomains=%s\n", bool_to_string(n->dhcp4_use_domains));
+                if (n->dhcp4_use_domains != -1) {
+                        r = set_config(key_file, "DHCPv4", "UseDomains", bool_to_string(n->dhcp4_use_domains));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->dhcp4_use_ntp != -1)
-                        g_string_append_printf(config, "UseNTP=%s\n", bool_to_string(n->dhcp4_use_ntp));
+                if (n->dhcp4_use_ntp != -1) {
+                        r = set_config(key_file, "DHCPv4", "UseNTP", bool_to_string(n->dhcp4_use_ntp));
+                        if (r < 0)
+                                return r;
+                }
 
-                if (n->dhcp4_use_mtu != -1)
-                        g_string_append_printf(config, "UseMTU=%s\n", bool_to_string(n->dhcp4_use_mtu));
+                if (n->dhcp4_use_mtu != -1) {
+                        r = set_config(key_file, "DHCPv4", "UseMTU", bool_to_string(n->dhcp4_use_mtu));
+                        if (r < 0)
+                                return r;
+                }
         }
 
         if ( n->dhcp6_use_dns != -1 || n->dhcp6_use_ntp != -1) {
-                g_string_append(config, "\n[DHCPv6]\n");
+                if (n->dhcp6_use_dns != -1) {
+                        r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_string(n->dhcp4_use_dns));
+                         if (r < 0)
+                                return r;
+                }
 
-                if (n->dhcp6_use_dns != -1)
-                        g_string_append_printf(config, "UseDNS=%s\n", bool_to_string(n->dhcp6_use_dns));
-
-                if (n->dhcp6_use_ntp != -1)
-                        g_string_append_printf(config, "UseNTP=%s\n", bool_to_string(n->dhcp6_use_ntp));
+                if (n->dhcp6_use_ntp != -1) {
+                        r = set_config(key_file, "DHCPv6", "UseNTP", bool_to_string(n->dhcp6_use_ntp));
+                        if (r < 0)
+                                return r;
+                }
         }
 
         if (n->addresses && set_size(n->addresses) > 0)
-                set_foreach(n->addresses, append_addresses, config);
+                set_foreach(n->addresses, append_addresses, key_file);
 
         if (n->gateway && !ip_is_null(n->gateway)) {
-                g_string_append(config, "\n[Route]\n");
+                _cleanup_(section_freep) Section *section = NULL;
 
                 (void) ip_to_string_prefix(AF_INET, n->gateway, &gateway);
-                g_string_append_printf(config, "Gateway=%s\n", gateway);
 
-                if (n->gateway_onlink != -1)
-                        g_string_append_printf(config, "GatewayOnlink=%s\n", bool_to_string(n->gateway_onlink));
+                r = section_new("Route", &section);
+                if (r < 0)
+                        return r;
+
+                add_key_to_section(section, "Gateway", gateway);
+                add_key_to_section(section, "GatewayOnlink", bool_to_string(n->gateway_onlink));
+
+                r = add_section_to_key_file(key_file, section);
+                if (r < 0)
+                        return r;
+
+                steal_pointer(section);
         }
 
         if (n->routes)
-                g_hash_table_foreach(n->routes, append_routes, config);
+                g_hash_table_foreach(n->routes, append_routes, key_file);
 
-        *ret = steal_pointer(config);
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                return r;
+        }
+
+        r = set_file_permisssion(network, "systemd-network");
+        if (r < 0)
+                return r;
+
+        (void) dbus_network_reload();
+
         return 0;
 }

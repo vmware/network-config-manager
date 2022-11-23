@@ -1929,7 +1929,7 @@ int manager_parse_proxy_config(GHashTable **c) {
 }
 
 int manager_generate_network_config_from_yaml(const char *file) {
-        _cleanup_(g_string_unrefp) GString *config = NULL, *wifi_config = NULL;
+        _cleanup_(g_string_unrefp) GString *wifi_config = NULL;
         _cleanup_(network_unrefp) Network *n = NULL;
         _cleanup_(netdev_link_unrefp) NetDevLink *l = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -1962,15 +1962,11 @@ int manager_generate_network_config_from_yaml(const char *file) {
                         return r;
                 }
 
-                r = generate_network_config(n, &config);
+                r = generate_network_config(n);
                 if (r < 0) {
                         log_warning("Failed to generate network configuration for file '%s': %s", file, g_strerror(-r));
                         return r;
                 }
-
-                r = manager_write_network_config(n, config);
-                if (r < 0)
-                        return r;
 
                 if (n->access_points) {
                         r = generate_wifi_config(n, &wifi_config);
@@ -1994,7 +1990,7 @@ static void manager_command_line_config_generator(void *key, void *value, void *
 
         n = (Network *) value;
 
-        r = generate_network_config(n, &config);
+        r = generate_network_config(n);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return;
@@ -2051,7 +2047,6 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
                         return r;
 
                 for (GList *i = h->links; i; i = i->next) {
-                        _cleanup_(g_string_unrefp) GString *config = NULL;
                         Link *link = NULL;
 
                         link = i->data;
@@ -2063,13 +2058,12 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
                         if (!n->ifname)
                                 return log_oom();
 
-                        r = generate_network_config(n, &config);
+                        r = generate_network_config(n);
                         if (r < 0) {
                                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                                 return r;
                         }
 
-                        (void) manager_write_network_config(n, config);
                         n->ifname = mfree(n->ifname);
                 }
 
