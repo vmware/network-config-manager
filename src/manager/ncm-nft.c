@@ -43,9 +43,9 @@ _public_ int ncm_nft_show_tables(int argc, char *argv[]) {
                         log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                         return r;
                 }
+                f = r;
         }
 
-        f = r;
         if (argc <= 2) {
                 r = nft_get_tables(f, NULL, &s);
                 if (r < 0) {
@@ -86,9 +86,9 @@ _public_ int ncm_nft_get_tables(const char *family, const char *table, char ***r
                 r = nft_family_name_to_type(family);
                 if (r < 0)
                         return r;;
+                f = r;
         }
 
-        f = r;
         r = nft_get_tables(f, table, &s);
         if (r < 0)
                 return r;
@@ -134,8 +134,8 @@ _public_ int ncm_nft_delete_table(int argc, char *argv[]) {
                 log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                 return r;
         }
-
         f = r;
+
         r = nft_delete_table(f, argv[2]);
         if (r < 0) {
                 log_warning("Failed to delete table  %s : %s", argv[2], g_strerror(-r));
@@ -174,9 +174,9 @@ _public_ int ncm_nft_show_chains(int argc, char *argv[]) {
                         log_warning("Failed to parse family type %s : %s", argv[1], g_strerror(-r));
                         return r;
                 }
+                f = r;
         }
 
-        f = r;
         r = nft_get_chains(f, argc > 3 ? argv[2] : NULL, argc > 3 ? argv[3] : NULL, &s);
         if (r < 0) {
                 log_warning("Failed to get chains %s : %s", argv[2] ? argv[2] : "", g_strerror(-r));
@@ -222,9 +222,9 @@ _public_ int ncm_nft_get_chains(char *family, const char *table, const char *cha
                 r = nft_family_name_to_type(family);
                 if (r < 0)
                         return r;
+                f = r;
         }
 
-        f = r;
         r = nft_get_chains(f, table, chain, &s);
         if (r < 0)
                 return r;

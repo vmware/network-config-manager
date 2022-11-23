@@ -1176,7 +1176,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -1329,7 +1329,7 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -1511,7 +1511,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -1799,7 +1799,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -1960,7 +1960,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                         emit_router = r;
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -2180,7 +2180,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         continue;
                 } else {
 
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -2842,7 +2842,7 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
 
         r = manager_enable_ipv6(p, b);
         if (r < 0) {
-                log_warning("Failed to configure IPv6 for on device '%s': %s", p->ifname, g_strerror(-EINVAL));
+                log_warning("Failed to configure IPv6 for on device '%s': %s", p->ifname, g_strerror(EINVAL));
                 return -EINVAL;
         }
 

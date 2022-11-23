@@ -53,10 +53,9 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
 }
 
 int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id, const char *proto) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vlan_network_config = NULL;
-        _auto_cleanup_ char *vlan_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
@@ -93,32 +92,20 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &vlan_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
 
-        r = create_network_conf_file(ifnameidx->ifname, &vlan_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, vlan_network_config);
-
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0)
                 return r;
 
-        r = add_key_to_section_string(network, "Network", "VLAN", vlan);
-        if (r < 0)
-                return r;
-
-        return dbus_network_reload();
+        return add_key_to_section_string(network, "Network", "VLAN", vlan);
 }
 
 int manager_create_bridge(const char *bridge, char **interfaces) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *bridge_network_config = NULL;
-        _auto_cleanup_ char *bridge_netdev = NULL, *bridge_network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         char **s;
@@ -150,17 +137,11 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &bridge_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
-
-        r = create_network_conf_file(bridge, &bridge_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, bridge_network_config);
 
         strv_foreach(s, interfaces) {
                 _auto_cleanup_ IfNameIndex *p = NULL;
@@ -179,12 +160,10 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
                         return r;
         }
 
-        return dbus_network_reload();
+        return 0;
 }
 
 int manager_create_bond(const char *bond, const BondMode mode, char **interfaces) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *bond_network_config = NULL;
-        _auto_cleanup_ char *bond_netdev = NULL, *bond_network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         char **s;
@@ -218,17 +197,11 @@ int manager_create_bond(const char *bond, const BondMode mode, char **interfaces
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &bond_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
-
-        r = create_network_conf_file(bond, &bond_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, bond_network_config);
 
         strv_foreach(s, interfaces) {
                 _auto_cleanup_ char *network = NULL;
@@ -242,7 +215,7 @@ int manager_create_bond(const char *bond, const BondMode mode, char **interfaces
                         return r;
         }
 
-        return dbus_network_reload();
+        return 0;
 }
 
 int manager_create_vxlan(const char *vxlan,
@@ -254,10 +227,9 @@ int manager_create_vxlan(const char *vxlan,
                          const char *dev,
                          const bool independent) {
 
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vxlan_network_config = NULL;
-        _auto_cleanup_ char *vxlan_netdev = NULL, *vxlan_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(vxlan);
@@ -297,17 +269,11 @@ int manager_create_vxlan(const char *vxlan,
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &vxlan_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
-
-        r = create_network_conf_file(vxlan, &vxlan_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, vxlan_network_config);
 
         if (!independent) {
                 _auto_cleanup_ IfNameIndex *p = NULL;
@@ -325,15 +291,14 @@ int manager_create_vxlan(const char *vxlan,
                         return r;
         }
 
-        return dbus_network_reload();
+        return 0;
 }
 
 int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mode, bool kind) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *macvlan_network_config = NULL;
-        _auto_cleanup_ char *macvlan_netdev = NULL, *macvlan_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(macvlan);
@@ -363,17 +328,11 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &macvlan_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration : %s", g_strerror(-r));
                 return r;
         }
-
-        r = create_network_conf_file(macvlan, &macvlan_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, macvlan_network_config);
 
         r = parse_ifname_or_index(dev, &p);
         if (r < 0)
@@ -395,11 +354,10 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
 }
 
 int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, bool kind) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *ipvlan_network_config = NULL;
-        _auto_cleanup_ char *ipvlan_netdev = NULL, *ipvlan_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ipvlan);
@@ -430,17 +388,11 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &ipvlan_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration : %s", g_strerror(-r));
                 return r;
         }
-
-        r = create_network_conf_file(ipvlan, &ipvlan_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, ipvlan_network_config);
 
         r = parse_ifname_or_index(dev, &p);
         if (r < 0)
@@ -462,10 +414,8 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
 }
 
 int manager_create_veth(const char *veth, const char *veth_peer) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *veth_network_config = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
-        _auto_cleanup_ char *veth_network = NULL;
         int r;
 
         assert(veth);
@@ -497,19 +447,13 @@ int manager_create_veth(const char *veth, const char *veth_peer) {
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &veth_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
 
-        r = create_network_conf_file(veth, &veth_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, veth_network_config);
-
-        return dbus_network_reload();
+        return 0;
 }
 
 int manager_create_tunnel(const char *tunnel,
@@ -519,10 +463,9 @@ int manager_create_tunnel(const char *tunnel,
                           const char *dev,
                           bool independent) {
 
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *tunnel_network_config = NULL;
-        _auto_cleanup_ char *tunnel_netdev = NULL, *tunnel_network = NULL, *network = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(tunnel);
@@ -557,17 +500,11 @@ int manager_create_tunnel(const char *tunnel,
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &tunnel_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
-
-        r = create_network_conf_file(tunnel, &tunnel_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, tunnel_network_config);
 
         if (!independent) {
                 _auto_cleanup_ IfNameIndex *p = NULL;
@@ -585,14 +522,12 @@ int manager_create_tunnel(const char *tunnel,
                         return r;
         }
 
-        return dbus_network_reload();
+        return 0;
 }
 
 int manager_create_vrf(const char *vrf, const uint32_t table) {
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *vrf_network_config = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
-        _auto_cleanup_ char *vrf_network = NULL;
         int r;
 
         assert(vrf);
@@ -621,19 +556,13 @@ int manager_create_vrf(const char *vrf, const uint32_t table) {
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &vrf_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
 
-        r = create_network_conf_file(vrf, &vrf_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, vrf_network_config);
-
-        return dbus_network_reload();
+        return 0;
 }
 
 int manager_create_wireguard_tunnel(const char *wireguard,
@@ -644,9 +573,7 @@ int manager_create_wireguard_tunnel(const char *wireguard,
                                     const char *allowed_ips,
                                     const uint16_t listen_port) {
 
-        _cleanup_(g_string_unrefp) GString *netdev_config = NULL, *wireguard_network_config = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _auto_cleanup_ char *wireguard_network = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         int r;
 
@@ -692,19 +619,13 @@ int manager_create_wireguard_tunnel(const char *wireguard,
         if (!v->ifname)
                 return log_oom();
 
-        r = generate_network_config(v, &wireguard_network_config);
+        r = generate_network_config(v);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
 
-        r = create_network_conf_file(wireguard, &wireguard_network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(v, wireguard_network_config);
-
-        return dbus_network_reload();
+        return 0;
 }
 
 int manager_create_tun_tap(const NetDevKind kind,
@@ -716,10 +637,8 @@ int manager_create_tun_tap(const NetDevKind kind,
                            const int keep_carrier,
                            const int multi_queue) {
 
-        _cleanup_(g_string_unrefp) GString *network_config = NULL;
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *n = NULL;
-        _auto_cleanup_ char *network = NULL;
         int r;
 
         r = netdev_new(&netdev);
@@ -751,17 +670,11 @@ int manager_create_tun_tap(const NetDevKind kind,
         if (!n->ifname)
                 return log_oom();
 
-        r = generate_network_config(n, &network_config);
+        r = generate_network_config(n);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return r;
         }
 
-        r = create_network_conf_file(ifname, &network);
-        if (r < 0)
-                return r;
-
-        (void) manager_write_network_config(n, network_config);
-
-        return dbus_network_reload();
+        return 0;
 }

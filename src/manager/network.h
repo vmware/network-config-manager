@@ -254,5 +254,5 @@ int route_protocol_to_mode(const char *name);
 const char *route_table_to_name(int id);
 int route_table_to_mode(const char *name);
 
-int generate_network_config(Network *n, GString **ret);
+int generate_network_config(Network *n);
 int generate_wifi_config(Network *n, GString **ret);

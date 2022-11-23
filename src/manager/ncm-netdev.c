@@ -437,25 +437,6 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_remove_netdev(int argc, char *argv[]) {
-        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
-        int r;
-
-        r = netdev_ctl_name_to_configs_new(&m);
-        if (r < 0) {
-                log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
-
-        r = manager_remove_netdev(argv[1], ctl_to_config(m, argv[3]));
-        if (r < 0) {
-                log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
-                return r;
-        }
-
-        return 0;
-}
-
 _public_ int ncm_create_veth(int argc, char *argv[]) {
         _auto_cleanup_ char *peer = NULL;
         int r;
@@ -820,6 +801,25 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
                                    user, group, packet_info, vnet_hdr, keep_carrier, multi_queue);
         if (r < 0) {
                 log_warning("Failed to create tun tap='%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_remove_netdev(int argc, char *argv[]) {
+        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        int r;
+
+        r = netdev_ctl_name_to_configs_new(&m);
+        if (r < 0) {
+                log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
+                return r;
+        }
+
+        r = manager_remove_netdev(argv[1], ctl_to_config(m, argv[3]));
+        if (r < 0) {
+                log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
 
