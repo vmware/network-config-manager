@@ -30,6 +30,7 @@ typedef struct Link {
 
         char name[IFNAMSIZ+1];
         char *qdisc;
+        char *kind;
         char *parent_dev;
         char *parent_bus;
 

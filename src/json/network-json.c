@@ -682,10 +682,12 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 steal_pointer(js);
         }
 
-        if (string_na(arphrd_to_name(l->iftype))) {
+        if (l->kind || string_na(arphrd_to_name(l->iftype))) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
-
-                js = json_object_new_string(string_na(arphrd_to_name(l->iftype)));
+                if (l->kind)
+                        js = json_object_new_string(l->kind);
+                else
+                        js = json_object_new_string(string_na(arphrd_to_name(l->iftype)));
                 if (!js)
                         return log_oom();
 
