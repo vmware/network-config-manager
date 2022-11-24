@@ -105,6 +105,7 @@ void link_unref(Link *l) {
                 g_ptr_array_free(l->alt_names, true);
 
         free(l->qdisc);
+        free(l->kind);
         free(l->parent_dev);
         free(l->parent_bus);
         free(l);
@@ -131,6 +132,30 @@ static int link_add(Links **h, Link *link) {
         }
 
         (*h)->links = g_list_append((*h)->links, link);
+        return 0;
+}
+
+static int parse_link_info(struct rtattr *tb, Link *l) {
+        _auto_cleanup_ struct rtattr **rta_tb = NULL;
+       int r;
+
+       assert(tb);
+       assert(l);
+
+       rta_tb = new0(struct rtattr *, IFLA_INFO_MAX + 1);
+       if (!rta_tb)
+               return log_oom();
+
+        r = rtnl_message_parse_rtattr(rta_tb, IFLA_INFO_MAX, RTA_DATA(tb), RTA_PAYLOAD(tb));
+        if (r < 0)
+                return r;
+
+        if (rta_tb[IFLA_INFO_KIND]) {
+                l->kind = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_INFO_KIND]));
+                if (!l->kind)
+                        return -ENOMEM;
+        }
+
         return 0;
 }
 
@@ -259,6 +284,12 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                 n->alt_names = steal_pointer(s);
         }
 
+        if (rta_tb[IFLA_LINKINFO]) {
+                r = parse_link_info(rta_tb[IFLA_LINKINFO], n);
+                if (r < 0)
+                        return r;
+        }
+
         *ret = steal_pointer(n);
         return 0;
 }
@@ -354,6 +385,12 @@ static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
                 if (rta_tb[IFLA_ADDRESS]) {
                         rtnl_message_read_attribute_ether_address(rta_tb[IFLA_ADDRESS], &n->mac_address);
                         n->contains_mac_address = true;
+                }
+
+                if (rta_tb[IFLA_LINKINFO]) {
+                        r = parse_link_info(rta_tb[IFLA_LINKINFO], n);
+                        if (r < 0)
+                                return r;
                 }
 
                 r = link_add(links, n);
