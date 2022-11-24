@@ -99,7 +99,10 @@ static int list_links(int argc, char *argv[]) {
 
                 display(arg_beautify, ansi_color_bold(), "%-8d", link->ifindex);
                 display(arg_beautify, ansi_color_bold_cyan(), "  %-10s ", link->name);
-                display(arg_beautify, ansi_color_blue_magenta(), "%-10s ", arphrd_to_name(link->iftype));
+                if (link->kind)
+                        display(arg_beautify, ansi_color_blue_magenta(), "%-10s ", link->kind);
+                else
+                        display(arg_beautify, ansi_color_blue_magenta(), "%-10s ", arphrd_to_name(link->iftype));
                 display(arg_beautify, operstates_color, "%-9s ", operstates);
                 display(arg_beautify, operational_color, "%-15s ", string_na(operational));
                 display(arg_beautify, setup_color, "%-20s\n", string_na(setup));
@@ -425,8 +428,13 @@ static int list_one_link(char *argv[]) {
 
         display(arg_beautify, ansi_color_bold_cyan(), "                Network File: ");
         printf("%s\n", string_na(network));
+
         display(arg_beautify, ansi_color_bold_cyan(), "                        Type: ");
-        printf("%s\n", string_na(arphrd_to_name(l->iftype)));
+        if (l->kind)
+                printf("%s\n", l->kind);
+        else
+                printf("%s\n", string_na(arphrd_to_name(l->iftype)));
+
         display(arg_beautify, ansi_color_bold_cyan(), "                       State: ");
         display(arg_beautify, operational_state_color, "%s", string_na(operational_state));
         printf(" (");
