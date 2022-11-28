@@ -578,11 +578,11 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
 
         (void) ip_to_string_prefix(a->family, &a->address, &c);
         if (first) {
-                printf("%-30s on link ", c);
+                printf("%-30s on device ", c);
                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
                 first = false;
         } else {
-                printf("                      %-30s on link ", c);
+                printf("                      %-30s on device ", c);
                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
         }
 }
@@ -600,11 +600,11 @@ static void list_link_routes(gpointer key, gpointer value, gpointer userdata) {
 
         (void) ip_to_string_prefix(rt->family, &rt->address, &c);
         if (first) {
-                printf("%-30s on link ", c);
+                printf("%-30s on device ", c);
                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
                 first = false;
         } else {
-                printf("                      %-30s on link ", c);
+                printf("                      %-30s on device ", c);
                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
         }
 }
