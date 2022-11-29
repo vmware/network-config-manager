@@ -1184,7 +1184,9 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'VLAN') == 'vlan-98')
 
-        link_remove('vlan-98')
+        subprocess.check_call("nmctl remove-netdev vlan-98 kind vlan" , shell = True)
+        assert(unit_exist('10-vlan-98.netdev') == False)
+        assert(unit_exist('10-vlan-98.network') == False)
 
     def test_cli_create_macvlan(self):
         assert(link_exist('test98') == True)
@@ -1217,7 +1219,9 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'MACVLAN') == 'macvlan-98')
 
-        link_remove('macvlan-98')
+        subprocess.check_call("nmctl remove-netdev macvlan-98 kind macvlan" , shell = True)
+        assert(unit_exist('10-macvlan-98.netdev') == False)
+        assert(unit_exist('10-macvlan-98.network') == False)
 
     def test_cli_create_macvtap(self):
         assert(link_exist('test98') == True)
@@ -1250,7 +1254,9 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'MACVTAP') == 'macvtap-98')
 
-        link_remove('macvtap-98')
+        subprocess.check_call("nmctl remove-netdev macvtap-98 kind macvtap" , shell = True)
+        assert(unit_exist('10-macvtap-98.netdev') == False)
+        assert(unit_exist('10-macvtap-98.network') == False)
 
     def test_cli_create_ipvlan(self):
         assert(link_exist('test98') == True)
@@ -1283,7 +1289,9 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'IPVLAN') == 'ipvlan-98')
 
-        link_remove('ipvlan-98')
+        subprocess.check_call("nmctl remove-netdev ipvlan-98 kind ipvlan" , shell = True)
+        assert(unit_exist('10-ipvlan-98.netdev') == False)
+        assert(unit_exist('10-ipvlan-98.network') == False)
 
     def test_cli_create_ipvtap(self):
         assert(link_exist('test98') == True)
@@ -1316,7 +1324,9 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'IPVTAP') == 'ipvtap-98')
 
-        link_remove('ipvtap-98')
+        subprocess.check_call("nmctl remove-netdev ipvtap-98 kind ipvtap" , shell = True)
+        assert(unit_exist('10-ipvtap-98.netdev') == False)
+        assert(unit_exist('10-ipvtap-98.network') == False)
 
     @pytest.mark.skip(reason="skipping")
     def test_cli_create_vrf(self):
@@ -1341,7 +1351,9 @@ class TestCLINetDev:
 
         assert(vrf_network_parser.get('Match', 'Name') == 'vrf-98')
 
-        link_remove('vrf-98')
+        subprocess.check_call("nmctl remove-netdev vrf-98 kind vrf" , shell = True)
+        assert(unit_exist('10-vrf-98.netdev') == False)
+        assert(unit_exist('10-vrf-98.network') == False)
 
     def test_cli_create_veth(self):
         subprocess.check_call("nmctl create-veth veth-98 peer veth-99" , shell = True)
@@ -1366,7 +1378,9 @@ class TestCLINetDev:
 
         assert(veth_network_parser.get('Match', 'Name') == 'veth-98')
 
-        link_remove('veth-98')
+        subprocess.check_call("nmctl remove-netdev veth-98 kind veth" , shell = True)
+        assert(unit_exist('10-veth-98.netdev') == False)
+        assert(unit_exist('10-veth-98.network') == False)
 
     def test_cli_create_tap_no_args(self):
         subprocess.check_call("nmctl create-tap test-tap" , shell = True)
@@ -1389,7 +1403,9 @@ class TestCLINetDev:
 
         assert(tun_network_parser.get('Match', 'Name') == 'test-tap')
 
-        link_remove('test-tap')
+        subprocess.check_call("nmctl remove-netdev test-tap kind tap" , shell = True)
+        assert(unit_exist('10-test-tap.netdev') == False)
+        assert(unit_exist('10-test-tap.network') == False)
 
 
     def test_cli_create_tap(self):
@@ -1413,7 +1429,9 @@ class TestCLINetDev:
 
         assert(tun_network_parser.get('Match', 'Name') == 'test-tap')
 
-        link_remove('test-tap')
+        subprocess.check_call("nmctl remove-netdev test-tap kind tap" , shell = True)
+        assert(unit_exist('10-test-tap.netdev') == False)
+        assert(unit_exist('10-test-tap.network') == False)
 
     def test_cli_create_tun(self):
         subprocess.check_call("nmctl create-tun test-tun vnet-hdr yes" , shell = True)
@@ -1436,7 +1454,9 @@ class TestCLINetDev:
 
         assert(tun_network_parser.get('Match', 'Name') == 'test-tun')
 
-        link_remove('test-tun')
+        subprocess.check_call("nmctl remove-netdev test-tun kind tun" , shell = True)
+        assert(unit_exist('10-test-tun.netdev') == False)
+        assert(unit_exist('10-test-tun.network') == False)
 
     def test_cli_create_ipip(self):
         assert(link_exist('test98') == True)
@@ -1470,7 +1490,9 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'Tunnel') == 'ipip-98')
 
-        link_remove('ipip-98')
+        subprocess.check_call("nmctl remove-netdev ipip-98 kind ipip" , shell = True)
+        assert(unit_exist('10-ipip-98.netdev') == False)
+        assert(unit_exist('10-ipip-98.network') == False)
 
     def test_cli_create_ipip_without_master_device(self):
         subprocess.check_call("nmctl create-ipip ipip-98 local 192.168.1.2 remote 192.168.1.3 independent yes", shell = True)
@@ -1494,7 +1516,10 @@ class TestCLINetDev:
         ipip_network_parser.read(os.path.join(networkd_unit_file_path, '10-ipip-98.network'))
 
         assert(ipip_network_parser.get('Match', 'Name') == 'ipip-98')
-        link_remove('ipip-98')
+
+        subprocess.check_call("nmctl remove-netdev ipip-98 kind ipip" , shell = True)
+        assert(unit_exist('10-ipip-98.netdev') == False)
+        assert(unit_exist('10-ipip-98.network') == False)
 
     def test_cli_create_gre(self):
         assert(link_exist('test98') == True)
@@ -1528,41 +1553,10 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'Tunnel') == 'gre-98')
 
-        link_remove('gre-98')
+        subprocess.check_call("nmctl remove-netdev gre-98 kind gre" , shell = True)
+        assert(unit_exist('10-gre-98.netdev') == False)
+        assert(unit_exist('10-gre-98.network') == False)
 
-    def test_cli_create_gre(self):
-        assert(link_exist('test98') == True)
-
-        subprocess.check_call("nmctl create-gre gre-98 dev test98 local 192.168.1.2 remote 192.168.1.3", shell = True)
-        assert(unit_exist('10-gre-98.netdev') == True)
-        assert(unit_exist('10-gre-98.network') == True)
-        assert(unit_exist('10-test98.network') == True)
-
-        restart_networkd()
-        subprocess.check_call(['sleep', '3'])
-
-        assert(link_exist('gre-98') == True)
-
-        gre_parser = configparser.ConfigParser()
-        gre_parser.read(os.path.join(networkd_unit_file_path, '10-gre-98.netdev'))
-
-        assert(gre_parser.get('NetDev', 'Name') == 'gre-98')
-        assert(gre_parser.get('NetDev', 'kind') == 'gre')
-        assert(gre_parser.get('Tunnel', 'Local') == '192.168.1.2')
-        assert(gre_parser.get('Tunnel', 'Remote') == '192.168.1.3')
-
-        gre_network_parser = configparser.ConfigParser()
-        gre_network_parser.read(os.path.join(networkd_unit_file_path, '10-gre-98.network'))
-
-        assert(gre_network_parser.get('Match', 'Name') == 'gre-98')
-
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
-
-        assert(parser.get('Match', 'Name') == 'test98')
-        assert(parser.get('Network', 'Tunnel') == 'gre-98')
-
-        link_remove('gre-98')
 
     def test_cli_create_vti(self):
         assert(link_exist('test98') == True)
@@ -1596,7 +1590,9 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'Tunnel') == 'vti-98')
 
-        link_remove('vti-98')
+        subprocess.check_call("nmctl remove-netdev vti-98 kind vti" , shell = True)
+        assert(unit_exist('10-vti-98.netdev') == False)
+        assert(unit_exist('10-vti-98.network') == False)
 
     @pytest.mark.skip(reason="skipping")
     def test_cli_create_wireguard(self):
@@ -1626,7 +1622,9 @@ class TestCLINetDev:
 
         assert(network_parser.get('Match', 'Name') == 'wg99')
 
-        link_remove('wg99')
+        subprocess.check_call("nmctl remove-netdev wg99 kind wireguard" , shell = True)
+        assert(unit_exist('10-wg99.netdev') == False)
+        assert(unit_exist('10-wg99.network') == False)
 
     def test_cli_create_vxlan(self):
         assert(link_exist('test98') == True)
@@ -1662,7 +1660,9 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'VXLAN') == 'vxlan-98')
 
-        link_remove('vxlan-98')
+        subprocess.check_call("nmctl remove-netdev vxlan-98 kind vxlan" , shell = True)
+        assert(unit_exist('10-vxlan-98.netdev') == False)
+        assert(unit_exist('10-vxlan-98.network') == False)
 
     def test_cli_create_vxlan_without_master(self):
         subprocess.check_call("nmctl create-vxlan vxlan-98 vni 32 local 192.168.1.2 remote 192.168.1.3 port 7777 independent yes", shell = True)
@@ -1685,6 +1685,10 @@ class TestCLINetDev:
         vxlan_network_parser.read(os.path.join(networkd_unit_file_path, '10-vxlan-98.network'))
 
         assert(vxlan_network_parser.get('Match', 'Name') == 'vxlan-98')
+
+        subprocess.check_call("nmctl remove-netdev vxlan-98 kind vxlan" , shell = True)
+        assert(unit_exist('10-vxlan-98.netdev') == False)
+        assert(unit_exist('10-vxlan-98.network') == False)
 
     def test_cli_create_bridge(self):
         link_add_dummy('test-99')
@@ -1724,7 +1728,10 @@ class TestCLINetDev:
         assert(test99_parser.get('Match', 'Name') == 'test-99')
         assert(test99_parser.get('Network', 'Bridge') == 'bridge-98')
 
-        link_remove('bridge-98')
+        subprocess.check_call("nmctl remove-netdev bridge-98 kind bridge" , shell = True)
+        assert(unit_exist('10-bridge-98.netdev') == False)
+        assert(unit_exist('10-bridge-98.network') == False)
+
         link_remove('test-99')
 
     def test_cli_create_bond(self):
@@ -1766,7 +1773,10 @@ class TestCLINetDev:
         assert(test99_parser.get('Match', 'Name') == 'test-99')
         assert(test99_parser.get('Network', 'Bond') == 'bond-98')
 
-        link_remove('bond-98')
+        subprocess.check_call("nmctl remove-netdev bond-98 kind bond" , shell = True)
+        assert(unit_exist('10-bond-98.netdev') == False)
+        assert(unit_exist('10-bond-98.network') == False)
+
         link_remove('test-99')
 """
 class TestCLIGlobalDNSDomain:
