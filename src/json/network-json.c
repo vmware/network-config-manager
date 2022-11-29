@@ -25,7 +25,7 @@ DEFINE_CLEANUP(json_object*, json_object_put);
 
 static void json_list_link_addresses(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *jip = NULL, *jname = NULL, *jfamily = NULL,
-                *jifindex = NULL, *jobj_address = NULL;
+                *jidx = NULL, *jaddr = NULL;
         json_object *jobj = (json_object *) userdata;
         _auto_cleanup_ char *c = NULL;
         char buf[IF_NAMESIZE + 1] = {};
@@ -33,8 +33,8 @@ static void json_list_link_addresses(gpointer key, gpointer value, gpointer user
         Address *a;
         int r;
 
-        jobj_address = json_object_new_object();
-        if (!jobj_address)
+        jaddr = json_object_new_object();
+        if (!jaddr)
                 return;
 
         a = (Address *) g_bytes_get_data(key, &size);
@@ -49,13 +49,13 @@ static void json_list_link_addresses(gpointer key, gpointer value, gpointer user
         if (!jname)
                 return;
 
-        json_object_object_add(jobj_address, "ifname", jname);
+        json_object_object_add(jaddr, "ifname", jname);
 
         jip = json_object_new_string(c);
         if (!jip)
                 return;
 
-        json_object_object_add(jobj_address, "ip", jip);
+        json_object_object_add(jaddr, "ip", jip);
 
         if (a->family == AF_INET)
                 jfamily = json_object_new_string("ipv4");
@@ -65,25 +65,25 @@ static void json_list_link_addresses(gpointer key, gpointer value, gpointer user
         if (!jfamily)
                 return;
 
-        json_object_object_add(jobj_address, "family", jfamily);
+        json_object_object_add(jaddr, "family", jfamily);
 
-        jifindex = json_object_new_int(a->ifindex);
-        if (!jifindex)
+        jidx = json_object_new_int(a->ifindex);
+        if (!jidx)
                 return;
 
-        json_object_object_add(jobj_address, "ifindex", jifindex);
-        json_object_array_add(jobj, jobj_address);
+        json_object_object_add(jaddr, "ifindex", jidx);
+        json_object_array_add(jobj, jaddr);
 
-        steal_pointer(jobj_address);
+        steal_pointer(jaddr);
         steal_pointer(jip);
         steal_pointer(jname);
         steal_pointer(jfamily);
-        steal_pointer(jifindex);
+        steal_pointer(jidx);
 }
 
 static void json_list_link_gateways(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *jip = NULL, *jname = NULL, *jfamily = NULL,
-                *jifindex = NULL, *jobj_gw = NULL;
+                *jidx = NULL, *jobj_gw = NULL;
         json_object *jobj = (json_object *) userdata;
         _auto_cleanup_ char *c = NULL;
         char buf[IF_NAMESIZE + 1] = {};
@@ -124,18 +124,18 @@ static void json_list_link_gateways(gpointer key, gpointer value, gpointer userd
 
         json_object_object_add(jobj_gw, "family", jfamily);
 
-        jifindex = json_object_new_int(route->ifindex);
-        if (!jifindex)
+        jidx = json_object_new_int(route->ifindex);
+        if (!jidx)
                 return;
 
-        json_object_object_add(jobj_gw, "ifindex", jifindex);
+        json_object_object_add(jobj_gw, "ifindex", jidx);
         json_object_array_add(jobj, jobj_gw);
 
         steal_pointer(jobj_gw);
         steal_pointer(jip);
         steal_pointer(jname);
         steal_pointer(jfamily);
-        steal_pointer(jifindex);
+        steal_pointer(jidx);
 }
 
 int json_system_status(char **ret) {
