@@ -141,7 +141,8 @@ static void json_list_link_gateways(gpointer key, gpointer value, gpointer userd
 int json_system_status(char **ret) {
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jaddress = NULL, *jroutes = NULL;
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
-                *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
+                *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
+                *online_state;
         _auto_cleanup_strv_ char **dns = NULL, **domains = NULL, **ntp = NULL;
         _cleanup_(routes_unrefp) Routes *routes = NULL;
         _cleanup_(addresses_unrefp) Addresses *h = NULL;
@@ -274,6 +275,19 @@ int json_system_status(char **ret) {
                 json_object_object_add(jobj, "CarrierState", js);
                 steal_pointer(js);
         }
+
+        r = dbus_get_system_property_from_networkd("OnlineState", &online_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(online_state);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "OnlineState", js);
+                steal_pointer(js);
+        }
+
 
         r = manager_link_get_address(&h);
         if (r >= 0 && set_size(h->addresses) > 0) {
