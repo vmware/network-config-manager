@@ -46,6 +46,17 @@ bool beautify_enabled(void) {
         return arg_beautify;
 }
 
+static void system_online_state_to_color(const char *state, const char **on) {
+        if (string_equal(state, "online"))
+                *on = ansi_color_green();
+        else if (string_equal(state, "offline"))
+                *on = ansi_color_red();
+        else if (string_equal(state, "partial"))
+                *on = ansi_color_bold_yellow();
+        else
+                *on = ansi_color_reset();
+}
+
 static void link_state_to_color(const char *state, const char **on) {
         if (string_equal(state, "routable") || string_equal(state, "configured") || string_equal(state,"up"))
                 *on = ansi_color_green();
@@ -505,7 +516,7 @@ static int list_one_link(char *argv[]) {
                 if (!s)
                         return log_oom();
 
-                display(arg_beautify, ansi_color_bold_cyan(), "               Search Domains: ");
+                display(arg_beautify, ansi_color_bold_cyan(), "              Search Domains: ");
                 printf("%s\n", s);
         }
 
@@ -670,16 +681,22 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
         r = dbus_get_system_property_from_networkd("OperationalState", &state);
         if (r >= 0) {
-                const char *state_color, *carrier_color;
-
-                (void) dbus_get_system_property_from_networkd("CarrierState", &carrier_state);
+                const char *state_color;
 
                 link_state_to_color(state, &state_color);
-                link_state_to_color(carrier_state, &carrier_color);
 
                 display(arg_beautify, ansi_color_bold_cyan(), "        System State: ");
-                display(arg_beautify, state_color, "%s", state);
-                display(arg_beautify, carrier_color, "(%s)\n", carrier_state);
+                display(arg_beautify, state_color, "%s\n", state);
+        }
+
+        r = dbus_get_system_property_from_networkd("OnlineState", &state);
+        if (r >= 0) {
+                const char *state_color;
+
+                system_online_state_to_color(state, &state_color);
+
+                display(arg_beautify, ansi_color_bold_cyan(), "        Online State: ");
+                display(arg_beautify, state_color, "%s\n", state);
         }
 
         r = manager_link_get_address(&h);
