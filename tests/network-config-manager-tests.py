@@ -1368,6 +1368,30 @@ class TestCLINetDev:
 
         link_remove('veth-98')
 
+    def test_cli_create_tap_no_args(self):
+        subprocess.check_call("nmctl create-tap test-tap" , shell = True)
+        assert(unit_exist('10-test-tap.netdev') == True)
+        assert(unit_exist('10-test-tap.network') == True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '15'])
+
+        assert(link_exist('test-tap') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test-tap.netdev'))
+
+        assert(parser.get('NetDev', 'Name') == 'test-tap')
+        assert(parser.get('NetDev', 'kind') == 'tap')
+
+        tun_network_parser = configparser.ConfigParser()
+        tun_network_parser.read(os.path.join(networkd_unit_file_path, '10-test-tap.network'))
+
+        assert(tun_network_parser.get('Match', 'Name') == 'test-tap')
+
+        link_remove('test-tap')
+
+
     def test_cli_create_tap(self):
         subprocess.check_call("nmctl create-tap test-tap vnet-hdr yes" , shell = True)
         assert(unit_exist('10-test-tap.netdev') == True)
