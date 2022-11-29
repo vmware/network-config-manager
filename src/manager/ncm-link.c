@@ -213,7 +213,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -404,7 +404,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         n->use_adpt_tx_coal = r;
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -475,7 +475,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                         n->tx_buf = strdup(argv[i]);
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -537,7 +537,7 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
                         n->tx_queue_len = v;
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -598,7 +598,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                         n->auto_flow_ctrl = r;
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -649,7 +649,7 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -732,7 +732,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -867,7 +867,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -1002,7 +1002,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -1085,7 +1085,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -1170,7 +1170,7 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -1259,7 +1259,7 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
                         continue;
                 }
 
-                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -1343,7 +1343,7 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
