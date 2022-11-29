@@ -623,7 +623,7 @@ static void list_link_routes(gpointer key, gpointer value, gpointer userdata) {
 _public_ int ncm_system_status(int argc, char *argv[]) {
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
-        _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL;
+        _auto_cleanup_strv_ char **dns = NULL, **search_domains = NULL, **ntp = NULL;
         _cleanup_(routes_unrefp) Routes *routes = NULL;
         _cleanup_(addresses_unrefp) Addresses *h = NULL;
         sd_id128_t machine_id = {};
@@ -713,6 +713,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
         (void) network_parse_dns(&dns);
         (void) network_parse_ntp(&ntp);
+        (void) network_parse_search_domains(&search_domains);
 
         if (dns) {
                 _auto_cleanup_ char *s = NULL;
@@ -722,6 +723,17 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                         return log_oom();
 
                 display(arg_beautify, ansi_color_bold_cyan(), "                 DNS: ");
+                printf("%s\n", s);
+        }
+
+        if (search_domains) {
+                _auto_cleanup_ char *s = NULL;
+
+                s = strv_join(" ", search_domains);
+                if (!s)
+                        return log_oom();
+
+                display(arg_beautify, ansi_color_bold_cyan(), "      Search Domains: ");
                 printf("%s\n", s);
         }
 
