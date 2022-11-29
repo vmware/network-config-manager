@@ -161,7 +161,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -223,7 +223,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -333,7 +333,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                         continue;
                 } else {
 
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -404,7 +404,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -561,7 +561,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                         independent = r;
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -680,7 +680,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
@@ -787,7 +787,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                 } else {
 
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }

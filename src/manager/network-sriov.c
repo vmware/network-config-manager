@@ -259,7 +259,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(-EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
                         return -EINVAL;
                 }
         }
