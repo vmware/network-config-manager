@@ -2,7 +2,7 @@ name: network config manager CI
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: install update
       run: sudo apt-get update -y; sudo apt-get upgrade -y
     - name: install packages
