@@ -82,9 +82,9 @@ static int list_links(int argc, char *argv[]) {
                return r;
 
         if (arg_beautify)
-                printf("%s %8s %10s %11s %15s %9s\n",
+                printf("%s %10s %8s %11s %15s %9s\n",
                         "INDEX",
-                        "LINK",
+                        "DEVICE",
                         "TYPE",
                         "STATE",
                         "OPERATIONAL",
