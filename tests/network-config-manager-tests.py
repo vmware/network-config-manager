@@ -58,7 +58,7 @@ units = ["10-test99.network",
          '10-vri-98.network'
          '10-wg99.netdev',
          '10-wg99.network',
-         '10-sriov99.network']
+         '10-eni99np1.network']
 
 def link_exist(link):
     return os.path.exists(os.path.join('/sys/class/net', link))
@@ -124,6 +124,29 @@ def read_wpa_supplicant_conf(conf_file):
             networks[k] = v
 
     return networks
+
+def call_shell(*command, **kwargs):
+    command = command[0].split() + list(command[1:])
+    return subprocess.run(command, check=False, universal_newlines=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs).returncode
+
+def expectedFailureIfNetdevsimWithSRIOVIsNotAvailable():
+    def f(func):
+        def finalize(func, supported):
+            call_shell('rmmod netdevsim')
+            return func if supported else unittest.expectedFailure(func)
+
+        if call_shell('modprobe netdevsim') != 0:
+            return finalize(func, False)
+
+        try:
+            with open('/sys/bus/netdevsim/new_device', mode='w', encoding='utf-8') as f:
+                f.write('99 1')
+        except OSError:
+            return finalize(func, False)
+
+        return finalize(func, os.path.exists('/sys/bus/netdevsim/devices/netdevsim99/sriov_numvfs'))
+
+    return f
 
 class TestLinkConfigManagerYAML:
     yaml_configs = [
@@ -1778,8 +1801,9 @@ class TestCLINetDev:
         assert(unit_exist('10-bond-98.network') == False)
 
         link_remove('test-99')
-"""
+
 class TestCLIGlobalDNSDomain:
+    @pytest.mark.skip(reason="skipping")
     def test_cli_configure_global_dns_server(self):
         subprocess.check_call("nmctl add-dns global dns 8.8.4.4 8.8.8.8 8.8.8.1", shell = True)
 
@@ -1791,6 +1815,7 @@ class TestCLIGlobalDNSDomain:
         assert(dns.find("8.8.8.8") != -1)
         assert(dns.find("8.8.8.1") != -1)
 
+    @pytest.mark.skip(reason="skipping")
     def test_cli_configure_global_domain_server(self):
         subprocess.check_call("nmctl add-domain global domains test1 test2", shell = True)
 
@@ -1800,8 +1825,6 @@ class TestCLIGlobalDNSDomain:
         d = parser.get('Resolve', 'Domains')
         assert(dns.find("test1") != -1)
         assert(dns.find("test2") != -1)
-
-"""
 
 class TestCLINetworkProxy:
     def test_cli_configure_network_proxy(self):
@@ -2371,34 +2394,54 @@ class TestCLILink:
         assert(parser.get('Link', 'StatisticsBlockCoalesceSec') == '987766555')
 
 class TestCLISRIOV:
-    def setup_method(self):
-        link_remove('sriov99')
-        link_add_dummy('sriov99')
-        restart_networkd()
-
     def teardown_method(self):
         remove_units_from_netword_unit_path()
-        link_remove('sriov99')
 
-    def test_cli_configure_sr_iov(self):
-        assert(link_exist('sriov99') == True)
+    @expectedFailureIfNetdevsimWithSRIOVIsNotAvailable()
+    def test_sriov(self):
 
-        subprocess.check_call("nmctl add-sr-iov sriov99 vf 5 vlanid 2 qos 1 vlanproto "
+        if call_shell('modprobe netdevsim') != 0:
+            return
+
+        with open('/sys/bus/netdevsim/new_device', mode='w', encoding='utf-8') as f:
+            f.write('99 1')
+
+        with open('/sys/bus/netdevsim/devices/netdevsim99/sriov_numvfs', mode='w', encoding='utf-8') as f:
+            f.write('3')
+
+        output = subprocess.call("ip link", shell=True)
+        print(output)
+
+        subprocess.check_call("nmctl add-sr-iov eni99np1 vf 0 vlanid 5 qos 1 vlanproto "
                                "802.1Q macspoofck yes qrss True trust yes linkstate yes "
-                               "macaddr 00:0c:29:3a:bc:11", shell = True)
+                               "macaddr 00:11:22:33:44:55", shell = True)
 
-        assert(unit_exist('10-sriov99.network') == True)
+
+        assert(unit_exist('10-eni99np1.network') == True)
         parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-sriov99.network'))
+        parser.read(os.path.join(networkd_unit_file_path, '10-eni99np1.network'))
 
-        assert(parser.get('Match', 'Name') == 'sriov99')
+        assert(parser.get('Match', 'Name') == 'eni99np1')
 
-        assert(parser.get('SR-IOV', 'VirtualFunction') == '5')
-        assert(parser.get('SR-IOV', 'VLANId') == '2')
+        assert(parser.get('SR-IOV', 'VirtualFunction') == '0')
+        assert(parser.get('SR-IOV', 'VLANId') == '5')
         assert(parser.get('SR-IOV', 'QualityOfService') == '1')
         assert(parser.get('SR-IOV', 'VLANProtocol') == '802.1Q')
         assert(parser.get('SR-IOV', 'MACSpoofCheck') == 'yes')
         assert(parser.get('SR-IOV', 'QueryReceiveSideScaling') == 'yes')
         assert(parser.get('SR-IOV', 'Trust') == 'yes')
         assert(parser.get('SR-IOV', 'LinkState') == 'yes')
-        assert(parser.get('SR-IOV', 'MACAddress') == '00:0c:29:3a:bc:11')
+        assert(parser.get('SR-IOV', 'MACAddress') == '00:11:22:33:44:55')
+
+        subprocess.check_call("nmctl add-sr-iov eni99np1 vf 1 vlanid 6 qos 2 vlanproto 802.1Q macspoofck yes qrss True trust yes linkstate yes "
+                              "macaddr 00:11:22:33:44:56", shell = True)
+
+        subprocess.check_call("nmctl add-sr-iov eni99np1 vf 2 vlanid 7 qos 3 vlanproto 802.1Q macspoofck yes qrss True trust yes linkstate yes "
+                              "macaddr 00:11:22:33:44:57", shell = True)
+
+        restart_networkd()
+        subprocess.check_call(['sleep', '10'])
+
+        output = subprocess.call('ip link', shell=True)
+        print(output)
+        subprocess.check_call("rmmod netdevsim", shell=True)
