@@ -25,7 +25,7 @@ static const char *const dhcp_client_mode_table[_DHCP_CLIENT_MAX] = {
 
 const char *dhcp_client_modes_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(dhcp_client_mode_table))
                 return NULL;
@@ -81,7 +81,7 @@ static const char *const dhcp_client_identifier[_DHCP_CLIENT_IDENTIFIER_MAX] = {
 
 const char *dhcp_client_identifier_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(dhcp_client_identifier))
                 return NULL;
@@ -108,7 +108,7 @@ static const char *const dhcp_client_duid_type [_DHCP_CLIENT_DUID_TYPE_MAX] =  {
 
 const char *dhcp_client_duid_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(dhcp_client_duid_type))
                 return NULL;
@@ -137,7 +137,7 @@ static const char *const link_local_address_type[_LINK_LOCAL_ADDRESS_MAX] =  {
 
 const char *link_local_address_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(link_local_address_type))
                 return NULL;
@@ -163,7 +163,7 @@ static const char *const ipv6_ra_preference_type[_IPV6_RA_PREFERENCE_MAX] =  {
 
 const char *ipv6_ra_preference_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(ipv6_ra_preference_type))
                 return NULL;
@@ -190,7 +190,7 @@ static const char *const ip_duplicate_address_detection_type[_IP_DUPLICATE_ADDRE
 
 const char *ip_duplicate_address_detection_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(ip_duplicate_address_detection_type))
                 return NULL;
@@ -218,7 +218,7 @@ static const char *const route_scope_type[_ROUTE_SCOPE_MAX] =  {
 
 const char *route_scope_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(route_scope_type))
                 return NULL;
@@ -252,7 +252,7 @@ static const char * const route_type[_ROUTE_TYPE_MAX] = {
 
 const char *route_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(route_type))
                 return NULL;
@@ -278,7 +278,7 @@ static const char * const ipv6_route_preference_type[_IPV6_ROUTE_PREFERENCE_MAX]
 
 const char *ipv6_route_preference_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(ipv6_route_preference_type))
                 return NULL;
@@ -305,7 +305,7 @@ static const char * const route_protocol_type[_ROUTE_PROTOCOL_MAX] = {
 
 const char *route_protocol_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(route_protocol_type))
                 return NULL;
@@ -331,7 +331,7 @@ static const char * const route_table_type[_ROUTE_TABLE_MAX] = {
 
 const char *route_table_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(route_table_type))
                 return NULL;
@@ -358,7 +358,7 @@ static const char *const auth_key_management_type[_AUTH_KEY_MANAGEMENT_MAX] =  {
 
 const char *auth_key_management_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(auth_key_management_type))
                 return NULL;
@@ -385,7 +385,7 @@ static const char* const auth_eap_method_type[_AUTH_EAP_METHOD_MAX] =  {
 
 const char *auth_eap_method_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(auth_eap_method_type))
                 return NULL;

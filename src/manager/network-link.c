@@ -25,7 +25,7 @@ static const char* const link_operstates_table[] = {
 
 const char *link_operstates_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(link_operstates_table))
                 return NULL;
@@ -40,10 +40,10 @@ static const char* const link_states_table[_LINK_STATE_MAX] = {
 
 const char *link_state_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(link_states_table))
-                return "n/a";
+                return NULL;
 
         return link_states_table[id];
 }
@@ -67,7 +67,7 @@ static const char* const ipv6_address_generation_mode_table[] = {
 
 const char *ipv6_address_generation_mode_to_name(int mode) {
         if (mode < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) mode >= ELEMENTSOF(ipv6_address_generation_mode_table))
                 return NULL;

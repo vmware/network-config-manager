@@ -28,7 +28,7 @@ static const char * const address_family_table[_ADDRESS_FAMILY_MAX] = {
 
 const char *address_family_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(address_family_table))
                 return NULL;
@@ -57,7 +57,7 @@ static const char* const device_activation_policy_table[_DEVICE_ACTIVATION_POLIC
 
 const char *device_activation_policy_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(device_activation_policy_table))
                 return NULL;

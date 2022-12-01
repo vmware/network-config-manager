@@ -95,12 +95,12 @@ const char *arphrd_to_name(int id) {
         size_t i;
 
         if (id <= 0)
-                return "n/a";
+                return NULL;
 
         for (i = 0; i <= ELEMENTSOF(arphrd_names); i++) {
                 if (id == arphrd_names[i].type)
                         return arphrd_names[i].name;
         }
 
-        return "n/a";
+        return NULL;
 }
