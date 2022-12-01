@@ -47,7 +47,7 @@ static const char* const nft_family_table[] = {
 
 const char *nft_family_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(nft_family_table))
                 return NULL;
@@ -76,7 +76,7 @@ static const char* const nft_packet_action_table[] = {
 
 const char *nft_packet_action_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(nft_packet_action_table))
                 return NULL;
@@ -101,7 +101,7 @@ static const char* const ip_packet_port_table[] = {
 
 const char *ip_packet_port_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(ip_packet_port_table))
                 return NULL;
@@ -128,7 +128,7 @@ static const char* const ip_packet_protocol_table[] = {
 
 const char *ip_packet_protocol_type_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(ip_packet_protocol_table))
                 return NULL;

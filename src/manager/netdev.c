@@ -33,7 +33,7 @@ static const char *const netdev_kind_table[_NET_DEV_KIND_MAX] = {
 
 const char *netdev_kind_to_name(NetDevKind id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(netdev_kind_table))
                 return NULL;
@@ -63,7 +63,7 @@ static const char *const bond_mode_table[_BOND_MODE_MAX] = {
 
 const char *bond_mode_to_name(BondMode id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(bond_mode_table))
                 return NULL;
@@ -91,7 +91,7 @@ static const char *const macvlan_mode_table[_MAC_VLAN_MODE_MAX] = {
 
 const char *macvlan_mode_to_name(MACVLanMode id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(macvlan_mode_table))
                 return NULL;
@@ -117,7 +117,7 @@ static const char *const ipvlan_mode_table[_IP_VLAN_MODE_MAX] = {
 
 const char *ipvlan_mode_to_name(IPVLanMode id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(ipvlan_mode_table))
                 return NULL;
