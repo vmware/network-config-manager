@@ -809,6 +809,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
 _public_ int ncm_remove_netdev(int argc, char *argv[]) {
         _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _auto_cleanup_ char *kind = NULL;
         int r;
 
         r = netdev_ctl_name_to_configs_new(&m);
@@ -816,8 +817,22 @@ _public_ int ncm_remove_netdev(int argc, char *argv[]) {
                 log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
                 return r;
         }
+        for (int i = 2; i < argc; i++) {
+                if (string_equal_fold(argv[i], "kind") || string_equal_fold(argv[i], "k")) {
+                        parse_next_arg(argv, argc, i);
 
-        r = manager_remove_netdev(argv[1], ctl_to_config(m, argv[3]));
+                        if (!ctl_to_config(m, argv[i])) {
+                                log_warning("Failed to find kind '%s': %s", argv[i], g_strerror(EINVAL));
+                                continue;
+                        }
+
+                        kind = strdup(argv[i]);
+                        if (!kind)
+                                return log_oom();
+                }
+        }
+
+        r = manager_remove_netdev(argv[1], kind ? ctl_to_config(m, kind) : NULL);
         if (r < 0) {
                 log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
                 return r;
