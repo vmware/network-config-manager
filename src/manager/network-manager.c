@@ -1981,7 +1981,6 @@ int manager_generate_network_config_from_yaml(const char *file) {
 }
 
 static void manager_command_line_config_generator(void *key, void *value, void *user_data) {
-        _cleanup_(g_string_unrefp) GString *config = NULL;
         Network *n;
         int r;
 
@@ -1995,8 +1994,6 @@ static void manager_command_line_config_generator(void *key, void *value, void *
                 log_warning("Failed to generate network configuration: %s", g_strerror(-r));
                 return;
         }
-
-        (void) manager_write_network_config(n, config);
 }
 
 static Network *manager_no_interface_name(GHashTable *networks) {

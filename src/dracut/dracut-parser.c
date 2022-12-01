@@ -56,7 +56,7 @@ static const char *const dracut_to_networkd_dhcp_mode_table[_DRACUT_DHCP_MODE_MA
 
 const char *dracut_to_networkd_dhcp_mode_to_name(int id) {
         if (id < 0)
-                return "n/a";
+                return NULL;
 
         if ((size_t) id >= ELEMENTSOF(dracut_to_networkd_dhcp_mode_table))
                 return NULL;
