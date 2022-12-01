@@ -24,7 +24,7 @@ Configure
   - Edit network configuration via vim/vi.
 
   Please see [systemd.network](https://www.freedesktop.org/software/systemd/man/systemd.network.html) for more information.
-  
+
   Device's
   - Alias, Description, MTUBytes, WakeOnLan, WakeOnLanPassword, Port, BitsPerSecond, Duplex and Advertise.
   - Offload parameters and other features.
@@ -80,11 +80,11 @@ Or by simply doing
 
 #### Using DHCP:
 
-To set the link named `eth1` get an address via DHCP4 and client identifier as `mac` create a YAML file with the following:
+To set the device named `eth1` get an address via DHCP4 and client identifier as `mac` create a YAML file with the following:
 
 ```yml
  network:
-  link:
+  device:
      name: eth1
      dhcp: ipv4
      dhcp-client-identifier: mac
@@ -95,7 +95,7 @@ To set a static IP address, use the addresses key, which takes a list of (IPv4 o
 
 ```yml
  network:
-  link:
+  device:
      name: eth1
      gateway: 192.168.1.1/24
      gateway-onlink: yes
@@ -108,18 +108,18 @@ To set a static IP address, use the addresses key, which takes a list of (IPv4 o
 #### Directly connected gateway
 ```yml
  network:
-  link:
+  device:
      name: eth1
      addresses: [ 192.168.1.45/24 ]
      gateway: 192.168.1.1
      gateway-onlink: true
  ```
 
-#### Multiple addresses on a single link
+#### Multiple addresses on a single device
 
 ```yml
  network:
-  link:
+  device:
      name: eth1
      addresses: [ 192.168.1.45/24, 192.168.1.46 ]
      gateway: 192.168.1.1
@@ -127,7 +127,7 @@ To set a static IP address, use the addresses key, which takes a list of (IPv4 o
 #### Using multiple addresses with multiple gateways and DHCP4
 ```yml
  network:
-  link:
+  device:
      name: eth1
      mtu : 1200
      mac-address: 00:0c:29:3a:bc:89
@@ -135,10 +135,10 @@ To set a static IP address, use the addresses key, which takes a list of (IPv4 o
      dhcp: yes
      dhcp-client-identifier: mac
      lldp: yes
-     link-local: yes
+     link-local-address: yes
      ipv6-accept-ra: yes
-     use-mtu: yes
-     use-domain: yes
+     dhcp4-use-mtu: yes
+     dhcp4-use-domain: yes
      gateway: 192.168.1.1/24
      gateway-onlink: yes
      nameservers: [192.168.0.1, 8.8.8.8]
@@ -162,12 +162,12 @@ configuration are found it generates a confiration file found in ```/etc/network
 
 ```yml
  network:
-  link:
+  device:
      name: wlan1
      dhcp: yes
      use-dns: no
-     use-mtu: yes
-     use-domain: yes
+     dhcp4-use-mtu: yes
+     dhcp4-use-domain: yes
      gateway: 192.168.1.1/24
      gateway-onlink: yes
      nameservers: [192.168.0.1, 8.8.8.8]
@@ -182,7 +182,7 @@ configuration are found it generates a confiration file found in ```/etc/network
 
 ```yml
  network:
-  link:
+  device:
      name: wlan0
      dhcp: yes
      access-points:
@@ -198,7 +198,7 @@ configuration are found it generates a confiration file found in ```/etc/network
 ```yml
 
  network:
-  link:
+  device:
      name: wlan1
      dhcp: yes
      access-points:
@@ -219,28 +219,28 @@ configuration are found it generates a confiration file found in ```/etc/network
 ```bash
  Network
        ip={dhcp|on|any|dhcp6|auto6}
-           dhcp|on|any: get ip from dhcp server from all links. If root=dhcp, loop
-           sequentially through all links (eth0, eth1, ...) and use the first with a valid
+           dhcp|on|any: get ip from dhcp server from all devices. If root=dhcp, loop
+           sequentially through all devices (eth0, eth1, ...) and use the first with a valid
            DHCP root-path.
 
            auto6: IPv6 autoconfiguration
 
            dhcp6: IPv6 DHCP
 
-       ip=<link>:{dhcp|on|any|dhcp6|auto6}
-           dhcp|on|any|dhcp6: get ip from dhcp server on a specific link
+       ip=<device>:{dhcp|on|any|dhcp6|auto6}
+           dhcp|on|any|dhcp6: get ip from dhcp server on a specific device
 
            auto6: do IPv6 autoconfiguration
 
            This parameter can be specified multiple times.
 
-       ip=<client-IP>:[ <server-id>]:<gateway-IP>:<netmask>:<client_hostname>:<link>:{none|off}
+       ip=<client-IP>:[ <server-id>]:<gateway-IP>:<netmask>:<client_hostname>:<device>:{none|off}
            explicit network configuration.
 
-       ifname=<link>:<MAC>
-           Assign network device name <link> (ie eth0) to the NIC with MAC <MAC>. Note
+       ifname=<device>:<MAC>
+           Assign network device name <device> (ie eth0) to the NIC with MAC <MAC>. Note
            letters in the MAC-address must be lowercase!  Note: If you use this option you must
-           specify an ifname= argument for all links used in ip= or fcoe= arguments.  This
+           specify an ifname= argument for all devices used in ip= or fcoe= arguments.  This
            parameter can be specified multiple times.
 
        nameserver=<IP>[nameserver=<IP> ...]
