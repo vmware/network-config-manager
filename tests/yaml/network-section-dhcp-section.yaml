@@ -1,10 +1,10 @@
  network:
-  link:
+  device:
      name: test99
      dhcp: yes
      dhcp4-client-identifier: mac
      lldp: yes
-     link-local: yes
+     link-local-address: yes
      ipv6-accept-ra: yes
      dhcp4-use-mtu: yes
      dhcp4-use-domain: yes

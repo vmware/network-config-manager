@@ -1,5 +1,5 @@
  network:
-  link:
+  device:
      name: test99
      unmanaged: true
      requiredfamilyforonline: ipv4

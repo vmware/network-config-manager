@@ -1,5 +1,5 @@
  network:
-  link:
+  device:
      name: wlan1
      dhcp: yes
      dhcp4-use-dns: no
