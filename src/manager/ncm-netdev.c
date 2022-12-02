@@ -586,8 +586,8 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
-        _auto_cleanup_ char *private_key = NULL, *public_key = NULL, *preshared_key = NULL, *endpoint = NULL, *allowed_ips = NULL;
-        bool have_private_key = false, have_public_key = false;
+        _auto_cleanup_ char *private_key = NULL, *private_key_file = NULL, *public_key = NULL,
+                *preshared_key = NULL, *preshared_key_file = NULL, *endpoint = NULL, *allowed_ips = NULL;
         uint16_t listen_port;
         int r;
         for (int i = 2; i < argc; i++) {
@@ -598,8 +598,15 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                         if (!private_key)
                                 return log_oom();
 
-                        have_private_key = true;
+                } else if (string_equal_fold(argv[i], "private-key-file")) {
+                        parse_next_arg(argv, argc, i);
+
+                        private_key_file = strdup(argv[i]);
+                        if (!private_key_file)
+                                return log_oom();
+
                         continue;
+
                 } else if (string_equal_fold(argv[i], "public-key")) {
                         parse_next_arg(argv, argc, i);
 
@@ -607,13 +614,19 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                         if (!public_key)
                                 return log_oom();
 
-                        have_public_key = true;
-                        continue;
                 } else if (string_equal_fold(argv[i], "preshared-key")) {
                         parse_next_arg(argv, argc, i);
 
                         preshared_key= strdup(argv[i]);
                         if (!preshared_key)
+                                return log_oom();
+
+                        continue;
+                } else if (string_equal_fold(argv[i], "preshared-key-file")) {
+                        parse_next_arg(argv, argc, i);
+
+                        preshared_key_file = strdup(argv[i]);
+                        if (!preshared_key_file)
                                 return log_oom();
                         continue;
                 } else if (string_equal_fold(argv[i], "allowed-ips")) {
@@ -685,17 +698,13 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                 }
         }
 
-        if (!have_public_key || !have_private_key) {
-                log_warning("Missing public-key or private-key : %s", g_strerror(EINVAL));
-                return -EINVAL;
-        }
-
         if (!valid_ifname(argv[1])) {
                 log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
                 return r;
         }
 
-        r = manager_create_wireguard_tunnel(argv[1], private_key, public_key, preshared_key, endpoint, allowed_ips, listen_port);
+        r = manager_create_wireguard_tunnel(argv[1], private_key, private_key_file, public_key, preshared_key,
+                                            preshared_key_file, endpoint, allowed_ips, listen_port);
         if (r < 0) {
                 log_warning("Failed to create wireguard tunnel '%s': %s", argv[1], g_strerror(-r));
                 return r;

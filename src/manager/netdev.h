@@ -77,10 +77,14 @@ typedef struct NetDev {
 
         /* wireguard */
         char *wg_private_key;
+        char *wg_private_key_file;
         char *wg_public_key;
         char *wg_preshared_key;
+        char *wg_preshared_key_file;
         char *wg_endpoint;      /* ip:port */
         char *wg_allowed_ips;
+
+        int wg_persistent_keep_alive;
 
         char *proto;
 

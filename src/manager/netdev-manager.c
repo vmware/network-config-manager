@@ -567,8 +567,10 @@ int manager_create_vrf(const char *vrf, const uint32_t table) {
 
 int manager_create_wireguard_tunnel(const char *wireguard,
                                     const char *private_key,
+                                    const char *private_key_file,
                                     const char *public_key,
                                     const char *preshared_key,
+                                    const char *preshared_key_file,
                                     const char *endpoint,
                                     const char *allowed_ips,
                                     const uint16_t listen_port) {
@@ -578,8 +580,6 @@ int manager_create_wireguard_tunnel(const char *wireguard,
         int r;
 
         assert(wireguard);
-        assert(private_key);
-        assert(public_key);
 
         r = netdev_new(&netdev);
         if (r < 0)
@@ -589,6 +589,9 @@ int manager_create_wireguard_tunnel(const char *wireguard,
                          .ifname = strdup(wireguard),
                          .kind = NET_DEV_KIND_WIREGUARD,
                          .wg_private_key = private_key ? strdup(private_key) : NULL,
+                         .wg_private_key_file = private_key_file ? strdup(private_key_file) : NULL,
+                         .wg_preshared_key_file = preshared_key_file ? strdup(preshared_key_file) : NULL,
+                         .wg_preshared_key = preshared_key ? strdup(preshared_key) : NULL,
                          .wg_public_key = public_key ? strdup(public_key) : NULL,
                          .listen_port = listen_port,
                  };
