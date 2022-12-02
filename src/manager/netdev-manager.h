@@ -25,8 +25,10 @@ int manager_create_tunnel(const char *tunnel, NetDevKind kind, IPAddress *local,
 int manager_create_vrf(const char *vrf, const uint32_t table);
 int manager_create_wireguard_tunnel(const char *wireguard,
                                     const char *private_key,
+                                    const char *private_key_file,
                                     const char *public_key,
                                     const char *preshared_key,
+                                    const char *preshared_key_file,
                                     const char *endpoint,
                                     const char *allowed_ips,
                                     const uint16_t listen_port);
