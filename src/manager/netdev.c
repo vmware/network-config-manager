@@ -458,9 +458,5 @@ int generate_netdev_config(NetDev *n) {
                 return r;
         }
 
-        r = set_file_permisssion(key_file->name, "systemd-network");
-        if (r < 0)
-                return r;
-
-        return 0;
+        return set_file_permisssion(key_file->name, "systemd-network");
 }

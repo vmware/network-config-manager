@@ -232,6 +232,7 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if (n->desc) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "desc"), n->desc);
                 if (r < 0)
@@ -243,6 +244,7 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if(n->macaddr) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "macaddr"), n->macaddr);
                 if (r < 0)
@@ -254,6 +256,7 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if(n->name) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "name"), n->name);
                 if (r < 0)
@@ -265,6 +268,7 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if(n->altname) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "altname"), n->altname);
                 if (r < 0)
@@ -276,31 +280,37 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                     return r;
         }
+
         if(n->bps) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "bps"), n->bps);
                 if (r < 0)
                     return r;
         }
+
         if(n->duplex) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "duplex"), n->duplex);
                 if (r < 0)
                     return r;
         }
+
         if(n->wol) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "wol"), n->wol);
                 if (r < 0)
                     return r;
         }
+
         if(n->wolp) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "wolp"), n->wolp);
                 if (r < 0)
                     return r;
         }
+
         if(n->port) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "port"), n->port);
                 if (r < 0)
                     return r;
         }
+
         if(n->advertise) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "advertise"), n->advertise);
                 if (r < 0)
@@ -312,76 +322,91 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                  if (r < 0)
                          return r;
         }
+
         if (n->rx_csum_off != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcsumo"), bool_to_string(n->rx_csum_off));
                  if (r < 0)
                          return r;
         }
+
         if (n->tx_csum_off != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcsumo"), bool_to_string(n->tx_csum_off));
                  if (r < 0)
                          return r;
         }
+
         if (n->tcp_seg_off != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "tso"), bool_to_string(n->tcp_seg_off));
                  if (r < 0)
                          return r;
         }
+
         if (n->tcp6_seg_off!= -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "t6so"), bool_to_string(n->tcp6_seg_off));
                  if (r < 0)
                          return r;
         }
+
         if (n->gen_seg_off != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gso"), bool_to_string(n->gen_seg_off));
                  if (r < 0)
                          return r;
         }
+
         if (n->gen_rx_off != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "grxo"), bool_to_string(n->gen_rx_off));
                  if (r < 0)
                          return r;
         }
+
         if (n->gen_rx_off_hw != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "grxoh"), bool_to_string(n->gen_rx_off_hw));
                  if (r < 0)
                          return r;
         }
+
         if (n->large_rx_off != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "lrxo"), bool_to_string(n->large_rx_off));
                  if (r < 0)
                          return r;
         }
+
         if (n->rx_vlan_ctag_hw_acl != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxvtha"), bool_to_string(n->rx_vlan_ctag_hw_acl));
                  if (r < 0)
                          return r;
         }
+
         if (n->tx_vlan_ctag_hw_acl != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txvtha"), bool_to_string(n->tx_vlan_ctag_hw_acl));
                  if (r < 0)
                          return r;
         }
+
         if (n->rx_vlan_ctag_fltr != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxvtf"), bool_to_string(n->rx_vlan_ctag_fltr));
                  if (r < 0)
                          return r;
         }
+
         if (n->tx_vlan_stag_hw_acl != -1) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txvstha"), bool_to_string(n->tx_vlan_stag_hw_acl));
                  if (r < 0)
                          return r;
         }
+
         if (n->n_tpl_fltr != -1) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "ntf"), bool_to_string(n->n_tpl_fltr));
                 if (r < 0)
                         return r;
         }
+
         if (n->use_adpt_rx_coal != -1) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "uarxc"), bool_to_string(n->use_adpt_rx_coal));
                 if (r < 0)
                         return r;
         }
+
         if (n->use_adpt_tx_coal != -1) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "uatxc"), bool_to_string(n->use_adpt_tx_coal));
                 if (r < 0)
@@ -393,33 +418,37 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if (n->rx_flow_ctrl != -1) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxflowctrl"), bool_to_string(n->rx_flow_ctrl));
                 if (r < 0)
                         return r;
         }
+
         if (n->auto_flow_ctrl != -1) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "autoflowctrl"), bool_to_string(n->auto_flow_ctrl));
                 if (r < 0)
                         return r;
         }
 
-
         if (n->rx_chnl) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxch"), n->rx_chnl);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_chnl) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txch"), n->tx_chnl);
                 if (r < 0)
                         return r;
         }
+
         if (n->otr_chnl) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "otrch"), n->otr_chnl);
                 if (r < 0)
                         return r;
         }
+
         if (n->comb_chnl) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "combch"), n->comb_chnl);
                 if (r < 0)
@@ -431,16 +460,19 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if(n->rx_mini_buf) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxminbuf"), n->rx_mini_buf);
                 if (r < 0)
                     return r;
         }
+
         if(n->rx_jumbo_buf) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxjumbobuf"), n->rx_jumbo_buf);
                 if (r < 0)
                     return r;
         }
+
         if(n->tx_buf) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txbuf"), n->tx_buf);
                 if (r < 0)
@@ -452,11 +484,13 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if (n->rx_queues > 0) {
                 r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "rxq"), n->rx_queues);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_queue_len > 0) {
                 r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "rxqlen"), n->tx_queue_len);
                 if (r < 0)
@@ -479,36 +513,43 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if (n->rx_coal_irq_sec) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcsirq"), n->rx_coal_irq_sec);
                 if (r < 0)
                         return r;
         }
+
         if (n->rx_coal_low_sec) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcslow"), n->rx_coal_low_sec);
                 if (r < 0)
                         return r;
         }
+
         if (n->rx_coal_high_sec) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcshigh"), n->rx_coal_high_sec);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_coal_sec) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcs"), n->tx_coal_sec);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_coal_irq_sec) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcsirq"), n->tx_coal_irq_sec);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_coal_low_sec) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcslow"), n->tx_coal_low_sec);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_coal_high_sec) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcshigh"), n->tx_coal_high_sec);
                 if (r < 0)
@@ -520,36 +561,43 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if (n->rx_coald_irq_frames) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxmcfirq"), n->rx_coald_irq_frames);
                 if (r < 0)
                         return r;
         }
+
         if (n->rx_coald_low_frames) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxmcflow"), n->rx_coald_low_frames);
                 if (r < 0)
                         return r;
         }
+
         if (n->rx_coald_high_frames) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxmcfhigh"), n->rx_coald_high_frames);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_coald_frames) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txmcf"), n->tx_coald_frames);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_coald_irq_frames) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txmcfirq"), n->tx_coald_irq_frames);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_coald_low_frames) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txmcflow"), n->tx_coald_low_frames);
                 if (r < 0)
                         return r;
         }
+
         if (n->tx_coald_high_frames) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txmcfhigh"), n->tx_coald_high_frames);
                 if (r < 0)
@@ -561,20 +609,24 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                 if (r < 0)
                         return r;
         }
+
         if (n->coal_pkt_rate_high) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "cprhigh"), n->coal_pkt_rate_high);
                 if (r < 0)
                         return r;
         }
+
         if (n->coal_pkt_rate_smpl_itrvl) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "cprsis"), n->coal_pkt_rate_smpl_itrvl);
                 if (r < 0)
                         return r;
         }
+
         if (n->sts_blk_coal_sec) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "sbcs"), n->sts_blk_coal_sec);
                 if (r < 0)
                         return r;
         }
+
         return 0;
 }
