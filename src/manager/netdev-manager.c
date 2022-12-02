@@ -595,7 +595,7 @@ int manager_create_wireguard_tunnel(const char *wireguard,
                          .wg_public_key = public_key ? strdup(public_key) : NULL,
                          .listen_port = listen_port,
                  };
-        if (!netdev->ifname || !netdev->wg_private_key || !netdev->wg_public_key)
+        if (!netdev->ifname)
                 return log_oom();
 
         if (endpoint) {
