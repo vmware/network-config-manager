@@ -427,25 +427,28 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
-                        r = key_file_set_string(key_file, "WireGuard", "PublicKey", n->wg_public_key);
+                        r = key_file_set_string(key_file, "WireGuardPeer", "PublicKey", n->wg_public_key);
                         if (r < 0)
                                 return r;
 
                         if (n->wg_endpoint) {
-                                r = key_file_set_string(key_file, "WireGuard", "Endpoint", n->wg_endpoint);
+                                r = key_file_set_string(key_file, "WireGuardPeer", "Endpoint", n->wg_endpoint);
                                 if (r < 0)
                                         return r;
                         }
+
                         if (n->wg_preshared_key) {
-                                r = key_file_set_string(key_file, "WireGuard", "PresharedKey", n->wg_preshared_key);
+                                r = key_file_set_string(key_file, "WireGuardPeer", "PresharedKey", n->wg_preshared_key);
                                 if (r < 0)
                                         return r;
                         }
+
                         if (n->wg_allowed_ips) {
-                                r = key_file_set_string(key_file, "WireGuard", "AllowedIPs", n->wg_allowed_ips);
+                                r = key_file_set_string(key_file, "WireGuardPeer", "AllowedIPs", n->wg_allowed_ips);
                                 if (r < 0)
                                         return r;
                         }
+
                         break;
                 default:
                         break;
