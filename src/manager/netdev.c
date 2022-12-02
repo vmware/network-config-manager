@@ -218,7 +218,6 @@ void netdev_unref(NetDev *n) {
         free(n->wg_preshared_key);
         free(n->wg_endpoint);
         free(n->wg_allowed_ips);
-        free(n->wg_allowed_ips);
 
         free(n->proto);
         free(n->tun_tap.user);

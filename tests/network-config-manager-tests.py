@@ -1616,7 +1616,8 @@ class TestCLINetDev:
 
     @pytest.mark.skip(reason="skipping")
     def test_cli_create_wireguard(self):
-        subprocess.check_call(['nmctl', 'create-wg', 'wg99', 'private-key', 'EEGlnEPYJV//kbvvIqxKkQwOiS+UENyPncC4bF46ong=', 'listen-port', '32', 'public-key', 'RDf+LSpeEre7YEIKaxg+wbpsNV7du+ktR99uBEtIiCA', 'endpoint', '192.168.3.56:2000', 'allowed-ips', '192.168.1.2'])
+        subprocess.check_call("nmctl create-wg wg99 private-key EEGlnEPYJV//kbvvIqxKkQwOiS+UENyPncC4bF46ong= listen-port 32 "
+                              "public-key RDf+LSpeEre7YEIKaxg+wbpsNV7du+ktR99uBEtIiCA endpoint 192.168.3.56:2000 allowed-ips 192.168.1.2", shell = True)
 
         assert(unit_exist('10-wg99.netdev') == True)
         assert(unit_exist('10-wg99.network') == True)
@@ -1631,6 +1632,7 @@ class TestCLINetDev:
 
         assert(wg_parser.get('NetDev', 'Name') == 'wg99')
         assert(wg_parser.get('NetDev', 'kind') == 'wireguard')
+
         assert(wg_parser.get('WireGuard', 'PrivateKey') == 'EEGlnEPYJV//kbvvIqxKkQwOiS+UENyPncC4bF46ong=')
         assert(wg_parser.get('WireGuard', 'ListenPort') == '32')
         assert(wg_parser.get('WireGuardPeer', 'PublicKey') == 'RDf+LSpeEre7YEIKaxg+wbpsNV7du+ktR99uBEtIiCA')
