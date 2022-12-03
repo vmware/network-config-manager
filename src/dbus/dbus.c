@@ -716,10 +716,8 @@ int dbus_get_system_property_from_networkd(const char *p, char **ret) {
                                 &bus_error,
                                 &m,
                                 "s");
-        if (r < 0) {
-                log_warning("Failed to issue method call: %s", bus_error.message);
+        if (r < 0)
                 return r;
-        }
 
         r = sd_bus_message_read(m, "s", &v);
         if (r < 0)
