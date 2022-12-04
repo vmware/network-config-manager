@@ -3,6 +3,8 @@
  */
 #include <json-c/json.h>
 
+#include <systemd/sd-device.h>
+
 #include "alloc-util.h"
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
@@ -433,31 +435,51 @@ static void json_list_one_link_routes(gpointer key, gpointer value, gpointer use
 }
 
 static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
+        const char *link = NULL, *driver =  NULL, *path = NULL, *vendor = NULL, *model = NULL;
         _auto_cleanup_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
-        _cleanup_(udev_device_unrefp) struct udev_device *dev = NULL;
-        const char *link, *driver, *path, *vendor, *model;
-        _cleanup_(udev_unrefp) struct udev *udev = NULL;
-        int r;
+        _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
+        const char *t = NULL;
 
         assert(l);
 
-        r = asprintf(&devid, "n%i", l->ifindex);
-        if (r < 0)
-                return log_oom();
+        (void) sd_device_new_from_ifindex(&sd_device, l->ifindex);
+        if (sd_device) {
+                (void) sd_device_get_property_value(sd_device, "ID_NET_LINK_FILE", &link);
+                (void) sd_device_get_property_value(sd_device, "ID_NET_DRIVER", &driver);
+                (void) sd_device_get_property_value(sd_device, "ID_PATH", &path);
 
-        r = asprintf(&device,"%s/%s", "/sys/class/net", l->name);
-        if (r < 0)
-                return log_oom();
+                if (sd_device_get_property_value(sd_device, "ID_VENDOR_FROM_DATABASE", &vendor) < 0)
+                        (void) sd_device_get_property_value(sd_device, "ID_VENDOR", &vendor);
 
-        udev = udev_new();
-        if (!udev)
-                return log_oom();
+                if (sd_device_get_property_value(sd_device, "ID_MODEL_FROM_DATABASE", &model) < 0)
+                        (void) sd_device_get_property_value(sd_device, "ID_MODEL", &model);
+        }
 
-        dev = udev_device_new_from_syspath(udev, device);
-        if (!dev)
-                return log_oom();
+        if (l->kind) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
 
-        path = udev_device_get_property_value(dev, "ID_PATH");
+                js = json_object_new_string(l->kind);
+                if (!js)
+                        return log_oom();
+
+               json_object_object_add(j, "Kind", js);
+               steal_pointer(js);
+        }
+
+        if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 && !isempty_string(t)) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+               if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_string(t))
+                        js = json_object_new_string(t);
+               else
+                       js = json_object_new_string(string_na(arphrd_to_name(l->iftype)));
+               if (!js)
+                       return log_oom();
+
+               json_object_object_add(j, "Type", js);
+               steal_pointer(js);
+        }
+
         if (path) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
@@ -469,7 +491,6 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
                 steal_pointer(js);
         }
 
-        driver = udev_device_get_property_value(dev, "ID_NET_DRIVER");
         if (driver) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
@@ -481,7 +502,6 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
                 steal_pointer(js);
         }
 
-        vendor = udev_device_get_property_value(dev, "ID_VENDOR_FROM_DATABASE");
         if (vendor) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
@@ -494,7 +514,6 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
 
         }
 
-        model = udev_device_get_property_value(dev, "ID_MODEL_FROM_DATABASE");
         if (model) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
@@ -506,7 +525,6 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
                 steal_pointer(js);
         }
 
-        link = udev_device_get_property_value(dev, "ID_NET_LINK_FILE");
         if (link && link_file) {
                 *link_file = g_strdup(link);
                 if (!*link_file)
@@ -693,19 +711,6 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "NetworkFile", js);
-                steal_pointer(js);
-        }
-
-        if (l->kind || string_na(arphrd_to_name(l->iftype))) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
-                if (l->kind)
-                        js = json_object_new_string(l->kind);
-                else
-                        js = json_object_new_string(string_na(arphrd_to_name(l->iftype)));
-                if (!js)
-                        return log_oom();
-
-                json_object_object_add(jobj, "Type", js);
                 steal_pointer(js);
         }
 

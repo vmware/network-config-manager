@@ -272,7 +272,6 @@ static int display_one_link_device(Link *l, bool show, char **link_file) {
         }
 
         display(arg_beautify, ansi_color_bold_cyan(), "                        Type: ");
-
         if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_string(t))
                 printf("%s\n", t);
         else
@@ -315,6 +314,7 @@ static int display_one_link_device(Link *l, bool show, char **link_file) {
                         printf("%s\n", manufacturer);
                 }
         }
+
         return 0;
 }
 
