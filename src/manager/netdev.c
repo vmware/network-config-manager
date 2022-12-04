@@ -144,10 +144,14 @@ static const Config netdev_ctl_name_to_config_table[] = {
                 { "macvtap", "MACVLAN"},
                 { "vrf",     "VRF"},
                 { "ipvlan",  "IPVLAN"},
+                { "ipvtap",  "IPVTAP"},
+                { "veth",    "Peer"},
                 { "ipip",    "Tunnel"},
                 { "gre",     "Tunnel"},
                 { "sit",     "Tunnel"},
                 { "vti",     "Tunnel"},
+                { "tun",     "Tun"},
+                { "tap",     "Tap"},
                 {},
 };
 

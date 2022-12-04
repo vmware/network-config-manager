@@ -14,6 +14,7 @@
 #include "ctl-display.h"
 #include "ctl.h"
 #include "dbus.h"
+#include "device.h"
 #include "dns.h"
 #include "log.h"
 #include "macros.h"
@@ -117,7 +118,7 @@ static int list_links(int argc, char *argv[]) {
                 display(arg_beautify, ansi_color_bold(), "%-8d", link->ifindex);
                 display(arg_beautify, ansi_color_bold_cyan(), "  %-10s ", link->name);
 
-                r = sd_device_new_from_ifindex(&sd_device, link->ifindex);
+                (void) device_new_from_ifname(&sd_device, link->name);
                 if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_string(t))
                         display(arg_beautify, ansi_color_blue_magenta(), "%-12s ", t);
                 else
@@ -260,7 +261,7 @@ static int display_one_link_device(Link *l, bool show, char **link_file) {
         if (r < 0)
                 log_warning("Failed to open hardware database: %s", g_strerror(-r));
 
-        (void) sd_device_new_from_ifindex(&sd_device, l->ifindex);
+        (void) device_new_from_ifname(&sd_device, l->name);
         if (sd_device) {
                 (void) sd_device_get_property_value(sd_device, "ID_NET_LINK_FILE", &link);
                 (void) sd_device_get_property_value(sd_device, "ID_NET_DRIVER", &driver);

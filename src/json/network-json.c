@@ -10,6 +10,7 @@
 #include "arphrd-to-name.h"
 #include "ctl.h"
 #include "dbus.h"
+#include "device.h"
 #include "dns.h"
 #include "log.h"
 #include "macros.h"
@@ -442,7 +443,7 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
 
         assert(l);
 
-        (void) sd_device_new_from_ifindex(&sd_device, l->ifindex);
+        (void) device_new_from_ifname(&sd_device, l->name);
         if (sd_device) {
                 (void) sd_device_get_property_value(sd_device, "ID_NET_LINK_FILE", &link);
                 (void) sd_device_get_property_value(sd_device, "ID_NET_DRIVER", &driver);
