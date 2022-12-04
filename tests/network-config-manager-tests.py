@@ -1614,7 +1614,6 @@ class TestCLINetDev:
         assert(unit_exist('10-vti-98.netdev') == False)
         assert(unit_exist('10-vti-98.network') == False)
 
-    @pytest.mark.skip(reason="skipping")
     def test_cli_create_wireguard(self):
         subprocess.check_call("nmctl create-wg wg99 private-key EEGlnEPYJV//kbvvIqxKkQwOiS+UENyPncC4bF46ong= listen-port 32 "
                               "public-key RDf+LSpeEre7YEIKaxg+wbpsNV7du+ktR99uBEtIiCA endpoint 192.168.3.56:2000 allowed-ips 192.168.1.2 "
@@ -1644,10 +1643,6 @@ class TestCLINetDev:
         network_parser.read(os.path.join(networkd_unit_file_path, '10-wg99.network'))
 
         assert(network_parser.get('Match', 'Name') == 'wg99')
-
-        subprocess.check_call("nmctl remove-netdev wg99 kind wireguard" , shell = True)
-        assert(unit_exist('10-wg99.netdev') == False)
-        assert(unit_exist('10-wg99.network') == False)
 
     def test_cli_create_vxlan(self):
         assert(link_exist('test98') == True)

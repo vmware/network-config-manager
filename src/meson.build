@@ -75,4 +75,6 @@ network_config_manager_sources = files('''
         yaml/yaml-parser.h
         udev/udev-hwdb.h
         udev/udev-hwdb.c
+        udev/device.h
+        udev/device.c
 '''.split())
