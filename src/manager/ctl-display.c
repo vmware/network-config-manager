@@ -249,9 +249,9 @@ static void list_one_link_routes(gpointer key, gpointer value, gpointer userdata
 
 static int display_one_link_device(Link *l, bool show, char **link_file) {
         const char *link = NULL, *driver = NULL, *path = NULL, *vendor = NULL, *model = NULL;
-        _auto_cleanup_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
         _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
         _cleanup_(sd_hwdb_unrefp) sd_hwdb *hwdb = NULL;
+        _auto_cleanup_ char *manufacturer = NULL;
         const char *t = NULL;
         int r;
 

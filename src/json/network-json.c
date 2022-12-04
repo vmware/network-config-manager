@@ -291,7 +291,6 @@ int json_system_status(char **ret) {
                 steal_pointer(js);
         }
 
-
         r = manager_link_get_address(&h);
         if (r >= 0 && set_size(h->addresses) > 0) {
                 jaddress = json_object_new_array();
@@ -437,8 +436,8 @@ static void json_list_one_link_routes(gpointer key, gpointer value, gpointer use
 
 static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
         const char *link = NULL, *driver =  NULL, *path = NULL, *vendor = NULL, *model = NULL;
-        _auto_cleanup_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
         _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
+        _auto_cleanup_ char *manufacturer = NULL;
         const char *t = NULL;
 
         assert(l);
