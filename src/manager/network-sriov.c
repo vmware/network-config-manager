@@ -129,7 +129,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
                 log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
-                return -errno;
+                return r;
         }
 
         r = netdev_sriov_new(&s);
