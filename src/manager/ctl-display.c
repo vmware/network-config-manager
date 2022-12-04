@@ -4,6 +4,9 @@
 
 #include <network-config-manager.h>
 
+#include <systemd/sd-hwdb.h>
+#include <systemd/sd-device.h>
+
 #include "alloc-util.h"
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
@@ -237,39 +240,49 @@ static void list_one_link_routes(gpointer key, gpointer value, gpointer userdata
                 printf("                   %s\n", c);
 }
 
-static int display_one_link_udev(Link *l, bool show, char **link_file) {
+static int display_one_link_device(Link *l, bool show, char **link_file) {
+        const char *link = NULL, *driver = NULL, *path = NULL, *vendor = NULL, *model = NULL;
         _auto_cleanup_ char *devid = NULL, *device = NULL, *manufacturer = NULL;
-        const char *link, *driver, *path, *vendor, *model;
-        _cleanup_(udev_device_unrefp) struct udev_device *dev = NULL;
-        _cleanup_(udev_unrefp) struct udev *udev = NULL;
+        _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
+        _cleanup_(sd_hwdb_unrefp) sd_hwdb *hwdb = NULL;
+        const char *t = NULL;
+        int r;
 
         assert(l);
 
-        asprintf(&devid, "n%i", l->ifindex);
+        r = sd_hwdb_new(&hwdb);
+        if (r < 0)
+                log_warning("Failed to open hardware database: %s", g_strerror(-r));
 
-        asprintf(&device,"%s/%s", "/sys/class/net", l->name);
-        udev = udev_new();
-        if (!udev)
-                return log_oom();
+        (void) sd_device_new_from_ifindex(&sd_device, l->ifindex);
+        if (sd_device) {
+                (void) sd_device_get_property_value(sd_device, "ID_NET_LINK_FILE", &link);
+                (void) sd_device_get_property_value(sd_device, "ID_NET_DRIVER", &driver);
+                (void) sd_device_get_property_value(sd_device, "ID_PATH", &path);
 
-        dev = udev_device_new_from_syspath(udev, device);
-        if (!dev)
-                return log_oom();
+                if (sd_device_get_property_value(sd_device, "ID_VENDOR_FROM_DATABASE", &vendor) < 0)
+                        (void) sd_device_get_property_value(sd_device, "ID_VENDOR", &vendor);
 
-        path = udev_device_get_property_value(dev, "ID_PATH");
-        driver = udev_device_get_property_value(dev, "ID_NET_DRIVER");
-        link = udev_device_get_property_value(dev, "ID_NET_LINK_FILE");
-        vendor = udev_device_get_property_value(dev, "ID_VENDOR_FROM_DATABASE");
-        model = udev_device_get_property_value(dev, "ID_MODEL_FROM_DATABASE");
+                if (sd_device_get_property_value(sd_device, "ID_MODEL_FROM_DATABASE", &model) < 0)
+                        (void) sd_device_get_property_value(sd_device, "ID_MODEL", &model);
+        }
+        if (l->kind) {
+                display(arg_beautify, ansi_color_bold_cyan(), "                        Kind: ");
+                printf("%s\n", l->kind);
+        }
+
+        display(arg_beautify, ansi_color_bold_cyan(), "                        Type: ");
+
+        if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_string(t))
+                printf("%s\n", t);
+        else
+                printf("%s\n", string_na(arphrd_to_name(l->iftype)));
 
         if (link && link_file) {
                 *link_file = g_strdup(link);
                 if (!*link_file)
                         return log_oom();
         }
-
-        if (!show)
-                return 0;
 
         if (path) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                        Path: ");
@@ -295,10 +308,12 @@ static int display_one_link_udev(Link *l, bool show, char **link_file) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                       Model: ");
                 printf("%s \n", model);
         }
-        hwdb_get_manufacturer((uint8_t *) &l->mac_address.ether_addr_octet, &manufacturer);
-        if (manufacturer) {
-                display(arg_beautify, ansi_color_bold_cyan(), "                Manufacturer: ");
-                printf("%s\n", manufacturer);
+        if (!l->kind) {
+                hwdb_get_manufacturer((uint8_t *) &l->mac_address.ether_addr_octet, &manufacturer);
+                if (manufacturer) {
+                        display(arg_beautify, ansi_color_bold_cyan(), "                Manufacturer: ");
+                        printf("%s\n", manufacturer);
+                }
         }
         return 0;
 }
@@ -310,7 +325,7 @@ static void list_link_attributes(Link *l) {
         (void) link_read_sysfs_attribute(l->name, "duplex", &duplex);
         (void) link_read_sysfs_attribute(l->name, "address", &ether);
 
-        if (ether) {
+        if (!isempty_string(ether)) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                  HW Address: ");
                 printf("%s\n", ether);
         }
@@ -318,15 +333,15 @@ static void list_link_attributes(Link *l) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                         MTU: ");
                 printf("%d (min: %d max: %d) \n", l->mtu, l->min_mtu, l->max_mtu);
         }
-        if (duplex) {
+        if (!isempty_string(duplex)) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                      Duplex: ");
                 printf("%s\n", duplex);
         }
-        if (speed) {
+        if (!isempty_string(speed)) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                       Speed: ");
                 printf("%s\n", speed);
         }
-        if (l->qdisc) {
+        if (!isempty_string(l->qdisc)) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                       QDISC: ");
                 printf("%s \n", l->qdisc);
         }
@@ -432,19 +447,13 @@ static int list_one_link(char *argv[]) {
         (void) network_parse_link_ntp(l->ifindex, &ntp);
 
         (void) network_parse_link_network_file(l->ifindex, &network);
-        (void) display_one_link_udev(l, false, &link);
 
+        (void)  display_one_link_device(l, true, &link);
         display(arg_beautify, ansi_color_bold_cyan(), "                   Link File: ");
         printf("%s\n", string_na(link));
 
         display(arg_beautify, ansi_color_bold_cyan(), "                Network File: ");
         printf("%s\n", string_na(network));
-
-        display(arg_beautify, ansi_color_bold_cyan(), "                        Type: ");
-        if (l->kind)
-                printf("%s\n", l->kind);
-        else
-                printf("%s\n", string_na(arphrd_to_name(l->iftype)));
 
         display(arg_beautify, ansi_color_bold_cyan(), "                       State: ");
         display(arg_beautify, operational_state_color, "%s", string_na(operational_state));
@@ -483,7 +492,6 @@ static int list_one_link(char *argv[]) {
                 printf("%s\n", device_activation_policy);
         }
 
-        (void)  display_one_link_udev(l, true, NULL);
         list_link_attributes(l);
 
         r = manager_get_one_link_address(l->ifindex, &addr);
