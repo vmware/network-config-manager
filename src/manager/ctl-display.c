@@ -77,6 +77,7 @@ static void link_state_to_color(const char *state, const char **on) {
 }
 
 static int list_links(int argc, char *argv[]) {
+        _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
         _cleanup_(links_unrefp) Links *h = NULL;
         int r;
 
@@ -84,8 +85,9 @@ static int list_links(int argc, char *argv[]) {
         if (r < 0)
                return r;
 
+
         if (arg_beautify)
-                printf("%s %10s %8s %11s %15s %9s\n",
+                printf("%s %10s %8s %13s %15s %10s\n",
                         "INDEX",
                         "DEVICE",
                         "TYPE",
@@ -97,6 +99,7 @@ static int list_links(int argc, char *argv[]) {
                 const char *setup_color, *operational_color, *operstates, *operstates_color;
                 _auto_cleanup_ char *setup = NULL, *operational = NULL;
                 Link *link = (Link *) i->data;
+                const char *t = NULL;
 
                 setup_color = operational_color = operstates = operstates_color = ansi_color_reset();
 
@@ -113,13 +116,16 @@ static int list_links(int argc, char *argv[]) {
 
                 display(arg_beautify, ansi_color_bold(), "%-8d", link->ifindex);
                 display(arg_beautify, ansi_color_bold_cyan(), "  %-10s ", link->name);
-                if (link->kind)
-                        display(arg_beautify, ansi_color_blue_magenta(), "%-10s ", link->kind);
+
+                r = sd_device_new_from_ifindex(&sd_device, link->ifindex);
+                if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_string(t))
+                        display(arg_beautify, ansi_color_blue_magenta(), "%-12s ", t);
                 else
-                        display(arg_beautify, ansi_color_blue_magenta(), "%-10s ", arphrd_to_name(link->iftype));
+                        display(arg_beautify, ansi_color_blue_magenta(), "%-12s ", arphrd_to_name(link->iftype));
+
                 display(arg_beautify, operstates_color, "%-9s ", operstates);
-                display(arg_beautify, operational_color, "%-15s ", string_na(operational));
-                display(arg_beautify, setup_color, "%-20s\n", string_na(setup));
+                display(arg_beautify, operational_color, "%-16s ", string_na(operational));
+                display(arg_beautify, setup_color, "%-10s\n", string_na(setup));
         }
 
         return 0;

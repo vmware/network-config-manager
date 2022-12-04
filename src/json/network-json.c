@@ -531,16 +531,18 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
                         return log_oom();
         }
 
-        hwdb_get_manufacturer((uint8_t *) &l->mac_address.ether_addr_octet, &manufacturer);
-        if (manufacturer) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        if (!l->kind) {
+                hwdb_get_manufacturer((uint8_t *) &l->mac_address.ether_addr_octet, &manufacturer);
+                if (manufacturer) {
+                        _cleanup_(json_object_putp) json_object *js = NULL;
 
-                js = json_object_new_string(manufacturer);
-                if (!js)
-                        return log_oom();
+                        js = json_object_new_string(manufacturer);
+                        if (!js)
+                                return log_oom();
 
-                json_object_object_add(j, "Manufacturer", js);
-                steal_pointer(js);
+                        json_object_object_add(j, "Manufacturer", js);
+                        steal_pointer(js);
+                }
         }
 
         return 0;
