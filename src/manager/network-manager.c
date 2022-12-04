@@ -1931,50 +1931,28 @@ int manager_parse_proxy_config(GHashTable **c) {
 int manager_generate_network_config_from_yaml(const char *file) {
         _cleanup_(g_string_unrefp) GString *wifi_config = NULL;
         _cleanup_(network_unrefp) Network *n = NULL;
-        _cleanup_(netdev_link_unrefp) NetDevLink *l = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         assert(file);
 
-        if (string_has_suffix(file, "link.yaml")) {
-                r = parse_yaml_link_file(file, &l);
-                if (r < 0) {
-                        log_warning("Failed to parse configuration file '%s': %s", file, g_strerror(-r));
-                        return r;
-                }
+        r = parse_yaml_network_file(file, &n);
+        if (r < 0) {
+                log_warning("Failed to parse configuration file '%s': %s", file, g_strerror(-r));
+                return r;
+        }
 
-                r = parse_ifname_or_index(l->ifname, &p);
-                if (r < 0) {
-                        log_warning("Failed to find device: %s", g_strerror(-r));
-                        return r;
-                }
-
-                r = netdev_link_configure(p, l);
-                if (r < 0) {
-                        log_warning("Failed to configure device from yaml file '%s': %s", file, g_strerror(-r));
-                        return r;
-                }
-        } else {
-                r = parse_yaml_network_file(file, &n);
-                if (r < 0) {
-                        log_warning("Failed to parse configuration file '%s': %s", file, g_strerror(-r));
-                        return r;
-                }
-
-                r = generate_network_config(n);
-                if (r < 0) {
+        r = generate_network_config(n);
+        if (r < 0) {
                         log_warning("Failed to generate network configuration for file '%s': %s", file, g_strerror(-r));
                         return r;
-                }
+        }
 
-                if (n->access_points) {
-                        r = generate_wifi_config(n, &wifi_config);
-                        if (r < 0)
-                                return r;
+        if (n->access_points) {
+                r = generate_wifi_config(n, &wifi_config);
+                if (r < 0)
+                        return r;
 
-                        return manager_write_wifi_config(n, wifi_config);
-                }
+                return manager_write_wifi_config(n, wifi_config);
         }
 
         return dbus_network_reload();
