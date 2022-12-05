@@ -251,7 +251,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, const DHCPCl
 
 int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, const DHCPClient kind, uint32_t *iaid) {
         _auto_cleanup_ char *network = NULL;
-        uint32_t v;
+        uint32_t v = 0;
         int r;
 
         assert(ifnameidx);
