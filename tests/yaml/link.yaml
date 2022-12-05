@@ -1,6 +1,6 @@
 match:
    macaddress: fa:90:ae:07:52:0a
-device:
+link:
    ifname: test99
    alias: ifalias
    description: testconf
