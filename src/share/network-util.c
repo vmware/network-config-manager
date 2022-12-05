@@ -306,6 +306,13 @@ int parse_ifname_or_index(const char *s, IfNameIndex **ret) {
         return 0;
 }
 
+char *mac_addr_to_string(const char *addr, char *buf) {
+        assert(addr);
+
+        sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x", addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+        return buf;
+}
+
 char *ether_addr_to_string(const struct ether_addr *addr, char *s) {
         assert(addr);
         assert(s);
