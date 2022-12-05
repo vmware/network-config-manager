@@ -437,7 +437,7 @@ static void json_list_one_link_routes(gpointer key, gpointer value, gpointer use
 static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
         const char *link = NULL, *driver =  NULL, *path = NULL, *vendor = NULL, *model = NULL;
         _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
-        _auto_cleanup_ char *manufacturer = NULL;
+        _auto_cleanup_ char *desc = NULL;
         const char *t = NULL;
 
         assert(l);
@@ -532,15 +532,15 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
         }
 
         if (!l->kind) {
-                hwdb_get_manufacturer((uint8_t *) &l->mac_address.ether_addr_octet, &manufacturer);
-                if (manufacturer) {
+                hwdb_get_vendor((uint8_t *) &l->mac_address.ether_addr_octet, &desc);
+                if (desc) {
                         _cleanup_(json_object_putp) json_object *js = NULL;
 
-                        js = json_object_new_string(manufacturer);
+                        js = json_object_new_string(desc);
                         if (!js)
                                 return log_oom();
 
-                        json_object_object_add(j, "Manufacturer", js);
+                        json_object_object_add(j, "HWDescription", js);
                         steal_pointer(js);
                 }
         }
