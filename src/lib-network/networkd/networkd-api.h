@@ -30,6 +30,7 @@ int network_parse_link_search_domains(int ifindex, char ***ret);
 int network_parse_link_route_domains(int ifindex, char ***ret);
 int network_parse_link_addresses(int ifindex, char ***ret);
 int network_parse_link_dhcp6_client_duid(int ifindex, char **ret);
+int network_parse_link_dhcp6_client_iaid(int ifindex, char **ret);
 
 int network_parse_link_dhcp4_address(int ifindex, char **ret);
 int network_parse_link_dhcp4_server_address(int ifindex, char **ret);
