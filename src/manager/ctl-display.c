@@ -250,16 +250,9 @@ static void list_one_link_routes(gpointer key, gpointer value, gpointer userdata
 static int display_one_link_device(Link *l, bool show, char **link_file) {
         const char *link = NULL, *driver = NULL, *path = NULL, *vendor = NULL, *model = NULL;
         _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
-        _cleanup_(sd_hwdb_unrefp) sd_hwdb *hwdb = NULL;
-        _auto_cleanup_ char *manufacturer = NULL;
         const char *t = NULL;
-        int r;
 
         assert(l);
-
-        r = sd_hwdb_new(&hwdb);
-        if (r < 0)
-                log_warning("Failed to open hardware database: %s", g_strerror(-r));
 
         (void) device_new_from_ifname(&sd_device, l->name);
         if (sd_device) {
@@ -314,13 +307,6 @@ static int display_one_link_device(Link *l, bool show, char **link_file) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                       Model: ");
                 printf("%s \n", model);
         }
-        if (!l->kind) {
-                hwdb_get_manufacturer((uint8_t *) &l->mac_address.ether_addr_octet, &manufacturer);
-                if (manufacturer) {
-                        display(arg_beautify, ansi_color_bold_cyan(), "                Manufacturer: ");
-                        printf("%s\n", manufacturer);
-                }
-        }
 
         return 0;
 }
@@ -333,8 +319,11 @@ static void list_link_attributes(Link *l) {
         (void) link_read_sysfs_attribute(l->name, "address", &ether);
 
         if (!isempty_string(ether)) {
+                _auto_cleanup_ char *desc = NULL;
+                 hwdb_get_vendor((uint8_t *) &l->mac_address.ether_addr_octet, &desc);
+
                 display(arg_beautify, ansi_color_bold_cyan(), "                  HW Address: ");
-                printf("%s\n", ether);
+                printf("%s (%s)\n", ether, desc);
         }
         if (l->contains_mtu) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                         MTU: ");
