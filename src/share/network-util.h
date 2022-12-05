@@ -74,6 +74,9 @@ int ip_is_null(const IPAddress *a);
 int parse_ifname_or_index(const char *s, IfNameIndex **ret);
 char *ether_addr_to_string(const struct ether_addr *addr, char *s);
 bool ether_addr_is_not_null(const struct ether_addr *addr);
+
+char *mac_addr_to_string(const char *addr, char *buf);
+
 int parse_mtu(char *mtu, uint32_t *ret);
 
 int parse_group(char *mtu, uint32_t *ret);

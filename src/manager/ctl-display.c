@@ -567,8 +567,28 @@ static int list_one_link(char *argv[]) {
 
         r = network_parse_link_dhcp4_client_id(p->ifindex, &dhcp4_identifier);
         if (r >= 0) {
-                display(arg_beautify, ansi_color_bold_cyan(), "             DHCP4 Client ID: ");
-                printf("%s\n", dhcp4_identifier);
+                _auto_cleanup_ char *c = NULL, *n = NULL;
+                _auto_cleanup_ IfNameIndex *ifn = NULL;
+
+                r = parse_ifname_or_index(l->name, &ifn);
+                if (r < 0) {
+                        log_warning("Failed to find device: %s", l->name);
+                        return r;
+                }
+
+                r = create_or_parse_network_file(ifn, &network);
+                if (r >= 0) {
+                        r = parse_config_file(network, "DHCPv4", "ClientIdentifier", &c);
+                        if (r >= 0) {
+                                if (string_equal(c, "mac")) {
+                                         _auto_cleanup_ char *e = NULL;
+
+                                         (void) link_read_sysfs_attribute(l->name, "address", &e);
+                                         display(arg_beautify, ansi_color_bold_cyan(), "             DHCP4 Client ID: ");
+                                         printf("%s (mac)\n", e);
+                                }
+                        }
+                }
         }
 
         if (!iaid) {
