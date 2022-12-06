@@ -33,14 +33,14 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
 
                         r = argv_to_strv(argc - i, argv + i, &devs);
                         if (r < 0) {
-                                log_warning("Failed to parse devices: %s", g_strerror(-r));
+                                log_warning("Failed to parse devices: %s", strerror(-r));
                                 return r;
                         }
                 }
         }
 
        if (strv_length(devs) <= 0) {
-               log_warning("Failed to parse devices: %s", g_strerror(-r));
+               log_warning("Failed to parse devices: %s", strerror(-r));
                return r;
        }
 
@@ -49,19 +49,19 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
 
                 r = parse_ifname_or_index(*s, &p);
                 if (r < 0) {
-                        log_warning("Failed to find device '%s': %s", *s, g_strerror(-r));
+                        log_warning("Failed to find device '%s': %s", *s, strerror(-r));
                         return r;
                 }
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
         r = manager_create_bridge(argv[1], devs);
         if (r < 0) {
-                log_warning("Failed to create bridge '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create bridge '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -81,7 +81,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
 
                         r = bond_name_to_mode(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse bond mode '%s' : %s", argv[3], g_strerror(EINVAL));
+                                log_warning("Failed to parse bond mode '%s' : %s", argv[3], strerror(EINVAL));
                                 return r;
                         }
                         have_mode = true;
@@ -91,7 +91,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
 
                         r = argv_to_strv(argc - i, argv + i, &devs);
                         if (r < 0) {
-                                log_warning("Failed to parse devices: %s", g_strerror(-r));
+                                log_warning("Failed to parse devices: %s", strerror(-r));
                                 return r;
                         }
                 }
@@ -99,7 +99,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         }
 
         if (strv_length(devs) <= 0) {
-               log_warning("Failed to parse devices: %s", g_strerror(-r));
+               log_warning("Failed to parse devices: %s", strerror(-r));
                return r;
        }
 
@@ -108,24 +108,24 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
 
                 r = parse_ifname_or_index(*s, &p);
                 if (r < 0) {
-                        log_warning("Failed to find device '%s': %s", *s, g_strerror(-r));
+                        log_warning("Failed to find device '%s': %s", *s, strerror(-r));
                         return r;
                 }
         }
 
         if (!have_mode) {
-                log_warning("Missing Bond mode: %s", g_strerror(EINVAL));
+                log_warning("Missing Bond mode: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
         r = manager_create_bond(argv[1], mode, devs);
         if (r < 0) {
-                log_warning("Failed to create bond '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create bond '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -144,7 +144,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find device '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find device '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
                         continue;
@@ -153,7 +153,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
 
                         r = macvlan_name_to_mode(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse MacVLan/MacVTap mode '%s' : %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to parse MacVLan/MacVTap mode '%s' : %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
                         have_mode = true;
@@ -161,23 +161,23 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!have_mode) {
-                log_warning("Missing MacVLan/MacVTap mode: %s", g_strerror(EINVAL));
+                log_warning("Missing MacVLan/MacVTap mode: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
@@ -187,7 +187,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
                 r = manager_create_macvlan(argv[1], p->ifname, mode, false);
 
         if (r < 0) {
-                log_warning("Failed to %s '%s': %s", argv[0], argv[1], g_strerror(-r));
+                log_warning("Failed to %s '%s': %s", argv[0], argv[1], strerror(-r));
                 return r;
         }
 
@@ -206,7 +206,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find dev '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find dev '%s': %s", argv[i], strerror(-r));
                                 return -errno;
                         }
                         continue;
@@ -215,7 +215,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
 
                         r = ipvlan_name_to_mode(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse IPVLan/IPVTap mode '%s' : %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to parse IPVLan/IPVTap mode '%s' : %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
                         have_mode = true;
@@ -223,23 +223,23 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!have_mode) {
-                log_warning("Missing IPVLan/IPVTap mode: %s", g_strerror(EINVAL));
+                log_warning("Missing IPVLan/IPVTap mode: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
@@ -249,7 +249,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
                 r = manager_create_ipvlan(argv[1], p->ifname, mode, false);
 
         if (r < 0) {
-                log_warning("Failed to %s '%s': %s", argv[0], argv[1], g_strerror(-r));
+                log_warning("Failed to %s '%s': %s", argv[0], argv[1], strerror(-r));
                 return r;
         }
 
@@ -270,7 +270,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find device '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find device '%s': %s", argv[i], strerror(-r));
                                 return -errno;
                         }
                         continue;
@@ -279,7 +279,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &vni);
                         if (r < 0) {
-                                log_warning("Failed to parse vni %s: %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse vni %s: %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -317,7 +317,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse independent %s : %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to parse independent %s : %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
                         independent = r;
@@ -327,35 +327,35 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                         r = parse_uint16(argv[i], &port);
                         if (r < 0) {
-                                log_warning("Failed to parse port %s: %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse port %s: %s", argv[i], strerror(-r));
                                 return r;
                         }
                         continue;
                 } else {
 
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
         }
 
         if (!have_vni) {
-                log_warning("Missing VxLan vni: %s", g_strerror(EINVAL));
+                log_warning("Missing VxLan vni: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!independent && !p) {
-                log_warning("Missing device: %s", g_strerror(EINVAL));
+                log_warning("Missing device: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
         r = manager_create_vxlan(argv[1], vni, local, remote, group, port, p ? p->ifname : NULL, independent);
         if (r < 0) {
-                log_warning("Failed to create vxlan '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create vxlan '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -375,7 +375,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find device '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find device '%s': %s", argv[i], strerror(-r));
                                 return -errno;
                         }
                         have_dev = true;
@@ -385,7 +385,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 
                         r = parse_uint16(argv[i], &id);
                         if (r < 0) {
-                                log_warning("Failed to parse VLan id '%s': %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to parse VLan id '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
                         have_id = true;
@@ -398,39 +398,39 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                                 if (!proto)
                                         return log_oom();
                         } else {
-                                log_warning("Failed to parse VLan proto '%s': %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to parse VLan proto '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
         }
         if (!p) {
-                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!have_id) {
-                log_warning("Missing VLan id: %s", g_strerror(EINVAL));
+                log_warning("Missing VLan id: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!have_dev) {
-                log_warning("Missing device: %s", g_strerror(EINVAL));
+                log_warning("Missing device: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
         r = manager_create_vlan(p, argv[1], id, proto);
         if (r < 0) {
-                log_warning("Failed to create vlan '%s': %s", argv[2], g_strerror(-r));
+                log_warning("Failed to create vlan '%s': %s", argv[2], strerror(-r));
                 return r;
         }
 
@@ -446,7 +446,7 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
                         parse_next_arg(argv, argc, i);
 
                          if (!valid_ifname(argv[i])) {
-                                 log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                                 log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                                  return -EINVAL;
                          }
 
@@ -457,13 +457,13 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return -EINVAL;
         }
 
         r = manager_create_veth(argv[1], peer);
         if (r < 0) {
-                log_warning("Failed to create veth '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create veth '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -481,7 +481,7 @@ _public_ int ncm_create_vrf(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[3], &table);
                         if (r < 0) {
-                                log_warning("Failed to parse table id='%s' for '%s': %s", argv[i], argv[1], g_strerror(-r));
+                                log_warning("Failed to parse table id='%s' for '%s': %s", argv[i], argv[1], strerror(-r));
                                 return r;
                         }
                         have_table = true;
@@ -489,18 +489,18 @@ _public_ int ncm_create_vrf(int argc, char *argv[]) {
         }
 
         if (!have_table) {
-                log_warning("Missing table id: %s", g_strerror(EINVAL));
+                log_warning("Missing table id: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
         r = manager_create_vrf(argv[1], table);
         if (r < 0) {
-                log_warning("Failed to create vrf '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create vrf '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -518,7 +518,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
         c = strchr(argv[0], '-');
         kind = netdev_name_to_kind(++c);
         if (kind < 0) {
-                log_warning("Failed to find tunnel kind '%s': %s", c, g_strerror(EINVAL));
+                log_warning("Failed to find tunnel kind '%s': %s", c, strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -528,7 +528,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find device '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to find device '%s': %s", argv[i], strerror(-r));
                                 return -errno;
                         }
                         continue;
@@ -555,30 +555,30 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse independent %s : %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to parse independent %s : %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
                         independent = r;
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
         }
 
         if (!p && !independent) {
-                log_warning("Failed to find device: %s",  g_strerror(EINVAL));
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
         r = manager_create_tunnel(argv[1], kind, local, remote, p ? p->ifname : NULL, independent);
         if (r < 0) {
-                log_warning("Failed to create tunnel '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create tunnel '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -638,7 +638,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
 
                                 s = strsplit(argv[i], ",", -1);
                                 if (!s) {
-                                        log_warning("Failed to parse allowed ips '%s': %s", argv[i], g_strerror(EINVAL));
+                                        log_warning("Failed to parse allowed ips '%s': %s", argv[i], strerror(EINVAL));
                                         return -EINVAL;
                                 }
 
@@ -647,7 +647,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
 
                                         r = parse_ip_from_string(*d, &address);
                                         if (r < 0) {
-                                                log_warning("Failed to parse allowed ips '%s': %s", argv[i], g_strerror(EINVAL));
+                                                log_warning("Failed to parse allowed ips '%s': %s", argv[i], strerror(EINVAL));
                                                 return -EINVAL;
                                         }
                                 }
@@ -656,7 +656,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
 
                                 r = parse_ip_from_string(argv[i], &address);
                                 if (r < 0) {
-                                        log_warning("Failed to parse allowed ips '%s': %s", argv[i], g_strerror(EINVAL));
+                                        log_warning("Failed to parse allowed ips '%s': %s", argv[i], strerror(EINVAL));
                                         return -EINVAL;
                                 }                        }
 
@@ -673,7 +673,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
 
                         r = parse_ip_port(argv[i], &address, &port);
                         if (r < 0) {
-                                log_warning("Failed to parse endpoint '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse endpoint '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -687,26 +687,26 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
 
                         r = parse_uint16(argv[i], &listen_port);
                         if (r < 0) {
-                                log_warning("Failed to parse listen port '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse listen port '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
         r = manager_create_wireguard_tunnel(argv[1], private_key, private_key_file, public_key, preshared_key,
                                             preshared_key_file, endpoint, allowed_ips, listen_port);
         if (r < 0) {
-                log_warning("Failed to create wireguard tunnel '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create wireguard tunnel '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -726,7 +726,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                         pw = getpwnam(argv[i]);
                         if (!pw) {
-                                log_warning("Failed to find user '%s': %s", argv[i], g_strerror(-ENOENT));
+                                log_warning("Failed to find user '%s': %s", argv[i], strerror(-ENOENT));
                                 return -ENOENT;
                         }
                         user = strdup(argv[i]);
@@ -740,7 +740,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                         g = getgrnam(argv[i]);
                         if (!g) {
-                                log_warning("Failed to find group '%s': %s", argv[i], g_strerror(-ENOENT));
+                                log_warning("Failed to find group '%s': %s", argv[i], strerror(-ENOENT));
                                 return -ENOENT;
                         }
 
@@ -754,7 +754,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse multi queue %s: %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse multi queue %s: %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -765,7 +765,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse packet info %s: %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse packet info %s: %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -776,7 +776,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse keep carrier %s: %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse keep carrier %s: %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -787,7 +787,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse vnet header %s: %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse vnet header %s: %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -796,20 +796,20 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                 } else {
 
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
         }
 
         if (!valid_ifname(argv[1])) {
-                log_warning("Invalid ifname %s': %s", argv[1], g_strerror(EINVAL));
+                log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
         r = manager_create_tun_tap(string_equal(argv[0], "create-tun") ? NET_DEV_KIND_TUN: NET_DEV_KIND_TAP, argv[1],
                                    user, group, packet_info, vnet_hdr, keep_carrier, multi_queue);
         if (r < 0) {
-                log_warning("Failed to create tun tap='%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to create tun tap='%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -823,7 +823,7 @@ _public_ int ncm_remove_netdev(int argc, char *argv[]) {
 
         r = netdev_ctl_name_to_configs_new(&m);
         if (r < 0) {
-                log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to remove netdev '%s': %s", argv[1], strerror(-r));
                 return r;
         }
         for (int i = 2; i < argc; i++) {
@@ -831,7 +831,7 @@ _public_ int ncm_remove_netdev(int argc, char *argv[]) {
                         parse_next_arg(argv, argc, i);
 
                         if (!ctl_to_config(m, argv[i])) {
-                                log_warning("Failed to find kind '%s': %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to find kind '%s': %s", argv[i], strerror(EINVAL));
                                 continue;
                         }
 
@@ -843,7 +843,7 @@ _public_ int ncm_remove_netdev(int argc, char *argv[]) {
 
         r = manager_remove_netdev(argv[1], kind ? ctl_to_config(m, kind) : NULL);
         if (r < 0) {
-                log_warning("Failed to remove netdev '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to remove netdev '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 

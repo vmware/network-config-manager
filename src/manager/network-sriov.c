@@ -109,7 +109,7 @@ int netdev_sriov_configure(const IfNameIndex *ifnameidx, SRIOV *s) {
 
         r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 
@@ -128,7 +128,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
         r = parse_ifname_or_index(argv[1], &p);
         if (r < 0) {
-                log_warning("Failed to find device '%s': %s", argv[1], g_strerror(-r));
+                log_warning("Failed to find device '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -144,7 +144,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &v);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vf ='%s': %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to configure sriov vf ='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
@@ -159,7 +159,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &v);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vlanid ='%s': %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to configure sriov vlanid ='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
@@ -173,7 +173,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &v);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov qos ='%s': %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to configure sriov qos ='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
@@ -187,7 +187,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_sriov_vlanprotocol(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vlanproto ='%s': %s", argv[i], g_strerror(EINVAL));
+                                log_warning("Failed to configure sriov vlanproto ='%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
 
@@ -201,7 +201,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse sriov macspoofck '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse sriov macspoofck '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -212,7 +212,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse sriov qrss '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse sriov qrss '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -223,7 +223,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse sriov trust '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse sriov trust '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -235,7 +235,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                         if (!string_equal_fold(argv[i], "auto")) {
                                 r = parse_boolean(argv[i]);
                                 if (r < 0) {
-                                        log_warning("Failed to parse sriov linkstate '%s': %s", argv[i], g_strerror(-r));
+                                        log_warning("Failed to parse sriov linkstate '%s': %s", argv[i], strerror(-r));
                                         return r;
                                 }
                         }
@@ -249,7 +249,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_ether_address(argv[i])) {
-                                log_warning("Failed to parse sriov macaddr='%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse sriov macaddr='%s': %s", argv[i], strerror(-r));
                                 return -EINVAL;
                         }
 
@@ -259,19 +259,19 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
         }
 
         if (!have_vf) {
-                log_warning("Failed to configure sriov missing VirtualFunction : %s", g_strerror(EINVAL));
+                log_warning("Failed to configure sriov missing VirtualFunction : %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
         r = netdev_sriov_configure(p, s);
         if (r < 0) {
-                log_warning("Failed to configure sriov: %s", g_strerror(-r));
+                log_warning("Failed to configure sriov: %s", strerror(-r));
                 return r;
         }
 

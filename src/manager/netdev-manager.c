@@ -94,7 +94,7 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
@@ -139,7 +139,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
@@ -199,7 +199,7 @@ int manager_create_bond(const char *bond, const BondMode mode, char **interfaces
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
@@ -271,7 +271,7 @@ int manager_create_vxlan(const char *vxlan,
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
@@ -330,7 +330,7 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration : %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration : %s", strerror(-r));
                 return r;
         }
 
@@ -390,7 +390,7 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration : %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration : %s", strerror(-r));
                 return r;
         }
 
@@ -449,7 +449,7 @@ int manager_create_veth(const char *veth, const char *veth_peer) {
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
@@ -502,7 +502,7 @@ int manager_create_tunnel(const char *tunnel,
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
@@ -558,7 +558,7 @@ int manager_create_vrf(const char *vrf, const uint32_t table) {
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
@@ -624,7 +624,7 @@ int manager_create_wireguard_tunnel(const char *wireguard,
 
         r = generate_network_config(v);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
@@ -675,7 +675,7 @@ int manager_create_tun_tap(const NetDevKind kind,
 
         r = generate_network_config(n);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
