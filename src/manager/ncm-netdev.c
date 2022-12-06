@@ -99,7 +99,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
         }
 
         if (strv_length(devs) <= 0) {
-               log_warning("Failed to parse devices: %s", strerror(-r));
+               log_warning("Failed to parse devices: %s", strerror(EINVAL));
                return r;
        }
 
@@ -206,8 +206,8 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
 
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
-                                log_warning("Failed to find dev '%s': %s", argv[i], strerror(-r));
-                                return -errno;
+                                log_warning("Failed to find device '%s': %s", argv[i], strerror(-r));
+                                return r;
                         }
                         continue;
                 } else if (string_equal_fold(argv[i], "mode")) {

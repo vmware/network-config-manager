@@ -305,7 +305,7 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
                         if (n->vlan->reorder_header != -1) {
-                                r = key_file_set_string(key_file, "VLAN", "LooseBinding", bool_to_string(n->vlan->reorder_header));
+                                r = key_file_set_string(key_file, "VLAN", "ReorderHeader", bool_to_string(n->vlan->reorder_header));
                                 if (r < 0)
                                         return r;
                         }
