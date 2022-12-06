@@ -18,6 +18,7 @@
 #define strsplit g_strsplit
 #define string_has_prefix g_str_has_prefix
 #define string_has_suffix g_str_has_suffix
+#define strerror g_strerror
 
 char *free_and_strdup(char *s, char *t);
 
