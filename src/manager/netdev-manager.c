@@ -52,47 +52,41 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
         return dbus_network_reload();
 }
 
-int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id, const char *proto) {
+int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *v) {
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
+        _cleanup_(network_unrefp) Network *n= NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifnameidx);
-        assert(vlan);
-        assert(id > 0);
+        assert(ifname);
+        assert(v);
 
         r = netdev_new(&netdev);
         if (r < 0)
                 return log_oom();
 
         *netdev = (NetDev) {
-                        .id = id,
-                        .ifname = strdup(vlan),
+                        .ifname = strdup(ifname),
                         .kind = NET_DEV_KIND_VLAN,
+                        .vlan = v,
         };
         if (!netdev->ifname)
                 return log_oom();
-
-        if (proto) {
-                netdev->proto = strdup(proto);
-                if (!netdev->proto)
-                        return log_oom();
-        }
 
         r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
-        r = network_new(&v);
+        r = network_new(&n);
         if (r < 0)
                 return r;
 
-        v->ifname = strdup(vlan);
-        if (!v->ifname)
+        n->ifname = strdup(ifname);
+        if (!n->ifname)
                 return log_oom();
 
-        r = generate_network_config(v);
+        r = generate_network_config(n);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
@@ -102,7 +96,7 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t
         if (r < 0)
                 return r;
 
-        return add_key_to_section_string(network, "Network", "VLAN", vlan);
+        return add_key_to_section_string(network, "Network", "VLAN", ifname);
 }
 
 int manager_create_bridge(const char *bridge, char **interfaces) {

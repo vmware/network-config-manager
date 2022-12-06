@@ -365,9 +365,12 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 _public_ int ncm_create_vlan(int argc, char *argv[]) {
         bool have_id = false, have_dev = false;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_ char *proto = NULL;
-        uint16_t id;
+        _cleanup_(vlan_unrefp) VLan *v = NULL;
         int r = 0;
+
+        r = vlan_new(&v);
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
@@ -383,7 +386,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 } else if (string_equal_fold(argv[i], "id")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint16(argv[i], &id);
+                        r = parse_uint32(argv[i], &v->id);
                         if (r < 0) {
                                 log_warning("Failed to parse VLan id '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -394,14 +397,57 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         parse_next_arg(argv, argc, i);
 
                         if (string_equal_fold(argv[i], "802.1q") || string_equal_fold(argv[i], "802.1ad")) {
-                                proto = strdup(argv[i]);
-                                if (!proto)
+                                v->proto = strdup(argv[i]);
+                                if (!v->proto)
                                         return log_oom();
                         } else {
                                 log_warning("Failed to parse VLan proto '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
 
+                        continue;
+                } else if (string_equal_fold(argv[i], "gvrp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse gvrp '%s': %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        v->gvrp = r;
+                        continue;
+
+                } else if (string_equal_fold(argv[i], "mvrp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse mvrp '%s': %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        v->mvrp = r;
+                        continue;
+
+                } else if (string_equal_fold(argv[i], "loose-binding")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse loose-binding '%s': %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        v->loose_binding = r;
+                        continue;
+
+                } else if (string_equal_fold(argv[i], "reorder-hdr")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse reorder_hdr '%s': %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        v->reorder_header = r;
                         continue;
                 } else {
                         log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
@@ -428,7 +474,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_vlan(p, argv[1], id, proto);
+        r = manager_create_vlan(p, argv[1], v);
         if (r < 0) {
                 log_warning("Failed to create vlan '%s': %s", argv[2], strerror(-r));
                 return r;
