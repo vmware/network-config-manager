@@ -27,7 +27,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
 
                         r = parse_boolean(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse enable '%s': %s", argv[i], g_strerror(-r));
+                                log_warning("Failed to parse enable '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -111,14 +111,14 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
 
                         continue;
                 } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], g_strerror(EINVAL));
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
         }
 
         r = manager_configure_proxy(enable, http, https, ftp, gopher, socks, socks5, no_proxy);
         if (r < 0) {
-                log_warning("Failed to configure proxy settings: %s", g_strerror(-r));
+                log_warning("Failed to configure proxy settings: %s", strerror(-r));
                 return r;
         }
 
@@ -132,7 +132,7 @@ _public_ int ncm_show_proxy(int argc, char *argv[]) {
 
         r = manager_parse_proxy_config(&table);
         if (r < 0) {
-                log_warning("Failed to parse proxy settings: %s", g_strerror(-r));
+                log_warning("Failed to parse proxy settings: %s", strerror(-r));
                 return r;
         }
 

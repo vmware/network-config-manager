@@ -205,7 +205,7 @@ int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, const
 
         r = set_config_file_string(network, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(identifier));
         if (r < 0) {
-                log_warning("Failed to update DHCP4 ClientIdentifier= to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to update DHCP4 ClientIdentifier= to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -242,7 +242,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, const DHCPCl
 
         r = set_config_file_integer(network, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "IAID", iaid);
         if (r < 0) {
-                log_warning("Failed to update DHCP IAID= to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to update DHCP IAID= to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -288,14 +288,14 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx,
 
         r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
         if (r < 0) {
-                log_warning("Failed to update %s DUIDType= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, g_strerror(-r));
+                log_warning("Failed to update %s DUIDType= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, strerror(-r));
                 return r;
         }
 
         if (raw_data) {
                 r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDRawData", raw_data);
                 if (r < 0) {
-                        log_warning("Failed to update %s DUIDRawData= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, g_strerror(-r));
+                        log_warning("Failed to update %s DUIDRawData= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, strerror(-r));
                         return r;
                 }
         }
@@ -317,7 +317,7 @@ int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
         asprintf(&config_update_mtu, "%u", mtu);
         r = set_config_file_string(network, "Link", "MTUBytes", config_update_mtu);
         if (r < 0) {
-                log_warning("Failed to update MTUBytes= to configuration file '%s' = %s", network, g_strerror(-r));
+                log_warning("Failed to update MTUBytes= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
         }
 
@@ -339,7 +339,7 @@ int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group) {
 
         r = set_config_file_string(network, "Link", "Group", config_update_group);
         if (r < 0) {
-                log_warning("Failed to update Group= to configuration file '%s' = %s", network, g_strerror(-r));
+                log_warning("Failed to update Group= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
         }
 
@@ -401,7 +401,7 @@ int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu
 
         r = set_config_file_integer(network, "Network", "IPv6MTUBytes", mtu);
         if (r < 0) {
-                log_warning("Failed to update IPv6MTUBytes= to configuration file '%s' = %s", network, g_strerror(-r));
+                log_warning("Failed to update IPv6MTUBytes= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
         }
 
@@ -422,7 +422,7 @@ int manager_set_link_local_address(const IfNameIndex *ifnameidx, const char *k, 
 
         r = set_config_file_string(network, "Network", k, v);
         if (r < 0) {
-                log_warning("Failed to update LinkLocalAddressing= to configuration file '%s' = %s", network, g_strerror(-r));
+                log_warning("Failed to update LinkLocalAddressing= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
         }
 
@@ -537,7 +537,7 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx,
 
         r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 
@@ -557,19 +557,19 @@ int manager_delete_link_address(const IfNameIndex *ifnameidx, const char *a) {
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find device setup '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find device setup '%s': %s", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
         r = network_parse_link_network_file(ifnameidx->ifindex, &network);
         if (r < 0) {
-                log_warning("Failed to find .network file for '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find .network file for '%s': %s", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
         r = remove_section_from_config_file_key(network, "Address", "Address", a);
         if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -589,7 +589,7 @@ int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt) {
 
         r = manager_link_add_default_gateway(rt);
         if (r < 0 && r != -EEXIST) {
-                log_warning("Failed to add Gateway to kernel : %s\n", g_strerror(-r));
+                log_warning("Failed to add Gateway to kernel : %s\n", strerror(-r));
                 return r;
         }
 
@@ -719,7 +719,7 @@ int manager_configure_route(const IfNameIndex *ifnameidx,
 
         r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 
@@ -738,7 +738,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
 
         r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find device setup '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find device setup '%s': %s\n", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -789,7 +789,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -837,7 +837,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
 
         r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 
@@ -856,7 +856,7 @@ int manager_remove_routing_policy_rules(const IfNameIndex *ifnameidx) {
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to create or parse network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to create or parse network file '%s': %s\n", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -878,13 +878,13 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, const IPAddres
 
         r = create_network_conf_file(ifnameidx->ifname, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find or create network file '%s': %s", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find or create network file '%s': %s", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -909,7 +909,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, const IPAddres
                 if (r < 0) {
                         r = parse_config_file(network, "Address", "Address", &address);
                         if (r < 0) {
-                                log_warning("Failed to find Address= for device '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                                log_warning("Failed to find Address= for device '%s': %s", ifnameidx->ifname, strerror(-r));
                                 return r;
                         }
                 }
@@ -940,7 +940,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, const IPAddres
                 if (r < 0) {
                         r = parse_config_file(network, "Route", "Gateway", &address);
                         if (r < 0) {
-                                log_warning("AFailed to find Gateway= for device '%s': %s", ifnameidx->ifname, g_strerror(-r));
+                                log_warning("AFailed to find Gateway= for device '%s': %s", ifnameidx->ifname, strerror(-r));
                                 return r;
                         }
                 }
@@ -1026,7 +1026,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifnameidx, const IPAddres
 
         r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 
@@ -1057,7 +1057,7 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifnameidx,
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1120,7 +1120,7 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifnameidx,
 
         r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 
@@ -1139,7 +1139,7 @@ int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx) {
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to create network file '%s': %s\n", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1179,7 +1179,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifnameidx,
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find or create network file '%s': %s\n", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1277,7 +1277,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifnameidx,
 
         r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 
@@ -1296,7 +1296,7 @@ int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifnameidx) {
 
         r = create_or_parse_network_file(ifnameidx, &network);
         if (r < 0) {
-                log_warning("Failed to create network file '%s': %s\n", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to create network file '%s': %s\n", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1361,7 +1361,7 @@ int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool s
 
         r = set_config_file_string(network, "Network", "DNS", a);
         if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -1407,7 +1407,7 @@ int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, 
 
         r = set_config_file_string(network, "Network", "Domains", a);
         if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -1438,7 +1438,7 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx) {
 
         r = network_parse_link_network_file(ifnameidx->ifindex, &network);
         if (r < 0) {
-                log_warning("Failed to find network file for '%s', %s", ifnameidx->ifname, g_strerror(-r));
+                log_warning("Failed to find network file for '%s', %s", ifnameidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1551,7 +1551,7 @@ int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps, bool ad
 
         r = set_config_file_string(network, "Network", "NTP", add ? b : a);
         if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -1573,7 +1573,7 @@ int manager_remove_ntp_addresses(const IfNameIndex *ifnameidx) {
 
         r = remove_key_from_config_file(network, "Network", "NTP");
         if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -1595,7 +1595,7 @@ int manager_enable_ipv6(const IfNameIndex *ifnameidx, bool enable) {
 
         r = set_config_file_string(network, "Network", "DHCP", "ipv4");
         if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -1605,7 +1605,7 @@ int manager_enable_ipv6(const IfNameIndex *ifnameidx, bool enable) {
                 r = set_config_file_string(network, "Network", "LinkLocalAddressing", "no");
 
         if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -1639,7 +1639,7 @@ int manager_write_wifi_config(const Network *n, const GString *config) {
 
         r = open(path, O_WRONLY);
         if (r < 0) {
-                log_warning("Failed to open wpa supplicant file '%s': %s", path, g_strerror(-r));
+                log_warning("Failed to open wpa supplicant file '%s': %s", path, strerror(-r));
                 return r;
         }
 
@@ -1670,7 +1670,7 @@ int manager_write_network_config(const Network *n, const GString *config) {
 
         r = open(network, O_WRONLY);
         if (r < 0) {
-                log_warning("Failed to open network file '%s': %s", network, g_strerror(-r));
+                log_warning("Failed to open network file '%s': %s", network, strerror(-r));
                 return r;
         }
 
@@ -1738,7 +1738,7 @@ int manager_edit_link_network_config(const IfNameIndex *ifnameidx) {
 
                         execvp(*d, (char* const*) args);
                         if (errno != ENOENT) {
-                                log_warning("Failed to edit %s via editor %s: %s",  network, *d, g_strerror(-errno));
+                                log_warning("Failed to edit %s via editor %s: %s",  network, *d, strerror(-errno));
                                 _exit(EXIT_FAILURE);
                         }
                 }
@@ -1937,13 +1937,13 @@ int manager_generate_network_config_from_yaml(const char *file) {
 
         r = parse_yaml_network_file(file, &n);
         if (r < 0) {
-                log_warning("Failed to parse configuration file '%s': %s", file, g_strerror(-r));
+                log_warning("Failed to parse configuration file '%s': %s", file, strerror(-r));
                 return r;
         }
 
         r = generate_network_config(n);
         if (r < 0) {
-                        log_warning("Failed to generate network configuration for file '%s': %s", file, g_strerror(-r));
+                        log_warning("Failed to generate network configuration for file '%s': %s", file, strerror(-r));
                         return r;
         }
 
@@ -1969,7 +1969,7 @@ static void manager_command_line_config_generator(void *key, void *value, void *
 
         r = generate_network_config(n);
         if (r < 0) {
-                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return;
         }
 }
@@ -2035,7 +2035,7 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
 
                         r = generate_network_config(n);
                         if (r < 0) {
-                                log_warning("Failed to generate network configuration: %s", g_strerror(-r));
+                                log_warning("Failed to generate network configuration: %s", strerror(-r));
                                 return r;
                         }
 

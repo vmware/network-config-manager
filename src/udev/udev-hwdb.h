@@ -3,4 +3,4 @@
  */
 #pragma once
 
-int hwdb_get_vendor(const uint8_t *ether_address, char **description);
+int hwdb_get_description(const uint8_t *ether_address, char **description);

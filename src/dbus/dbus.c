@@ -211,31 +211,31 @@ int dbus_get_current_dns_servers_from_resolved(DNSServers **ret) {
 
         r = sd_bus_message_enter_container(reply, 'r', "iiay");
         if (r < 0) {
-                log_warning("Failed to enter bus message container: %s", g_strerror(-r));
+                log_warning("Failed to enter bus message container: %s", strerror(-r));
                 return r;
         }
 
         r = sd_bus_message_read(reply, "i", &ifindex);
         if (r < 0) {
-                log_warning("Failed to read integer bus message: %s", g_strerror(-r));
+                log_warning("Failed to read integer bus message: %s", strerror(-r));
                 return r;
         }
 
         r = sd_bus_message_read(reply, "i", &family);
         if (r < 0) {
-                log_warning("Failed to read integer bus message: %s", g_strerror(-r));
+                log_warning("Failed to read integer bus message: %s", strerror(-r));
                 return r;
         }
 
         r = sd_bus_message_read_array(reply, 'y', &a, &sz);
         if (r < 0) {
-                log_warning("Failed to read array bus message: %s", g_strerror(-r));
+                log_warning("Failed to read array bus message: %s", strerror(-r));
                 return r;
         }
 
         r = sd_bus_message_exit_container(reply);
         if (r < 0) {
-                log_warning("Failed to exit container bus message: %s", g_strerror(-r));
+                log_warning("Failed to exit container bus message: %s", strerror(-r));
                 return r;
         }
 
@@ -299,7 +299,7 @@ int dbus_acquire_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
 
         r = sd_bus_message_enter_container(reply, 'a', "(iiay)");
         if (r < 0) {
-                log_warning("Failed to enter variant container of '%s': %s", dns, g_strerror(-r));
+                log_warning("Failed to enter variant container of '%s': %s", dns, strerror(-r));
                 return r;
         }
 
@@ -314,32 +314,32 @@ int dbus_acquire_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
                         if (r == -ENXIO)
                                 break;
 
-                        log_warning("Failed to enter bus message container: %s", g_strerror(-r));
+                        log_warning("Failed to enter bus message container: %s", strerror(-r));
                         return r;
                 }
 
 
                 r = sd_bus_message_read(reply, "i", &ifindex);
                 if (r < 0) {
-                        log_warning("Failed to read integer bus message: %s", g_strerror(-r));
+                        log_warning("Failed to read integer bus message: %s", strerror(-r));
                         return r;
                 }
 
                 r = sd_bus_message_read(reply, "i", &family);
                 if (r < 0) {
-                        log_warning("Failed to read integrr bus message: %s", g_strerror(-r));
+                        log_warning("Failed to read integrr bus message: %s", strerror(-r));
                         return r;
                 }
 
                 r = sd_bus_message_read_array(reply, 'y', &a, &sz);
                 if (r < 0) {
-                        log_warning("Failed to read array bus message: %s", g_strerror(-r));
+                        log_warning("Failed to read array bus message: %s", strerror(-r));
                         return r;
                 }
 
                 r = sd_bus_message_exit_container(reply);
                 if (r < 0) {
-                        log_warning("Failed to exit container bus message: %s", g_strerror(-r));
+                        log_warning("Failed to exit container bus message: %s", strerror(-r));
                         return r;
                 }
 
@@ -395,19 +395,19 @@ int dbus_add_dns_server(int ifindex, DNSServers *dns) {
                                            "org.freedesktop.resolve1.Manager",
                                            "SetLinkDNS");
         if (r < 0) {
-                log_warning("Failed create bus message: %s", g_strerror(-r));
+                log_warning("Failed create bus message: %s", strerror(-r));
                 return r;
         }
 
         r = sd_bus_message_append(m, "i", ifindex);
         if (r < 0) {
-                log_warning("Failed to create bus message: %s", g_strerror(-r));
+                log_warning("Failed to create bus message: %s", strerror(-r));
                 return r;
         }
 
         r = sd_bus_message_open_container(m, 'a', "(iay)");
         if (r < 0) {
-                log_warning("Failed to create bus message: %s", g_strerror(-r));
+                log_warning("Failed to create bus message: %s", strerror(-r));
                 return r;
         }
 
@@ -416,13 +416,13 @@ int dbus_add_dns_server(int ifindex, DNSServers *dns) {
 
                 r = sd_bus_message_open_container(m, 'r', "iay");
                 if (r < 0) {
-                        log_warning("Failed to create bus message: %s", g_strerror(-r));
+                        log_warning("Failed to create bus message: %s", strerror(-r));
                         return r;
                 }
 
                 r = sd_bus_message_append(m, "i", d->address.family);
                 if (r < 0) {
-                        log_warning("Failed to create bus message: %s", g_strerror(-r));
+                        log_warning("Failed to create bus message: %s", strerror(-r));
                         return r;
                 }
 
@@ -432,20 +432,20 @@ int dbus_add_dns_server(int ifindex, DNSServers *dns) {
                         r = sd_bus_message_append_array(m, 'y', &d->address.in6, sizeof(d->address.in6));
 
                 if (r < 0) {
-                        log_warning("Failed to create bus message: %s", g_strerror(-r));
+                        log_warning("Failed to create bus message: %s", strerror(-r));
                         return r;
                 }
 
                 r = sd_bus_message_close_container(m);
                 if (r < 0) {
-                        log_warning("Failed to create bus message: %s", g_strerror(-r));
+                        log_warning("Failed to create bus message: %s", strerror(-r));
                         return r;
                 }
         }
 
         r = sd_bus_message_close_container(m);
         if (r < 0) {
-                log_warning("Failed to close container: %s", g_strerror(-r));
+                log_warning("Failed to close container: %s", strerror(-r));
                 return r;
         }
 
@@ -479,33 +479,33 @@ int dbus_add_dns_domains(int ifindex, char **domains) {
                                            "org.freedesktop.resolve1.Manager",
                                            "SetLinkDomains");
         if (r < 0) {
-                log_warning("Failed create bus message: %s", g_strerror(-r));
+                log_warning("Failed create bus message: %s", strerror(-r));
                 return r;
         }
 
         r = sd_bus_message_append(m, "i", ifindex);
         if (r < 0) {
-                log_warning("Failed to create bus message: %s", g_strerror(-r));
+                log_warning("Failed to create bus message: %s", strerror(-r));
                 return r;
         }
 
         r = sd_bus_message_open_container(m, 'a', "(sb)");
         if (r < 0) {
-                log_warning("Failed to create bus message: %s", g_strerror(-r));
+                log_warning("Failed to create bus message: %s", strerror(-r));
                 return r;
         }
 
         strv_foreach(d, domains) {
                 r = sd_bus_message_append(m, "(sb)", *d);
                 if (r < 0) {
-                        log_warning("Failed to create bus message: %s", g_strerror(-r));
+                        log_warning("Failed to create bus message: %s", strerror(-r));
                         return r;
                 }
         }
 
         r = sd_bus_message_close_container(m);
         if (r < 0) {
-                log_warning("Failed to create bus mess: %s", g_strerror(-r));
+                log_warning("Failed to create bus mess: %s", strerror(-r));
                 return r;
         }
 
@@ -557,7 +557,7 @@ int dbus_acquire_dns_domains_from_resolved(DNSDomains **domains) {
                         if (r == -ENXIO)
                                 break;
 
-                        log_warning("Failed to enter bus message container: %s", g_strerror(-r));
+                        log_warning("Failed to enter bus message container: %s", strerror(-r));
                         return r;
                 }
                 r = sd_bus_message_read(m, "i", &ifindex);
@@ -575,7 +575,7 @@ int dbus_acquire_dns_domains_from_resolved(DNSDomains **domains) {
 
                 r = sd_bus_message_exit_container(m);
                 if (r < 0) {
-                        log_warning("Failed to exit container bus message: %s", g_strerror(-r));
+                        log_warning("Failed to exit container bus message: %s", strerror(-r));
                         return r;
                 }
 

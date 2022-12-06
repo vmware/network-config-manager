@@ -84,7 +84,7 @@ int parse_yaml_uint32_or_max(const char *key,
         p = (char **) userdata;
 
         if (!is_uint32_or_max(value)) { 
-                log_warning("Failed to parse parameter='%s': %s", value, g_strerror(EINVAL));
+                log_warning("Failed to parse parameter='%s': %s", value, strerror(EINVAL));
                 return -EINVAL;
         }
     

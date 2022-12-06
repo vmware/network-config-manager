@@ -484,7 +484,7 @@ int generate_netdev_config(NetDev *n) {
 
         r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to '%s': %s", key_file->name, g_strerror(-r));
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 

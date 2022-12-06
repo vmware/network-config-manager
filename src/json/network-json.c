@@ -532,7 +532,7 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
         }
 
         if (!l->kind) {
-                hwdb_get_vendor((uint8_t *) &l->mac_address.ether_addr_octet, &desc);
+                hwdb_get_description((uint8_t *) &l->mac_address.ether_addr_octet, &desc);
                 if (desc) {
                         _cleanup_(json_object_putp) json_object *js = NULL;
 
@@ -1418,7 +1418,7 @@ int json_show_dns_server_domains(void) {
 
         r = dbus_acquire_dns_domains_from_resolved(&domains);
         if (r < 0){
-                log_warning("Failed to fetch DNS domain from resolved: %s", g_strerror(-r));
+                log_warning("Failed to fetch DNS domain from resolved: %s", strerror(-r));
                 return r;
         }
 
@@ -1427,7 +1427,7 @@ int json_show_dns_server_domains(void) {
                 return log_oom();
 
         if (!domains || g_sequence_is_empty(domains->dns_domains)) {
-                log_warning("No DNS Domain configured: %s", g_strerror(ENODATA));
+                log_warning("No DNS Domain configured: %s", strerror(ENODATA));
                 return -ENODATA;
         } else {
                  _cleanup_(json_object_putp) json_object *ja = NULL;
@@ -1439,7 +1439,7 @@ int json_show_dns_server_domains(void) {
 
                 r = set_new(&all_domains, NULL, NULL);
                 if (r < 0) {
-                        log_debug("Failed to init set for domains: %s", g_strerror(-r));
+                        log_debug("Failed to init set for domains: %s", strerror(-r));
                         return r;
                 }
 
@@ -1460,7 +1460,7 @@ int json_show_dns_server_domains(void) {
                                 log_oom();
 
                         if (!set_add(all_domains, s)) {
-                                log_debug("Failed to add domain to set '%s': %s", d->domain, g_strerror(-r));
+                                log_debug("Failed to add domain to set '%s': %s", d->domain, strerror(-r));
                                 return -EINVAL;
                         }
 

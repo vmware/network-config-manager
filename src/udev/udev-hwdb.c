@@ -9,7 +9,7 @@
 #include "string-util.h"
 #include "udev-hwdb.h"
 
-int hwdb_get_vendor(const uint8_t *ether_address, char **ret) {
+int hwdb_get_description(const uint8_t *ether_address, char **ret) {
         _cleanup_(sd_hwdb_unrefp) sd_hwdb *hwdb = NULL;
         _auto_cleanup_ char *s = NULL;
         const char *description;

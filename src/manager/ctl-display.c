@@ -320,7 +320,7 @@ static void list_link_attributes(Link *l) {
 
         if (!isempty_string(ether)) {
                 _auto_cleanup_ char *desc = NULL;
-                 hwdb_get_vendor((uint8_t *) &l->mac_address.ether_addr_octet, &desc);
+                 hwdb_get_description((uint8_t *) &l->mac_address.ether_addr_octet, &desc);
 
                 display(arg_beautify, ansi_color_bold_cyan(), "                  HW Address: ");
                 printf("%s (%s)\n", ether, desc);
