@@ -232,6 +232,33 @@ void netdev_unref(NetDev *n) {
         free(n);
 }
 
+int vlan_new(VLan **ret) {
+        _auto_cleanup_ VLan *v;
+
+        v = new0(VLan, 1);
+        if (!v)
+                return log_oom();
+
+        *v = (VLan) {
+            .gvrp = -1,
+            .mvrp = -1,
+            .loose_binding = -1,
+            .reorder_header = -1,
+        };
+
+        *ret = steal_pointer(v);
+        return 0;
+
+}
+
+void vlan_unref(VLan *v) {
+        if (!v)
+                return;
+
+        free(v->proto);
+        free(v);
+}
+
 int generate_netdev_config(NetDev *n) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
@@ -252,15 +279,37 @@ int generate_netdev_config(NetDev *n) {
 
         switch (n->kind) {
                 case NET_DEV_KIND_VLAN:
-                        r = key_file_set_uint(key_file, "VLAN", "Id", n->id);
+                        r = key_file_set_uint(key_file, "VLAN", "Id", n->vlan->id);
                         if (r < 0)
                                 return r;
 
-                        if (n->proto) {
-                                r = key_file_set_string(key_file, "VLAN", "Protocol", n->proto);
+                        if (n->vlan->proto) {
+                                r = key_file_set_string(key_file, "VLAN", "Protocol", n->vlan->proto);
                                 if (r < 0)
                                         return r;
                         }
+                        if (n->vlan->gvrp != -1) {
+                                r = key_file_set_string(key_file, "VLAN", "GVRP", bool_to_string(n->vlan->gvrp));
+                                if (r < 0)
+                                        return r;
+                        }
+                        if (n->vlan->mvrp != -1) {
+                                r = key_file_set_string(key_file, "VLAN", "MVRP", bool_to_string(n->vlan->mvrp));
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vlan->loose_binding != -1) {
+                                r = key_file_set_string(key_file, "VLAN", "LooseBinding", bool_to_string(n->vlan->loose_binding));
+                                if (r < 0)
+                                        return r;
+                        }
+                        if (n->vlan->reorder_header != -1) {
+                                r = key_file_set_string(key_file, "VLAN", "ReorderHeader", bool_to_string(n->vlan->reorder_header));
+                                if (r < 0)
+                                        return r;
+                        }
+
                         break;
 
                 case NET_DEV_KIND_BOND:

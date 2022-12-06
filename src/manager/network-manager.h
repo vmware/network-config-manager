@@ -85,7 +85,7 @@ int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k
 int manager_set_network_section(const IfNameIndex *ifnameidx, const char *k, const char *v);
 int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *ifnameidx, const char *k, bool v);
 
-int manager_create_vlan(const IfNameIndex *ifnameidx, const char *vlan, uint32_t id, const char *proto);
+int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *v);
 
 int manager_generate_network_config_from_yaml(const char *file);
 int manager_write_wifi_config(const Network *n, const GString *config);

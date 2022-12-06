@@ -70,6 +70,16 @@ typedef struct TunTap {
         int keep_carrier;
 } TunTap;
 
+typedef struct VLan {
+        uint32_t id;
+        char *proto;
+
+        int gvrp;
+        int mvrp;
+        int loose_binding;
+        int reorder_header;
+} VLan;
+
 typedef struct NetDev {
         char *ifname;
         char *peer;
@@ -101,6 +111,7 @@ typedef struct NetDev {
         uint32_t table;
 
         TunTap tun_tap;
+        VLan *vlan;
 
         NetDevKind kind;
         BondMode bond_mode;
@@ -111,6 +122,10 @@ typedef struct NetDev {
 int netdev_new(NetDev **ret);
 void netdev_unref(NetDev *n);
 DEFINE_CLEANUP(NetDev*, netdev_unref);
+
+int vlan_new(VLan **ret);
+void vlan_unref(VLan *n);
+DEFINE_CLEANUP(VLan*, vlan_unref);
 
 int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);

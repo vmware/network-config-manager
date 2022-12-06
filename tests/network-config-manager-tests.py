@@ -1178,7 +1178,7 @@ class TestCLINetDev:
     def test_cli_create_vlan(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call("nmctl create-vlan vlan-98 dev test98 id 11", shell = True)
+        subprocess.check_call("nmctl create-vlan vlan-98 dev test98 id 11 proto 802.1q gvrp yes mvrp yes loose-binding yes reorder-hdr yes", shell = True)
         assert(unit_exist('10-test98.network') == True)
         assert(unit_exist('10-vlan-98.netdev') == True)
         assert(unit_exist('10-vlan-98.network') == True)
@@ -1193,7 +1193,13 @@ class TestCLINetDev:
 
         assert(vlan_parser.get('NetDev', 'Name') == 'vlan-98')
         assert(vlan_parser.get('NetDev', 'kind') == 'vlan')
+
         assert(vlan_parser.get('VLAN', 'id') == '11')
+        assert(vlan_parser.get('VLAN', 'Protocol') == '802.1q')
+        assert(vlan_parser.get('VLAN', 'GVRP') == 'yes')
+        assert(vlan_parser.get('VLAN', 'MVRP') == 'yes')
+        assert(vlan_parser.get('VLAN', 'LooseBinding') == 'yes')
+        assert(vlan_parser.get('VLAN', 'ReorderHeader') == 'yes')
 
         vlan_network_parser = configparser.ConfigParser()
         vlan_network_parser.read(os.path.join(networkd_unit_file_path, '10-vlan-98.network'))
