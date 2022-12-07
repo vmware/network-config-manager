@@ -9,25 +9,25 @@
 #include "network-util.h"
 
 typedef enum NetDevKind {
-        NET_DEV_KIND_VLAN,
-        NET_DEV_KIND_BRIDGE,
-        NET_DEV_KIND_BOND,
-        NET_DEV_KIND_VXLAN,
-        NET_DEV_KIND_MACVLAN,
-        NET_DEV_KIND_MACVTAP,
-        NET_DEV_KIND_IPVLAN,
-        NET_DEV_KIND_IPVTAP,
-        NET_DEV_KIND_VRF,
-        NET_DEV_KIND_TUN,
-        NET_DEV_KIND_TAP,
-        NET_DEV_KIND_VETH,
-        NET_DEV_KIND_IPIP_TUNNEL,
-        NET_DEV_KIND_SIT_TUNNEL,
-        NET_DEV_KIND_GRE_TUNNEL,
-        NET_DEV_KIND_VTI_TUNNEL,
-        NET_DEV_KIND_WIREGUARD,
-        _NET_DEV_KIND_MAX,
-        _NET_DEV_KIND_INVALID = -EINVAL
+        NETDEV_KIND_VLAN,
+        NETDEV_KIND_BRIDGE,
+        NETDEV_KIND_BOND,
+        NETDEV_KIND_VXLAN,
+        NETDEV_KIND_MACVLAN,
+        NETDEV_KIND_MACVTAP,
+        NETDEV_KIND_IPVLAN,
+        NETDEV_KIND_IPVTAP,
+        NETDEV_KIND_VRF,
+        NETDEV_KIND_TUN,
+        NETDEV_KIND_TAP,
+        NETDEV_KIND_VETH,
+        NETDEV_KIND_IPIP_TUNNEL,
+        NETDEV_KIND_SIT_TUNNEL,
+        NETDEV_KIND_GRE_TUNNEL,
+        NETDEV_KIND_VTI_TUNNEL,
+        NETDEV_KIND_WIREGUARD,
+        _NETDEV_KIND_MAX,
+        _NETDEV_KIND_INVALID = -EINVAL
 } NetDevKind;
 
 typedef enum BondMode {
@@ -43,19 +43,19 @@ typedef enum BondMode {
 } BondMode;
 
 typedef enum MACVLanMode {
-        MAC_VLAN_MODE_PRIVATE  = MACVLAN_MODE_PRIVATE,
-        MAC_VLAN_MODE_VEPA     = MACVLAN_MODE_VEPA,
-        MAC_VLAN_MODE_BRIDGE   = MACVLAN_MODE_BRIDGE,
-        MAC_VLAN_MODE_PASSTHRU = MACVLAN_MODE_PASSTHRU,
-        MAC_VLAN_MODE_SOURCE   = MACVLAN_MODE_SOURCE,
+        MAC_VLAN_MODE_PRIVATE,
+        MAC_VLAN_MODE_VEPA,
+        MAC_VLAN_MODE_BRIDGE,
+        MAC_VLAN_MODE_PASSTHRU,
+        MAC_VLAN_MODE_SOURCE,
         _MAC_VLAN_MODE_MAX,
         _MAC_VLAN_MODE_INVALID = -EINVAL
 } MACVLanMode;
 
 typedef enum IPVLanMode {
-        IP_VLAN_MODE_L2  = IPVLAN_MODE_L2,
-        IP_VLAN_MODE_L3  = IPVLAN_MODE_L3,
-        IP_VLAN_MODE_L3S = IPVLAN_MODE_L3S,
+        IP_VLAN_MODE_L2,
+        IP_VLAN_MODE_L3,
+        IP_VLAN_MODE_L3S,
         _IP_VLAN_MODE_MAX,
         _IP_VLAN_MODE_INVALID = -EINVAL
 } IPVLanMode;
@@ -80,21 +80,23 @@ typedef struct VLan {
         int reorder_header;
 } VLan;
 
+typedef struct WireGuard {
+        char *private_key;
+        char *private_key_file;
+        char *public_key;
+        char *preshared_key;
+        char *preshared_key_file;
+        char *endpoint;      /* ip:port */
+        char *allowed_ips;
+
+        int persistent_keep_alive;
+        uint16_t listen_port;
+} WireGuard;
+
 typedef struct NetDev {
         char *ifname;
         char *peer;
         char *mac;
-
-        /* wireguard */
-        char *wg_private_key;
-        char *wg_private_key_file;
-        char *wg_public_key;
-        char *wg_preshared_key;
-        char *wg_preshared_key_file;
-        char *wg_endpoint;      /* ip:port */
-        char *wg_allowed_ips;
-
-        int wg_persistent_keep_alive;
 
         char *proto;
 
@@ -112,6 +114,7 @@ typedef struct NetDev {
 
         TunTap tun_tap;
         VLan *vlan;
+        WireGuard *wg;
 
         NetDevKind kind;
         BondMode bond_mode;
@@ -126,6 +129,10 @@ DEFINE_CLEANUP(NetDev*, netdev_unref);
 int vlan_new(VLan **ret);
 void vlan_unref(VLan *n);
 DEFINE_CLEANUP(VLan*, vlan_unref);
+
+int wireguard_new(WireGuard **ret);
+void wireguard_unref(WireGuard *wg);
+DEFINE_CLEANUP(WireGuard*, wireguard_unref);
 
 int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);
