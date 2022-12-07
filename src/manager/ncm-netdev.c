@@ -632,23 +632,26 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
-        _auto_cleanup_ char *private_key = NULL, *private_key_file = NULL, *public_key = NULL,
-                *preshared_key = NULL, *preshared_key_file = NULL, *endpoint = NULL, *allowed_ips = NULL;
-        uint16_t listen_port;
+        _cleanup_(wireguard_unrefp) WireGuard *wg = NULL;
         int r;
+
+        r = wireguard_new(&wg);
+        if (r < 0)
+                return log_oom();
+
         for (int i = 2; i < argc; i++) {
                 if (string_equal_fold(argv[i], "private-key")) {
                         parse_next_arg(argv, argc, i);
 
-                        private_key = strdup(argv[i]);
-                        if (!private_key)
+                        wg->private_key = strdup(argv[i]);
+                        if (!wg->private_key)
                                 return log_oom();
 
                 } else if (string_equal_fold(argv[i], "private-key-file")) {
                         parse_next_arg(argv, argc, i);
 
-                        private_key_file = strdup(argv[i]);
-                        if (!private_key_file)
+                        wg->private_key_file = strdup(argv[i]);
+                        if (!wg->private_key_file)
                                 return log_oom();
 
                         continue;
@@ -656,23 +659,23 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                 } else if (string_equal_fold(argv[i], "public-key")) {
                         parse_next_arg(argv, argc, i);
 
-                        public_key = strdup(argv[i]);
-                        if (!public_key)
+                        wg->public_key = strdup(argv[i]);
+                        if (!wg->public_key)
                                 return log_oom();
 
                 } else if (string_equal_fold(argv[i], "preshared-key")) {
                         parse_next_arg(argv, argc, i);
 
-                        preshared_key= strdup(argv[i]);
-                        if (!preshared_key)
+                        wg->preshared_key= strdup(argv[i]);
+                        if (!wg->preshared_key)
                                 return log_oom();
 
                         continue;
                 } else if (string_equal_fold(argv[i], "preshared-key-file")) {
                         parse_next_arg(argv, argc, i);
 
-                        preshared_key_file = strdup(argv[i]);
-                        if (!preshared_key_file)
+                        wg->preshared_key_file = strdup(argv[i]);
+                        if (!wg->preshared_key_file)
                                 return log_oom();
                         continue;
                 } else if (string_equal_fold(argv[i], "allowed-ips")) {
@@ -704,10 +707,11 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 if (r < 0) {
                                         log_warning("Failed to parse allowed ips '%s': %s", argv[i], strerror(EINVAL));
                                         return -EINVAL;
-                                }                        }
+                                }
+                        }
 
-                        allowed_ips = strdup(argv[i]);
-                        if (!allowed_ips)
+                        wg->allowed_ips = strdup(argv[i]);
+                        if (!wg->allowed_ips)
                                 return log_oom();
 
                         continue;
@@ -723,15 +727,15 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 return r;
                         }
 
-                        endpoint = strdup(argv[i]);
-                        if (!endpoint)
+                        wg->endpoint = strdup(argv[i]);
+                        if (!wg->endpoint)
                                 return log_oom();
 
                         continue;
                 } else if (string_equal_fold(argv[i], "listen-port")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint16(argv[i], &listen_port);
+                        r = parse_uint16(argv[i], &wg->listen_port);
                         if (r < 0) {
                                 log_warning("Failed to parse listen port '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -749,8 +753,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_wireguard_tunnel(argv[1], private_key, private_key_file, public_key, preshared_key,
-                                            preshared_key_file, endpoint, allowed_ips, listen_port);
+        r = manager_create_wireguard(argv[1], wg);
         if (r < 0) {
                 log_warning("Failed to create wireguard tunnel '%s': %s", argv[1], strerror(-r));
                 return r;
@@ -852,7 +855,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_tun_tap(string_equal(argv[0], "create-tun") ? NET_DEV_KIND_TUN: NET_DEV_KIND_TAP, argv[1],
+        r = manager_create_tun_tap(string_equal(argv[0], "create-tun") ? NETDEV_KIND_TUN: NETDEV_KIND_TAP, argv[1],
                                    user, group, packet_info, vnet_hdr, keep_carrier, multi_queue);
         if (r < 0) {
                 log_warning("Failed to create tun tap='%s': %s", argv[1], strerror(-r));

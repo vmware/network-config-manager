@@ -68,7 +68,7 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *
 
         *netdev = (NetDev) {
                         .ifname = strdup(ifname),
-                        .kind = NET_DEV_KIND_VLAN,
+                        .kind = NETDEV_KIND_VLAN,
                         .vlan = v,
         };
         if (!netdev->ifname)
@@ -114,7 +114,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
 
         *netdev = (NetDev) {
                         .ifname = strdup(bridge),
-                        .kind = NET_DEV_KIND_BRIDGE,
+                        .kind = NETDEV_KIND_BRIDGE,
                   };
         if (!netdev->ifname)
                 return log_oom();
@@ -172,7 +172,7 @@ int manager_create_bond(const char *bond, const BondMode mode, char **interfaces
 
         *netdev = (NetDev) {
                         .ifname = strdup(bond),
-                        .kind = NET_DEV_KIND_BOND,
+                        .kind = NETDEV_KIND_BOND,
                         .bond_mode = mode,
                   };
 
@@ -235,7 +235,7 @@ int manager_create_vxlan(const char *vxlan,
 
         *netdev = (NetDev) {
                       .ifname = strdup(vxlan),
-                      .kind = NET_DEV_KIND_VXLAN,
+                      .kind = NETDEV_KIND_VXLAN,
                       .id = vni,
                       .destination_port = port,
                       .independent = independent,
@@ -304,7 +304,7 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
 
         *netdev = (NetDev) {
                        .ifname = strdup(macvlan),
-                       .kind = kind ? NET_DEV_KIND_MACVLAN : NET_DEV_KIND_MACVTAP,
+                       .kind = kind ? NETDEV_KIND_MACVLAN : NETDEV_KIND_MACVTAP,
                        .macvlan_mode = mode,
                 };
         if (!netdev->ifname)
@@ -363,7 +363,7 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
 
         *netdev = (NetDev) {
                           .ifname = strdup(ipvlan),
-                          .kind = kind ? NET_DEV_KIND_IPVLAN : NET_DEV_KIND_IPVTAP,
+                          .kind = kind ? NETDEV_KIND_IPVLAN : NETDEV_KIND_IPVTAP,
                           .ipvlan_mode = mode,
                  };
 
@@ -421,7 +421,7 @@ int manager_create_veth(const char *veth, const char *veth_peer) {
         *netdev = (NetDev) {
                        .ifname = strdup(veth),
                        .peer = veth_peer ? strdup(veth_peer) : NULL,
-                       .kind = NET_DEV_KIND_VETH,
+                       .kind = NETDEV_KIND_VETH,
                   };
         if (!netdev->ifname)
                 return log_oom();
@@ -532,7 +532,7 @@ int manager_create_vrf(const char *vrf, const uint32_t table) {
 
         *netdev = (NetDev) {
                         .ifname = strdup(vrf),
-                        .kind = NET_DEV_KIND_VRF,
+                        .kind = NETDEV_KIND_VRF,
                         .table = table
                 };
         if (!netdev->ifname)
@@ -559,64 +559,39 @@ int manager_create_vrf(const char *vrf, const uint32_t table) {
         return 0;
 }
 
-int manager_create_wireguard_tunnel(const char *wireguard,
-                                    const char *private_key,
-                                    const char *private_key_file,
-                                    const char *public_key,
-                                    const char *preshared_key,
-                                    const char *preshared_key_file,
-                                    const char *endpoint,
-                                    const char *allowed_ips,
-                                    const uint16_t listen_port) {
-
+int manager_create_wireguard(const char *ifname, WireGuard *wg) {
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
+        _cleanup_(network_unrefp) Network *n = NULL;
         int r;
 
-        assert(wireguard);
+        assert(wg);
 
         r = netdev_new(&netdev);
         if (r < 0)
                 return log_oom();
 
         *netdev = (NetDev) {
-                         .ifname = strdup(wireguard),
-                         .kind = NET_DEV_KIND_WIREGUARD,
-                         .wg_private_key = private_key ? strdup(private_key) : NULL,
-                         .wg_private_key_file = private_key_file ? strdup(private_key_file) : NULL,
-                         .wg_preshared_key_file = preshared_key_file ? strdup(preshared_key_file) : NULL,
-                         .wg_preshared_key = preshared_key ? strdup(preshared_key) : NULL,
-                         .wg_public_key = public_key ? strdup(public_key) : NULL,
-                         .listen_port = listen_port,
+                         .ifname = strdup(ifname),
+                         .kind = NETDEV_KIND_WIREGUARD,
+                         .wg = wg,
                  };
+
         if (!netdev->ifname)
                 return log_oom();
-
-        if (endpoint) {
-                netdev->wg_endpoint = strdup(endpoint);
-                if (!netdev->wg_endpoint)
-                        return log_oom();
-        }
-
-        if (allowed_ips) {
-                netdev->wg_allowed_ips = strdup(allowed_ips);
-                if (!netdev->wg_allowed_ips)
-                        return log_oom();
-        }
 
         r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
-        r = network_new(&v);
+        r = network_new(&n);
         if (r < 0)
                 return r;
 
-        v->ifname = strdup(wireguard);
-        if (!v->ifname)
+        n->ifname = strdup(ifname);
+        if (!n->ifname)
                 return log_oom();
 
-        r = generate_network_config(v);
+        r = generate_network_config(n);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;

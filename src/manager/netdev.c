@@ -11,24 +11,24 @@
 #include "parse-util.h"
 #include "string-util.h"
 
-static const char *const netdev_kind_table[_NET_DEV_KIND_MAX] = {
-        [NET_DEV_KIND_VLAN]        = "vlan",
-        [NET_DEV_KIND_BRIDGE]      = "bridge",
-        [NET_DEV_KIND_BOND]        = "bond",
-        [NET_DEV_KIND_VXLAN]       = "vxlan",
-        [NET_DEV_KIND_MACVLAN]     = "macvlan",
-        [NET_DEV_KIND_MACVTAP]     = "macvtap",
-        [NET_DEV_KIND_IPVLAN]      = "ipvlan",
-        [NET_DEV_KIND_IPVTAP]      = "ipvtap",
-        [NET_DEV_KIND_VRF]         = "vrf",
-        [NET_DEV_KIND_VETH]        = "veth",
-        [NET_DEV_KIND_TUN]         = "tun",
-        [NET_DEV_KIND_TAP]         = "tap",
-        [NET_DEV_KIND_IPIP_TUNNEL] = "ipip",
-        [NET_DEV_KIND_SIT_TUNNEL]  = "sit",
-        [NET_DEV_KIND_GRE_TUNNEL]  = "gre",
-        [NET_DEV_KIND_VTI_TUNNEL]  = "vti",
-        [NET_DEV_KIND_WIREGUARD]   = "wireguard",
+static const char *const netdev_kind_table[_NETDEV_KIND_MAX] = {
+        [NETDEV_KIND_VLAN]        = "vlan",
+        [NETDEV_KIND_BRIDGE]      = "bridge",
+        [NETDEV_KIND_BOND]        = "bond",
+        [NETDEV_KIND_VXLAN]       = "vxlan",
+        [NETDEV_KIND_MACVLAN]     = "macvlan",
+        [NETDEV_KIND_MACVTAP]     = "macvtap",
+        [NETDEV_KIND_IPVLAN]      = "ipvlan",
+        [NETDEV_KIND_IPVTAP]      = "ipvtap",
+        [NETDEV_KIND_VRF]         = "vrf",
+        [NETDEV_KIND_VETH]        = "veth",
+        [NETDEV_KIND_TUN]         = "tun",
+        [NETDEV_KIND_TAP]         = "tap",
+        [NETDEV_KIND_IPIP_TUNNEL] = "ipip",
+        [NETDEV_KIND_SIT_TUNNEL]  = "sit",
+        [NETDEV_KIND_GRE_TUNNEL]  = "gre",
+        [NETDEV_KIND_VTI_TUNNEL]  = "vti",
+        [NETDEV_KIND_WIREGUARD]   = "wireguard",
 };
 
 const char *netdev_kind_to_name(NetDevKind id) {
@@ -44,11 +44,11 @@ const char *netdev_kind_to_name(NetDevKind id) {
 int netdev_name_to_kind(const char *name) {
         assert(name);
 
-        for (size_t i = NET_DEV_KIND_VLAN; i < (int) ELEMENTSOF(netdev_kind_table); i++)
+        for (size_t i = NETDEV_KIND_VLAN; i < (int) ELEMENTSOF(netdev_kind_table); i++)
                 if (netdev_kind_table[i] && string_equal_fold(name, netdev_kind_table[i]))
                         return i;
 
-        return _NET_DEV_KIND_INVALID;
+        return _NETDEV_KIND_INVALID;
 }
 
 static const char *const bond_mode_table[_BOND_MODE_MAX] = {
@@ -198,7 +198,7 @@ int netdev_new(NetDev **ret) {
                 return log_oom();
 
         *n = (NetDev) {
-                .kind = _NET_DEV_KIND_INVALID,
+                .kind = _NETDEV_KIND_INVALID,
                 .tun_tap.packet_info = -1,
                 .tun_tap.vnet_hdr = -1,
                 .tun_tap.keep_carrier = -1,
@@ -217,14 +217,6 @@ void netdev_unref(NetDev *n) {
         free(n->peer);
         free(n->mac);
 
-        free(n->wg_private_key);
-        free(n->wg_private_key_file);
-        free(n->wg_public_key);
-        free(n->wg_preshared_key);
-        free(n->wg_preshared_key_file);
-        free(n->wg_endpoint);
-        free(n->wg_allowed_ips);
-
         free(n->proto);
         free(n->tun_tap.user);
         free(n->tun_tap.group);
@@ -233,7 +225,7 @@ void netdev_unref(NetDev *n) {
 }
 
 int vlan_new(VLan **ret) {
-        _auto_cleanup_ VLan *v;
+        _auto_cleanup_ VLan *v = NULL;
 
         v = new0(VLan, 1);
         if (!v)
@@ -259,6 +251,32 @@ void vlan_unref(VLan *v) {
         free(v);
 }
 
+int wireguard_new(WireGuard **ret) {
+        _auto_cleanup_ WireGuard *wg = NULL;
+
+        wg = new0(WireGuard, 1);
+        if (!wg)
+                return log_oom();
+
+        *ret = steal_pointer(wg);
+        return 0;
+
+}
+
+void wireguard_unref(WireGuard *wg) {
+        if (!wg)
+                return;
+
+        free(wg->private_key);
+        free(wg->private_key_file);
+        free(wg->public_key);
+        free(wg->preshared_key);
+        free(wg->preshared_key_file);
+        free(wg->endpoint);
+        free(wg->allowed_ips);
+        free(wg);
+}
+
 int generate_netdev_config(NetDev *n) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
@@ -278,7 +296,7 @@ int generate_netdev_config(NetDev *n) {
                 return r;
 
         switch (n->kind) {
-                case NET_DEV_KIND_VLAN:
+                case NETDEV_KIND_VLAN:
                         r = key_file_set_uint(key_file, "VLAN", "Id", n->vlan->id);
                         if (r < 0)
                                 return r;
@@ -312,14 +330,14 @@ int generate_netdev_config(NetDev *n) {
 
                         break;
 
-                case NET_DEV_KIND_BOND:
+                case NETDEV_KIND_BOND:
                         r = key_file_set_string(key_file, "Bond", "Mode", bond_mode_to_name(n->bond_mode));
                         if (r < 0)
                                 return r;
 
                         break;
 
-                case NET_DEV_KIND_VXLAN: {
+                case NETDEV_KIND_VXLAN: {
                         _auto_cleanup_ char *local = NULL, *remote = NULL, *group = NULL;
 
                         r = key_file_set_uint(key_file, "VXLAN", "VNI", n->id);
@@ -361,35 +379,35 @@ int generate_netdev_config(NetDev *n) {
                 }
                         break;
 
-                case NET_DEV_KIND_MACVLAN:
+                case NETDEV_KIND_MACVLAN:
                         r = key_file_set_string(key_file, "MACVLAN", "Mode", macvlan_mode_to_name(n->macvlan_mode));
                         if (r < 0)
                                 return r;
 
                         break;
 
-                case NET_DEV_KIND_MACVTAP:
+                case NETDEV_KIND_MACVTAP:
                         r = key_file_set_string(key_file, "MACVTAP", "Mode", macvlan_mode_to_name(n->macvlan_mode));
                         if (r < 0)
                                 return r;
 
                         break;
 
-                case NET_DEV_KIND_IPVLAN:
+                case NETDEV_KIND_IPVLAN:
                         r = key_file_set_string(key_file, "IPVLAN", "Mode", ipvlan_mode_to_name(n->ipvlan_mode));
                         if (r < 0)
                                 return r;
 
                         break;
 
-                case NET_DEV_KIND_IPVTAP:
+                case NETDEV_KIND_IPVTAP:
                         r = key_file_set_string(key_file, "IPVTAP", "Mode", ipvlan_mode_to_name(n->ipvlan_mode));
                         if (r < 0)
                                 return r;
 
                         break;
 
-                case NET_DEV_KIND_VETH:
+                case NETDEV_KIND_VETH:
                         if (n->peer) {
                                 r = key_file_set_string(key_file, "Peer", "Name", n->peer);
                                 if (r < 0)
@@ -397,56 +415,56 @@ int generate_netdev_config(NetDev *n) {
                         }
                         break;
 
-                case NET_DEV_KIND_VRF:
+                case NETDEV_KIND_VRF:
                         r = key_file_set_uint(key_file, "VRF", "Table", n->table);
                         if (r < 0)
                                 return r;
 
                         break;
-                case NET_DEV_KIND_TUN:
-                case NET_DEV_KIND_TAP:
+                case NETDEV_KIND_TUN:
+                case NETDEV_KIND_TAP:
                         if (n->tun_tap.user) {
-                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "User", n->tun_tap.user);
+                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "User", n->tun_tap.user);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap.group) {
-                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "Group", n->tun_tap.group);
+                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "Group", n->tun_tap.group);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap.packet_info != -1) {
-                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "PacketInfo", bool_to_string(n->tun_tap.packet_info));
+                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "PacketInfo", bool_to_string(n->tun_tap.packet_info));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap.vnet_hdr != -1) {
-                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "VNetHeader", bool_to_string(n->tun_tap.vnet_hdr));
+                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "VNetHeader", bool_to_string(n->tun_tap.vnet_hdr));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap.keep_carrier != -1) {
-                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "KeepCarrier", bool_to_string(n->tun_tap.keep_carrier));
+                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "KeepCarrier", bool_to_string(n->tun_tap.keep_carrier));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap.multi_queue != -1) {
-                                r = key_file_set_string(key_file, n->kind == NET_DEV_KIND_TUN ? "Tun" : "Tap", "MultiQueue", bool_to_string(n->tun_tap.multi_queue));
+                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "MultiQueue", bool_to_string(n->tun_tap.multi_queue));
                                 if (r < 0)
                                         return r;
                         }
 
                         break;
 
-                case NET_DEV_KIND_IPIP_TUNNEL:
-                case NET_DEV_KIND_SIT_TUNNEL:
-                case NET_DEV_KIND_GRE_TUNNEL:
-                case NET_DEV_KIND_VTI_TUNNEL: {
+                case NETDEV_KIND_IPIP_TUNNEL:
+                case NETDEV_KIND_SIT_TUNNEL:
+                case NETDEV_KIND_GRE_TUNNEL:
+                case NETDEV_KIND_VTI_TUNNEL: {
                         _auto_cleanup_ char *local = NULL, *remote = NULL;
 
                         if (n->independent) {
@@ -471,15 +489,15 @@ int generate_netdev_config(NetDev *n) {
                 }
                         break;
 
-                case NET_DEV_KIND_WIREGUARD:
-                        if (n->wg_private_key) {
-                                r = key_file_set_string(key_file, "WireGuard", "PrivateKey", n->wg_private_key);
+                case NETDEV_KIND_WIREGUARD:
+                        if (n->wg->private_key) {
+                                r = key_file_set_string(key_file, "WireGuard", "PrivateKey", n->wg->private_key);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->wg_private_key_file) {
-                                r = key_file_set_string(key_file, "WireGuard", "PrivateKeyFile", n->wg_private_key_file);
+                        if (n->wg->private_key_file) {
+                                r = key_file_set_string(key_file, "WireGuard", "PrivateKeyFile", n->wg->private_key_file);
                                 if (r < 0)
                                         return r;
                         }
@@ -490,38 +508,38 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
-                        if (n->wg_public_key) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "PublicKey", n->wg_public_key);
+                        if (n->wg->public_key) {
+                                r = key_file_set_string(key_file, "WireGuardPeer", "PublicKey", n->wg->public_key);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->wg_endpoint) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "Endpoint", n->wg_endpoint);
+                        if (n->wg->endpoint) {
+                                r = key_file_set_string(key_file, "WireGuardPeer", "Endpoint", n->wg->endpoint);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->wg_preshared_key) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "PresharedKey", n->wg_preshared_key);
+                        if (n->wg->preshared_key) {
+                                r = key_file_set_string(key_file, "WireGuardPeer", "PresharedKey", n->wg->preshared_key);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->wg_preshared_key_file) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "PresharedKeyFile", n->wg_preshared_key_file);
+                        if (n->wg->preshared_key_file) {
+                                r = key_file_set_string(key_file, "WireGuardPeer", "PresharedKeyFile", n->wg->preshared_key_file);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->wg_allowed_ips) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "AllowedIPs", n->wg_allowed_ips);
+                        if (n->wg->allowed_ips) {
+                                r = key_file_set_string(key_file, "WireGuardPeer", "AllowedIPs", n->wg->allowed_ips);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->wg_persistent_keep_alive > 0) {
-                                r = key_file_set_uint(key_file, "WireGuardPeer", "PersistentKeepalive", n->wg_persistent_keep_alive);
+                        if (n->wg->persistent_keep_alive > 0) {
+                                r = key_file_set_uint(key_file, "WireGuardPeer", "PersistentKeepalive", n->wg->persistent_keep_alive);
                                 if (r < 0)
                                         return r;
                         }
