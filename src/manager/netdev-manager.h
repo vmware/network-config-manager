@@ -8,14 +8,7 @@
 
 int manager_create_bridge(const char *bridge, char **interfaces);
 int manager_create_bond(const char *bond, const BondMode mode, char **interfaces);
-int manager_create_vxlan(const char *vxlan,
-                         const uint32_t vni,
-                         const IPAddress *local,
-                         const IPAddress *remote,
-                         const IPAddress *group,
-                         const uint16_t port,
-                         const char *dev,
-                         const bool independent);
+int manager_create_vxlan(const char *ifname, const char *dev, VxLan *v);
 
 int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mode, bool kind);
 int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, bool kind);

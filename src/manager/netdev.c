@@ -217,7 +217,6 @@ void netdev_unref(NetDev *n) {
         free(n->peer);
         free(n->mac);
 
-        free(n->proto);
         free(n->tun_tap.user);
         free(n->tun_tap.group);
 
@@ -248,6 +247,25 @@ void vlan_unref(VLan *v) {
                 return;
 
         free(v->proto);
+        free(v);
+}
+
+int vxlan_new(VxLan **ret) {
+        _auto_cleanup_ VxLan *v = NULL;
+
+        v = new0(VxLan, 1);
+        if (!v)
+                return log_oom();
+
+        *ret = steal_pointer(v);
+        return 0;
+
+}
+
+void vxlan_unref(VxLan *v) {
+        if (!v)
+                return;
+
         free(v);
 }
 
@@ -344,35 +362,35 @@ int generate_netdev_config(NetDev *n) {
                         if (r < 0)
                                 return r;
 
-                        if (!ip_is_null(&n->local)) {
-                                (void) ip_to_string(n->local.family, &n->local, &local);
+                        if (!ip_is_null(n->vxlan->local)) {
+                                (void) ip_to_string(n->local.family, n->vxlan->local, &local);
                                 r = key_file_set_string(key_file, "VXLAN", "Local", local);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (!ip_is_null(&n->remote)) {
-                                (void) ip_to_string(n->remote.family, &n->remote, &remote);
+                        if (!ip_is_null(n->vxlan->remote)) {
+                                (void) ip_to_string(n->remote.family, n->vxlan->remote, &remote);
                                 r = key_file_set_string(key_file, "VXLAN", "Remote", remote);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (!ip_is_null(&n->group)) {
-                                (void) ip_to_string(n->group.family, &n->group, &group);
+                        if (!ip_is_null(n->vxlan->group)) {
+                                (void) ip_to_string(n->vxlan->group->family, n->vxlan->group, &group);
                                 r = key_file_set_string(key_file, "VXLAN", "Group", group);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->destination_port > 0) {
-                                r = key_file_set_uint(key_file, "VXLAN", "DestinationPort", n->destination_port);
+                        if (n->vxlan->destination_port > 0) {
+                                r = key_file_set_uint(key_file, "VXLAN", "DestinationPort", n->vxlan->destination_port);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->independent)  {
-                                r = key_file_set_bool(key_file, "VXLAN", "Independent", n->independent);
+                        if (n->vxlan->independent)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "Independent", n->vxlan->independent);
                                 if (r < 0)
                                         return r;
                         }
@@ -502,8 +520,8 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
-                        if (n->listen_port > 0) {
-                                r = key_file_set_uint(key_file, "WireGuard", "ListenPort", n->listen_port);
+                        if (n->wg->listen_port > 0) {
+                                r = key_file_set_uint(key_file, "WireGuard", "ListenPort", n->wg->listen_port);
                                 if (r < 0)
                                         return r;
                         }
