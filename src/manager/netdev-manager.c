@@ -442,37 +442,31 @@ int manager_create_veth(const char *veth, const char *veth_peer) {
         return 0;
 }
 
-int manager_create_tunnel(const char *tunnel,
+int manager_create_tunnel(const char *ifname,
                           NetDevKind kind,
-                          IPAddress *local,
-                          IPAddress *remote,
                           const char *dev,
-                          bool independent) {
+                          Tunnel *t) {
 
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(tunnel);
+        assert(t);
+        assert(ifname);
 
         r = netdev_new(&netdev);
         if (r < 0)
                 return log_oom();
 
         *netdev = (NetDev) {
-                .ifname = strdup(tunnel),
+                .ifname = strdup(ifname),
                 .kind = kind,
-                .independent = independent,
+                .tunnel = t,
         };
 
         if (!netdev->ifname)
                 return log_oom();
-
-        if (local)
-                netdev->local = *local;
-        if (remote)
-                netdev->remote = *remote;
 
         r = generate_netdev_config(netdev);
         if (r < 0)
@@ -482,7 +476,7 @@ int manager_create_tunnel(const char *tunnel,
         if (r < 0)
                 return r;
 
-        v->ifname = strdup(tunnel);
+        v->ifname = strdup(ifname);
         if (!v->ifname)
                 return log_oom();
 
@@ -492,7 +486,7 @@ int manager_create_tunnel(const char *tunnel,
                 return r;
         }
 
-        if (!independent) {
+        if (!t->independent) {
                 _auto_cleanup_ IfNameIndex *p = NULL;
 
                 r = parse_ifname_or_index(dev, &p);
@@ -503,7 +497,7 @@ int manager_create_tunnel(const char *tunnel,
                 if (r < 0)
                         return r;
 
-                r = add_key_to_section_string(network, "Network", "Tunnel", tunnel);
+                r = add_key_to_section_string(network, "Network", "Tunnel", ifname);
                 if (r < 0)
                         return r;
         }

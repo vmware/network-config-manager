@@ -105,15 +105,18 @@ typedef struct VxLan {
         bool independent;
 } VxLan;
 
+typedef struct Tunnel {
+         bool independent;
+
+        IPAddress local;
+        IPAddress remote;
+
+} Tunnel;
+
 typedef struct NetDev {
         char *ifname;
         char *peer;
         char *mac;
-
-        bool independent;
-
-        IPAddress local;
-        IPAddress remote;
 
         uint32_t id;
         uint32_t table;
@@ -122,6 +125,7 @@ typedef struct NetDev {
         VLan *vlan;
         WireGuard *wg;
         VxLan *vxlan;
+        Tunnel *tunnel;
 
         NetDevKind kind;
         BondMode bond_mode;
@@ -145,6 +149,9 @@ int vxlan_new(VxLan **ret);
 void vxlan_unref(VxLan *v);
 DEFINE_CLEANUP(VxLan*, vxlan_unref);
 
+int tunnel_new(Tunnel **ret);
+void tunnel_unref(Tunnel *v);
+DEFINE_CLEANUP(Tunnel*, tunnel_unref);
 
 int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);

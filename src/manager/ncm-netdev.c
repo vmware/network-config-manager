@@ -565,9 +565,8 @@ _public_ int ncm_create_vrf(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_tunnel(int argc, char *argv[]) {
-        _auto_cleanup_ IPAddress *local = NULL, *remote = NULL;
+        _cleanup_(tunnel_unrefp) Tunnel *t = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool independent = false;
         NetDevKind kind;
         char *c;
         int r;
@@ -578,6 +577,10 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                 log_warning("Failed to find tunnel kind '%s': %s", c, strerror(EINVAL));
                 return -EINVAL;
         }
+
+        r = tunnel_new(&t);
+        if (r < 0)
+                return r;
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
@@ -590,22 +593,28 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                         }
                         continue;
                 } else if (string_equal_fold(argv[i], "local")) {
+                        _auto_cleanup_ IPAddress *a = NULL;
+
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &local);
+                        r = parse_ip_from_string(argv[i], &a);
                         if (r < 0) {
                                 log_warning("Failed to parse local address : %s", argv[i]);
                                 return r;
                         }
+                        t->local = *a;
                         continue;
                 } else if (string_equal_fold(argv[i], "remote")) {
+                        _auto_cleanup_ IPAddress *a = NULL;
+
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &remote);
+                        r = parse_ip_from_string(argv[i], &a);
                         if (r < 0) {
                                 log_warning("Failed to parse remote address : %s", argv[i]);
                                 return r;
                         }
+                        t->remote = *a;
                         continue;
                 } else if (string_equal_fold(argv[i], "independent")) {
                         parse_next_arg(argv, argc, i);
@@ -615,7 +624,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                                 log_warning("Failed to parse independent %s : %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
-                        independent = r;
+                        t->independent = r;
                         continue;
                 } else {
                         log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
@@ -623,7 +632,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                 }
         }
 
-        if (!p && !independent) {
+        if (!p && !t->independent) {
                 log_warning("Failed to find device: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
@@ -633,7 +642,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_tunnel(argv[1], kind, local, remote, p ? p->ifname : NULL, independent);
+        r = manager_create_tunnel(argv[1], kind, p ? p->ifname : NULL, t);
         if (r < 0) {
                 log_warning("Failed to create tunnel '%s': %s", argv[1], strerror(-r));
                 return r;
