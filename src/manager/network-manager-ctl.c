@@ -15,15 +15,16 @@
 static bool alias = false;
 
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
+        _cleanup_(g_error_freep) GError *e = NULL;
         _cleanup_(g_dir_closep) GDir *dir = NULL;
         const char *file = NULL;
         int r;
 
         if (string_equal(argv[0], "apply-yaml-config")) {
-                dir = g_dir_open("/etc/network-config-manager/yaml", 0, NULL);
+                dir = g_dir_open("/etc/network-config-manager/yaml", 0, &e);
                 if (!dir) {
-                        log_warning("Failed to open directory '/etc/network-config-manager/yaml': %m");
-                        return -errno;
+                        log_warning("Failed to open directory '/etc/network-config-manager/yaml': %s", e->message);
+                        return -e->code;
                 }
 
                 for (;;) {

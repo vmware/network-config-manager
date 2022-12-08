@@ -358,26 +358,26 @@ int generate_netdev_config(NetDev *n) {
                 case NETDEV_KIND_VXLAN: {
                         _auto_cleanup_ char *local = NULL, *remote = NULL, *group = NULL;
 
-                        r = key_file_set_uint(key_file, "VXLAN", "VNI", n->id);
-                        if (r < 0)
+                        r = key_file_set_uint(key_file, "VXLAN", "VNI", n->vxlan->vni);
+                        if (r <0)
                                 return r;
 
-                        if (!ip_is_null(n->vxlan->local)) {
-                                (void) ip_to_string(n->local.family, n->vxlan->local, &local);
+                        if (!ip_is_null(&n->vxlan->local)) {
+                                (void) ip_to_string(n->vxlan->local.family, &n->vxlan->local, &local);
                                 r = key_file_set_string(key_file, "VXLAN", "Local", local);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (!ip_is_null(n->vxlan->remote)) {
-                                (void) ip_to_string(n->remote.family, n->vxlan->remote, &remote);
+                        if (!ip_is_null(&n->vxlan->remote)) {
+                                (void) ip_to_string(n->vxlan->remote.family, &n->vxlan->remote, &remote);
                                 r = key_file_set_string(key_file, "VXLAN", "Remote", remote);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (!ip_is_null(n->vxlan->group)) {
-                                (void) ip_to_string(n->vxlan->group->family, n->vxlan->group, &group);
+                        if (!ip_is_null(&n->vxlan->group)) {
+                                (void) ip_to_string(n->vxlan->group.family, &n->vxlan->group, &group);
                                 r = key_file_set_string(key_file, "VXLAN", "Group", group);
                                 if (r < 0)
                                         return r;

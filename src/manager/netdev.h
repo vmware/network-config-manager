@@ -96,9 +96,9 @@ typedef struct WireGuard {
 typedef struct VxLan {
         uint32_t vni;
 
-        IPAddress *local;
-        IPAddress *remote;
-        IPAddress *group;
+        IPAddress local;
+        IPAddress remote;
+        IPAddress group;
 
         uint16_t destination_port;
 

@@ -96,7 +96,12 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *
         if (r < 0)
                 return r;
 
-        return add_key_to_section_string(network, "Network", "VLAN", ifname);
+        r = add_key_to_section_string(network, "Network", "VLAN", ifname);
+        if (r < 0)
+                return r;
+
+        steal_pointer(netdev->vlan);
+        return 0;
 }
 
 int manager_create_bridge(const char *bridge, char **interfaces) {
@@ -271,6 +276,7 @@ int manager_create_vxlan(const char *ifname,
                         return r;
         }
 
+        steal_pointer(netdev->vxlan);
         return 0;
 }
 
