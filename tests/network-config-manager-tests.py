@@ -1655,7 +1655,7 @@ class TestCLINetDev:
     def test_cli_create_vxlan(self):
         assert(link_exist('test98') == True)
 
-        subprocess.check_call("nmctl create-vxlan vxlan-98 dev test98 vni 32 local 192.168.1.2 remote 192.168.1.3 port 7777", shell = True)
+        subprocess.check_call("nmctl create-vxlan vxlan-98 dev test98 vni 32 local 192.168.1.2 remote 192.168.1.3 dport 7777", shell = True)
         assert(unit_exist('10-test98.network') == True)
         assert(unit_exist('10-vxlan-98.network') == True)
         assert(unit_exist('10-vxlan-98.netdev') == True)
