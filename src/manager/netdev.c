@@ -295,6 +295,24 @@ void wireguard_unref(WireGuard *wg) {
         free(wg);
 }
 
+int tunnel_new(Tunnel **ret) {
+        Tunnel *t;
+
+        t = new0(Tunnel, 1);
+        if (!t)
+                return log_oom();
+
+        *ret = steal_pointer(t);
+        return 0;
+}
+
+void tunnel_unref(Tunnel *t) {
+        if (!t)
+                return;
+
+        free(t);
+}
+
 int generate_netdev_config(NetDev *n) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
@@ -485,21 +503,21 @@ int generate_netdev_config(NetDev *n) {
                 case NETDEV_KIND_VTI_TUNNEL: {
                         _auto_cleanup_ char *local = NULL, *remote = NULL;
 
-                        if (n->independent) {
-                                r = key_file_set_bool(key_file, "Tunnel", "Independent", n->independent);
+                        if (n->tunnel->independent) {
+                                r = key_file_set_bool(key_file, "Tunnel", "Independent", n->tunnel->independent);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (!ip_is_null(&n->local)) {
-                                (void) ip_to_string(n->local.family, &n->local, &local);
+                        if (!ip_is_null(&n->tunnel->local)) {
+                                (void) ip_to_string(n->tunnel->local.family, &n->tunnel->local, &local);
                                 r = key_file_set_string(key_file, "Tunnel", "Local", local);
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (!ip_is_null(&n->remote)) {
-                                (void) ip_to_string(n->remote.family, &n->remote, &remote);
+                        if (!ip_is_null(&n->tunnel->remote)) {
+                                (void) ip_to_string(n->tunnel->remote.family, &n->tunnel->remote, &remote);
                                 r = key_file_set_string(key_file, "Tunnel", "Remote", remote);
                                 if (r < 0)
                                         return r;
