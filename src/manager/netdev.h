@@ -89,25 +89,31 @@ typedef struct WireGuard {
         char *endpoint;      /* ip:port */
         char *allowed_ips;
 
-        int persistent_keep_alive;
         uint16_t listen_port;
+        int persistent_keep_alive;
 } WireGuard;
 
-typedef struct NetDev {
-        char *ifname;
-        char *peer;
-        char *mac;
-
-        char *proto;
-
-        bool independent;
+typedef struct VxLan {
+        uint32_t vni;
 
         IPAddress local;
         IPAddress remote;
         IPAddress group;
 
         uint16_t destination_port;
-        uint16_t listen_port;  /* wireguard */
+
+        bool independent;
+} VxLan;
+
+typedef struct NetDev {
+        char *ifname;
+        char *peer;
+        char *mac;
+
+        bool independent;
+
+        IPAddress local;
+        IPAddress remote;
 
         uint32_t id;
         uint32_t table;
@@ -115,6 +121,7 @@ typedef struct NetDev {
         TunTap tun_tap;
         VLan *vlan;
         WireGuard *wg;
+        VxLan *vxlan;
 
         NetDevKind kind;
         BondMode bond_mode;
@@ -133,6 +140,11 @@ DEFINE_CLEANUP(VLan*, vlan_unref);
 int wireguard_new(WireGuard **ret);
 void wireguard_unref(WireGuard *wg);
 DEFINE_CLEANUP(WireGuard*, wireguard_unref);
+
+int vxlan_new(VxLan **ret);
+void vxlan_unref(VxLan *v);
+DEFINE_CLEANUP(VxLan*, vxlan_unref);
+
 
 int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);

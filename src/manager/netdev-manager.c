@@ -96,7 +96,12 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *
         if (r < 0)
                 return r;
 
-        return add_key_to_section_string(network, "Network", "VLAN", ifname);
+        r = add_key_to_section_string(network, "Network", "VLAN", ifname);
+        if (r < 0)
+                return r;
+
+        steal_pointer(netdev->vlan);
+        return 0;
 }
 
 int manager_create_bridge(const char *bridge, char **interfaces) {
@@ -212,64 +217,50 @@ int manager_create_bond(const char *bond, const BondMode mode, char **interfaces
         return 0;
 }
 
-int manager_create_vxlan(const char *vxlan,
-                         const uint32_t vni,
-                         const IPAddress *local,
-                         const IPAddress *remote,
-                         const IPAddress *group,
-                         const uint16_t port,
+int manager_create_vxlan(const char *ifname,
                          const char *dev,
-                         const bool independent) {
+                         VxLan *v) {
 
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
+        _cleanup_(network_unrefp) Network *n = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(vxlan);
-        assert(vni > 0);
+        assert(ifname);
+        assert(v);
 
         r = netdev_new(&netdev);
         if (r < 0)
                 return log_oom();
 
         *netdev = (NetDev) {
-                      .ifname = strdup(vxlan),
+                      .ifname = strdup(ifname),
                       .kind = NETDEV_KIND_VXLAN,
-                      .id = vni,
-                      .destination_port = port,
-                      .independent = independent,
+                      .vxlan = v,
                   };
 
         if (!netdev->ifname)
                 return log_oom();
 
-        if (local)
-                netdev->local = *local;
-        if (remote)
-                netdev->remote = *remote;
-        if (group)
-                netdev->group = *group;
-
         r = generate_netdev_config(netdev);
         if (r < 0)
                 return r;
 
-        r = network_new(&v);
+        r = network_new(&n);
         if (r < 0)
                 return r;
 
-        v->ifname = strdup(vxlan);
-        if (!v->ifname)
+        n->ifname = strdup(ifname);
+        if (!n->ifname)
                 return log_oom();
 
-        r = generate_network_config(v);
+        r = generate_network_config(n);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;
         }
 
-        if (!independent) {
+        if (!v->independent) {
                 _auto_cleanup_ IfNameIndex *p = NULL;
 
                 r = parse_ifname_or_index(dev, &p);
@@ -280,11 +271,12 @@ int manager_create_vxlan(const char *vxlan,
                 if (r < 0)
                         return r;
 
-                r = add_key_to_section_string(network, "Network", "VXLAN", vxlan);
+                r = add_key_to_section_string(network, "Network", "VXLAN", ifname);
                 if (r < 0)
                         return r;
         }
 
+        steal_pointer(netdev->vxlan);
         return 0;
 }
 

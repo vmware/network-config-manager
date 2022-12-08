@@ -257,12 +257,14 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_vxlan(int argc, char *argv[]) {
-        _auto_cleanup_ IPAddress *local = NULL, *remote = NULL, *group = NULL;
-        bool independent = false, have_vni = false;
+        _cleanup_(vxlan_unrefp) VxLan *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        uint16_t port;
-        uint32_t vni;
+        bool have_vni = false;
         int r;
+
+        r = vxlan_new(&v);
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
@@ -271,13 +273,13 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                         r = parse_ifname_or_index(argv[i], &p);
                         if (r < 0) {
                                 log_warning("Failed to find device '%s': %s", argv[i], strerror(-r));
-                                return -errno;
+                                return r;
                         }
                         continue;
                 } else if (string_equal_fold(argv[i], "vni")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint32(argv[i], &vni);
+                        r = parse_uint32(argv[i], &v->vni);
                         if (r < 0) {
                                 log_warning("Failed to parse vni %s: %s", argv[i], strerror(-r));
                                 return r;
@@ -286,31 +288,40 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                         have_vni = true;
                         continue;
                 } else if (string_equal_fold(argv[i], "local")) {
+                       _auto_cleanup_ IPAddress *ip = NULL;
+
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &local);
+                        r = parse_ip_from_string(argv[i], &ip);
                         if (r < 0) {
                                 log_warning("Failed to parse local address : %s", argv[i]);
                                 return r;
                         }
+                        v->local = *ip;
                         continue;
                 } else if (string_equal_fold(argv[i], "remote")) {
-                        parse_next_arg(argv, argc, i);
+                       _auto_cleanup_ IPAddress *ip = NULL;
 
-                        r = parse_ip_from_string(argv[i], &remote);
-                        if (r < 0) {
-                                log_warning("Failed to parse remote address : %s", argv[i]);
-                                return r;
-                        }
-                        continue;
+                       parse_next_arg(argv, argc, i);
+
+                       r = parse_ip_from_string(argv[i], &ip);
+                       if (r < 0) {
+                               log_warning("Failed to parse remote address : %s", argv[i]);
+                               return r;
+                       }
+                       v->remote = *ip;
+                       continue;
                 } else if (string_equal_fold(argv[i], "group")) {
-                        parse_next_arg(argv, argc, i);
+                       _auto_cleanup_ IPAddress *ip = NULL;
 
-                        r = parse_ip_from_string(argv[i], &group);
+                       parse_next_arg(argv, argc, i);
+
+                        r = parse_ip_from_string(argv[i], &ip);
                         if (r < 0) {
                                 log_warning("Failed to parse greoup address : %s", argv[i]);
                                 return r;
                         }
+                        v->group = *ip;
                         continue;
                 } else if (string_equal_fold(argv[i], "independent")) {
                         parse_next_arg(argv, argc, i);
@@ -320,12 +331,12 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                                 log_warning("Failed to parse independent %s : %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
-                        independent = r;
+                        v->independent = r;
                         continue;
-                } else if (string_equal_fold(argv[i], "port")) {
+                } else if (string_equal_fold(argv[i], "dport")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint16(argv[i], &port);
+                        r = parse_uint16(argv[i], &v->destination_port);
                         if (r < 0) {
                                 log_warning("Failed to parse port %s: %s", argv[i], strerror(-r));
                                 return r;
@@ -343,7 +354,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        if (!independent && !p) {
+        if (!v->independent && !p) {
                 log_warning("Missing device: %s", strerror(EINVAL));
                 return -EINVAL;
         }
@@ -353,7 +364,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_vxlan(argv[1], vni, local, remote, group, port, p ? p->ifname : NULL, independent);
+        r = manager_create_vxlan(argv[1], p ? p->ifname : NULL, v);
         if (r < 0) {
                 log_warning("Failed to create vxlan '%s': %s", argv[1], strerror(-r));
                 return r;
