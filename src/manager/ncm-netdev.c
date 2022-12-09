@@ -70,10 +70,13 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
 
 _public_ int ncm_create_bond(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **devs = NULL;
-        bool have_mode = false;
-        BondMode mode;
+        _cleanup_(bond_unrefp) Bond *b = NULL;
         char **s;
         int r;
+
+        r = bond_new(&b);
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal_fold(argv[i], "mode") || string_equal_fold(argv[i], "m")) {
@@ -84,8 +87,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                                 log_warning("Failed to parse bond mode '%s' : %s", argv[3], strerror(EINVAL));
                                 return r;
                         }
-                        have_mode = true;
-                        mode = r;
+                        b->mode = r;
                 } else if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
@@ -95,7 +97,6 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                                 return r;
                         }
                 }
-
         }
 
         if (strv_length(devs) <= 0) {
@@ -113,17 +114,12 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                 }
         }
 
-        if (!have_mode) {
-                log_warning("Missing Bond mode: %s", strerror(EINVAL));
-                return -EINVAL;
-        }
-
         if (!valid_ifname(argv[1])) {
                 log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
 
-        r = manager_create_bond(argv[1], mode, devs);
+        r = manager_create_bond(argv[1], b, devs);
         if (r < 0) {
                 log_warning("Failed to create bond '%s': %s", argv[1], strerror(-r));
                 return r;

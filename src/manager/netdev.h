@@ -3,7 +3,7 @@
  */
 #pragma once
 
-#include <linux/if_link.h>
+#include <netinet/in.h>
 
 #include "config-file.h"
 #include "network-util.h"
@@ -31,13 +31,13 @@ typedef enum NetDevKind {
 } NetDevKind;
 
 typedef enum BondMode {
-        BOND_MODE_ROUNDROBIN,
-        BOND_MODE_ACTIVEBACKUP,
-        BOND_MODE_XOR,
-        BOND_MODE_BROADCAST,
-        BOND_MODE_8023AD,
-        BOND_MODE_TLB,
-        BOND_MODE_ALB,
+         BOND_MODE_ROUNDROBIN,
+         BOND_MODE_ACTIVEBACKUP,
+         BOND_MODE_XOR,
+         BOND_MODE_BROADCAST,
+         BOND_MODE_8023AD,
+         BOND_MODE_TLB,
+         BOND_MODE_ALB,
         _BOND_MODE_MAX,
         _BOND_MODE_INVALID = -EINVAL
 } BondMode;
@@ -59,6 +59,17 @@ typedef enum IPVLanMode {
         _IP_VLAN_MODE_MAX,
         _IP_VLAN_MODE_INVALID = -EINVAL
 } IPVLanMode;
+
+typedef enum BondXmitHashPolicy {
+        BOND_XMIT_POLICY_LAYER2,
+        BOND_XMIT_POLICY_LAYER34,
+        BOND_XMIT_POLICY_LAYER23,
+        BOND_XMIT_POLICY_ENCAP23,
+        BOND_XMIT_POLICY_ENCAP34,
+        BOND_XMIT_POLICY_VLAN_SRCMAC,
+        _BOND_XMIT_HASH_POLICY_MAX,
+        _BOND_XMIT_HASH_POLICY_INVALID      = -EINVAL,
+} BondXmitHashPolicy;
 
 typedef struct TunTap {
         char *user;
@@ -110,8 +121,12 @@ typedef struct Tunnel {
 
         IPAddress local;
         IPAddress remote;
-
 } Tunnel;
+
+typedef struct Bond {
+        BondMode mode;
+        BondXmitHashPolicy xmit_hash_policy;
+} Bond;
 
 typedef struct NetDev {
         char *ifname;
@@ -126,9 +141,9 @@ typedef struct NetDev {
         WireGuard *wg;
         VxLan *vxlan;
         Tunnel *tunnel;
+        Bond *bond;
 
         NetDevKind kind;
-        BondMode bond_mode;
         MACVLanMode macvlan_mode;
         IPVLanMode ipvlan_mode;
 } NetDev;
@@ -157,6 +172,10 @@ int tuntap_new(TunTap **ret);
 void tuntap_unref(TunTap *t);
 DEFINE_CLEANUP(TunTap*, tuntap_unref);
 
+int bond_new(Bond **ret);
+void bond_unref(Bond *t);
+DEFINE_CLEANUP(Bond*, bond_unref);
+
 int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);
 
@@ -171,5 +190,8 @@ int macvlan_name_to_mode(const char *name);
 
 const char *ipvlan_mode_to_name(IPVLanMode id);
 int ipvlan_name_to_mode(const char *name);
+
+const char *bond_xmit_hash_policy_to_name(BondXmitHashPolicy id);
+int bond_xmit_hash_policy_to_mode(const char *name);
 
 int netdev_ctl_name_to_configs_new(ConfigManager **ret);
