@@ -586,15 +586,7 @@ int manager_create_wireguard(const char *ifname, WireGuard *wg) {
         return 0;
 }
 
-int manager_create_tun_tap(const NetDevKind kind,
-                           const char *ifname,
-                           const char *user,
-                           const char *group,
-                           const int packet_info,
-                           const int vnet_hdr,
-                           const int keep_carrier,
-                           const int multi_queue) {
-
+int manager_create_tun_tap(const char *ifname, const NetDevKind kind, TunTap *t) {
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *n = NULL;
         int r;
@@ -606,13 +598,8 @@ int manager_create_tun_tap(const NetDevKind kind,
         *netdev = (NetDev) {
                          .ifname = strdup(ifname),
                          .kind = kind,
-                         .tun_tap.user = user ? strdup(user) : NULL,
-                         .tun_tap.group = group ? strdup(group) : NULL,
-                         .tun_tap.packet_info = packet_info,
-                         .tun_tap.vnet_hdr = vnet_hdr,
-                         .tun_tap.keep_carrier = keep_carrier,
-                         .tun_tap.multi_queue = multi_queue,
-        };
+                         .tun_tap = t,
+                 };
         if (!netdev->ifname)
                 return log_oom();
 
