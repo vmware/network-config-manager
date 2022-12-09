@@ -16,11 +16,4 @@ int manager_create_veth(const char *veth, const char *veth_peer);
 int manager_create_tunnel(const char *tunnel, NetDevKind kind, const char *dev, Tunnel *t);
 int manager_create_vrf(const char *vrf, const uint32_t table);
 int manager_create_wireguard(const char *ifname, WireGuard *wg);
-int manager_create_tun_tap(const NetDevKind kind,
-                           const char *ifname,
-                           const char *user,
-                           const char *group,
-                           const int packet_info,
-                           const int vnet_hdr,
-                           const int keep_carrier,
-                           const int multi_queue);
+int manager_create_tun_tap(const char *ifname, const NetDevKind kind, TunTap *t);

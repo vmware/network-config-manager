@@ -121,7 +121,7 @@ typedef struct NetDev {
         uint32_t id;
         uint32_t table;
 
-        TunTap tun_tap;
+        TunTap *tun_tap;
         VLan *vlan;
         WireGuard *wg;
         VxLan *vxlan;
@@ -152,6 +152,10 @@ DEFINE_CLEANUP(VxLan*, vxlan_unref);
 int tunnel_new(Tunnel **ret);
 void tunnel_unref(Tunnel *v);
 DEFINE_CLEANUP(Tunnel*, tunnel_unref);
+
+int tuntap_new(TunTap **ret);
+void tuntap_unref(TunTap *t);
+DEFINE_CLEANUP(TunTap*, tuntap_unref);
 
 int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);
