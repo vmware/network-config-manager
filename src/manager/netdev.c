@@ -7,9 +7,9 @@
 #include "file-util.h"
 #include "log.h"
 #include "macros.h"
-#include "netdev.h"
 #include "parse-util.h"
 #include "string-util.h"
+#include "netdev.h"
 
 static const char *const netdev_kind_table[_NETDEV_KIND_MAX] = {
         [NETDEV_KIND_VLAN]        = "vlan",
@@ -79,6 +79,34 @@ int bond_name_to_mode(const char *name) {
                         return i;
 
         return _BOND_MODE_INVALID;
+}
+
+static const char* const bond_xmit_hash_policy_table[_BOND_XMIT_HASH_POLICY_MAX] = {
+        [BOND_XMIT_POLICY_LAYER2]  = "layer2",
+        [BOND_XMIT_POLICY_LAYER34] = "layer3+4",
+        [BOND_XMIT_POLICY_LAYER23] = "layer2+3",
+        [BOND_XMIT_POLICY_ENCAP23] = "encap2+3",
+        [BOND_XMIT_POLICY_ENCAP34] = "encap3+4",
+};
+
+const char *bond_xmit_hash_policy_to_name(BondXmitHashPolicy id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(bond_xmit_hash_policy_table))
+                return NULL;
+
+        return bond_xmit_hash_policy_table[id];
+}
+
+int bond_xmit_hash_policy_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = BOND_XMIT_POLICY_LAYER2; i < (size_t) ELEMENTSOF(bond_xmit_hash_policy_table); i++)
+                if (bond_xmit_hash_policy_table[i] && string_equal_fold(name, bond_xmit_hash_policy_table[i]))
+                        return i;
+
+        return _BOND_XMIT_HASH_POLICY_INVALID;
 }
 
 static const char *const macvlan_mode_table[_MAC_VLAN_MODE_MAX] = {
@@ -252,7 +280,6 @@ int vxlan_new(VxLan **ret) {
 
         *ret = steal_pointer(v);
         return 0;
-
 }
 
 void vxlan_unref(VxLan *v) {
@@ -260,6 +287,28 @@ void vxlan_unref(VxLan *v) {
                 return;
 
         free(v);
+}
+
+int bond_new(Bond **ret) {
+        _auto_cleanup_ Bond *b = NULL;
+
+        b = new0(Bond, 1);
+        if (!b)
+                return log_oom();
+
+        *b = (Bond) {
+                .mode = BOND_MODE_ROUNDROBIN,
+          };
+
+        *ret = steal_pointer(b);
+        return 0;
+}
+
+void bond_unref(Bond *b) {
+        if (!b)
+                return;
+
+        free(b);
 }
 
 int wireguard_new(WireGuard **ret) {
@@ -271,7 +320,6 @@ int wireguard_new(WireGuard **ret) {
 
         *ret = steal_pointer(wg);
         return 0;
-
 }
 
 void wireguard_unref(WireGuard *wg) {
@@ -362,11 +410,13 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
                         if (n->vlan->gvrp != -1) {
                                 r = key_file_set_string(key_file, "VLAN", "GVRP", bool_to_string(n->vlan->gvrp));
                                 if (r < 0)
                                         return r;
                         }
+
                         if (n->vlan->mvrp != -1) {
                                 r = key_file_set_string(key_file, "VLAN", "MVRP", bool_to_string(n->vlan->mvrp));
                                 if (r < 0)
@@ -378,6 +428,7 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
                         if (n->vlan->reorder_header != -1) {
                                 r = key_file_set_string(key_file, "VLAN", "ReorderHeader", bool_to_string(n->vlan->reorder_header));
                                 if (r < 0)
@@ -387,7 +438,7 @@ int generate_netdev_config(NetDev *n) {
                         break;
 
                 case NETDEV_KIND_BOND:
-                        r = key_file_set_string(key_file, "Bond", "Mode", bond_mode_to_name(n->bond_mode));
+                        r = key_file_set_string(key_file, "Bond", "Mode", bond_mode_to_name(n->bond->mode));
                         if (r < 0)
                                 return r;
 
