@@ -85,7 +85,6 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                         b->mcast_querier = r;
                         continue;
                 }
-
         }
 
        if (!devs || strv_length(devs) <= 0) {

@@ -1721,7 +1721,7 @@ class TestCLINetDev:
         assert(link_exist('test98') == True)
         assert(link_exist('test-99') == True)
 
-        subprocess.check_call("nmctl create-bridge bridge-98 dev test98 test-99", shell = True)
+        subprocess.check_call("nmctl create-bridge bridge-98 dev test98,test-99 stp yes", shell = True)
         assert(unit_exist('10-test98.network') == True)
         assert(unit_exist('10-test-99.network') == True)
         assert(unit_exist('10-bridge-98.network') == True)
@@ -1736,6 +1736,8 @@ class TestCLINetDev:
 
         assert(bridge_parser.get('NetDev', 'Name') == 'bridge-98')
         assert(bridge_parser.get('NetDev', 'kind') == 'bridge')
+
+        assert(bridge_parser.get('Bridge', 'STP') == 'yes')
 
         bridge_network_parser = configparser.ConfigParser()
         bridge_network_parser.read(os.path.join(networkd_unit_file_path, '10-bridge-98.network'))
@@ -1765,7 +1767,7 @@ class TestCLINetDev:
         assert(link_exist('test98') == True)
         assert(link_exist('test-99') == True)
 
-        subprocess.check_call("nmctl create-bond bond-98 mode balance-rr xmit-hash-policy layer2+3 dev test98 test-99", shell = True)
+        subprocess.check_call("nmctl create-bond bond-98 mode balance-rr xmit-hash-policy layer2+3 dev test98,test-99", shell = True)
         assert(unit_exist('10-test98.network') == True)
         assert(unit_exist('10-test-99.network') == True)
         assert(unit_exist('10-bond-98.network') == True)
