@@ -166,6 +166,7 @@ typedef struct NetDev {
         char *ifname;
         char *mac;
 
+        /* NetDev */
         TunTap *tun_tap;
         VLan *vlan;
         WireGuard *wg;
