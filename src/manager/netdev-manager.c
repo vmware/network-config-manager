@@ -281,14 +281,15 @@ int manager_create_vxlan(const char *ifname, const char *dev, VxLan *v) {
         return 0;
 }
 
-int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mode, bool kind) {
+int manager_create_macvlan(const char *ifname, const char *dev, MACVLan *m, bool kind) {
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(macvlan);
+        assert(ifname);
+        assert(m);
         assert(dev);
 
         r = netdev_new(&netdev);
@@ -296,9 +297,9 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
                 return log_oom();
 
         *netdev = (NetDev) {
-                       .ifname = strdup(macvlan),
+                       .ifname = strdup(ifname),
                        .kind = kind ? NETDEV_KIND_MACVLAN : NETDEV_KIND_MACVTAP,
-                       .macvlan_mode = mode,
+                       .macvlan = m,
                 };
         if (!netdev->ifname)
                 return log_oom();
@@ -311,7 +312,7 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
         if (r < 0)
                 return r;
 
-        v->ifname = strdup(macvlan);
+        v->ifname = strdup(ifname);
         if (!v->ifname)
                 return log_oom();
 
@@ -330,9 +331,9 @@ int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mod
                 return r;
 
         if (kind)
-                r = add_key_to_section_string(network, "Network", "MACVLAN", macvlan);
+                r = add_key_to_section_string(network, "Network", "MACVLAN", ifname);
         else
-                r = add_key_to_section_string(network, "Network", "MACVTAP", macvlan);
+                r = add_key_to_section_string(network, "Network", "MACVTAP", ifname);
 
         if (r < 0)
                 return r;

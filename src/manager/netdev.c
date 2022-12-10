@@ -444,6 +444,27 @@ void veth_unref(Veth *v) {
         free(v);
 }
 
+int macvlan_new(MACVLan **ret) {
+        MACVLan *m;
+
+        m = new0(MACVLan, 1);
+        if (!m)
+                return log_oom();
+
+        *m = (MACVLan) {
+               .mode = _MAC_VLAN_MODE_INVALID,
+             };
+        *ret = m;
+        return 0;
+}
+
+void macvlan_unref(MACVLan *m) {
+        if (!m)
+                return;
+
+        free(m);
+}
+
 int generate_netdev_config(NetDev *n) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
@@ -584,14 +605,14 @@ int generate_netdev_config(NetDev *n) {
                         break;
 
                 case NETDEV_KIND_MACVLAN:
-                        r = key_file_set_string(key_file, "MACVLAN", "Mode", macvlan_mode_to_name(n->macvlan_mode));
+                        r = key_file_set_string(key_file, "MACVLAN", "Mode", macvlan_mode_to_name(n->macvlan->mode));
                         if (r < 0)
                                 return r;
 
                         break;
 
                 case NETDEV_KIND_MACVTAP:
-                        r = key_file_set_string(key_file, "MACVTAP", "Mode", macvlan_mode_to_name(n->macvlan_mode));
+                        r = key_file_set_string(key_file, "MACVTAP", "Mode", macvlan_mode_to_name(n->macvlan->mode));
                         if (r < 0)
                                 return r;
 
