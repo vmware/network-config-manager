@@ -8,15 +8,8 @@
 #include <network-config-manager.h>
 
 #include "alloc-util.h"
-#include "ansi-color.h"
-#include "arphrd-to-name.h"
 #include "config-parser.h"
-#include "dbus.h"
-#include "dns.h"
 #include "log.h"
-#include "macros.h"
-#include "network-address.h"
-#include "network-link.h"
 #include "network-manager.h"
 #include "netdev-manager.h"
 #include "network-util.h"
