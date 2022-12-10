@@ -1765,7 +1765,7 @@ class TestCLINetDev:
         assert(link_exist('test98') == True)
         assert(link_exist('test-99') == True)
 
-        subprocess.check_call("nmctl create-bond bond-98 mode balance-rr dev test98 test-99", shell = True)
+        subprocess.check_call("nmctl create-bond bond-98 mode balance-rr xmit-hash-policy layer2+3 dev test98 test-99", shell = True)
         assert(unit_exist('10-test98.network') == True)
         assert(unit_exist('10-test-99.network') == True)
         assert(unit_exist('10-bond-98.network') == True)
@@ -1780,7 +1780,9 @@ class TestCLINetDev:
 
         assert(bond_parser.get('NetDev', 'Name') == 'bond-98')
         assert(bond_parser.get('NetDev', 'kind') == 'bond')
+
         assert(bond_parser.get('Bond', 'Mode') == 'balance-rr')
+        assert(bond_parser.get('Bond', 'TransmitHashPolicy') == 'layer2+3')
 
         bond_network_parser = configparser.ConfigParser()
         bond_network_parser.read(os.path.join(networkd_unit_file_path, '10-bond-98.network'))
