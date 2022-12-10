@@ -239,7 +239,6 @@ void netdev_unref(NetDev *n) {
                 return;
 
         free(n->ifname);
-        free(n->peer);
         free(n->mac);
 
         free(n);
@@ -416,6 +415,7 @@ int vrf_new(VRF **ret) {
         if (!v)
                 return -ENOMEM;
 
+        *ret = v;
         return 0;
 }
 
@@ -423,6 +423,24 @@ void vrf_unref(VRF *v) {
         if (!v)
                 return;
 
+        free(v);
+}
+
+int veth_new(Veth **ret) {
+        Veth *v;
+
+        v = new0(Veth, 1);
+        if (!v)
+                return log_oom();
+
+        *ret = v;
+        return 0;
+}
+void veth_unref(Veth *v) {
+        if (!v)
+                return;
+
+        free(v->peer);
         free(v);
 }
 
@@ -594,8 +612,8 @@ int generate_netdev_config(NetDev *n) {
                         break;
 
                 case NETDEV_KIND_VETH:
-                        if (n->peer) {
-                                r = key_file_set_string(key_file, "Peer", "Name", n->peer);
+                        if (n->veth && n->veth->peer) {
+                                r = key_file_set_string(key_file, "Peer", "Name", n->veth->peer);
                                 if (r < 0)
                                         return r;
                         }

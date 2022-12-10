@@ -150,9 +150,12 @@ typedef struct VRF {
         uint32_t table;
 } VRF;
 
+typedef struct Veth {
+        char *peer;
+} Veth;
+
 typedef struct NetDev {
         char *ifname;
-        char *peer;
         char *mac;
 
         uint32_t id;
@@ -165,6 +168,7 @@ typedef struct NetDev {
         Bond *bond;
         Bridge *bridge;
         VRF *vrf;
+        Veth *veth;
 
         NetDevKind kind;
         MACVLanMode macvlan_mode;
@@ -174,6 +178,10 @@ typedef struct NetDev {
 int netdev_new(NetDev **ret);
 void netdev_unref(NetDev *n);
 DEFINE_CLEANUP(NetDev*, netdev_unref);
+
+int veth_new(Veth **ret);
+void veth_unref(Veth *v);
+DEFINE_CLEANUP(Veth*, veth_unref);
 
 int vrf_new(VRF **ret);
 void vrf_unref(VRF *v);
