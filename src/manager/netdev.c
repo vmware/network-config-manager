@@ -356,6 +356,32 @@ void tunnel_unref(Tunnel *t) {
         free(t);
 }
 
+int bridge_new(Bridge **ret) {
+        Bridge *t;
+
+        t = new0(Bridge, 1);
+        if (!t)
+                return log_oom();
+
+        *t = (Bridge) {
+              .mcast_querier = -1,
+              .mcast_snooping = -1,
+              .vlan_filtering = -1,
+              .vlan_protocol = -1,
+              .stp = -1,
+          };
+
+        *ret = steal_pointer(t);
+        return 0;
+}
+
+void bridge_unref(Bridge *b) {
+        if (!b)
+                return;
+
+        free(b);
+}
+
 int tuntap_new(TunTap **ret) {
         TunTap *t = NULL;
 
@@ -383,6 +409,23 @@ void tuntap_unref(TunTap *t) {
         free(t);
 }
 
+int vrf_new(VRF **ret) {
+        VRF *v;
+
+        v = new0(VRF, 1);
+        if (!v)
+                return -ENOMEM;
+
+        return 0;
+}
+
+void vrf_unref(VRF *v) {
+        if (!v)
+                return;
+
+        free(v);
+}
+
 int generate_netdev_config(NetDev *n) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
@@ -402,6 +445,34 @@ int generate_netdev_config(NetDev *n) {
                 return r;
 
         switch (n->kind) {
+                case NETDEV_KIND_BRIDGE:
+                        if (n->bridge->mcast_querier >= 0) {
+                                r = key_file_set_string(key_file, "Bridge", "MulticastQuerier", bool_to_string(n->bridge->mcast_querier));
+                                if (r < 0)
+                                        return r;
+                        }
+                        if (n->bridge->mcast_snooping >= 0) {
+                                r = key_file_set_string(key_file, "Bridge", "MulticastSnooping", bool_to_string(n->bridge->mcast_snooping));
+                                if (r < 0)
+                                        return r;
+                        }
+                        if (n->bridge->vlan_filtering >= 0) {
+                                r = key_file_set_string(key_file, "Bridge", "VLANFiltering", bool_to_string(n->bridge->vlan_filtering));
+                                if (r < 0)
+                                        return r;
+                        }
+                        if (n->bridge->vlan_protocol >= 0) {
+                                r = key_file_set_string(key_file, "Bridge", "VLANProtocol", bool_to_string(n->bridge->vlan_protocol));
+                                if (r < 0)
+                                        return r;
+                        }
+                        if (n->bridge->stp >= 0) {
+                                r = key_file_set_string(key_file, "Bridge", "STP", bool_to_string(n->bridge->stp));
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        break;
                 case NETDEV_KIND_VLAN:
                         r = key_file_set_uint(key_file, "VLAN", "Id", n->vlan->id);
                         if (r < 0)
@@ -413,25 +484,25 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
-                        if (n->vlan->gvrp != -1) {
+                        if (n->vlan->gvrp >= 0) {
                                 r = key_file_set_string(key_file, "VLAN", "GVRP", bool_to_string(n->vlan->gvrp));
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->vlan->mvrp != -1) {
+                        if (n->vlan->mvrp >= 0) {
                                 r = key_file_set_string(key_file, "VLAN", "MVRP", bool_to_string(n->vlan->mvrp));
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->vlan->loose_binding != -1) {
+                        if (n->vlan->loose_binding >= 0) {
                                 r = key_file_set_string(key_file, "VLAN", "LooseBinding", bool_to_string(n->vlan->loose_binding));
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->vlan->reorder_header != -1) {
+                        if (n->vlan->reorder_header >= 0) {
                                 r = key_file_set_string(key_file, "VLAN", "ReorderHeader", bool_to_string(n->vlan->reorder_header));
                                 if (r < 0)
                                         return r;
@@ -531,7 +602,7 @@ int generate_netdev_config(NetDev *n) {
                         break;
 
                 case NETDEV_KIND_VRF:
-                        r = key_file_set_uint(key_file, "VRF", "Table", n->table);
+                        r = key_file_set_uint(key_file, "VRF", "Table", n->vrf->table);
                         if (r < 0)
                                 return r;
 
@@ -550,25 +621,25 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
-                        if (n->tun_tap->packet_info != -1) {
+                        if (n->tun_tap->packet_info >= 0) {
                                 r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "PacketInfo", bool_to_string(n->tun_tap->packet_info));
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->tun_tap->vnet_hdr != -1) {
+                        if (n->tun_tap->vnet_hdr >= 0) {
                                 r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "VNetHeader", bool_to_string(n->tun_tap->vnet_hdr));
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->tun_tap->keep_carrier != -1) {
+                        if (n->tun_tap->keep_carrier >= 0) {
                                 r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "KeepCarrier", bool_to_string(n->tun_tap->keep_carrier));
                                 if (r < 0)
                                         return r;
                         }
 
-                        if (n->tun_tap->multi_queue != -1) {
+                        if (n->tun_tap->multi_queue >= 0) {
                                 r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "MultiQueue", bool_to_string(n->tun_tap->multi_queue));
                                 if (r < 0)
                                         return r;

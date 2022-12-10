@@ -567,7 +567,7 @@ static int list_one_link(char *argv[]) {
 
         r = network_parse_link_dhcp4_client_id(p->ifindex, &dhcp4_identifier);
         if (r >= 0) {
-                _auto_cleanup_ char *c = NULL, *n = NULL;
+                _auto_cleanup_ char *c = NULL;
                 _auto_cleanup_ IfNameIndex *ifn = NULL;
 
                 r = parse_ifname_or_index(l->name, &ifn);
@@ -653,7 +653,7 @@ static void list_link_routes(gpointer key, gpointer value, gpointer userdata) {
 }
 
 _public_ int ncm_system_status(int argc, char *argv[]) {
-        _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
+        _auto_cleanup_ char *state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **search_domains = NULL, **ntp = NULL;
         _cleanup_(routes_unrefp) Routes *routes = NULL;

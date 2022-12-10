@@ -104,13 +104,14 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *
         return 0;
 }
 
-int manager_create_bridge(const char *bridge, char **interfaces) {
+int manager_create_bridge(const char *ifname, Bridge *b, char **interfaces) {
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         char **s;
         int r;
 
-        assert(bridge);
+        assert(ifname);
+        assert(b);
         assert(interfaces);
 
         r = netdev_new(&netdev);
@@ -118,8 +119,9 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
                 return log_oom();
 
         *netdev = (NetDev) {
-                        .ifname = strdup(bridge),
+                        .ifname = strdup(ifname),
                         .kind = NETDEV_KIND_BRIDGE,
+                        .bridge = b,
                   };
         if (!netdev->ifname)
                 return log_oom();
@@ -132,7 +134,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
         if (r < 0)
                 return r;
 
-        v->ifname = strdup(bridge);
+        v->ifname = strdup(ifname);
         if (!v->ifname)
                 return log_oom();
 
@@ -154,7 +156,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
                 if (r < 0)
                         return r;
 
-                r = add_key_to_section_string(network, "Network", "Bridge", bridge);
+                r = add_key_to_section_string(network, "Network", "Bridge", ifname);
                 if (r < 0)
                         return r;
         }
@@ -501,21 +503,22 @@ int manager_create_tunnel(const char *ifname, NetDevKind kind, const char *dev, 
         return 0;
 }
 
-int manager_create_vrf(const char *vrf, const uint32_t table) {
+int manager_create_vrf(const char *ifname, VRF *vrf) {
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
+        _cleanup_(network_unrefp) Network *n = NULL;
         int r;
 
         assert(vrf);
+        assert(ifname);
 
         r = netdev_new(&netdev);
         if (r < 0)
                 return log_oom();
 
         *netdev = (NetDev) {
-                        .ifname = strdup(vrf),
+                        .ifname = strdup(ifname),
                         .kind = NETDEV_KIND_VRF,
-                        .table = table
+                        .vrf = vrf,
                 };
         if (!netdev->ifname)
                 return log_oom();
@@ -524,15 +527,15 @@ int manager_create_vrf(const char *vrf, const uint32_t table) {
         if (r < 0)
                 return r;
 
-        r = network_new(&v);
+        r = network_new(&n);
         if (r < 0)
                 return r;
 
-        v->ifname = strdup(vrf);
-        if (!v->ifname)
+        n->ifname = strdup(ifname);
+        if (!n->ifname)
                 return log_oom();
 
-        r = generate_network_config(v);
+        r = generate_network_config(n);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", strerror(-r));
                 return r;

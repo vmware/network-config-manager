@@ -117,7 +117,7 @@ typedef struct VxLan {
 } VxLan;
 
 typedef struct Tunnel {
-         bool independent;
+        bool independent;
 
         IPAddress local;
         IPAddress remote;
@@ -128,13 +128,34 @@ typedef struct Bond {
         BondXmitHashPolicy xmit_hash_policy;
 } Bond;
 
+typedef struct Bridge {
+        int mcast_querier;
+        int mcast_snooping;
+        int vlan_filtering;
+        int vlan_protocol;
+        int stp;
+
+        uint16_t priority;
+        uint16_t group_fwd_mask;
+        uint16_t default_pvid;
+        uint8_t igmp_version;
+
+        uint64_t forward_delay;
+        uint64_t hello_time;
+        uint64_t max_age;
+        uint64_t ageing_time;
+} Bridge;
+
+typedef struct VRF {
+        uint32_t table;
+} VRF;
+
 typedef struct NetDev {
         char *ifname;
         char *peer;
         char *mac;
 
         uint32_t id;
-        uint32_t table;
 
         TunTap *tun_tap;
         VLan *vlan;
@@ -142,6 +163,8 @@ typedef struct NetDev {
         VxLan *vxlan;
         Tunnel *tunnel;
         Bond *bond;
+        Bridge *bridge;
+        VRF *vrf;
 
         NetDevKind kind;
         MACVLanMode macvlan_mode;
@@ -151,6 +174,10 @@ typedef struct NetDev {
 int netdev_new(NetDev **ret);
 void netdev_unref(NetDev *n);
 DEFINE_CLEANUP(NetDev*, netdev_unref);
+
+int vrf_new(VRF **ret);
+void vrf_unref(VRF *v);
+DEFINE_CLEANUP(VRF*, vrf_unref);
 
 int vlan_new(VLan **ret);
 void vlan_unref(VLan *n);
@@ -175,6 +202,10 @@ DEFINE_CLEANUP(TunTap*, tuntap_unref);
 int bond_new(Bond **ret);
 void bond_unref(Bond *t);
 DEFINE_CLEANUP(Bond*, bond_unref);
+
+int bridge_new(Bridge **ret);
+void bridge_unref(Bridge *b);
+DEFINE_CLEANUP(Bridge*, bridge_unref);
 
 int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);
