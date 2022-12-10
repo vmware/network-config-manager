@@ -12,7 +12,7 @@ int manager_create_vxlan(const char *ifname, const char *dev, VxLan *v);
 
 int manager_create_macvlan(const char *macvlan, const char *dev, MACVLanMode mode, bool kind);
 int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, bool kind);
-int manager_create_veth(const char *veth, const char *veth_peer);
+int manager_create_veth(const char *ifname, Veth *v);
 int manager_create_tunnel(const char *tunnel, NetDevKind kind, const char *dev, Tunnel *t);
 int manager_create_vrf(const char *ifname, VRF *vrf);
 int manager_create_wireguard(const char *ifname, WireGuard *wg);

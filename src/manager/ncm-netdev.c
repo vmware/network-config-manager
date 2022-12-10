@@ -548,8 +548,12 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_veth(int argc, char *argv[]) {
-        _auto_cleanup_ char *peer = NULL;
+        _cleanup_(veth_unrefp) Veth *v = NULL;
         int r;
+
+        r = veth_new(&v);
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal_fold(argv[i], "peer")) {
@@ -560,8 +564,8 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
                                  return -EINVAL;
                          }
 
-                         peer = strdup(argv[i]);
-                         if (!peer)
+                         v->peer = strdup(argv[i]);
+                         if (!v->peer)
                                  return log_oom();
                 }
         }
@@ -571,7 +575,7 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_create_veth(argv[1], peer);
+        r = manager_create_veth(argv[1], v);
         if (r < 0) {
                 log_warning("Failed to create veth '%s': %s", argv[1], strerror(-r));
                 return r;
