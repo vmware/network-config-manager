@@ -6,7 +6,7 @@
 
 #include "netdev.h"
 
-int manager_create_bridge(const char *bridge, char **interfaces);
+int manager_create_bridge(const char *ifname, Bridge *b, char **interfaces);
 int manager_create_bond(const char *ifname, Bond *b, char **interfaces);
 int manager_create_vxlan(const char *ifname, const char *dev, VxLan *v);
 

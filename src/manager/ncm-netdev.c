@@ -17,23 +17,79 @@
 
 _public_ int ncm_create_bridge(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **devs = NULL;
+        _cleanup_(bridge_unrefp) Bridge *b = NULL;
         char **s;
         int r;
+
+        r = bridge_new(&b);
+        if (r < 0)
+                return log_oom();
 
        for (int i = 2; i < argc; i++) {
                 if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = argv_to_strv(argc - i, argv + i, &devs);
+                        devs = strsplit(argv[i], ",", -1);
                         if (r < 0) {
                                 log_warning("Failed to parse devices: %s", strerror(-r));
                                 return r;
                         }
+                } else if (string_equal_fold(argv[i], "stp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse stp %s : %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        b->stp = r;
+                        continue;
+                } else if (string_equal_fold(argv[i], "vlan-protocol")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse vlan-protocol %s : %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        b->vlan_protocol = r;
+                        continue;
+                } else if (string_equal_fold(argv[i], "vlan-filtering")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse vlan-filtering %s : %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        b->vlan_filtering = r;
+                        continue;
+                } else if (string_equal_fold(argv[i], "mcast-snooping")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse mcast-snooping %s : %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        b->mcast_snooping = r;
+                        continue;
+                } else if (string_equal_fold(argv[i], "mcast-querier")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse mcast-querier %s : %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        b->mcast_querier = r;
+                        continue;
                 }
+
         }
 
-       if (strv_length(devs) <= 0) {
-               log_warning("Failed to parse devices: %s", strerror(-r));
+       if (!devs || strv_length(devs) <= 0) {
+               log_warning("Failed to parse devices: %s", strerror(EINVAL));
                return r;
        }
 
@@ -52,7 +108,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_bridge(argv[1], devs);
+        r = manager_create_bridge(argv[1], b, devs);
         if (r < 0) {
                 log_warning("Failed to create bridge '%s': %s", argv[1], strerror(-r));
                 return r;
@@ -93,7 +149,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                 } else if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = argv_to_strv(argc - i, argv + i, &devs);
+                        devs = strsplit(argv[i], ",", -1);
                         if (r < 0) {
                                 log_warning("Failed to parse devices: %s", strerror(-r));
                                 return r;
@@ -101,7 +157,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                 }
         }
 
-        if (strv_length(devs) <= 0) {
+        if (!devs || strv_length(devs) <= 0) {
                log_warning("Failed to parse devices: %s", strerror(EINVAL));
                return r;
        }

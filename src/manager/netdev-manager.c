@@ -104,13 +104,14 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *
         return 0;
 }
 
-int manager_create_bridge(const char *bridge, char **interfaces) {
+int manager_create_bridge(const char *ifname, Bridge *b, char **interfaces) {
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         char **s;
         int r;
 
-        assert(bridge);
+        assert(ifname);
+        assert(b);
         assert(interfaces);
 
         r = netdev_new(&netdev);
@@ -118,8 +119,9 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
                 return log_oom();
 
         *netdev = (NetDev) {
-                        .ifname = strdup(bridge),
+                        .ifname = strdup(ifname),
                         .kind = NETDEV_KIND_BRIDGE,
+                        .bridge = b,
                   };
         if (!netdev->ifname)
                 return log_oom();
@@ -132,7 +134,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
         if (r < 0)
                 return r;
 
-        v->ifname = strdup(bridge);
+        v->ifname = strdup(ifname);
         if (!v->ifname)
                 return log_oom();
 
@@ -154,7 +156,7 @@ int manager_create_bridge(const char *bridge, char **interfaces) {
                 if (r < 0)
                         return r;
 
-                r = add_key_to_section_string(network, "Network", "Bridge", bridge);
+                r = add_key_to_section_string(network, "Network", "Bridge", ifname);
                 if (r < 0)
                         return r;
         }

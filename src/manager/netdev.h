@@ -128,6 +128,24 @@ typedef struct Bond {
         BondXmitHashPolicy xmit_hash_policy;
 } Bond;
 
+typedef struct Bridge {
+        int mcast_querier;
+        int mcast_snooping;
+        int vlan_filtering;
+        int vlan_protocol;
+        int stp;
+
+        uint16_t priority;
+        uint16_t group_fwd_mask;
+        uint16_t default_pvid;
+        uint8_t igmp_version;
+
+        uint64_t forward_delay;
+        uint64_t hello_time;
+        uint64_t max_age;
+        uint64_t ageing_time;
+} Bridge;
+
 typedef struct NetDev {
         char *ifname;
         char *peer;
@@ -142,6 +160,7 @@ typedef struct NetDev {
         VxLan *vxlan;
         Tunnel *tunnel;
         Bond *bond;
+        Bridge *bridge;
 
         NetDevKind kind;
         MACVLanMode macvlan_mode;
@@ -175,6 +194,10 @@ DEFINE_CLEANUP(TunTap*, tuntap_unref);
 int bond_new(Bond **ret);
 void bond_unref(Bond *t);
 DEFINE_CLEANUP(Bond*, bond_unref);
+
+int bridge_new(Bridge **ret);
+void bridge_unref(Bridge *b);
+DEFINE_CLEANUP(Bridge*, bridge_unref);
 
 int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifnameidx, char **ret);
