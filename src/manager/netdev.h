@@ -158,11 +158,13 @@ typedef struct MACVLan {
          MACVLanMode mode;
 } MACVLan;
 
+typedef struct IPVLan {
+        IPVLanMode mode;
+} IPVLan;
+
 typedef struct NetDev {
         char *ifname;
         char *mac;
-
-        uint32_t id;
 
         TunTap *tun_tap;
         VLan *vlan;
@@ -174,14 +176,18 @@ typedef struct NetDev {
         VRF *vrf;
         Veth *veth;
         MACVLan *macvlan;
+        IPVLan *ipvlan;
 
         NetDevKind kind;
-        IPVLanMode ipvlan_mode;
 } NetDev;
 
 int netdev_new(NetDev **ret);
 void netdev_unref(NetDev *n);
 DEFINE_CLEANUP(NetDev*, netdev_unref);
+
+int ipvlan_new(IPVLan **ret);
+void ipvlan_unref(IPVLan *v);
+DEFINE_CLEANUP(IPVLan*, ipvlan_unref);
 
 int veth_new(Veth **ret);
 void veth_unref(Veth *v);

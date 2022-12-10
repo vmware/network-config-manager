@@ -452,8 +452,9 @@ int macvlan_new(MACVLan **ret) {
                 return log_oom();
 
         *m = (MACVLan) {
-               .mode = _MAC_VLAN_MODE_INVALID,
+                      .mode = _MAC_VLAN_MODE_INVALID,
              };
+
         *ret = m;
         return 0;
 }
@@ -463,6 +464,28 @@ void macvlan_unref(MACVLan *m) {
                 return;
 
         free(m);
+}
+
+int ipvlan_new(IPVLan **ret) {
+        IPVLan *v;
+
+        v = new0(IPVLan, 1);
+        if (!v)
+                return -ENOMEM;
+
+        *v = (IPVLan) {
+                     .mode = _IP_VLAN_MODE_INVALID,
+             };
+
+        *ret = v;
+        return 0;
+}
+
+void ipvlan_unref(IPVLan *v) {
+        if (!v)
+                return;
+
+        free(v);
 }
 
 int generate_netdev_config(NetDev *n) {
@@ -619,14 +642,14 @@ int generate_netdev_config(NetDev *n) {
                         break;
 
                 case NETDEV_KIND_IPVLAN:
-                        r = key_file_set_string(key_file, "IPVLAN", "Mode", ipvlan_mode_to_name(n->ipvlan_mode));
+                        r = key_file_set_string(key_file, "IPVLAN", "Mode", ipvlan_mode_to_name(n->ipvlan->mode));
                         if (r < 0)
                                 return r;
 
                         break;
 
                 case NETDEV_KIND_IPVTAP:
-                        r = key_file_set_string(key_file, "IPVTAP", "Mode", ipvlan_mode_to_name(n->ipvlan_mode));
+                        r = key_file_set_string(key_file, "IPVTAP", "Mode", ipvlan_mode_to_name(n->ipvlan->mode));
                         if (r < 0)
                                 return r;
 

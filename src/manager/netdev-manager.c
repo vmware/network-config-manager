@@ -341,24 +341,25 @@ int manager_create_macvlan(const char *ifname, const char *dev, MACVLan *m, bool
         return dbus_network_reload();
 }
 
-int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, bool kind) {
+int manager_create_ipvlan(const char *ifname, const char *dev, IPVLan *m, bool kind) {
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ipvlan);
+        assert(ifname);
         assert(dev);
+        assert(m);
 
         r = netdev_new(&netdev);
         if (r < 0)
                 return log_oom();
 
         *netdev = (NetDev) {
-                          .ifname = strdup(ipvlan),
+                          .ifname = strdup(ifname),
                           .kind = kind ? NETDEV_KIND_IPVLAN : NETDEV_KIND_IPVTAP,
-                          .ipvlan_mode = mode,
+                          .ipvlan = m,
                  };
 
         if (!netdev->ifname)
@@ -372,7 +373,7 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
         if (r < 0)
                 return r;
 
-        v->ifname = strdup(ipvlan);
+        v->ifname = strdup(ifname);
         if (!v->ifname)
                 return log_oom();
 
@@ -391,10 +392,9 @@ int manager_create_ipvlan(const char *ipvlan, const char *dev, IPVLanMode mode, 
                 return r;
 
         if (kind)
-                r = add_key_to_section_string(network, "Network", "IPVLAN", ipvlan);
+                r = add_key_to_section_string(network, "Network", "IPVLAN", ifname);
         else
-                r = add_key_to_section_string(network, "Network", "IPVTAP", ipvlan);
-
+                r = add_key_to_section_string(network, "Network", "IPVTAP", ifname);
         if (r < 0)
                 return r;
 
