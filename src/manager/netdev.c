@@ -82,11 +82,12 @@ int bond_name_to_mode(const char *name) {
 }
 
 static const char* const bond_xmit_hash_policy_table[_BOND_XMIT_HASH_POLICY_MAX] = {
-        [BOND_XMIT_POLICY_LAYER2]  = "layer2",
-        [BOND_XMIT_POLICY_LAYER34] = "layer3+4",
-        [BOND_XMIT_POLICY_LAYER23] = "layer2+3",
-        [BOND_XMIT_POLICY_ENCAP23] = "encap2+3",
-        [BOND_XMIT_POLICY_ENCAP34] = "encap3+4",
+        [BOND_XMIT_POLICY_LAYER2]      = "layer2",
+        [BOND_XMIT_POLICY_LAYER34]     = "layer3+4",
+        [BOND_XMIT_POLICY_LAYER23]     = "layer2+3",
+        [BOND_XMIT_POLICY_ENCAP23]     = "encap2+3",
+        [BOND_XMIT_POLICY_ENCAP34]     = "encap3+4",
+        [BOND_XMIT_POLICY_VLAN_SRCMAC] = "vlan+srcmac",
 };
 
 const char *bond_xmit_hash_policy_to_name(BondXmitHashPolicy id) {
@@ -298,6 +299,7 @@ int bond_new(Bond **ret) {
 
         *b = (Bond) {
                 .mode = BOND_MODE_ROUNDROBIN,
+                .xmit_hash_policy = _BOND_XMIT_HASH_POLICY_INVALID,
           };
 
         *ret = steal_pointer(b);
@@ -441,6 +443,12 @@ int generate_netdev_config(NetDev *n) {
                         r = key_file_set_string(key_file, "Bond", "Mode", bond_mode_to_name(n->bond->mode));
                         if (r < 0)
                                 return r;
+
+                        if (n->bond->xmit_hash_policy != _BOND_XMIT_HASH_POLICY_INVALID) {
+                                r = key_file_set_string(key_file, "Bond", "TransmitHashPolicy", bond_xmit_hash_policy_to_name(n->bond->xmit_hash_policy));
+                                if (r < 0)
+                                        return r;
+                        }
 
                         break;
 

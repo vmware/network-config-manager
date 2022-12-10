@@ -68,7 +68,7 @@ typedef enum BondXmitHashPolicy {
         BOND_XMIT_POLICY_ENCAP34,
         BOND_XMIT_POLICY_VLAN_SRCMAC,
         _BOND_XMIT_HASH_POLICY_MAX,
-        _BOND_XMIT_HASH_POLICY_INVALID      = -EINVAL,
+        _BOND_XMIT_HASH_POLICY_INVALID = -EINVAL,
 } BondXmitHashPolicy;
 
 typedef struct TunTap {

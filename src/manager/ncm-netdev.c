@@ -84,10 +84,19 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
 
                         r = bond_name_to_mode(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse bond mode '%s' : %s", argv[3], strerror(EINVAL));
+                                log_warning("Failed to parse bond mode '%s' : %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
                         b->mode = r;
+                } if (string_equal_fold(argv[i], "xmit-hash-policy") || string_equal_fold(argv[i], "xhp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = bond_xmit_hash_policy_to_mode(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse bond xmit hash policy '%s' : %s", argv[i], strerror(EINVAL));
+                                return r;
+                        }
+                        b->xmit_hash_policy = r;
                 } else if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 

@@ -194,7 +194,7 @@ static int help(void) {
                                                      "\n\t\t\t\t    [loose-binding BOOLEAN] [reorder-hdr BOOLEAN] Creates vlan netdev and network file\n"
                "  create-bridge                [BRIDGE name] dev [DEVICE] [DEVICE] ... Creates bridge netdev and sets master to device\n"
                "  create-bond                  [BOND name] mode [MODE {balance-rr|active-backup|balance-xor|broadcast|802.3ad|balance-tlb|balance-alb}]"
-                                               "\n\t\t\t\tdev [DEVICE] [DEVICE] ... Creates bond netdev and sets master to device\n"
+                                               "\n\t\t\t\t[xmit-hash-policy layer2|layer2+3|layer3+4|encap2+3|encap3+4|vlan+srcmac] dev [DEVICE] [DEVICE] ... Creates a bond and sets master to devices\n"
                "  create-vxlan                 [VXLAN name] [dev DEVICE] vni [INTEGER] [local ADDRESS] [remote ADDRESS] [dport PORT] [independent BOOLEAN]."
                                                "\n\t\t\t\tCreates vxlan VXLAN (Virtual eXtensible Local Area Network) tunneling.\n"
                "  create-macvlan               [MACVLAN name] dev [DEVICE] mode [MODE {private|vepa|bridge|passthru|source}] Creates macvlan virtualized bridged networking.\n"
