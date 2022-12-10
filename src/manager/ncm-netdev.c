@@ -252,10 +252,14 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
+        _cleanup_(ipvlan_unrefp) IPVLan *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_mode = false;
-        IPVLanMode mode;
         int r;
+
+        r = ipvlan_new(&v);
+        if (r < 0)
+                return log_oom();
 
         for (int i = 2; i < argc; i++) {
                 if (string_equal_fold(argv[i], "dev") || string_equal_fold(argv[i], "device") || string_equal_fold(argv[i], "link")) {
@@ -276,7 +280,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
                                 return r;
                         }
                         have_mode = true;
-                        mode = r;
+                        v->mode = r;
 
                         continue;
                 } else {
@@ -301,9 +305,9 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
         }
 
         if (string_equal_fold(argv[0], "create-ipvlan"))
-                r = manager_create_ipvlan(argv[1], p->ifname, mode, true);
+                r = manager_create_ipvlan(argv[1], p->ifname, v, true);
         else
-                r = manager_create_ipvlan(argv[1], p->ifname, mode, false);
+                r = manager_create_ipvlan(argv[1], p->ifname, v, false);
 
         if (r < 0) {
                 log_warning("Failed to %s '%s': %s", argv[0], argv[1], strerror(-r));
