@@ -581,15 +581,19 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_vrf(int argc, char *argv[]) {
+        _cleanup_(vrf_unrefp) VRF *vrf = NULL;
         bool have_table = false;
-        uint32_t table;
         int r;
+
+        r = vrf_new(&vrf);
+        if (r < 0)
+                return log_oom();
 
         for (int i = 1; i < argc; i++) {
                 if (string_equal_fold(argv[i], "table") || string_equal_fold(argv[i], "t")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint32(argv[3], &table);
+                        r = parse_uint32(argv[3], &vrf->table);
                         if (r < 0) {
                                 log_warning("Failed to parse table id='%s' for '%s': %s", argv[i], argv[1], strerror(-r));
                                 return r;
@@ -608,7 +612,7 @@ _public_ int ncm_create_vrf(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_vrf(argv[1], table);
+        r = manager_create_vrf(argv[1], vrf);
         if (r < 0) {
                 log_warning("Failed to create vrf '%s': %s", argv[1], strerror(-r));
                 return r;

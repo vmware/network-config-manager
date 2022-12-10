@@ -117,7 +117,7 @@ typedef struct VxLan {
 } VxLan;
 
 typedef struct Tunnel {
-         bool independent;
+        bool independent;
 
         IPAddress local;
         IPAddress remote;
@@ -146,13 +146,16 @@ typedef struct Bridge {
         uint64_t ageing_time;
 } Bridge;
 
+typedef struct VRF {
+        uint32_t table;
+} VRF;
+
 typedef struct NetDev {
         char *ifname;
         char *peer;
         char *mac;
 
         uint32_t id;
-        uint32_t table;
 
         TunTap *tun_tap;
         VLan *vlan;
@@ -161,6 +164,7 @@ typedef struct NetDev {
         Tunnel *tunnel;
         Bond *bond;
         Bridge *bridge;
+        VRF *vrf;
 
         NetDevKind kind;
         MACVLanMode macvlan_mode;
@@ -170,6 +174,10 @@ typedef struct NetDev {
 int netdev_new(NetDev **ret);
 void netdev_unref(NetDev *n);
 DEFINE_CLEANUP(NetDev*, netdev_unref);
+
+int vrf_new(VRF **ret);
+void vrf_unref(VRF *v);
+DEFINE_CLEANUP(VRF*, vrf_unref);
 
 int vlan_new(VLan **ret);
 void vlan_unref(VLan *n);

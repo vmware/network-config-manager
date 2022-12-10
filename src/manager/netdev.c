@@ -409,6 +409,23 @@ void tuntap_unref(TunTap *t) {
         free(t);
 }
 
+int vrf_new(VRF **ret) {
+        VRF *v;
+
+        v = new0(VRF, 1);
+        if (!v)
+                return -ENOMEM;
+
+        return 0;
+}
+
+void vrf_unref(VRF *v) {
+        if (!v)
+                return;
+
+        free(v);
+}
+
 int generate_netdev_config(NetDev *n) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
@@ -585,7 +602,7 @@ int generate_netdev_config(NetDev *n) {
                         break;
 
                 case NETDEV_KIND_VRF:
-                        r = key_file_set_uint(key_file, "VRF", "Table", n->table);
+                        r = key_file_set_uint(key_file, "VRF", "Table", n->vrf->table);
                         if (r < 0)
                                 return r;
 
