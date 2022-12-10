@@ -154,6 +154,10 @@ typedef struct Veth {
         char *peer;
 } Veth;
 
+typedef struct MACVLan {
+         MACVLanMode mode;
+} MACVLan;
+
 typedef struct NetDev {
         char *ifname;
         char *mac;
@@ -169,9 +173,9 @@ typedef struct NetDev {
         Bridge *bridge;
         VRF *vrf;
         Veth *veth;
+        MACVLan *macvlan;
 
         NetDevKind kind;
-        MACVLanMode macvlan_mode;
         IPVLanMode ipvlan_mode;
 } NetDev;
 
@@ -182,6 +186,10 @@ DEFINE_CLEANUP(NetDev*, netdev_unref);
 int veth_new(Veth **ret);
 void veth_unref(Veth *v);
 DEFINE_CLEANUP(Veth*, veth_unref);
+
+int macvlan_new(MACVLan **ret);
+void macvlan_unref(MACVLan *v);
+DEFINE_CLEANUP(MACVLan*, macvlan_unref);
 
 int vrf_new(VRF **ret);
 void vrf_unref(VRF *v);
