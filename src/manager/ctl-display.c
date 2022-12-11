@@ -232,21 +232,6 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         return 0;
 }
 
-static void list_one_link_routes(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_ char *c = NULL;
-        static bool first = true;
-        unsigned long size;
-        Route *rt = NULL;
-
-        rt = (Route *) g_bytes_get_data(key, &size);
-        (void) ip_to_string(rt->family, &rt->address, &c);
-        if (first) {
-                printf("%s\n", c);
-                first = false;
-        } else
-                printf("                   %s\n", c);
-}
-
 static int display_one_link_device(Link *l, bool show, char **link_file) {
         const char *link = NULL, *driver = NULL, *path = NULL, *vendor = NULL, *model = NULL;
         _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
@@ -498,8 +483,26 @@ static int list_one_link(char *argv[]) {
 
         r = manager_get_one_link_route(l->ifindex, &route);
         if (r >= 0 && route && set_size(route->routes) > 0) {
+                gpointer key, value;
+                GHashTableIter iter;
+                bool first = true;
+
                 display(arg_beautify, ansi_color_bold_cyan(), "                     Gateway: ");
-                set_foreach(route->routes, list_one_link_routes, NULL);
+
+                g_hash_table_iter_init(&iter, route->routes->hash);
+                while (g_hash_table_iter_next (&iter, &key, &value)) {
+                        _auto_cleanup_ char *c = NULL;
+                        unsigned long size;
+                        Route *rt = NULL;
+
+                        rt = (Route *) g_bytes_get_data(key, &size);
+                        (void) ip_to_string(rt->family, &rt->address, &c);
+                        if (first) {
+                                printf("%s\n", c);
+                                first = false;
+                        } else
+                                printf("                              %s\n", c);
+                }
         }
 
         if (dns) {

@@ -5,7 +5,6 @@
 #include <grp.h>
 #include <pwd.h>
 #include <network-config-manager.h>
-#include <network-config-manager.h>
 
 #include "alloc-util.h"
 #include "config-parser.h"
@@ -404,7 +403,6 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                         }
                         continue;
                 } else {
-
                         log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }

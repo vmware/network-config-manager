@@ -5,7 +5,6 @@
 #include <network-config-manager.h>
 
 #include "alloc-util.h"
-#include "dbus.h"
 #include "log.h"
 #include "netdev-link.h"
 #include "network-util.h"
