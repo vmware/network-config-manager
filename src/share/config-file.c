@@ -168,6 +168,20 @@ int add_key_to_section_integer(Section *s, const char *k, int v) {
         return add_key_to_section(s, k, c);
 }
 
+int add_key_to_section_uint(Section *s, const char *k, uint v) {
+        _auto_cleanup_ gchar *c = NULL;
+
+        assert(s);
+        assert(k);
+
+        c = g_strdup_printf("%u", v);
+        if (!c)
+                return -ENOMEM;
+
+        return add_key_to_section(s, k, c);
+}
+
+
 int config_manager_new(const Config *configs, ConfigManager **ret) {
         _auto_cleanup_ ConfigManager *m = NULL;
 
