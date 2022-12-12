@@ -119,7 +119,6 @@ libsystemd = dependency('libsystemd',
 glib_dep = dependency('glib-2.0')
 gobj_dep = dependency('gobject-2.0')
 gio_dep = dependency('gio-2.0')
-udev_dep = dependency('libudev')
 yaml_dep = dependency('yaml-0.1')
 libmnl_dep = dependency('libmnl')
 libnftnl_dep = dependency('libnftnl')
@@ -145,7 +144,7 @@ network_config_managerlib = library('network_config_manager',
                         network_config_manager_sources,
                         include_directories: includes,
                         dependencies : [
-                        libsystemd, glib_dep, gio_dep, gobj_dep, udev_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnnft_dep, libjson_dep],
+                        libsystemd, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnnft_dep, libjson_dep],
                         install: true,
                         version: meson.project_version(),
                         soversion: so_version)
@@ -155,7 +154,7 @@ network_config_manager = executable(
                               [network_config_manager_sources, 'src/manager/network-manager-ctl.c'],
                               include_directories : includes,
                               dependencies : [
-                              libsystemd, glib_dep, gio_dep, gobj_dep, udev_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnnft_dep, libjson_dep],
+                              libsystemd, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnnft_dep, libjson_dep],
                               install : true)
 
 pkg = import('pkgconfig')

@@ -25,7 +25,6 @@
 #include "networkd-api.h"
 #include "nftables.h"
 #include "parse-util.h"
-#include "udev-hwdb.h"
 
 _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
