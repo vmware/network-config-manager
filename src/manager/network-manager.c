@@ -827,8 +827,8 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx, Routing
         if (rule->sport)
                 add_key_to_section(section, "SourcePort", rule->sport);
 
-        if (rule->sport)
-                add_key_to_section(section, "DestinationPort", rule->sport);
+        if (rule->dport)
+                add_key_to_section(section, "DestinationPort", rule->dport);
 
         if (rule->ipproto)
                 add_key_to_section(section, "IPProtocol", rule->ipproto);
