@@ -454,15 +454,15 @@ int link_get_links(Links **ret) {
         return acquire_link_info(s, ret);
 }
 
-int link_update_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
+int link_update_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
       _auto_cleanup_ IPlinkMessage *m = NULL;
       _auto_cleanup_close_ int s = -1;
       int r;
 
       assert(mtu > 0);
-      assert(ifnameidx);
+      assert(ifidx);
 
-      r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifnameidx->ifindex, &m);
+      r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifidx->ifindex, &m);
       if (r < 0)
                 return r;
 
@@ -477,15 +477,15 @@ int link_update_mtu(const IfNameIndex *ifnameidx, uint32_t mtu) {
       return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
 }
 
-int link_set_mac_address(const IfNameIndex *ifnameidx, const char *mac_address) {
+int link_set_mac_address(const IfNameIndex *ifidx, const char *mac_address) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
         _auto_cleanup_close_ int s = -1;
         int r;
 
         assert(mac_address);
-        assert(ifnameidx);
+        assert(ifidx);
 
-        r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifnameidx->ifindex, &m);
+        r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifidx->ifindex, &m);
         if (r < 0)
                 return r;
 
@@ -500,24 +500,24 @@ int link_set_mac_address(const IfNameIndex *ifnameidx, const char *mac_address) 
         return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
 }
 
-int link_set_state(const IfNameIndex *ifnameidx, LinkState state) {
+int link_set_state(const IfNameIndex *ifidx, LinkState state) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
         _auto_cleanup_ char *operstate = NULL;
         _auto_cleanup_close_ int s = -1;
         int r;
 
-        assert(ifnameidx);
+        assert(ifidx);
 
-        r = link_get_operstate(ifnameidx->ifname, &operstate);
+        r = link_get_operstate(ifidx->ifname, &operstate);
         if (r < 0) {
-                log_warning("Failed to get link operstate: %s\n", ifnameidx->ifname);
+                log_warning("Failed to get link operstate: %s\n", ifidx->ifname);
                 return r;
         }
 
         if ((int) state == link_name_to_state(operstate))
                 return 0;
 
-        r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifnameidx->ifindex, &m);
+        r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifidx->ifindex, &m);
         if (r < 0)
                 return r;
 
@@ -541,14 +541,14 @@ int link_set_state(const IfNameIndex *ifnameidx, LinkState state) {
         return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
 }
 
-int link_remove(const IfNameIndex *ifnameidx) {
+int link_remove(const IfNameIndex *ifidx) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
         _auto_cleanup_close_ int s = -1;
         int r;
 
-        assert(ifnameidx);
+        assert(ifidx);
 
-        r = ip_link_message_new(RTM_DELLINK, AF_UNSPEC, ifnameidx->ifindex, &m);
+        r = ip_link_message_new(RTM_DELLINK, AF_UNSPEC, ifidx->ifindex, &m);
         if (r < 0)
                 return r;
 

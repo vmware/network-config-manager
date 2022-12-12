@@ -53,16 +53,16 @@ void netdev_sriov_unref(SRIOV *s) {
         free(s);
 }
 
-int netdev_sriov_configure(const IfNameIndex *ifnameidx, SRIOV *s) {
+int netdev_sriov_configure(const IfNameIndex *ifidx, SRIOV *s) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         _auto_cleanup_ char *network = NULL;
          int r;
 
-        assert(ifnameidx);
+        assert(ifidx);
         assert(s);
 
-        r = create_or_parse_network_file(ifnameidx, &network);
+        r = create_or_parse_network_file(ifidx, &network);
         if (r < 0)
                 return r;
 

@@ -219,11 +219,11 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
         return 0;
 }
 
-int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
+int netdev_link_configure(const IfNameIndex *ifidx, NetDevLink *n) {
         _auto_cleanup_ char *path = NULL;
          int r;
 
-        r = create_or_parse_netdev_link_conf_file(ifnameidx->ifname, &path);
+        r = create_or_parse_netdev_link_conf_file(ifidx->ifname, &path);
         if (r < 0)
                 return r;
 
@@ -317,115 +317,115 @@ int netdev_link_configure(const IfNameIndex *ifnameidx, NetDevLink *n) {
                     return r;
         }
 
-        if (n->auto_nego != -1) {
+        if (n->auto_nego >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "auton"), bool_to_string(n->auto_nego));
                  if (r < 0)
                          return r;
         }
 
-        if (n->rx_csum_off != -1) {
+        if (n->rx_csum_off >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcsumo"), bool_to_string(n->rx_csum_off));
                  if (r < 0)
                          return r;
         }
 
-        if (n->tx_csum_off != -1) {
+        if (n->tx_csum_off >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcsumo"), bool_to_string(n->tx_csum_off));
                  if (r < 0)
                          return r;
         }
 
-        if (n->tcp_seg_off != -1) {
+        if (n->tcp_seg_off >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "tso"), bool_to_string(n->tcp_seg_off));
                  if (r < 0)
                          return r;
         }
 
-        if (n->tcp6_seg_off!= -1) {
+        if (n->tcp6_seg_off>= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "t6so"), bool_to_string(n->tcp6_seg_off));
                  if (r < 0)
                          return r;
         }
 
-        if (n->gen_seg_off != -1) {
+        if (n->gen_seg_off >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "gso"), bool_to_string(n->gen_seg_off));
                  if (r < 0)
                          return r;
         }
 
-        if (n->gen_rx_off != -1) {
+        if (n->gen_rx_off >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "grxo"), bool_to_string(n->gen_rx_off));
                  if (r < 0)
                          return r;
         }
 
-        if (n->gen_rx_off_hw != -1) {
+        if (n->gen_rx_off_hw >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "grxoh"), bool_to_string(n->gen_rx_off_hw));
                  if (r < 0)
                          return r;
         }
 
-        if (n->large_rx_off != -1) {
+        if (n->large_rx_off >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "lrxo"), bool_to_string(n->large_rx_off));
                  if (r < 0)
                          return r;
         }
 
-        if (n->rx_vlan_ctag_hw_acl != -1) {
+        if (n->rx_vlan_ctag_hw_acl >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxvtha"), bool_to_string(n->rx_vlan_ctag_hw_acl));
                  if (r < 0)
                          return r;
         }
 
-        if (n->tx_vlan_ctag_hw_acl != -1) {
+        if (n->tx_vlan_ctag_hw_acl >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txvtha"), bool_to_string(n->tx_vlan_ctag_hw_acl));
                  if (r < 0)
                          return r;
         }
 
-        if (n->rx_vlan_ctag_fltr != -1) {
+        if (n->rx_vlan_ctag_fltr >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxvtf"), bool_to_string(n->rx_vlan_ctag_fltr));
                  if (r < 0)
                          return r;
         }
 
-        if (n->tx_vlan_stag_hw_acl != -1) {
+        if (n->tx_vlan_stag_hw_acl >= 0) {
                  r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txvstha"), bool_to_string(n->tx_vlan_stag_hw_acl));
                  if (r < 0)
                          return r;
         }
 
-        if (n->n_tpl_fltr != -1) {
+        if (n->n_tpl_fltr >= 0) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "ntf"), bool_to_string(n->n_tpl_fltr));
                 if (r < 0)
                         return r;
         }
 
-        if (n->use_adpt_rx_coal != -1) {
+        if (n->use_adpt_rx_coal >= 0) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "uarxc"), bool_to_string(n->use_adpt_rx_coal));
                 if (r < 0)
                         return r;
         }
 
-        if (n->use_adpt_tx_coal != -1) {
+        if (n->use_adpt_tx_coal >= 0) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "uatxc"), bool_to_string(n->use_adpt_tx_coal));
                 if (r < 0)
                         return r;
         }
 
-        if (n->tx_flow_ctrl != -1) {
+        if (n->tx_flow_ctrl >= 0) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txflowctrl"), bool_to_string(n->tx_flow_ctrl));
                 if (r < 0)
                         return r;
         }
 
-        if (n->rx_flow_ctrl != -1) {
+        if (n->rx_flow_ctrl >= 0) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxflowctrl"), bool_to_string(n->rx_flow_ctrl));
                 if (r < 0)
                         return r;
         }
 
-        if (n->auto_flow_ctrl != -1) {
+        if (n->auto_flow_ctrl >= 0) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "autoflowctrl"), bool_to_string(n->auto_flow_ctrl));
                 if (r < 0)
                         return r;
