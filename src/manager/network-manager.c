@@ -821,6 +821,18 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx, Routing
         if (rule->oif.ifindex > 0)
                 add_key_to_section(section, "OutgoingInterface", rule->oif.ifname);
 
+        if (rule->invert)
+                add_key_to_section(section, "Invert", bool_to_string(rule->invert));
+
+        if (rule->sport)
+                add_key_to_section(section, "SourcePort", rule->sport);
+
+        if (rule->sport)
+                add_key_to_section(section, "DestinationPort", rule->sport);
+
+        if (rule->ipproto)
+                add_key_to_section(section, "IPProtocol", rule->ipproto);
+
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
                 return r;

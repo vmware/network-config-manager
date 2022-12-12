@@ -149,16 +149,18 @@ typedef struct RoutingPolicyRule {
         IfNameIndex oif;
         IfNameIndex iif;
 
+        bool invert;
+
+        char *ipproto;
+        char *sport;
+        char *dport;
+
         uint8_t tos;
         uint8_t type;
-        uint8_t ipproto;
-        uint8_t protocol;
 
         uint32_t table;
         uint32_t priority;
 
-        struct fib_rule_port_range sport;
-        struct fib_rule_port_range dport;
         struct fib_rule_uid_range uid_range;
 } RoutingPolicyRule;
 
