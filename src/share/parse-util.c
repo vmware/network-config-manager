@@ -9,6 +9,7 @@
 #include <glib/gstdio.h>
 #include <linux/if.h>
 
+#include "alloc-util.h"
 #include "macros.h"
 #include "parse-util.h"
 #include "string-util.h"
@@ -71,6 +72,31 @@ int parse_uint16(const char *c, uint16_t *val) {
 
         *val = r;
         return 0;
+}
+
+bool is_port_or_range(const char *c) {
+        uint16_t k;
+        int r;
+
+        assert(c);
+
+        r = parse_uint16(c, &k);
+        if (r < 0) {
+                _auto_cleanup_strv_ char **s = NULL;
+                char **j;
+
+                s = strsplit(c, "-", -1);
+                if (!s)
+                        return false;
+
+                strv_foreach(j, s) {
+                        r = parse_uint16(*j, &k);
+                        if (r < 0)
+                                return false;
+                }
+        }
+
+        return true;
 }
 
 bool is_uint32_or_max(const char *c) {
