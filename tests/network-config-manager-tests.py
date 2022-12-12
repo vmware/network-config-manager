@@ -859,7 +859,7 @@ class TestCLINetwork:
         assert(parser.get('RoutingPolicyRule', 'Table') == '10')
         assert(parser.get('RoutingPolicyRule', 'From') == '192.168.1.3/24')
         assert(parser.get('RoutingPolicyRule', 'To') == '192.168.1.2/24')
-        assert(parser.get('RoutingPolicyRule', 'TypeOfService') == '0x12')
+        assert(parser.get('RoutingPolicyRule', 'TypeOfService') == '18')
         assert(parser.get('RoutingPolicyRule', 'OutgoingInterface') == 'test99')
         assert(parser.get('RoutingPolicyRule', 'IncomingInterface') == 'test99')
 

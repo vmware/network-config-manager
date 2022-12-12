@@ -462,6 +462,24 @@ int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret) {
         return 0;
 }
 
+int routing_policy_rule_new(RoutingPolicyRule **ret) {
+        RoutingPolicyRule *rule;
+
+        rule = new0(RoutingPolicyRule, 1);
+        if (!rule)
+                return -ENOMEM;
+
+        *ret = rule;
+        return 0;
+}
+
+void routing_policy_rule_free(RoutingPolicyRule *rule) {
+        if (!rule)
+                return;
+
+        free(rule);
+}
+
 int network_new(Network **ret) {
         _auto_cleanup_ Network *n = NULL;
         int r;

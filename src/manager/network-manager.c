@@ -771,15 +771,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway) 
         return dbus_network_reload();
 }
 
-int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
-                                           const IfNameIndex *iif,
-                                           const IfNameIndex *oif,
-                                           const IPAddress *to_addr,
-                                           const IPAddress *from_addr,
-                                           const uint32_t table,
-                                           const uint32_t priority,
-                                           const char *tos) {
-
+int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx, RoutingPolicyRule *rule) {
         _auto_cleanup_ char *network = NULL, *to = NULL, *from = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
@@ -797,11 +789,11 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
         if (r < 0)
                 return r;
 
-        r = ip_to_string_prefix(to_addr->family, to_addr, &to);
+        r = ip_to_string_prefix(rule->to.family, &rule->to, &to);
         if (r < 0)
                 return r;
 
-        r = ip_to_string_prefix(from_addr->family, from_addr, &from);
+        r = ip_to_string_prefix(rule->from.family, &rule->from, &from);
         if (r < 0)
                 return r;
 
@@ -809,13 +801,13 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
         if (r < 0)
                 return r;
 
-        if (tos)
-                add_key_to_section(section, "TypeOfService", tos);
+        if (rule->tos > 0)
+                add_key_to_section_uint(section, "TypeOfService", rule->tos);
 
-        add_key_to_section_integer(section, "Table", table);
+        add_key_to_section_integer(section, "Table", rule->table);
 
-        if (priority > 0)
-                add_key_to_section_integer(section, "Priority", priority);
+        if (rule->priority > 0)
+                add_key_to_section_integer(section, "Priority", rule->priority);
 
         if (from)
                 add_key_to_section(section, "From", from);
@@ -823,11 +815,11 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx,
         if (to)
                 add_key_to_section(section, "To", to);
 
-        if (iif)
-                add_key_to_section(section, "IncomingInterface", iif->ifname);
+        if (rule->iif.ifindex > 0)
+                add_key_to_section(section, "IncomingInterface", rule->iif.ifname);
 
-        if (oif)
-                add_key_to_section(section, "OutgoingInterface", oif->ifname);
+        if (rule->oif.ifindex > 0)
+                add_key_to_section(section, "OutgoingInterface", rule->oif.ifname);
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)

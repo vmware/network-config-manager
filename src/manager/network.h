@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <linux/fib_rules.h>
+
 #include "netdev.h"
 #include "network-address.h"
 #include "network-route.h"
@@ -140,6 +142,26 @@ typedef enum ParserType {
         _PARSER_TYPE_INVALID = -EINVAL,
 } ParserType;
 
+typedef struct RoutingPolicyRule {
+        IPAddress to;
+        IPAddress from;
+
+        IfNameIndex oif;
+        IfNameIndex iif;
+
+        uint8_t tos;
+        uint8_t type;
+        uint8_t ipproto;
+        uint8_t protocol;
+
+        uint32_t table;
+        uint32_t priority;
+
+        struct fib_rule_port_range sport;
+        struct fib_rule_port_range dport;
+        struct fib_rule_uid_range uid_range;
+} RoutingPolicyRule;
+
 typedef struct WIFIAuthentication {
         AuthKeyManagement key_management;
         AuthEAPMethod eap_method;
@@ -206,6 +228,10 @@ void network_unref(Network *n);
 DEFINE_CLEANUP(Network*, network_unref);
 
 void g_network_free(gpointer data);
+
+int routing_policy_rule_new(RoutingPolicyRule **ret);
+void routing_policy_rule_free(RoutingPolicyRule *rule);
+DEFINE_CLEANUP(RoutingPolicyRule*, routing_policy_rule_free);
 
 int parse_address_from_string_and_add(const char *s, Set *a);
 

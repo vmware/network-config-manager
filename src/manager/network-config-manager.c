@@ -1701,11 +1701,13 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
-        _auto_cleanup_ IfNameIndex *p = NULL, *oif = NULL, *iif = NULL;
-        _auto_cleanup_ IPAddress *to = NULL, *from = NULL;
-        _auto_cleanup_ char *tos = NULL;
-        uint32_t table = 0, priority = 0;
+        _cleanup_(routing_policy_rule_freep) RoutingPolicyRule *rule = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
+
+        r = routing_policy_rule_new(&rule);
+        if (r < 0)
+                return log_oom();
 
         for (int i = 1; i < argc; i++) {
                 if (string_equal_fold(argv[i], "dev")) {
@@ -1718,49 +1720,61 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                         }
                         continue;
                 } else if (string_equal_fold(argv[i], "iif")) {
+                        _auto_cleanup_ IfNameIndex *idx = NULL;
+
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ifname_or_index(argv[i], &iif);
+                        r = parse_ifname_or_index(argv[i], &idx);
                         if (r < 0) {
                                 log_warning("Failed to find device '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
+
+                        rule->iif = *idx;
 
                         continue;
                 } else if (string_equal_fold(argv[i], "oif")) {
+                        _auto_cleanup_ IfNameIndex *idx = NULL;
+
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ifname_or_index(argv[i], &oif);
+                        r = parse_ifname_or_index(argv[i], &idx);
                         if (r < 0) {
                                 log_warning("Failed to find device '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
-
+                        rule->oif = *idx;
                         continue;
                 } if (string_equal_fold(argv[i], "from")) {
+                         _auto_cleanup_ IPAddress *a = NULL;
+
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &from);
+                        r = parse_ip_from_string(argv[i], &a);
                         if (r < 0) {
                                 log_warning("Failed to parse from address '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
+                        rule->from = *a;
                         continue;
                 } if (string_equal_fold(argv[i], "to")) {
+                         _auto_cleanup_ IPAddress *a = NULL;
+
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &to);
+                        r = parse_ip_from_string(argv[i], &a);
                         if (r < 0) {
                                 log_warning("Failed to parse ntp address '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
+                        rule->to = *a;
 
                         continue;
                 } if (string_equal_fold(argv[i], "table")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint32(argv[i], &table);
+                        r = parse_uint32(argv[i], &rule->table);
                         if (r < 0) {
                                 log_warning("Failed to parse table '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -1770,7 +1784,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                 } if (string_equal_fold(argv[i], "prio")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint32(argv[i], &priority);
+                        r = parse_uint32(argv[i], &rule->priority);
                         if (r < 0) {
                                 log_warning("Failed to parse priority '%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
@@ -1792,11 +1806,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 log_warning("TOS is out of range '%s': %s", strerror(EINVAL), argv[i]);
                                 return -EINVAL;
                         }
-
-                        tos = strdup(argv[i]);
-                        if (!tos)
-                                return log_oom();
-
+                        rule->tos = k;
                         continue;
                 } else {
                         log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
@@ -1809,9 +1819,9 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_configure_routing_policy_rules(p, iif, oif, to, from, table, priority, tos);
+        r = manager_configure_routing_policy_rules(p, rule);
         if (r < 0) {
-                log_warning("Failed to configure routing policy rules: %s",  strerror(-r));
+                log_warning("Failed to configure routing policy rules: %s", strerror(-r));
                 return r;
         }
 
