@@ -52,13 +52,13 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
         return dbus_network_reload();
 }
 
-int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *v) {
+int manager_create_vlan(const IfNameIndex *ifidx, const char *ifname, VLan *v) {
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *n= NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifnameidx);
+        assert(ifidx);
         assert(ifname);
         assert(v);
 
@@ -92,7 +92,7 @@ int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *
                 return r;
         }
 
-        r = create_or_parse_network_file(ifnameidx, &network);
+        r = create_or_parse_network_file(ifidx, &network);
         if (r < 0)
                 return r;
 
@@ -221,7 +221,6 @@ int manager_create_bond(const char *ifname, Bond *b, char **interfaces) {
 }
 
 int manager_create_vxlan(const char *ifname, const char *dev, VxLan *v) {
-
         _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
         _cleanup_(network_unrefp) Network *n = NULL;
         _auto_cleanup_ char *network = NULL;

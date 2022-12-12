@@ -9,32 +9,32 @@
 #include "network.h"
 #include "network-route.h"
 
-int manager_set_link_mtu(const IfNameIndex *ifnameidx, uint32_t mtu);
-int manager_set_link_mac_addr(const IfNameIndex *ifnameidx, const char *mac);
+int manager_set_link_mtu(const IfNameIndex *ifidx, uint32_t mtu);
+int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac);
 
-int manager_set_link_dhcp_client(const IfNameIndex *ifnameidx, DHCPClient mode);
-int manager_get_link_dhcp_client(const IfNameIndex *ifnameidx, DHCPClient *mode);
+int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode);
+int manager_get_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient *mode);
 
-int manager_set_link_flag(const IfNameIndex *ifnameidx, const char *k, const char *v);
-int manager_set_link_state(const IfNameIndex *ifnameidx, LinkState state);
+int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v);
+int manager_set_link_state(const IfNameIndex *ifidx, LinkState state);
 
-int manager_set_link_group(const IfNameIndex *ifnameidx, uint32_t group);
-int manager_set_link_rf_online(const IfNameIndex *ifnameidx, const char *addrfamily);
-int manager_set_link_act_policy(const IfNameIndex *ifnameidx, const char *actpolicy);
+int manager_set_link_group(const IfNameIndex *ifidx, uint32_t group);
+int manager_set_link_rf_online(const IfNameIndex *ifidx, const char *addrfamily);
+int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy);
 
-int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, const DHCPClientIdentifier identifier);
-int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifnameidx, DHCPClientIdentifier *ret);
+int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHCPClientIdentifier identifier);
+int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret);
 
-int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t v);
-int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifnameidx, DHCPClient kind, uint32_t *iaid);
+int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, uint32_t v);
+int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, uint32_t *iaid);
 
-int manager_set_link_dhcp_client_duid(const IfNameIndex *ifnameidx,
+int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                                       const DHCPClientDUIDType duid,
                                       const char *raw_data,
                                       const bool system,
                                       const DHCPClient kind);
 
-int manager_configure_link_address(const IfNameIndex *ifnameidx,
+int manager_configure_link_address(const IfNameIndex *ifidx,
                                    const IPAddress *address,
                                    const IPAddress *peer,
                                    const char *scope,
@@ -43,11 +43,11 @@ int manager_configure_link_address(const IfNameIndex *ifnameidx,
                                    const int prefix_route,
                                    const char *label);
 
-int manager_delete_link_address(const IfNameIndex *ifnameidx, const char *a);
+int manager_delete_link_address(const IfNameIndex *ifidx, const char *a);
 
-int manager_configure_default_gateway(const IfNameIndex *ifnameidx, Route *rt);
+int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt);
 
-int manager_configure_route(const IfNameIndex *ifnameidx,
+int manager_configure_route(const IfNameIndex *ifidx,
                             const IPAddress *gateway,
                             const IPAddress *destination,
                             const IPAddress *source,
@@ -61,43 +61,43 @@ int manager_configure_route(const IfNameIndex *ifnameidx,
                             const int metric,
                             const int onlink);
 
-int manager_remove_gateway_or_route(const IfNameIndex *ifnameidx, bool gateway);
+int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway);
 
-int manager_add_dns_server(const IfNameIndex *ifnameidx, DNSServers *dns, bool system, bool global);
-int manager_add_dns_server_domain(const IfNameIndex *ifnameidx, char **domains, bool system, bool global);
-int manager_revert_dns_server_and_domain(const IfNameIndex *ifnameidx);
+int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool system, bool global);
+int manager_add_dns_server_domain(const IfNameIndex *ifidx, char **domains, bool system, bool global);
+int manager_revert_dns_server_and_domain(const IfNameIndex *ifidx);
 int manager_read_domains_from_system_config(char **domains);
-int manager_add_ntp_addresses(const IfNameIndex *ifnameidx, char **ntps, bool add);
-int manager_remove_ntp_addresses(const IfNameIndex *ifnameidx);
-int manager_enable_ipv6(const IfNameIndex *ifnameidx, bool enable);
+int manager_add_ntp_addresses(const IfNameIndex *ifidx, char **ntps, bool add);
+int manager_remove_ntp_addresses(const IfNameIndex *ifidx);
+int manager_enable_ipv6(const IfNameIndex *ifidx, bool enable);
 int manager_reload_network(void);
-int manager_reconfigure_link(const IfNameIndex *ifnameidx);
+int manager_reconfigure_link(const IfNameIndex *ifidx);
 
-int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifnameidx, uint32_t mtu);
+int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifidx, uint32_t mtu);
 
 int manager_network_section_configs_new(ConfigManager **ret);
 int manager_network_dhcp4_section_configs_new(ConfigManager **ret);
 int manager_network_dhcp6_section_configs_new(ConfigManager **ret);
 int manager_network_link_section_configs_new(ConfigManager **ret);
 
-int manager_set_link_local_address(const IfNameIndex *ifnameidx, const char *k, const char *v);
-int manager_set_network_section_bool(const IfNameIndex *ifnameidx, const char *k, bool v);
-int manager_set_network_section(const IfNameIndex *ifnameidx, const char *k, const char *v);
-int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *ifnameidx, const char *k, bool v);
+int manager_set_link_local_address(const IfNameIndex *ifidx, const char *k, const char *v);
+int manager_set_network_section_bool(const IfNameIndex *ifidx, const char *k, bool v);
+int manager_set_network_section(const IfNameIndex *ifidx, const char *k, const char *v);
+int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *ifidx, const char *k, bool v);
 
-int manager_create_vlan(const IfNameIndex *ifnameidx, const char *ifname, VLan *v);
+int manager_create_vlan(const IfNameIndex *ifidx, const char *ifname, VLan *v);
 
 int manager_generate_network_config_from_yaml(const char *file);
 int manager_write_wifi_config(const Network *n, const GString *config);
 
 int manager_generate_networkd_config_from_command_line(const char *file, const char *command_line);
 
-int manager_configure_additional_gw(const IfNameIndex *ifnameidx, const IPAddress *a, const Route *rt);
-int manager_configure_routing_policy_rules(const IfNameIndex *ifnameidx, RoutingPolicyRule *rule);
+int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a, const Route *rt);
+int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPolicyRule *rule);
 
-int manager_remove_routing_policy_rules(const IfNameIndex *ifnameidx);
+int manager_remove_routing_policy_rules(const IfNameIndex *ifidx);
 
-int manager_configure_dhcpv4_server (const IfNameIndex *ifnameidx,
+int manager_configure_dhcpv4_server (const IfNameIndex *ifidx,
                                      const IPAddress *dns,
                                      const IPAddress *ntp,
                                      const uint32_t pool_offset,
@@ -108,7 +108,7 @@ int manager_configure_dhcpv4_server (const IfNameIndex *ifnameidx,
                                      const int emit_ntp,
                                      const int emit_router);
 
-int manager_remove_dhcpv4_server(const IfNameIndex *ifnameidx);
+int manager_remove_dhcpv4_server(const IfNameIndex *ifidx);
 
 int manager_configure_ipv6_router_advertisement(const IfNameIndex *p,
                                                 const IPAddress *prefix,
@@ -126,10 +126,10 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *p,
                                                 const int emit_domain,
                                                 const int assign);
 
-int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifnameidx);
+int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifidx);
 
-int manager_show_link_network_config(const IfNameIndex *ifnameidx, char **ret);
-int manager_edit_link_network_config(const IfNameIndex *ifnameidx);
+int manager_show_link_network_config(const IfNameIndex *ifidx, char **ret);
+int manager_edit_link_network_config(const IfNameIndex *ifidx);
 
 int manager_remove_netdev(const char *ifname, const char *kind);
 

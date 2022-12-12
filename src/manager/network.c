@@ -432,28 +432,28 @@ int create_network_conf_file(const char *ifname, char **ret) {
         return dbus_network_reload();
 }
 
-int create_or_parse_network_file(const IfNameIndex *ifnameidx, char **ret) {
+int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
         _auto_cleanup_ char *setup = NULL, *network = NULL;
         int r;
 
-        assert(ifnameidx);
+        assert(ifidx);
 
-        r = network_parse_link_setup_state(ifnameidx->ifindex, &setup);
+        r = network_parse_link_setup_state(ifidx->ifindex, &setup);
         if (r < 0) {
-                r = create_network_conf_file(ifnameidx->ifname, &network);
+                r = create_network_conf_file(ifidx->ifname, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = network_parse_link_network_file(ifnameidx->ifindex, &network);
+                r = network_parse_link_network_file(ifidx->ifindex, &network);
                 if (r < 0) {
-                        r = create_network_conf_file(ifnameidx->ifname, &network);
+                        r = create_network_conf_file(ifidx->ifname, &network);
                         if (r < 0)
                                 return r;
                 }
         }
 
         if (!g_file_test(network, G_FILE_TEST_EXISTS)) {
-                r = create_network_conf_file(ifnameidx->ifname, &network);
+                r = create_network_conf_file(ifidx->ifname, &network);
                 if (r < 0)
                         return r;
         }
@@ -783,40 +783,40 @@ int generate_network_config(Network *n) {
                         return r;
         }
 
-        if (n->unmanaged != -1 || n->arp != -1 || n->multicast != -1 || n->all_multicast != -1 || n->promiscuous != -1 ||
-            n->req_for_online != -1 || n->mtu > 0 || n->mac || n->req_family_for_online) {
+        if (n->unmanaged >= 0 || n->arp >= 0 || n->multicast >= 0 || n->all_multicast >= 0 || n->promiscuous >= 0 ||
+            n->req_for_online >= 0 || n->mtu > 0 || n->mac || n->req_family_for_online) {
 
-                if (n->unmanaged != -1) {
+                if (n->unmanaged >= 0) {
                         r = set_config(key_file, "Link", "Unmanaged", bool_to_string(!n->unmanaged));
                         if (r < 0)
                                 return r;
                 }
 
-                if (n->arp != -1) {
+                if (n->arp >= 0) {
                         r = set_config(key_file, "Link", "ARP", bool_to_string(n->arp));
                         if (r < 0)
                                 return r;
                 }
 
-                if (n->multicast != -1) {
+                if (n->multicast >= 0) {
                         r = set_config(key_file, "Link", "Multicast", bool_to_string(n->multicast));
                         if (r < 0)
                                 return r;
                 }
 
-                if (n->all_multicast != -1) {
+                if (n->all_multicast >= 0) {
                         r = set_config(key_file, "Link", "AllMulticast", bool_to_string(n->all_multicast));
                         if (r < 0)
                                 return r;
                 }
 
-                if (n->promiscuous != -1) {
+                if (n->promiscuous >= 0) {
                         r = set_config(key_file, "Link", "Promiscuous", bool_to_string(n->promiscuous));
                         if (r < 0)
                                 return r;
                 }
 
-                if (n->req_for_online != -1) {
+                if (n->req_for_online >= 0) {
                         r = set_config(key_file, "Link", "RequiredForOnline", bool_to_string(n->req_for_online));
                         if (r < 0)
                                 return r;
@@ -848,7 +848,7 @@ int generate_network_config(Network *n) {
                         r = set_config(key_file, "Network", "DHCP", dracut_to_networkd_dhcp_mode_to_name(n->dhcp_type));
         }
 
-        if (n->lldp != -1) {
+        if (n->lldp >= 0) {
                 r = set_config(key_file, "Network", "LLDP", bool_to_string(n->lldp));
                 if (r < 0)
                         return r;
@@ -861,7 +861,7 @@ int generate_network_config(Network *n) {
 
         }
 
-        if (n->ipv6_accept_ra != -1) {
+        if (n->ipv6_accept_ra >= 0) {
                 r = set_config(key_file, "Network", "IPv6AcceptRA", bool_to_string(n->ipv6_accept_ra));
                 if (r < 0)
                         return r;
@@ -899,8 +899,8 @@ int generate_network_config(Network *n) {
                         return r;
         }
 
-        if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID || n->dhcp4_use_dns != -1 || n->dhcp4_use_domains != -1 ||
-            n->dhcp4_use_ntp != -1 || n->dhcp4_use_mtu != -1) {
+        if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID || n->dhcp4_use_dns >= 0 || n->dhcp4_use_domains >= 0 ||
+            n->dhcp4_use_ntp >= 0 || n->dhcp4_use_mtu >= 0) {
 
                 if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID) {
                         r = set_config(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
@@ -908,39 +908,39 @@ int generate_network_config(Network *n) {
                                 return r;
                 }
 
-                if (n->dhcp4_use_dns != -1) {
+                if (n->dhcp4_use_dns >= 0) {
                         r = set_config(key_file, "DHCPv4", "UseDNS", bool_to_string(n->dhcp4_use_dns));
                         if (r < 0)
                                 return r;
                 }
 
-                if (n->dhcp4_use_domains != -1) {
+                if (n->dhcp4_use_domains >= 0) {
                         r = set_config(key_file, "DHCPv4", "UseDomains", bool_to_string(n->dhcp4_use_domains));
                         if (r < 0)
                                 return r;
                 }
 
-                if (n->dhcp4_use_ntp != -1) {
+                if (n->dhcp4_use_ntp >= 0) {
                         r = set_config(key_file, "DHCPv4", "UseNTP", bool_to_string(n->dhcp4_use_ntp));
                         if (r < 0)
                                 return r;
                 }
 
-                if (n->dhcp4_use_mtu != -1) {
+                if (n->dhcp4_use_mtu >= 0) {
                         r = set_config(key_file, "DHCPv4", "UseMTU", bool_to_string(n->dhcp4_use_mtu));
                         if (r < 0)
                                 return r;
                 }
         }
 
-        if ( n->dhcp6_use_dns != -1 || n->dhcp6_use_ntp != -1) {
-                if (n->dhcp6_use_dns != -1) {
+        if ( n->dhcp6_use_dns >= 0 || n->dhcp6_use_ntp >= 0) {
+                if (n->dhcp6_use_dns >= 0) {
                         r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_string(n->dhcp4_use_dns));
                          if (r < 0)
                                 return r;
                 }
 
-                if (n->dhcp6_use_ntp != -1) {
+                if (n->dhcp6_use_ntp >= 0) {
                         r = set_config(key_file, "DHCPv6", "UseNTP", bool_to_string(n->dhcp6_use_ntp));
                         if (r < 0)
                                 return r;

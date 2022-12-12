@@ -29,4 +29,4 @@ int netdev_sriov_new(SRIOV **ret);
 void netdev_sriov_unref(SRIOV *s);
 DEFINE_CLEANUP(SRIOV*, netdev_sriov_unref);
 
-int netdev_sriov_configure(const IfNameIndex *ifnameidx, SRIOV *s);
+int netdev_sriov_configure(const IfNameIndex *ifidx, SRIOV *s);
