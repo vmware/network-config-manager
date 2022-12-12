@@ -25,7 +25,6 @@
 #include "networkd-api.h"
 #include "nftables.h"
 #include "parse-util.h"
-#include "udev-hwdb.h"
 
 _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -1807,6 +1806,52 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
                         rule->tos = k;
+                        continue;
+                } else if (string_equal_fold(argv[i], "invert")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_boolean(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse invert '%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
+                        }
+
+                        rule->invert = r;
+
+                        continue;
+                } else if (string_equal_fold(argv[i], "sport")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (!is_port_or_range(argv[i])) {
+                                log_warning("Failed to parse sport '%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
+                        }
+
+                        rule->sport = strdup(argv[i]);
+                        if (!rule->sport)
+                                return log_oom();
+
+                        continue;
+                } else if (string_equal_fold(argv[i], "dport")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (!is_port_or_range(argv[i])) {
+                                log_warning("Failed to parse dport '%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
+                        }
+
+                        rule->dport = strdup(argv[i]);
+                        if (!rule->dport)
+                                return log_oom();
+
+                        continue;
+                } else if (string_equal_fold(argv[i], "proto")) {
+                        parse_next_arg(argv, argc, i);
+
+                        rule->ipproto = strdup(argv[i]);
+                        if (!rule->ipproto)
+                                return log_oom();
+
                         continue;
                 } else {
                         log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));

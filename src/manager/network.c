@@ -477,6 +477,9 @@ void routing_policy_rule_free(RoutingPolicyRule *rule) {
         if (!rule)
                 return;
 
+        free(rule->ipproto);
+        free(rule->sport);
+        free(rule->dport);
         free(rule);
 }
 
