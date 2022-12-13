@@ -1506,7 +1506,6 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                         }
 
                         onlink = r;
-
                         continue;
                 }
 
@@ -2583,7 +2582,6 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 }
 
                 printf("%s\n", config_domain);
-
                 return 0;
         }
 

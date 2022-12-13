@@ -222,7 +222,7 @@ static int create_or_parse_netdev_conf_file(const char *ifname, KeyFile **ret) {
 int netdev_new(NetDev **ret) {
         _auto_cleanup_ NetDev *n;
 
-        n = new0(NetDev, 1);
+        n = new(NetDev, 1);
         if (!n)
                 return log_oom();
 
@@ -247,7 +247,7 @@ void netdev_unref(NetDev *n) {
 int vlan_new(VLan **ret) {
         _auto_cleanup_ VLan *v = NULL;
 
-        v = new0(VLan, 1);
+        v = new(VLan, 1);
         if (!v)
                 return log_oom();
 
@@ -292,7 +292,7 @@ void vxlan_unref(VxLan *v) {
 int bond_new(Bond **ret) {
         _auto_cleanup_ Bond *b = NULL;
 
-        b = new0(Bond, 1);
+        b = new(Bond, 1);
         if (!b)
                 return log_oom();
 
@@ -358,7 +358,7 @@ void tunnel_unref(Tunnel *t) {
 int bridge_new(Bridge **ret) {
         Bridge *t;
 
-        t = new0(Bridge, 1);
+        t = new(Bridge, 1);
         if (!t)
                 return log_oom();
 
@@ -384,7 +384,7 @@ void bridge_unref(Bridge *b) {
 int tuntap_new(TunTap **ret) {
         TunTap *t = NULL;
 
-        t = new0(TunTap, 1);
+        t = new(TunTap, 1);
         if (!t)
                 return log_oom();
 
@@ -447,7 +447,7 @@ void veth_unref(Veth *v) {
 int macvlan_new(MACVLan **ret) {
         MACVLan *m;
 
-        m = new0(MACVLan, 1);
+        m = new(MACVLan, 1);
         if (!m)
                 return log_oom();
 
@@ -469,7 +469,7 @@ void macvlan_unref(MACVLan *m) {
 int ipvlan_new(IPVLan **ret) {
         IPVLan *v;
 
-        v = new0(IPVLan, 1);
+        v = new(IPVLan, 1);
         if (!v)
                 return -ENOMEM;
 
