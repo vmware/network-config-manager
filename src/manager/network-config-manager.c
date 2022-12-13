@@ -1110,7 +1110,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal_fold(argv[i], "pref-lifetime") || string_equal_fold(argv[i], "pl")) {
+                } else if (string_equal_fold(argv[i], "pref-lifetime") || string_equal_fold(argv[i], "pl") || string_equal_fold(argv[i], "pref-lft")) {
                         uint32_t lft;
 
                         parse_next_arg(argv, argc, i);
@@ -1596,13 +1596,13 @@ _public_ int ncm_link_delete_gateway_or_route(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        if (string_equal_fold(argv[0], "delete-gateway"))
+        if (string_equal_fold(argv[0], "delete-gateway") || string_equal_fold(argv[0], "dgw"))
                 r = manager_remove_gateway_or_route(p, true);
         else
                 r = manager_remove_gateway_or_route(p, false);
 
         if (r < 0) {
-                log_warning("Failed to delete %s on '%s': %s\n", argv[0], p->ifname, strerror(-r));
+                log_warning("Failed to delete route or gatwway '%s' on '%s': %s\n", argv[0], p->ifname, strerror(-r));
                 return r;
         }
 
