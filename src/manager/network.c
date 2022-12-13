@@ -983,6 +983,5 @@ int generate_network_config(Network *n) {
                 return r;
 
         (void) dbus_network_reload();
-
         return 0;
 }

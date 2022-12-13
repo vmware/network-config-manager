@@ -58,7 +58,6 @@ void addresses_unref(Addresses *a) {
                 return;
 
         g_hash_table_iter_init(&iter, a->addresses->hash);
-
         while (g_hash_table_iter_next(&iter, &key, &value)) {
 
                 addr = (Address *) g_bytes_get_data(key, &size);

@@ -5,8 +5,11 @@ all: build
 build:
 	meson setup --prefix=/usr build
 
+clang:
+	CC=clang  meson setup --prefix=/usr build-clang; ninja -C build-clang
+
 clean:
-	rm -rf build/
+	rm -rf build/ build-clang/
 .PHONY: clean
 
 install: build
