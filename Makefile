@@ -6,7 +6,7 @@ build:
 	meson setup --prefix=/usr build
 
 clean:
-	rm -rf build/
+	rm -rf build/ build-clang/
 .PHONY: clean
 
 install: build
