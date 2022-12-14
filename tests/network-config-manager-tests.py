@@ -1090,6 +1090,195 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
 
+    def test_cli_add_dns_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-manage dev test99 manag yes") != 0)
+        assert(call_shell("nmctl add-dns dev test99 ds 192.168.1.45 192.168.1.46") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_add_domain_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-manage dev test99 maage yes") != 0)
+        assert(call_shell("nmctl add-domain dev test99 doains domain1 domain2") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_enable_ipv6_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl ipv dev test99 yes") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_hostname_failure(self):
+        assert(call_shell("nmctl host Zeus") != 0)
+
+    def test_cli_set_mtu_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-mtu dev test99 mt 1400") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_mtu_without_kind_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-mu dev test99 1400") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_ipv6_mtu_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-ipmtu dev test99 notint") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_mac_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-mac dev test99 macc 00:0c:29:3a:bc:11") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_mac_without_kind_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-mac dev test99 00:0c:29:3a") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_link_option_failure(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        assert(unit_exist('10-test99.network') == True)
+
+        assert(call_shell("nmctl set-link-option dev test99 arp 121 mc yes 0 pcs false") != 0)
+
+    def test_cli_set_act_policy_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-link-ap dev test99 app always-up") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_dhcp_client_type_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-dhcp dev test99 dhcppp yes") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_dhcp4_iaid_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-dhcp dev test99 dh ipv4") != 0)
+        assert(call_shell("nmctl set-dhcp-iaid dev test99 f 4 5555") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_dhcp6_iaid_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set dev test99 dhcp ipv4") != 0)
+        assert(call_shell("nmctl set-iaid dev test99 f 6 iaid 5555") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_dhcp4_duid_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-dhcp dev test99 dhcp ipv") != 0)
+        assert(call_shell("nmctl set-dhcp-duid dev test99 f 4 duid") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_add_static_address_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl add-addr dev test99 a 192.168.1.45/24 peerrr 192.168.1.46/24 ipv4 scope "
+                              "link pref-time forever yes label test") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_add_default_gateway_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl add-addr dev test99 peer 192.168.1.46/24 dad link prefix-route yes") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+        assert(call_shell("nmctl add-default-gw dev test99 xgw 192.168.1.1 onlink") != 0)
+
+    def test_cli_add_route_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl add-addr dev test99 a 19245/24 peer ipv4 scope link") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+        assert(call_shell("nmctl add-route dev test99 gw 192.168.1.1 destttttt 192.168.1.2 scope") != 0)
+
+    def test_cli_add_additional_gateway_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl add-addl-gw dev test99 192.168.10.5/24 dest 0.0.0.0 gw table 100 ") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_add_routing_policy_rule_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl add-rule dev test99 tbe 10 to frrrom 192.168.1.3/24 iif test99 toos 0x12") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_ip_v6_router_advertisement_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-ipv6tra dev test99 yes") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_llmnr_failure(self):
+        assert(link_exist('test99') == True);
+
+        assert(call_shell("nmctl llmnr dev test99 ") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_dhcp4_client_identifier_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-dhcp4-cid dev test99 id") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_dhcp4_use_dns_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-dhcp4 dev test99 use-dns") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_set_dhcp4_section_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-dhcp4 dev test99 use yes hostname yes use-gw use-tz 2") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
+    def test_cli_add_ntp_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl add-ntp dev test99 ntttp 192.168.1.34 192.168.1.45") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
+
 class TestCLIDHCPv4Server:
     def setup_method(self):
         link_remove('test99')
