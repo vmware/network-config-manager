@@ -1316,6 +1316,12 @@ class TestCLIDHCPv4Server:
         assert(parser.get('DHCPServer', 'DNS') == '192.168.1.1')
         assert(parser.get('DHCPServer', 'EmitRouter') == 'yes')
 
+    def test_cli_configure_dhcpv4_server_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl add-dhcpv4-server dev test99 10 pool-size 20 default-lease-time 100 emit-router") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
 
 class TestCLIIPv6RA:
     def setup_method(self):
@@ -1357,6 +1363,13 @@ class TestCLIIPv6RA:
 
         assert(parser.get('IPv6RoutePrefix', 'LifetimeSec') == '1000')
         assert(parser.get('IPv6RoutePrefix', 'Route') == '2001:db1:fff::/64')
+
+    def test_cli_configure_ipv6ra_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl add-ipv6ra dev test99 prrefefix 2002:da8:1:0::/64 route-prefix 1000") != 0)
+
+        assert(unit_exist('10-test99.network') == False)
 
 class TestCLINetDev:
     def setup_method(self):
@@ -2002,6 +2015,23 @@ class TestCLINetDev:
 
         link_remove('test-99')
 
+    def test_cli_create_vlan_failure(self):
+        assert(link_exist('test98') == True)
+
+        assert(call_shell("nmctl create-vlan dev test98 id 11") != 0)
+        assert(unit_exist('10-test98.network') == False)
+        assert(unit_exist('10-vlan-98.netdev') == False)
+        assert(unit_exist('10-vlan-98.network') == False)
+
+    def test_cli_create_bond_failure(self):
+        assert(link_exist('test98') == True)
+
+        assert(call_shell("nmctl create-bond mode balance-rr dev") != 0)
+        assert(unit_exist('10-test98.network') == False)
+        assert(unit_exist('10-test-99.network') == False)
+        assert(unit_exist('10-bond-98.network') == False)
+        assert(unit_exist('10-bond-98.netdev') == False)
+
 class TestCLIGlobalDNSDomain:
     @pytest.mark.skip(reason="skipping")
     def test_cli_configure_global_dns_server(self):
@@ -2592,6 +2622,44 @@ class TestCLILink:
         assert(parser.get('Link', 'CoalescePacketRateHigh') == 'max')
         assert(parser.get('Link', 'CoalescePacketRateSampleIntervalSec') == '99877761')
         assert(parser.get('Link', 'StatisticsBlockCoalesceSec') == '987766555')
+
+    def test_cli_set_link_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-link test99 alias ifalias desc testconf mtub 10M bps 5G duplex full wol phyunicastbroadcastmulticastarpmagicsecureon woolp port mii advertise") != 0)
+        assert(unit_exist('10-test99.link') == False)
+
+    def test_cli_set_link_feature_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-link-feature test99 auton") != 0)
+        assert(unit_exist('10-test99.link') == False)
+
+    def test_cli_set_link_mac_policy_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-link-mac test99 none") != 0)
+
+        assert(call_shell("nmctl set-link-mac test99 macaddr") != 0)
+        assert(unit_exist('10-test99.link') == False)
+
+    def test_cli_set_link_buff_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-link-buf test99 rxbuf maximum rxminbuf notstring rxjumbobuf") != 0)
+        assert(unit_exist('10-test99.link') == False)
+
+    def test_cli_set_link_channel_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-link-channel test99 ch max 656756677 otrch") != 0)
+        assert(unit_exist('10-test99.link') == False)
+
+    def test_cli_set_link_coalesce_failure(self):
+        assert(link_exist('test99') == True)
+
+        assert(call_shell("nmctl set-link-coalesce test99 rxcs max 123456") != 0)
+        assert(unit_exist('10-test99.link') == False)
 
 class TestCLISRIOV:
     def teardown_method(self):
