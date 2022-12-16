@@ -157,11 +157,6 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode) {
         if (r < 0)
                 return r;
 
-        if (!network) {
-                log_warning("Failed to find network file for '%s'. systemd-networkd is configuring. Please try after a while.", ifidx->ifname);
-                return -ENODATA;
-        }
-
         r = set_config_file_string(network, "Network", "DHCP", dhcp_client_modes_to_name(mode));
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
@@ -1898,7 +1893,7 @@ int manager_configure_proxy(int enable,
                 steal_pointer(k);
         }
 
-        if (enable != -1) {
+        if (enable >= 0) {
                 _auto_cleanup_ char *p = NULL, *t = NULL;
 
                 t = strdup(bool_to_string(enable));
