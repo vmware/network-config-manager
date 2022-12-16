@@ -88,13 +88,13 @@ static int list_links(int argc, char *argv[]) {
 
 
         if (arg_beautify)
-                printf("%s %10s %8s %13s %15s %10s\n",
-                        "INDEX",
-                        "DEVICE",
-                        "TYPE",
-                        "STATE",
+                printf("%s %10s      %8s %13s %15s %10s\n",
+                       "INDEX",
+                       "DEVICE",
+                       "TYPE",
+                       "STATE",
                         "OPERATIONAL",
-                        "SETUP");
+                       "SETUP");
 
         for (GList *i = h->links; i; i = g_list_next (i)) {
                 const char *setup_color, *operational_color, *operstates, *operstates_color;
@@ -116,7 +116,7 @@ static int list_links(int argc, char *argv[]) {
                         link_state_to_color(operstates, &operstates_color);
 
                 display(arg_beautify, ansi_color_bold(), "%-8d", link->ifindex);
-                display(arg_beautify, ansi_color_bold_cyan(), "  %-10s ", link->name);
+                display(arg_beautify, ansi_color_bold_cyan(), "  %-15s ", link->name);
 
                 (void) device_new_from_ifname(&sd_device, link->name);
                 if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_string(t))
