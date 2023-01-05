@@ -612,7 +612,6 @@ static int json_list_link_attributes(json_object *jobj, Link *l) {
 
                 json_object_object_add(jobj, "QDisc", js);
                 steal_pointer(js);
-
         }
 
         return 0;
@@ -656,7 +655,9 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 return r;
 
         if (l->alt_names) {
-                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                ja = json_object_new_array();
                 if (!ja)
                         return log_oom();
 
@@ -701,7 +702,6 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
 
                 json_object_object_add(jobj, "LinkFile", js);
                 steal_pointer(js);
-
         }
 
         (void) network_parse_link_network_file(l->ifindex, &network);
@@ -1182,7 +1182,9 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
 
         r = manager_get_one_link_address(l->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0) {
-                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                ja = json_object_new_array();
                 if (!ja)
                         return log_oom();
 
@@ -1207,9 +1209,10 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         }
 
         if (dns) {
-                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                _cleanup_(json_object_putp) json_object *ja = NULL;
                 char **d;
 
+                ja = json_object_new_array();
                 if (!ja)
                         return log_oom();
 
@@ -1227,9 +1230,10 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         }
 
         if (search_domains) {
-                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                _cleanup_(json_object_putp) json_object *ja = NULL;
                 char **d;
 
+                ja = json_object_new_array();
                 if (!ja)
                         return log_oom();
 
@@ -1246,9 +1250,10 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         }
 
         if (ntp) {
-                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                _cleanup_(json_object_putp) json_object *ja = NULL;
                 char **d;
 
+                ja = json_object_new_array();
                 if (!ja)
                         return log_oom();
 
