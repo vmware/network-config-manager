@@ -1,4 +1,4 @@
-/* Copyright 2022 VMware, Inc.
+/* Copyright 2023 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -436,6 +436,7 @@ int veth_new(Veth **ret) {
         *ret = v;
         return 0;
 }
+
 void veth_unref(Veth *v) {
         if (!v)
                 return;
