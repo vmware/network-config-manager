@@ -148,7 +148,6 @@ def expectedFailureIfNetdevsimWithSRIOVIsNotAvailable():
 
     return f
 
-"""
 class TestLinkConfigManagerYAML:
     yaml_configs = [
         "link.yaml",
@@ -248,7 +247,6 @@ class TestLinkConfigManagerYAML:
         assert(parser.get('Link', 'CoalescePacketRateHigh') == 'max')
         assert(parser.get('Link', 'CoalescePacketRateSampleIntervalSec') == '99877761')
         assert(parser.get('Link', 'StatisticsBlockCoalesceSec') == '987766555')
-"""
 
 class TestNetworkConfigManagerYAML:
     yaml_configs = [

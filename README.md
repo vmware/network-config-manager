@@ -42,7 +42,7 @@ Configure
 
 Please see [systemd.link](https://www.freedesktop.org/software/systemd/man/systemd.link.html) for more information.
 
-Gererates networkd unit configs from
+Generates networkd unit configs from
  - [YML](https://yaml.org) file.
  - [Dracut](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) kernel command line network config.
 
@@ -72,7 +72,7 @@ Or by simply doing
 ```bash
 ➜  ~ nmctl --help
 ```
-### Gererate network config from yml file:
+### Generate network config from yml file:
 
 `nmctl` can generate configurations for required network links from YAML description. Configuration written to disk under `/etc/systemd/network` will persist between reboots. When `netmgr-yaml-generator.service` is enabled it reads yaml files from `/etc/network-config-manager/yaml` and generates systemd-networkd configuration files.
 
@@ -212,6 +212,62 @@ configuration are found it generates a confiration file found in ```/etc/network
            client-key: /etc/ssl/cust-key.pem
            client-key-password: "QZTrSEtq:h_d.W7_"
 ```
+### Generate link config from yml file:
+
+`nmctl` can generate link configuration from YAML description. Configuration written to disk under `/etc/systemd/network` will persist between reboots. When `netmgr-yaml-generator.service` is enabled it reads yaml files from `/etc/network-config-manager/yaml` and generates systemd-networkd configuration files.
+
+```yml
+ match:
+    macaddress: fa:90:ae:07:52:0a
+ link:
+    ifname: test99
+    alias: ifalias
+    description: testconf
+    mtubytes: 10M
+    bitspersecond: 5G
+    duplex: full
+    wakeonlan: phy unicast broadcast multicast arp magic secureon
+    wakeonlanpassword: cb:a9:87:65:43:21
+    port: mii
+    advertise: 10baset-half 10baset-full 100baset-half 100baset-full 1000baset-half 1000baset-full 10000baset-full 2500basex-full 1000basekx-full 10000basekx4-full 10000basekr-full 10000baser-fec 20000basemld2-full 20000basekr2-full
+    autonegotiation: no
+    receivechecksumoffload: yes
+    transmitchecksumoffload: no
+    tcpsegmentationoffload: no
+    tcp6segmentationoffload: yes
+    genericsegmentationoffload: no
+    genericreceiveoffload: no
+    genericreceiveoffloadhardware: no
+    largereceiveoffload: yes
+    receivevlanctaghardwareacceleration: yes
+    transmitvlanctaghardwareacceleration: no
+    receivevlanctagfilter: no
+    transmitvlanstaghardwareacceleration: yes
+    ntuplefilter: no
+    useadaptiverxcoalesce: yes
+    useadaptivetxcoalesce: yes
+    macaddresspolicy: none
+    macaddress: 00:0c:29:3a:bc:11
+    namepolicy: kernel database onboard slot path mac keep
+    name: dm1
+    alternativenamespolicy: database onboard slot path mac
+    alternativename: demo1
+    rxbuffersize: max
+    rxminibuffersize: 65335
+    rxjumbobuffersize: 88776555
+    txbuffersize: max
+    transmitqueues: 4096
+    receivequeues: 4096
+    transmitqueuelength: 1024
+    txflowcontrol: no
+    rxflowcontrol: yes
+    autonegotiationflowcontrol: yes
+    genericsegmentoffloadmaxbytes: 65535
+    genericsegmentoffloadmaxsegments: 1024
+    rxchannels: max
+    txchannels: 656756677
+    otherchannels: 429496729
+ ```
 ### Generate network config from kernel command line
 
 `nmctl` understands kernel command line specified in [dracut's](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) network configuration format and can generate [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html)'s configuration while the system boots and will persist between reboots.

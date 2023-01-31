@@ -188,33 +188,6 @@ static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc,
         return true;
 }
 
-static int parse_network_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
-        yaml_node_pair_t *entry;
-
-        assert(m);
-        assert(doc);
-        assert(node);
-
-        for (entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
-                yaml_node_t *key, *value;
-                ParserTable *p;
-                void *v;
-
-                key = yaml_document_get_node(doc, entry->key);
-                value = yaml_document_get_node(doc, entry->value);
-
-                p = g_hash_table_lookup(m->network_config, scalar(key));
-                if (!p)
-                        continue;
-
-                v = (uint8_t *) network + p->offset;
-                if (p->parser)
-                        (void) p->parser(scalar(key), scalar(value), network, v, doc, value);
-        }
-
-        return true;
-}
-
 static int parse_route_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
         yaml_node_pair_t *entry;
 
@@ -242,7 +215,69 @@ static int parse_route_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t 
         return true;
 }
 
-static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+static int parse_network_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
+        yaml_node_pair_t *entry;
+
+        assert(m);
+        assert(doc);
+        assert(node);
+
+        for (entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
+                yaml_node_t *key, *value;
+                ParserTable *p;
+                void *v;
+
+                key = yaml_document_get_node(doc, entry->key);
+                value = yaml_document_get_node(doc, entry->value);
+
+                if (string_equal(scalar(key), "access-points")) {
+                        value = yaml_document_get_node(doc, value->data.mapping.pairs.start->key);
+                        (void) parse_wifi_access_points_config(m, doc, value, network);
+                } else if (string_equal(scalar(key), "routes")) {
+                        value = yaml_document_get_node(doc, value->data.mapping.pairs.start->key);
+                        (void) parse_route_config(m, doc, value, network);
+                }
+
+                p = g_hash_table_lookup(m->network_config, scalar(key));
+                if (!p)
+                        continue;
+
+                v = (uint8_t *) network + p->offset;
+                if (p->parser)
+                        (void) p->parser(scalar(key), scalar(value), network, v, doc, value);
+        }
+
+        return true;
+}
+
+static int parse_link_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, NetDevLink *link) {
+        yaml_node_pair_t *entry;
+
+        assert(m);
+        assert(doc);
+        assert(node);
+
+        for (entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
+                yaml_node_t *key, *value;
+                ParserTable *p;
+                void *v;
+
+                key = yaml_document_get_node(doc, entry->key);
+                value = yaml_document_get_node(doc, entry->value);
+
+                p = g_hash_table_lookup(m->link_config, scalar(key));
+                if (!p)
+                        continue;
+
+                v = (uint8_t *) link + p->offset;
+                if (p->parser)
+                        (void) p->parser(scalar(key), scalar(value), link, v, doc, value);
+        }
+
+        return true;
+}
+
+static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network, NetDevLink *link) {
         yaml_node_item_t *i;
         yaml_node_pair_t *p;
         yaml_node_t *n;
@@ -251,6 +286,7 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         assert(dp);
         assert(node);
         assert(network);
+        assert(link);
 
         switch (node->type) {
         case YAML_NO_NODE:
@@ -260,23 +296,26 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                 for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                         n = yaml_document_get_node(dp, *i);
                         if (n)
-                                (void) parse_yaml_node(m, dp, n, network);
+                                (void) parse_yaml_node(m, dp, n, network, link);
                 }
         }
                 break;
         case YAML_MAPPING_NODE:
-                (void) parse_network_config(m, dp, node, network);
-                (void) parse_wifi_access_points_config(m, dp, node, network);
-                (void) parse_route_config(m, dp, node, network);
-
                 for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                         n = yaml_document_get_node(dp, p->key);
-                        if (n)
-                                (void) parse_yaml_node(m, dp, n, network);
-
-                        n = yaml_document_get_node(dp, p->value);
-                        if (n)
-                                (void) parse_yaml_node(m, dp, n, network);
+                        if (string_equal(scalar(n), "link")) {
+                                n = yaml_document_get_node(dp, p->value);
+                                if (n)
+                                        (void) parse_link_config(m, dp, n, link);
+                        } else if (string_equal(scalar(n), "device")) {
+                                n = yaml_document_get_node(dp, p->value);
+                                if (n)
+                                        (void) parse_network_config(m, dp, n, network);
+                        } else {
+                                n = yaml_document_get_node(dp, p->value);
+                                if (n)
+                                        (void) parse_yaml_node(m, dp, n, network, link);
+                        }
                 }
                 break;
         default:
@@ -287,17 +326,19 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         return 0;
 }
 
-static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Network *network) {
+static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Network *network, NetDevLink *link) {
         assert(m);
         assert(dp);
         assert(network);
+        assert(link);
 
-        return parse_yaml_node(m, dp, yaml_document_get_root_node(dp), network);
+        return parse_yaml_node(m, dp, yaml_document_get_root_node(dp), network, link);
 }
 
-int parse_yaml_network_file(const char *file, Network **ret) {
+int parse_yaml_file(const char *file, Network **n, NetDevLink **l) {
         _cleanup_(yaml_manager_unrefp) YAMLManager *m = NULL;
         _cleanup_(network_unrefp) Network *network = NULL;
+        _cleanup_(netdev_link_unrefp) NetDevLink *link = NULL;
         _auto_cleanup_fclose_ FILE *f = NULL;
         yaml_document_t document;
         yaml_parser_t parser;
@@ -305,7 +346,8 @@ int parse_yaml_network_file(const char *file, Network **ret) {
         int r = 0;
 
         assert(file);
-        assert(ret);
+        assert(n);
+        assert(l);
 
         r = new_yaml_manager(&m);
         if (r < 0)
@@ -326,6 +368,12 @@ int parse_yaml_network_file(const char *file, Network **ret) {
 
         network->parser_type = PARSER_TYPE_YAML;
 
+        r = netdev_link_new(&link);
+        if (r < 0)
+                return r;
+
+        link->parser_type = PARSER_TYPE_YAML;
+
         for (;!done;) {
                 if (!yaml_parser_load(&parser, &document)) {
                         r = -EINVAL;
@@ -334,16 +382,19 @@ int parse_yaml_network_file(const char *file, Network **ret) {
 
                 done = !yaml_document_get_root_node(&document);
                 if (!done)
-                        r = parse_yaml_document(m, &document, network);
+                        r = parse_yaml_document(m, &document, network, link);
 
                 yaml_document_delete(&document);
         }
 
         yaml_parser_delete(&parser);
 
-        if (r >= 0)
-                *ret = steal_pointer(network);
-
+        if (r >= 0) {
+                if (link->ifname)
+                        *l = steal_pointer(link);
+                else
+                        *n = steal_pointer(network);
+        }
         return r;
 }
 
