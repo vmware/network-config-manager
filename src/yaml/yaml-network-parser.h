@@ -25,4 +25,4 @@ static inline const char *scalar(const yaml_node_t *node) {
         return (const char*) node->data.scalar.value;
 }
 
-int parse_yaml_network_file(const char *yaml_file, Network **ret);
+int parse_yaml_file(const char *yaml_file, Network **n, NetDevLink **l);
