@@ -1941,7 +1941,7 @@ int manager_generate_network_config_from_yaml(const char *file) {
                 return r;
         }
 
-        if (l->ifname) {
+        if (l && l->ifname) {
                 r = parse_ifname_or_index(l->ifname, &p);
                 if (r < 0) {
                         log_warning("Failed to find link '%s': %s", n->ifname, g_strerror(-r));
