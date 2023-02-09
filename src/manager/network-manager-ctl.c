@@ -170,7 +170,7 @@ static int help(void) {
                "  set-dhcp4                    dev [DEVICE] [use-dns BOOLEAN] [use-domains BOOLEAN] [use-mtu BOOLEAN] [use-ntp BOOLEAN] [send-release BOOLEAN]."
                                                      "\n\t\t\t\t     [use-hostname BOOLEAN] [use-routes BOOLEAN] [use-gw BOOLEAN] [use-tz BOOLEAN] Configures Link DHCPv4\n"
                "  set-dhcp6                    dev [DEVICE] [use-dns BOOLEAN] [use-domains BOOLEAN] [rapid-commit BOOLEAN] [use-addr BOOLEAN] [use-delegataed-prefix BOOLEAN]"
-                                                     "\n\t\t\t\t     [without-ra BOOLEAN] Configures DHCPv6.\n"
+                                                     "\n\t\t\t\t     [without-ra BOOLEAN] [use-ntp BOOLEAN] [use-hostname BOOLEAN] [send-release BOOLEAN] Configures DHCPv6.\n"
                "  add-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Add Link NTP server address. This option may be specified more than once.\n"
                "  set-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Set Link NTP server address. This option may be specified more than once.\n"
                "  delete-ntp                   dev [DEVICE] Delete Link NTP server addresses.\n"
