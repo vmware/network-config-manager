@@ -2,7 +2,7 @@
 
 ### What is nmctl
 
-The network-config-manager `nmctl` allows to configure and introspect the state of the network links as seen by [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html). nmctl can be used to query and configure devices's for Address, Routes, Gateways, DNS,  NTP,  domain, hostname. nmctl also allows to create virtual NetDev (VLan, VXLan, Bridge, Bond) etc. It also allows to configure link's various configuration such as WakeOnLanPassword, Port, BitsPerSecond, Duplex and Advertise etc. nmctl uses [sd-bus](http://0pointer.net/blog/the-new-sd-bus-api-of-systemd.html), [libudev](https://www.freedesktop.org/software/systemd/man/libudev.html) APIs to interact with [systemd](https://www.freedesktop.org/wiki/Software/systemd), [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html), [systemd-resolved](https://www.freedesktop.org/software/systemd/man/systemd-resolved.service.html), [systemd-hostnamed](https://www.freedesktop.org/software/systemd/man/systemd-hostnamed.service.html), and [systemd-timesyncd](https://www.freedesktop.org/software/systemd/man/systemd-timesyncd.service.html) via dbus. nmctl uses networkd verbs to explain output. nmctl can generate configurations for required network links from YAML description. It also understands kernel command line specified in [dracut](http://man7.org/linux/man-pages/man7/dracut.cmdline.7.html)'s network configuration format and can generate systemd-networkd's configuration while the system boots and will persist between reboots.
+The network-config-manager `nmctl` allows to configure and introspect the state of the network links as seen by [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html). nmctl can be used to query and configure devices's for Address, Routes, Gateways, DNS,  NTP,  domain, hostname. nmctl also allows to create virtual NetDev (VLan, VXLan, Bridge, Bond) etc. It also allows to configure link's various configuration such as WakeOnLanPassword, Port, BitsPerSecond, Duplex and Advertise etc. nmctl uses [sd-bus](http://0pointer.net/blog/the-new-sd-bus-api-of-systemd.html), [sd-device](https://www.freedesktop.org/software/systemd/man/sd-device.html) APIs to interact with [systemd](https://www.freedesktop.org/wiki/Software/systemd), [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html), [systemd-resolved](https://www.freedesktop.org/software/systemd/man/systemd-resolved.service.html), [systemd-hostnamed](https://www.freedesktop.org/software/systemd/man/systemd-hostnamed.service.html), and [systemd-timesyncd](https://www.freedesktop.org/software/systemd/man/systemd-timesyncd.service.html) via dbus. nmctl uses networkd verbs to explain output. nmctl can generate configurations for required network links from YAML description. It also understands kernel command line specified in [dracut](http://man7.org/linux/man-pages/man7/dracut.cmdline.7.html)'s network configuration format and can generate systemd-networkd's configuration while the system boots and will persist between reboots.
 
 ### Features
 
@@ -42,7 +42,7 @@ Configure
 
 Please see [systemd.link](https://www.freedesktop.org/software/systemd/man/systemd.link.html) for more information.
 
-Gererates networkd unit configs from
+Generates networkd unit configs from
  - [YML](https://yaml.org) file.
  - [Dracut](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) kernel command line network config.
 
@@ -72,7 +72,7 @@ Or by simply doing
 ```bash
 ➜  ~ nmctl --help
 ```
-### Gererate network config from yml file:
+### Generate network config from yml file:
 
 `nmctl` can generate configurations for required network links from YAML description. Configuration written to disk under `/etc/systemd/network` will persist between reboots. When `netmgr-yaml-generator.service` is enabled it reads yaml files from `/etc/network-config-manager/yaml` and generates systemd-networkd configuration files.
 
@@ -212,6 +212,62 @@ configuration are found it generates a confiration file found in ```/etc/network
            client-key: /etc/ssl/cust-key.pem
            client-key-password: "QZTrSEtq:h_d.W7_"
 ```
+### Generate link config from yml file:
+
+`nmctl` can generate link configuration from YAML description.
+
+```yml
+ match:
+    macaddress: fa:90:ae:07:52:0a
+ link:
+    ifname: test99
+    alias: ifalias
+    description: testconf
+    mtubytes: 10M
+    bitspersecond: 5G
+    duplex: full
+    wakeonlan: phy unicast broadcast multicast arp magic secureon
+    wakeonlanpassword: cb:a9:87:65:43:21
+    port: mii
+    advertise: 10baset-half 10baset-full 100baset-half 100baset-full 1000baset-half 1000baset-full 10000baset-full 2500basex-full 1000basekx-full 10000basekx4-full 10000basekr-full 10000baser-fec 20000basemld2-full 20000basekr2-full
+    autonegotiation: no
+    receivechecksumoffload: yes
+    transmitchecksumoffload: no
+    tcpsegmentationoffload: no
+    tcp6segmentationoffload: yes
+    genericsegmentationoffload: no
+    genericreceiveoffload: no
+    genericreceiveoffloadhardware: no
+    largereceiveoffload: yes
+    receivevlanctaghardwareacceleration: yes
+    transmitvlanctaghardwareacceleration: no
+    receivevlanctagfilter: no
+    transmitvlanstaghardwareacceleration: yes
+    ntuplefilter: no
+    useadaptiverxcoalesce: yes
+    useadaptivetxcoalesce: yes
+    macaddresspolicy: none
+    macaddress: 00:0c:29:3a:bc:11
+    namepolicy: kernel database onboard slot path mac keep
+    name: dm1
+    alternativenamespolicy: database onboard slot path mac
+    alternativename: demo1
+    rxbuffersize: max
+    rxminibuffersize: 65335
+    rxjumbobuffersize: 88776555
+    txbuffersize: max
+    transmitqueues: 4096
+    receivequeues: 4096
+    transmitqueuelength: 1024
+    txflowcontrol: no
+    rxflowcontrol: yes
+    autonegotiationflowcontrol: yes
+    genericsegmentoffloadmaxbytes: 65535
+    genericsegmentoffloadmaxsegments: 1024
+    rxchannels: max
+    txchannels: 656756677
+    otherchannels: 429496729
+ ```
 ### Generate network config from kernel command line
 
 `nmctl` understands kernel command line specified in [dracut's](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) network configuration format and can generate [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html)'s configuration while the system boots and will persist between reboots.
@@ -266,10 +322,3 @@ Created symlink /etc/systemd/system/network.target.wants/network-config-manager-
 ### Contributing
 
 The network-config-manager project team welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
-
-Please join [#photon](https://code.vmware.com/web/code/join).
-
-License
-----
-
-[Apache-2.0](https://spdx.org/licenses/Apache-2.0.html)
