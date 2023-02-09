@@ -73,7 +73,7 @@ static ParserTable parser_link_vtable[] = {
         { "ifname",                                   CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, ifname)},
         { "alias",                                    CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, alias)},
         { "description",                              CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, desc)},
-        { "mtubytes",                                 CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, mtub)},
+        { "mtu",                                      CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, mtu)},
         { "bitspersecond",                            CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, bps)},
         { "duplex",                                   CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, duplex)},
         { "wakeonlan",                                CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wol)},

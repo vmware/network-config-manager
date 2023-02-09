@@ -53,16 +53,16 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal_fold(argv[i], "mtub")) {
+                } else if (string_equal_fold(argv[i], "mtu")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_link_bytes(argv[i])) {
-                                log_warning("Failed to parse mtub='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to parse mtu='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
-                        n->mtub = strdup(argv[i]);
-                        if (!n->mtub)
+                        n->mtu = strdup(argv[i]);
+                        if (!n->mtu)
                                 return log_oom();
 
                         continue;

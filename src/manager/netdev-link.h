@@ -29,7 +29,7 @@ typedef struct NetDevLink {
         char *altnamepolicy;
         char *altname;
 
-        char *mtub;
+        char *mtu;
         char *bps;
         char *duplex;
         char *wol;

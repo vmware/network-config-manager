@@ -2425,7 +2425,7 @@ class TestCLILink:
     def test_cli_set_link(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call(['nmctl', 'set-link', 'test99', 'alias', 'ifalias', 'desc', 'testconf', 'mtub', '10M', 'bps', '5G', 'duplex', 'full', 'wol', 'phy,unicast,broadcast,multicast,arp,magic,secureon', 'wolp', 'cb:a9:87:65:43:21', 'port', 'mii', 'advertise', '10baset-half,10baset-full,100baset-half,100baset-full,1000baset-half,1000baset-full,10000baset-full,2500basex-full,1000basekx-full,10000basekx4-full,10000basekr-full,10000baser-fec,20000basemld2-full,20000basekr2-full'])
+        subprocess.check_call(['nmctl', 'set-link', 'test99', 'alias', 'ifalias', 'desc', 'testconf', 'mtu', '10M', 'bps', '5G', 'duplex', 'full', 'wol', 'phy,unicast,broadcast,multicast,arp,magic,secureon', 'wolp', 'cb:a9:87:65:43:21', 'port', 'mii', 'advertise', '10baset-half,10baset-full,100baset-half,100baset-full,1000baset-half,1000baset-full,10000baset-full,2500basex-full,1000basekx-full,10000basekx4-full,10000basekr-full,10000baser-fec,20000basemld2-full,20000basekr2-full'])
         assert(unit_exist('10-test99.link') == True)
 
         parser = configparser.ConfigParser()
