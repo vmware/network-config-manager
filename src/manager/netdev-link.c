@@ -21,7 +21,7 @@ static const Config link_ctl_to_config_table[] = {
                 { "name",            "Name" },
                 { "altnamepolicy",   "AlternativeNamesPolicy" },
                 { "altname",         "AlternativeName" },
-                { "mtub",            "MTUBytes" },
+                { "mtu",             "MTUBytes" },
                 { "bps",             "BitsPerSecond" },
                 { "duplex",          "Duplex" },
                 { "wol",             "WakeOnLan" },
@@ -136,7 +136,7 @@ void netdev_link_unref(NetDevLink *n) {
         free(n->altnamepolicy);
         free(n->altname);
 
-        free(n->mtub);
+        free(n->mtu);
         free(n->bps);
         free(n->duplex);
         free(n->wol);
@@ -275,8 +275,8 @@ int netdev_link_configure(const IfNameIndex *ifidx, NetDevLink *n) {
                     return r;
         }
 
-        if(n->mtub) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "mtub"), n->mtub);
+        if(n->mtu) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "mtu"), n->mtu);
                 if (r < 0)
                     return r;
         }
