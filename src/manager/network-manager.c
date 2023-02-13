@@ -62,10 +62,12 @@ static const Config network_ctl_to_dhcp6_section_config_table[] = {
                 { "use-ntp",               "UseNTP"},
                 { "use-domains",           "UseDomains"},
                 { "use-mtu",               "UseMTU"},
+                { "use-hostname",          "UseHostname"},
                 { "rapid-commit",          "RapidCommit"},
                 { "use-addr",              "UseAddress"},
                 { "use-delegataed-prefix", "UseDelegatedPrefix"},
                 { "without-ra",            "WithoutRA"},
+                { "send-release",          "SendRelease"},
                 {},
 };
 
