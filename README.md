@@ -223,7 +223,7 @@ configuration are found it generates a confiration file found in ```/etc/network
     ifname: test99
     alias: ifalias
     description: testconf
-    mtubytes: 10M
+    mtu: 10M
     bitspersecond: 5G
     duplex: full
     wakeonlan: phy unicast broadcast multicast arp magic secureon
