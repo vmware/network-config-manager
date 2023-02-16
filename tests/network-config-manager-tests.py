@@ -2678,7 +2678,7 @@ class TestCLISRIOV:
         output = subprocess.call("ip link", shell=True)
         print(output)
 
-        subprocess.check_call("nmctl add-sr-iov eni99np1 vf 0 vlanid 5 qos 1 vlanproto "
+        subprocess.check_call("nmctl add-sr-iov dev eni99np1 vf 0 vlanid 5 qos 1 vlanproto "
                                "802.1Q macspoofck yes qrss True trust yes linkstate yes "
                                "macaddr 00:11:22:33:44:55", shell = True)
 
@@ -2699,10 +2699,10 @@ class TestCLISRIOV:
         assert(parser.get('SR-IOV', 'LinkState') == 'yes')
         assert(parser.get('SR-IOV', 'MACAddress') == '00:11:22:33:44:55')
 
-        subprocess.check_call("nmctl add-sr-iov eni99np1 vf 1 vlanid 6 qos 2 vlanproto 802.1Q macspoofck yes qrss True trust yes linkstate yes "
+        subprocess.check_call("nmctl add-sr-iov dev eni99np1 vf 1 vlanid 6 qos 2 vlanproto 802.1Q macspoofck yes qrss True trust yes linkstate yes "
                               "macaddr 00:11:22:33:44:56", shell = True)
 
-        subprocess.check_call("nmctl add-sr-iov eni99np1 vf 2 vlanid 7 qos 3 vlanproto 802.1Q macspoofck yes qrss True trust yes linkstate yes "
+        subprocess.check_call("nmctl add-sr-iov dev eni99np1 vf 2 vlanid 7 qos 3 vlanproto 802.1Q macspoofck yes qrss True trust yes linkstate yes "
                               "macaddr 00:11:22:33:44:57", shell = True)
 
         restart_networkd()
