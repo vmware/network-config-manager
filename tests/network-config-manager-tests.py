@@ -58,7 +58,8 @@ units = ["10-test99.network",
          '10-vri-98.network'
          '10-wg99.netdev',
          '10-wg99.network',
-         '10-eni99np1.network']
+         '10-eni99np1.network',
+         '10-test99.link']
 
 def link_exist(link):
     return os.path.exists(os.path.join('/sys/class/net', link))
@@ -2711,3 +2712,46 @@ class TestCLISRIOV:
         output = subprocess.call('ip link', shell=True)
         print(output)
         subprocess.check_call("rmmod netdevsim", shell=True)
+
+class TestCLISRIOLink:
+    def setup_method(self):
+        link_remove('test99')
+        link_add_dummy('test99')
+        restart_networkd()
+
+    def teardown_method(self):
+        remove_units_from_netword_unit_path()
+        link_remove('test99')
+
+    def test_sriov(self):
+
+        output = subprocess.call("ip link", shell=True)
+        print(output)
+
+        subprocess.check_call("nmctl add-link-sr-iov dev test99 vf 0 vlanid 5 qos 1 vlanproto "
+                               "802.1Q macspoofck yes qrss True trust yes linkstate yes "
+                               "macaddr 00:11:22:33:44:55", shell = True)
+
+
+        assert(unit_exist('10-test99.link') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.link'))
+
+        assert(parser.get('SR-IOV', 'VirtualFunction') == '0')
+        assert(parser.get('SR-IOV', 'VLANId') == '5')
+        assert(parser.get('SR-IOV', 'QualityOfService') == '1')
+        assert(parser.get('SR-IOV', 'VLANProtocol') == '802.1Q')
+        assert(parser.get('SR-IOV', 'MACSpoofCheck') == 'yes')
+        assert(parser.get('SR-IOV', 'QueryReceiveSideScaling') == 'yes')
+        assert(parser.get('SR-IOV', 'Trust') == 'yes')
+        assert(parser.get('SR-IOV', 'LinkState') == 'yes')
+        assert(parser.get('SR-IOV', 'MACAddress') == '00:11:22:33:44:55')
+
+        subprocess.check_call("nmctl add-sr-iov dev test99 vf 1 vlanid 6 qos 2 vlanproto 802.1Q macspoofck yes qrss True trust yes linkstate yes "
+                              "macaddr 00:11:22:33:44:56", shell = True)
+
+        subprocess.check_call("nmctl add-sr-iov dev test99 vf 2 vlanid 7 qos 3 vlanproto 802.1Q macspoofck yes qrss True trust yes linkstate yes "
+                              "macaddr 00:11:22:33:44:57", shell = True)
+
+        output = subprocess.call('ip link', shell=True)
+        print(output)
