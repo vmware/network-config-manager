@@ -187,7 +187,7 @@ static int help(void) {
                                                       "\n\t\t\t\t      route [Prefix ADDRESS] route-lifetime [LifetimeSec NUMBER] Configures IPv6 Router Advertisement.\n"
                "  remove-ipv6ra                dev [DEVICE] Removes Ipv6 Router Advertisement.\n"
                "  enable-ipv6                  dev [DEVICE] [BOOLEAN] Enable or disables IPv6 on the link.\n"
-               "  add-sr-iov                   [DEVICE] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN]"
+               "  add-sr-iov                   dev [DEVICE] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN]"
                                                      "\n\t\t\t\t      [trust BOOLEAN] [linkstate BOOLEAN or STRING] [macaddr ADDRESS] Configures SR-IOV VirtualFunction, "
                                                      "\n\t\t\t\t      VLANId, QualityOfService, VLANProtocol, MACSpoofCheck, QueryReceiveSideScaling, Trust, LinkState, MACAddress \n"
                "  create-vlan                  [VLAN name] dev [MASTER DEVICE] id [ID INTEGER] proto [PROTOCOL {802.1q|802.1ad}] [gvrp BOOLEAN] [mvrp BOOLEAN] "

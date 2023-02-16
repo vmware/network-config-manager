@@ -126,20 +126,24 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
         bool have_vf = false;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find device '%s': %s", argv[1], strerror(-r));
-                return r;
-        }
-
         r = netdev_sriov_new(&s);
         if (r < 0)
                 return log_oom();
 
-        for (int i = 2; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 unsigned v;
 
-                if (string_equal_fold(argv[i], "vf")) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+
+                } else if (string_equal_fold(argv[i], "vf")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v);
@@ -262,6 +266,11 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                         log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                         return -EINVAL;
                 }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (!have_vf) {
