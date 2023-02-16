@@ -417,6 +417,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-link-coalesce",             "lcoalesce",        2,        WORD_ANY, false, ncm_configure_link_coalesce },
                 { "set-link-coald-frames",         "lcf",              2,        WORD_ANY, false, ncm_configure_link_coald_frames },
                 { "set-link-coal-pkt",             "lcp",              2,        WORD_ANY, false, ncm_configure_link_coal_pkt },
+                { "add-link-sr-iov",               "lsriov",           2,        WORD_ANY, false, ncm_configure_sr_iov},
                 { "add-sr-iov",                    "sriov",            2,        WORD_ANY, false, ncm_configure_sr_iov},
                 { "set-proxy",                     "pxy",              1,        WORD_ANY, false, ncm_configure_proxy },
                 { "show-proxy",                    "spxy",             WORD_ANY, WORD_ANY, false, ncm_show_proxy },
