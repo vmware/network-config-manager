@@ -15,14 +15,14 @@
 #include "file-util.h"
 #include "log.h"
 #include "macros.h"
-#include "netlink.h"
+#include "netdev-link.h"
 #include "network-sriov.h"
 #include "network-util.h"
 #include "network.h"
 #include "parse-util.h"
 
-int netdev_sriov_new(SRIOV **ret) {
-        _cleanup_(netdev_sriov_unrefp) SRIOV *s = NULL;
+int sriov_new(SRIOV **ret) {
+        _cleanup_(sriov_unrefp) SRIOV *s = NULL;
 
         s = new0(SRIOV, 1);
         if (!s)
@@ -39,7 +39,7 @@ int netdev_sriov_new(SRIOV **ret) {
         return 0;
 }
 
-void netdev_sriov_unref(SRIOV *s) {
+void sriov_unref(SRIOV *s) {
         if (!s)
                 return;
 
@@ -53,7 +53,7 @@ void netdev_sriov_unref(SRIOV *s) {
         free(s);
 }
 
-int netdev_sriov_configure(const IfNameIndex *ifidx, SRIOV *s) {
+int sriov_configure(const IfNameIndex *ifidx, SRIOV *s, bool link) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         _auto_cleanup_ char *network = NULL;
@@ -62,9 +62,15 @@ int netdev_sriov_configure(const IfNameIndex *ifidx, SRIOV *s) {
         assert(ifidx);
         assert(s);
 
-        r = create_or_parse_network_file(ifidx, &network);
-        if (r < 0)
-                return r;
+        if (!link) {
+                r = create_or_parse_network_file(ifidx, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = create_or_parse_netdev_link_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
+        }
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -121,25 +127,32 @@ int netdev_sriov_configure(const IfNameIndex *ifidx, SRIOV *s) {
 }
 
 _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
-        _cleanup_(netdev_sriov_unrefp) SRIOV *s = NULL;
+        _cleanup_(sriov_unrefp) SRIOV *s = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool have_vf = false;
+        bool have_vf = false, link = false;
         int r;
 
-        r = parse_ifname_or_index(argv[1], &p);
-        if (r < 0) {
-                log_warning("Failed to find device '%s': %s", argv[1], strerror(-r));
-                return r;
-        }
+        if (string_equal(argv[0], "add-link-sr-iov") || string_equal(argv[0], "lsriov"))
+                link = true;
 
-        r = netdev_sriov_new(&s);
+        r = sriov_new(&s);
         if (r < 0)
                 return log_oom();
 
-        for (int i = 2; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
                 unsigned v;
 
-                if (string_equal_fold(argv[i], "vf")) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+
+                } else if (string_equal_fold(argv[i], "vf")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v);
@@ -264,12 +277,17 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                 }
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
         if (!have_vf) {
                 log_warning("Failed to configure sriov missing VirtualFunction : %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
-        r = netdev_sriov_configure(p, s);
+        r = sriov_configure(p, s, link);
         if (r < 0) {
                 log_warning("Failed to configure sriov: %s", strerror(-r));
                 return r;

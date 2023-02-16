@@ -187,7 +187,7 @@ static int help(void) {
                                                       "\n\t\t\t\t      route [Prefix ADDRESS] route-lifetime [LifetimeSec NUMBER] Configures IPv6 Router Advertisement.\n"
                "  remove-ipv6ra                dev [DEVICE] Removes Ipv6 Router Advertisement.\n"
                "  enable-ipv6                  dev [DEVICE] [BOOLEAN] Enable or disables IPv6 on the link.\n"
-               "  add-sr-iov                   [DEVICE] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN]"
+               "  add-sr-iov                   dev [DEVICE] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN]"
                                                      "\n\t\t\t\t      [trust BOOLEAN] [linkstate BOOLEAN or STRING] [macaddr ADDRESS] Configures SR-IOV VirtualFunction, "
                                                      "\n\t\t\t\t      VLANId, QualityOfService, VLANProtocol, MACSpoofCheck, QueryReceiveSideScaling, Trust, LinkState, MACAddress \n"
                "  create-vlan                  [VLAN name] dev [MASTER DEVICE] id [ID INTEGER] proto [PROTOCOL {802.1q|802.1ad}] [gvrp BOOLEAN] [mvrp BOOLEAN] "
@@ -417,6 +417,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-link-coalesce",             "lcoalesce",        2,        WORD_ANY, false, ncm_configure_link_coalesce },
                 { "set-link-coald-frames",         "lcf",              2,        WORD_ANY, false, ncm_configure_link_coald_frames },
                 { "set-link-coal-pkt",             "lcp",              2,        WORD_ANY, false, ncm_configure_link_coal_pkt },
+                { "add-link-sr-iov",               "lsriov",           2,        WORD_ANY, false, ncm_configure_sr_iov},
                 { "add-sr-iov",                    "sriov",            2,        WORD_ANY, false, ncm_configure_sr_iov},
                 { "set-proxy",                     "pxy",              1,        WORD_ANY, false, ncm_configure_proxy },
                 { "show-proxy",                    "spxy",             WORD_ANY, WORD_ANY, false, ncm_show_proxy },

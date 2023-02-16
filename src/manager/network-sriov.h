@@ -24,9 +24,9 @@ typedef struct SRIOV {
         int trust;
 } SRIOV;
 
-int netdev_sriov_new(SRIOV **ret);
+int sriov_new(SRIOV **ret);
 
-void netdev_sriov_unref(SRIOV *s);
-DEFINE_CLEANUP(SRIOV*, netdev_sriov_unref);
+void sriov_unref(SRIOV *s);
+DEFINE_CLEANUP(SRIOV*, sriov_unref);
 
-int netdev_sriov_configure(const IfNameIndex *ifidx, SRIOV *s);
+int sriov_configure(const IfNameIndex *ifidx, SRIOV *s, bool link);
