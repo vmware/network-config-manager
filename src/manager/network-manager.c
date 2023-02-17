@@ -6,6 +6,7 @@
 #include <net/ethernet.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <systemd/sd-device.h>
 
 #include "alloc-util.h"
 #include "config-file.h"
@@ -1739,6 +1740,58 @@ int manager_edit_link_network_config(const IfNameIndex *ifidx) {
                         execvp(*d, (char* const*) args);
                         if (errno != ENOENT) {
                                 log_warning("Failed to edit %s via editor %s: %s",  network, *d, strerror(-errno));
+                                _exit(EXIT_FAILURE);
+                        }
+                }
+
+                _exit(EXIT_SUCCESS);
+        } else {
+                int status;
+
+                waitpid(pid, &status, 0);
+        }
+
+        return 0;
+}
+
+int manager_edit_link_config(const IfNameIndex *ifidx) {
+        _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
+        const char *link = NULL;
+        pid_t pid;
+        int r;
+
+        assert(ifidx);
+
+        r = sd_device_new_from_ifname(&sd_device, ifidx->ifname);
+        if (r < 0)
+             return r;
+
+        r = sd_device_get_property_value(sd_device, "ID_NET_LINK_FILE", &link);
+        if (r < 0)
+              return r;
+
+        pid = fork();
+        if (pid < 0)
+                return -errno;
+
+        if (pid == 0) {
+                _auto_cleanup_strv_ char **editors = NULL;
+                char **d;
+
+                editors = strv_new("vim");
+                if (!editors)
+                        return log_oom();
+
+                r = strv_add(&editors, "vi");
+                if (r < 0)
+                        return r;
+
+                strv_foreach(d, editors) {
+                        const char *args[] = {*d, link, NULL};
+
+                        execvp(*d, (char* const*) args);
+                        if (errno != ENOENT) {
+                                log_warning("Failed to edit %s via editor %s: %s",  link, *d, strerror(-errno));
                                 _exit(EXIT_FAILURE);
                         }
                 }

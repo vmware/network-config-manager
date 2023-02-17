@@ -222,6 +222,7 @@ static int help(void) {
                "  reconfigure                  dev [DEVICE] Reconfigure device.\n"
                "  show-config                  dev [DEVICE] Displays network configuration of device.\n"
                "  edit                         dev [DEVICE] Edit network configuration of device.\n"
+               "  edit-link                    dev [DEVICE] Edit link configuration of device.\n"
                "  set-link                     [LINK] [alias STRING] [desc STRING] [mtu STRING]  [bps STRING]  [duplex STRING] [wol STRING | List] [wolp STRING] "
                                                        "\n\t\t\t\t    [port STRING] [advertise STRING | List]"
                                                        "\n\t\t\t\t    Configure link's other parameters like mtuytes, bitspersecond, duplex, wakeonlan, wakeonlanpassword, port and advertise.\n"
@@ -408,6 +409,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "reconfigure",                   "rc",               1,        WORD_ANY, false, ncm_link_reconfigure },
                 { "show-config",                   "sc",               1,        WORD_ANY, false, ncm_link_show_network_config },
                 { "edit",                          "e" ,               1,        WORD_ANY, false, ncm_link_edit_network_config },
+                { "edit-link",                     "el" ,              1,        WORD_ANY, false, ncm_link_edit_link_config },
                 { "set-link",                      "l",                2,        WORD_ANY, false, ncm_configure_link },
                 { "set-link-feature",              "lf",               2,        WORD_ANY, false, ncm_configure_link_features },
                 { "set-link-mac",                  "lm",               2,        WORD_ANY, false, ncm_configure_link_mac },

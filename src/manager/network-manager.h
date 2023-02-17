@@ -130,6 +130,7 @@ int manager_remove_ipv6_router_advertisement(const IfNameIndex *ifidx);
 
 int manager_show_link_network_config(const IfNameIndex *ifidx, char **ret);
 int manager_edit_link_network_config(const IfNameIndex *ifidx);
+int manager_edit_link_config(const IfNameIndex *ifidx);
 
 int manager_remove_netdev(const char *ifname, const char *kind);
 
