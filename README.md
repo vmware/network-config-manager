@@ -21,7 +21,7 @@ Configure
   - IPv6 Router Advertisements.
   - SR-IOV
   - Add delete and view nftables table, chains and rules.
-  - Edit network configuration via vim/vi.
+  - Edit network / link configuration via vim/vi.
 
   Please see [systemd.network](https://www.freedesktop.org/software/systemd/man/systemd.network.html) for more information.
 
