@@ -19,7 +19,7 @@ Configure
   - Hostname.
   - DHCPv4 Server.
   - IPv6 Router Advertisements.
-  - SR-IOV
+  - Network and Link SRIOV
   - Add delete and view nftables table, chains and rules.
   - Edit network / link configuration via vim/vi.
 
