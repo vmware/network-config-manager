@@ -2999,6 +2999,42 @@ _public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_edit_link_config(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (string_equal_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                } else {
+                         r = parse_ifname_or_index(argv[i], &p);
+                         if (r < 0)
+                                 continue;
+                         break;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_edit_link_config(p);
+        if (r < 0) {
+                log_warning("Failed to edit link configuration of device '%s': %s", argv[1], strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ bool ncm_is_netword_running(void) {
         if (access("/run/systemd/netif/state", F_OK) < 0) {
                 log_warning("systemd-networkd is not running. Failed to continue.\n\n");
