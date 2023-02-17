@@ -93,7 +93,7 @@ static int list_links(int argc, char *argv[]) {
                        "DEVICE",
                        "TYPE",
                        "STATE",
-                        "OPERATIONAL",
+                       "OPERATIONAL",
                        "SETUP");
 
         for (GList *i = h->links; i; i = g_list_next (i)) {
@@ -415,6 +415,9 @@ static int list_one_link(char *argv[]) {
 
                 if (l->flags & IFF_DORMANT)
                         printf("DORMANT");
+
+                if (l->flags & IFF_DEBUG)
+                        printf("DEBUG");
 
                 printf("\n");
         }
