@@ -387,7 +387,7 @@ int parse_yaml_routes(const char *key,
                         if (r < 0)
                                 return r;
 
-                        route->destination = *address;
+                        route->dst = *address;
 
                         if (!g_hash_table_insert(network->routes, GUINT_TO_POINTER(route), route)) {
                                 log_warning("Failed to add route: %s", value);

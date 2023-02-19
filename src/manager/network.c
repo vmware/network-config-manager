@@ -704,15 +704,15 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         Route *route = value;
         int r;
 
-        if (ip_is_null(&route->destination) && ip_is_null(&route->gw))
+        if (ip_is_null(&route->dst) && ip_is_null(&route->gw))
                 return;
 
         r = section_new("Route", &section);
         if (r < 0)
                 return;
 
-        if (!ip_is_null(&route->destination)) {
-                (void) ip_to_string(AF_INET, &route->destination, &destination);
+        if (!ip_is_null(&route->dst)) {
+                (void) ip_to_string(AF_INET, &route->dst, &destination);
                 (void ) add_key_to_section(section, "Destination", destination);
         }
 

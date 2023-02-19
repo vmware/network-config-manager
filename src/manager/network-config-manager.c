@@ -1553,7 +1553,7 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
                 Route *a = (Route *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL;
 
-                ip_to_string(a->family, &a->address, &c);
+                ip_to_string(a->family, &a->gw, &c);
                 if (r < 0)
                         return r;
 
@@ -1685,7 +1685,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                 .ifindex = p->ifindex,
                 .table = table,
                 .dst_prefixlen = destination->prefix_len,
-                .destination = *destination,
+                .dst = *destination,
                 .gw = *gw,
         };
 

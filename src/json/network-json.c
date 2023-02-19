@@ -84,9 +84,9 @@ static void json_list_link_addresses(gpointer key, gpointer value, gpointer user
         steal_pointer(jidx);
 }
 
-static void json_list_link_gateways(gpointer key, gpointer value, gpointer userdata) {
+static void json_list_link_routes(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *jip = NULL, *jname = NULL, *jfamily = NULL,
-                *jidx = NULL, *jobj_gw = NULL;
+                *jidx = NULL, *jrt = NULL, *jdst = NULL;
         json_object *jobj = (json_object *) userdata;
         _auto_cleanup_ char *c = NULL;
         char buf[IF_NAMESIZE + 1] = {};
@@ -94,14 +94,14 @@ static void json_list_link_gateways(gpointer key, gpointer value, gpointer userd
         size_t size;
         int r;
 
-        jobj_gw = json_object_new_object();
-        if (!jobj_gw)
+        jrt = json_object_new_object();
+        if (!jrt)
                 return;
 
         route = (Route *) g_bytes_get_data(key, &size);
         if_indextoname(route->ifindex, buf);
 
-        r = ip_to_string_prefix(route->family, &route->address, &c);
+        r = ip_to_string_prefix(route->family, &route->gw, &c);
         if (r < 0)
                 return;
 
@@ -109,14 +109,25 @@ static void json_list_link_gateways(gpointer key, gpointer value, gpointer userd
         if (!jname)
                 return;
 
-        json_object_object_add(jobj_gw, "ifname", jname);
-
+        json_object_object_add(jrt, "ifname", jname);
 
         jip = json_object_new_string(c);
         if (!jip)
                 return;
 
-        json_object_object_add(jobj_gw, "ip", jip);
+        json_object_object_add(jrt, "gateway", jip);
+        steal_pointer(jip);
+
+        r = ip_to_string_prefix(route->family, &route->dst, &c);
+        if (r < 0)
+                return;
+
+        jip = json_object_new_string(c);
+        if (!jip)
+                return;
+
+        json_object_object_add(jrt, "destination", jip);
+        steal_pointer(jip);
 
         if (route->family == AF_INET)
                 jfamily = json_object_new_string("ipv4");
@@ -125,17 +136,16 @@ static void json_list_link_gateways(gpointer key, gpointer value, gpointer userd
         if (!jfamily)
                 return;
 
-        json_object_object_add(jobj_gw, "family", jfamily);
+        json_object_object_add(jrt, "family", jfamily);
 
         jidx = json_object_new_int(route->ifindex);
         if (!jidx)
                 return;
 
-        json_object_object_add(jobj_gw, "ifindex", jidx);
-        json_object_array_add(jobj, jobj_gw);
+        json_object_object_add(jrt, "ifindex", jidx);
+        json_object_array_add(jobj, jrt);
 
-        steal_pointer(jobj_gw);
-        steal_pointer(jip);
+        steal_pointer(jrt);
         steal_pointer(jname);
         steal_pointer(jfamily);
         steal_pointer(jidx);
@@ -310,10 +320,10 @@ int json_system_status(char **ret) {
                 if (!jroutes)
                         return log_oom();
 
-                set_foreach(routes->routes, json_list_link_gateways, jroutes);
+                set_foreach(routes->routes, json_list_link_routes, jroutes);
         }
 
-        json_object_object_add(jobj, "Gateways", jroutes);
+        json_object_object_add(jobj, "Routes", jroutes);
         steal_pointer(jroutes);
 
         (void) network_parse_dns(&dns);
@@ -422,7 +432,10 @@ static void json_list_one_link_routes(gpointer key, gpointer value, gpointer use
         int r;
 
         rt = (Route *) g_bytes_get_data(key, &size);
-        r = ip_to_string(rt->family, &rt->address, &c);
+        if (ip_is_null(&rt->gw))
+                return;
+
+        r = ip_to_string(rt->family, &rt->gw, &c);
         if (r < 0)
                 return;
 
@@ -430,7 +443,7 @@ static void json_list_one_link_routes(gpointer key, gpointer value, gpointer use
         if (!js)
                 return;
 
-        json_object_array_add(ja, js);
+        json_object_object_add(ja, "Gateway", js);
         steal_pointer(js);
 }
 
@@ -1198,13 +1211,13 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         if (r >= 0 && route && set_size(route->routes) > 0) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
 
-                ja = json_object_new_array();
+                ja = json_object_new_object();
                 if (!ja)
                         return log_oom();
 
                 set_foreach(route->routes, json_list_one_link_routes, ja);
 
-                json_object_object_add(jobj, "Gateway", ja);
+                json_object_object_add(jobj, "Routes", ja);
                 steal_pointer(ja);
         }
 

@@ -488,7 +488,6 @@ static int list_one_link(char *argv[]) {
         if (r >= 0 && route && set_size(route->routes) > 0) {
                 gpointer key, value;
                 GHashTableIter iter;
-                bool first = true;
 
                 display(arg_beautify, ansi_color_bold_cyan(), "                     Gateway: ");
 
@@ -499,12 +498,13 @@ static int list_one_link(char *argv[]) {
                         Route *rt = NULL;
 
                         rt = (Route *) g_bytes_get_data(key, &size);
-                        (void) ip_to_string(rt->family, &rt->address, &c);
-                        if (first) {
-                                printf("%s\n", c);
-                                first = false;
-                        } else
-                                printf("                              %s\n", c);
+
+                        if (ip_is_null(&rt->gw))
+                            continue;
+
+                        (void) ip_to_string(rt->family, &rt->gw, &c);
+                        printf("%s\n", c);
+                        break;
                 }
         }
 
@@ -622,32 +622,9 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
         Address *a;
 
         a = (Address *) g_bytes_get_data(key, &size);
-
         if_indextoname(a->ifindex, buf);
 
         (void) ip_to_string_prefix(a->family, &a->address, &c);
-        if (first) {
-                printf("%-30s on device ", c);
-                display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
-                first = false;
-        } else {
-                printf("                      %-30s on device ", c);
-                display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
-        }
-}
-
-static void list_link_routes(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_ char *c = NULL;
-        char buf[IF_NAMESIZE + 1] = {};
-        static bool first = true;
-        unsigned long size;
-        Route *rt;
-
-        rt = (Route *) g_bytes_get_data(key, &size);
-
-        if_indextoname(rt->ifindex, buf);
-
-        (void) ip_to_string_prefix(rt->family, &rt->address, &c);
         if (first) {
                 printf("%-30s on device ", c);
                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
@@ -745,8 +722,44 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
         r = manager_link_get_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
+                _cleanup_(set_unrefp) Set *devs = NULL;
+                gpointer key, value;
+                GHashTableIter iter;
+                bool first = true;
+
+                r = set_new(&devs, g_int64_hash, g_int64_equal);
+                if (r < 0)
+                        return r;
+
                 display(arg_beautify, ansi_color_bold_cyan(), "             Gateway: ");
-                set_foreach(routes->routes, list_link_routes, NULL);
+
+                g_hash_table_iter_init(&iter, routes->routes->hash);
+                while (g_hash_table_iter_next (&iter, &key, &value)) {
+                        _auto_cleanup_ char *c = NULL;
+                        char buf[IF_NAMESIZE + 1] = {};
+                        unsigned long size;
+                        Route *rt;
+
+                        rt = (Route *) g_bytes_get_data(key, &size);
+                        if (ip_is_null(&rt->gw))
+                                continue;
+
+                        if (!set_contains(devs, &rt->ifindex))
+                                set_add(devs, &rt->ifindex);
+                        else
+                                continue;
+
+                        if_indextoname(rt->ifindex, buf);
+                        (void) ip_to_string(rt->family, &rt->gw, &c);
+                        if (first) {
+                                printf("%-30s on device ", c);
+                                display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
+                                first = false;
+                        } else {
+                                printf("                      %-30s on device ", c);
+                                display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
+                         }
+                }
         }
 
         (void) network_parse_dns(&dns);

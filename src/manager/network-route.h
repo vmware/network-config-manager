@@ -12,26 +12,33 @@
 #include "set.h"
 
 typedef struct Route {
+	unsigned char dst_prefixlen;
+        unsigned char src_prefixlen;
+        unsigned char scope;
+        unsigned char protocol;
+        unsigned char type;
+        unsigned char tos;
+
+        uint32_t priority;
+        uint32_t table;
+        uint32_t mtu;
+        uint32_t metric;
+        uint32_t flags;
+        uint32_t flow;
+
         int family;
         int ifindex;
-        int dst_prefixlen;
-
-        char protocol;
-        char type;
-
-        unsigned char scope;
-
-        uint32_t metric;
-        uint32_t table;
 
         int onlink;
 
-        IPAddress address;
+        IPAddress src;
+        IPAddress dst;
         IPAddress gw;
-        IPAddress destination;
+        IPAddress prefsrc;
 } Route;
 
 typedef struct Routes {
+        int ifindex;
         Set *routes;
 } Routes;
 
