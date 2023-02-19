@@ -36,8 +36,8 @@ network_config_manager_sources = files('''
         manager/network.c
         nftables/nftables.h
         nftables/nftables.c
-        nftables/mnl_util.h
-        nftables/mnl_util.c
+        lib-mnl/mnl_util.h
+        lib-mnl/mnl_util.c
         nftables/nft_util.h
         nftables/nft_util.c
         share/ansi-color.h

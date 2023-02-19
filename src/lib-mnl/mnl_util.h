@@ -21,7 +21,7 @@ int mnl_new(Mnl **ret);
 void mnl_unref(Mnl *m);
 DEFINE_CLEANUP(Mnl*, mnl_unref);
 
-int mnl_send(struct Mnl *m, mnl_cb_t cb, void *d);
+int mnl_send(struct Mnl *m, mnl_cb_t cb, void *d, uint16_t type);
 
 void unref_mnl_socket(struct mnl_socket *nl);
 DEFINE_CLEANUP(struct mnl_socket*, unref_mnl_socket);

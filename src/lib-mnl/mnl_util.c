@@ -44,7 +44,7 @@ void unref_mnl_socket(struct mnl_socket *nl) {
         mnl_socket_close(nl);
 }
 
-int mnl_send(Mnl *m, mnl_cb_t cb, void *d) {
+int mnl_send(Mnl *m, mnl_cb_t cb, void *d, uint16_t type) {
         _cleanup_(unref_mnl_socketp) struct mnl_socket *nl = NULL;
         uint32_t port_id;
         size_t k;
@@ -52,7 +52,7 @@ int mnl_send(Mnl *m, mnl_cb_t cb, void *d) {
 
         assert(m);
 
-        nl = mnl_socket_open(NETLINK_NETFILTER);
+        nl = mnl_socket_open(type);
         if (!nl)
                 return -errno;
 

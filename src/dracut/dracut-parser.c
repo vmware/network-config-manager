@@ -286,7 +286,7 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
                 if (r < 0)
                         return r;
 
-                route->destination = *destination;
+                route->dst = *destination;
 
         }
 

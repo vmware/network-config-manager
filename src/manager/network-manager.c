@@ -919,8 +919,8 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (!pref_source)
                 return log_oom();
 
-        if (!ip_is_null(&rt->destination)) {
-                r = ip_to_string(rt->destination.family, &rt->destination, &destination);
+        if (!ip_is_null(&rt->dst)) {
+                r = ip_to_string(rt->dst.family, &rt->dst, &destination);
                 if (r < 0)
                         return r;
         } else {

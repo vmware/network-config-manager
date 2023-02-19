@@ -1,32 +1,12 @@
 /* Copyright 2023 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-#include <net/if.h>
-#include <linux/if.h>
-#include <net/ethernet.h>
 
 #include "alloc-util.h"
 #include "log.h"
-#include "macros.h"
-#include "netlink.h"
 #include "network-route.h"
+#include "mnl_util.h"
 #include "network-util.h"
-
-static int routes_new(Routes **ret) {
-        Routes *rt;
-        int r;
-
-        rt = new0(Routes, 1);
-        if (!rt)
-                return log_oom();
-
-        r = set_new(&rt->routes, g_bytes_hash, g_bytes_equal);
-        if (r < 0)
-                return r;
-
-        *ret = steal_pointer(rt);
-        return 0;
-}
 
 int route_new(Route **ret) {
         Route *route;
@@ -46,6 +26,22 @@ int route_new(Route **ret) {
         };
 
         *ret = route;
+        return 0;
+}
+
+static int routes_new(Routes **ret) {
+        Routes *rt;
+        int r;
+
+        rt = new0(Routes, 1);
+        if (!rt)
+                return log_oom();
+
+        r = set_new(&rt->routes, g_bytes_hash, g_bytes_equal);
+        if (r < 0)
+                return r;
+
+        *ret = steal_pointer(rt);
         return 0;
 }
 
@@ -95,134 +91,230 @@ static int route_add(Routes **rts, Route *rt) {
         return -EEXIST;
 }
 
-static int fill_link_route(struct nlmsghdr *h, size_t len, int ifindex, Routes **ret) {
-        int r;
+static int data_attr_cb2(const struct nlattr *attr, void *data) {
+        const struct nlattr **tb = data;
 
-        assert(h);
-        assert(ret);
-        assert(len);
+        if (mnl_attr_type_valid(attr, RTAX_MAX) < 0)
+                return MNL_CB_OK;
 
-        for (struct nlmsghdr *p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
-                _auto_cleanup_ struct rtattr **rta_tb = NULL;
-                _auto_cleanup_ Route *a = NULL;
-                struct rtmsg *rt;
-                int l;
+        if (mnl_attr_validate(attr, MNL_TYPE_U32) < 0)
+                return MNL_CB_ERROR;
 
-                rt = NLMSG_DATA(p);
+        tb[mnl_attr_get_type(attr)] = attr;
+        return MNL_CB_OK;
+}
 
-                l = p->nlmsg_len;
-                l -= NLMSG_LENGTH(sizeof(*rt));
+static int route_data_ipv4_attr_cb(const struct nlattr *attr, void *data) {
+        int type = mnl_attr_get_type(attr);
+        const struct nlattr **tb = data;
 
-                rta_tb = new0(struct rtattr *, RTA_MAX + 1);
-                if (!rta_tb)
-                        return log_oom();
+        if (mnl_attr_type_valid(attr, RTA_MAX) < 0)
+                return MNL_CB_OK;
 
-                r = rtnl_message_parse_rtattr(rta_tb, RTA_MAX, RTM_RTA(rt), l);
-                if (r < 0)
-                        return r;
+        switch(type) {
+        case RTA_TABLE:
+        case RTA_DST:
+        case RTA_SRC:
+        case RTA_OIF:
+        case RTA_FLOW:
+        case RTA_PREFSRC:
+        case RTA_GATEWAY:
+        case RTA_PRIORITY:
+                if (mnl_attr_validate(attr, MNL_TYPE_U32) < 0)
+                        return MNL_CB_ERROR;
+                break;
+        case RTA_METRICS:
+                if (mnl_attr_validate(attr, MNL_TYPE_NESTED) < 0)
+                        return MNL_CB_ERROR;
+                break;
+        }
+        tb[type] = attr;
+        return MNL_CB_OK;
+}
 
-                r = route_new(&a);
-                if (r < 0)
-                        return r;
+static int route_data_ipv6_attr_cb(const struct nlattr *attr, void *data) {
+        int type = mnl_attr_get_type(attr);
+        const struct nlattr **tb = data;
 
-                a->family = rt->rtm_family;
+        if (mnl_attr_type_valid(attr, RTA_MAX) < 0)
+                return MNL_CB_OK;
 
-                if (rta_tb[RTA_OIF])
-                        a->ifindex = rtnl_message_read_attribute_u32(rta_tb[RTA_OIF]);
+        switch(type) {
+        case RTA_TABLE:
+        case RTA_OIF:
+        case RTA_FLOW:
+        case RTA_PRIORITY:
+                if (mnl_attr_validate(attr, MNL_TYPE_U32) < 0)
+                        return MNL_CB_ERROR;
+                break;
+        case RTA_DST:
+        case RTA_SRC:
+        case RTA_PREFSRC:
+        case RTA_GATEWAY:
+                if (mnl_attr_validate2(attr, MNL_TYPE_BINARY, sizeof(struct in6_addr)) < 0)
+                        return MNL_CB_ERROR;
+                break;
+        case RTA_METRICS:
+                if (mnl_attr_validate(attr, MNL_TYPE_NESTED) < 0)
+                        return MNL_CB_ERROR;
+                break;
+        }
+
+        tb[type] = attr;
+        return MNL_CB_OK;
+}
+
+static int fill_link_route_message(Route *rt, int ifindex , struct nlattr *tb[]) {
+        if (tb[RTA_TABLE])
+                rt->table = mnl_attr_get_u32(tb[RTA_TABLE]);
+
+        if (tb[RTA_DST]) {
+                if (rt->family == AF_INET)
+                        memcpy(&rt->dst.in, mnl_attr_get_payload(tb[RTA_DST]), sizeof(struct in_addr));
                 else
-                        continue;
+                        memcpy(&rt->dst.in6, mnl_attr_get_payload(tb[RTA_DST]), sizeof(struct in6_addr));
 
-                if (ifindex > 0 && ifindex != (int) a->ifindex)
-                        continue;
+                rt->dst.family = rt->family;
+        }
 
-                if (rt->rtm_dst_len != 0)
-                        continue;
+        if (tb[RTA_SRC]) {
+                if (rt->family == AF_INET)
+                        memcpy(&rt->src.in, mnl_attr_get_payload(tb[RTA_SRC]), sizeof(struct in_addr));
+                else
+                        memcpy(&rt->src.in6, mnl_attr_get_payload(tb[RTA_SRC]), sizeof(struct in6_addr));
 
-                if (rt->rtm_src_len != 0)
-                        continue;
+                rt->src.family = rt->family;
+        }
 
-                switch (a->family) {
-                case AF_INET:
-                        if (rta_tb[RTA_GATEWAY])
-                                (void) rtnl_message_read_in_addr(rta_tb[RTA_GATEWAY], &a->address.in);
-                        break;
-                case AF_INET6:
-                        if (rta_tb[RTA_GATEWAY])
-                                (void) rtnl_message_read_in6_addr(rta_tb[RTA_GATEWAY], &a->address.in6);
-                        break;
-                default:
-                        break;
+        if (tb[RTA_OIF])
+                rt->ifindex = mnl_attr_get_u32(tb[RTA_OIF]);
+
+        if (ifindex > 0 && ifindex != (int) rt->ifindex)
+                return -EINVAL;
+
+        if (tb[RTA_FLOW])
+                rt->flow = mnl_attr_get_u32(tb[RTA_FLOW]);
+
+        if (tb[RTA_PREFSRC]) {
+                if (rt->family == AF_INET)
+                        memcpy(&rt->prefsrc.in, mnl_attr_get_payload(tb[RTA_PREFSRC]), sizeof(struct in_addr));
+                else
+                        memcpy(&rt->prefsrc.in6, mnl_attr_get_payload(tb[RTA_PREFSRC]), sizeof(struct in6_addr));
+
+                rt->prefsrc.family = rt->family;
+        }
+
+        if (tb[RTA_GATEWAY]) {
+                if (rt->family == AF_INET)
+                        memcpy(&rt->gw.in, mnl_attr_get_payload(tb[RTA_GATEWAY]), sizeof(struct in_addr));
+                else
+                        memcpy(&rt->gw.in6, mnl_attr_get_payload(tb[RTA_GATEWAY]), sizeof(struct in6_addr));
+
+                rt->gw.family = rt->family;
+        }
+
+        if (tb[RTA_PRIORITY])
+                rt->priority = mnl_attr_get_u32(tb[RTA_PRIORITY]);
+
+        if (tb[RTA_METRICS]) {
+                struct nlattr *tbx[RTAX_MAX+1] = {};
+                int i;
+
+                mnl_attr_parse_nested(tb[RTA_METRICS], data_attr_cb2, tbx);
+                for (i=0; i<RTAX_MAX; i++) {
+                        if (tbx[i])
+                                rt->metric =  mnl_attr_get_u32(tbx[i]);
                 }
-
-                r = route_add(ret, a);
-                if (r < 0) {
-                        return r;
-                }
-
-                steal_pointer(a);
         }
 
         return 0;
 }
 
-static int acquire_link_route(int s, int ifindex, Routes **ret) {
-        _auto_cleanup_ IPRouteMessage *m = NULL;
-        struct nlmsghdr *reply = NULL;
+static int fill_link_route(const struct nlmsghdr *nlh, void *data) {
+        struct nlattr *tb[RTA_MAX+1] = {};
+        _auto_cleanup_ Route *rt = NULL;
+        Routes *rts = (Routes *) data;
+        struct rtmsg *rm;
         int r;
 
-        assert(s);
-        assert(ret);
+        assert(data);
+        assert(nlh);
 
-        r = ip_route_message_new(RTM_GETROUTE, AF_UNSPEC, 0, &m);
+        r = route_new(&rt);
         if (r < 0)
                 return r;
 
-        r = rtnl_message_request_dump(&m->hdr, true);
-        if (r < 0)
-                return r;
+        rm = mnl_nlmsg_get_payload(nlh);
 
-        r = rtnl_send_message(s, &m->hdr);
-        if (r < 0)
-                return r;
+        rt->family = rm->rtm_family;
+        rt->dst_prefixlen = rm->rtm_dst_len;
+        rt->src_prefixlen = rm->rtm_src_len;
+        rt->tos = rm->rtm_tos;
+        rt->table = rm->rtm_table;
+        rt->type = rm->rtm_type;
+        rt->scope = rm->rtm_scope;
+        rt->protocol = rm->rtm_protocol;
+        rt->flags = rm->rtm_flags;
 
-        r = rtnl_receive_message(s, m->buf, sizeof(m->buf), 0);
-        if (r < 0)
-                 return r;
-
-        reply = (struct nlmsghdr *) m->buf;
-        for(;;) {
-                fill_link_route(reply, r, ifindex, ret);
-
-                r = rtnl_receive_message(s, m->buf, sizeof(m->buf), 0);
+        switch(rm->rtm_family) {
+        case AF_INET:
+                mnl_attr_parse(nlh, sizeof(*rm), route_data_ipv4_attr_cb, tb);
+                r = fill_link_route_message(rt, rts->ifindex, tb);
                 if (r < 0)
-                        return -errno;
-                if (r == 0)
-                         break;
-         }
+                        return MNL_CB_OK;
+                break;
+        case AF_INET6:
+                mnl_attr_parse(nlh, sizeof(*rm), route_data_ipv6_attr_cb, tb);
+                fill_link_route_message(rt, rts->ifindex, tb);
+                break;
+        }
 
+        r = route_add(&rts, rt);
+        if (r < 0)
+                return r;
+
+        steal_pointer(rt);
+
+        return MNL_CB_OK;
+}
+
+static int acquire_link_route(int ifindex, Routes **ret) {
+        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        struct nlmsghdr *nlh;
+        Routes *rts = NULL;
+        int r;
+
+        r = mnl_new(&m);
+        if (r < 0)
+                return r;
+
+        nlh = mnl_nlmsg_put_header(m->buf);
+        nlh->nlmsg_type = RTM_GETROUTE;
+        nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
+        nlh->nlmsg_seq = time(NULL);
+        mnl_nlmsg_put_extra_header(nlh, sizeof(struct rtmsg));
+        m->nlh = nlh;
+
+        r = routes_new(&rts);
+        if (r < 0)
+                return r;
+
+        rts->ifindex = ifindex;
+
+        r = mnl_send(m, fill_link_route, rts, NETLINK_ROUTE);
+        if (r < 0)
+                return r;
+
+        *ret = rts;
         return 0;
 }
 
-int manager_link_get_routes(Routes **ret) {
-       _auto_cleanup_close_ int s = -1;
-        int r;
-
-        r = rtnl_socket_open(0, &s);
-        if (r < 0)
-                return r;
-
-        return acquire_link_route(s, 0, ret);
+int manager_link_get_routes(Routes **rt) {
+        return acquire_link_route(0, rt);
 }
 
 int manager_get_one_link_route(int ifindex, Routes **ret) {
-        _auto_cleanup_close_ int s = -1;
-        int r;
-
-        r = rtnl_socket_open(0, &s);
-        if (r < 0)
-                return r;
-
-        return acquire_link_route(s, ifindex, ret);
+        return acquire_link_route(ifindex, ret);
 }
 
 static int link_add_route(int s, Route *route) {
@@ -252,19 +344,18 @@ static int link_add_route(int s, Route *route) {
 
                 if (r < 0)
                         return r;
-
         }
 
-        if (route->destination.prefix_len > 0) {
-                if (route->destination.family == AF_INET)
-                        r = rtnl_message_add_attribute(&m->hdr, RTA_DST, &route->destination.in, sizeof(struct in_addr));
+        if (route->dst.prefix_len > 0) {
+                if (route->dst.family == AF_INET)
+                        r = rtnl_message_add_attribute(&m->hdr, RTA_DST, &route->dst.in, sizeof(struct in_addr));
                 else
-                        r = rtnl_message_add_attribute(&m->hdr, RTA_DST, &route->destination.in6, sizeof(struct in6_addr));
+                        r = rtnl_message_add_attribute(&m->hdr, RTA_DST, &route->dst.in6, sizeof(struct in6_addr));
 
                 if (r < 0)
                         return r;
 
-                m->rtm.rtm_dst_len = route->destination.prefix_len;
+                m->rtm.rtm_dst_len = route->dst.prefix_len;
         }
 
         if (route->table != RT_TABLE_MAIN) {

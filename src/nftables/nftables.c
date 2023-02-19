@@ -324,7 +324,7 @@ int nft_add_table(int family, const char *name) {
         nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
         mnl_nlmsg_batch_next(m->batch);
 
-        return mnl_send(m, 0, 0);
+        return mnl_send(m, 0, 0, NETLINK_NETFILTER);
 }
 
 int nft_delete_table(int family, const char *name) {
@@ -357,7 +357,7 @@ int nft_delete_table(int family, const char *name) {
         nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
         mnl_nlmsg_batch_next(m->batch);
 
-        return mnl_send(m, 0, 0);
+        return mnl_send(m, 0, 0, NETLINK_NETFILTER);
 }
 
 static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
@@ -419,7 +419,7 @@ int nft_get_tables(int family, const char *table, GPtrArray **ret) {
         if (!s)
                 return -ENOMEM;
 
-        r = mnl_send(m, get_table_cb, s);
+        r = mnl_send(m, get_table_cb, s, NETLINK_NETFILTER);
         if (r < 0)
                 return r;
 
@@ -460,7 +460,7 @@ int nft_add_chain(int family, const char *table, const char *name) {
         nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
         mnl_nlmsg_batch_next(m->batch);
 
-        return mnl_send(m, 0, 0);
+        return mnl_send(m, 0, 0, NETLINK_NETFILTER);
 }
 
 static int get_chain_cb(const struct nlmsghdr *nlh, void *data) {
@@ -524,7 +524,7 @@ int nft_get_chains(int family, const char *table, const char *chain, GPtrArray *
         if (!s)
                 return -ENOMEM;
 
-        r = mnl_send(m, get_chain_cb, s);
+        r = mnl_send(m, get_chain_cb, s, NETLINK_NETFILTER);
         if (r < 0)
                 return r;
 
@@ -565,7 +565,7 @@ int nft_delete_chain(int family, const char *table, const char *name) {
         nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
         mnl_nlmsg_batch_next(m->batch);
 
-        return mnl_send(m, 0, 0);
+        return mnl_send(m, 0, 0, NETLINK_NETFILTER);
 }
 
 int nft_configure_rule_port(int family,
@@ -643,7 +643,7 @@ int nft_configure_rule_port(int family,
         nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
         mnl_nlmsg_batch_next(m->batch);
 
-        return mnl_send(m, 0, 0);
+        return mnl_send(m, 0, 0, NETLINK_NETFILTER);
 }
 
 int nft_run_command(char **command, GString **ret) {
@@ -745,5 +745,5 @@ int nft_delete_rule(int family, const char *table, const char *chain, int handle
         nftnl_batch_end(mnl_nlmsg_batch_current(m->batch), m->seq++);
         mnl_nlmsg_batch_next(m->batch);
 
-        return mnl_send(m, 0, 0);
+        return mnl_send(m, 0, 0, NETLINK_NETFILTER);
 }
