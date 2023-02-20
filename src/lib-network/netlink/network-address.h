@@ -31,6 +31,7 @@ typedef struct Address {
 } Address;
 
 typedef struct Addresses {
+       int ifindex;
        Set *addresses;
 } Addresses;
 

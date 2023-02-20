@@ -91,7 +91,7 @@ static int route_add(Routes **rts, Route *rt) {
         return -EEXIST;
 }
 
-static int data_attr_cb2(const struct nlattr *attr, void *data) {
+static int validata_attr_mettrics(const struct nlattr *attr, void *data) {
         const struct nlattr **tb = data;
 
         if (mnl_attr_type_valid(attr, RTAX_MAX) < 0)
@@ -220,7 +220,7 @@ static int fill_link_route_message(Route *rt, int ifindex , struct nlattr *tb[])
                 struct nlattr *tbx[RTAX_MAX+1] = {};
                 int i;
 
-                mnl_attr_parse_nested(tb[RTA_METRICS], data_attr_cb2, tbx);
+                mnl_attr_parse_nested(tb[RTA_METRICS], validata_attr_mettrics, tbx);
                 for (i=0; i<RTAX_MAX; i++) {
                         if (tbx[i])
                                 rt->metric =  mnl_attr_get_u32(tbx[i]);
@@ -240,21 +240,23 @@ static int fill_link_route(const struct nlmsghdr *nlh, void *data) {
         assert(data);
         assert(nlh);
 
+        rm = mnl_nlmsg_get_payload(nlh);
+
         r = route_new(&rt);
         if (r < 0)
                 return r;
 
-        rm = mnl_nlmsg_get_payload(nlh);
-
-        rt->family = rm->rtm_family;
-        rt->dst_prefixlen = rm->rtm_dst_len;
-        rt->src_prefixlen = rm->rtm_src_len;
-        rt->tos = rm->rtm_tos;
-        rt->table = rm->rtm_table;
-        rt->type = rm->rtm_type;
-        rt->scope = rm->rtm_scope;
-        rt->protocol = rm->rtm_protocol;
-        rt->flags = rm->rtm_flags;
+        *rt = (Route) {
+               .family = rm->rtm_family,
+               .dst_prefixlen = rm->rtm_dst_len,
+               .src_prefixlen = rm->rtm_src_len,
+               .tos = rm->rtm_tos,
+               .table = rm->rtm_table,
+               .type = rm->rtm_type,
+               .scope = rm->rtm_scope,
+               .protocol = rm->rtm_protocol,
+               .flags = rm->rtm_flags,
+        };
 
         switch(rm->rtm_family) {
         case AF_INET:
