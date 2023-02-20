@@ -12,7 +12,7 @@
 #include "set.h"
 
 typedef struct Route {
-	unsigned char dst_prefixlen;
+        unsigned char dst_prefixlen;
         unsigned char src_prefixlen;
         unsigned char scope;
         unsigned char protocol;

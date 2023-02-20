@@ -11,6 +11,7 @@
 #include "alloc-util.h"
 #include "log.h"
 #include "macros.h"
+#include "mnl_util.h"
 #include "netlink-message.h"
 #include "netlink.h"
 #include "network-address.h"
@@ -94,104 +95,97 @@ int address_add(Addresses **h, Address *a) {
         return -EEXIST;
 }
 
-static int fill_link_address(struct nlmsghdr *h, size_t len, int ifindex, Addresses **ret) {
+static int validate_address_attributes(const struct nlattr *attr, void *data) {
+        const struct nlattr **tb = data;
+        int type = mnl_attr_get_type(attr);
+
+        if (mnl_attr_type_valid(attr, IFA_MAX) < 0)
+                return MNL_CB_OK;
+
+        switch(type) {
+        case IFA_ADDRESS:
+                if (mnl_attr_validate(attr, MNL_TYPE_BINARY) < 0)
+                        return MNL_CB_ERROR;
+                break;
+        }
+        tb[type] = attr;
+        return MNL_CB_OK;
+}
+
+static int fill_link_address(const struct nlmsghdr *nlh, void *data) {
+        struct ifaddrmsg *ifa = mnl_nlmsg_get_payload(nlh);
+        struct nlattr *tb[IFA_MAX + 1] = {};
         _auto_cleanup_ Address *a = NULL;
-        struct ifaddrmsg *ifm;
-        int r, l;
+        Addresses *addrs = data;
+        int r;
 
-        assert(h);
-        assert(ret);
+        assert(nlh);
+        assert(data);
 
-        for (struct nlmsghdr *p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
-                _auto_cleanup_ struct rtattr **rta_tb = NULL;
-                ifm = NLMSG_DATA(p);
+        r = address_new(&a);
+        if (r < 0)
+                return r;
 
-                l = p->nlmsg_len;
-                l -= NLMSG_LENGTH(sizeof(*ifm));
+        *a = (Address) {
+           .family = ifa->ifa_family,
+           .ifindex = ifa->ifa_index,
+           .scope = ifa->ifa_scope,
+           .address.prefix_len = ifa->ifa_prefixlen,
+        };
 
+        if (addrs->ifindex !=0 && addrs->ifindex != a->ifindex)
+                return MNL_CB_OK;
 
-                if (ifindex > 0 && ifindex != (int) ifm->ifa_index)
-                        continue;
-
-                rta_tb = new0(struct rtattr *, IFA_MAX + 1);
-                if (!rta_tb)
-                        return log_oom();
-
-                r = rtnl_message_parse_rtattr(rta_tb, IFA_MAX, IFA_RTA(ifm), l);
-                if (r < 0)
-                        return r;
-
-                r = address_new(&a);
-                if (r < 0)
-                        return r;
-
-                a->family = ifm->ifa_family;
-                a->ifindex = ifm->ifa_index;
-                a->address.prefix_len = ifm->ifa_prefixlen;
-                switch (a->family) {
-                case AF_INET:
-                        if (rta_tb[IFA_LOCAL])
-                                (void) rtnl_message_read_in_addr(rta_tb[IFA_LOCAL], &a->address.in);
-                        else if (rta_tb[IFA_ADDRESS])
-                                (void) rtnl_message_read_in_addr(rta_tb[IFA_ADDRESS], &a->address.in);
-
-                        break;
-                case AF_INET6:
-                        if (rta_tb[IFA_LOCAL])
-                                (void) rtnl_message_read_in6_addr(rta_tb[IFA_LOCAL], &a->address.in6);
-                        else if (rta_tb[IFA_ADDRESS])
-                                (void) rtnl_message_read_in6_addr(rta_tb[IFA_ADDRESS], &a->address.in6);
-
-                        break;
-                default:
-                        break;
-                }
-
-                r = address_add(ret, a);
-                if (r < 0)
-                        return r;
-
-                steal_pointer(a);
+        mnl_attr_parse(nlh, sizeof(*ifa), validate_address_attributes, tb);
+        if (tb[IFA_ADDRESS]) {
+                if (a->family == AF_INET)
+                        memcpy(&a->address.in, mnl_attr_get_payload(tb[IFA_ADDRESS]), sizeof(struct in_addr));
+                else
+                        memcpy(&a->address.in6, mnl_attr_get_payload(tb[IFA_ADDRESS]), sizeof(struct in6_addr));
         }
 
-        return 0;
+        if (tb[IFA_LOCAL]) {
+                if (a->family == AF_INET)
+                        memcpy(&a->address.in, mnl_attr_get_payload(tb[IFA_ADDRESS]), sizeof(struct in_addr));
+                else
+                        memcpy(&a->address.in6, mnl_attr_get_payload(tb[IFA_ADDRESS]), sizeof(struct in6_addr));
+        }
+
+        r = address_add(&addrs, a);
+        if (r < 0)
+                return r;
+
+        steal_pointer(a);
+        return MNL_CB_OK;
 }
 
 static int acquire_link_address(int s, int ifindex, Addresses **ret) {
-        _auto_cleanup_ IPAddressMessage *m = NULL;
-        struct nlmsghdr *reply = NULL;
+        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        struct nlmsghdr *nlh;
+        Addresses *a = NULL;
         int r;
 
-        assert(s);
-        assert(ret);
-
-        r = ip_address_message_new(RTM_GETADDR, AF_UNSPEC, ifindex, &m);
+        r = mnl_new(&m);
         if (r < 0)
                 return r;
 
-        r = rtnl_message_request_dump(&m->hdr, true);
+        nlh = mnl_nlmsg_put_header(m->buf);
+        nlh->nlmsg_type = RTM_GETADDR;
+        nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
+        mnl_nlmsg_put_extra_header(nlh, sizeof(struct rtgenmsg));
+        m->nlh = nlh;
+
+        r = addresses_new(&a);
         if (r < 0)
                 return r;
 
-        r = rtnl_send_message(s, &m->hdr);
+        a->ifindex = ifindex;
+
+        r = mnl_send(m, fill_link_address, a, NETLINK_ROUTE);
         if (r < 0)
                 return r;
 
-        r = rtnl_receive_message(s, m->buf, sizeof(m->buf), 0);
-        if (r < 0)
-                 return r;
-
-        reply = (struct nlmsghdr *) m->buf;
-        for (; r > 0;) {
-                (void) fill_link_address(reply, r, ifindex, ret);
-
-                r = rtnl_receive_message(s, m->buf, sizeof(m->buf), 0);
-                if (r < 0)
-                        return -errno;
-                if (r == 0)
-                         break;
-         }
-
+        *ret = a;
         return 0;
 }
 
