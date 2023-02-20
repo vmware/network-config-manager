@@ -10,7 +10,7 @@ typedef struct Set {
 } Set;
 
 int set_new(Set **ret, GHashFunc hash_func, GEqualFunc compare_func);
-void set_unrefp(Set **s);
+void set_freep(Set **s);
 
 #define set_size(s)  g_hash_table_size(s->hash)
 

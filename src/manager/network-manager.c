@@ -1983,8 +1983,8 @@ int manager_parse_proxy_config(GHashTable **c) {
 
 int manager_generate_network_config_from_yaml(const char *file) {
         _cleanup_(g_string_unrefp) GString *wifi_config = NULL;
-        _cleanup_(netdev_link_unrefp) NetDevLink *l = NULL;
-        _cleanup_(network_unrefp) Network *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *l = NULL;
+        _cleanup_(network_freep) Network *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -2084,7 +2084,7 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
 
         n = manager_no_interface_name(networks);
         if (n) {
-                _cleanup_(links_unrefp) Links *h = NULL;
+                _cleanup_(links_freep) Links *h = NULL;
 
                 r = link_get_links(&h);
                 if (r < 0)

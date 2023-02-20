@@ -16,7 +16,7 @@
 
 _public_ int ncm_create_bridge(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **devs = NULL;
-        _cleanup_(bridge_unrefp) Bridge *b = NULL;
+        _cleanup_(bridge_freep) Bridge *b = NULL;
         char **s;
         int r;
 
@@ -117,7 +117,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
 
 _public_ int ncm_create_bond(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **devs = NULL;
-        _cleanup_(bond_unrefp) Bond *b = NULL;
+        _cleanup_(bond_freep) Bond *b = NULL;
         char **s;
         int r;
 
@@ -185,7 +185,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_macvlan(int argc, char *argv[]) {
-        _cleanup_(macvlan_unrefp) MACVLan *m = NULL;
+        _cleanup_(macvlan_freep) MACVLan *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_mode = false;
         int r;
@@ -251,7 +251,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
-        _cleanup_(ipvlan_unrefp) IPVLan *v = NULL;
+        _cleanup_(ipvlan_freep) IPVLan *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_mode = false;
         int r;
@@ -317,7 +317,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_vxlan(int argc, char *argv[]) {
-        _cleanup_(vxlan_unrefp) VxLan *v = NULL;
+        _cleanup_(vxlan_freep) VxLan *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_vni = false;
         int r;
@@ -435,7 +435,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 _public_ int ncm_create_vlan(int argc, char *argv[]) {
         bool have_id = false, have_dev = false;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        _cleanup_(vlan_unrefp) VLan *v = NULL;
+        _cleanup_(vlan_freep) VLan *v = NULL;
         int r = 0;
 
         r = vlan_new(&v);
@@ -554,7 +554,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_veth(int argc, char *argv[]) {
-        _cleanup_(veth_unrefp) Veth *v = NULL;
+        _cleanup_(veth_freep) Veth *v = NULL;
         int r;
 
         r = veth_new(&v);
@@ -591,7 +591,7 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_vrf(int argc, char *argv[]) {
-        _cleanup_(vrf_unrefp) VRF *vrf = NULL;
+        _cleanup_(vrf_freep) VRF *vrf = NULL;
         bool have_table = false;
         int r;
 
@@ -632,7 +632,7 @@ _public_ int ncm_create_vrf(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_tunnel(int argc, char *argv[]) {
-        _cleanup_(tunnel_unrefp) Tunnel *t = NULL;
+        _cleanup_(tunnel_freep) Tunnel *t = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         NetDevKind kind;
         char *c;
@@ -719,7 +719,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
-        _cleanup_(wireguard_unrefp) WireGuard *wg = NULL;
+        _cleanup_(wireguard_freep) WireGuard *wg = NULL;
         int r;
 
         r = wireguard_new(&wg);
@@ -850,7 +850,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
-        _cleanup_(tuntap_unrefp) TunTap *t = NULL;
+        _cleanup_(tuntap_freep) TunTap *t = NULL;
         int r;
 
         r = tuntap_new(&t);
@@ -955,7 +955,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 }
 
 _public_ int ncm_remove_netdev(int argc, char *argv[]) {
-        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ char *kind = NULL;
         int r;
 

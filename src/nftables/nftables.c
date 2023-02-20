@@ -154,7 +154,7 @@ int ip_packet_protcol_name_to_type(char *name) {
         return _IP_PACKET_PROTOCOL_INVALID;
 }
 
-void nft_table_unref(NFTNLTable *t) {
+void nft_table_free(NFTNLTable *t) {
         if (!t)
                 return;
 
@@ -164,7 +164,7 @@ void nft_table_unref(NFTNLTable *t) {
 }
 
 int nft_table_new(int family, const char *name, NFTNLTable **ret) {
-        _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
+        _cleanup_(nft_table_freep) NFTNLTable *t = NULL;
 
         t = new(NFTNLTable, 1);
         if (!t)
@@ -191,7 +191,7 @@ int nft_table_new(int family, const char *name, NFTNLTable **ret) {
         return 0;
 }
 
-void nft_chain_unref(NFTNLChain *c) {
+void nft_chain_free(NFTNLChain *c) {
         if (!c)
                 return;
 
@@ -203,7 +203,7 @@ void nft_chain_unref(NFTNLChain *c) {
 }
 
 int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **ret) {
-        _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
+        _cleanup_(nft_chain_freep) NFTNLChain *c = NULL;
 
         c = new(NFTNLChain, 1);
         if (!c)
@@ -235,7 +235,7 @@ int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **
         return 0;
 }
 
-void nft_rule_unref(NFTNLRule *r) {
+void nft_rule_free(NFTNLRule *r) {
         if (!r)
                 return;
 
@@ -246,7 +246,7 @@ void nft_rule_unref(NFTNLRule *r) {
 }
 
 int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **ret) {
-        _cleanup_(nft_rule_unrefp) NFTNLRule *nf_rule = NULL;
+        _cleanup_(nft_rule_freep) NFTNLRule *nf_rule = NULL;
 
         nf_rule = new(NFTNLRule, 1);
         if (!nf_rule)
@@ -295,8 +295,8 @@ static int generic_parser_data_attr_cb(const struct nlattr *attr, void *data) {
 }
 
 int nft_add_table(int family, const char *name) {
-        _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(nft_table_freep) NFTNLTable *t = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         int r;
 
         assert(name);
@@ -328,8 +328,8 @@ int nft_add_table(int family, const char *name) {
 }
 
 int nft_delete_table(int family, const char *name) {
-        _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(nft_table_freep) NFTNLTable *t = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         int r;
 
         assert(name);
@@ -362,7 +362,7 @@ int nft_delete_table(int family, const char *name) {
 
 static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
         struct nfgenmsg *nfg = mnl_nlmsg_get_payload(nlh);
-        _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
+        _cleanup_(nft_table_freep) NFTNLTable *t = NULL;
         struct nlattr *tb[NFTA_TABLE_MAX+1] = {};
         const char *name = NULL;
         GPtrArray *s = data;
@@ -390,7 +390,7 @@ static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
 
 int nft_get_tables(int family, const char *table, GPtrArray **ret) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         int r;
 
         r = mnl_new(&m);
@@ -402,7 +402,7 @@ int nft_get_tables(int family, const char *table, GPtrArray **ret) {
                 if (!m->nlh)
                         return -ENOMEM;
         } else {
-                _cleanup_(nft_table_unrefp) NFTNLTable *t = NULL;
+                _cleanup_(nft_table_freep) NFTNLTable *t = NULL;
 
                 r = nft_table_new(family, table, &t);
                 if (r < 0)
@@ -428,8 +428,8 @@ int nft_get_tables(int family, const char *table, GPtrArray **ret) {
 }
 
 int nft_add_chain(int family, const char *table, const char *name) {
-        _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(nft_chain_freep) NFTNLChain *c = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         int r;
 
         assert(name);
@@ -465,7 +465,7 @@ int nft_add_chain(int family, const char *table, const char *name) {
 
 static int get_chain_cb(const struct nlmsghdr *nlh, void *data) {
         struct nfgenmsg *nfg = mnl_nlmsg_get_payload(nlh);
-        _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
+        _cleanup_(nft_chain_freep) NFTNLChain *c = NULL;
         struct nlattr *tb[NFTA_CHAIN_MAX+1] = {};
         const char *name = NULL, *table = NULL;
         GPtrArray *s = data;
@@ -495,7 +495,7 @@ static int get_chain_cb(const struct nlmsghdr *nlh, void *data) {
 
 int nft_get_chains(int family, const char *table, const char *chain, GPtrArray **ret) {
         _cleanup_(g_ptr_array_unrefp) GPtrArray *s = NULL;
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         int r;
 
         r = mnl_new(&m);
@@ -507,7 +507,7 @@ int nft_get_chains(int family, const char *table, const char *chain, GPtrArray *
                 if (!m->nlh)
                         return -ENOMEM;
         } else {
-                _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
+                _cleanup_(nft_chain_freep) NFTNLChain *c = NULL;
 
                 r = nft_chain_new(family, chain, table, &c);
                 if (r < 0)
@@ -533,8 +533,8 @@ int nft_get_chains(int family, const char *table, const char *chain, GPtrArray *
 }
 
 int nft_delete_chain(int family, const char *table, const char *name) {
-        _cleanup_(nft_chain_unrefp) NFTNLChain *c = NULL;
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(nft_chain_freep) NFTNLChain *c = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         int r;
 
         assert(name);
@@ -576,8 +576,8 @@ int nft_configure_rule_port(int family,
                             uint16_t port,
                             NFPacketAction action) {
 
-        _cleanup_(nft_rule_unrefp) NFTNLRule *nf_rule = NULL;
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(nft_rule_freep) NFTNLRule *nf_rule = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         uint16_t k;
         int r;
 
@@ -710,8 +710,8 @@ int nft_get_rules(const char *table, GString **ret) {
 }
 
 int nft_delete_rule(int family, const char *table, const char *chain, int handle) {
-        _cleanup_(nft_rule_unrefp) NFTNLRule *rl = NULL;
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(nft_rule_freep) NFTNLRule *rl = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         int r;
 
         assert(table);

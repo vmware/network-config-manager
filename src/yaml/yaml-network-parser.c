@@ -336,9 +336,9 @@ static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Network *net
 }
 
 int parse_yaml_file(const char *file, Network **n, NetDevLink **l) {
-        _cleanup_(yaml_manager_unrefp) YAMLManager *m = NULL;
-        _cleanup_(network_unrefp) Network *network = NULL;
-        _cleanup_(netdev_link_unrefp) NetDevLink *link = NULL;
+        _cleanup_(yaml_manager_freep) YAMLManager *m = NULL;
+        _cleanup_(network_freep) Network *network = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *link = NULL;
         _auto_cleanup_fclose_ FILE *f = NULL;
         yaml_document_t document;
         yaml_parser_t parser;
@@ -398,7 +398,7 @@ int parse_yaml_file(const char *file, Network **n, NetDevLink **l) {
         return r;
 }
 
-void yaml_manager_unrefp(YAMLManager **p) {
+void yaml_manager_freep(YAMLManager **p) {
         if (!p || !*p)
                 return;
 
@@ -411,7 +411,7 @@ void yaml_manager_unrefp(YAMLManager **p) {
 }
 
 int new_yaml_manager(YAMLManager **ret) {
-        _cleanup_(yaml_manager_unrefp) YAMLManager *m = NULL;
+        _cleanup_(yaml_manager_freep) YAMLManager *m = NULL;
 
         m = new0(YAMLManager, 1);
         if (!m)

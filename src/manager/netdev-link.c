@@ -121,11 +121,11 @@ int netdev_link_new(NetDevLink **ret) {
         return 0;
 }
 
-void netdev_link_unref(NetDevLink *n) {
+void netdev_link_free(NetDevLink *n) {
         if (!n)
                 return;
 
-        config_manager_unref(n->m);
+        config_manager_free(n->m);
 
         free(n->alias);
         free(n->desc);

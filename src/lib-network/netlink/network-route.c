@@ -45,7 +45,7 @@ static int routes_new(Routes **ret) {
         return 0;
 }
 
-void routes_unref(Routes *routes) {
+void routes_free(Routes *routes) {
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
@@ -64,7 +64,7 @@ void routes_unref(Routes *routes) {
                 g_hash_table_iter_remove(&iter);
         }
 
-        set_unrefp(&routes->routes);
+        set_freep(&routes->routes);
         free(routes);
 }
 
@@ -281,7 +281,7 @@ static int fill_link_route(const struct nlmsghdr *nlh, void *data) {
 }
 
 static int acquire_link_route(int ifindex, Routes **ret) {
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         struct nlmsghdr *nlh;
         Routes *rts = NULL;
         int r;

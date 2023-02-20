@@ -79,7 +79,7 @@ static void link_state_to_color(const char *state, const char **on) {
 
 static int list_links(int argc, char *argv[]) {
         _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
-        _cleanup_(links_unrefp) Links *h = NULL;
+        _cleanup_(links_freep) Links *h = NULL;
         int r;
 
         r = link_get_links(&h);
@@ -163,7 +163,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
 }
 
 _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
-        _cleanup_(addresses_unrefp) Addresses *addr = NULL;
+        _cleanup_(addresses_freep) Addresses *addr = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool ipv4 = false, ipv6 = false;
         GHashTableIter iter;
@@ -352,9 +352,9 @@ static int list_one_link(char *argv[]) {
                 *online_state = NULL, *link = NULL, *dhcp4_identifier = NULL, *dhcp6_duid = NULL, *dhcp6_iaid = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
-        _cleanup_(addresses_unrefp) Addresses *addr = NULL;
-        _cleanup_(routes_unrefp) Routes *route = NULL;
-        _cleanup_(link_unrefp) Link *l = NULL;
+        _cleanup_(addresses_freep) Addresses *addr = NULL;
+        _cleanup_(routes_freep) Routes *route = NULL;
+        _cleanup_(link_freep) Link *l = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t iaid;
         int r;
@@ -639,8 +639,8 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         _auto_cleanup_ char *state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **search_domains = NULL, **ntp = NULL;
-        _cleanup_(routes_unrefp) Routes *routes = NULL;
-        _cleanup_(addresses_unrefp) Addresses *h = NULL;
+        _cleanup_(routes_freep) Routes *routes = NULL;
+        _cleanup_(addresses_freep) Addresses *h = NULL;
         sd_id128_t machine_id = {};
         int r;
 
@@ -722,7 +722,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
         r = manager_link_get_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
-                _cleanup_(set_unrefp) Set *devs = NULL;
+                _cleanup_(set_freep) Set *devs = NULL;
                 gpointer key, value;
                 GHashTableIter iter;
                 bool first = true;

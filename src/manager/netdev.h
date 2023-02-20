@@ -183,52 +183,52 @@ typedef struct NetDev {
 } NetDev;
 
 int netdev_new(NetDev **ret);
-void netdev_unref(NetDev *n);
-DEFINE_CLEANUP(NetDev*, netdev_unref);
+void netdev_free(NetDev *n);
+DEFINE_CLEANUP(NetDev*, netdev_free);
 
 int ipvlan_new(IPVLan **ret);
-void ipvlan_unref(IPVLan *v);
-DEFINE_CLEANUP(IPVLan*, ipvlan_unref);
+void ipvlan_free(IPVLan *v);
+DEFINE_CLEANUP(IPVLan*, ipvlan_free);
 
 int veth_new(Veth **ret);
-void veth_unref(Veth *v);
-DEFINE_CLEANUP(Veth*, veth_unref);
+void veth_free(Veth *v);
+DEFINE_CLEANUP(Veth*, veth_free);
 
 int macvlan_new(MACVLan **ret);
-void macvlan_unref(MACVLan *v);
-DEFINE_CLEANUP(MACVLan*, macvlan_unref);
+void macvlan_free(MACVLan *v);
+DEFINE_CLEANUP(MACVLan*, macvlan_free);
 
 int vrf_new(VRF **ret);
-void vrf_unref(VRF *v);
-DEFINE_CLEANUP(VRF*, vrf_unref);
+void vrf_free(VRF *v);
+DEFINE_CLEANUP(VRF*, vrf_free);
 
 int vlan_new(VLan **ret);
-void vlan_unref(VLan *n);
-DEFINE_CLEANUP(VLan*, vlan_unref);
+void vlan_free(VLan *n);
+DEFINE_CLEANUP(VLan*, vlan_free);
 
 int wireguard_new(WireGuard **ret);
-void wireguard_unref(WireGuard *wg);
-DEFINE_CLEANUP(WireGuard*, wireguard_unref);
+void wireguard_free(WireGuard *wg);
+DEFINE_CLEANUP(WireGuard*, wireguard_free);
 
 int vxlan_new(VxLan **ret);
-void vxlan_unref(VxLan *v);
-DEFINE_CLEANUP(VxLan*, vxlan_unref);
+void vxlan_free(VxLan *v);
+DEFINE_CLEANUP(VxLan*, vxlan_free);
 
 int tunnel_new(Tunnel **ret);
-void tunnel_unref(Tunnel *v);
-DEFINE_CLEANUP(Tunnel*, tunnel_unref);
+void tunnel_free(Tunnel *v);
+DEFINE_CLEANUP(Tunnel*, tunnel_free);
 
 int tuntap_new(TunTap **ret);
-void tuntap_unref(TunTap *t);
-DEFINE_CLEANUP(TunTap*, tuntap_unref);
+void tuntap_free(TunTap *t);
+DEFINE_CLEANUP(TunTap*, tuntap_free);
 
 int bond_new(Bond **ret);
-void bond_unref(Bond *t);
-DEFINE_CLEANUP(Bond*, bond_unref);
+void bond_free(Bond *t);
+DEFINE_CLEANUP(Bond*, bond_free);
 
 int bridge_new(Bridge **ret);
-void bridge_unref(Bridge *b);
-DEFINE_CLEANUP(Bridge*, bridge_unref);
+void bridge_free(Bridge *b);
+DEFINE_CLEANUP(Bridge*, bridge_free);
 
 int generate_netdev_config(NetDev *n);
 int create_netdev_conf_file(const char *ifidx, char **ret);

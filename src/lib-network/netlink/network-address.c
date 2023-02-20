@@ -49,7 +49,7 @@ int address_new(Address **ret) {
         return 0;
 }
 
-void addresses_unref(Addresses *a) {
+void addresses_free(Addresses *a) {
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
@@ -68,7 +68,7 @@ void addresses_unref(Addresses *a) {
                 g_hash_table_iter_remove(&iter);
         }
 
-        set_unrefp(&a->addresses);
+        set_freep(&a->addresses);
         free(a);
 }
 
@@ -160,7 +160,7 @@ static int fill_link_address(const struct nlmsghdr *nlh, void *data) {
 }
 
 static int acquire_link_address(int s, int ifindex, Addresses **ret) {
-        _cleanup_(mnl_unrefp) Mnl *m = NULL;
+        _cleanup_(mnl_freep) Mnl *m = NULL;
         struct nlmsghdr *nlh;
         Addresses *a = NULL;
         int r;

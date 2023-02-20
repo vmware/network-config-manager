@@ -53,8 +53,8 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
 }
 
 int manager_create_vlan(const IfNameIndex *ifidx, const char *ifname, VLan *v) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *n= NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *n= NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -105,8 +105,8 @@ int manager_create_vlan(const IfNameIndex *ifidx, const char *ifname, VLan *v) {
 }
 
 int manager_create_bridge(const char *ifname, Bridge *b, char **interfaces) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *v = NULL;
         char **s;
         int r;
 
@@ -165,8 +165,8 @@ int manager_create_bridge(const char *ifname, Bridge *b, char **interfaces) {
 }
 
 int manager_create_bond(const char *ifname, Bond *b, char **interfaces) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *n = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *n = NULL;
         char **s;
         int r;
 
@@ -221,8 +221,8 @@ int manager_create_bond(const char *ifname, Bond *b, char **interfaces) {
 }
 
 int manager_create_vxlan(const char *ifname, const char *dev, VxLan *v) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *n = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *n = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -281,8 +281,8 @@ int manager_create_vxlan(const char *ifname, const char *dev, VxLan *v) {
 }
 
 int manager_create_macvlan(const char *ifname, const char *dev, MACVLan *m, bool kind) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
@@ -341,8 +341,8 @@ int manager_create_macvlan(const char *ifname, const char *dev, MACVLan *m, bool
 }
 
 int manager_create_ipvlan(const char *ifname, const char *dev, IPVLan *m, bool kind) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *v = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
@@ -401,8 +401,8 @@ int manager_create_ipvlan(const char *ifname, const char *dev, IPVLan *m, bool k
 }
 
 int manager_create_veth(const char *ifname, Veth *v) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *n = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *n = NULL;
         int r;
 
         assert(ifname);
@@ -441,8 +441,8 @@ int manager_create_veth(const char *ifname, Veth *v) {
 }
 
 int manager_create_tunnel(const char *ifname, NetDevKind kind, const char *dev, Tunnel *t) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *v = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *v = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -500,8 +500,8 @@ int manager_create_tunnel(const char *ifname, NetDevKind kind, const char *dev, 
 }
 
 int manager_create_vrf(const char *ifname, VRF *vrf) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *n = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *n = NULL;
         int r;
 
         assert(vrf);
@@ -541,8 +541,8 @@ int manager_create_vrf(const char *ifname, VRF *vrf) {
 }
 
 int manager_create_wireguard(const char *ifname, WireGuard *wg) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *n = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *n = NULL;
         int r;
 
         assert(wg);
@@ -582,8 +582,8 @@ int manager_create_wireguard(const char *ifname, WireGuard *wg) {
 }
 
 int manager_create_tun_tap(const char *ifname, const NetDevKind kind, TunTap *t) {
-        _cleanup_(netdev_unrefp) NetDev *netdev = NULL;
-        _cleanup_(network_unrefp) Network *n = NULL;
+        _cleanup_(netdev_freep) NetDev *netdev = NULL;
+        _cleanup_(network_freep) Network *n = NULL;
         int r;
 
         r = netdev_new(&netdev);

@@ -330,7 +330,7 @@ static int parse_argv(int argc, char *argv[]) {
 }
 
 static int cli_run(int argc, char *argv[]) {
-        _cleanup_(ctl_unrefp) CtlManager *m = NULL;
+        _cleanup_(ctl_freep) CtlManager *m = NULL;
         int r;
 
         static const Ctl commands[] = {

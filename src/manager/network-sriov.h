@@ -26,7 +26,7 @@ typedef struct SRIOV {
 
 int sriov_new(SRIOV **ret);
 
-void sriov_unref(SRIOV *s);
-DEFINE_CLEANUP(SRIOV*, sriov_unref);
+void sriov_free(SRIOV *s);
+DEFINE_CLEANUP(SRIOV*, sriov_free);
 
 int sriov_configure(const IfNameIndex *ifidx, SRIOV *s, bool link);

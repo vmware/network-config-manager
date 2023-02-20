@@ -157,8 +157,8 @@ int json_system_status(char **ret) {
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
                 *online_state;
         _auto_cleanup_strv_ char **dns = NULL, **domains = NULL, **ntp = NULL;
-        _cleanup_(routes_unrefp) Routes *routes = NULL;
-        _cleanup_(addresses_unrefp) Addresses *h = NULL;
+        _cleanup_(routes_freep) Routes *routes = NULL;
+        _cleanup_(addresses_freep) Addresses *h = NULL;
         sd_id128_t machine_id = {};
         int r;
 
@@ -652,9 +652,9 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL, *link = NULL, *online_state = NULL,
                 *address_state = NULL, *ipv4_state = NULL, *ipv6_state = NULL, *required_for_online = NULL,
                 *device_activation_policy = NULL;
-        _cleanup_(addresses_unrefp) Addresses *addr = NULL;
-        _cleanup_(routes_unrefp) Routes *route = NULL;
-        _cleanup_(link_unrefp) Link *l = NULL;
+        _cleanup_(addresses_freep) Addresses *addr = NULL;
+        _cleanup_(routes_freep) Routes *route = NULL;
+        _cleanup_(link_freep) Link *l = NULL;
         int r;
 
         assert(p);
@@ -1449,7 +1449,7 @@ int json_show_dns_server_domains(void) {
                 return -ENODATA;
         } else {
                  _cleanup_(json_object_putp) json_object *ja = NULL;
-                _cleanup_(set_unrefp) Set *all_domains = NULL;
+                _cleanup_(set_freep) Set *all_domains = NULL;
 
                 ja = json_object_new_array();
                 if (!ja)

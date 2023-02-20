@@ -32,7 +32,7 @@ int set_new(Set **ret, GHashFunc hash_func, GEqualFunc compare_func) {
         return 0;
 }
 
-void set_unrefp(Set **s) {
+void set_freep(Set **s) {
         if (!s || !*s)
                 return;
 
