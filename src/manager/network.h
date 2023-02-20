@@ -226,8 +226,8 @@ typedef struct Network {
 } Network;
 
 int network_new(Network **ret);
-void network_unref(Network *n);
-DEFINE_CLEANUP(Network*, network_unref);
+void network_free(Network *n);
+DEFINE_CLEANUP(Network*, network_free);
 
 void g_network_free(gpointer data);
 

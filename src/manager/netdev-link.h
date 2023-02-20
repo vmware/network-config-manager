@@ -101,8 +101,8 @@ typedef struct NetDevLink {
 
 int netdev_link_new(NetDevLink **ret);
 
-void netdev_link_unref(NetDevLink *n);
-DEFINE_CLEANUP(NetDevLink*, netdev_link_unref);
+void netdev_link_free(NetDevLink *n);
+DEFINE_CLEANUP(NetDevLink*, netdev_link_free);
 
 int netdev_link_configure(const IfNameIndex *ifidx, NetDevLink *n);
 int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret);

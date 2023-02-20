@@ -12,7 +12,7 @@
 #include "mnl_util.h"
 #include "log.h"
 
-void mnl_unref(Mnl *m) {
+void mnl_free(Mnl *m) {
         if (!m)
                 return;
 

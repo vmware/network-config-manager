@@ -43,9 +43,9 @@ typedef struct Routes {
 } Routes;
 
 int route_new(Route **ret);
-void routes_unref(Routes *rt);
+void routes_free(Routes *rt);
 
-DEFINE_CLEANUP(Routes *, routes_unref);
+DEFINE_CLEANUP(Routes *, routes_free);
 
 int manager_link_get_routes(Routes **ret);
 int manager_get_one_link_route(int ifindex, Routes **ret);

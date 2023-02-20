@@ -234,7 +234,7 @@ int netdev_new(NetDev **ret) {
         return 0;
 }
 
-void netdev_unref(NetDev *n) {
+void netdev_free(NetDev *n) {
         if (!n)
                 return;
 
@@ -263,7 +263,7 @@ int vlan_new(VLan **ret) {
 
 }
 
-void vlan_unref(VLan *v) {
+void vlan_free(VLan *v) {
         if (!v)
                 return;
 
@@ -282,7 +282,7 @@ int vxlan_new(VxLan **ret) {
         return 0;
 }
 
-void vxlan_unref(VxLan *v) {
+void vxlan_free(VxLan *v) {
         if (!v)
                 return;
 
@@ -305,7 +305,7 @@ int bond_new(Bond **ret) {
         return 0;
 }
 
-void bond_unref(Bond *b) {
+void bond_free(Bond *b) {
         if (!b)
                 return;
 
@@ -323,7 +323,7 @@ int wireguard_new(WireGuard **ret) {
         return 0;
 }
 
-void wireguard_unref(WireGuard *wg) {
+void wireguard_free(WireGuard *wg) {
         if (!wg)
                 return;
 
@@ -348,7 +348,7 @@ int tunnel_new(Tunnel **ret) {
         return 0;
 }
 
-void tunnel_unref(Tunnel *t) {
+void tunnel_free(Tunnel *t) {
         if (!t)
                 return;
 
@@ -374,7 +374,7 @@ int bridge_new(Bridge **ret) {
         return 0;
 }
 
-void bridge_unref(Bridge *b) {
+void bridge_free(Bridge *b) {
         if (!b)
                 return;
 
@@ -399,7 +399,7 @@ int tuntap_new(TunTap **ret) {
         return 0;
 }
 
-void tuntap_unref(TunTap *t) {
+void tuntap_free(TunTap *t) {
         if (!t)
                 return;
 
@@ -419,7 +419,7 @@ int vrf_new(VRF **ret) {
         return 0;
 }
 
-void vrf_unref(VRF *v) {
+void vrf_free(VRF *v) {
         if (!v)
                 return;
 
@@ -437,7 +437,7 @@ int veth_new(Veth **ret) {
         return 0;
 }
 
-void veth_unref(Veth *v) {
+void veth_free(Veth *v) {
         if (!v)
                 return;
 
@@ -460,7 +460,7 @@ int macvlan_new(MACVLan **ret) {
         return 0;
 }
 
-void macvlan_unref(MACVLan *m) {
+void macvlan_free(MACVLan *m) {
         if (!m)
                 return;
 
@@ -482,7 +482,7 @@ int ipvlan_new(IPVLan **ret) {
         return 0;
 }
 
-void ipvlan_unref(IPVLan *v) {
+void ipvlan_free(IPVLan *v) {
         if (!v)
                 return;
 

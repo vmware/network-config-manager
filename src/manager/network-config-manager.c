@@ -189,7 +189,7 @@ _public_ int ncm_link_get_mac(const char *ifname, char **ret) {
 }
 
 _public_ int ncm_link_set_mode(int argc, char *argv[]) {
-        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool k = true;
         int r;
@@ -249,7 +249,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_option(int argc, char *argv[]) {
-        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool k;
         int r;
@@ -846,7 +846,7 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
-        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         const char *s;
         int r;
@@ -884,7 +884,7 @@ _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
-        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool v;
         int r;
@@ -927,7 +927,7 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
-        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool v;
         int r;
@@ -975,7 +975,7 @@ _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
-        _cleanup_(config_manager_unrefp) ConfigManager *m = NULL;
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool v;
         int r;
@@ -1245,7 +1245,7 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
-        _cleanup_(addresses_unrefp) Addresses *addr = NULL;
+        _cleanup_(addresses_freep) Addresses *addr = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         GHashTableIter iter;
@@ -1528,7 +1528,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
-        _cleanup_(routes_unrefp) Routes *route = NULL;
+        _cleanup_(routes_freep) Routes *route = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_strv_ char **s = NULL;
         GHashTableIter iter;
@@ -2602,7 +2602,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 display(beautify_enabled(), ansi_color_bold_cyan(), "DNS Domain: ");
                 printf("%s\n", d->domain);
         } else {
-                _cleanup_(set_unrefp) Set *all_domains = NULL;
+                _cleanup_(set_freep) Set *all_domains = NULL;
 
                 r = set_new(&all_domains, NULL, NULL);
                 if (r < 0) {

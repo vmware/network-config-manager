@@ -67,11 +67,11 @@ typedef struct Links {
          GList *links;
 } Links;
 
-void link_unref(Link *l);
-void links_unref(Links *l);
+void link_free(Link *l);
+void links_free(Links *l);
 
-DEFINE_CLEANUP(Link*, link_unref);
-DEFINE_CLEANUP(Links*, links_unref);
+DEFINE_CLEANUP(Link*, link_free);
+DEFINE_CLEANUP(Links*, links_free);
 
 int link_get_links(Links **ret);
 int link_get_one_link(const char *ifname, Link **ret);

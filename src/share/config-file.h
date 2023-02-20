@@ -49,8 +49,8 @@ void key_file_free(KeyFile *k);
 DEFINE_CLEANUP(KeyFile*, key_file_free);
 
 int config_manager_new(const Config *configs, ConfigManager **ret);
-void config_manager_unref(ConfigManager *m);
-DEFINE_CLEANUP(ConfigManager*, config_manager_unref);
+void config_manager_free(ConfigManager *m);
+DEFINE_CLEANUP(ConfigManager*, config_manager_free);
 
 int set_config(KeyFile *key_file, const char *section, const char *k, const char *v);
 

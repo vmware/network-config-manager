@@ -22,7 +22,7 @@
 #include "parse-util.h"
 
 int sriov_new(SRIOV **ret) {
-        _cleanup_(sriov_unrefp) SRIOV *s = NULL;
+        _cleanup_(sriov_freep) SRIOV *s = NULL;
 
         s = new0(SRIOV, 1);
         if (!s)
@@ -39,7 +39,7 @@ int sriov_new(SRIOV **ret) {
         return 0;
 }
 
-void sriov_unref(SRIOV *s) {
+void sriov_free(SRIOV *s) {
         if (!s)
                 return;
 
@@ -127,7 +127,7 @@ int sriov_configure(const IfNameIndex *ifidx, SRIOV *s, bool link) {
 }
 
 _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
-        _cleanup_(sriov_unrefp) SRIOV *s = NULL;
+        _cleanup_(sriov_freep) SRIOV *s = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool have_vf = false, link = false;
         int r;

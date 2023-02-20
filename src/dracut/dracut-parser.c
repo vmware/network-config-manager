@@ -371,7 +371,7 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
                 return log_oom();
 
         strv_foreach(j, s) {
-                _cleanup_(network_unrefp) Network *n = NULL;
+                _cleanup_(network_freep) Network *n = NULL;
                 _auto_cleanup_ char *k = NULL, *v = NULL;
 
                 r = parse_line(*j, &k, &v);

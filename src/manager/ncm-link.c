@@ -11,7 +11,7 @@
 #include "parse-util.h"
 
 _public_ int ncm_configure_link(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -218,7 +218,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_features(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -409,7 +409,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -480,7 +480,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -542,7 +542,7 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -603,7 +603,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -654,7 +654,7 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -737,7 +737,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -872,7 +872,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1007,7 +1007,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1090,7 +1090,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1175,7 +1175,7 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_name(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1263,7 +1263,7 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
 }
 
 _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
-        _cleanup_(netdev_link_unrefp) NetDevLink *n = NULL;
+        _cleanup_(netdev_link_freep) NetDevLink *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 

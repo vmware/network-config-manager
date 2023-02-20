@@ -97,7 +97,7 @@ static int link_new(Link **ret) {
         return 0;
 }
 
-void link_unref(Link *l) {
+void link_free(Link *l) {
         if (!l)
                 return;
 
@@ -111,7 +111,7 @@ void link_unref(Link *l) {
         free(l);
 }
 
-void links_unref(Links *l) {
+void links_free(Links *l) {
         if (!l)
                 return;
 

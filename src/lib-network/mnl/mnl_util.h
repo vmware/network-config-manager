@@ -18,8 +18,8 @@ typedef struct Mnl {
 
 int mnl_new(Mnl **ret);
 
-void mnl_unref(Mnl *m);
-DEFINE_CLEANUP(Mnl*, mnl_unref);
+void mnl_free(Mnl *m);
+DEFINE_CLEANUP(Mnl*, mnl_free);
 
 int mnl_send(struct Mnl *m, mnl_cb_t cb, void *d, uint16_t type);
 

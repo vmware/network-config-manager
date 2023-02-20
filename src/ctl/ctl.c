@@ -38,7 +38,7 @@ int ctl_manager_new(const Ctl *ctl_commands, CtlManager **ret) {
         return 0;
 }
 
-void ctl_unref(CtlManager *m) {
+void ctl_free(CtlManager *m) {
         if (!m)
                 return;
 

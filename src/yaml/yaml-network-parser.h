@@ -19,7 +19,7 @@ typedef struct YAMLManager {
 } YAMLManager;
 
 int new_yaml_manager(YAMLManager **ret);
-void yaml_manager_unrefp(YAMLManager **p);
+void yaml_manager_freep(YAMLManager **p);
 
 static inline const char *scalar(const yaml_node_t *node) {
         return (const char*) node->data.scalar.value;

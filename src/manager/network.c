@@ -529,7 +529,7 @@ int network_new(Network **ret) {
         return 0;
 }
 
-static int wifi_access_point_unref (void *key, void *value, void *user_data) {
+static int wifi_access_point_free (void *key, void *value, void *user_data) {
         WiFiAccessPoint *ap = value;
 
         if (!ap)
@@ -550,16 +550,16 @@ static int wifi_access_point_unref (void *key, void *value, void *user_data) {
         return 0;
 }
 
-void network_unref(Network *n) {
+void network_free(Network *n) {
         if (!n)
                 return;
 
-        set_unrefp(&n->addresses);
-        set_unrefp(&n->ntps);
-        set_unrefp(&n->nameservers);
+        set_freep(&n->addresses);
+        set_freep(&n->ntps);
+        set_freep(&n->nameservers);
 
         if (n->access_points) {
-                g_hash_table_foreach_steal(n->access_points, wifi_access_point_unref, NULL);
+                g_hash_table_foreach_steal(n->access_points, wifi_access_point_free, NULL);
                 g_hash_table_destroy(n->access_points);
         }
 
@@ -576,7 +576,7 @@ void g_network_free (gpointer data) {
         Network *n;
 
         n = data;
-        network_unrefp(&n);
+        network_freep(&n);
 }
 
 int parse_address_from_string_and_add(const char *s, Set *a) {

@@ -24,8 +24,8 @@ typedef struct CtlManager {
         Ctl *commands;
 } CtlManager;
 
-void ctl_unref(CtlManager *m);
-DEFINE_CLEANUP(CtlManager*, ctl_unref);
+void ctl_free(CtlManager *m);
+DEFINE_CLEANUP(CtlManager*, ctl_free);
 
 int ctl_manager_new(const Ctl *ctl_commands, CtlManager **ret);
 int ctl_run_command(const CtlManager *m, int argc, char *argv[]);
