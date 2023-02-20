@@ -21,12 +21,6 @@ network_config_manager_sources = files('''
         manager/netdev-manager.c
         manager/netdev-link.c
         manager/netdev-link.h
-        manager/network-link.h
-        manager/network-link.c
-        manager/network-address.h
-        manager/network-address.c
-        manager/network-route.h
-        manager/network-route.c
         manager/network-sriov.h
         manager/network-sriov.c
         manager/network-config-manager.c
@@ -65,6 +59,12 @@ network_config_manager_sources = files('''
         lib-network/netlink/netlink.c
         lib-network/netlink/netlink-message.h
         lib-network/netlink/netlink-message.c
+        lib-network/netlink/network-link.h
+        lib-network/netlink/network-link.c
+        lib-network/netlink/network-address.h
+        lib-network/netlink/network-address.c
+        lib-network/netlink/network-route.h
+        lib-network/netlink/network-route.c
         lib-network/networkd/networkd-api.h
         lib-network/networkd/networkd-api.c
         yaml/yaml-network-parser.h
