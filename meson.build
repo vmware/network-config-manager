@@ -130,7 +130,7 @@ includes = include_directories('src/ctl',
                                'src/share',
                                'src/udev',
                                'src/yaml',
-                               'src/lib-mnl',
+                               'src/lib-network/mnl',
                                'include',
                                '.')
 
