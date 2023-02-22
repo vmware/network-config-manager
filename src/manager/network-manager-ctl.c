@@ -20,7 +20,7 @@ static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         const char *file = NULL;
         int r;
 
-        if (string_equal(argv[0], "apply-yaml-config")) {
+        if (string_equal(argv[0], "apply")) {
                 dir = g_dir_open("/etc/network-config-manager/yaml", 0, &e);
                 if (!dir) {
                         log_warning("Failed to open directory '/etc/network-config-manager/yaml': %s", e->message);
@@ -73,8 +73,8 @@ static int generate_networkd_config_from_command_line(int argc, char *argv[]) {
 static bool runs_without_networkd(char *c) {
         _cleanup_(g_hash_table_unrefp) GHashTable *h = NULL;
         const char *cli_commands[] = {
-                "generate-config-from-yaml",
-                "apply-yaml-config",
+                "apply-file",
+                "apply",
                 "generate-config-from-cmdline",
                 "add-nft-table",
                 "show-nft-tables",
@@ -261,8 +261,8 @@ static int help(void) {
 
                "  set-proxy                    [enable {BOOLEAN}] [http|https|ftp|gopher|socks|socks5|noproxy] [CONFIGURATION | none] Configure proxy.\n"
                "  show-proxy                   Shows proxy configuration.\n"
-               "  generate-config-from-yaml    [FILE] Generates network file configuration from yaml file.\n"
-               "  apply-yaml-config            Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
+               "  apply-file                   [FILE] Generates network file configuration from yaml file.\n"
+               "  apply                        Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
                "  generate-config-from-cmdline [FILE | COMMAND LINE] Generates network file configuration from command kernel command line or command line.\n"
                "  add-nft-table                [FAMILY {ipv4|ipv6|ip}] [TABLE] adds a new table.\n"
                "  show-nft-tables              [FAMILY {ipv4|ipv6|ip}] shows nftable's tables.\n"
@@ -427,8 +427,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-sr-iov",                    "sriov",            2,        WORD_ANY, false, ncm_configure_sr_iov},
                 { "set-proxy",                     "pxy",              1,        WORD_ANY, false, ncm_configure_proxy },
                 { "show-proxy",                    "spxy",             WORD_ANY, WORD_ANY, false, ncm_show_proxy },
-                { "generate-config-from-yaml",     "gcyml",            1,        WORD_ANY, false, generate_networkd_config_from_yaml },
-                { "apply-yaml-config",             "ayml",             WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
+                { "apply-file",                    "applyf",           1,        WORD_ANY, false, generate_networkd_config_from_yaml },
+                { "apply",                         "apply",            WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "generate-config-from-cmdline",  "gccmd",            WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
                 { "add-nft-table",                 "atable",           2,        WORD_ANY, false, ncm_nft_add_tables },
                 { "show-nft-tables",               "table",            WORD_ANY, WORD_ANY, false, ncm_nft_show_tables },

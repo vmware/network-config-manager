@@ -30,6 +30,7 @@ typedef struct Route {
         int ifindex;
 
         int onlink;
+        bool to_default;
 
         IPAddress src;
         IPAddress dst;

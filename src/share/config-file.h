@@ -53,6 +53,7 @@ void config_manager_free(ConfigManager *m);
 DEFINE_CLEANUP(ConfigManager*, config_manager_free);
 
 int set_config(KeyFile *key_file, const char *section, const char *k, const char *v);
+int set_config_uint(KeyFile *key_file, const char *section, const char *k, uint v);
 
 int add_key_to_section(Section *s, const char *k, const char *v);
 int add_key_to_section_integer(Section *s, const char *k, int v);

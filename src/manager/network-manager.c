@@ -1984,7 +1984,7 @@ int manager_parse_proxy_config(GHashTable **c) {
 int manager_generate_network_config_from_yaml(const char *file) {
         _cleanup_(g_string_unrefp) GString *wifi_config = NULL;
         _cleanup_(netdev_link_freep) NetDevLink *l = NULL;
-        _cleanup_(network_freep) Network *n = NULL;
+        _cleanup_(networks_freep) Networks *n = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -1999,7 +1999,7 @@ int manager_generate_network_config_from_yaml(const char *file) {
         if (l && l->ifname) {
                 r = parse_ifname_or_index(l->ifname, &p);
                 if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", n->ifname, g_strerror(-r));
+                        log_warning("Failed to find link '%s': %s", l->ifname, g_strerror(-r));
                         return r;
                 }
 
@@ -2009,18 +2009,26 @@ int manager_generate_network_config_from_yaml(const char *file) {
                         return r;
                 }
         } else {
-                r = generate_network_config(n);
-                if (r < 0) {
-                        log_warning("Failed to generate network configuration for file '%s': %s", file, strerror(-r));
-                        return r;
-                }
+                GHashTableIter iter;
+                gpointer k, v;
 
-                if (n->access_points) {
-                        r = generate_wifi_config(n, &wifi_config);
-                        if (r < 0)
+                g_hash_table_iter_init (&iter, n->networks);
+                for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+                        Network *net = (Network *) v;
+
+                        r = generate_network_config(net);
+                        if (r < 0) {
+                                log_warning("Failed to generate network configuration for file '%s': %s", file, strerror(-r));
                                 return r;
+                        }
 
-                        return manager_write_wifi_config(n, wifi_config);
+                        if (net->access_points) {
+                                r = generate_wifi_config(net, &wifi_config);
+                                if (r < 0)
+                                        return r;
+
+                                return manager_write_wifi_config(net, wifi_config);
+                        }
                 }
         }
 

@@ -192,6 +192,10 @@ typedef struct Network {
 
         ParserType parser_type;
         DHCPClient dhcp_type;
+
+        int dhcp4;
+        int dhcp6;
+
         DHCPClientIdentifier dhcp_client_identifier_type;
         LinkLocalAddress link_local;
 
@@ -203,13 +207,27 @@ typedef struct Network {
         int req_for_online;
         uint32_t mtu;
 
+        /* dhcp4 section  */
+        uint32_t dhcp4_route_metric;
         int dhcp4_use_mtu;
         int dhcp4_use_dns;
         int dhcp4_use_domains;
         int dhcp4_use_ntp;
+        int dhcp4_use_routes;
+        int dhcp4_use_hostname;
+        int dhcp4_send_hostname;
+        char *dhcp4_hostname;
+
+        /* dhcp6 section  */
         int dhcp6_use_dns;
         int dhcp6_use_ntp;
+        int dhcp6_use_domains;
+        int dhcp6_use_address;
+        int dhcp6_use_hostname;
+
+        /* Network section */
         int lldp;
+        int emit_lldp;
         int ipv6_accept_ra;
 
         IPAddress *gateway;
@@ -217,6 +235,7 @@ typedef struct Network {
 
         Set *addresses;
         Set *nameservers;
+        Set *domains;
         Set *ntps;
 
         NetDev *netdev;
@@ -228,8 +247,15 @@ typedef struct Network {
 int network_new(Network **ret);
 void network_free(Network *n);
 DEFINE_CLEANUP(Network*, network_free);
-
 void g_network_free(gpointer data);
+
+typedef struct Networks {
+    GHashTable *networks;
+} Networks;
+
+int networks_new(Networks **ret);
+void networks_free(Networks *n);
+DEFINE_CLEANUP(Networks*, networks_free);
 
 int routing_policy_rule_new(RoutingPolicyRule **ret);
 void routing_policy_rule_free(RoutingPolicyRule *rule);
