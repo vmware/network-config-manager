@@ -149,14 +149,14 @@ void netdev_link_free(NetDevLink *n) {
         free(n->otr_chnl);
         free(n->comb_chnl);
 
-        free(n->rx_coal_sec);
-        free(n->rx_coal_irq_sec);
-        free(n->rx_coal_low_sec);
-        free(n->rx_coal_high_sec);
-        free(n->tx_coal_sec);
-        free(n->tx_coal_irq_sec);
-        free(n->tx_coal_low_sec);
-        free(n->tx_coal_high_sec);
+        free(n->rx_coal);
+        free(n->rx_coal_irq);
+        free(n->rx_coal_low);
+        free(n->rx_coal_high);
+        free(n->tx_coal);
+        free(n->tx_coal_irq);
+        free(n->tx_coal_low);
+        free(n->tx_coal_high);
 
         free(n->rx_coald_frames);
         free(n->rx_coald_irq_frames);
@@ -170,7 +170,7 @@ void netdev_link_free(NetDevLink *n) {
         free(n->coal_pkt_rate_low);
         free(n->coal_pkt_rate_high);
         free(n->coal_pkt_rate_smpl_itrvl);
-        free(n->sts_blk_coal_sec);
+        free(n->sts_blk_coal);
 
         free(n->rx_buf);
         free(n->rx_mini_buf);
@@ -508,50 +508,50 @@ int netdev_link_configure(const IfNameIndex *ifidx, NetDevLink *n) {
                         return r;
         }
 
-        if (n->rx_coal_sec) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcs"), n->rx_coal_sec);
+        if (n->rx_coal) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcs"), n->rx_coal);
                 if (r < 0)
                         return r;
         }
 
-        if (n->rx_coal_irq_sec) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcsirq"), n->rx_coal_irq_sec);
+        if (n->rx_coal_irq) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcsirq"), n->rx_coal_irq);
                 if (r < 0)
                         return r;
         }
 
-        if (n->rx_coal_low_sec) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcslow"), n->rx_coal_low_sec);
+        if (n->rx_coal_low) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcslow"), n->rx_coal_low);
                 if (r < 0)
                         return r;
         }
 
-        if (n->rx_coal_high_sec) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcshigh"), n->rx_coal_high_sec);
+        if (n->rx_coal_high) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "rxcshigh"), n->rx_coal_high);
                 if (r < 0)
                         return r;
         }
 
-        if (n->tx_coal_sec) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcs"), n->tx_coal_sec);
+        if (n->tx_coal) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcs"), n->tx_coal);
                 if (r < 0)
                         return r;
         }
 
-        if (n->tx_coal_irq_sec) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcsirq"), n->tx_coal_irq_sec);
+        if (n->tx_coal_irq) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcsirq"), n->tx_coal_irq);
                 if (r < 0)
                         return r;
         }
 
-        if (n->tx_coal_low_sec) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcslow"), n->tx_coal_low_sec);
+        if (n->tx_coal_low) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcslow"), n->tx_coal_low);
                 if (r < 0)
                         return r;
         }
 
-        if (n->tx_coal_high_sec) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcshigh"), n->tx_coal_high_sec);
+        if (n->tx_coal_high) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "txcshigh"), n->tx_coal_high);
                 if (r < 0)
                         return r;
         }
@@ -622,8 +622,8 @@ int netdev_link_configure(const IfNameIndex *ifidx, NetDevLink *n) {
                         return r;
         }
 
-        if (n->sts_blk_coal_sec) {
-                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "sbcs"), n->sts_blk_coal_sec);
+        if (n->sts_blk_coal) {
+                r = set_config_file_string(path, "Link", ctl_to_config(n->m, "sbcs"), n->sts_blk_coal);
                 if (r < 0)
                         return r;
         }

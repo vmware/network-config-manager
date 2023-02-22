@@ -42,14 +42,14 @@ typedef struct NetDevLink {
         char *otr_chnl;
         char *comb_chnl;
 
-        char *rx_coal_sec;
-        char *rx_coal_irq_sec;
-        char *rx_coal_low_sec;
-        char *rx_coal_high_sec;
-        char *tx_coal_sec;
-        char *tx_coal_irq_sec;
-        char *tx_coal_low_sec;
-        char *tx_coal_high_sec;
+        char *rx_coal;
+        char *rx_coal_irq;
+        char *rx_coal_low;
+        char *rx_coal_high;
+        char *tx_coal;
+        char *tx_coal_irq;
+        char *tx_coal_low;
+        char *tx_coal_high;
 
         char *rx_coald_frames;
         char *rx_coald_irq_frames;
@@ -64,7 +64,7 @@ typedef struct NetDevLink {
         char *coal_pkt_rate_low;
         char *coal_pkt_rate_high;
         char *coal_pkt_rate_smpl_itrvl;
-        char *sts_blk_coal_sec;
+        char *sts_blk_coal;
  
         char *rx_buf;
         char *rx_mini_buf;

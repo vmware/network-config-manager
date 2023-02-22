@@ -760,8 +760,8 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        n->rx_coal_sec = strdup(argv[i]);
-                        if (!n->rx_coal_sec)
+                        n->rx_coal = strdup(argv[i]);
+                        if (!n->rx_coal)
                                 return log_oom();
 
                         continue;
@@ -773,8 +773,8 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        n->rx_coal_irq_sec = strdup(argv[i]);
-                        if (!n->rx_coal_irq_sec)
+                        n->rx_coal_irq = strdup(argv[i]);
+                        if (!n->rx_coal_irq)
                                 return log_oom();
 
                         continue;
@@ -786,8 +786,8 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        n->rx_coal_low_sec = strdup(argv[i]);
-                        if (!n->rx_coal_low_sec)
+                        n->rx_coal_low = strdup(argv[i]);
+                        if (!n->rx_coal_low)
                                 return log_oom();
 
                         continue;
@@ -799,8 +799,8 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        n->rx_coal_high_sec = strdup(argv[i]);
-                        if (!n->rx_coal_high_sec)
+                        n->rx_coal_high = strdup(argv[i]);
+                        if (!n->rx_coal_high)
                                 return log_oom();
 
                         continue;
@@ -812,8 +812,8 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        n->tx_coal_sec = strdup(argv[i]);
-                        if (!n->tx_coal_sec)
+                        n->tx_coal = strdup(argv[i]);
+                        if (!n->tx_coal)
                                 return log_oom();
 
                         continue;
@@ -825,8 +825,8 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        n->tx_coal_irq_sec = strdup(argv[i]);
-                        if (!n->rx_coal_irq_sec)
+                        n->tx_coal_irq = strdup(argv[i]);
+                        if (!n->rx_coal_irq)
                                 return log_oom();
 
                         continue;
@@ -838,8 +838,8 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        n->tx_coal_low_sec = strdup(argv[i]);
-                        if (!n->tx_coal_low_sec)
+                        n->tx_coal_low = strdup(argv[i]);
+                        if (!n->tx_coal_low)
                                 return log_oom();
 
                         continue;
@@ -851,8 +851,8 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        n->tx_coal_high_sec = strdup(argv[i]);
-                        if (!n->tx_coal_high_sec)
+                        n->tx_coal_high = strdup(argv[i]);
+                        if (!n->tx_coal_high)
                                 return log_oom();
 
                         continue;
@@ -1069,8 +1069,8 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        n->sts_blk_coal_sec = strdup(argv[i]);
-                        if (!n->sts_blk_coal_sec)
+                        n->sts_blk_coal = strdup(argv[i]);
+                        if (!n->sts_blk_coal)
                                 return log_oom();
 
                         continue;
