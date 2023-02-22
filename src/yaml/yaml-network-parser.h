@@ -9,6 +9,7 @@
 #include "netdev-link.h"
 
 typedef struct YAMLManager {
+        GHashTable *match_config;
         GHashTable *network_config;
         GHashTable *address_config;
         GHashTable *dhcp4_config;
