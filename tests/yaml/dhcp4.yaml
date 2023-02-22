@@ -1,0 +1,6 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    test99:
+      dhcp4: true

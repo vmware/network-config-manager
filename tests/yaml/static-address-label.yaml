@@ -1,0 +1,14 @@
+network:
+  ethernets:
+    test99:
+      addresses:
+          - 10.100.1.37/24
+          - 10.100.1.38/24:
+              label: test99:0
+              lifetime: 1000
+          - 10.100.1.39/24:
+              label: test99:some-label
+              lifetime: 2000
+      routes:
+          - to: default
+            via: 10.100.1.1
