@@ -285,6 +285,20 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'ipv4')
 
+    def test__dhcp4_overrides(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('dhcp-overrides.yaml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-test99.network') == True)
+        assert(unit_exist('10-dummy95.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'DHCP') == 'ipv4')
+        assert(parser.get('DHCPv4', 'RouteMetric') == '100')
+
     def test_network_static_address_label_configuration(self):
         self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yaml')
 
