@@ -31,22 +31,25 @@ static ParserTable parser_wifi_vtable[] = {
         { NULL,                  _CONF_TYPE_INVALID, 0,                                   0}
 };
 
-static ParserTable parser_network_vtable[] = {
+static ParserTable parser_match_vtable[] = {
         { "name",                       CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, ifname)},
-        { "match-mac-address",          CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, match_mac)},
-        { "mac-address",                CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, mac)},
-        { "mtu",                        CONF_TYPE_NETWORK,     parse_yaml_uint32,                 offsetof(Network, mtu)},
-        { "dhcp",                       CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp_type)},
-        { "dhcp4",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp4)},
-        { "dhcp6",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp6)},
-        { "dhcp-identifier",            CONF_TYPE_NETWORK,     parse_yaml_dhcp_client_identifier, offsetof(Network, dhcp_client_identifier_type)},
+        { "macaddress",                 CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, match_mac)},
+        { NULL,                         _CONF_TYPE_INVALID,    0,                                 0}
+};
+
+static ParserTable parser_network_vtable[] = {
         { "unmanaged",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, unmanaged)},
+        { "mtu",                        CONF_TYPE_NETWORK,     parse_yaml_uint32,                 offsetof(Network, mtu)},
         { "arp",                        CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, arp)},
         { "multicast",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, multicast)},
         { "allmulticast",               CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, all_multicast)},
         { "promiscuous",                CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, promiscuous)},
         { "required-for-online",        CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, req_for_online)},
         { "required-family-for-online", CONF_TYPE_NETWORK,     parse_yaml_rf_online,              offsetof(Network, req_family_for_online)},
+        { "dhcp",                       CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp_type)},
+        { "dhcp4",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp4)},
+        { "dhcp6",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp6)},
+        { "dhcp-identifier",            CONF_TYPE_NETWORK,     parse_yaml_dhcp_client_identifier, offsetof(Network, dhcp_client_identifier_type)},
         { "lldp",                       CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, lldp)},
         { "emit-lldp",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, emit_lldp)},
         { "accept-ra",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, ipv6_accept_ra)},
@@ -155,14 +158,14 @@ static ParserTable parser_link_vtable[] = {
         { "tx-coalesce-irq",                           CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coal_irq)},
         { "tx-coalesce-low",                           CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coal_low)},
         { "tx-coalesce-high",                          CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coal_high)},
-        { "rx-maxcoalesced-frames",                    CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_frames)},
-        { "rx-maxcoalesced-irq-frames",                CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_irq_frames)},
-        { "rx-maxcoalesced-low-frames",                CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_low_frames)},
-        { "rx-maxcoalesced-high-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_high_frames)},
-        { "tx-maxcoalesced-frames",                    CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_frames)},
-        { "tx-maxcoalesced-irq-frames",                CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_irq_frames)},
-        { "tx-maxcoalesced-low-frames",                CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_low_frames)},
-        { "tx-maxcoalesced-high-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_high_frames)},
+        { "rx-max-coalesced-frames",                   CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_frames)},
+        { "rx-max-coalesced-irq-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_irq_frames)},
+        { "rx-max-coalesced-low-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_low_frames)},
+        { "rx-max-coalesced-high-frames",              CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_high_frames)},
+        { "tx-max-coalesced-frames",                   CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_frames)},
+        { "tx-max-coalesced-irq-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_irq_frames)},
+        { "tx-max-coalesced-low-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_low_frames)},
+        { "tx-max-coalesced-high-frames",              CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_high_frames)},
         { "coalesce-packetrate-low",                   CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, coal_pkt_rate_low)},
         { "coalesce-packetrate-high",                  CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, coal_pkt_rate_high)},
         { "coalesce-packetrate-sample-interval",       CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, coal_pkt_rate_smpl_itrvl)},
@@ -281,12 +284,6 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                 if (!k && !v)
                         continue;
 
-                if (k)
-                        printf("%s ", scalar(k));
-
-                if (v)
-                        printf("%s \n", scalar(v));
-
                 if (!a) {
                         a = new0(IPAddress, 1);
                         if (!a)
@@ -354,6 +351,35 @@ static int parse_nameserver(YAMLManager *m, yaml_document_t *dp, yaml_node_t *no
                 v = yaml_document_get_node(dp, p->value);
 
                 table = g_hash_table_lookup(m->nameserver_config, scalar(k));
+                if (!table)
+                        continue;
+
+                t = (uint8_t *) network + table->offset;
+                if (table->parser)
+                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+        }
+
+        return 0;
+}
+
+static int parse_match(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        yaml_node_pair_t *p;
+        yaml_node_t *k, *v;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+        assert(link);
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                table = g_hash_table_lookup(m->match_config, scalar(k));
                 if (!table)
                         continue;
 
@@ -442,6 +468,8 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
 
                 table = g_hash_table_lookup(m->network_config, scalar(k));
                 if (!table) {
+                        if (string_equal(scalar(k), "match"))
+                                parse_match(m, dp, v, network);
                         if (string_equal(scalar(k), "dhcp4-overrides"))
                                 parse_dhcp4(m, dp, v, network);
                         if (string_equal(scalar(k), "dhcp6-overrides"))
@@ -618,6 +646,7 @@ void yaml_manager_freep(YAMLManager **p) {
         if (!p || !*p)
                 return;
 
+        g_hash_table_destroy((*p)->match_config);
         g_hash_table_destroy((*p)->network_config);
         g_hash_table_destroy((*p)->address_config);
         g_hash_table_destroy((*p)->dhcp4_config);
@@ -638,6 +667,7 @@ int new_yaml_manager(YAMLManager **ret) {
                 return log_oom();
 
         *m = (YAMLManager) {
+                 .match_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .network_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .address_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .dhcp4_config = g_hash_table_new(g_str_hash, g_str_equal),
@@ -651,6 +681,13 @@ int new_yaml_manager(YAMLManager **ret) {
         if (!m->network_config || !m->route_config || !m->wifi_config || !m->link_config || !m->address_config ||
             !m->dhcp4_config || !m->dhcp6_config || !m->nameserver_config)
                 return log_oom();
+
+        for (size_t i = 0; parser_match_vtable[i].key; i++) {
+               if (!g_hash_table_insert(m->match_config, (void *) parser_match_vtable[i].key, &parser_match_vtable[i])) {
+                        log_warning("Failed add key='%s' to match table", parser_match_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
 
         for (size_t i = 0; parser_network_vtable[i].key; i++) {
                if (!g_hash_table_insert(m->network_config, (void *) parser_network_vtable[i].key, &parser_network_vtable[i])) {
