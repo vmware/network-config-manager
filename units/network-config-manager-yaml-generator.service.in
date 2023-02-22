@@ -8,7 +8,7 @@ Before=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/nmctl apply-yaml-config
+ExecStart=/usr/bin/nmctl apply
 
 [Install]
 WantedBy=network.target
