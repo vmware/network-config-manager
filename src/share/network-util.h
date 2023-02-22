@@ -49,6 +49,9 @@ typedef struct IPAddress {
 
         int family;
         int prefix_len;
+
+        char *label;
+        char *lifetime;
 } IPAddress;
 
 typedef struct IfNameIndex {

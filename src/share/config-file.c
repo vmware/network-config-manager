@@ -274,6 +274,21 @@ int set_config(KeyFile *key_file, const char *section, const char *k, const char
         return 0;
 }
 
+int set_config_uint(KeyFile *key_file, const char *section, const char *k, uint v) {
+        _auto_cleanup_ gchar *s = NULL;
+        int r;
+
+        s = g_strdup_printf("%i", v);
+        if (!s)
+                return -ENOMEM;
+
+        r = key_file_set_string(key_file, section, k, s);
+        if (r < 0)
+                return r;
+
+        return 0;
+}
+
 int set_config_file_string(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
