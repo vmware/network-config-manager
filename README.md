@@ -159,6 +159,22 @@ network:
       dhcp6-overrides:
         use-dns: true
 ```
+#### Using match as MacAddress
+```
+network:
+  version: 2
+  ethernets:
+      eth0:
+          match:
+              macaddress: "de:ad:be:ef:ca:fe"
+          addresses: [ "10.3.0.5/23" ]
+          nameservers:
+              addresses: [ "8.8.8.8", "8.8.4.4" ]
+              search: [ example.com ]
+          routes:
+              - to: default
+                via: 10.3.0.1
+```
 ### Generate WiFi config from yml file
 
 `nmctl` can generate [WPA Supplicant](https://w1.fi/wpa_supplicant/) configuration from yaml file. When a yml file with wifi
