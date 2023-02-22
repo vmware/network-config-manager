@@ -80,14 +80,15 @@ Or by simply doing
 
 #### Using DHCP:
 
-To set the device named `eth1` get an address via DHCP4 and client identifier as `mac` create a YAML file with the following:
+To set the device named `eth1` get an address via DHCP4 create a YAML file with the following:
 
 ```yml
  network:
-  device:
-     name: eth1
-     dhcp: ipv4
-     dhcp-client-identifier: mac
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth1:
+      dhcp4: true
  ```
 
 #### Static configuration
@@ -108,50 +109,50 @@ To set a static IP address, use the addresses key, which takes a list of (IPv4 o
 #### Directly connected gateway
 ```yml
  network:
-  device:
-     name: eth1
-     addresses: [ 192.168.1.45/24 ]
-     gateway: 192.168.1.1
-     gateway-onlink: true
+  version: 2
+  renderer: networkd
+  ethernets:
+      ens3:
+          addresses: [ "10.10.10.1/24" ]
+          routes:
+            - to: 0.0.0.0/0
+              via: 9.9.9.9
+              on-link: true
  ```
 
 #### Multiple addresses on a single device
 
 ```yml
- network:
-  device:
-     name: eth1
-     addresses: [ 192.168.1.45/24, 192.168.1.46 ]
-     gateway: 192.168.1.1
+network:
+  ethernets:
+    ens3:
+      addresses:
+          - 10.100.1.37/24
+          - 10.100.1.38/24:
+              label: ens3:0
+              lifetime: 1000
+          - 10.100.1.39/24:
+              label: ens3:test-label
+              lifetime: 2000
+      routes:
+          - to: default
+            via: 10.100.1.1
  ```
-#### Using multiple addresses with multiple gateways and DHCP4
+#### Using DHCP4 overrides
 ```yml
- network:
-  device:
-     name: eth1
-     mtu : 1200
-     mac-address: 00:0c:29:3a:bc:89
-     match-mac-address: 00:0c:29:3a:bc:89
-     dhcp: yes
-     dhcp-client-identifier: mac
-     lldp: yes
-     link-local-address: yes
-     ipv6-accept-ra: yes
-     dhcp4-use-mtu: yes
-     dhcp4-use-domain: yes
-     gateway: 192.168.1.1/24
-     gateway-onlink: yes
-     nameservers: [192.168.0.1, 8.8.8.8]
-     ntps: [192.168.0.2, 8.8.8.1]
-     addresses:
-       - 5.0.0.5/24
-       - 10.0.0.12/24
-       - 11.0.0.13/24
-     routes:
-       - to: 0.0.0.0/0
-         via: 5.0.0.1
-       - to: 0.0.0.1/0
-         via: 5.0.0.2
+network:
+  version: 2
+  ethernets:
+    dummy95:
+      dhcp4: yes
+      dhcp4-overrides:
+        route-metric: 200
+    test99:
+      dhcp4: yes
+      dhcp4-overrides:
+        route-metric: 300
+      dhcp6-overrides:
+        use-dns: true
 ```
 ### Generate WiFi config from yml file
 
