@@ -83,11 +83,11 @@ int parse_yaml_uint32_or_max(const char *key,
 
         p = (char **) userdata;
 
-        if (!is_uint32_or_max(value)) { 
+        if (!is_uint32_or_max(value)) {
                 log_warning("Failed to parse parameter='%s': %s", value, strerror(EINVAL));
                 return -EINVAL;
         }
-    
+
         *p = g_strdup(value);
         if (!*p)
                 return log_oom();
@@ -245,8 +245,8 @@ int parse_yaml_dhcp_client_identifier(const char *key,
         assert(node);
 
         n = data;
-
         n->dhcp_client_identifier_type = dhcp_client_identifier_to_mode((char *) value);
+
         return 0;
 }
 
@@ -257,6 +257,7 @@ int parse_yaml_dhcp_type(const char *key,
                          yaml_document_t *doc,
                          yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -266,7 +267,22 @@ int parse_yaml_dhcp_type(const char *key,
 
         n = data;
 
-        n->dhcp_type = dhcp_client_name_to_mode((char *) value);
+        if (string_equal("dhcp4", key)) {
+                r = parse_boolean(value);
+                if (r < 0)
+                        return r;
+
+                n->dhcp4 = r;
+
+        } else if (string_equal("dhcp6", key)) {
+                r = parse_boolean(value);
+                if (r < 0)
+                        return r;
+
+                n->dhcp6 = r;
+        } else
+                n->dhcp_type = dhcp_client_name_to_mode((char *) value);
+
         return 0;
 }
 
@@ -297,7 +313,6 @@ int parse_yaml_address(const char *key,
                        yaml_document_t *doc,
                        yaml_node_t *node) {
         _auto_cleanup_ IPAddress *address = NULL;
-        IPAddress **p = NULL;
         int r;
 
         assert(key);
@@ -305,16 +320,11 @@ int parse_yaml_address(const char *key,
         assert(doc);
         assert(node);
 
-        p = (IPAddress **) userdata;
-
         r = parse_ip_from_string(value, &address);
         if (r < 0) {
-                log_warning("Failed to parse address : %s", value);
+                log_warning("Failed to parse address: %s", value);
                 return r;
         }
-
-        *p = address;
-        address = NULL;
 
         return 0;
 }
@@ -337,11 +347,8 @@ int parse_yaml_addresses(const char *key,
         network = data;
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
-
                 if (string_equal("addresses", key))
                         r = parse_address_from_string_and_add(scalar(entry), network->addresses);
-                else if (string_equal("nameservers", key))
-                        r = parse_address_from_string_and_add(scalar(entry), network->nameservers);
                 else if (string_equal("ntps", key))
                         r = parse_address_from_string_and_add(scalar(entry), network->ntps);
                 else
@@ -349,6 +356,63 @@ int parse_yaml_addresses(const char *key,
 
                 if (r < 0 && r != -EEXIST)
                         return r;
+        }
+
+        return 0;
+}
+
+int parse_yaml_nameserver_addresses(const char *key,
+                                    const char *value,
+                                    void *data,
+                                    void *userdata,
+                                    yaml_document_t *doc,
+                                    yaml_node_t *node) {
+        yaml_node_item_t *i;
+        Network *network;
+        int r;
+
+        assert(key);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        network = data;
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *entry = yaml_document_get_node(doc, *i);
+
+                r = parse_address_from_string_and_add(scalar(entry), network->nameservers);
+                if (r < 0 && r != -EEXIST)
+                        return r;
+        }
+
+        return 0;
+}
+
+int parse_yaml_domains(const char *key,
+                       const char *value,
+                       void *data,
+                       void *userdata,
+                       yaml_document_t *doc,
+                       yaml_node_t *node) {
+        yaml_node_item_t *i;
+        Network *network;
+
+        assert(key);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        network = data;
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *entry = yaml_document_get_node(doc, *i);
+                _auto_cleanup_ char *p = NULL;
+
+                p = strdup(scalar(entry));
+                if (!p)
+                        return log_oom();
+
+                set_add(network->domains, p);
+                steal_pointer(p);
         }
 
         return 0;
@@ -363,6 +427,7 @@ int parse_yaml_routes(const char *key,
         _auto_cleanup_ IPAddress *address = NULL;
         static Route *route;
         Network *network;
+        bool b = false;
         int r;
 
         assert(key);
@@ -375,9 +440,16 @@ int parse_yaml_routes(const char *key,
         if (string_equal("to", key) || string_equal("via", key)) {
                 r = parse_ip_from_string(value, &address);
                 if (r < 0) {
-                        log_warning("Failed to parse route address : %s", value);
-                        return r;
+                        if (string_equal("default", value))
+                                b = true;
+                        else {
+                                log_warning("Failed to parse route address : %s", value);
+                                return r;
+                        }
                 }
+
+                if (string_equal("0.0.0.0/0", value))
+                        b = true;
 
                 if (string_equal("to", key)) {
                         if (!network->routes)
@@ -387,18 +459,37 @@ int parse_yaml_routes(const char *key,
                         if (r < 0)
                                 return r;
 
-                        route->dst = *address;
+                        if (address)
+                                route->dst = *address;
+                        route->to_default = b;
 
                         if (!g_hash_table_insert(network->routes, GUINT_TO_POINTER(route), route)) {
                                 log_warning("Failed to add route: %s", value);
                                 return false;
                         }
-                } else
-                        route->gw = *address;
+                } else {
+                        if (address)
+                                route->gw = *address;
+                }
         }
 
         if (string_equal("metric", key))
                 parse_uint32(value, &route->metric);
+        else if (string_equal("on-link", key)) {
+               r = parse_boolean(value);
+               if (r < 0)
+                       return r;
+
+               route->onlink = r;
+        } else if (string_equal("table", key)) {
+                uint32_t k;
+
+                r = parse_uint32(value, &k);
+                if (r < 0)
+                        return r;
+
+                route->table = k;
+        }
 
         return 0;
 }

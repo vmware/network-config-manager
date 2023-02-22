@@ -483,52 +483,6 @@ void routing_policy_rule_free(RoutingPolicyRule *rule) {
         free(rule);
 }
 
-int network_new(Network **ret) {
-        _auto_cleanup_ Network *n = NULL;
-        int r;
-
-        n = new0(Network, 1);
-        if (!n)
-                return log_oom();
-
-        *n = (Network) {
-                .unmanaged = -1,
-                .arp = -1,
-                .multicast = -1,
-                .all_multicast = -1,
-                .promiscuous = -1,
-                .req_for_online = -1,
-                .dhcp_type = _DHCP_CLIENT_INVALID,
-                .dhcp4_use_mtu = -1,
-                .dhcp4_use_dns = -1,
-                .dhcp4_use_domains = -1,
-                .dhcp4_use_ntp = -1,
-                .dhcp6_use_dns = -1,
-                .dhcp6_use_ntp = -1,
-                .gateway_onlink = -1,
-                .lldp = -1,
-                .ipv6_accept_ra = -1,
-                .dhcp_client_identifier_type = _DHCP_CLIENT_IDENTIFIER_INVALID,
-                .link_local = _LINK_LOCAL_ADDRESS_INVALID,
-                .parser_type = _PARSER_TYPE_INVALID,
-        };
-
-        r = set_new(&n->addresses, NULL, NULL);
-        if (r < 0)
-                return r;
-
-        r = set_new(&n->nameservers, NULL, NULL);
-        if (r < 0)
-                return r;
-
-        r = set_new(&n->ntps, NULL, NULL);
-        if (r < 0)
-                return r;
-
-        *ret = steal_pointer(n);
-        return 0;
-}
-
 static int wifi_access_point_free (void *key, void *value, void *user_data) {
         WiFiAccessPoint *ap = value;
 
@@ -550,6 +504,65 @@ static int wifi_access_point_free (void *key, void *value, void *user_data) {
         return 0;
 }
 
+int network_new(Network **ret) {
+        _auto_cleanup_ Network *n = NULL;
+        int r;
+
+        n = new0(Network, 1);
+        if (!n)
+                return log_oom();
+
+        *n = (Network) {
+                .unmanaged = -1,
+                .arp = -1,
+                .multicast = -1,
+                .all_multicast = -1,
+                .promiscuous = -1,
+                .req_for_online = -1,
+                .dhcp_type = _DHCP_CLIENT_INVALID,
+                .dhcp4 = -1,
+                .dhcp6 = -1,
+                .dhcp4_use_mtu = -1,
+                .dhcp4_use_dns = -1,
+                .dhcp4_use_domains = -1,
+                .dhcp4_use_routes = -1,
+                .dhcp4_use_hostname = -1,
+                .dhcp4_send_hostname = -1,
+                .dhcp4_use_ntp = -1,
+                .dhcp6_use_dns = -1,
+                .dhcp6_use_ntp = -1,
+                .dhcp6_use_domains = -1,
+                .dhcp6_use_address = -1,
+                .dhcp6_use_hostname = -1,
+                .gateway_onlink = -1,
+                .lldp = -1,
+                .emit_lldp = -1,
+                .ipv6_accept_ra = -1,
+                .dhcp_client_identifier_type = _DHCP_CLIENT_IDENTIFIER_INVALID,
+                .link_local = _LINK_LOCAL_ADDRESS_INVALID,
+                .parser_type = _PARSER_TYPE_INVALID,
+        };
+
+        r = set_new(&n->addresses, NULL, NULL);
+        if (r < 0)
+                return r;
+
+        r = set_new(&n->nameservers, NULL, NULL);
+        if (r < 0)
+                return r;
+
+        r = set_new(&n->domains, NULL, NULL);
+        if (r < 0)
+                return r;
+
+        r = set_new(&n->ntps, NULL, NULL);
+        if (r < 0)
+                return r;
+
+        *ret = steal_pointer(n);
+        return 0;
+}
+
 void network_free(Network *n) {
         if (!n)
                 return;
@@ -557,6 +570,7 @@ void network_free(Network *n) {
         set_freep(&n->addresses);
         set_freep(&n->ntps);
         set_freep(&n->nameservers);
+        set_freep(&n->domains);
 
         if (n->access_points) {
                 g_hash_table_foreach_steal(n->access_points, wifi_access_point_free, NULL);
@@ -568,6 +582,7 @@ void network_free(Network *n) {
         free(n->match_mac);
         free(n->hostname);
         free(n->gateway);
+        free(n->dhcp4_hostname);
         free(n->req_family_for_online);
         free(n);
 }
@@ -577,6 +592,29 @@ void g_network_free (gpointer data) {
 
         n = data;
         network_freep(&n);
+}
+
+int networks_new(Networks **ret) {
+        _auto_cleanup_ Networks *n = NULL;
+
+        n = new0(Networks, 1);
+        if (!n)
+                return log_oom();
+
+        n->networks = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!n->networks)
+             return log_oom();
+
+        *ret = steal_pointer(n);
+        return 0;
+}
+
+void networks_free(Networks *n) {
+        if (!n)
+                return;
+
+        g_hash_table_unref(n->networks);
+        free(n);
 }
 
 int parse_address_from_string_and_add(const char *s, Set *a) {
@@ -714,12 +752,19 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         if (!ip_is_null(&route->dst)) {
                 (void) ip_to_string(AF_INET, &route->dst, &destination);
                 (void ) add_key_to_section(section, "Destination", destination);
-        }
+        } else if (route->to_default)
+                (void ) add_key_to_section(section, "Destination", "0.0.0.0/0");
 
         if (!ip_is_null(&route->gw)) {
                 (void) ip_to_string(AF_INET, &route->gw, &gateway);
                 (void) add_key_to_section(section, "Gateway", gateway);
         }
+
+        if (route->onlink >= 0)
+                (void) add_key_to_section(section, "Onlink", bool_to_string(route->onlink));
+
+        if (route->table > 0)
+                (void) add_key_to_section_uint(section, "Table", route->table);
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
@@ -734,6 +779,12 @@ static void append_nameservers(gpointer key, gpointer value, gpointer userdata) 
         g_string_append_printf(config, "%s ", (char *) key);
 }
 
+static void append_domains(gpointer key, gpointer value, gpointer userdata) {
+        GString *config = userdata;
+
+        g_string_append_printf(config, "%s ", (char *) key);
+}
+
 static void append_ntp(gpointer key, gpointer value, gpointer userdata) {
         GString *config = userdata;
 
@@ -742,19 +793,29 @@ static void append_ntp(gpointer key, gpointer value, gpointer userdata) {
 
 static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(section_freep) Section *section = NULL;
+        _auto_cleanup_ char *addr = NULL;
         KeyFile *key_file = userdata;
+        IPAddress *a = key;
         int r;
 
         r = section_new("Address", &section);
         if (r < 0)
                 return;
 
-        (void) add_key_to_section(section, "Address", (char *) key);
+        r = ip_to_string_prefix(a->family, a, &addr);
+        (void) add_key_to_section(section, "Address", addr);
+
+        if (a->label)
+                (void) add_key_to_section(section, "Label", a->label);
+
+        if (a->lifetime)
+                (void) add_key_to_section(section, "PreferredLifetime", a->lifetime);
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
                 return;
 
+        steal_pointer(addr);
         steal_pointer(section);
 }
 
@@ -848,6 +909,15 @@ int generate_network_config(Network *n) {
                         r = set_config(key_file, "Network", "DHCP", dracut_to_networkd_dhcp_mode_to_name(n->dhcp_type));
         }
 
+        if (n->dhcp4 >= 0 || n->dhcp6 >= 0) {
+               if (n->dhcp4 > 0  && n->dhcp6 > 0)
+                       r = set_config(key_file, "Network", "DHCP", "yes");
+               else if (n->dhcp4 > 0)
+                       r = set_config(key_file, "Network", "DHCP", "ipv4");
+               else if (n->dhcp6 > 0)
+                       r = set_config(key_file, "Network", "DHCP", "ipv6");
+        }
+
         if (n->lldp >= 0) {
                 r = set_config(key_file, "Network", "LLDP", bool_to_string(n->lldp));
                 if (r < 0)
@@ -880,6 +950,19 @@ int generate_network_config(Network *n) {
                         return r;
         }
 
+        if (n->domains && set_size(n->domains) > 0) {
+                _cleanup_(g_string_unrefp) GString *c = NULL;
+
+                c = g_string_new(NULL);
+                if (!c)
+                        return log_oom();
+
+                set_foreach(n->domains, append_domains, c);
+                r = set_config(key_file, "Network", "Domains", c->str);
+                if (r < 0)
+                        return r;
+        }
+
         if (n->ntps && set_size(n->ntps) > 0) {
                 _cleanup_(g_string_unrefp) GString *c = NULL;
 
@@ -900,7 +983,8 @@ int generate_network_config(Network *n) {
         }
 
         if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID || n->dhcp4_use_dns >= 0 || n->dhcp4_use_domains >= 0 ||
-            n->dhcp4_use_ntp >= 0 || n->dhcp4_use_mtu >= 0) {
+            n->dhcp4_use_ntp >= 0 || n->dhcp4_use_mtu >= 0 || n->dhcp4_route_metric > 0 || n->dhcp4_use_routes >= 0 || n->dhcp4_use_hostname >= 0 ||
+            n->dhcp4_send_hostname >= 0 || n->dhcp4_hostname ) {
 
                 if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID) {
                         r = set_config(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
@@ -931,9 +1015,39 @@ int generate_network_config(Network *n) {
                         if (r < 0)
                                 return r;
                 }
+
+                if (n->dhcp4_use_routes >= 0) {
+                        r = set_config(key_file, "DHCPv4", "UseRoutes", bool_to_string(n->dhcp4_use_routes));
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->dhcp4_use_hostname >= 0) {
+                        r = set_config(key_file, "DHCPv4", "UseHostname", bool_to_string(n->dhcp4_use_hostname));
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->dhcp4_send_hostname >= 0) {
+                        r = set_config(key_file, "DHCPv4", "SendHostname", bool_to_string(n->dhcp4_send_hostname));
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->dhcp4_hostname) {
+                        r = set_config(key_file, "DHCPv4", "Hostname", n->dhcp4_hostname);
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->dhcp4_route_metric > 0) {
+                        r = set_config_uint(key_file, "DHCPv4", "RouteMetric", n->dhcp4_route_metric);
+                        if (r < 0)
+                                return r;
+                }
         }
 
-        if ( n->dhcp6_use_dns >= 0 || n->dhcp6_use_ntp >= 0) {
+        if ( n->dhcp6_use_dns >= 0 || n->dhcp6_use_ntp >= 0 || n->dhcp6_use_address >= 0 || n->dhcp6_use_hostname >= 0 || n->dhcp6_use_domains) {
                 if (n->dhcp6_use_dns >= 0) {
                         r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_string(n->dhcp4_use_dns));
                          if (r < 0)
@@ -945,29 +1059,28 @@ int generate_network_config(Network *n) {
                         if (r < 0)
                                 return r;
                 }
+
+                if (n->dhcp6_use_ntp >= 0) {
+                        r = set_config(key_file, "DHCPv6", "UseAddress", bool_to_string(n->dhcp6_use_address));
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->dhcp6_use_hostname >= 0) {
+                        r = set_config(key_file, "DHCPv6", "UseHostname", bool_to_string(n->dhcp6_use_hostname));
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->dhcp6_use_domains >= 0) {
+                        r = set_config(key_file, "DHCPv6", "UseDomains", bool_to_string(n->dhcp6_use_domains));
+                        if (r < 0)
+                                return r;
+                }
         }
 
         if (n->addresses && set_size(n->addresses) > 0)
                 set_foreach(n->addresses, append_addresses, key_file);
-
-        if (n->gateway && !ip_is_null(n->gateway)) {
-                _cleanup_(section_freep) Section *section = NULL;
-
-                (void) ip_to_string_prefix(AF_INET, n->gateway, &gateway);
-
-                r = section_new("Route", &section);
-                if (r < 0)
-                        return r;
-
-                add_key_to_section(section, "Gateway", gateway);
-                add_key_to_section(section, "GatewayOnlink", bool_to_string(n->gateway_onlink));
-
-                r = add_section_to_key_file(key_file, section);
-                if (r < 0)
-                        return r;
-
-                steal_pointer(section);
-        }
 
         if (n->routes)
                 g_hash_table_foreach(n->routes, append_routes, key_file);

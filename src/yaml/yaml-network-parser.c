@@ -32,40 +32,69 @@ static ParserTable parser_wifi_vtable[] = {
 };
 
 static ParserTable parser_network_vtable[] = {
-        { "name",                     CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, ifname)},
-        { "match-mac-address",        CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, match_mac)},
-        { "mac-address",              CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, mac)},
-        { "mtu",                      CONF_TYPE_NETWORK,     parse_yaml_uint32,                 offsetof(Network, mtu)},
-        { "dhcp",                     CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp_type)},
-        { "dhcp4-client-identifier",  CONF_TYPE_NETWORK,     parse_yaml_dhcp_client_identifier, offsetof(Network, dhcp_client_identifier_type)},
-        { "unmanaged",                CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, unmanaged)},
-        { "arp",                      CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, arp)},
-        { "multicast",                CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, multicast)},
-        { "allmulticast",             CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, all_multicast)},
-        { "promiscuous",              CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, promiscuous)},
-        { "requiredforonline",        CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, req_for_online)},
-        { "requiredfamilyforonline",  CONF_TYPE_NETWORK,     parse_yaml_rf_online,              offsetof(Network, req_family_for_online)},
-        { "dhcp4-use-dns",            CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp4_use_dns)},
-        { "dhcp4-use-domain",         CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp4_use_domains)},
-        { "dhcp4-use-ntp",            CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp4_use_ntp)},
-        { "dhcp4-use-mtu",            CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp4_use_mtu)},
-        { "dhcp6-use-dns",            CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp6_use_dns)},
-        { "dhcp6-use-ntp",            CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, dhcp6_use_ntp)},
-        { "gateway",                  CONF_TYPE_NETWORK,     parse_yaml_address,                offsetof(Network, gateway)},
-        { "gateway-onlink",           CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, gateway_onlink)},
-        { "lldp",                     CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, lldp)},
-        { "ipv6-accept-ra",           CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, ipv6_accept_ra)},
-        { "link-local-address",       CONF_TYPE_NETWORK,     parse_yaml_link_local_type,        offsetof(Network, link_local)},
-        { "nameservers",              CONF_TYPE_NETWORK,     parse_yaml_addresses,              offsetof(Network, nameservers)},
-        { "ntps",                     CONF_TYPE_NETWORK,     parse_yaml_addresses,              offsetof(Network, ntps)},
-        { "addresses",                CONF_TYPE_NETWORK,     parse_yaml_addresses,              offsetof(Network, addresses)},
-        { NULL,                       _CONF_TYPE_INVALID,    0,                                 0}
+        { "name",                       CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, ifname)},
+        { "match-mac-address",          CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, match_mac)},
+        { "mac-address",                CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, mac)},
+        { "mtu",                        CONF_TYPE_NETWORK,     parse_yaml_uint32,                 offsetof(Network, mtu)},
+        { "dhcp",                       CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp_type)},
+        { "dhcp4",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp4)},
+        { "dhcp6",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp6)},
+        { "dhcp-identifier",            CONF_TYPE_NETWORK,     parse_yaml_dhcp_client_identifier, offsetof(Network, dhcp_client_identifier_type)},
+        { "unmanaged",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, unmanaged)},
+        { "arp",                        CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, arp)},
+        { "multicast",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, multicast)},
+        { "allmulticast",               CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, all_multicast)},
+        { "promiscuous",                CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, promiscuous)},
+        { "required-for-online",        CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, req_for_online)},
+        { "required-family-for-online", CONF_TYPE_NETWORK,     parse_yaml_rf_online,              offsetof(Network, req_family_for_online)},
+        { "lldp",                       CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, lldp)},
+        { "emit-lldp",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, emit_lldp)},
+        { "accept-ra",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, ipv6_accept_ra)},
+        { "link-local",                 CONF_TYPE_NETWORK,     parse_yaml_link_local_type,        offsetof(Network, link_local)},
+        { "ntps",                       CONF_TYPE_NETWORK,     parse_yaml_addresses,              offsetof(Network, ntps)},
+        { NULL,                         _CONF_TYPE_INVALID,    0,                                 0}
+};
+
+static ParserTable parser_dhcp4_overrides_vtable[] = {
+        { "use-dns",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_dns)},
+        { "use-domain",         CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_domains)},
+        { "use-ntp",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_ntp)},
+        { "use-mtu",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_mtu)},
+        { "use-routes",         CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_routes)},
+        { "use-hostname",       CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_hostname)},
+        { "send-hostname",      CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_send_hostname)},
+        { "route-metric",       CONF_TYPE_NETWORK,     parse_yaml_uint32, offsetof(Network, dhcp4_route_metric)},
+        { "hostname",           CONF_TYPE_NETWORK,     parse_yaml_string, offsetof(Network, dhcp4_hostname)},
+        { NULL,                _CONF_TYPE_INVALID,    0,                  0}
+};
+
+static ParserTable parser_dhcp6_overrides_vtable[] = {
+        { "use-dns",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_dns)},
+        { "use-domain",         CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_domains)},
+        { "use-ntp",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_ntp)},
+        { "use-address",        CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_address)},
+        { "use-hostname",       CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_hostname)},
+        { NULL,                _CONF_TYPE_INVALID,    0,                  0}
+};
+
+static ParserTable parser_address_vtable[] = {
+        { "label",     CONF_TYPE_NETWORK,     parse_yaml_addresses, offsetof(Network, addresses)},
+        { "addresses", CONF_TYPE_NETWORK,     parse_yaml_addresses, offsetof(Network, addresses)},
+        { NULL,        _CONF_TYPE_INVALID,    0,                    0}
+};
+
+static ParserTable parser_nameservers_vtable[] = {
+        { "search",     CONF_TYPE_NETWORK,     parse_yaml_domains,              offsetof(Network, domains)},
+        { "addresses",  CONF_TYPE_NETWORK,     parse_yaml_nameserver_addresses, offsetof(Network, nameservers)},
+        { NULL,         _CONF_TYPE_INVALID,    0,                               0}
 };
 
 static ParserTable parser_route_vtable[] = {
-        { "to",     CONF_TYPE_ROUTE,     parse_yaml_routes, offsetof(Network, routes)},
-        { "via",    CONF_TYPE_ROUTE,     parse_yaml_routes, offsetof(Network, routes)},
-        { "metric", CONF_TYPE_ROUTE,     parse_yaml_routes, offsetof(Network, routes)},
+        { "to",      CONF_TYPE_ROUTE,     parse_yaml_routes, offsetof(Network, routes)},
+        { "via",     CONF_TYPE_ROUTE,     parse_yaml_routes, offsetof(Network, routes)},
+        { "metric",  CONF_TYPE_ROUTE,     parse_yaml_routes, offsetof(Network, routes)},
+        { "on-link", CONF_TYPE_ROUTE,     parse_yaml_routes, offsetof(Network, routes)},
+        { "table",   CONF_TYPE_ROUTE,     parse_yaml_routes, offsetof(Network, routes)},
         { NULL,     _CONF_TYPE_INVALID,  0,            0}
 };
 
@@ -188,96 +217,293 @@ static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc,
         return true;
 }
 
-static int parse_route_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
-        yaml_node_pair_t *entry;
+static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        yaml_node_pair_t *p;
+        yaml_node_t *k, *v;
+        yaml_node_item_t *i;
+        yaml_node_t *n;
 
-        assert(doc);
-        assert(node);
         assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+        assert(link);
 
-        for (entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
-                yaml_node_t *key, *value;
-                ParserTable *p;
-                void *v;
-
-                key = yaml_document_get_node(doc, entry->key);
-                value = yaml_document_get_node(doc, entry->value);
-
-                p = g_hash_table_lookup(m->route_config, scalar(key));
-                if (!p)
-                        continue;
-
-                v = (uint8_t *) network + p->offset;
-                if (p->parser)
-                        (void) p->parser(scalar(key), scalar(value), network, v, doc, value);
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                n = yaml_document_get_node(dp, *i);
+                if (n)
+                        (void) parse_route(m, dp, n, network);
         }
 
-        return true;
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                table = g_hash_table_lookup(m->route_config, scalar(k));
+                if (!table)
+                        continue;
+
+                t = (uint8_t *) network + table->offset;
+                if (table->parser)
+                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+        }
+
+        return 0;
 }
 
-static int parse_network_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
-        yaml_node_pair_t *entry;
+static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        static IPAddress *a = NULL;
+        yaml_node_pair_t *p;
+        yaml_node_item_t *i;
+        yaml_node_t *k, *v;
+        yaml_node_t *n;
+        int r;
 
         assert(m);
-        assert(doc);
+        assert(dp);
         assert(node);
+        assert(network);
+        assert(link);
 
-        for (entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
-                yaml_node_t *key, *value;
-                ParserTable *p;
-                void *v;
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                n = yaml_document_get_node(dp, *i);
+                if (n)
+                        (void) parse_address(m, dp, n, network);
+        }
 
-                key = yaml_document_get_node(doc, entry->key);
-                value = yaml_document_get_node(doc, entry->value);
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
 
-                if (string_equal(scalar(key), "access-points")) {
-                        value = yaml_document_get_node(doc, value->data.mapping.pairs.start->key);
-                        (void) parse_wifi_access_points_config(m, doc, value, network);
-                } else if (string_equal(scalar(key), "routes")) {
-                        value = yaml_document_get_node(doc, value->data.mapping.pairs.start->key);
-                        (void) parse_route_config(m, doc, value, network);
+                if (!k && !v)
+                        continue;
+
+                if (k)
+                        printf("%s ", scalar(k));
+
+                if (v)
+                        printf("%s \n", scalar(v));
+
+                if (!a) {
+                        a = new0(IPAddress, 1);
+                        if (!a)
+                                return log_oom();
                 }
 
-                p = g_hash_table_lookup(m->network_config, scalar(key));
-                if (!p)
-                        continue;
+                if (string_equal(scalar(k), "lifetime")) {
+                        free(a->lifetime);
+                        a->lifetime = strdup(scalar(v));
+                        if (!a->lifetime)
+                                return log_oom();
+                } else if (string_equal(scalar(k), "label")) {
+                        free(a->label);
+                        a->label = strdup(scalar(v));
+                        if (!a->label)
+                                return log_oom();
+                } else {
+                        _auto_cleanup_ IPAddress *address = NULL;
 
-                v = (uint8_t *) network + p->offset;
-                if (p->parser)
-                        (void) p->parser(scalar(key), scalar(value), network, v, doc, value);
+                        r = parse_ip_from_string(scalar(k), &address);
+                        if (r < 0)
+                                return r;
+
+                        if (a) {
+                                if (a->label)
+                                        address->label = strdup(a->label);
+                                if (a->lifetime)
+                                        address->lifetime = a->lifetime;
+
+                                free(a);
+                                steal_pointer(a);
+                        }
+
+                        (void) set_add(network->addresses, address);
+                        steal_pointer(address);
+
+                        if (v) {
+                                r = parse_ip_from_string(scalar(v), &address);
+                                if (r >= 0) {
+                                        (void) set_add(network->addresses, address);
+                                        steal_pointer(address);
+                                }
+                        }
+                }
         }
 
-        return true;
+        return 0;
 }
 
-static int parse_link_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, NetDevLink *link) {
-        yaml_node_pair_t *entry;
+static int parse_nameserver(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        yaml_node_pair_t *p;
+        yaml_node_t *k, *v;
 
         assert(m);
-        assert(doc);
+        assert(dp);
         assert(node);
+        assert(network);
+        assert(link);
 
-        for (entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
-                yaml_node_t *key, *value;
-                ParserTable *p;
-                void *v;
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
 
-                key = yaml_document_get_node(doc, entry->key);
-                value = yaml_document_get_node(doc, entry->value);
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
 
-                p = g_hash_table_lookup(m->link_config, scalar(key));
-                if (!p)
+                table = g_hash_table_lookup(m->nameserver_config, scalar(k));
+                if (!table)
                         continue;
 
-                v = (uint8_t *) link + p->offset;
-                if (p->parser)
-                        (void) p->parser(scalar(key), scalar(value), link, v, doc, value);
+                t = (uint8_t *) network + table->offset;
+                if (table->parser)
+                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
         }
 
-        return true;
+        return 0;
 }
 
-static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network, NetDevLink *link) {
+static int parse_dhcp4(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        yaml_node_pair_t *p;
+        yaml_node_t *k, *v;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+        assert(link);
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                table = g_hash_table_lookup(m->dhcp4_config, scalar(k));
+                if (!table)
+                        continue;
+
+                t = (uint8_t *) network + table->offset;
+                if (table->parser)
+                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+        }
+
+        return 0;
+}
+
+static int parse_dhcp6(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        yaml_node_pair_t *p;
+        yaml_node_t *k, *v;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+        assert(link);
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                table = g_hash_table_lookup(m->dhcp6_config, scalar(k));
+                if (!table)
+                        continue;
+
+                t = (uint8_t *) network + table->offset;
+                if (table->parser)
+                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+        }
+
+        return 0;
+}
+
+static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        yaml_node_pair_t *p;
+        yaml_node_t *k, *v;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+        assert(link);
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                table = g_hash_table_lookup(m->network_config, scalar(k));
+                if (!table) {
+                        if (string_equal(scalar(k), "dhcp4-overrides"))
+                                parse_dhcp4(m, dp, v, network);
+                        if (string_equal(scalar(k), "dhcp6-overrides"))
+                                parse_dhcp6(m, dp, v, network);
+                        else if (string_equal(scalar(k), "addresses"))
+                                parse_address(m, dp, v, network);
+                        else if (string_equal(scalar(k), "routes"))
+                                parse_route(m, dp, v, network);
+                        else if (string_equal(scalar(k), "nameservers"))
+                                parse_nameserver(m, dp, v, network);
+                        else
+                                (void) parse_network_config(m, dp, v, network);
+
+                        continue;
+                }
+
+                t = (uint8_t *) network + table->offset;
+                if (table->parser)
+                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+        }
+
+        return 0;
+}
+
+static int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
+        yaml_node_pair_t *p;
+        yaml_node_t *n;
+        int r;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(nets);
+        assert(link);
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                _cleanup_(network_freep) Network *net = NULL;
+                n = yaml_document_get_node(dp, p->key);
+
+                r = network_new(&net);
+                if (r < 0)
+                        return r;
+
+                net->parser_type = PARSER_TYPE_YAML;
+                net->ifname = strdup(scalar(n));
+                if (!net->ifname)
+                        return log_oom();
+
+                n = yaml_document_get_node(dp, p->value);
+                if (n)
+                        (void) parse_network_config(m, dp, n, net);
+
+                if (!g_hash_table_insert(nets->networks, (gpointer *) net->ifname, (gpointer *) net))
+                        return log_oom();
+
+                steal_pointer(net);
+        }
+
+        return 0;
+}
+
+static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *networks, NetDevLink *link) {
         yaml_node_item_t *i;
         yaml_node_pair_t *p;
         yaml_node_t *n;
@@ -285,7 +511,7 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         assert(m);
         assert(dp);
         assert(node);
-        assert(network);
+        assert(networks);
         assert(link);
 
         switch (node->type) {
@@ -296,48 +522,40 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                 for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                         n = yaml_document_get_node(dp, *i);
                         if (n)
-                                (void) parse_yaml_node(m, dp, n, network, link);
+                                (void) parse_yaml_node(m, dp, n, networks, link);
                 }
         }
                 break;
         case YAML_MAPPING_NODE:
                 for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                         n = yaml_document_get_node(dp, p->key);
-                        if (string_equal(scalar(n), "link")) {
+
+                        if (string_equal(scalar(n), "ethernets")) {
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
-                                        (void) parse_link_config(m, dp, n, link);
-                        } else if (string_equal(scalar(n), "device")) {
-                                n = yaml_document_get_node(dp, p->value);
-                                if (n)
-                                        (void) parse_network_config(m, dp, n, network);
+                                        (void) parse_ethernet_config(m, dp, n, networks);
                         } else {
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
-                                        (void) parse_yaml_node(m, dp, n, network, link);
+                                        (void) parse_yaml_node(m, dp, n, networks, link);
                         }
                 }
                 break;
-        default:
-                log_warning("Failed to parse node type: '%d'", node->type);
-                break;
+                default:
+                        log_warning("Failed to parse node type: '%d'", node->type);
+                        break;
         }
 
         return 0;
 }
 
-static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Network *network, NetDevLink *link) {
-        assert(m);
-        assert(dp);
-        assert(network);
-        assert(link);
-
-        return parse_yaml_node(m, dp, yaml_document_get_root_node(dp), network, link);
+static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Networks *networks, NetDevLink *link) {
+        return parse_yaml_node(m, dp, yaml_document_get_root_node(dp), networks, link);
 }
 
-int parse_yaml_file(const char *file, Network **n, NetDevLink **l) {
+int parse_yaml_file(const char *file, Networks **n, NetDevLink **l) {
         _cleanup_(yaml_manager_freep) YAMLManager *m = NULL;
-        _cleanup_(network_freep) Network *network = NULL;
+        _cleanup_(networks_freep) Networks *networks = NULL;
         _cleanup_(netdev_link_freep) NetDevLink *link = NULL;
         _auto_cleanup_fclose_ FILE *f = NULL;
         yaml_document_t document;
@@ -362,11 +580,9 @@ int parse_yaml_file(const char *file, Network **n, NetDevLink **l) {
         assert(yaml_parser_initialize(&parser));
         yaml_parser_set_input_file(&parser, f);
 
-        r = network_new(&network);
+        r = networks_new(&networks);
         if (r < 0)
                 return r;
-
-        network->parser_type = PARSER_TYPE_YAML;
 
         r = netdev_link_new(&link);
         if (r < 0)
@@ -382,7 +598,7 @@ int parse_yaml_file(const char *file, Network **n, NetDevLink **l) {
 
                 done = !yaml_document_get_root_node(&document);
                 if (!done)
-                        r = parse_yaml_document(m, &document, network, link);
+                        r = parse_yaml_document(m, &document, networks, link);
 
                 yaml_document_delete(&document);
         }
@@ -393,7 +609,7 @@ int parse_yaml_file(const char *file, Network **n, NetDevLink **l) {
                 if (link->ifname)
                         *l = steal_pointer(link);
                 else
-                        *n = steal_pointer(network);
+                        *n = steal_pointer(networks);
         }
         return r;
 }
@@ -403,6 +619,10 @@ void yaml_manager_freep(YAMLManager **p) {
                 return;
 
         g_hash_table_destroy((*p)->network_config);
+        g_hash_table_destroy((*p)->address_config);
+        g_hash_table_destroy((*p)->dhcp4_config);
+        g_hash_table_destroy((*p)->dhcp6_config);
+        g_hash_table_destroy((*p)->nameserver_config);
         g_hash_table_destroy((*p)->route_config);
         g_hash_table_destroy((*p)->wifi_config);
         g_hash_table_destroy((*p)->link_config);
@@ -419,38 +639,71 @@ int new_yaml_manager(YAMLManager **ret) {
 
         *m = (YAMLManager) {
                  .network_config = g_hash_table_new(g_str_hash, g_str_equal),
+                 .address_config = g_hash_table_new(g_str_hash, g_str_equal),
+                 .dhcp4_config = g_hash_table_new(g_str_hash, g_str_equal),
+                 .dhcp6_config = g_hash_table_new(g_str_hash, g_str_equal),
+                 .nameserver_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .route_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .wifi_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .link_config = g_hash_table_new(g_str_hash, g_str_equal),
         };
 
-        if (!m->network_config || !m->route_config || !m->wifi_config || !m->link_config)
+        if (!m->network_config || !m->route_config || !m->wifi_config || !m->link_config || !m->address_config ||
+            !m->dhcp4_config || !m->dhcp6_config || !m->nameserver_config)
                 return log_oom();
 
         for (size_t i = 0; parser_network_vtable[i].key; i++) {
                if (!g_hash_table_insert(m->network_config, (void *) parser_network_vtable[i].key, &parser_network_vtable[i])) {
-                        log_warning("Failed add key to network table");
+                        log_warning("Failed add key='%s' to network table", parser_network_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        for (size_t i = 0; parser_wifi_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->wifi_config, (void *) parser_wifi_vtable[i].key, &parser_wifi_vtable[i])) {
-                        log_warning("Failed add key to wifi table");
+        for (size_t i = 0; parser_dhcp4_overrides_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->dhcp4_config, (void *) parser_dhcp4_overrides_vtable[i].key, &parser_dhcp4_overrides_vtable[i])) {
+                        log_warning("Failed add key='%s' to dhcp4 table", parser_dhcp4_overrides_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        for (size_t i = 0; parser_dhcp6_overrides_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->dhcp6_config, (void *) parser_dhcp6_overrides_vtable[i].key, &parser_dhcp6_overrides_vtable[i])) {
+                        log_warning("Failed add key='%s' to dhcp6 table", parser_dhcp6_overrides_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        for (size_t i = 0; parser_address_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->address_config, (void *) parser_address_vtable[i].key, &parser_address_vtable[i])) {
+                        log_warning("Failed add key='%s' to address table", parser_address_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        for (size_t i = 0; parser_nameservers_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->nameserver_config, (void *) parser_nameservers_vtable[i].key, &parser_nameservers_vtable[i])) {
+                        log_warning("Failed add key='%s' to nameserver table", parser_nameservers_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
         for (size_t i = 0; parser_route_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->route_config, (void *) parser_route_vtable[i].key, &parser_route_vtable[i])) {
-                        log_warning("Failed add key to route table");
+                        log_warning("Failed add key='%s' to route table", parser_route_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        for (size_t i = 0; parser_wifi_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->wifi_config, (void *) parser_wifi_vtable[i].key, &parser_wifi_vtable[i])) {
+                        log_warning("Failed add key='%s' to wifi table", parser_wifi_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
         for (size_t i = 0; parser_link_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->link_config, (void *) parser_link_vtable[i].key, &parser_link_vtable[i])) {
-                        log_warning("Failed add key to link table");
+                        log_warning("Failed add key='%s' to link table", parser_link_vtable[i].key);
                         return -EINVAL;
                 }
         }
