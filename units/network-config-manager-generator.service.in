@@ -8,7 +8,7 @@ Before=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/nmctl generate-config-from-cmdline
+ExecStart=/usr/bin/nmctl apply-cmdline
 
 [Install]
 WantedBy=network.target
