@@ -312,7 +312,7 @@ class TestKernelCommandLine:
     def test_network_kernel_command_line_ip_dhcp(self):
         ''' ip=<interface>:{dhcp|on|any|dhcp6|auto6} '''
 
-        subprocess.check_call(['nmctl', 'generate-config-from-cmdline', 'ip=test99:dhcp'])
+        subprocess.check_call(['nmctl', 'apply-cmdline', 'ip=test99:dhcp'])
         assert(unit_exist('10-test99.network') == True)
 
         parser = configparser.ConfigParser()
@@ -324,7 +324,7 @@ class TestKernelCommandLine:
     def test_network_kernel_command_line_multiple_ip_dhcp(self):
         ''' ip=<interface>:{dhcp|on|any|dhcp6|auto6} '''
 
-        subprocess.check_call(['nmctl', 'generate-config-from-cmdline', 'ip=test99:dhcp ip=test98:dhcp'])
+        subprocess.check_call(['nmctl', 'apply-cmdline', 'ip=test99:dhcp ip=test98:dhcp'])
         assert(unit_exist('10-test99.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
@@ -342,7 +342,7 @@ class TestKernelCommandLine:
     def test_network_kernel_command_line_ip_static(self):
         ''' ip=<client-IP>:[ <server-id>]:<gateway-IP>:<netmask>:<client_hostname>:<interface>:{none|off}'''
 
-        subprocess.check_call(['nmctl', 'generate-config-from-cmdline', 'ip=192.168.1.34::192.168.1.1:::test99:dhcp'])
+        subprocess.check_call(['nmctl', 'apply-cmdline', 'ip=192.168.1.34::192.168.1.1:::test99:dhcp'])
         assert(unit_exist('10-test99.network') == True)
 
         parser = configparser.ConfigParser()
