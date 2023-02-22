@@ -96,21 +96,26 @@ To set a static IP address, use the addresses key, which takes a list of (IPv4 o
 
 ```yml
  network:
-  device:
-     name: eth1
-     gateway: 192.168.1.1/24
-     gateway-onlink: yes
-     nameservers: [192.168.0.1, 8.8.8.8]
-     ntps: [192.168.0.2, 8.8.8.1]
-     addresses:
-       - 192.168.1.5/24
+  version: 2
+  ethernets:
+    eth0:
+      addresses:
+        - 10.10.10.2/24
+        - 10.10.10.3/24
+        - 10.10.10.4/24
+        - 10.10.10.5/24
+      nameservers:
+        search: [mydomain, otherdomain]
+        addresses: [10.10.10.1, 1.1.1.1]
+      routes:
+        - to: 192.168.1.1
+          via: 10.10.10.1
 ```
 
 #### Directly connected gateway
 ```yml
  network:
   version: 2
-  renderer: networkd
   ethernets:
       ens3:
           addresses: [ "10.10.10.1/24" ]
