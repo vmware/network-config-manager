@@ -1,0 +1,13 @@
+network:
+  version: 2
+  ethernets:
+    dummy95:
+      dhcp4: yes
+      dhcp4-overrides:
+        route-metric: 100
+    test99:
+      dhcp4: yes
+      dhcp4-overrides:
+        route-metric: 200
+      dhcp6-overrides:
+        use-dns: true
