@@ -238,6 +238,7 @@ typedef struct Network {
         Set *domains;
         Set *ntps;
 
+        void *link;
         NetDev *netdev;
 
         GHashTable *access_points;

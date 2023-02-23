@@ -16,6 +16,7 @@
 #include "file-util.h"
 #include "log.h"
 #include "macros.h"
+#include "netdev-link.h"
 #include "network-address.h"
 #include "network-link.h"
 #include "network-manager.h"
@@ -1983,51 +1984,51 @@ int manager_parse_proxy_config(GHashTable **c) {
 
 int manager_generate_network_config_from_yaml(const char *file) {
         _cleanup_(g_string_unrefp) GString *wifi_config = NULL;
-        _cleanup_(netdev_link_freep) NetDevLink *l = NULL;
         _cleanup_(networks_freep) Networks *n = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
+        GHashTableIter iter;
+        gpointer k, v;
         int r;
 
         assert(file);
 
-        r = parse_yaml_file(file, &n, &l);
+        r = parse_yaml_file(file, &n);
         if (r < 0) {
                 log_warning("Failed to parse configuration file '%s': %s", file, strerror(-r));
                 return r;
         }
 
-        if (l && l->ifname) {
-                r = parse_ifname_or_index(l->ifname, &p);
+        g_hash_table_iter_init (&iter, n->networks);
+        for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+                Network *net = (Network *) v;
+
+                r = generate_network_config(net);
                 if (r < 0) {
-                        log_warning("Failed to find link '%s': %s", l->ifname, g_strerror(-r));
+                        log_warning("Failed to generate network configuration for file '%s': %s", file, strerror(-r));
                         return r;
                 }
 
-                r = netdev_link_configure(p, l);
-                if (r < 0) {
-                        log_warning("Failed to configure link from yaml file '%s': %s", file, g_strerror(-r));
-                        return r;
-                }
-        } else {
-                GHashTableIter iter;
-                gpointer k, v;
-
-                g_hash_table_iter_init (&iter, n->networks);
-                for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
-                        Network *net = (Network *) v;
-
-                        r = generate_network_config(net);
-                        if (r < 0) {
-                                log_warning("Failed to generate network configuration for file '%s': %s", file, strerror(-r));
+                if (net->access_points) {
+                        r = generate_wifi_config(net, &wifi_config);
+                        if (r < 0)
                                 return r;
+
+                        return manager_write_wifi_config(net, wifi_config);
+                }
+
+                if (net->link) {
+                        _auto_cleanup_ IfNameIndex *p = NULL;
+                        NetDevLink *l = net->link;
+
+                        r = parse_ifname_or_index(net->ifname, &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device '%s': %s", net->ifname, strerror(-r));
+                                continue;
                         }
 
-                        if (net->access_points) {
-                                r = generate_wifi_config(net, &wifi_config);
-                                if (r < 0)
-                                        return r;
-
-                                return manager_write_wifi_config(net, wifi_config);
+                        r = netdev_link_configure(p, l);
+                        if (r < 0) {
+                                log_warning("Failed to configure device: %s", strerror(-r));
+                                return r;
                         }
                 }
         }

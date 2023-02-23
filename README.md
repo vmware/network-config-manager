@@ -85,7 +85,6 @@ To set the device named `eth1` get an address via DHCP4 create a YAML file with 
 ```yml
  network:
   version: 2
-  renderer: networkd
   ethernets:
     eth1:
       dhcp4: true
@@ -160,7 +159,7 @@ network:
         use-dns: true
 ```
 #### Using match as MacAddress
-```
+```yml
 network:
   version: 2
   ethernets:
@@ -239,56 +238,17 @@ configuration are found it generates a confiration file found in ```/etc/network
 `nmctl` can generate link configuration from YAML description.
 
 ```yml
- match:
-    macaddress: fa:90:ae:07:52:0a
- link:
-    ifname: test99
-    alias: ifalias
-    description: testconf
-    mtu: 10M
-    bitspersecond: 5G
-    duplex: full
-    wakeonlan: phy unicast broadcast multicast arp magic secureon
-    wakeonlanpassword: cb:a9:87:65:43:21
-    port: mii
-    advertise: 10baset-half 10baset-full 100baset-half 100baset-full 1000baset-half 1000baset-full 10000baset-full 2500basex-full 1000basekx-full 10000basekx4-full 10000basekr-full 10000baser-fec 20000basemld2-full 20000basekr2-full
-    autonegotiation: no
-    receivechecksumoffload: yes
-    transmitchecksumoffload: no
-    tcpsegmentationoffload: no
-    tcp6segmentationoffload: yes
-    genericsegmentationoffload: no
-    genericreceiveoffload: no
-    genericreceiveoffloadhardware: no
-    largereceiveoffload: yes
-    receivevlanctaghardwareacceleration: yes
-    transmitvlanctaghardwareacceleration: no
-    receivevlanctagfilter: no
-    transmitvlanstaghardwareacceleration: yes
-    ntuplefilter: no
-    useadaptiverxcoalesce: yes
-    useadaptivetxcoalesce: yes
-    macaddresspolicy: none
-    macaddress: 00:0c:29:3a:bc:11
-    namepolicy: kernel database onboard slot path mac keep
-    name: dm1
-    alternativenamespolicy: database onboard slot path mac
-    alternativename: demo1
-    rxbuffersize: max
-    rxminibuffersize: 65335
-    rxjumbobuffersize: 88776555
-    txbuffersize: max
-    transmitqueues: 4096
-    receivequeues: 4096
-    transmitqueuelength: 1024
-    txflowcontrol: no
-    rxflowcontrol: yes
-    autonegotiationflowcontrol: yes
-    genericsegmentoffloadmaxbytes: 65535
-    genericsegmentoffloadmaxsegments: 1024
-    rxchannels: max
-    txchannels: 656756677
-    otherchannels: 429496729
+network:
+  version: 2
+  ethernets:
+    eth1:
+      receive-checksum-offload: true
+      transmit-checksum-offload: true
+      tcp-segmentation-offload: true
+      tcp6-segmentation-offload: true
+      generic-segmentation-offload: true
+      generic-receive-offload: true
+      large-receive-offload: true
  ```
 ### Generate network config from kernel command line
 

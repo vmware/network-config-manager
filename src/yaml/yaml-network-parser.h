@@ -6,7 +6,6 @@
 #include <yaml.h>
 
 #include "network.h"
-#include "netdev-link.h"
 
 typedef struct YAMLManager {
         GHashTable *match_config;
@@ -18,9 +17,6 @@ typedef struct YAMLManager {
         GHashTable *route_config;
         GHashTable *wifi_config;
         GHashTable *link_config;
-
-        Network *n;
-        NetDevLink *l;
 } YAMLManager;
 
 int new_yaml_manager(YAMLManager **ret);
@@ -30,4 +26,4 @@ static inline const char *scalar(const yaml_node_t *node) {
         return (const char*) node->data.scalar.value;
 }
 
-int parse_yaml_file(const char *yaml_file, Networks **n, NetDevLink **l);
+int parse_yaml_file(const char *yaml_file, Networks **n);
