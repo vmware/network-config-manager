@@ -7,6 +7,7 @@
 #include "log.h"
 #include "macros.h"
 #include "network-manager.h"
+#include "netdev-link.h"
 #include "network.h"
 #include "networkd-api.h"
 #include "parse-util.h"
@@ -134,9 +135,9 @@ static ParserTable parser_link_vtable[] = {
         { "name",                                      CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, name)},
         { "alternative-namespolicy",                   CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, altnamepolicy)},
         { "alternative-name",                          CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, altname)},
-        { "rx-buffersize",                             CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_buf)},
-        { "rx-minibuffer",                             CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_mini_buf)},
-        { "rx-jumbobuffer",                            CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_jumbo_buf)},
+        { "rx-buffer-size",                            CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_buf)},
+        { "rx-mini-buffer",                            CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_mini_buf)},
+        { "rx-jumbo-buffer",                           CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_jumbo_buf)},
         { "tx-buffer",                                 CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_buf)},
         { "transmit-queues",                           CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, tx_queues)},
         { "receive-queues",                            CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, rx_queues)},
@@ -144,8 +145,8 @@ static ParserTable parser_link_vtable[] = {
         { "tx-flow-control",                           CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, tx_flow_ctrl)},
         { "rx-flow-control",                           CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, rx_flow_ctrl)},
         { "autonegotiation-flow-control",              CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, auto_flow_ctrl)},
-        { "generic-segmentoffload-maxbytes",           CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, gen_seg_off_bytes)},
-        { "generic-segmentoffload-maxsegments",        CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, gen_seg_off_seg)},
+        { "generic-segmentoffload-max-bytes",          CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, gen_seg_off_bytes)},
+        { "generic-segmentoffload-max-segments",       CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, gen_seg_off_seg)},
         { "rx-channels",                               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_chnl)},
         { "tx-channels",                               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_chnl)},
         { "other-channels",                            CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, otr_chnl)},
@@ -452,6 +453,7 @@ static int parse_dhcp6(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
 static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         yaml_node_pair_t *p;
         yaml_node_t *k, *v;
+        int r;
 
         assert(m);
         assert(dp);
@@ -460,7 +462,7 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
         assert(link);
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
-                ParserTable *table;
+                ParserTable *table, *link_table;
                 void *t;
 
                 k = yaml_document_get_node(dp, p->key);
@@ -482,6 +484,26 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                                 parse_nameserver(m, dp, v, network);
                         else
                                 (void) parse_network_config(m, dp, v, network);
+
+                        /* .link  */
+                        link_table = g_hash_table_lookup(m->link_config, scalar(k));
+                        if (link_table) {
+                                if (!network->link) {
+                                        NetDevLink *l;
+
+                                        r = netdev_link_new((NetDevLink **) &network->link);
+                                        if (r < 0)
+                                                return r;
+
+                                        l = network->link;
+                                        l->parser_type = PARSER_TYPE_YAML;
+                                }
+
+                                printf("%s %s\n", scalar(k), scalar(v));
+                                t = (uint8_t *) network->link + link_table->offset;
+                                if (link_table->parser)
+                                        (void) link_table->parser(scalar(k), scalar(v), link, t, dp, v);
+                        }
 
                         continue;
                 }
@@ -531,7 +553,7 @@ static int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_
         return 0;
 }
 
-static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *networks, NetDevLink *link) {
+static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *networks) {
         yaml_node_item_t *i;
         yaml_node_pair_t *p;
         yaml_node_t *n;
@@ -540,7 +562,6 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         assert(dp);
         assert(node);
         assert(networks);
-        assert(link);
 
         switch (node->type) {
         case YAML_NO_NODE:
@@ -550,7 +571,7 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                 for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                         n = yaml_document_get_node(dp, *i);
                         if (n)
-                                (void) parse_yaml_node(m, dp, n, networks, link);
+                                (void) parse_yaml_node(m, dp, n, networks);
                 }
         }
                 break;
@@ -565,7 +586,7 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                         } else {
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
-                                        (void) parse_yaml_node(m, dp, n, networks, link);
+                                        (void) parse_yaml_node(m, dp, n, networks);
                         }
                 }
                 break;
@@ -577,14 +598,13 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         return 0;
 }
 
-static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Networks *networks, NetDevLink *link) {
-        return parse_yaml_node(m, dp, yaml_document_get_root_node(dp), networks, link);
+static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Networks *n) {
+        return parse_yaml_node(m, dp, yaml_document_get_root_node(dp), n);
 }
 
-int parse_yaml_file(const char *file, Networks **n, NetDevLink **l) {
+int parse_yaml_file(const char *file, Networks **n) {
         _cleanup_(yaml_manager_freep) YAMLManager *m = NULL;
         _cleanup_(networks_freep) Networks *networks = NULL;
-        _cleanup_(netdev_link_freep) NetDevLink *link = NULL;
         _auto_cleanup_fclose_ FILE *f = NULL;
         yaml_document_t document;
         yaml_parser_t parser;
@@ -593,7 +613,6 @@ int parse_yaml_file(const char *file, Networks **n, NetDevLink **l) {
 
         assert(file);
         assert(n);
-        assert(l);
 
         r = new_yaml_manager(&m);
         if (r < 0)
@@ -612,12 +631,6 @@ int parse_yaml_file(const char *file, Networks **n, NetDevLink **l) {
         if (r < 0)
                 return r;
 
-        r = netdev_link_new(&link);
-        if (r < 0)
-                return r;
-
-        link->parser_type = PARSER_TYPE_YAML;
-
         for (;!done;) {
                 if (!yaml_parser_load(&parser, &document)) {
                         r = -EINVAL;
@@ -626,19 +639,15 @@ int parse_yaml_file(const char *file, Networks **n, NetDevLink **l) {
 
                 done = !yaml_document_get_root_node(&document);
                 if (!done)
-                        r = parse_yaml_document(m, &document, networks, link);
+                        r = parse_yaml_document(m, &document, networks);
 
                 yaml_document_delete(&document);
         }
 
         yaml_parser_delete(&parser);
+        if (r >= 0)
+                *n = steal_pointer(networks);
 
-        if (r >= 0) {
-                if (link->ifname)
-                        *l = steal_pointer(link);
-                else
-                        *n = steal_pointer(networks);
-        }
         return r;
 }
 

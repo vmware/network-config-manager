@@ -584,6 +584,7 @@ void network_free(Network *n) {
         free(n->gateway);
         free(n->dhcp4_hostname);
         free(n->req_family_for_online);
+        free(n->link);
         free(n);
 }
 
