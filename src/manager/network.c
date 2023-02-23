@@ -585,6 +585,7 @@ void network_free(Network *n) {
         free(n->dhcp4_hostname);
         free(n->req_family_for_online);
         free(n->link);
+        free(n->driver);
         free(n);
 }
 
@@ -841,6 +842,12 @@ int generate_network_config(Network *n) {
 
         if (n->match_mac) {
                 r = set_config(key_file, "Match", "MACAddress", n->match_mac);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->driver) {
+                r = set_config(key_file, "Match", "Driver", n->driver);
                 if (r < 0)
                         return r;
         }

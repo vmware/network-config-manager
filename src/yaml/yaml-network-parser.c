@@ -34,6 +34,7 @@ static ParserTable parser_wifi_vtable[] = {
 
 static ParserTable parser_match_vtable[] = {
         { "name",                       CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, ifname)},
+        { "driver",                     CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, driver)},
         { "macaddress",                 CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, match_mac)},
         { NULL,                         _CONF_TYPE_INVALID,    0,                                 0}
 };

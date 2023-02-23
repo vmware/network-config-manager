@@ -1,0 +1,13 @@
+network:
+  version: 2
+  ethernets:
+      test99:
+          match:
+              driver: "test-driver"
+          addresses: [ "10.3.0.5/23" ]
+          nameservers:
+              addresses: [ "8.8.8.8", "8.8.4.4" ]
+              search: [ example.com ]
+          routes:
+              - to: default
+                via: 10.3.0.1
