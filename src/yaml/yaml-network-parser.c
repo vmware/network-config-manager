@@ -34,6 +34,7 @@ static ParserTable parser_wifi_vtable[] = {
 
 static ParserTable parser_match_vtable[] = {
         { "name",                       CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, ifname)},
+        { "driver",                     CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, driver)},
         { "macaddress",                 CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, match_mac)},
         { NULL,                         _CONF_TYPE_INVALID,    0,                                 0}
 };
@@ -109,8 +110,8 @@ static ParserTable parser_link_vtable[] = {
         { "mtu",                                       CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, mtu)},
         { "bitspersecond",                             CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, bps)},
         { "duplex",                                    CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, duplex)},
-        { "wakeon-lan",                                CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wol)},
-        { "wakeon-lan-password",                       CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wolp)},
+        { "wakeonlan",                                 CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wol)},
+        { "wakeonlan-password",                        CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wolp)},
         { "port",                                      CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, port)},
         { "advertise",                                 CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, advertise)},
         { "auto-negotiation",                          CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, auto_nego)},
@@ -132,7 +133,7 @@ static ParserTable parser_link_vtable[] = {
         { "macaddress-policy",                         CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, macpolicy)},
         { "macaddress",                                CONF_TYPE_LINK,           parse_yaml_mac_address,             offsetof(NetDevLink, macaddr)},
         { "name-policy",                               CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, namepolicy)},
-        { "name",                                      CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, name)},
+        { "set-name",                                  CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, name)},
         { "alternative-namespolicy",                   CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, altnamepolicy)},
         { "alternative-name",                          CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, altname)},
         { "rx-buffer-size",                            CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_buf)},
@@ -253,6 +254,8 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
@@ -321,6 +324,8 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                         (void) set_add(network->addresses, address);
                         steal_pointer(address);
 
+                        network->modified = true;
+
                         if (v) {
                                 r = parse_ip_from_string(scalar(v), &address);
                                 if (r >= 0) {
@@ -358,6 +363,8 @@ static int parse_nameserver(YAMLManager *m, yaml_document_t *dp, yaml_node_t *no
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
@@ -387,6 +394,8 @@ static int parse_match(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
@@ -416,6 +425,8 @@ static int parse_dhcp4(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
@@ -445,6 +456,8 @@ static int parse_dhcp6(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
@@ -499,7 +512,6 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                                         l->parser_type = PARSER_TYPE_YAML;
                                 }
 
-                                printf("%s %s\n", scalar(k), scalar(v));
                                 t = (uint8_t *) network->link + link_table->offset;
                                 if (link_table->parser)
                                         (void) link_table->parser(scalar(k), scalar(v), link, t, dp, v);

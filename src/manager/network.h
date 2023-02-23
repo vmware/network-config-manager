@@ -187,6 +187,7 @@ typedef struct Network {
         char *ifname;
         char *mac;
         char *match_mac;
+        char *driver;
         char *hostname;
         char *req_family_for_online;
 
@@ -240,6 +241,8 @@ typedef struct Network {
 
         void *link;
         NetDev *netdev;
+
+        bool modified;
 
         GHashTable *access_points;
         GHashTable *routes;

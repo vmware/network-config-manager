@@ -151,7 +151,7 @@ def expectedFailureIfNetdevsimWithSRIOVIsNotAvailable():
 
 class TestLinkConfigManagerYAML:
     yaml_configs = [
-        "link.yaml",
+        "link.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -173,9 +173,9 @@ class TestLinkConfigManagerYAML:
 
     def test_link(self):
         assert(link_exist('test99') == True)
-        self.copy_yaml_file_to_netmanager_yaml_path('link.yaml')
+        self.copy_yaml_file_to_netmanager_yaml_path('link.yml')
 
-        subprocess.check_call(['nmctl', 'apply-yaml-config'])
+        subprocess.check_call(['nmctl', 'apply'])
         assert(unit_exist('10-test99.link') == True)
 
         parser = configparser.ConfigParser()
@@ -191,8 +191,10 @@ class TestLinkConfigManagerYAML:
 
 class TestNetworkConfigManagerYAML:
     yaml_configs = [
-        "dhcp4.yaml",
-        "static-address-label.yaml",
+        "dhcp4.yml",
+        "match-driver.yml",
+        "static-address-label.yml",
+        "dhcp-overrides.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -212,8 +214,20 @@ class TestNetworkConfigManagerYAML:
         self.remove_units_from_netmanager_yaml_path()
         remove_units_from_netword_unit_path()
 
+    def test_match_driver(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('match-driver.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Match', 'Driver') == 'test-driver')
+
     def test_basic_dhcp4(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('dhcp4.yaml')
+        self.copy_yaml_file_to_netmanager_yaml_path('dhcp4.yml')
 
         subprocess.check_call(['nmctl', 'apply'])
         assert(unit_exist('10-test99.network') == True)
@@ -224,8 +238,8 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'ipv4')
 
-    def test__dhcp4_overrides(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('dhcp-overrides.yaml')
+    def test_dhcp4_overrides(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('dhcp-overrides.yml')
 
         subprocess.check_call(['nmctl', 'apply'])
         assert(unit_exist('10-test99.network') == True)
@@ -236,10 +250,11 @@ class TestNetworkConfigManagerYAML:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'ipv4')
-        assert(parser.get('DHCPv4', 'RouteMetric') == '100')
+        assert(parser.get('DHCPv4', 'RouteMetric') == '200')
+        assert(parser.get('DHCPv6', 'UseDNS') == 'yes')
 
     def test_network_static_address_label_configuration(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yaml')
+        self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yml')
 
         subprocess.check_call(['nmctl', 'apply'])
         assert(unit_exist('10-test99.network') == True)
