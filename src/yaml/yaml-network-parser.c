@@ -521,8 +521,10 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                 }
 
                 t = (uint8_t *) network + table->offset;
-                if (table->parser)
+                if (table->parser) {
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+                        network->modified = true;
+                }
         }
 
         return 0;
