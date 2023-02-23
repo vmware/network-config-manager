@@ -828,6 +828,9 @@ int generate_network_config(Network *n) {
 
         assert(n);
 
+        if (!n->modified)
+                return 0;
+
         r = create_network_conf_file(n->ifname, &network);
         if (r < 0)
                 return r;

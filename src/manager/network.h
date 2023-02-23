@@ -242,6 +242,8 @@ typedef struct Network {
         void *link;
         NetDev *netdev;
 
+        bool modified;
+
         GHashTable *access_points;
         GHashTable *routes;
 } Network;

@@ -254,6 +254,8 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
@@ -322,6 +324,8 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                         (void) set_add(network->addresses, address);
                         steal_pointer(address);
 
+                        network->modified = true;
+
                         if (v) {
                                 r = parse_ip_from_string(scalar(v), &address);
                                 if (r >= 0) {
@@ -359,6 +363,8 @@ static int parse_nameserver(YAMLManager *m, yaml_document_t *dp, yaml_node_t *no
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
@@ -388,6 +394,8 @@ static int parse_match(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
@@ -417,6 +425,8 @@ static int parse_dhcp4(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
@@ -446,6 +456,8 @@ static int parse_dhcp6(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 t = (uint8_t *) network + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+
+                network->modified = true;
         }
 
         return 0;
