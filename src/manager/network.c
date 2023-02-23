@@ -751,20 +751,20 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
                 return;
 
         if (!ip_is_null(&route->dst)) {
-                (void) ip_to_string(AF_INET, &route->dst, &destination);
+                (void) ip_to_string_prefix(AF_INET, &route->dst, &destination);
                 (void ) add_key_to_section(section, "Destination", destination);
         } else if (route->to_default)
                 (void ) add_key_to_section(section, "Destination", "0.0.0.0/0");
 
         if (!ip_is_null(&route->gw)) {
-                (void) ip_to_string(AF_INET, &route->gw, &gateway);
+                (void) ip_to_string_prefix(AF_INET, &route->gw, &gateway);
                 (void) add_key_to_section(section, "Gateway", gateway);
         }
 
         if (route->onlink >= 0)
                 (void) add_key_to_section(section, "Onlink", bool_to_string(route->onlink));
 
-        if (route->table > 0)
+        if (route->table > 0 && route->table != RT_TABLE_MAIN)
                 (void) add_key_to_section_uint(section, "Table", route->table);
 
         r = add_section_to_key_file(key_file, section);

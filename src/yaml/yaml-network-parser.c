@@ -109,8 +109,8 @@ static ParserTable parser_link_vtable[] = {
         { "mtu",                                       CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, mtu)},
         { "bitspersecond",                             CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, bps)},
         { "duplex",                                    CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, duplex)},
-        { "wakeon-lan",                                CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wol)},
-        { "wakeon-lan-password",                       CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wolp)},
+        { "wakeonlan",                                 CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wol)},
+        { "wakeonlan-password",                        CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wolp)},
         { "port",                                      CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, port)},
         { "advertise",                                 CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, advertise)},
         { "auto-negotiation",                          CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, auto_nego)},
@@ -499,7 +499,6 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                                         l->parser_type = PARSER_TYPE_YAML;
                                 }
 
-                                printf("%s %s\n", scalar(k), scalar(v));
                                 t = (uint8_t *) network->link + link_table->offset;
                                 if (link_table->parser)
                                         (void) link_table->parser(scalar(k), scalar(v), link, t, dp, v);
