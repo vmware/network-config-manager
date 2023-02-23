@@ -132,7 +132,7 @@ static ParserTable parser_link_vtable[] = {
         { "macaddress-policy",                         CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, macpolicy)},
         { "macaddress",                                CONF_TYPE_LINK,           parse_yaml_mac_address,             offsetof(NetDevLink, macaddr)},
         { "name-policy",                               CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, namepolicy)},
-        { "name",                                      CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, name)},
+        { "set-name",                                  CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, name)},
         { "alternative-namespolicy",                   CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, altnamepolicy)},
         { "alternative-name",                          CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, altname)},
         { "rx-buffer-size",                            CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_buf)},
