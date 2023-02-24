@@ -101,7 +101,7 @@ static void json_list_link_routes(gpointer key, gpointer value, gpointer userdat
         route = (Route *) g_bytes_get_data(key, &size);
         if_indextoname(route->ifindex, buf);
 
-        r = ip_to_string_prefix(route->family, &route->gw, &c);
+        r = ip_to_string_prefix(route->gw.family, &route->gw, &c);
         if (r < 0)
                 return;
 
