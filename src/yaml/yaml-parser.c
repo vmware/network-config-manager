@@ -452,9 +452,6 @@ int parse_yaml_routes(const char *key,
                         b = true;
 
                 if (string_equal("to", key)) {
-                        if (!network->routes)
-                                network->routes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
-
                         r = route_new(&route);
                         if (r < 0)
                                 return r;

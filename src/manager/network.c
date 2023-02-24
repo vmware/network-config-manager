@@ -547,6 +547,10 @@ int network_new(Network **ret) {
         if (r < 0)
                 return r;
 
+        n->routes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+        if (!n->routes)
+                return log_oom();
+
         r = set_new(&n->nameservers, NULL, NULL);
         if (r < 0)
                 return r;

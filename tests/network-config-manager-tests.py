@@ -318,8 +318,8 @@ class TestKernelCommandLine:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'ipv4')
-        assert(parser.get('Route', 'Gateway') == '192.168.1.1/32')
         assert(parser.get('Address', 'Address') == '192.168.1.34')
+        assert(parser.get('Route', 'Gateway') == '192.168.1.1')
 
 class TestCLINetwork:
     def setup_method(self):
