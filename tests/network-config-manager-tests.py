@@ -341,6 +341,7 @@ class TestCLINetwork:
         subprocess.check_call("nmctl dns", text=True, shell = True)
 
     def test_cli_show_domains(self):
+        subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
         subprocess.check_call("nmctl domain", text=True, shell = True)
 
     def test_cli_add_dns(self):
@@ -1233,7 +1234,7 @@ class TestCLINetDev:
         assert(unit_exist('10-vlan-98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '15'])
+        subprocess.check_call(['sleep', '10'])
 
         assert(link_exist('vlan-98') == True)
 
@@ -1465,7 +1466,7 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tap.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '15'])
+        subprocess.check_call(['sleep', '10'])
 
         assert(link_exist('test-tap') == True)
 
@@ -1491,7 +1492,7 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tap.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '15'])
+        subprocess.check_call(['sleep', '10'])
 
         assert(link_exist('test-tap') == True)
 
@@ -1516,7 +1517,7 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tun.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '15'])
+        subprocess.check_call(['sleep', '10'])
 
         assert(link_exist('test-tun') == True)
 
@@ -1710,7 +1711,7 @@ class TestCLINetDev:
         assert(unit_exist('10-vxlan-98.netdev') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '15'])
+        subprocess.check_call(['sleep', '10'])
 
         assert(link_exist('vxlan-98') == True)
 
