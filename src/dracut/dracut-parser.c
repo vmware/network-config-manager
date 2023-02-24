@@ -149,6 +149,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
                         return r;
 
                 route->gw = *ip;
+                route->family = ip->family;
                 if (!g_hash_table_insert(n->routes, GUINT_TO_POINTER(route), route))
                         return -EINVAL;
         }
@@ -292,7 +293,7 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
                         return r;
 
                 route->dst = *destination;
-
+                route->family = destination->family;
         }
 
        if (!isempty_string(s[1])) {
@@ -301,6 +302,7 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
                         return r;
 
                 route->gw = *gw;
+                route->family = gw->family;
                 if (!g_hash_table_insert(n->routes, route, route))
                         return -EINVAL;
 

@@ -751,7 +751,7 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
                 return;
 
         if (!ip_is_null(&route->dst)) {
-                (void) ip_to_string_prefix(AF_INET, &route->dst, &destination);
+                (void) ip_to_string_prefix(route->dst.family, &route->dst, &destination);
                 (void ) add_key_to_section(section, "Destination", destination);
         } else if (route->to_default) {
                 switch(route->family) {
@@ -765,7 +765,7 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         }
 
         if (!ip_is_null(&route->gw)) {
-                (void) ip_to_string_prefix(route->family, &route->gw, &gateway);
+                (void) ip_to_string_prefix(route->gw.family, &route->gw, &gateway);
                 (void) add_key_to_section(section, "Gateway", gateway);
         }
 
