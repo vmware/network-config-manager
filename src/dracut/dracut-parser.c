@@ -339,12 +339,6 @@ static int merge_network(GHashTable *networks_by_ifname, Network *n) {
         if (!v)
                 return -ENOENT;
 
-        if (!v->routes) {
-                v->routes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
-                if (!v->routes)
-                        return log_oom();
-        }
-
         r = g_hash_table_foreach_steal(n->routes, merge_network_routes, v);
         if (r < 0)
                 return r;
