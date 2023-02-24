@@ -252,10 +252,10 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                         continue;
 
                 t = (uint8_t *) network + table->offset;
-                if (table->parser)
+                if (table->parser) {
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
+                        network->modified = true;
+                }
         }
 
         return 0;
@@ -361,10 +361,10 @@ static int parse_nameserver(YAMLManager *m, yaml_document_t *dp, yaml_node_t *no
                         continue;
 
                 t = (uint8_t *) network + table->offset;
-                if (table->parser)
+                if (table->parser) {
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
+                        network->modified = true;
+                }
         }
 
         return 0;
@@ -392,10 +392,10 @@ static int parse_match(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                         continue;
 
                 t = (uint8_t *) network + table->offset;
-                if (table->parser)
+                if (table->parser) {
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
+                        network->modified = true;
+                }
         }
 
         return 0;
@@ -423,10 +423,10 @@ static int parse_dhcp4(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                         continue;
 
                 t = (uint8_t *) network + table->offset;
-                if (table->parser)
+                if (table->parser) {
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
+                        network->modified = true;
+                }
         }
 
         return 0;
@@ -454,10 +454,10 @@ static int parse_dhcp6(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                         continue;
 
                 t = (uint8_t *) network + table->offset;
-                if (table->parser)
+                if (table->parser) {
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
+                        network->modified = true;
+                }
         }
 
         return 0;
