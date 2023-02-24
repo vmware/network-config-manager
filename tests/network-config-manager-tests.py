@@ -195,6 +195,7 @@ class TestNetworkConfigManagerYAML:
         "match-driver.yml",
         "static-address-label.yml",
         "dhcp-overrides.yml",
+        "dhcp-client-identifier.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -237,6 +238,19 @@ class TestNetworkConfigManagerYAML:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'ipv4')
+
+    def test_dhcp4_client_identifier(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('dhcp-client-identifier.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'DHCP') == 'ipv4')
+        assert(parser.get('DHCPv4', 'ClientIdentifier') == 'mac')
 
     def test_dhcp4_overrides(self):
         self.copy_yaml_file_to_netmanager_yaml_path('dhcp-overrides.yml')
@@ -304,8 +318,8 @@ class TestKernelCommandLine:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'ipv4')
-        assert(parser.get('Route', 'Gateway') == '192.168.1.1/32')
         assert(parser.get('Address', 'Address') == '192.168.1.34')
+        assert(parser.get('Route', 'Gateway') == '192.168.1.1')
 
 class TestCLINetwork:
     def setup_method(self):

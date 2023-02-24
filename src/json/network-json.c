@@ -86,7 +86,7 @@ static void json_list_link_addresses(gpointer key, gpointer value, gpointer user
 
 static void json_list_link_routes(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *jip = NULL, *jname = NULL, *jfamily = NULL,
-                *jidx = NULL, *jrt = NULL, *jdst = NULL;
+                *jidx = NULL, *jrt = NULL;
         json_object *jobj = (json_object *) userdata;
         _auto_cleanup_ char *c = NULL;
         char buf[IF_NAMESIZE + 1] = {};

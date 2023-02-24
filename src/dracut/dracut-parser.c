@@ -113,6 +113,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
  static int parse_command_line_ip_interface(const char *line, Network *n) {
         _auto_cleanup_ IPAddress *peer = NULL, *prefix = NULL;
         _auto_cleanup_strv_ char **s = NULL;
+        _auto_cleanup_ Route *route = NULL;
         _auto_cleanup_ Address *a = NULL;
         int r = 0;
 
@@ -137,19 +138,29 @@ static int dracut_parse_mac(char *mac, Network *n) {
         steal_pointer(a);
 
         if (strv_length(s) >= 2 && !isempty_string(s[2])) {
-                r = parse_ip_from_string(s[2], &n->gateway);
+                _auto_cleanup_ IPAddress *ip = NULL;
+
+                r = route_new(&route);
                 if (r < 0)
                         return r;
+
+                r = parse_ip_from_string(s[2], &ip);
+                if (r < 0)
+                        return r;
+
+                route->gw = *ip;
+                if (!g_hash_table_insert(n->routes, GUINT_TO_POINTER(route), route))
+                        return -EINVAL;
         }
 
         if (strv_length(s) >= 3 && !isempty_string(s[3])) {
                 r = parse_ip_from_string(s[3], &prefix);
-                if (r >= 0)
-                        n->gateway->prefix_len = ipv4_netmask_to_prefixlen(prefix);
-                else
-                        r = parse_integer(s[3], &n->gateway->prefix_len);
-        } else
-                n->gateway->prefix_len = 32;
+                 if (r >= 0)
+                         route->gw.prefix_len = ipv4_netmask_to_prefixlen(prefix);
+                 else
+                         r = parse_integer(s[3], &route->gw.prefix_len);
+        }
+        steal_pointer(route);
 
         if (strv_length(s) >= 4 && !isempty_string(s[4])) {
                 n->hostname = g_strdup(s[4]);
@@ -267,12 +278,6 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
         assert(line);
         assert(n);
 
-        if (!n->routes) {
-                n->routes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
-                if (!n->routes)
-                        return log_oom();
-        }
-
         s = strsplit(line, ":", 3);
         if (!s)
                 return -EINVAL;
@@ -296,15 +301,13 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
                         return r;
 
                 route->gw = *gw;
+                if (!g_hash_table_insert(n->routes, route, route))
+                        return -EINVAL;
+
+                steal_pointer(route);
        }
 
-       if (!g_hash_table_insert(n->routes, route, route)) {
-               log_warning("Failed to add route: %s", line);
-               return false;
-       }
-       route = NULL;
-
-       if (!isempty_string(s[2])) {
+        if (!isempty_string(s[2])) {
                n->ifname = g_strdup(s[2]);
                if (!n->ifname)
                        return log_oom();
@@ -318,7 +321,7 @@ static int merge_network_routes(void *key, void *value, void *network) {
         Network *n = network;
 
         if (!g_hash_table_insert(n->routes, route, route)) {
-                log_warning("Failed to merge route: %s", n->ifname);
+                log_warning("Failed to merge dracut routes: %s", n->ifname);
                 return -1;
         }
 

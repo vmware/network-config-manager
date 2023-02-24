@@ -232,7 +232,6 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
         assert(dp);
         assert(node);
         assert(network);
-        assert(link);
 
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 n = yaml_document_get_node(dp, *i);
@@ -252,10 +251,10 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                         continue;
 
                 t = (uint8_t *) network + table->offset;
-                if (table->parser)
+                if (table->parser) {
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
+                        network->modified = true;
+                }
         }
 
         return 0;
@@ -273,7 +272,6 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
         assert(dp);
         assert(node);
         assert(network);
-        assert(link);
 
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 n = yaml_document_get_node(dp, *i);
@@ -339,15 +337,13 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
         return 0;
 }
 
-static int parse_nameserver(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         yaml_node_pair_t *p;
         yaml_node_t *k, *v;
 
-        assert(m);
         assert(dp);
         assert(node);
         assert(network);
-        assert(link);
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                 ParserTable *table;
@@ -356,108 +352,15 @@ static int parse_nameserver(YAMLManager *m, yaml_document_t *dp, yaml_node_t *no
                 k = yaml_document_get_node(dp, p->key);
                 v = yaml_document_get_node(dp, p->value);
 
-                table = g_hash_table_lookup(m->nameserver_config, scalar(k));
+                table = g_hash_table_lookup(config, scalar(k));
                 if (!table)
                         continue;
 
                 t = (uint8_t *) network + table->offset;
-                if (table->parser)
+                if (table->parser) {
                         (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
-        }
-
-        return 0;
-}
-
-static int parse_match(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
-        yaml_node_pair_t *p;
-        yaml_node_t *k, *v;
-
-        assert(m);
-        assert(dp);
-        assert(node);
-        assert(network);
-        assert(link);
-
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
-                ParserTable *table;
-                void *t;
-
-                k = yaml_document_get_node(dp, p->key);
-                v = yaml_document_get_node(dp, p->value);
-
-                table = g_hash_table_lookup(m->match_config, scalar(k));
-                if (!table)
-                        continue;
-
-                t = (uint8_t *) network + table->offset;
-                if (table->parser)
-                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
-        }
-
-        return 0;
-}
-
-static int parse_dhcp4(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
-        yaml_node_pair_t *p;
-        yaml_node_t *k, *v;
-
-        assert(m);
-        assert(dp);
-        assert(node);
-        assert(network);
-        assert(link);
-
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
-                ParserTable *table;
-                void *t;
-
-                k = yaml_document_get_node(dp, p->key);
-                v = yaml_document_get_node(dp, p->value);
-
-                table = g_hash_table_lookup(m->dhcp4_config, scalar(k));
-                if (!table)
-                        continue;
-
-                t = (uint8_t *) network + table->offset;
-                if (table->parser)
-                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
-        }
-
-        return 0;
-}
-
-static int parse_dhcp6(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
-        yaml_node_pair_t *p;
-        yaml_node_t *k, *v;
-
-        assert(m);
-        assert(dp);
-        assert(node);
-        assert(network);
-        assert(link);
-
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
-                ParserTable *table;
-                void *t;
-
-                k = yaml_document_get_node(dp, p->key);
-                v = yaml_document_get_node(dp, p->value);
-
-                table = g_hash_table_lookup(m->dhcp6_config, scalar(k));
-                if (!table)
-                        continue;
-
-                t = (uint8_t *) network + table->offset;
-                if (table->parser)
-                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-
-                network->modified = true;
+                        network->modified = true;
+                }
         }
 
         return 0;
@@ -472,7 +375,6 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
         assert(dp);
         assert(node);
         assert(network);
-        assert(link);
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                 ParserTable *table, *link_table;
@@ -484,17 +386,17 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                 table = g_hash_table_lookup(m->network_config, scalar(k));
                 if (!table) {
                         if (string_equal(scalar(k), "match"))
-                                parse_match(m, dp, v, network);
+                                parse_config(m->match_config, dp, v, network);
                         if (string_equal(scalar(k), "dhcp4-overrides"))
-                                parse_dhcp4(m, dp, v, network);
+                                parse_config(m->dhcp4_config, dp, v, network);
                         if (string_equal(scalar(k), "dhcp6-overrides"))
-                                parse_dhcp6(m, dp, v, network);
+                                parse_config(m->dhcp6_config, dp, v, network);
                         else if (string_equal(scalar(k), "addresses"))
                                 parse_address(m, dp, v, network);
                         else if (string_equal(scalar(k), "routes"))
                                 parse_route(m, dp, v, network);
                         else if (string_equal(scalar(k), "nameservers"))
-                                parse_nameserver(m, dp, v, network);
+                                parse_config(m->nameserver_config, dp, v, network);
                         else
                                 (void) parse_network_config(m, dp, v, network);
 
@@ -539,7 +441,6 @@ static int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_
         assert(dp);
         assert(node);
         assert(nets);
-        assert(link);
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                 _cleanup_(network_freep) Network *net = NULL;
