@@ -753,11 +753,19 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         if (!ip_is_null(&route->dst)) {
                 (void) ip_to_string_prefix(AF_INET, &route->dst, &destination);
                 (void ) add_key_to_section(section, "Destination", destination);
-        } else if (route->to_default)
-                (void ) add_key_to_section(section, "Destination", "0.0.0.0/0");
+        } else if (route->to_default) {
+                switch(route->family) {
+                        case AF_INET:
+                                (void ) add_key_to_section(section, "Destination", "0.0.0.0/0");
+                                break;
+                        case AF_INET6:
+                                (void ) add_key_to_section(section, "Destination", "::/0");
+                                break;
+                }
+        }
 
         if (!ip_is_null(&route->gw)) {
-                (void) ip_to_string_prefix(AF_INET, &route->gw, &gateway);
+                (void) ip_to_string_prefix(route->family, &route->gw, &gateway);
                 (void) add_key_to_section(section, "Gateway", gateway);
         }
 
@@ -766,6 +774,9 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
 
         if (route->table > 0 && route->table != RT_TABLE_MAIN)
                 (void) add_key_to_section_uint(section, "Table", route->table);
+
+        if (route->metric > 0)
+                (void) add_key_to_section_uint(section, "RouteMetric", route->metric);
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
@@ -1092,7 +1103,7 @@ int generate_network_config(Network *n) {
         if (n->addresses && set_size(n->addresses) > 0)
                 set_foreach(n->addresses, append_addresses, key_file);
 
-        if (n->routes)
+        if (n->routes && g_hash_table_size(n->routes) > 0)
                 g_hash_table_foreach(n->routes, append_routes, key_file);
 
         r = key_file_save (key_file);
