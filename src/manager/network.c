@@ -821,8 +821,8 @@ static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
 }
 
 int generate_network_config(Network *n) {
-        _auto_cleanup_ char *gateway = NULL, *network = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(n);

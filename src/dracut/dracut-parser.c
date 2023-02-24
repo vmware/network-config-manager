@@ -301,15 +301,13 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
                         return r;
 
                 route->gw = *gw;
+                if (!g_hash_table_insert(n->routes, route, route))
+                        return -EINVAL;
+
+                steal_pointer(route);
        }
 
-       if (!g_hash_table_insert(n->routes, route, route)) {
-               log_warning("Failed to add route: %s", line);
-               return false;
-       }
-       route = NULL;
-
-       if (!isempty_string(s[2])) {
+        if (!isempty_string(s[2])) {
                n->ifname = g_strdup(s[2]);
                if (!n->ifname)
                        return log_oom();
@@ -323,7 +321,7 @@ static int merge_network_routes(void *key, void *value, void *network) {
         Network *n = network;
 
         if (!g_hash_table_insert(n->routes, route, route)) {
-                log_warning("Failed to merge route: %s", n->ifname);
+                log_warning("Failed to merge dracut routes: %s", n->ifname);
                 return -1;
         }
 
