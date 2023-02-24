@@ -508,7 +508,7 @@ int network_new(Network **ret) {
         _auto_cleanup_ Network *n = NULL;
         int r;
 
-        n = new0(Network, 1);
+        n = new(Network, 1);
         if (!n)
                 return log_oom();
 
@@ -621,7 +621,6 @@ void networks_free(Networks *n) {
 
 int parse_address_from_string_and_add(const char *s, Set *a) {
         _auto_cleanup_ IPAddress *address = NULL;
-        _auto_cleanup_ char *p = NULL;
         int r;
 
         if (set_contains(a, (void *) s))
@@ -631,13 +630,9 @@ int parse_address_from_string_and_add(const char *s, Set *a) {
         if (r < 0)
                 return r;
 
-        p = g_strdup(s);
-        if (!p)
-                return log_oom();
+        (void) set_add(a, address);
 
-        (void) set_add(a, p);
-
-        steal_pointer(p);
+        steal_pointer(address);
         return 0;
 }
 
@@ -828,7 +823,7 @@ int generate_network_config(Network *n) {
 
         assert(n);
 
-        if (!n->modified)
+        if (n->parser_type == PARSER_TYPE_YAML && !n->modified)
                 return 0;
 
         r = create_network_conf_file(n->ifname, &network);
