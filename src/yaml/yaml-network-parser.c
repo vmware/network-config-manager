@@ -308,8 +308,8 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
         return 0;
 }
 
-static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
-        static IPAddress *a = NULL;
+static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network, IPAddress **addr) {
+        _auto_cleanup_ IPAddress *a = NULL;
         yaml_node_pair_t *p;
         yaml_node_item_t *i;
         yaml_node_t *k, *v;
@@ -324,7 +324,7 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 n = yaml_document_get_node(dp, *i);
                 if (n)
-                        (void) parse_address(m, dp, n, network);
+                        (void) parse_address(m, dp, n, network, addr);
         }
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
@@ -334,7 +334,7 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                 if (!k && !v)
                         continue;
 
-                if (!a) {
+                if (!a && !*addr) {
                         a = new0(IPAddress, 1);
                         if (!a)
                                 return log_oom();
@@ -357,30 +357,35 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                         if (r < 0)
                                 return r;
 
-                        if (a) {
-                                if (a->label)
-                                        address->label = strdup(a->label);
-                                if (a->lifetime)
-                                        address->lifetime = a->lifetime;
+                        if (*addr) {
+                                if ((*addr)->label)
+                                        address->label = strdup((*addr)->label);
+                                if ((*addr)->lifetime)
+                                        address->lifetime = (*addr)->lifetime;
 
-                                free(a);
-                                steal_pointer(a);
+                                free(*addr);
+                                steal_pointer(*addr);
                         }
 
-                        (void) set_add(network->addresses, address);
+                        if (!set_add(network->addresses, address)) {
+                                log_warning("Failed to add address: '%s'", scalar(k));
+                                free(address);
+                        }
                         steal_pointer(address);
 
                         network->modified = true;
 
                         if (v) {
-                                r = parse_ip_from_string(scalar(v), &address);
+                                r = parse_address_from_string_and_add(scalar(v), network->addresses);
                                 if (r < 0)
-                                        return r;
-
-                                (void) set_add(network->addresses, address);
-                                steal_pointer(address);
+                                        log_warning("Failed to add address: '%s'", scalar(v));
                         }
                 }
+        }
+
+        if (a) {
+                *addr = a;
+                steal_pointer(a);
         }
 
         return 0;
@@ -440,9 +445,11 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                                 parse_config(m->dhcp4_config, dp, v, network);
                         if (string_equal(scalar(k), "dhcp6-overrides"))
                                 parse_config(m->dhcp6_config, dp, v, network);
-                        else if (string_equal(scalar(k), "addresses"))
-                                parse_address(m, dp, v, network);
-                        else if (string_equal(scalar(k), "routes"))
+                        else if (string_equal(scalar(k), "addresses")) {
+                                IPAddress *a = NULL;
+
+                                parse_address(m, dp, v, network, &a);
+                        } else if (string_equal(scalar(k), "routes"))
                                 parse_route(m, dp, v, network);
                         else if (string_equal(scalar(k), "nameservers"))
                                 parse_config(m->nameserver_config, dp, v, network);
