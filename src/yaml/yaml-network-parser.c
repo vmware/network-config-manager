@@ -302,6 +302,7 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 if (!g_hash_table_insert(network->routes, rt, rt))
                         return -EINVAL;
 
+                network->modified = true;
                 steal_pointer(rt);
         }
         return 0;
@@ -633,7 +634,7 @@ void yaml_manager_freep(YAMLManager **p) {
 int new_yaml_manager(YAMLManager **ret) {
         _cleanup_(yaml_manager_freep) YAMLManager *m = NULL;
 
-        m = new0(YAMLManager, 1);
+        m = new(YAMLManager, 1);
         if (!m)
                 return log_oom();
 
