@@ -347,6 +347,7 @@ int parse_yaml_addresses(const char *key,
         network = data;
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
+
                 if (string_equal("addresses", key))
                         r = parse_address_from_string_and_add(scalar(entry), network->addresses);
                 else if (string_equal("ntps", key))
@@ -381,8 +382,10 @@ int parse_yaml_nameserver_addresses(const char *key,
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
                 r = parse_address_from_string_and_add(scalar(entry), network->nameservers);
-                if (r < 0 && r != -EEXIST)
+                if (r < 0 && r != -EEXIST) {
+                        log_warning("Failed to add DNS domains: %s", scalar(entry));
                         return r;
+                }
         }
 
         return 0;

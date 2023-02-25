@@ -543,7 +543,7 @@ int network_new(Network **ret) {
                 .parser_type = _PARSER_TYPE_INVALID,
         };
 
-        r = set_new(&n->addresses, NULL, NULL);
+        r = set_new(&n->addresses, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
@@ -786,9 +786,16 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
 }
 
 static void append_nameservers(gpointer key, gpointer value, gpointer userdata) {
+        _auto_cleanup_ char *pretty = NULL;
+        IPAddress *a = (IPAddress *) key;
         GString *config = userdata;
+        int r;
 
-        g_string_append_printf(config, "%s ", (char *) key);
+        r = ip_to_string(a->family,a, &pretty);
+        if (r < 0)
+                return;
+
+        g_string_append_printf(config, "%s ", pretty);
 }
 
 static void append_domains(gpointer key, gpointer value, gpointer userdata) {
@@ -798,9 +805,16 @@ static void append_domains(gpointer key, gpointer value, gpointer userdata) {
 }
 
 static void append_ntp(gpointer key, gpointer value, gpointer userdata) {
+        _auto_cleanup_ char *pretty = NULL;
+        IPAddress *a = (IPAddress *) key;
         GString *config = userdata;
+        int r;
 
-        g_string_append_printf(config, "%s ", (char *) key);
+        r = ip_to_string(a->family,a, &pretty);
+        if (r < 0)
+                return;
+
+        g_string_append_printf(config, "%s ", (char *) pretty);
 }
 
 static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
