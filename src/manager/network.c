@@ -551,7 +551,7 @@ int network_new(Network **ret) {
         if (!n->routes)
                 return log_oom();
 
-        r = set_new(&n->nameservers, NULL, NULL);
+        r = set_new(&n->nameservers, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
@@ -559,7 +559,7 @@ int network_new(Network **ret) {
         if (r < 0)
                 return r;
 
-        r = set_new(&n->ntps, NULL, NULL);
+        r = set_new(&n->ntps, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
@@ -627,14 +627,12 @@ int parse_address_from_string_and_add(const char *s, Set *a) {
         _auto_cleanup_ IPAddress *address = NULL;
         int r;
 
-        if (set_contains(a, (void *) s))
-                return -EEXIST;
+        assert(s);
+        assert(a);
 
         r = parse_ip_from_string(s, &address);
         if (r < 0)
                 return r;
-
-        (void) set_add(a, address);
 
         steal_pointer(address);
         return 0;

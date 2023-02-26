@@ -367,10 +367,7 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                                 steal_pointer(*addr);
                         }
 
-                        if (!set_add(network->addresses, address)) {
-                                log_warning("Failed to add address: '%s'", scalar(k));
-                                free(address);
-                        }
+                        set_add(network->addresses, address);
                         steal_pointer(address);
 
                         network->modified = true;
@@ -378,7 +375,7 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                         if (v) {
                                 r = parse_address_from_string_and_add(scalar(v), network->addresses);
                                 if (r < 0)
-                                        log_warning("Failed to add address: '%s'", scalar(v));
+                                        continue;
                         }
                 }
         }

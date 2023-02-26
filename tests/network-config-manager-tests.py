@@ -273,6 +273,13 @@ class TestNetworkConfigManagerYAML:
         subprocess.check_call(['nmctl', 'apply'])
         assert(unit_exist('10-test99.network') == True)
 
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Address', 'Address') == '10.100.1.39/24')
+        assert(parser.get('Address', 'Label') == 'test99:some-label')
+        assert(parser.get('Address', 'PreferredLifetime') == '2000')
+
 class TestKernelCommandLine:
     def teardown_method(self):
         remove_units_from_netword_unit_path()
