@@ -2044,7 +2044,6 @@ static void manager_command_line_config_generator(void *key, void *value, void *
         assert(value);
 
         n = (Network *) value;
-
         r = generate_network_config(n);
         if (r < 0) {
                 log_warning("Failed to generate network configuration: %s", strerror(-r));
@@ -2093,33 +2092,11 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
 
         n = manager_no_interface_name(networks);
         if (n) {
-                _cleanup_(links_freep) Links *h = NULL;
-
-                r = link_get_links(&h);
-                if (r < 0)
+                r = generate_network_config(n);
+                if (r < 0) {
+                        log_warning("Failed to generate network configuration: %s", strerror(-r));
                         return r;
-
-                for (GList *i = h->links; i; i = i->next) {
-                        Link *link = NULL;
-
-                        link = i->data;
-
-                        if (string_equal(link->name, "lo"))
-                                continue;
-
-                        n->ifname = g_strdup(link->name);
-                        if (!n->ifname)
-                                return log_oom();
-
-                        r = generate_network_config(n);
-                        if (r < 0) {
-                                log_warning("Failed to generate network configuration: %s", strerror(-r));
-                                return r;
-                        }
-
-                        n->ifname = mfree(n->ifname);
                 }
-
         } else
                 g_hash_table_foreach(networks, manager_command_line_config_generator, NULL);
 

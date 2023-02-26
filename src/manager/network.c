@@ -634,7 +634,9 @@ int parse_address_from_string_and_add(const char *s, Set *a) {
         if (r < 0)
                 return r;
 
+        set_add(a, address);
         steal_pointer(address);
+        
         return 0;
 }
 
@@ -827,6 +829,9 @@ static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
                 return;
 
         r = ip_to_string_prefix(a->family, a, &addr);
+        if (r < 0)
+                return;
+
         (void) add_key_to_section(section, "Address", addr);
 
         if (a->label)

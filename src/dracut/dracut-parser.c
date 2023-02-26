@@ -9,6 +9,7 @@
 #include "config-parser.h"
 #include "dracut-parser.h"
 #include "log.h"
+#include "set.h"
 #include "parse-util.h"
 #include "network.h"
 #include "string-util.h"
@@ -382,7 +383,6 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
                         return r;
 
                 if (string_equal(k, "ip")) {
-
                         network = n;
 
                         r = parse_command_line_ip(v, n);
@@ -411,9 +411,8 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
                         continue;
 
                 n->parser_type = PARSER_TYPE_DRACUT;
-
                 if (!g_hash_table_insert(networks, n, n))
-                        return log_oom();
+                        return -EINVAL;
 
                 steal_pointer(n);
         }
