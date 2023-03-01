@@ -196,6 +196,7 @@ class TestNetworkConfigManagerYAML:
         "static-address-label.yml",
         "dhcp-overrides.yml",
         "dhcp-client-identifier.yml",
+        "gw-onlink.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -279,6 +280,21 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Address', 'Address') == '10.100.1.39/24')
         assert(parser.get('Address', 'Label') == 'test99:some-label')
         assert(parser.get('Address', 'PreferredLifetime') == '2000')
+
+    def test_network_gw_onlink(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('gw-onlink.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Address', 'Address') == '10.10.10.1/24')
+        assert(parser.get('Route', 'Destination') == '0.0.0.0/0')
+        assert(parser.get('Route', 'Gateway') == '9.9.9.9')
+        assert(parser.get('Route', 'Onlink') == 'yes')
+
 
 class TestKernelCommandLine:
     def teardown_method(self):
