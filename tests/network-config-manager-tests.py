@@ -197,6 +197,7 @@ class TestNetworkConfigManagerYAML:
         "dhcp-overrides.yml",
         "dhcp-client-identifier.yml",
         "gw-onlink.yml",
+        "ipv6-config.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -295,6 +296,19 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'Gateway') == '9.9.9.9')
         assert(parser.get('Route', 'Onlink') == 'yes')
 
+    def test_network_ipv6(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('ipv6-config.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Address', 'Address') == '2001:cafe:face:beef::dead:dead/64')
+        assert(parser.get('Route', 'Destination') == '::/0')
+        assert(parser.get('Route', 'Gateway') == '2001:cafe:face::1')
+        assert(parser.get('Route', 'Onlink') == 'yes')
 
 class TestKernelCommandLine:
     def teardown_method(self):
