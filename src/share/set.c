@@ -32,12 +32,12 @@ int set_new(Set **ret, GHashFunc hash_func, GEqualFunc compare_func) {
         return 0;
 }
 
-void set_freep(Set **s) {
-        if (!s || !*s)
+void set_free(Set *s) {
+        if (!s)
                 return;
 
-        g_hash_table_destroy((*s)->hash);
-        free(*s);
+        g_hash_table_destroy(s->hash);
+        free(s);
 }
 
 bool set_add(Set *s, void *k) {
