@@ -226,7 +226,6 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
         assert(node);
         assert(network);
 
-
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 n = yaml_document_get_node(dp, *i);
                 if (n)
@@ -619,20 +618,20 @@ int parse_yaml_file(const char *file, Networks **n) {
         return r;
 }
 
-void yaml_manager_freep(YAMLManager **p) {
-        if (!p || !*p)
+void yaml_manager_free(YAMLManager *p) {
+        if (!p)
                 return;
 
-        g_hash_table_destroy((*p)->match_config);
-        g_hash_table_destroy((*p)->network_config);
-        g_hash_table_destroy((*p)->address_config);
-        g_hash_table_destroy((*p)->dhcp4_config);
-        g_hash_table_destroy((*p)->dhcp6_config);
-        g_hash_table_destroy((*p)->nameserver_config);
-        g_hash_table_destroy((*p)->wifi_config);
-        g_hash_table_destroy((*p)->link_config);
+        g_hash_table_destroy(p->match_config);
+        g_hash_table_destroy(p->network_config);
+        g_hash_table_destroy(p->address_config);
+        g_hash_table_destroy(p->dhcp4_config);
+        g_hash_table_destroy(p->dhcp6_config);
+        g_hash_table_destroy(p->nameserver_config);
+        g_hash_table_destroy(p->wifi_config);
+        g_hash_table_destroy(p->link_config);
 
-        free(*p);
+        free(p);
 }
 
 int new_yaml_manager(YAMLManager **ret) {
