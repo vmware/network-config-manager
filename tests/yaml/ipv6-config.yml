@@ -1,0 +1,10 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+      test99:
+          addresses: [ "2001:cafe:face:beef::dead:dead/64" ]
+          routes:
+            - to: default # or "::/0"
+              via: "2001:cafe:face::1"
+              on-link: true
