@@ -775,6 +775,9 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         if (route->table > 0 && route->table != RT_TABLE_MAIN)
                 (void) add_key_to_section_uint(section, "Table", route->table);
 
+        if (route->type != _ROUTE_TYPE_INVALID && route->type != ROUTE_TYPE_UNICAST)
+                (void) add_key_to_section(section, "Type", route_type_to_name(route->type));
+
         if (route->metric > 0)
                 (void) add_key_to_section_uint(section, "RouteMetric", route->metric);
 
