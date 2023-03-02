@@ -781,6 +781,9 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         if (route->initcwnd > 0)
                 (void) add_key_to_section_uint(section, "InitialCongestionWindow", route->initcwnd);
 
+        if (route->initrwnd > 0)
+                (void) add_key_to_section_uint(section, "InitialAdvertisedReceiveWindow", route->initrwnd);
+
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
                 return;

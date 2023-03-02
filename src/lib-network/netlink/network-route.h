@@ -26,6 +26,7 @@ typedef struct Route {
         uint32_t flags;
         uint32_t flow;
         uint32_t initcwnd;
+        uint32_t initrwnd;
 
         int family;
         int ifindex;
