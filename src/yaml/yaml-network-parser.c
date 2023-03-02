@@ -271,6 +271,13 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                                 return r;
                         }
                         rt->type = r;
+                } else if (string_equal(scalar(k), "scope")) {
+                        r = route_scope_type_to_mode(scalar(v));
+                        if (r < 0) {
+                                log_warning("Failed to parse route scope='%s'\n", scalar(v));
+                                return r;
+                        }
+                        rt->scope = r;
                 } else if (string_equal(scalar(k), "congestion-window")) {
                         r = parse_uint32(scalar(v), &rt->initcwnd);
                         if (r < 0) {
