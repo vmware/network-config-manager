@@ -636,7 +636,7 @@ int parse_address_from_string_and_add(const char *s, Set *a) {
 
         set_add(a, address);
         steal_pointer(address);
-        
+
         return 0;
 }
 
@@ -777,6 +777,9 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
 
         if (route->metric > 0)
                 (void) add_key_to_section_uint(section, "RouteMetric", route->metric);
+
+        if (route->initcwnd > 0)
+                (void) add_key_to_section_uint(section, "InitialCongestionWindow", route->initcwnd);
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)

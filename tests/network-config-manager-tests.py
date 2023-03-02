@@ -198,6 +198,7 @@ class TestNetworkConfigManagerYAML:
         "dhcp-client-identifier.yml",
         "gw-onlink.yml",
         "ipv6-config.yml",
+        "static-gw.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -295,6 +296,20 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'Destination') == '0.0.0.0/0')
         assert(parser.get('Route', 'Gateway') == '9.9.9.9')
         assert(parser.get('Route', 'Onlink') == 'yes')
+
+    def test_network_static_gw(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('static-gw.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Address', 'Address') == '192.168.1.10/24')
+        assert(parser.get('Route', 'Destination') == '192.168.1.1/24')
+        assert(parser.get('Route', 'Gateway') == '192.168.1.1')
+        assert(parser.get('Route', 'InitialCongestionWindow') == '10')
 
     def test_network_ipv6(self):
         self.copy_yaml_file_to_netmanager_yaml_path('ipv6-config.yml')
