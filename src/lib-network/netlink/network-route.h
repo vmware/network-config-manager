@@ -14,9 +14,7 @@
 typedef struct Route {
         unsigned char dst_prefixlen;
         unsigned char src_prefixlen;
-        unsigned char scope;
         unsigned char protocol;
-        unsigned char type;
         unsigned char tos;
 
         uint32_t priority;
@@ -30,6 +28,8 @@ typedef struct Route {
 
         int family;
         int ifindex;
+        int type;
+        int scope;
 
         int onlink;
         bool to_default;

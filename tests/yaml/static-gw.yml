@@ -8,5 +8,7 @@ network:
       routes:
       -    to: 192.168.1.1/24
            via: 192.168.1.1
+           type: local
+           scope: link
            congestion-window: 10
            advertised-receive-window: 20
