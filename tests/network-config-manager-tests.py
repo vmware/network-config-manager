@@ -310,6 +310,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'Destination') == '192.168.1.1/24')
         assert(parser.get('Route', 'Gateway') == '192.168.1.1')
         assert(parser.get('Route', 'InitialCongestionWindow') == '10')
+        assert(parser.get('Route', 'InitialAdvertisedReceiveWindow') == '20')
 
     def test_network_ipv6(self):
         self.copy_yaml_file_to_netmanager_yaml_path('ipv6-config.yml')
