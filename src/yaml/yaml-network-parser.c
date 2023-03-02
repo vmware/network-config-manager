@@ -215,9 +215,9 @@ static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc,
 
 static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Route *rt = NULL;
+        yaml_node_item_t *i;
         yaml_node_pair_t *p;
         yaml_node_t *k, *v;
-        yaml_node_item_t *i;
         yaml_node_t *n;
         int r;
 
@@ -245,7 +245,7 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                                 return log_oom();
                 }
 
-                 if (string_equal(scalar(k), "metric")) {
+                if (string_equal(scalar(k), "metric")) {
                         r = parse_uint32(scalar(v), &rt->metric);
                         if (r < 0) {
                                 log_warning("Failed to parse route metric='%s'\n", scalar(v));
@@ -262,6 +262,12 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                         r = parse_uint32(scalar(v), &rt->table);
                         if (r < 0) {
                                 log_warning("Failed to parse route table='%s'\n", scalar(v));
+                                return r;
+                        }
+                } else if (string_equal(scalar(k), "congestion-window")) {
+                        r = parse_uint32(scalar(v), &rt->initcwnd);
+                        if (r < 0) {
+                                log_warning("Failed to parse route congestion-window='%s'\n", scalar(v));
                                 return r;
                         }
                 } else if (string_equal("to", scalar(k)) || string_equal("via", scalar(k))) {
@@ -294,7 +300,7 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                                         rt->family = address->family;
                                 }
                         }
-                 }
+                }
         }
 
         if (rt) {
