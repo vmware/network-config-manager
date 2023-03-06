@@ -20,6 +20,7 @@ int parse_yaml_bool(const char *key,
                     void *userdata,
                     yaml_document_t *doc,
                     yaml_node_t *node) {
+
         int *p;
         int r;
 
@@ -45,6 +46,7 @@ int parse_yaml_uint32(const char *key,
                       void *userdata,
                       yaml_document_t *doc,
                       yaml_node_t *node) {
+
         uint32_t *p, k;
         int r;
 
@@ -73,6 +75,7 @@ int parse_yaml_uint32_or_max(const char *key,
                       void *userdata,
                       yaml_document_t *doc,
                       yaml_node_t *node) {
+
         char **p;
 
         assert(key);
@@ -101,6 +104,7 @@ int parse_yaml_mac_address(const char *key,
                            void *userdata,
                            yaml_document_t *doc,
                            yaml_node_t *node) {
+
         char **mac;
 
         assert(key);
@@ -124,11 +128,12 @@ int parse_yaml_mac_address(const char *key,
 }
 
 int parse_yaml_rf_online(const char *key,
-                           const char *value,
-                           void *data,
-                           void *userdata,
-                           yaml_document_t *doc,
-                           yaml_node_t *node) {
+                         const char *value,
+                         void *data,
+                         void *userdata,
+                         yaml_document_t *doc,
+                         yaml_node_t *node) {
+
         char **family;
         int r;
 
@@ -151,6 +156,37 @@ int parse_yaml_rf_online(const char *key,
 
         return 0;
 }
+
+int parse_yaml_activation_policy(const char *key,
+                                 const char *value,
+                                 void *data,
+                                 void *userdata,
+                                 yaml_document_t *doc,
+                                 yaml_node_t *node) {
+
+        char **activation_policy;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        activation_policy = (char **) userdata;
+        r = device_activation_policy_name_to_type(value);
+        if (r < 0) {
+                log_warning("Failed to parse activation-mode='%s': %s", value, strerror(EINVAL));
+                return r;
+        }
+
+        *activation_policy =  g_strdup(value);
+        if (!*activation_policy)
+                return log_oom();
+
+        return 0;
+}
+
 
 int parse_yaml_string(const char *key,
                       const char *value,

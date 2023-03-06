@@ -1,0 +1,9 @@
+network:
+  ethernets:
+    test99:
+      activation-mode: up
+      addresses:
+          - 10.100.1.37/24
+      routes:
+          - to: default
+            via: 10.100.1.1

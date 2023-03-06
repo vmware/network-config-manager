@@ -190,6 +190,7 @@ typedef struct Network {
         char *driver;
         char *hostname;
         char *req_family_for_online;
+        char *activation_policy;
 
         ParserType parser_type;
         DHCPClient dhcp_type;
