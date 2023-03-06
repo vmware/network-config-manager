@@ -48,6 +48,7 @@ static ParserTable parser_network_vtable[] = {
         { "promiscuous",                CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, promiscuous)},
         { "required-for-online",        CONF_TYPE_NETWORK,     parse_yaml_bool,                   offsetof(Network, req_for_online)},
         { "required-family-for-online", CONF_TYPE_NETWORK,     parse_yaml_rf_online,              offsetof(Network, req_family_for_online)},
+        { "activation-mode",            CONF_TYPE_NETWORK,     parse_yaml_activation_policy,      offsetof(Network, activation_policy)},
         { "dhcp",                       CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp_type)},
         { "dhcp4",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp4)},
         { "dhcp6",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,              offsetof(Network, dhcp6)},

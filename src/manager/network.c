@@ -588,6 +588,7 @@ void network_free(Network *n) {
         free(n->gateway);
         free(n->dhcp4_hostname);
         free(n->req_family_for_online);
+        free(n->activation_policy);
         free(n->link);
         free(n->driver);
         free(n);
@@ -895,7 +896,7 @@ int generate_network_config(Network *n) {
         }
 
         if (n->unmanaged >= 0 || n->arp >= 0 || n->multicast >= 0 || n->all_multicast >= 0 || n->promiscuous >= 0 ||
-            n->req_for_online >= 0 || n->mtu > 0 || n->mac || n->req_family_for_online) {
+            n->req_for_online >= 0 || n->mtu > 0 || n->mac || n->req_family_for_online || n->activation_policy) {
 
                 if (n->unmanaged >= 0) {
                         r = set_config(key_file, "Link", "Unmanaged", bool_to_string(!n->unmanaged));
@@ -947,6 +948,12 @@ int generate_network_config(Network *n) {
 
                 if (n->req_family_for_online) {
                         r = set_config(key_file, "Link", "RequiredFamilyForOnline", n->req_family_for_online);
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->activation_policy) {
+                        r = set_config(key_file, "Link", "ActivationPolicy", n->activation_policy);
                         if (r < 0)
                                 return r;
                 }
