@@ -289,12 +289,22 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                                 log_warning("Failed to parse route congestion-window='%s'\n", scalar(v));
                                 return r;
                         }
-               } else if (string_equal(scalar(k), "advertised-receive-window")) {
+                } else if (string_equal(scalar(k), "advertised-receive-window")) {
                         r = parse_uint32(scalar(v), &rt->initrwnd);
                         if (r < 0) {
                                 log_warning("Failed to parse route advertised-receive-window='%s'\n", scalar(v));
                                 return r;
                         }
+                } else if (string_equal(scalar(k), "from")) {
+                        _auto_cleanup_ IPAddress *address = NULL;
+
+                        r = parse_ip_from_string(scalar(v), &address);
+                        if (r < 0) {
+                                log_warning("Failed to parse %s='%s'", scalar(k), scalar(v));
+                                return r;
+                        }
+
+                        rt->prefsrc = *address;
                 } else if (string_equal("to", scalar(k)) || string_equal("via", scalar(k))) {
                         _auto_cleanup_ IPAddress *address = NULL;
                         bool b = false;

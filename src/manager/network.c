@@ -793,7 +793,7 @@ int generate_wifi_config(Network *n, GString **ret) {
 }
 
 static void append_routes(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_ char *gateway = NULL, *destination = NULL;
+        _auto_cleanup_ char *gateway = NULL, *destination = NULL, *prefsrc = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         KeyFile *key_file = userdata;
         Route *route = value;
@@ -823,6 +823,11 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         if (!ip_is_null(&route->gw)) {
                 (void) ip_to_string_prefix(route->gw.family, &route->gw, &gateway);
                 (void) add_key_to_section(section, "Gateway", gateway);
+        }
+
+        if (!ip_is_null(&route->prefsrc)) {
+                (void) ip_to_string_prefix(route->prefsrc.family, &route->prefsrc, &prefsrc);
+                (void) add_key_to_section(section, "PreferredSource", prefsrc);
         }
 
         if (route->onlink >= 0)
