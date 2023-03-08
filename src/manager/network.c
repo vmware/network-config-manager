@@ -182,6 +182,32 @@ int ipv6_link_local_address_gen_type_to_mode(const char *name) {
         return _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID;
 }
 
+static const char* const ipv6_privacy_extensions_type[_IPV6_PRIVACY_EXTENSIONS_MAX] = {
+        [IPV6_PRIVACY_EXTENSIONS_NO] = "no",
+        [IPV6_PRIVACY_EXTENSIONS_PREFER_PUBLIC] = "prefer-public",
+        [IPV6_PRIVACY_EXTENSIONS_YES] = "yes",
+};
+
+const char *ipv6_privacy_extensions_type_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(ipv6_privacy_extensions_type))
+                return NULL;
+
+        return ipv6_privacy_extensions_type[id];
+}
+
+int ipv6_privacy_extensions_to_type(const char *name) {
+        assert(name);
+
+        for (size_t i = IPV6_PRIVACY_EXTENSIONS_NO; i < (size_t) ELEMENTSOF(ipv6_link_local_address_gen_type); i++)
+                if (string_equal_fold(name, ipv6_privacy_extensions_type[i]))
+                        return i;
+
+        return _IPV6_PRIVACY_EXTENSIONS_INVALID;
+}
+
 static const char *const ipv6_ra_preference_type[_IPV6_RA_PREFERENCE_MAX] =  {
         [IPV6_RA_PREFERENCE_LOW]    = "low",
         [IPV6_RA_PREFERENCE_MEDIUM] = "medium",
@@ -568,6 +594,7 @@ int network_new(Network **ret) {
                 .dhcp_client_identifier_type = _DHCP_CLIENT_IDENTIFIER_INVALID,
                 .link_local = _LINK_LOCAL_ADDRESS_INVALID,
                 .ipv6_address_generation = _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID,
+                .ipv6_privacy = _IPV6_PRIVACY_EXTENSIONS_INVALID,
                 .parser_type = _PARSER_TYPE_INVALID,
         };
 
@@ -1017,6 +1044,12 @@ int generate_network_config(Network *n) {
 
         if (n->ipv6_address_generation != _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID) {
                 r = set_config(key_file, "Network", "IPv6LinkLocalAddressGenerationMode", ipv6_link_local_address_gen_type_to_name(n->ipv6_address_generation));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipv6_privacy != _IPV6_PRIVACY_EXTENSIONS_INVALID) {
+                r = set_config(key_file, "Network", "IPv6PrivacyExtensions", ipv6_privacy_extensions_type_to_name(n->ipv6_privacy));
                 if (r < 0)
                         return r;
         }

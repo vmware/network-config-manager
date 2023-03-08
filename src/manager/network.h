@@ -56,6 +56,14 @@ typedef enum IPv6LinkLocalAddressGenMode {
        _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID = -EINVAL,
 } IPv6LinkLocalAddressGenMode;
 
+typedef enum IPv6PrivacyExtensions {
+        IPV6_PRIVACY_EXTENSIONS_NO,
+        IPV6_PRIVACY_EXTENSIONS_PREFER_PUBLIC,
+        IPV6_PRIVACY_EXTENSIONS_YES,
+        _IPV6_PRIVACY_EXTENSIONS_MAX,
+        _IPV6_PRIVACY_EXTENSIONS_INVALID = -EINVAL,
+} IPv6PrivacyExtensions;
+
 typedef enum IPDuplicateAddressDetection {
         IP_DUPLICATE_ADDRESS_DETECTION_NONE,
         IP_DUPLICATE_ADDRESS_DETECTION_IPV4,
@@ -210,6 +218,7 @@ typedef struct Network {
         DHCPClientIdentifier dhcp_client_identifier_type;
         LinkLocalAddress link_local;
         IPv6LinkLocalAddressGenMode ipv6_address_generation;
+        IPv6PrivacyExtensions ipv6_privacy;
 
         int unmanaged;
         int arp;
@@ -310,6 +319,9 @@ int ip_duplicate_address_detection_type_to_mode(const char *name);
 
 const char *ipv6_link_local_address_gen_type_to_name(int id);
 int ipv6_link_local_address_gen_type_to_mode(const char *name);
+
+const char *ipv6_privacy_extensions_type_to_name(int id);
+int ipv6_privacy_extensions_to_type(const char *name);
 
 const char *route_scope_type_to_name(int id);
 int route_scope_type_to_mode(const char *name);
