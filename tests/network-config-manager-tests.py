@@ -243,6 +243,7 @@ class TestNetworkConfigManagerYAML:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'ActivationPolicy') == 'up')
+        assert(parser.get('Link', 'MACAddress') == 'c2:b0:bb:e3:4d:88')
 
     def test_network_network(self):
         self.copy_yaml_file_to_netmanager_yaml_path('network-network.yml')
