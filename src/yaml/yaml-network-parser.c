@@ -59,6 +59,7 @@ static ParserTable parser_network_vtable[] = {
         { "link-local",                 CONF_TYPE_NETWORK,     parse_yaml_link_local_type,              offsetof(Network, link_local)},
         { "ipv6-address-generation",    CONF_TYPE_NETWORK,     parse_yaml_ipv6_address_generation_mode, offsetof(Network, ipv6_address_generation)},
         { "ipv6-privacy",               CONF_TYPE_NETWORK,     parse_yaml_ipv6_privacy_extensions,      offsetof(Network, ipv6_privacy)},
+        { "ipv6-mtu",                   CONF_TYPE_NETWORK,     parse_yaml_uint32,                       offsetof(Network, ipv6_mtu)},
         { "ntps",                       CONF_TYPE_NETWORK,     parse_yaml_addresses,                    offsetof(Network, ntps)},
         { NULL,                         _CONF_TYPE_INVALID,    0,                                       0}
 };
