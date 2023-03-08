@@ -200,6 +200,7 @@ class TestNetworkConfigManagerYAML:
         "ipv6-config.yml",
         "static-gw.yml",
         "network-link.yml",
+        "network-network.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -242,6 +243,18 @@ class TestNetworkConfigManagerYAML:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'ActivationPolicy') == 'up')
+
+    def test_network_network(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('network-network.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'IPv6LinkLocalAddressGenerationMode') == 'eui64')
 
     def test_basic_dhcp4(self):
         self.copy_yaml_file_to_netmanager_yaml_path('dhcp4.yml')
