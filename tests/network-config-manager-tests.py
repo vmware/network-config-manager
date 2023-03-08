@@ -338,6 +338,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Address', 'Address') == '192.168.1.10/24')
         assert(parser.get('Route', 'Destination') == '192.168.1.1/24')
         assert(parser.get('Route', 'Gateway') == '192.168.1.1')
+        assert(parser.get('Route', 'PreferredSource') == '192.168.1.10')
         assert(parser.get('Route', 'InitialCongestionWindow') == '10')
         assert(parser.get('Route', 'InitialAdvertisedReceiveWindow') == '20')
         assert(parser.get('Route', 'Type') == 'local')
