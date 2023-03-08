@@ -40,26 +40,27 @@ static ParserTable parser_match_vtable[] = {
 };
 
 static ParserTable parser_network_vtable[] = {
-        { "unmanaged",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                    offsetof(Network, unmanaged)},
-        { "mtu",                        CONF_TYPE_NETWORK,     parse_yaml_uint32,                  offsetof(Network, mtu)},
-        { "arp",                        CONF_TYPE_NETWORK,     parse_yaml_bool,                    offsetof(Network, arp)},
-        { "multicast",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                    offsetof(Network, multicast)},
-        { "allmulticast",               CONF_TYPE_NETWORK,     parse_yaml_bool,                    offsetof(Network, all_multicast)},
-        { "promiscuous",                CONF_TYPE_NETWORK,     parse_yaml_bool,                    offsetof(Network, promiscuous)},
-        { "required-for-online",        CONF_TYPE_NETWORK,     parse_yaml_bool,                    offsetof(Network, req_for_online)},
-        { "required-family-for-online", CONF_TYPE_NETWORK,     parse_yaml_rf_online,               offsetof(Network, req_family_for_online)},
-        { "activation-mode",            CONF_TYPE_NETWORK,     parse_yaml_activation_policy,       offsetof(Network, activation_policy)},
-        { "dhcp",                       CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,               offsetof(Network, dhcp_type)},
-        { "dhcp4",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,               offsetof(Network, dhcp4)},
-        { "dhcp6",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,               offsetof(Network, dhcp6)},
-        { "dhcp-identifier",            CONF_TYPE_NETWORK,     parse_yaml_dhcp_client_identifier,  offsetof(Network, dhcp_client_identifier_type)},
-        { "lldp",                       CONF_TYPE_NETWORK,     parse_yaml_bool,                    offsetof(Network, lldp)},
-        { "emit-lldp",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                    offsetof(Network, emit_lldp)},
-        { "accept-ra",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                    offsetof(Network, ipv6_accept_ra)},
-        { "link-local",                 CONF_TYPE_NETWORK,     parse_yaml_link_local_type,         offsetof(Network, link_local)},
-        { "ipv6-address-generation",    CONF_TYPE_NETWORK,     parse_yaml_ipv6_address_generation, offsetof(Network, ipv6_address_generation)},
-        { "ntps",                       CONF_TYPE_NETWORK,     parse_yaml_addresses,               offsetof(Network, ntps)},
-        { NULL,                         _CONF_TYPE_INVALID,    0,                                  0}
+        { "unmanaged",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, unmanaged)},
+        { "mtu",                        CONF_TYPE_NETWORK,     parse_yaml_uint32,                       offsetof(Network, mtu)},
+        { "arp",                        CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, arp)},
+        { "multicast",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, multicast)},
+        { "allmulticast",               CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, all_multicast)},
+        { "promiscuous",                CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, promiscuous)},
+        { "required-for-online",        CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, req_for_online)},
+        { "required-family-for-online", CONF_TYPE_NETWORK,     parse_yaml_rf_online,                    offsetof(Network, req_family_for_online)},
+        { "activation-mode",            CONF_TYPE_NETWORK,     parse_yaml_activation_policy,            offsetof(Network, activation_policy)},
+        { "dhcp",                       CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,                    offsetof(Network, dhcp_type)},
+        { "dhcp4",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,                    offsetof(Network, dhcp4)},
+        { "dhcp6",                      CONF_TYPE_NETWORK,     parse_yaml_dhcp_type,                    offsetof(Network, dhcp6)},
+        { "dhcp-identifier",            CONF_TYPE_NETWORK,     parse_yaml_dhcp_client_identifier,       offsetof(Network, dhcp_client_identifier_type)},
+        { "lldp",                       CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, lldp)},
+        { "emit-lldp",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, emit_lldp)},
+        { "accept-ra",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, ipv6_accept_ra)},
+        { "link-local",                 CONF_TYPE_NETWORK,     parse_yaml_link_local_type,              offsetof(Network, link_local)},
+        { "ipv6-address-generation",    CONF_TYPE_NETWORK,     parse_yaml_ipv6_address_generation_mode, offsetof(Network, ipv6_address_generation)},
+        { "ipv6-privacy",               CONF_TYPE_NETWORK,     parse_yaml_ipv6_privacy_extensions,      offsetof(Network, ipv6_privacy)},
+        { "ntps",                       CONF_TYPE_NETWORK,     parse_yaml_addresses,                    offsetof(Network, ntps)},
+        { NULL,                         _CONF_TYPE_INVALID,    0,                                       0}
 };
 
 static ParserTable parser_dhcp4_overrides_vtable[] = {
