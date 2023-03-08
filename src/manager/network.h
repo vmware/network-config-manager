@@ -227,6 +227,7 @@ typedef struct Network {
         int promiscuous;
         int req_for_online;
         uint32_t mtu;
+        uint32_t ipv6_mtu;
 
         /* dhcp4 section  */
         uint32_t dhcp4_route_metric;

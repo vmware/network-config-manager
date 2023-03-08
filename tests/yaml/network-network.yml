@@ -3,6 +3,7 @@ network:
     test99:
       ipv6-address-generation: eui64
       ipv6-privacy: no
+      ipv6-mtu: 1800
       addresses:
           - 10.100.1.37/24
       routes:

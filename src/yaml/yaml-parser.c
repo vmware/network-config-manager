@@ -382,7 +382,6 @@ int parse_yaml_ipv6_privacy_extensions(const char *key,
         return 0;
 }
 
-
 int parse_yaml_address(const char *key,
                        const char *value,
                        void *data,

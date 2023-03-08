@@ -1060,6 +1060,12 @@ int generate_network_config(Network *n) {
                         return r;
         }
 
+        if (n->ipv6_mtu > 0) {
+                r = set_config_uint(key_file, "Network", "IPv6MTUBytes", n->ipv6_mtu);
+                if (r < 0)
+                        return r;
+        }
+
         if (n->nameservers && set_size(n->nameservers) > 0) {
                 _cleanup_(g_string_unrefp) GString *c = NULL;
 
