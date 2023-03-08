@@ -2,6 +2,7 @@ network:
   ethernets:
     test99:
       ipv6-address-generation: eui64
+      ipv6-privacy: no
       addresses:
           - 10.100.1.37/24
       routes:
