@@ -1,0 +1,9 @@
+network:
+  ethernets:
+    test99:
+      ipv6-address-generation: eui64
+      addresses:
+          - 10.100.1.37/24
+      routes:
+          - to: default
+            via: 10.100.1.1

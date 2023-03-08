@@ -155,6 +155,33 @@ int link_local_address_type_to_mode(const char *name) {
         return _LINK_LOCAL_ADDRESS_INVALID;
 }
 
+static const char* const ipv6_link_local_address_gen_type[_IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_MAX] = {
+        [IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_EUI64]          = "eui64",
+        [IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_NONE]           = "none",
+        [IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_STABLE_PRIVACY] = "stable-privacy",
+        [IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_RANDOM]         = "random",
+};
+
+const char *ipv6_link_local_address_gen_type_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(ipv6_link_local_address_gen_type))
+                return NULL;
+
+        return ipv6_link_local_address_gen_type[id];
+}
+
+int ipv6_link_local_address_gen_type_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_EUI64; i < (size_t) ELEMENTSOF(ipv6_link_local_address_gen_type); i++)
+                if (string_equal_fold(name, ipv6_link_local_address_gen_type[i]))
+                        return i;
+
+        return _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID;
+}
+
 static const char *const ipv6_ra_preference_type[_IPV6_RA_PREFERENCE_MAX] =  {
         [IPV6_RA_PREFERENCE_LOW]    = "low",
         [IPV6_RA_PREFERENCE_MEDIUM] = "medium",
@@ -540,6 +567,7 @@ int network_new(Network **ret) {
                 .ipv6_accept_ra = -1,
                 .dhcp_client_identifier_type = _DHCP_CLIENT_IDENTIFIER_INVALID,
                 .link_local = _LINK_LOCAL_ADDRESS_INVALID,
+                .ipv6_address_generation = _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID,
                 .parser_type = _PARSER_TYPE_INVALID,
         };
 
@@ -985,7 +1013,12 @@ int generate_network_config(Network *n) {
                 r = set_config(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(n->link_local));
                 if (r < 0)
                         return r;
+        }
 
+        if (n->ipv6_address_generation != _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID) {
+                r = set_config(key_file, "Network", "IPv6LinkLocalAddressGenerationMode", ipv6_link_local_address_gen_type_to_name(n->ipv6_address_generation));
+                if (r < 0)
+                        return r;
         }
 
         if (n->ipv6_accept_ra >= 0) {

@@ -36,5 +36,6 @@ int parse_yaml_address(const char *key, const char *value, void *data, void *use
 int parse_yaml_nameserver_addresses(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_domains(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_link_local_type(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_ipv6_address_generation(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_rf_online(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_activation_policy(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);

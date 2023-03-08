@@ -47,6 +47,15 @@ typedef enum LinkLocalAddress {
        _LINK_LOCAL_ADDRESS_INVALID = -EINVAL,
 } LinkLocalAddress;
 
+typedef enum IPv6LinkLocalAddressGenMode {
+       IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_EUI64,
+       IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_NONE,
+       IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_STABLE_PRIVACY,
+       IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_RANDOM,
+       _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_MAX,
+       _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID = -EINVAL,
+} IPv6LinkLocalAddressGenMode;
+
 typedef enum IPDuplicateAddressDetection {
         IP_DUPLICATE_ADDRESS_DETECTION_NONE,
         IP_DUPLICATE_ADDRESS_DETECTION_IPV4,
@@ -200,6 +209,7 @@ typedef struct Network {
 
         DHCPClientIdentifier dhcp_client_identifier_type;
         LinkLocalAddress link_local;
+        IPv6LinkLocalAddressGenMode ipv6_address_generation;
 
         int unmanaged;
         int arp;
@@ -297,6 +307,9 @@ int link_local_address_type_to_mode(const char *name);
 
 const char *ip_duplicate_address_detection_type_to_name(int id);
 int ip_duplicate_address_detection_type_to_mode(const char *name);
+
+const char *ipv6_link_local_address_gen_type_to_name(int id);
+int ipv6_link_local_address_gen_type_to_mode(const char *name);
 
 const char *route_scope_type_to_name(int id);
 int route_scope_type_to_mode(const char *name);
