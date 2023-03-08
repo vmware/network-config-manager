@@ -256,6 +256,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'IPv6LinkLocalAddressGenerationMode') == 'eui64')
         assert(parser.get('Network', 'IPv6PrivacyExtensions') == 'no')
+        assert(parser.get('Network', 'IPv6MTUBytes') == '1800')
 
     def test_basic_dhcp4(self):
         self.copy_yaml_file_to_netmanager_yaml_path('dhcp4.yml')
