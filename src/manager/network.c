@@ -951,10 +951,16 @@ int generate_network_config(Network *n) {
         }
 
         if (n->unmanaged >= 0 || n->arp >= 0 || n->multicast >= 0 || n->all_multicast >= 0 || n->promiscuous >= 0 ||
-            n->req_for_online >= 0 || n->mtu > 0 || n->mac || n->req_family_for_online || n->activation_policy) {
+            n->req_for_online >= 0 || n->mtu > 0 || n->mac || n->req_family_for_online || n->activation_policy || n->mac) {
 
                 if (n->unmanaged >= 0) {
                         r = set_config(key_file, "Link", "Unmanaged", bool_to_string(!n->unmanaged));
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->mac) {
+                        r = set_config(key_file, "Link", "MACAddress", n->mac);
                         if (r < 0)
                                 return r;
                 }
