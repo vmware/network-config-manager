@@ -15,6 +15,7 @@ typedef struct YAMLManager {
         GHashTable *dhcp6_config;
         GHashTable *nameserver_config;
         GHashTable *route_config;
+        GHashTable *routing_policy_rule_config;
         GHashTable *wifi_config;
         GHashTable *link_config;
 } YAMLManager;

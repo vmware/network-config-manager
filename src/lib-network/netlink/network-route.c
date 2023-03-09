@@ -21,7 +21,6 @@ int route_new(Route **ret) {
                 .family = AF_UNSPEC,
                 .scope = RT_SCOPE_UNIVERSE,
                 .protocol = RTPROT_UNSPEC,
-                .type = RTN_UNICAST,
                 .table = RT_TABLE_MAIN,
                 .onlink = -1,
         };
