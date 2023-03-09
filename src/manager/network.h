@@ -204,7 +204,7 @@ typedef struct Network {
         char *ifname;
         char *mac;
         char *match_mac;
-        char *driver;
+        char **driver;
         char *hostname;
         char *req_family_for_online;
         char *activation_policy;

@@ -34,7 +34,7 @@ static ParserTable parser_wifi_vtable[] = {
 
 static ParserTable parser_match_vtable[] = {
         { "name",                       CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, ifname)},
-        { "driver",                     CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, driver)},
+        { "driver",                     CONF_TYPE_NETWORK,     parse_yaml_scalar_or_sequence,     offsetof(Network, driver)},
         { "macaddress",                 CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, match_mac)},
         { NULL,                         _CONF_TYPE_INVALID,    0,                                 0}
 };
@@ -282,7 +282,6 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                                 log_warning("Failed to parse route type='%s'\n", scalar(v));
                                 return r;
                         }
-                        printf("route type = %s=%s\n", scalar(k), scalar(v));
                         rt->type = r;
                 } else if (string_equal(scalar(k), "scope")) {
                         r = route_scope_type_to_mode(scalar(v));
@@ -542,27 +541,38 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
 
                 table = g_hash_table_lookup(m->network_config, scalar(k));
                 if (!table) {
-                        if (string_equal(scalar(k), "match"))
-                                parse_config(m->match_config, dp, v, network);
-                        else if (string_equal(scalar(k), "dhcp4-overrides"))
-                                parse_config(m->dhcp4_config, dp, v, network);
-                        else if (string_equal(scalar(k), "dhcp6-overrides"))
-                                parse_config(m->dhcp6_config, dp, v, network);
-                        else if (string_equal(scalar(k), "addresses")) {
+                        if (string_equal(scalar(k), "match")) {
+                                r = parse_config(m->match_config, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                        } else if (string_equal(scalar(k), "dhcp4-overrides")) {
+                                r = parse_config(m->dhcp4_config, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                        } else if (string_equal(scalar(k), "dhcp6-overrides")) {
+                                r = parse_config(m->dhcp6_config, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                        } else if (string_equal(scalar(k), "addresses")) {
                                 IPAddress *a = NULL;
 
-                                parse_address(m, dp, v, network, &a);
-                        } else if (string_equal(scalar(k), "routes"))
-                                parse_route(m, dp, v, network);
-                        else if (string_equal(scalar(k), "routing-policy")) {
+                                r = parse_address(m, dp, v, network, &a);
+                                if (r < 0)
+                                        return r;
+                        } else if (string_equal(scalar(k), "routes")) {
+                                r = parse_route(m, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                        } else if (string_equal(scalar(k), "routing-policy")) {
                                 r = parse_routing_policy_rule_config(m->routing_policy_rule_config, dp, v, network);
                                 if (r < 0)
                                         return r;
                         } else if (string_equal(scalar(k), "nameservers"))
-                                parse_config(m->nameserver_config, dp, v, network);
+                                r = parse_config(m->nameserver_config, dp, v, network);
                         else
-                                (void) parse_network_config(m, dp, v, network);
-
+                                r = parse_network_config(m, dp, v, network);
+                        if (r < 0)
+                                return r;
                         /* .link  */
                         link_table = g_hash_table_lookup(m->link_config, scalar(k));
                         if (link_table) {

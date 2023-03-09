@@ -991,7 +991,18 @@ int generate_network_config(Network *n) {
         }
 
         if (n->driver) {
-                r = set_config(key_file, "Match", "Driver", n->driver);
+                _cleanup_(g_string_unrefp) GString *c = NULL;
+                char **d;
+
+                c = g_string_new(NULL);
+                if (!c)
+                        return log_oom();
+
+                strv_foreach(d, n->driver) {
+                        g_string_append_printf(c, "%s ", *d);
+                }
+
+                r = set_config(key_file, "Match", "Driver", c->str);
                 if (r < 0)
                         return r;
         }
