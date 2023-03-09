@@ -652,7 +652,8 @@ void network_free(Network *n) {
         free(n->req_family_for_online);
         free(n->activation_policy);
         free(n->link);
-        free(n->driver);
+
+        strv_free(n->driver);
         free(n);
 }
 
