@@ -174,6 +174,22 @@ network:
               - to: default
                 via: 10.3.0.1
 ```
+
+### Routing Policy Rule
+```
+network:
+  ethernets:
+    eth1:
+      addresses:
+          - 10.100.1.5/24
+      routes:
+          - to: default
+            via: 10.100.1.1
+      routing-policy:
+            - from: 10.100.1.5/24
+              to: 10.100.1.5/24
+              table: 101
+```
 ### Generate WiFi config from yml file
 
 `nmctl` can generate [WPA Supplicant](https://w1.fi/wpa_supplicant/) configuration from yaml file. When a yml file with wifi
