@@ -176,7 +176,7 @@ network:
 ```
 
 ### Routing Policy Rule
-```
+```yml
 network:
   ethernets:
     eth1:
