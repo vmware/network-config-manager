@@ -606,6 +606,10 @@ int network_new(Network **ret) {
         if (!n->routes)
                 return log_oom();
 
+        n->routing_policy_rules = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+        if (!n->routing_policy_rules)
+                return log_oom();
+
         r = set_new(&n->nameservers, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
@@ -630,6 +634,9 @@ void network_free(Network *n) {
         set_freep(&n->ntps);
         set_freep(&n->nameservers);
         set_freep(&n->domains);
+
+        g_hash_table_destroy(n->routes);
+        g_hash_table_destroy(n->routing_policy_rules);
 
         if (n->access_points) {
                 g_hash_table_foreach_steal(n->access_points, wifi_access_point_free, NULL);
@@ -792,6 +799,40 @@ int generate_wifi_config(Network *n, GString **ret) {
         return 0;
 }
 
+static void append_routing_policy_rules(gpointer key, gpointer value, gpointer userdata) {
+        _auto_cleanup_ char *to = NULL, *from = NULL;
+        _cleanup_(section_freep) Section *section = NULL;
+        RoutingPolicyRule *rule = value;
+        KeyFile *key_file = userdata;
+        int r;
+
+        if (ip_is_null(&rule->to) && ip_is_null(&rule->from))
+                return;
+
+        r = section_new("RoutingPolicyRule", &section);
+        if (r < 0)
+                return;
+
+        if (!ip_is_null(&rule->from)) {
+                (void) ip_to_string_prefix(rule->from.family, &rule->from, &from);
+                (void ) add_key_to_section(section, "From", from);
+        }
+
+        if (!ip_is_null(&rule->to)) {
+                (void) ip_to_string_prefix(rule->to.family, &rule->to, &to);
+                (void ) add_key_to_section(section, "To", to);
+        }
+
+        if (rule->table > 0 && rule->table != RT_TABLE_MAIN)
+                (void) add_key_to_section_uint(section, "Table", rule->table);
+
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return;
+
+        steal_pointer(section);
+}
+
 static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         _auto_cleanup_ char *gateway = NULL, *destination = NULL, *prefsrc = NULL;
         _cleanup_(section_freep) Section *section = NULL;
@@ -839,17 +880,17 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
        if (route->scope > 0)
                 add_key_to_section(section, "Scope", route_scope_type_to_name(route->scope));
 
-        if (route->type != _ROUTE_TYPE_INVALID && route->type != ROUTE_TYPE_UNICAST)
-                (void) add_key_to_section(section, "Type", route_type_to_name(route->type));
+       if (route->type != _ROUTE_TYPE_INVALID && route->type != ROUTE_TYPE_UNICAST)
+               (void) add_key_to_section(section, "Type", route_type_to_name(route->type));
 
-        if (route->metric > 0)
-                (void) add_key_to_section_uint(section, "RouteMetric", route->metric);
+       if (route->metric > 0)
+               (void) add_key_to_section_uint(section, "RouteMetric", route->metric);
 
-        if (route->initcwnd > 0)
-                (void) add_key_to_section_uint(section, "InitialCongestionWindow", route->initcwnd);
+       if (route->initcwnd > 0)
+               (void) add_key_to_section_uint(section, "InitialCongestionWindow", route->initcwnd);
 
-        if (route->initrwnd > 0)
-                (void) add_key_to_section_uint(section, "InitialAdvertisedReceiveWindow", route->initrwnd);
+       if (route->initrwnd > 0)
+               (void) add_key_to_section_uint(section, "InitialAdvertisedReceiveWindow", route->initrwnd);
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
@@ -1224,6 +1265,9 @@ int generate_network_config(Network *n) {
 
         if (n->routes && g_hash_table_size(n->routes) > 0)
                 g_hash_table_foreach(n->routes, append_routes, key_file);
+
+        if (n->routing_policy_rules && g_hash_table_size(n->routing_policy_rules) > 0)
+                g_hash_table_foreach(n->routing_policy_rules, append_routing_policy_rules, key_file);
 
         r = key_file_save (key_file);
         if (r < 0) {

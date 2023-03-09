@@ -70,11 +70,11 @@ int parse_yaml_uint32(const char *key,
 }
 
 int parse_yaml_uint32_or_max(const char *key,
-                      const char *value,
-                      void *data,
-                      void *userdata,
-                      yaml_document_t *doc,
-                      yaml_node_t *node) {
+                             const char *value,
+                             void *data,
+                             void *userdata,
+                             yaml_document_t *doc,
+                             yaml_node_t *node) {
 
         char **p;
 
@@ -180,7 +180,7 @@ int parse_yaml_activation_policy(const char *key,
                 return r;
         }
 
-        *activation_policy =  g_strdup(value);
+        *activation_policy = g_strdup(value);
         if (!*activation_policy)
                 return log_oom();
 
@@ -237,6 +237,7 @@ int parse_yaml_auth_eap_method(const char *key,
                                void *userdata,
                                yaml_document_t *doc,
                                yaml_node_t *node) {
+
         WiFiAccessPoint *p;
 
         assert(key);
@@ -249,18 +250,18 @@ int parse_yaml_auth_eap_method(const char *key,
 
         p->auth->key_management = auth_key_management_type_to_mode(key);
         switch (p->auth->key_management) {
-        case AUTH_KEY_MANAGEMENT_NONE:
-                p->auth->password = g_strdup(value);
-                if (!p->auth->password)
-                        return log_oom();
-                break;
-        case AUTH_KEY_MANAGEMENT_WPA_PSK:
-                p->auth->password = g_strdup(value);
-                if (!p->auth->password)
-                        return log_oom();
-                break;
-        default:
-                break;
+                case AUTH_KEY_MANAGEMENT_NONE:
+                        p->auth->password = g_strdup(value);
+                        if (!p->auth->password)
+                                return log_oom();
+                        break;
+                case AUTH_KEY_MANAGEMENT_WPA_PSK:
+                        p->auth->password = g_strdup(value);
+                        if (!p->auth->password)
+                                return log_oom();
+                        break;
+                default:
+                        break;
         }
 
         return 0;
@@ -272,6 +273,7 @@ int parse_yaml_dhcp_client_identifier(const char *key,
                                       void *userdata,
                                       yaml_document_t *doc,
                                       yaml_node_t *node) {
+
         Network *n;
 
         assert(key);
@@ -388,7 +390,9 @@ int parse_yaml_address(const char *key,
                        void *userdata,
                        yaml_document_t *doc,
                        yaml_node_t *node) {
+
         _auto_cleanup_ IPAddress *address = NULL;
+        IPAddress **addr;
         int r;
 
         assert(key);
@@ -396,12 +400,15 @@ int parse_yaml_address(const char *key,
         assert(doc);
         assert(node);
 
+        addr = (IPAddress **) userdata;
+
         r = parse_ip_from_string(value, &address);
         if (r < 0) {
-                log_warning("Failed to parse address: %s", value);
+                log_warning("Failed to parse address %s = %s", key, value);
                 return r;
         }
 
+        memcpy(addr, address, sizeof(IPAddress));
         return 0;
 }
 

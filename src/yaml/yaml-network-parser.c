@@ -99,6 +99,13 @@ static ParserTable parser_nameservers_vtable[] = {
         { NULL,         _CONF_TYPE_INVALID,    0,                               0}
 };
 
+static ParserTable parser_routing_policy_rule_vtable[] = {
+        { "from",       CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, from)},
+        { "to",         CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, to)},
+        { "table",      CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, table)},
+        { NULL,         _CONF_TYPE_INVALID,                0,                  0}
+};
+
 static ParserTable parser_link_vtable[] = {
         { "ifname",                                    CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, ifname)},
         { "alias",                                     CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, alias)},
@@ -275,6 +282,7 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                                 log_warning("Failed to parse route type='%s'\n", scalar(v));
                                 return r;
                         }
+                        printf("route type = %s=%s\n", scalar(k), scalar(v));
                         rt->type = r;
                 } else if (string_equal(scalar(k), "scope")) {
                         r = route_scope_type_to_mode(scalar(v));
@@ -428,6 +436,63 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
         return 0;
 }
 
+static int parse_routing_policy_rule_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+       _cleanup_(routing_policy_rule_freep) RoutingPolicyRule *rule = NULL;
+        yaml_node_t *k, *v;
+        yaml_node_item_t *i;
+        yaml_node_pair_t *p;
+        yaml_node_t *n;
+        int r;
+
+        assert(config);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                n = yaml_document_get_node(dp, *i);
+                if (n)
+                        (void) parse_routing_policy_rule_config(config, dp, n, network);
+        }
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(config, scalar(k));
+                if (!table)
+                        continue;
+
+                if (!rule) {
+                        r = routing_policy_rule_new(&rule);
+                        if (r < 0)
+                                return log_oom();
+                }
+
+                t = (uint8_t *) rule + table->offset;
+                if (table->parser) {
+                        (void) table->parser(scalar(k), scalar(v), rule, t, dp, v);
+                        network->modified = true;
+                }
+        }
+
+        if (rule) {
+                if (!g_hash_table_insert(network->routing_policy_rules, rule, rule))
+                        return -EINVAL;
+
+                network->modified = true;
+                steal_pointer(rule);
+        }
+
+        return 0;
+}
+
 static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         yaml_node_pair_t *p;
         yaml_node_t *k, *v;
@@ -442,6 +507,7 @@ static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *no
 
                 k = yaml_document_get_node(dp, p->key);
                 v = yaml_document_get_node(dp, p->value);
+
 
                 table = g_hash_table_lookup(config, scalar(k));
                 if (!table)
@@ -478,9 +544,9 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                 if (!table) {
                         if (string_equal(scalar(k), "match"))
                                 parse_config(m->match_config, dp, v, network);
-                        if (string_equal(scalar(k), "dhcp4-overrides"))
+                        else if (string_equal(scalar(k), "dhcp4-overrides"))
                                 parse_config(m->dhcp4_config, dp, v, network);
-                        if (string_equal(scalar(k), "dhcp6-overrides"))
+                        else if (string_equal(scalar(k), "dhcp6-overrides"))
                                 parse_config(m->dhcp6_config, dp, v, network);
                         else if (string_equal(scalar(k), "addresses")) {
                                 IPAddress *a = NULL;
@@ -488,7 +554,11 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                                 parse_address(m, dp, v, network, &a);
                         } else if (string_equal(scalar(k), "routes"))
                                 parse_route(m, dp, v, network);
-                        else if (string_equal(scalar(k), "nameservers"))
+                        else if (string_equal(scalar(k), "routing-policy")) {
+                                r = parse_routing_policy_rule_config(m->routing_policy_rule_config, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                        } else if (string_equal(scalar(k), "nameservers"))
                                 parse_config(m->nameserver_config, dp, v, network);
                         else
                                 (void) parse_network_config(m, dp, v, network);
@@ -666,6 +736,7 @@ void yaml_manager_free(YAMLManager *p) {
         g_hash_table_destroy(p->match_config);
         g_hash_table_destroy(p->network_config);
         g_hash_table_destroy(p->address_config);
+        g_hash_table_destroy(p->routing_policy_rule_config);
         g_hash_table_destroy(p->dhcp4_config);
         g_hash_table_destroy(p->dhcp6_config);
         g_hash_table_destroy(p->nameserver_config);
@@ -686,6 +757,7 @@ int new_yaml_manager(YAMLManager **ret) {
                  .match_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .network_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .address_config = g_hash_table_new(g_str_hash, g_str_equal),
+                 .routing_policy_rule_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .dhcp4_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .dhcp6_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .nameserver_config = g_hash_table_new(g_str_hash, g_str_equal),
@@ -728,6 +800,13 @@ int new_yaml_manager(YAMLManager **ret) {
         for (size_t i = 0; parser_address_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->address_config, (void *) parser_address_vtable[i].key, &parser_address_vtable[i])) {
                         log_warning("Failed add key='%s' to address table", parser_address_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        for (size_t i = 0; parser_routing_policy_rule_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->routing_policy_rule_config, (void *) parser_routing_policy_rule_vtable[i].key, &parser_routing_policy_rule_vtable[i])) {
+                        log_warning("Failed add key='%s' to routing policy rule table", parser_routing_policy_rule_vtable[i].key);
                         return -EINVAL;
                 }
         }

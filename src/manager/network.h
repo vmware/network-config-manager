@@ -267,6 +267,7 @@ typedef struct Network {
 
         GHashTable *access_points;
         GHashTable *routes;
+        GHashTable *routing_policy_rules;
 } Network;
 
 int network_new(Network **ret);
