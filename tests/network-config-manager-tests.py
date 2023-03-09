@@ -201,6 +201,7 @@ class TestNetworkConfigManagerYAML:
         "static-gw.yml",
         "network-link.yml",
         "network-network.yml",
+        "routing-policy-rule.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -343,6 +344,24 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'InitialAdvertisedReceiveWindow') == '20')
         assert(parser.get('Route', 'Type') == 'local')
         assert(parser.get('Route', 'Scope') == 'link')
+
+    def test_network_routing_policy_rule(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('routing-policy-rule.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Address', 'Address') == '10.100.1.5/24')
+
+        assert(parser.get('Route', 'Destination') == '0.0.0.0/0')
+        assert(parser.get('Route', 'Gateway') == '10.100.1.1')
+
+        assert(parser.get('RoutingPolicyRule', 'From') == '10.100.1.5/24')
+        assert(parser.get('RoutingPolicyRule', 'To') == '10.100.1.5/24')
+        assert(parser.get('RoutingPolicyRule', 'Table') == '101')
 
     def test_network_ipv6(self):
         self.copy_yaml_file_to_netmanager_yaml_path('ipv6-config.yml')
