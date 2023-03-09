@@ -503,3 +503,45 @@ int parse_yaml_domains(const char *key,
 
         return 0;
 }
+
+int parse_yaml_scalar_or_sequence(const char *key,
+                                  const char *value,
+                                  void *data,
+                                  void *userdata,
+                                  yaml_document_t *doc,
+                                  yaml_node_t *node) {
+
+        char ***s = (char ***) userdata;
+        yaml_node_item_t *i;
+        Network *network;
+        int r;
+
+        assert(key);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        network = data;
+
+        if (!isempty_string(key) && !isempty_string(value)) {
+                *s = strv_new(value);
+                if (!*s)
+                        return -ENOMEM;
+        }
+
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *entry = yaml_document_get_node(doc, *i);
+
+                if (!*s) {
+                        *s = strv_new(strdup(scalar(entry)));
+                        if (!*s)
+                                return log_oom();
+                } else {
+                        r = strv_add(s, strdup(scalar(entry)));
+                        if (r < 0)
+                                return r;
+                }
+        }
+
+        return 0;
+}
