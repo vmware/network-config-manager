@@ -513,15 +513,12 @@ int parse_yaml_scalar_or_sequence(const char *key,
 
         char ***s = (char ***) userdata;
         yaml_node_item_t *i;
-        Network *network;
         int r;
 
         assert(key);
         assert(data);
         assert(doc);
         assert(node);
-
-        network = data;
 
         if (!isempty_string(key) && !isempty_string(value)) {
                 *s = strv_new(value);
@@ -542,6 +539,113 @@ int parse_yaml_scalar_or_sequence(const char *key,
                                 return r;
                 }
         }
+
+        return 0;
+}
+
+int parse_yaml_route(const char *key,
+                     const char *value,
+                     void *data,
+                     void *userdata,
+                     yaml_document_t *doc,
+                     yaml_node_t *node) {
+
+        Route *rt;
+        int r;
+
+        assert(key);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        rt = data;
+
+        if (string_equal("to", key) || string_equal("via", key)) {
+                _auto_cleanup_ IPAddress *address = NULL;
+                bool b = false;
+
+                r = parse_ip_from_string(value, &address);
+                if (r < 0) {
+                        if (string_equal("default", value))
+                                b = true;
+                        else {
+                                log_warning("Failed to parse %s='%s'", key, value);
+                                return r;
+                        }
+                }
+
+                if (string_equal("0.0.0.0/0", value) || string_equal("::/0", value))
+                        b = true;
+
+                if (string_equal("to", key)) {
+                        if (address) {
+                                rt->dst = *address;
+                                rt->family = address->family;
+                        }
+
+                        rt->to_default = b;
+                } else {
+                        if (address) {
+                                rt->gw = *address;
+                                rt->family = address->family;
+                        }
+                }
+        }
+
+        return 0;
+}
+
+int parse_yaml_route_type(const char *key,
+                          const char *value,
+                          void *data,
+                          void *userdata,
+                          yaml_document_t *doc,
+                          yaml_node_t *node) {
+
+        Route *rt;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        rt = data;
+
+        r = route_type_to_mode(value);
+        if (r < 0) {
+                log_warning("Failed to parse route type='%s'\n", value);
+                return r;
+        }
+        rt->type = r;
+        return 0;
+}
+
+int parse_yaml_route_scope(const char *key,
+                           const char *value,
+                           void *data,
+                           void *userdata,
+                           yaml_document_t *doc,
+                           yaml_node_t *node) {
+
+        Route *rt;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        rt = data;
+
+        r = route_scope_type_to_mode(value);
+        if (r < 0) {
+                log_warning("Failed to parse route scope='%s'\n", value);
+                return r;
+        }
+        rt->scope = r;
 
         return 0;
 }
