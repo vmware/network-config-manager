@@ -99,6 +99,20 @@ static ParserTable parser_nameservers_vtable[] = {
         { NULL,         _CONF_TYPE_INVALID,    0,                               0}
 };
 
+static ParserTable parser_route_vtable[] = {
+        { "via",                        CONF_TYPE_ROUTE,     parse_yaml_route,       offsetof(Route, gw)},
+        { "to",                         CONF_TYPE_ROUTE,     parse_yaml_route,       offsetof(Route, dst)},
+        { "from",                       CONF_TYPE_ROUTE,     parse_yaml_address,     offsetof(Route, prefsrc)},
+        { "table",                      CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, table)},
+        { "type",                       CONF_TYPE_ROUTE,     parse_yaml_route_type,  offsetof(Route, type)},
+        { "scope",                      CONF_TYPE_ROUTE,     parse_yaml_route_scope, offsetof(Route, scope)},
+        { "metric",                     CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, metric)},
+        { "on-link",                    CONF_TYPE_ROUTE,     parse_yaml_bool,        offsetof(Route, onlink)},
+        { "congestion-window",          CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, initcwnd)},
+        { "advertised-receive-window",  CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, initrwnd)},
+        { NULL,                         _CONF_TYPE_INVALID,  0,                      0}
+};
+
 static ParserTable parser_routing_policy_rule_vtable[] = {
         { "from",       CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, from)},
         { "to",         CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, to)},
@@ -225,15 +239,15 @@ static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc,
         return 0;
 }
 
-static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+static int parse_route(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Route *rt = NULL;
+        yaml_node_t *k, *v;
         yaml_node_item_t *i;
         yaml_node_pair_t *p;
-        yaml_node_t *k, *v;
         yaml_node_t *n;
         int r;
 
-        assert(m);
+        assert(config);
         assert(dp);
         assert(node);
         assert(network);
@@ -241,14 +255,21 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 n = yaml_document_get_node(dp, *i);
                 if (n)
-                        (void) parse_route(m, dp, n, network);
+                        (void) parse_route(config, dp, n, network);
         }
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
                 k = yaml_document_get_node(dp, p->key);
                 v = yaml_document_get_node(dp, p->value);
 
                 if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(config, scalar(k));
+                if (!table)
                         continue;
 
                 if (!rt) {
@@ -257,91 +278,10 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                                 return log_oom();
                 }
 
-                if (string_equal(scalar(k), "metric")) {
-                        r = parse_uint32(scalar(v), &rt->metric);
-                        if (r < 0) {
-                                log_warning("Failed to parse route metric='%s'\n", scalar(v));
-                                return r;
-                        }
-                } else if (string_equal(scalar(k), "on-link")) {
-                        r = parse_boolean(scalar(v));
-                        if (r < 0) {
-                                log_warning("Failed to parse route on-link='%s'\n", scalar(v));
-                                return r;
-                        }
-                        rt->onlink = r;
-                } else if (string_equal(scalar(k), "table")) {
-                        r = parse_uint32(scalar(v), &rt->table);
-                        if (r < 0) {
-                                log_warning("Failed to parse route table='%s'\n", scalar(v));
-                                return r;
-                        }
-                } else if (string_equal(scalar(k), "type")) {
-                        r = route_type_to_mode(scalar(v));
-                        if (r < 0) {
-                                log_warning("Failed to parse route type='%s'\n", scalar(v));
-                                return r;
-                        }
-                        rt->type = r;
-                } else if (string_equal(scalar(k), "scope")) {
-                        r = route_scope_type_to_mode(scalar(v));
-                        if (r < 0) {
-                                log_warning("Failed to parse route scope='%s'\n", scalar(v));
-                                return r;
-                        }
-                        rt->scope = r;
-                } else if (string_equal(scalar(k), "congestion-window")) {
-                        r = parse_uint32(scalar(v), &rt->initcwnd);
-                        if (r < 0) {
-                                log_warning("Failed to parse route congestion-window='%s'\n", scalar(v));
-                                return r;
-                        }
-                } else if (string_equal(scalar(k), "advertised-receive-window")) {
-                        r = parse_uint32(scalar(v), &rt->initrwnd);
-                        if (r < 0) {
-                                log_warning("Failed to parse route advertised-receive-window='%s'\n", scalar(v));
-                                return r;
-                        }
-                } else if (string_equal(scalar(k), "from")) {
-                        _auto_cleanup_ IPAddress *address = NULL;
-
-                        r = parse_ip_from_string(scalar(v), &address);
-                        if (r < 0) {
-                                log_warning("Failed to parse %s='%s'", scalar(k), scalar(v));
-                                return r;
-                        }
-
-                        rt->prefsrc = *address;
-                } else if (string_equal("to", scalar(k)) || string_equal("via", scalar(k))) {
-                        _auto_cleanup_ IPAddress *address = NULL;
-                        bool b = false;
-
-                        r = parse_ip_from_string(scalar(v), &address);
-                        if (r < 0) {
-                                if (string_equal("default", scalar(v)))
-                                        b = true;
-                                else {
-                                        log_warning("Failed to parse %s='%s'", scalar(k), scalar(v));
-                                        return r;
-                                }
-                        }
-
-                        if (string_equal("0.0.0.0/0", scalar(v)) || string_equal("::/0", scalar(v)))
-                                b = true;
-
-                        if (string_equal("to", scalar(k))) {
-                                if (address) {
-                                        rt->dst = *address;
-                                        rt->family = address->family;
-                                }
-
-                                rt->to_default = b;
-                        } else {
-                                if (address) {
-                                        rt->gw = *address;
-                                        rt->family = address->family;
-                                }
-                        }
+                t = (uint8_t *) rt + table->offset;
+                if (table->parser) {
+                        (void) table->parser(scalar(k), scalar(v), rt, t, dp, v);
+                        network->modified = true;
                 }
         }
 
@@ -352,6 +292,8 @@ static int parse_route(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, N
                 network->modified = true;
                 steal_pointer(rt);
         }
+
+
         return 0;
 }
 
@@ -560,7 +502,7 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                                 if (r < 0)
                                         return r;
                         } else if (string_equal(scalar(k), "routes")) {
-                                r = parse_route(m, dp, v, network);
+                                r = parse_route(m->route_config, dp, v, network);
                                 if (r < 0)
                                         return r;
                         } else if (string_equal(scalar(k), "routing-policy")) {
@@ -746,6 +688,7 @@ void yaml_manager_free(YAMLManager *p) {
         g_hash_table_destroy(p->match_config);
         g_hash_table_destroy(p->network_config);
         g_hash_table_destroy(p->address_config);
+        g_hash_table_destroy(p->route_config);
         g_hash_table_destroy(p->routing_policy_rule_config);
         g_hash_table_destroy(p->dhcp4_config);
         g_hash_table_destroy(p->dhcp6_config);
@@ -767,6 +710,7 @@ int new_yaml_manager(YAMLManager **ret) {
                  .match_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .network_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .address_config = g_hash_table_new(g_str_hash, g_str_equal),
+                 .route_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .routing_policy_rule_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .dhcp4_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .dhcp6_config = g_hash_table_new(g_str_hash, g_str_equal),
@@ -817,6 +761,13 @@ int new_yaml_manager(YAMLManager **ret) {
         for (size_t i = 0; parser_routing_policy_rule_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->routing_policy_rule_config, (void *) parser_routing_policy_rule_vtable[i].key, &parser_routing_policy_rule_vtable[i])) {
                         log_warning("Failed add key='%s' to routing policy rule table", parser_routing_policy_rule_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        for (size_t i = 0; parser_route_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->route_config, (void *) parser_route_vtable[i].key, &parser_route_vtable[i])) {
+                        log_warning("Failed add key='%s' to route table", parser_route_vtable[i].key);
                         return -EINVAL;
                 }
         }
