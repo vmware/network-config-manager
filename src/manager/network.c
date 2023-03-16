@@ -518,9 +518,15 @@ int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
 int routing_policy_rule_new(RoutingPolicyRule **ret) {
         RoutingPolicyRule *rule;
 
-        rule = new0(RoutingPolicyRule, 1);
+        rule = new(RoutingPolicyRule, 1);
         if (!rule)
                 return -ENOMEM;
+
+        *rule = (RoutingPolicyRule) {
+                 .priority = G_MAXUINT,
+                 .tos = G_MAXUINT,
+                 .fwmark = G_MAXUINT,
+                };
 
         *ret = rule;
         return 0;
@@ -824,8 +830,17 @@ static void append_routing_policy_rules(gpointer key, gpointer value, gpointer u
                 (void ) add_key_to_section(section, "To", to);
         }
 
+        if (rule->priority != G_MAXUINT)
+                (void) add_key_to_section_uint(section, "Priority", rule->priority);
+
         if (rule->table > 0 && rule->table != RT_TABLE_MAIN)
                 (void) add_key_to_section_uint(section, "Table", rule->table);
+
+        if (rule->tos != G_MAXUINT)
+                (void) add_key_to_section_uint(section, "TypeOfService", rule->tos);
+
+        if (rule->fwmark != G_MAXUINT)
+                (void) add_key_to_section_uint(section, "FirewallMark", rule->fwmark);
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)

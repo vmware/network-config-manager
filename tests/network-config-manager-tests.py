@@ -362,6 +362,9 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('RoutingPolicyRule', 'From') == '10.100.1.5/24')
         assert(parser.get('RoutingPolicyRule', 'To') == '10.100.1.5/24')
         assert(parser.get('RoutingPolicyRule', 'Table') == '101')
+        assert(parser.get('RoutingPolicyRule', 'Priority') == '11')
+        assert(parser.get('RoutingPolicyRule', 'TypeOfService') == '31')
+        assert(parser.get('RoutingPolicyRule', 'FirewallMark') == '21')
 
     def test_network_ipv6(self):
         self.copy_yaml_file_to_netmanager_yaml_path('ipv6-config.yml')

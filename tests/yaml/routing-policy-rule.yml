@@ -10,3 +10,6 @@ network:
             - from: 10.100.1.5/24
               to: 10.100.1.5/24
               table: 101
+              priority: 11
+              mark: 21
+              type-of-service: 31
