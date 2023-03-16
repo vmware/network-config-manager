@@ -449,7 +449,6 @@ static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *no
                 k = yaml_document_get_node(dp, p->key);
                 v = yaml_document_get_node(dp, p->value);
 
-
                 table = g_hash_table_lookup(config, scalar(k));
                 if (!table)
                         continue;
@@ -515,6 +514,7 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                                 r = parse_network_config(m, dp, v, network);
                         if (r < 0)
                                 return r;
+
                         /* .link  */
                         link_table = g_hash_table_lookup(m->link_config, scalar(k));
                         if (link_table) {
@@ -720,7 +720,8 @@ int new_yaml_manager(YAMLManager **ret) {
         };
 
         if (!m->network_config || !m->wifi_config || !m->link_config || !m->address_config || !m->dhcp4_config ||
-            !m->dhcp6_config || !m->nameserver_config)
+            !m->dhcp6_config || !m->nameserver_config || !m->route_config || !m->routing_policy_rule_config ||
+            !m->nameserver_config)
                 return log_oom();
 
         for (size_t i = 0; parser_match_vtable[i].key; i++) {
