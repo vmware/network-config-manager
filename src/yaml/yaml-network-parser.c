@@ -114,10 +114,13 @@ static ParserTable parser_route_vtable[] = {
 };
 
 static ParserTable parser_routing_policy_rule_vtable[] = {
-        { "from",       CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, from)},
-        { "to",         CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, to)},
-        { "table",      CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, table)},
-        { NULL,         _CONF_TYPE_INVALID,                0,                  0}
+        { "from",            CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, from)},
+        { "to",              CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, to)},
+        { "table",           CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, table)},
+        { "priority",        CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, priority)},
+        { "type-of-service", CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, tos)},
+        { "mark",            CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, fwmark)},
+        { NULL,              _CONF_TYPE_INVALID,                0,                  0}
 };
 
 static ParserTable parser_link_vtable[] = {

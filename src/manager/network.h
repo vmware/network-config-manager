@@ -172,8 +172,9 @@ typedef struct RoutingPolicyRule {
         char *sport;
         char *dport;
 
-        uint8_t tos;
-        uint8_t type;
+        uint32_t tos;
+        uint32_t type;
+        uint32_t fwmark;
 
         uint32_t table;
         uint32_t priority;
