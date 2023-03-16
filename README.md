@@ -190,65 +190,7 @@ network:
               to: 10.100.1.5/24
               table: 101
 ```
-### Generate WiFi config from yml file
 
-`nmctl` can generate [WPA Supplicant](https://w1.fi/wpa_supplicant/) configuration from yaml file. When a yml file with wifi
-configuration are found it generates a confiration file found in ```/etc/network-config-manager/wpa_supplicant_photon_os.conf``` which is understood by  `wpa_supplicant`.
-
-#### Connecting to a WPA Personal wireless network
-
-```yml
- network:
-  device:
-     name: wlan1
-     dhcp: yes
-     use-dns: no
-     dhcp4-use-mtu: yes
-     dhcp4-use-domain: yes
-     gateway: 192.168.1.1/24
-     gateway-onlink: yes
-     nameservers: [192.168.0.1, 8.8.8.8]
-     access-points:
-         - ssid-name: "network_ssid_name1"
-           password: "test123"
-         - ssid-name: "network_ssid_name2"
-           password: "test456"
-```
-
-#### WPA Enterprise wireless networks
-
-```yml
- network:
-  device:
-     name: wlan0
-     dhcp: yes
-     access-points:
-         - ssid-name: "network_ssid_name1"
-           password: "test123"
-           method: ttls
-           anonymous-identity: "@test.example.com"
-           identity: "max@internal.example.com"
-```
-
-#### WPA-EAP and TLS:
-
-```yml
-
- network:
-  device:
-     name: wlan1
-     dhcp: yes
-     access-points:
-         - ssid-name: "network_ssid_name1"
-           key-management: eap
-           method: tls
-           anonymous-identity: "@test.example.com"
-           identity: "cert-max@test.example.com"
-           ca-certificate: /etc/ssl/cust-cacrt.pem
-           client-certificate: /etc/ssl/cust-crt.pem
-           client-key: /etc/ssl/cust-key.pem
-           client-key-password: "QZTrSEtq:h_d.W7_"
-```
 ### Generate link config from yml file:
 
 `nmctl` can generate link configuration from YAML description.
