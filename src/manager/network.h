@@ -276,14 +276,6 @@ void network_free(Network *n);
 DEFINE_CLEANUP(Network*, network_free);
 void g_network_free(gpointer data);
 
-typedef struct Networks {
-    GHashTable *networks;
-} Networks;
-
-int networks_new(Networks **ret);
-void networks_free(Networks *n);
-DEFINE_CLEANUP(Networks*, networks_free);
-
 int routing_policy_rule_new(RoutingPolicyRule **ret);
 void routing_policy_rule_free(RoutingPolicyRule *rule);
 DEFINE_CLEANUP(RoutingPolicyRule*, routing_policy_rule_free);

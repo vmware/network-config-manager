@@ -418,6 +418,7 @@ int parse_yaml_addresses(const char *key,
                          void *userdata,
                          yaml_document_t *doc,
                          yaml_node_t *node) {
+
         yaml_node_item_t *i;
         Network *network;
         int r;
@@ -480,6 +481,7 @@ int parse_yaml_domains(const char *key,
                        void *userdata,
                        yaml_document_t *doc,
                        yaml_node_t *node) {
+
         yaml_node_item_t *i;
         Network *network;
 

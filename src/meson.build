@@ -67,8 +67,12 @@ network_config_manager_sources = files('''
         lib-network/netlink/network-route.c
         lib-network/networkd/networkd-api.h
         lib-network/networkd/networkd-api.c
+        yaml/yaml-manager.c
+        yaml/yaml-manager.h
         yaml/yaml-network-parser.h
         yaml/yaml-network-parser.c
+        yaml/yaml-link-parser.c
+        yaml/yaml-link-parser.h
         yaml/yaml-parser.c
         yaml/yaml-parser.h
         udev/udev-hwdb.h

@@ -670,29 +670,6 @@ void g_network_free (gpointer data) {
         network_freep(&n);
 }
 
-int networks_new(Networks **ret) {
-        _auto_cleanup_ Networks *n = NULL;
-
-        n = new0(Networks, 1);
-        if (!n)
-                return log_oom();
-
-        n->networks = g_hash_table_new(g_str_hash, g_str_equal);
-        if (!n->networks)
-             return log_oom();
-
-        *ret = steal_pointer(n);
-        return 0;
-}
-
-void networks_free(Networks *n) {
-        if (!n)
-                return;
-
-        g_hash_table_unref(n->networks);
-        free(n);
-}
-
 int parse_address_from_string_and_add(const char *s, Set *a) {
         _auto_cleanup_ IPAddress *address = NULL;
         int r;
