@@ -207,6 +207,45 @@ network:
       generic-segmentation-offload: true
       generic-receive-offload: true
       large-receive-offload: true
+      ifname: test99
+      alias: ifalias
+      description: testconf
+      mtu: 10M
+      bitspersecond: 5G
+      duplex: full
+      wakeonlan: phy unicast broadcast multicast arp magic secureon
+      wakeonlan-password: cb:a9:87:65:43:21
+      port: mii
+      advertise: 10baset-half 10baset-full 100baset-half 100baset-full 1000baset-half 1000baset-full 10000baset-full 2500basex-full 1000basekx-full 10000basekx4-full 10000basekr-full 10000baser-fec 20000basemld2-full 20000basekr2-full
+      auto-negotiation: no
+      receive-vlan-ctag-hardware-acceleration: yes
+      transmit-vlan-ctag-hardware-acceleration: no
+      receive-vlan-ctag-filter: no
+      transmit-vlan-stag-hardware-acceleration: yes
+      ntuple-filter: no
+      use-adaptive-rx-coalesce: yes
+      use-adaptive-tx-coalesce: yes
+      macaddress-policy: none
+      macaddress: 00:0c:29:3a:bc:11
+      namepolicy: kernel database onboard slot path mac keep
+      name: dm1
+      alternative-names-policy: database onboard slot path mac
+      alternative-name: demo1
+      rx-buffer-size: max
+      rx-mini-buffer-size: 65335
+      rx-jumbo-buffer-size: 88776555
+      tx-buffer-size: max
+      transmit-queues: 4096
+      receive-queues: 4096
+      transmit-queue-length: 1024
+      tx-flow-control: no
+      rx-flow-control: yes
+      auto-negotiation-flow-control: yes
+      generic-segment-offload-maxbytes: 65535
+      generic-segment-offload-max-segments: 1024
+      rx-channels: max
+      tx-channels: 656756677
+      other-channels: 429496729
  ```
 ### Generate network config from kernel command line
 
