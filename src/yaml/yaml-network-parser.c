@@ -123,78 +123,6 @@ static ParserTable parser_routing_policy_rule_vtable[] = {
         { NULL,              _CONF_TYPE_INVALID,                0,                  0}
 };
 
-static ParserTable parser_link_vtable[] = {
-        { "ifname",                                    CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, ifname)},
-        { "alias",                                     CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, alias)},
-        { "description",                               CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, desc)},
-        { "mtu",                                       CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, mtu)},
-        { "bitspersecond",                             CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, bps)},
-        { "duplex",                                    CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, duplex)},
-        { "wakeonlan",                                 CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wol)},
-        { "wakeonlan-password",                        CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, wolp)},
-        { "port",                                      CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, port)},
-        { "advertise",                                 CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, advertise)},
-        { "auto-negotiation",                          CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, auto_nego)},
-        { "receive-checksum-offload",                  CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, rx_csum_off)},
-        { "transmit-checksum-offload",                 CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, tx_csum_off)},
-        { "tcp-segmentation-offload",                  CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, tcp_seg_off)},
-        { "tcp6-segmentation-offload",                 CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, tcp6_seg_off)},
-        { "generic-segmentation-offload",              CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, gen_seg_off)},
-        { "generic-receive-offload",                   CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, gen_rx_off)},
-        { "generic-receive-offload-hardware",          CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, gen_rx_off_hw)},
-        { "large-receive-offload",                     CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, large_rx_off)},
-        { "receive-vlan-ctag-hardware-acceleration",   CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, rx_vlan_ctag_hw_acl)},
-        { "transmit-vlan-ctag-hardware-acceleration",  CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, tx_vlan_ctag_hw_acl)},
-        { "receive-vlan-ctag-filter",                  CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, rx_vlan_ctag_fltr)},
-        { "transmit-vlan-stag-hardware-acceleration",  CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, tx_vlan_stag_hw_acl)},
-        { "ntuple-filter",                             CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, n_tpl_fltr)},
-        { "use-adaptive-rxcoalesce",                   CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, use_adpt_rx_coal)},
-        { "use-adaptive-txcoalesce",                   CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, use_adpt_tx_coal)},
-        { "macaddress-policy",                         CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, macpolicy)},
-        { "macaddress",                                CONF_TYPE_LINK,           parse_yaml_mac_address,             offsetof(NetDevLink, macaddr)},
-        { "name-policy",                               CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, namepolicy)},
-        { "set-name",                                  CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, name)},
-        { "alternative-namespolicy",                   CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, altnamepolicy)},
-        { "alternative-name",                          CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, altname)},
-        { "rx-buffer-size",                            CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_buf)},
-        { "rx-mini-buffer",                            CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_mini_buf)},
-        { "rx-jumbo-buffer",                           CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_jumbo_buf)},
-        { "tx-buffer",                                 CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_buf)},
-        { "transmit-queues",                           CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, tx_queues)},
-        { "receive-queues",                            CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, rx_queues)},
-        { "transmit-queue-length",                     CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, tx_queue_len)},
-        { "tx-flow-control",                           CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, tx_flow_ctrl)},
-        { "rx-flow-control",                           CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, rx_flow_ctrl)},
-        { "autonegotiation-flow-control",              CONF_TYPE_LINK,           parse_yaml_bool,                    offsetof(NetDevLink, auto_flow_ctrl)},
-        { "generic-segmentoffload-max-bytes",          CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, gen_seg_off_bytes)},
-        { "generic-segmentoffload-max-segments",       CONF_TYPE_LINK,           parse_yaml_uint32,                  offsetof(NetDevLink, gen_seg_off_seg)},
-        { "rx-channels",                               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_chnl)},
-        { "tx-channels",                               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_chnl)},
-        { "other-channels",                            CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, otr_chnl)},
-        { "combined-channels",                         CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, comb_chnl)},
-        { "rx-coalesce",                               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coal)},
-        { "rx-coalesce-irq",                           CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coal_irq)},
-        { "rx-coalesce-low",                           CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coal_low)},
-        { "rx-coalesce-high",                          CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coal_high)},
-        { "tx-coalesce",                               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coal)},
-        { "tx-coalesce-irq",                           CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coal_irq)},
-        { "tx-coalesce-low",                           CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coal_low)},
-        { "tx-coalesce-high",                          CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coal_high)},
-        { "rx-max-coalesced-frames",                   CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_frames)},
-        { "rx-max-coalesced-irq-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_irq_frames)},
-        { "rx-max-coalesced-low-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_low_frames)},
-        { "rx-max-coalesced-high-frames",              CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, rx_coald_high_frames)},
-        { "tx-max-coalesced-frames",                   CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_frames)},
-        { "tx-max-coalesced-irq-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_irq_frames)},
-        { "tx-max-coalesced-low-frames",               CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_low_frames)},
-        { "tx-max-coalesced-high-frames",              CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, tx_coald_high_frames)},
-        { "coalesce-packetrate-low",                   CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, coal_pkt_rate_low)},
-        { "coalesce-packetrate-high",                  CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, coal_pkt_rate_high)},
-        { "coalesce-packetrate-sample-interval",       CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, coal_pkt_rate_smpl_itrvl)},
-        { "statistics-block-coalesce",                 CONF_TYPE_LINK,           parse_yaml_uint32_or_max,           offsetof(NetDevLink, sts_blk_coal)},
-        { NULL,                                        _CONF_TYPE_INVALID,       0,                                  0}
-};
-
 static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
         yaml_node_pair_t *entry;
 
@@ -550,7 +478,7 @@ static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t
         return 0;
 }
 
-static int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
+int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
         yaml_node_pair_t *p;
         yaml_node_t *n;
         int r;
@@ -586,146 +514,8 @@ static int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_
         return 0;
 }
 
-static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *networks) {
-        yaml_node_item_t *i;
-        yaml_node_pair_t *p;
-        yaml_node_t *n;
-
+int yaml_register_network(YAMLManager *m) {
         assert(m);
-        assert(dp);
-        assert(node);
-        assert(networks);
-
-        switch (node->type) {
-        case YAML_NO_NODE:
-        case YAML_SCALAR_NODE:
-                break;
-        case YAML_SEQUENCE_NODE: {
-                for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
-                        n = yaml_document_get_node(dp, *i);
-                        if (n)
-                                (void) parse_yaml_node(m, dp, n, networks);
-                }
-        }
-                break;
-        case YAML_MAPPING_NODE:
-                for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
-                        n = yaml_document_get_node(dp, p->key);
-
-                        if (string_equal(scalar(n), "ethernets")) {
-                                n = yaml_document_get_node(dp, p->value);
-                                if (n)
-                                        (void) parse_ethernet_config(m, dp, n, networks);
-                        } else {
-                                n = yaml_document_get_node(dp, p->value);
-                                if (n)
-                                        (void) parse_yaml_node(m, dp, n, networks);
-                        }
-                }
-                break;
-                default:
-                        log_warning("Failed to parse node type: '%d'", node->type);
-                        break;
-        }
-
-        return 0;
-}
-
-static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Networks *n) {
-        return parse_yaml_node(m, dp, yaml_document_get_root_node(dp), n);
-}
-
-int parse_yaml_file(const char *file, Networks **n) {
-        _cleanup_(yaml_manager_freep) YAMLManager *m = NULL;
-        _cleanup_(networks_freep) Networks *networks = NULL;
-        _auto_cleanup_fclose_ FILE *f = NULL;
-        yaml_document_t document;
-        yaml_parser_t parser;
-        bool done = false;
-        int r = 0;
-
-        assert(file);
-        assert(n);
-
-        r = new_yaml_manager(&m);
-        if (r < 0)
-                return r;
-
-        f = fopen(file, "r");
-        if (!f) {
-                log_warning("Failed to open yaml config file: %s", file);
-                return -errno;
-        }
-
-        assert(yaml_parser_initialize(&parser));
-        yaml_parser_set_input_file(&parser, f);
-
-        r = networks_new(&networks);
-        if (r < 0)
-                return r;
-
-        for (;!done;) {
-                if (!yaml_parser_load(&parser, &document)) {
-                        r = -EINVAL;
-                        break;
-                }
-
-                done = !yaml_document_get_root_node(&document);
-                if (!done)
-                        r = parse_yaml_document(m, &document, networks);
-
-                yaml_document_delete(&document);
-        }
-
-        yaml_parser_delete(&parser);
-        if (r >= 0)
-                *n = steal_pointer(networks);
-
-        return r;
-}
-
-void yaml_manager_free(YAMLManager *p) {
-        if (!p)
-                return;
-
-        g_hash_table_destroy(p->match_config);
-        g_hash_table_destroy(p->network_config);
-        g_hash_table_destroy(p->address_config);
-        g_hash_table_destroy(p->route_config);
-        g_hash_table_destroy(p->routing_policy_rule_config);
-        g_hash_table_destroy(p->dhcp4_config);
-        g_hash_table_destroy(p->dhcp6_config);
-        g_hash_table_destroy(p->nameserver_config);
-        g_hash_table_destroy(p->wifi_config);
-        g_hash_table_destroy(p->link_config);
-
-        free(p);
-}
-
-int new_yaml_manager(YAMLManager **ret) {
-        _cleanup_(yaml_manager_freep) YAMLManager *m = NULL;
-
-        m = new(YAMLManager, 1);
-        if (!m)
-                return log_oom();
-
-        *m = (YAMLManager) {
-                 .match_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .network_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .address_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .route_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .routing_policy_rule_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .dhcp4_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .dhcp6_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .nameserver_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .wifi_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .link_config = g_hash_table_new(g_str_hash, g_str_equal),
-        };
-
-        if (!m->network_config || !m->wifi_config || !m->link_config || !m->address_config || !m->dhcp4_config ||
-            !m->dhcp6_config || !m->nameserver_config || !m->route_config || !m->routing_policy_rule_config ||
-            !m->nameserver_config)
-                return log_oom();
 
         for (size_t i = 0; parser_match_vtable[i].key; i++) {
                if (!g_hash_table_insert(m->match_config, (void *) parser_match_vtable[i].key, &parser_match_vtable[i])) {
@@ -790,13 +580,5 @@ int new_yaml_manager(YAMLManager **ret) {
                 }
         }
 
-        for (size_t i = 0; parser_link_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->link_config, (void *) parser_link_vtable[i].key, &parser_link_vtable[i])) {
-                        log_warning("Failed add key='%s' to link table", parser_link_vtable[i].key);
-                        return -EINVAL;
-                }
-        }
-
-        *ret = steal_pointer(m);
         return 0;
 }

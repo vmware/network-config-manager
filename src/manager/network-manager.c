@@ -24,7 +24,7 @@
 #include "networkd-api.h"
 #include "parse-util.h"
 #include "string-util.h"
-#include "yaml-network-parser.h"
+#include "yaml-manager.h"
 
 static const Config network_ctl_to_network_section_config_table[] = {
                 { "set-lla",           "LinkLocalAddressing"},
