@@ -394,7 +394,7 @@ static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *no
         return 0;
 }
 
-static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         yaml_node_pair_t *p;
         yaml_node_t *k, *v;
         int r;
