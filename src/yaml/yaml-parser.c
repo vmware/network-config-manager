@@ -530,17 +530,24 @@ int parse_yaml_scalar_or_sequence(const char *key,
 
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
+                _auto_cleanup_ char *c = NULL;
+
+                c = strdup(scalar(entry));
+                if (!c)
+                        return log_oom();
 
                 if (!*s) {
-                        *s = strv_new(strdup(scalar(entry)));
+                        *s = strv_new(c);
                         if (!*s)
                                 return log_oom();
                 } else {
-                        r = strv_add(s, strdup(scalar(entry)));
+                        r = strv_add(s, strdup(c));
                         if (r < 0)
                                 return r;
                 }
-        }
+
+                steal_pointer(c);
+       }
 
         return 0;
 }
