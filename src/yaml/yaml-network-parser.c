@@ -394,7 +394,7 @@ static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *no
         return 0;
 }
 
-static int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         yaml_node_pair_t *p;
         yaml_node_t *k, *v;
         int r;
@@ -516,6 +516,15 @@ int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
 
 int yaml_register_network(YAMLManager *m) {
         assert(m);
+        assert(m->match_config);
+        assert(m->network_config);
+        assert(m->dhcp4_config);
+        assert(m->dhcp6_config);
+        assert(m->address_config);
+        assert(m->routing_policy_rule_config);
+        assert(m->route_config);
+        assert(m->nameserver_config);
+        assert(m->wifi_config);
 
         for (size_t i = 0; parser_match_vtable[i].key; i++) {
                if (!g_hash_table_insert(m->match_config, (void *) parser_match_vtable[i].key, &parser_match_vtable[i])) {
