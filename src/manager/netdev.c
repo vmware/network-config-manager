@@ -240,6 +240,7 @@ void netdev_free(NetDev *n) {
 
         free(n->ifname);
         free(n->mac);
+        free(n->master);
 
         free(n);
 }

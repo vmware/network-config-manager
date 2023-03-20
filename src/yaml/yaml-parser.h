@@ -8,10 +8,12 @@
 
 typedef enum ConfType {
         CONF_TYPE_NETWORK,
+        CONF_TYPE_NETDEV,
         CONF_TYPE_WIFI,
         CONF_TYPE_ROUTE,
         CONF_TYPE_ROUTING_POLICY_RULE,
         CONF_TYPE_LINK,
+        CONF_TYPE_NETDEV_VLAN,
         _CONF_TYPE_MAX,
         _CONF_TYPE_INVALID = -1,
 } ConfType;

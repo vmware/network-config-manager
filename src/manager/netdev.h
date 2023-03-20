@@ -164,6 +164,7 @@ typedef struct IPVLan {
 
 typedef struct NetDev {
         char *ifname;
+        char *master;
         char *mac;
 
         /* NetDev */

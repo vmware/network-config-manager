@@ -2,7 +2,7 @@
 #include "alloc-util.h"
 #include "device.h"
 
-int device_new_from_ifname(sd_device **ret, char *ifname) {
+int device_new_from_ifname(sd_device **ret, const char *ifname) {
         _cleanup_(sd_device_unrefp) sd_device *dev = NULL;
         _auto_cleanup_ char *path = NULL;
         int r;

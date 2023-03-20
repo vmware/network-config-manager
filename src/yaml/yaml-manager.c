@@ -4,6 +4,7 @@
 
 #include "yaml-manager.h"
 #include "yaml-network-parser.h"
+#include "yaml-netdev-parser.h"
 #include "yaml-link-parser.h"
 #include "alloc-util.h"
 #include "string-util.h"
@@ -39,6 +40,10 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
                                         (void) parse_ethernet_config(m, dp, n, networks);
+                        } else if (string_equal(scalar(n), "vlans")) {
+                                n = yaml_document_get_node(dp, p->value);
+                                if (n)
+                                        (void) parse_netdev_config(m, dp, n, networks);
                         } else {
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
@@ -142,8 +147,8 @@ void yaml_manager_free(YAMLManager *p) {
         g_hash_table_destroy(p->dhcp4_config);
         g_hash_table_destroy(p->dhcp6_config);
         g_hash_table_destroy(p->nameserver_config);
-        g_hash_table_destroy(p->wifi_config);
         g_hash_table_destroy(p->link_config);
+        g_hash_table_destroy(p->netdev_vlan_config);
 
         free(p);
 }
@@ -165,11 +170,9 @@ int yaml_manager_new(YAMLManager **ret) {
                  .dhcp4_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .dhcp6_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .nameserver_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .wifi_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .link_config = g_hash_table_new(g_str_hash, g_str_equal),
         };
 
-        if (!m->network_config || !m->wifi_config || !m->link_config || !m->address_config || !m->dhcp4_config ||
+        if (!m->network_config || !m->address_config || !m->dhcp4_config ||
             !m->dhcp6_config || !m->nameserver_config || !m->route_config || !m->routing_policy_rule_config ||
             !m->nameserver_config)
                 return log_oom();
@@ -179,6 +182,10 @@ int yaml_manager_new(YAMLManager **ret) {
                 return r;
 
         r = yaml_register_link(m);
+        if (r < 0)
+                return r;
+
+        r = yaml_register_netdev(m);
         if (r < 0)
                 return r;
 

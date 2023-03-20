@@ -86,7 +86,10 @@ static ParserTable parser_link_vtable[] = {
 
 int yaml_register_link(YAMLManager *m) {
         assert(m);
-        assert(m->link_config);
+
+        m->link_config = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->link_config)
+                return log_oom();
 
         for (size_t i = 0; parser_link_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->link_config, (void *) parser_link_vtable[i].key, &parser_link_vtable[i])) {

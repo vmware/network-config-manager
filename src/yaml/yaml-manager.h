@@ -26,6 +26,7 @@ typedef struct YAMLManager {
         GHashTable *routing_policy_rule_config;
         GHashTable *wifi_config;
         GHashTable *link_config;
+        GHashTable *netdev_vlan_config;
 } YAMLManager;
 
 int yaml_manager_new(YAMLManager **ret);

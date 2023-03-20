@@ -202,6 +202,7 @@ class TestNetworkConfigManagerYAML:
         "network-link.yml",
         "network-network.yml",
         "routing-policy-rule.yml",
+        "vlan.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -379,6 +380,26 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'Destination') == '::/0')
         assert(parser.get('Route', 'Gateway') == '2001:cafe:face::1')
         assert(parser.get('Route', 'Onlink') == 'yes')
+
+    def test_netdev_vlan(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('vlan.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-vlan10.netdev') == True)
+
+        assert(unit_exist('10-test99.network') == True)
+        assert(unit_exist('10-vlan10.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Network', 'VLAN') == 'vlan10')
+
+        parsera = configparser.ConfigParser()
+        parsera.read(os.path.join(networkd_unit_file_path, '10-vlan10.netdev'))
+
+        assert(parsera.get('VLAN', 'Id') == '10')
+
 
 class TestKernelCommandLine:
     def teardown_method(self):

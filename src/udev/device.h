@@ -6,4 +6,4 @@
 
 #include <systemd/sd-device.h>
 
-int device_new_from_ifname(sd_device **ret, char *ifname);
+int device_new_from_ifname(sd_device **ret, const char *ifname);

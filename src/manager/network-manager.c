@@ -6,12 +6,12 @@
 #include <net/ethernet.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <systemd/sd-device.h>
 
 #include "alloc-util.h"
 #include "config-file.h"
 #include "config-parser.h"
 #include "dbus.h"
+#include "device.h"
 #include "dracut-parser.h"
 #include "file-util.h"
 #include "log.h"
@@ -1763,7 +1763,7 @@ int manager_edit_link_config(const IfNameIndex *ifidx) {
 
         assert(ifidx);
 
-        r = sd_device_new_from_ifname(&sd_device, ifidx->ifname);
+        r = device_new_from_ifname(&sd_device, ifidx->ifname);
         if (r < 0)
              return r;
 
@@ -1997,6 +1997,21 @@ int manager_generate_network_config_from_yaml(const char *file) {
                 return r;
         }
 
+        /* generate netdev */
+        g_hash_table_iter_init (&iter, n->networks);
+        for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+                Network *net = (Network *) v;
+
+                if (net->netdev) {
+                        r = generate_netdev_config(net->netdev);
+                        if (r < 0) {
+                                log_warning("Failed to generate network configuration for file '%s': %s", file, strerror(-r));
+                                return r;
+                        }
+                }
+        }
+
+        /* generate network */
         g_hash_table_iter_init (&iter, n->networks);
         for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
                 Network *net = (Network *) v;
@@ -2005,14 +2020,6 @@ int manager_generate_network_config_from_yaml(const char *file) {
                 if (r < 0) {
                         log_warning("Failed to generate network configuration for file '%s': %s", file, strerror(-r));
                         return r;
-                }
-
-                if (net->access_points) {
-                        r = generate_wifi_config(net, &wifi_config);
-                        if (r < 0)
-                                return r;
-
-                        return manager_write_wifi_config(net, wifi_config);
                 }
 
                 if (net->link) {
@@ -2030,6 +2037,36 @@ int manager_generate_network_config_from_yaml(const char *file) {
                                 log_warning("Failed to configure device: %s", strerror(-r));
                                 return r;
                         }
+                }
+        }
+
+        /* generate master device network section  */
+        g_hash_table_iter_init (&iter, n->networks);
+        for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+                Network *net = (Network *) v;
+
+                if (net->netdev && net->netdev->master) {
+                        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
+                        _auto_cleanup_ IfNameIndex *p = NULL;
+                        _auto_cleanup_ char *network = NULL;
+
+                        r = parse_ifname_or_index(net->netdev->master, &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", net->netdev->master);
+                                return r;
+                        }
+
+                        r = netdev_ctl_name_to_configs_new(&m);
+                        if (r < 0)
+                                return r;
+
+                        r = create_or_parse_network_file(p, &network);
+                        if (r < 0)
+                                return r;
+
+                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(net->netdev->kind)), net->netdev->ifname);
+                        if (r < 0)
+                                return r;
                 }
         }
 

@@ -604,7 +604,7 @@ int network_new(Network **ret) {
                 .parser_type = _PARSER_TYPE_INVALID,
         };
 
-        r = set_new(&n->addresses, g_direct_hash, g_direct_equal);
+        r = set_new(&n->addresses, g_int64_hash, g_int64_equal);
         if (r < 0)
                 return r;
 
@@ -616,7 +616,7 @@ int network_new(Network **ret) {
         if (!n->routing_policy_rules)
                 return log_oom();
 
-        r = set_new(&n->nameservers, g_direct_hash, g_direct_equal);
+        r = set_new(&n->nameservers, g_bytes_hash, g_bytes_equal);
         if (r < 0)
                 return r;
 
@@ -1157,12 +1157,6 @@ int generate_network_config(Network *n) {
 
                 set_foreach(n->ntps, append_ntp, c);
                 r = set_config(key_file, "Network", "NTP", c->str);
-                if (r < 0)
-                        return r;
-        }
-
-        if (n->netdev) {
-                r = set_config(key_file, "Network", netdev_kind_to_name(n->netdev->kind), n->netdev->ifname);
                 if (r < 0)
                         return r;
         }
