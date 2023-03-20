@@ -248,7 +248,7 @@ network:
       other-channels: 429496729
  ```
  
-### Generate VLAN coniguration
+### Generate VLAN configuration
  Configue VLan with id 10 and set it's master device to `ens33` .
  ```yml
  network:
@@ -262,7 +262,7 @@ network:
               search: [ example.com ]
           routes:
               - to: default
-                via: 10.3.0.1
+                via: 192.168.1.1
   vlans:
       vlan10:
           id: 10
