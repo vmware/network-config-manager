@@ -247,7 +247,7 @@ network:
       tx-channels: 656756677
       other-channels: 429496729
  ```
- 
+
 ### Generate VLAN configuration
  Configue VLan with id 10 and set it's master device to `ens33` .
  ```yml
