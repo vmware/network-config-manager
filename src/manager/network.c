@@ -1161,12 +1161,6 @@ int generate_network_config(Network *n) {
                         return r;
         }
 
-        if (n->netdev) {
-                r = set_config(key_file, "Network", netdev_kind_to_name(n->netdev->kind), n->netdev->ifname);
-                if (r < 0)
-                        return r;
-        }
-
         if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID || n->dhcp4_use_dns >= 0 || n->dhcp4_use_domains >= 0 ||
             n->dhcp4_use_ntp >= 0 || n->dhcp4_use_mtu >= 0 || n->dhcp4_route_metric > 0 || n->dhcp4_use_routes >= 0 || n->dhcp4_use_hostname >= 0 ||
             n->dhcp4_send_hostname >= 0 || n->dhcp4_hostname ) {

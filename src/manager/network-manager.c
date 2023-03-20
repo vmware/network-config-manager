@@ -1997,6 +1997,21 @@ int manager_generate_network_config_from_yaml(const char *file) {
                 return r;
         }
 
+        /* generate netdev */
+        g_hash_table_iter_init (&iter, n->networks);
+        for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+                Network *net = (Network *) v;
+
+                if (net->netdev) {
+                        r = generate_netdev_config(net->netdev);
+                        if (r < 0) {
+                                log_warning("Failed to generate network configuration for file '%s': %s", file, strerror(-r));
+                                return r;
+                        }
+                }
+        }
+
+        /* generate network */
         g_hash_table_iter_init (&iter, n->networks);
         for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
                 Network *net = (Network *) v;
@@ -2007,29 +2022,44 @@ int manager_generate_network_config_from_yaml(const char *file) {
                         return r;
                 }
 
-                if (net->access_points) {
-                        r = generate_wifi_config(net, &wifi_config);
-                        if (r < 0)
-                                return r;
-
-                        return manager_write_wifi_config(net, wifi_config);
-                }
-
                 if (net->link) {
                         _auto_cleanup_ IfNameIndex *p = NULL;
-                        NetDevLink *l = net->link;
 
                         r = parse_ifname_or_index(net->ifname, &p);
                         if (r < 0) {
                                 log_warning("Failed to find device '%s': %s", net->ifname, strerror(-r));
                                 continue;
                         }
+                }
+        }
 
-                        r = netdev_link_configure(p, l);
+        /* generate master device network section  */
+        g_hash_table_iter_init (&iter, n->networks);
+        for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+                Network *net = (Network *) v;
+
+                if (net->netdev && net->netdev->master) {
+                        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
+                        _auto_cleanup_ IfNameIndex *p = NULL;
+                        _auto_cleanup_ char *network = NULL;
+
+                        r = parse_ifname_or_index(net->netdev->master, &p);
                         if (r < 0) {
-                                log_warning("Failed to configure device: %s", strerror(-r));
+                                log_warning("Failed to find device: %s", net->netdev->master);
                                 return r;
                         }
+
+                        r = netdev_ctl_name_to_configs_new(&m);
+                        if (r < 0)
+                                return r;
+
+                        r = create_or_parse_network_file(p, &network);
+                        if (r < 0)
+                                return r;
+
+                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(net->netdev->kind)), net->netdev->ifname);
+                        if (r < 0)
+                                return r;
                 }
         }
 
