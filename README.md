@@ -250,7 +250,7 @@ network:
  
 ### Generate VLAN coniguration
  Configue VLan with id 10 and set it's master device to `ens33` .
- ```
+ ```yml
  network:
   version: 2
   renderer: networkd
