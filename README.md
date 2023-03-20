@@ -247,6 +247,32 @@ network:
       tx-channels: 656756677
       other-channels: 429496729
  ```
+ 
+### Generate VLAN coniguration
+ Configue VLan with id 10 and set it's master device to `ens33` .
+ ```
+ network:
+  version: 2
+  renderer: networkd
+  ethernets:
+     ens33:
+          addresses: [ "192.168.10.2/23" ]
+          nameservers:
+              addresses: [ "8.8.8.8", "8.8.4.4" ]
+              search: [ example.com ]
+          routes:
+              - to: default
+                via: 10.3.0.1
+  vlans:
+      vlan10:
+          id: 10
+          link: ens33
+          addresses: [ "192.168.10.5/24" ]
+          nameservers:
+              addresses: [ "8.8.8.8" ]
+              search: [ domain1.example.com, domain2.example.com ]
+
+ ```
 ### Generate network config from kernel command line
 
 `nmctl` understands kernel command line specified in [dracut's](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) network configuration format and can generate [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html)'s configuration while the system boots and will persist between reboots.
