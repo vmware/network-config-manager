@@ -2024,11 +2024,18 @@ int manager_generate_network_config_from_yaml(const char *file) {
 
                 if (net->link) {
                         _auto_cleanup_ IfNameIndex *p = NULL;
+                        NetDevLink *l = net->link;
 
                         r = parse_ifname_or_index(net->ifname, &p);
                         if (r < 0) {
                                 log_warning("Failed to find device '%s': %s", net->ifname, strerror(-r));
                                 continue;
+                        }
+
+                        r = netdev_link_configure(p, l);
+                        if (r < 0) {
+                                log_warning("Failed to configure device: %s", strerror(-r));
+                                return r;
                         }
                 }
         }

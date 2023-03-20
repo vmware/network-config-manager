@@ -604,7 +604,7 @@ int network_new(Network **ret) {
                 .parser_type = _PARSER_TYPE_INVALID,
         };
 
-        r = set_new(&n->addresses, g_direct_hash, g_direct_equal);
+        r = set_new(&n->addresses, g_int64_hash, g_int64_equal);
         if (r < 0)
                 return r;
 
@@ -616,7 +616,7 @@ int network_new(Network **ret) {
         if (!n->routing_policy_rules)
                 return log_oom();
 
-        r = set_new(&n->nameservers, g_direct_hash, g_direct_equal);
+        r = set_new(&n->nameservers, g_bytes_hash, g_bytes_equal);
         if (r < 0)
                 return r;
 
