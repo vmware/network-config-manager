@@ -65,7 +65,6 @@ int parse_yaml_uint32(const char *key,
         }
 
         *p = k;
-
         return 0;
 }
 

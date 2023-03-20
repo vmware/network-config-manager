@@ -75,6 +75,8 @@ network_config_manager_sources = files('''
         yaml/yaml-link-parser.h
         yaml/yaml-parser.c
         yaml/yaml-parser.h
+        yaml/yaml-netdev-parser.c
+        yaml/yaml-netdev-parser.h
         udev/udev-hwdb.h
         udev/udev-hwdb.c
         udev/device.h
