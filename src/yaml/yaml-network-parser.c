@@ -524,7 +524,6 @@ int yaml_register_network(YAMLManager *m) {
         assert(m->routing_policy_rule_config);
         assert(m->route_config);
         assert(m->nameserver_config);
-        assert(m->wifi_config);
 
         for (size_t i = 0; parser_match_vtable[i].key; i++) {
                if (!g_hash_table_insert(m->match_config, (void *) parser_match_vtable[i].key, &parser_match_vtable[i])) {
@@ -578,13 +577,6 @@ int yaml_register_network(YAMLManager *m) {
         for (size_t i = 0; parser_nameservers_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->nameserver_config, (void *) parser_nameservers_vtable[i].key, &parser_nameservers_vtable[i])) {
                         log_warning("Failed add key='%s' to nameserver table", parser_nameservers_vtable[i].key);
-                        return -EINVAL;
-                }
-        }
-
-        for (size_t i = 0; parser_wifi_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->wifi_config, (void *) parser_wifi_vtable[i].key, &parser_wifi_vtable[i])) {
-                        log_warning("Failed add key='%s' to wifi table", parser_wifi_vtable[i].key);
                         return -EINVAL;
                 }
         }
