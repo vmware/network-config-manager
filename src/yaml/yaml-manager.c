@@ -142,7 +142,6 @@ void yaml_manager_free(YAMLManager *p) {
         g_hash_table_destroy(p->dhcp4_config);
         g_hash_table_destroy(p->dhcp6_config);
         g_hash_table_destroy(p->nameserver_config);
-        g_hash_table_destroy(p->wifi_config);
         g_hash_table_destroy(p->link_config);
 
         free(p);
@@ -165,8 +164,6 @@ int yaml_manager_new(YAMLManager **ret) {
                  .dhcp4_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .dhcp6_config = g_hash_table_new(g_str_hash, g_str_equal),
                  .nameserver_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .wifi_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .link_config = g_hash_table_new(g_str_hash, g_str_equal),
         };
 
         if (!m->network_config || !m->wifi_config || !m->link_config || !m->address_config || !m->dhcp4_config ||
