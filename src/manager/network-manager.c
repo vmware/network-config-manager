@@ -6,12 +6,12 @@
 #include <net/ethernet.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <systemd/sd-device.h>
 
 #include "alloc-util.h"
 #include "config-file.h"
 #include "config-parser.h"
 #include "dbus.h"
+#include "device.h"
 #include "dracut-parser.h"
 #include "file-util.h"
 #include "log.h"
@@ -1763,7 +1763,7 @@ int manager_edit_link_config(const IfNameIndex *ifidx) {
 
         assert(ifidx);
 
-        r = sd_device_new_from_ifname(&sd_device, ifidx->ifname);
+        r = device_new_from_ifname(&sd_device, ifidx->ifname);
         if (r < 0)
              return r;
 
