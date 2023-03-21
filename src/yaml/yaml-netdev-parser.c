@@ -280,6 +280,7 @@ static ParserTable parser_netdev_tunnel_vtable[] = {
         { "key",    CONF_TYPE_NETDEV_TUNNEL, parse_yaml_uint32,  offsetof(Tunnel, key)},
         { "input",  CONF_TYPE_NETDEV_TUNNEL, parse_yaml_uint32,  offsetof(Tunnel, ikey)},
         { "output", CONF_TYPE_NETDEV_TUNNEL, parse_yaml_uint32,  offsetof(Tunnel, okey)},
+        { "ttl",    CONF_TYPE_NETDEV_TUNNEL, parse_yaml_uint32,  offsetof(Tunnel, ttl)},
         { NULL,     _CONF_TYPE_INVALID,      0,                  0}
 };
 
