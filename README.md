@@ -274,7 +274,7 @@ network:
 
  ```
  ### Generate Bond configuration
- Configue bond `bond0` with mode `active-backup`  and set slave master devices to `ens33` and `ens37`.
+ Configue bond `bond0` with mode `active-backup`  and set slave devices to `ens33` and `ens37`.
  ```yml
  network:
   version: 2
@@ -289,6 +289,22 @@ network:
               mode: active-backup
 
  ```
+ ### Generate Bridge configuration
+ Configue bridge `bridge0` and set slave master devices to `ens33` with IPv4 DHCP network.
+ ```yml
+ network:
+  version: 2
+  renderer: networkd
+  ethernets:
+      ens33:
+          dhcp4: no
+  bridges:
+      br0:
+          dhcp4: yes
+          interfaces:
+              - ens33
+ ```
+#
 ### Generate network config from kernel command line
 
 `nmctl` understands kernel command line specified in [dracut's](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) network configuration format and can generate [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html)'s configuration while the system boots and will persist between reboots.
