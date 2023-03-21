@@ -277,6 +277,9 @@ static int yaml_parse_netdev_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node
 static ParserTable parser_netdev_tunnel_vtable[] = {
         { "local",  CONF_TYPE_NETDEV_TUNNEL, parse_yaml_address, offsetof(Tunnel, local)},
         { "remote", CONF_TYPE_NETDEV_TUNNEL, parse_yaml_address, offsetof(Tunnel, remote)},
+        { "key",    CONF_TYPE_NETDEV_TUNNEL, parse_yaml_uint32,  offsetof(Tunnel, key)},
+        { "input",  CONF_TYPE_NETDEV_TUNNEL, parse_yaml_uint32,  offsetof(Tunnel, ikey)},
+        { "output", CONF_TYPE_NETDEV_TUNNEL, parse_yaml_uint32,  offsetof(Tunnel, okey)},
         { NULL,     _CONF_TYPE_INVALID,      0,                  0}
 };
 

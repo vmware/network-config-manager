@@ -120,6 +120,14 @@ typedef struct VxLan {
 typedef struct Tunnel {
         bool independent;
 
+        unsigned ttl;
+        unsigned tos;
+        unsigned flags;
+
+        uint32_t key;
+        uint32_t ikey;
+        uint32_t okey;
+
         IPAddress local;
         IPAddress remote;
 } Tunnel;

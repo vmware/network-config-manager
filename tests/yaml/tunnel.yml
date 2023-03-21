@@ -13,6 +13,9 @@ network:
           mode: sit
           remote: 2.2.2.2
           local: 1.1.1.1
+          input: 2222
+          output: 3333
+          key: 1111
           addresses:
               - "2001:dead:beef::2/64"
           routes:

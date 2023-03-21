@@ -739,6 +739,24 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
+                        if (n->tunnel->key > 0) {
+                                r = key_file_set_uint(key_file, "Tunnel", "Key", n->tunnel->key);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->tunnel->ikey > 0) {
+                                r = key_file_set_uint(key_file, "Tunnel", "InputKey", n->tunnel->ikey);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->tunnel->okey > 0) {
+                                r = key_file_set_uint(key_file, "Tunnel", "OutputKey", n->tunnel->okey);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
                         break;
 
