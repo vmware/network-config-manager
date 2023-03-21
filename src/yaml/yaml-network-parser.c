@@ -441,7 +441,7 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
                                         return r;
                         } else if (string_equal(scalar(k), "nameservers"))
                                 r = parse_config(m->nameserver, dp, v, network);
-                        else
+                        else if (v)
                                 r = parse_network(m, dp, v, network);
                         if (r < 0)
                                 return r;

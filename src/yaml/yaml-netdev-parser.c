@@ -153,6 +153,66 @@ static int yaml_parse_netdev_bond(YAMLManager *m, yaml_document_t *dp, yaml_node
         return 0;
 }
 
+static ParserTable parser_netdev_bridge_vtable[] = {
+        { "interfaces", CONF_TYPE_NETDEV_BRIDGE, parse_yaml_sequence,  offsetof(Bridge, interfaces)},
+        { NULL,         _CONF_TYPE_INVALID,    0,                  0}
+};
+
+static int yaml_parse_netdev_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        _auto_cleanup_ Bridge *b = NULL;
+        yaml_node_t *k, *v;
+        yaml_node_pair_t *p;
+        int r;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        r = netdev_new(&network->netdev);
+        if (r < 0)
+                return log_oom();
+
+        r = bridge_new(&b);
+        if (r < 0)
+                return log_oom();
+
+        *network->netdev = (NetDev) {
+                           .ifname = strdup(network->ifname),
+                           .kind = YAML_NETDEV_KIND_BRIDGE,
+                           .bridge = b,
+        };
+        if (!network->netdev->ifname)
+                return log_oom();
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(m->netdev_bridge, scalar(k));
+                if (!table) {
+                        (void) parse_network(m, dp, node, network);
+
+                        continue;
+                }
+
+                t = (uint8_t *) b + table->offset;
+                if (table->parser) {
+                        (void) table->parser(scalar(k), scalar(v), b, t, dp, v);
+                        network->modified = true;
+                }
+        }
+
+        steal_pointer(b);
+        return 0;
+}
+
 static ParserTable parser_netdev_vlan_vtable[] = {
         { "id",   CONF_TYPE_NETDEV_VLAN, parse_yaml_uint32,  offsetof(VLan, id)},
         { "link", CONF_TYPE_NETDEV_VLAN, parse_yaml_string,  offsetof(VLan, master)},
@@ -246,6 +306,9 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                                 case YAML_NETDEV_KIND_BOND:
                                         (void) yaml_parse_netdev_bond(m, dp, n, net);
                                         break;
+                                case YAML_NETDEV_KIND_BRIDGE:
+                                        (void) yaml_parse_netdev_bridge(m, dp, n, net);
+                                        break;
                                 default:
                                         break;
                         }
@@ -281,6 +344,17 @@ int yaml_register_netdev(YAMLManager *m) {
         for (size_t i = 0; parser_netdev_bond_vtable[i].key; i++) {
                if (!g_hash_table_insert(m->netdev_bond, (void *) parser_netdev_bond_vtable[i].key, &parser_netdev_bond_vtable[i])) {
                         log_warning("Failed add key='%s' to Bond table", parser_netdev_bond_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        m->netdev_bridge = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->netdev_bridge)
+                return log_oom();
+
+        for (size_t i = 0; parser_netdev_bridge_vtable[i].key; i++) {
+               if (!g_hash_table_insert(m->netdev_bridge, (void *) parser_netdev_bridge_vtable[i].key, &parser_netdev_bridge_vtable[i])) {
+                        log_warning("Failed add key='%s' to Bridge table", parser_netdev_bridge_vtable[i].key);
                         return -EINVAL;
                 }
         }

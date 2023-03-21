@@ -14,6 +14,7 @@ typedef enum ConfType {
         CONF_TYPE_ROUTING_POLICY_RULE,
         CONF_TYPE_LINK,
         CONF_TYPE_NETDEV_VLAN,
+        CONF_TYPE_NETDEV_BRIDGE,
         CONF_TYPE_NETDEV_BOND,
         _CONF_TYPE_MAX,
         _CONF_TYPE_INVALID = -1,

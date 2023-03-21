@@ -204,6 +204,7 @@ class TestNetworkConfigManagerYAML:
         "routing-policy-rule.yml",
         "vlan.yml",
         "bond.yml",
+        "bridge.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -429,6 +430,26 @@ class TestNetworkConfigManagerYAML:
         parserc.read(os.path.join(networkd_unit_file_path, '10-bond0.network'))
         assert(parserc.get('Network', 'DHCP') == 'ipv4')
 
+    def test_netdev_bridge(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('bridge.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-br0.netdev') == True)
+
+        assert(unit_exist('10-br0.network') == True)
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+        assert(parser.get('Network', 'Bridge') == 'br0')
+
+        parserb = configparser.ConfigParser()
+        parserb.read(os.path.join(networkd_unit_file_path, '10-br0.netdev'))
+        assert(parserb.get('NetDev', 'Kind') == 'bridge')
+
+        parserc = configparser.ConfigParser()
+        parserc.read(os.path.join(networkd_unit_file_path, '10-br0.network'))
+        assert(parserc.get('Network', 'DHCP') == 'ipv4')
 
 class TestKernelCommandLine:
     def teardown_method(self):
