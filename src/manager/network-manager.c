@@ -1991,7 +1991,7 @@ int manager_generate_network_config_from_yaml(const char *file) {
 
         assert(file);
 
-        r = parse_yaml_file(file, &n);
+        r = yaml_parse_file(file, &n);
         if (r < 0) {
                 log_warning("Failed to parse configuration file '%s': %s", file, strerror(-r));
                 return r;

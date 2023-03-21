@@ -10,7 +10,7 @@
 #include "string-util.h"
 #include "log.h"
 
-static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *networks) {
+static int yaml_parse_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *networks) {
         yaml_node_item_t *i;
         yaml_node_pair_t *p;
         yaml_node_t *n;
@@ -28,7 +28,7 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                 for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                         n = yaml_document_get_node(dp, *i);
                         if (n)
-                                (void) parse_yaml_node(m, dp, n, networks);
+                                (void) yaml_parse_node(m, dp, n, networks);
                 }
         }
                 break;
@@ -45,11 +45,11 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
 
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
-                                        (void) parse_netdev_config(m, kind, dp, n, networks);
+                                        (void) yaml_parse_netdev_config(m, kind, dp, n, networks);
                         } else {
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
-                                        (void) parse_yaml_node(m, dp, n, networks);
+                                        (void) yaml_parse_node(m, dp, n, networks);
                         }
                 }
                 break;
@@ -61,11 +61,11 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         return 0;
 }
 
-static int parse_yaml_document(YAMLManager *m, yaml_document_t *dp, Networks *n) {
-        return parse_yaml_node(m, dp, yaml_document_get_root_node(dp), n);
+static int yaml_parse_document(YAMLManager *m, yaml_document_t *dp, Networks *n) {
+        return yaml_parse_node(m, dp, yaml_document_get_root_node(dp), n);
 }
 
-int parse_yaml_file(const char *file, Networks **n) {
+int yaml_parse_file(const char *file, Networks **n) {
         _cleanup_(yaml_manager_freep) YAMLManager *m = NULL;
         _cleanup_(networks_freep) Networks *networks = NULL;
         _auto_cleanup_fclose_ FILE *f = NULL;
@@ -102,7 +102,7 @@ int parse_yaml_file(const char *file, Networks **n) {
 
                 done = !yaml_document_get_root_node(&document);
                 if (!done)
-                        r = parse_yaml_document(m, &document, networks);
+                        r = yaml_parse_document(m, &document, networks);
 
                 yaml_document_delete(&document);
         }

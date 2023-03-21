@@ -30,4 +30,4 @@ int yaml_netdev_name_to_kind(const char *name);
 
 int yaml_register_netdev(YAMLManager *p);
 
-int parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets);
+int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets);
