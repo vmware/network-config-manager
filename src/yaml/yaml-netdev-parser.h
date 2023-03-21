@@ -20,7 +20,7 @@ typedef enum YAMLNetDevKind {
         YAML_NETDEV_KIND_TUN,
         YAML_NETDEV_KIND_TAP,
         YAML_NETDEV_KIND_VETH,
-        YAML_NETDEV_KIND_TUNNELS,
+        YAML_NETDEV_KIND_TUNNEL,
         _YAML_NETDEV_KIND_MAX,
         _YAML_NETDEV_KIND_INVALID = -EINVAL
 } YAMLNetDevKind;
@@ -28,6 +28,6 @@ typedef enum YAMLNetDevKind {
 const char *yaml_netdev_kind_to_name(YAMLNetDevKind id);
 int yaml_netdev_name_to_kind(const char *name);
 
-int yaml_register_netdev(YAMLManager *p);
+int yaml_register_netdev(YAMLManager *m);
 
 int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets);

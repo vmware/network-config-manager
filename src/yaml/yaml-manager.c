@@ -14,6 +14,7 @@ static int yaml_parse_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         yaml_node_item_t *i;
         yaml_node_pair_t *p;
         yaml_node_t *n;
+        int r;
 
         assert(m);
         assert(dp);
@@ -40,12 +41,16 @@ static int yaml_parse_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
                                         (void) parse_ethernet_config(m, dp, n, networks);
-                        } else if (string_equal(scalar(n), "vlans") || string_equal(scalar(n), "bonds") || string_equal(scalar(n), "bridges")) {
+                        } else if (string_equal(scalar(n), "vlans") || string_equal(scalar(n), "bonds") ||
+                                   string_equal(scalar(n), "bridges") || string_equal(scalar(n), "tunnels")) {
                                 YAMLNetDevKind kind = yaml_netdev_name_to_kind(scalar(n));
 
                                 n = yaml_document_get_node(dp, p->value);
-                                if (n)
-                                        (void) yaml_parse_netdev_config(m, kind, dp, n, networks);
+                                if (n) {
+                                        r = yaml_parse_netdev_config(m, kind, dp, n, networks);
+                                        if (r < 0)
+                                                return r;
+                                }
                         } else {
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
@@ -154,6 +159,8 @@ void yaml_manager_free(YAMLManager *p) {
 
         g_hash_table_destroy(p->netdev_vlan);
         g_hash_table_destroy(p->netdev_bond);
+        g_hash_table_destroy(p->netdev_bridge);
+        g_hash_table_destroy(p->netdev_tunnel);
 
         free(p);
 }
