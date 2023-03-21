@@ -126,6 +126,8 @@ typedef struct Tunnel {
 typedef struct Bond {
         BondMode mode;
         BondXmitHashPolicy xmit_hash_policy;
+
+        char **interfaces;
 } Bond;
 
 typedef struct Bridge {
