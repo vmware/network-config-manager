@@ -470,6 +470,9 @@ class TestNetworkConfigManagerYAML:
         assert(parserb.get('Tunnel', 'Independent') == 'yes')
         assert(parserb.get('Tunnel', 'Local') == '1.1.1.1')
         assert(parserb.get('Tunnel', 'Remote') == '2.2.2.2')
+        assert(parserb.get('Tunnel', 'Key') == '1111')
+        assert(parserb.get('Tunnel', 'InputKey') == '2222')
+        assert(parserb.get('Tunnel', 'OutputKey') == '3333')
 
 class TestKernelCommandLine:
     def teardown_method(self):
