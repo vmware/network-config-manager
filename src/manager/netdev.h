@@ -84,6 +84,7 @@ typedef struct TunTap {
 typedef struct VLan {
         uint32_t id;
         char *proto;
+        char *master;
 
         int gvrp;
         int mvrp;

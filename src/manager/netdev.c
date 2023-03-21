@@ -269,6 +269,7 @@ void vlan_free(VLan *v) {
                 return;
 
         free(v->proto);
+        free(v->master);
         free(v);
 }
 
