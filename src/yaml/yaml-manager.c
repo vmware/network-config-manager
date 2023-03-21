@@ -141,19 +141,19 @@ void yaml_manager_free(YAMLManager *p) {
         if (!p)
                 return;
 
-        g_hash_table_destroy(p->match_config);
-        g_hash_table_destroy(p->network_config);
-        g_hash_table_destroy(p->address_config);
-        g_hash_table_destroy(p->route_config);
-        g_hash_table_destroy(p->routing_policy_rule_config);
-        g_hash_table_destroy(p->dhcp4_config);
-        g_hash_table_destroy(p->dhcp6_config);
-        g_hash_table_destroy(p->nameserver_config);
+        g_hash_table_destroy(p->match);
+        g_hash_table_destroy(p->network);
+        g_hash_table_destroy(p->address);
+        g_hash_table_destroy(p->route);
+        g_hash_table_destroy(p->routing_policy_rule);
+        g_hash_table_destroy(p->dhcp4);
+        g_hash_table_destroy(p->dhcp6);
+        g_hash_table_destroy(p->nameserver);
 
-        g_hash_table_destroy(p->link_config);
+        g_hash_table_destroy(p->link);
 
-        g_hash_table_destroy(p->netdev_vlan_config);
-        g_hash_table_destroy(p->netdev_bond_config);
+        g_hash_table_destroy(p->netdev_vlan);
+        g_hash_table_destroy(p->netdev_bond);
 
         free(p);
 }
@@ -167,19 +167,18 @@ int yaml_manager_new(YAMLManager **ret) {
                 return log_oom();
 
         *m = (YAMLManager) {
-                 .match_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .network_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .address_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .route_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .routing_policy_rule_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .dhcp4_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .dhcp6_config = g_hash_table_new(g_str_hash, g_str_equal),
-                 .nameserver_config = g_hash_table_new(g_str_hash, g_str_equal),
+                 .match = g_hash_table_new(g_str_hash, g_str_equal),
+                 .network = g_hash_table_new(g_str_hash, g_str_equal),
+                 .address = g_hash_table_new(g_str_hash, g_str_equal),
+                 .route = g_hash_table_new(g_str_hash, g_str_equal),
+                 .routing_policy_rule = g_hash_table_new(g_str_hash, g_str_equal),
+                 .dhcp4 = g_hash_table_new(g_str_hash, g_str_equal),
+                 .dhcp6 = g_hash_table_new(g_str_hash, g_str_equal),
+                 .nameserver = g_hash_table_new(g_str_hash, g_str_equal),
         };
 
-        if (!m->network_config || !m->address_config || !m->dhcp4_config ||
-            !m->dhcp6_config || !m->nameserver_config || !m->route_config || !m->routing_policy_rule_config ||
-            !m->nameserver_config)
+        if (!m->network || !m->address || !m->dhcp4 || !m->dhcp6 || !m->nameserver || !m->route || !m->routing_policy_rule ||
+            !m->nameserver)
                 return log_oom();
 
         r = yaml_register_network(m);

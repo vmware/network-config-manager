@@ -308,7 +308,7 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
         return 0;
 }
 
-static int parse_routing_policy_rule_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+static int parse_routing_policy_rule(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
        _cleanup_(routing_policy_rule_freep) RoutingPolicyRule *rule = NULL;
         yaml_node_t *k, *v;
         yaml_node_item_t *i;
@@ -324,7 +324,7 @@ static int parse_routing_policy_rule_config(GHashTable *config, yaml_document_t 
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 n = yaml_document_get_node(dp, *i);
                 if (n)
-                        (void) parse_routing_policy_rule_config(config, dp, n, network);
+                        (void) parse_routing_policy_rule(config, dp, n, network);
         }
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
@@ -394,7 +394,7 @@ static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *no
         return 0;
 }
 
-int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         yaml_node_pair_t *p;
         yaml_node_t *k, *v;
         int r;
@@ -411,18 +411,18 @@ int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                 k = yaml_document_get_node(dp, p->key);
                 v = yaml_document_get_node(dp, p->value);
 
-                table = g_hash_table_lookup(m->network_config, scalar(k));
+                table = g_hash_table_lookup(m->network, scalar(k));
                 if (!table) {
                         if (string_equal(scalar(k), "match")) {
-                                r = parse_config(m->match_config, dp, v, network);
+                                r = parse_config(m->match, dp, v, network);
                                 if (r < 0)
                                         return r;
                         } else if (string_equal(scalar(k), "dhcp4-overrides")) {
-                                r = parse_config(m->dhcp4_config, dp, v, network);
+                                r = parse_config(m->dhcp4, dp, v, network);
                                 if (r < 0)
                                         return r;
                         } else if (string_equal(scalar(k), "dhcp6-overrides")) {
-                                r = parse_config(m->dhcp6_config, dp, v, network);
+                                r = parse_config(m->dhcp6, dp, v, network);
                                 if (r < 0)
                                         return r;
                         } else if (string_equal(scalar(k), "addresses")) {
@@ -432,22 +432,22 @@ int parse_network_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                                 if (r < 0)
                                         return r;
                         } else if (string_equal(scalar(k), "routes")) {
-                                r = parse_route(m->route_config, dp, v, network);
+                                r = parse_route(m->route, dp, v, network);
                                 if (r < 0)
                                         return r;
                         } else if (string_equal(scalar(k), "routing-policy")) {
-                                r = parse_routing_policy_rule_config(m->routing_policy_rule_config, dp, v, network);
+                                r = parse_routing_policy_rule(m->routing_policy_rule, dp, v, network);
                                 if (r < 0)
                                         return r;
                         } else if (string_equal(scalar(k), "nameservers"))
-                                r = parse_config(m->nameserver_config, dp, v, network);
+                                r = parse_config(m->nameserver, dp, v, network);
                         else
-                                r = parse_network_config(m, dp, v, network);
+                                r = parse_network(m, dp, v, network);
                         if (r < 0)
                                 return r;
 
                         /* .link  */
-                        link_table = g_hash_table_lookup(m->link_config, scalar(k));
+                        link_table = g_hash_table_lookup(m->link, scalar(k));
                         if (link_table) {
                                 if (!network->link) {
                                         NetDevLink *l;
@@ -503,7 +503,7 @@ int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
 
                 n = yaml_document_get_node(dp, p->value);
                 if (n)
-                        (void) parse_network_config(m, dp, n, net);
+                        (void) parse_network(m, dp, n, net);
 
                 if (!g_hash_table_insert(nets->networks, (gpointer *) net->ifname, (gpointer *) net))
                         return log_oom();
@@ -516,66 +516,66 @@ int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
 
 int yaml_register_network(YAMLManager *m) {
         assert(m);
-        assert(m->match_config);
-        assert(m->network_config);
-        assert(m->dhcp4_config);
-        assert(m->dhcp6_config);
-        assert(m->address_config);
-        assert(m->routing_policy_rule_config);
-        assert(m->route_config);
-        assert(m->nameserver_config);
+        assert(m->match);
+        assert(m->network);
+        assert(m->dhcp4);
+        assert(m->dhcp6);
+        assert(m->address);
+        assert(m->routing_policy_rule);
+        assert(m->route);
+        assert(m->nameserver);
 
         for (size_t i = 0; parser_match_vtable[i].key; i++) {
-               if (!g_hash_table_insert(m->match_config, (void *) parser_match_vtable[i].key, &parser_match_vtable[i])) {
+               if (!g_hash_table_insert(m->match, (void *) parser_match_vtable[i].key, &parser_match_vtable[i])) {
                         log_warning("Failed add key='%s' to match table", parser_match_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
         for (size_t i = 0; parser_network_vtable[i].key; i++) {
-               if (!g_hash_table_insert(m->network_config, (void *) parser_network_vtable[i].key, &parser_network_vtable[i])) {
+               if (!g_hash_table_insert(m->network, (void *) parser_network_vtable[i].key, &parser_network_vtable[i])) {
                         log_warning("Failed add key='%s' to network table", parser_network_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
         for (size_t i = 0; parser_dhcp4_overrides_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->dhcp4_config, (void *) parser_dhcp4_overrides_vtable[i].key, &parser_dhcp4_overrides_vtable[i])) {
+                if (!g_hash_table_insert(m->dhcp4, (void *) parser_dhcp4_overrides_vtable[i].key, &parser_dhcp4_overrides_vtable[i])) {
                         log_warning("Failed add key='%s' to dhcp4 table", parser_dhcp4_overrides_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
         for (size_t i = 0; parser_dhcp6_overrides_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->dhcp6_config, (void *) parser_dhcp6_overrides_vtable[i].key, &parser_dhcp6_overrides_vtable[i])) {
+                if (!g_hash_table_insert(m->dhcp6, (void *) parser_dhcp6_overrides_vtable[i].key, &parser_dhcp6_overrides_vtable[i])) {
                         log_warning("Failed add key='%s' to dhcp6 table", parser_dhcp6_overrides_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
         for (size_t i = 0; parser_address_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->address_config, (void *) parser_address_vtable[i].key, &parser_address_vtable[i])) {
+                if (!g_hash_table_insert(m->address, (void *) parser_address_vtable[i].key, &parser_address_vtable[i])) {
                         log_warning("Failed add key='%s' to address table", parser_address_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
         for (size_t i = 0; parser_routing_policy_rule_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->routing_policy_rule_config, (void *) parser_routing_policy_rule_vtable[i].key, &parser_routing_policy_rule_vtable[i])) {
+                if (!g_hash_table_insert(m->routing_policy_rule, (void *) parser_routing_policy_rule_vtable[i].key, &parser_routing_policy_rule_vtable[i])) {
                         log_warning("Failed add key='%s' to routing policy rule table", parser_routing_policy_rule_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
         for (size_t i = 0; parser_route_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->route_config, (void *) parser_route_vtable[i].key, &parser_route_vtable[i])) {
+                if (!g_hash_table_insert(m->route, (void *) parser_route_vtable[i].key, &parser_route_vtable[i])) {
                         log_warning("Failed add key='%s' to route table", parser_route_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
         for (size_t i = 0; parser_nameservers_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->nameserver_config, (void *) parser_nameservers_vtable[i].key, &parser_nameservers_vtable[i])) {
+                if (!g_hash_table_insert(m->nameserver, (void *) parser_nameservers_vtable[i].key, &parser_nameservers_vtable[i])) {
                         log_warning("Failed add key='%s' to nameserver table", parser_nameservers_vtable[i].key);
                         return -EINVAL;
                 }

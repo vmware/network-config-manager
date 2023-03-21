@@ -84,7 +84,7 @@ static int parse_netdev_bond_parameters(YAMLManager *m, yaml_document_t *dp, yam
                 if (!k && !v)
                         continue;
 
-                table = g_hash_table_lookup(m->netdev_bond_config, scalar(k));
+                table = g_hash_table_lookup(m->netdev_bond, scalar(k));
                 if (!table)
                         continue;
 
@@ -96,7 +96,7 @@ static int parse_netdev_bond_parameters(YAMLManager *m, yaml_document_t *dp, yam
         return 0;
 }
 
-static int parse_netdev_bond_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+static int parse_netdev_bond(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Bond *bond = NULL;
         yaml_node_t *k, *v;
         yaml_node_pair_t *p;
@@ -133,12 +133,12 @@ static int parse_netdev_bond_config(YAMLManager *m, yaml_document_t *dp, yaml_no
                 if (!k && !v)
                         continue;
 
-                table = g_hash_table_lookup(m->netdev_bond_config, scalar(k));
+                table = g_hash_table_lookup(m->netdev_bond, scalar(k));
                 if (!table) {
                         if (string_equal(scalar(k), "parameters"))
                                 parse_netdev_bond_parameters(m, dp, v, bond);
                         else
-                                (void) parse_network_config(m, dp, node, network);
+                                (void) parse_network(m, dp, node, network);
                         continue;
                 }
 
@@ -159,7 +159,7 @@ static ParserTable parser_netdev_vlan_vtable[] = {
         { NULL,   _CONF_TYPE_INVALID,    0,                  0}
 };
 
-static int parse_netdev_vlan_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+static int parse_netdev_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ VLan *vlan = NULL;
         yaml_node_t *k, *v;
         yaml_node_pair_t *p;
@@ -196,9 +196,9 @@ static int parse_netdev_vlan_config(YAMLManager *m, yaml_document_t *dp, yaml_no
                 if (!k && !v)
                         continue;
 
-                table = g_hash_table_lookup(m->netdev_vlan_config, scalar(k));
+                table = g_hash_table_lookup(m->netdev_vlan, scalar(k));
                 if (!table) {
-                        (void) parse_network_config(m, dp, node, network);
+                        (void) parse_network(m, dp, node, network);
 
                         continue;
                 }
@@ -241,10 +241,10 @@ int parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp
                 if (n) {
                         switch (kind) {
                                 case YAML_NETDEV_KIND_VLAN:
-                                        (void) parse_netdev_vlan_config(m, dp, n, net);
+                                        (void) parse_netdev_vlan(m, dp, n, net);
                                         break;
                                 case YAML_NETDEV_KIND_BOND:
-                                        (void) parse_netdev_bond_config(m, dp, n, net);
+                                        (void) parse_netdev_bond(m, dp, n, net);
                                         break;
                                 default:
                                         break;
@@ -263,23 +263,23 @@ int parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp
 int yaml_register_netdev(YAMLManager *m) {
         assert(m);
 
-        m->netdev_vlan_config = g_hash_table_new(g_str_hash, g_str_equal);
-        if (!m->netdev_vlan_config)
+        m->netdev_vlan = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->netdev_vlan)
                 return log_oom();
 
         for (size_t i = 0; parser_netdev_vlan_vtable[i].key; i++) {
-               if (!g_hash_table_insert(m->netdev_vlan_config, (void *) parser_netdev_vlan_vtable[i].key, &parser_netdev_vlan_vtable[i])) {
+               if (!g_hash_table_insert(m->netdev_vlan, (void *) parser_netdev_vlan_vtable[i].key, &parser_netdev_vlan_vtable[i])) {
                         log_warning("Failed add key='%s' to VLan table", parser_netdev_vlan_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        m->netdev_bond_config = g_hash_table_new(g_str_hash, g_str_equal);
-        if (!m->netdev_bond_config)
+        m->netdev_bond = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->netdev_bond)
                 return log_oom();
 
         for (size_t i = 0; parser_netdev_bond_vtable[i].key; i++) {
-               if (!g_hash_table_insert(m->netdev_bond_config, (void *) parser_netdev_bond_vtable[i].key, &parser_netdev_bond_vtable[i])) {
+               if (!g_hash_table_insert(m->netdev_bond, (void *) parser_netdev_bond_vtable[i].key, &parser_netdev_bond_vtable[i])) {
                         log_warning("Failed add key='%s' to Bond table", parser_netdev_bond_vtable[i].key);
                         return -EINVAL;
                 }
