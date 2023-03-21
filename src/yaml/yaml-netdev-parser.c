@@ -155,6 +155,7 @@ static int parse_netdev_bond_config(YAMLManager *m, yaml_document_t *dp, yaml_no
 
 static ParserTable parser_netdev_vlan_vtable[] = {
         { "id",   CONF_TYPE_NETDEV_VLAN, parse_yaml_uint32,  offsetof(VLan, id)},
+        { "link", CONF_TYPE_NETDEV_VLAN, parse_yaml_string,  offsetof(VLan, master)},
         { NULL,   _CONF_TYPE_INVALID,    0,                  0}
 };
 
@@ -197,12 +198,7 @@ static int parse_netdev_vlan_config(YAMLManager *m, yaml_document_t *dp, yaml_no
 
                 table = g_hash_table_lookup(m->netdev_vlan_config, scalar(k));
                 if (!table) {
-                        if (string_equal(scalar(k), "link")) {
-                                network->netdev->master = strdup(scalar(v));
-                                if (!network->netdev->master)
-                                        return log_oom();
-                        } else
-                                (void) parse_network_config(m, dp, node, network);
+                        (void) parse_network_config(m, dp, node, network);
 
                         continue;
                 }

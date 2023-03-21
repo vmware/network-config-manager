@@ -2056,17 +2056,18 @@ int manager_generate_network_config_from_yaml(const char *file) {
                         return r;
 
                 /* VLAN */
-                if (net->netdev->master) {
-                        r = parse_ifname_or_index(net->netdev->master, &p);
+                if (net->netdev->kind == NETDEV_KIND_VLAN) {
+                        VLan *vlan = net->netdev->vlan;
+
+                        r = parse_ifname_or_index(vlan->master, &p);
                         if (r < 0) {
-                                log_warning("Failed to find device: %s", net->netdev->master);
+                                log_warning("Failed to find device: %s", vlan->master);
                                 return r;
                         }
 
                         r = create_or_parse_network_file(p, &network);
                         if (r < 0)
                                 return r;
-
 
                         r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(net->netdev->kind)), net->netdev->ifname);
                         if (r < 0)
