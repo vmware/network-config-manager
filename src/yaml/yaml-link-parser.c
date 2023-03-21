@@ -87,12 +87,12 @@ static ParserTable parser_link_vtable[] = {
 int yaml_register_link(YAMLManager *m) {
         assert(m);
 
-        m->link_config = g_hash_table_new(g_str_hash, g_str_equal);
-        if (!m->link_config)
+        m->link = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->link)
                 return log_oom();
 
         for (size_t i = 0; parser_link_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->link_config, (void *) parser_link_vtable[i].key, &parser_link_vtable[i])) {
+                if (!g_hash_table_insert(m->link, (void *) parser_link_vtable[i].key, &parser_link_vtable[i])) {
                         log_warning("Failed add key='%s' to link table", parser_link_vtable[i].key);
                         return -EINVAL;
                 }

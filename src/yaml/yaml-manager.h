@@ -16,18 +16,18 @@ void networks_free(Networks *n);
 DEFINE_CLEANUP(Networks*, networks_free);
 
 typedef struct YAMLManager {
-        GHashTable *match_config;
-        GHashTable *network_config;
-        GHashTable *address_config;
-        GHashTable *dhcp4_config;
-        GHashTable *dhcp6_config;
-        GHashTable *nameserver_config;
-        GHashTable *route_config;
-        GHashTable *routing_policy_rule_config;
+        GHashTable *match;
+        GHashTable *network;
+        GHashTable *address;
+        GHashTable *dhcp4;
+        GHashTable *dhcp6;
+        GHashTable *nameserver;
+        GHashTable *route;
+        GHashTable *routing_policy_rule;
         GHashTable *wifi_config;
-        GHashTable *link_config;
-        GHashTable *netdev_vlan_config;
-        GHashTable *netdev_bond_config;
+        GHashTable *link;
+        GHashTable *netdev_vlan;
+        GHashTable *netdev_bond;
 } YAMLManager;
 
 int yaml_manager_new(YAMLManager **ret);
@@ -39,4 +39,4 @@ static inline const char *scalar(const yaml_node_t *node) {
         return (const char*) node->data.scalar.value;
 }
 
-int parse_yaml_file(const char *yaml_file, Networks **n);
+int yaml_parse_file(const char *yaml_file, Networks **n);

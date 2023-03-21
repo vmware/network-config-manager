@@ -1280,3 +1280,65 @@ int generate_network_config(Network *n) {
         (void) dbus_network_reload();
         return 0;
 }
+
+int generate_master_device_network(Network *n) {
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        if (!n->netdev)
+                return 0;
+
+        r = netdev_ctl_name_to_configs_new(&m);
+        if (r < 0)
+                return r;
+
+        /* VLAN */
+        switch (n->netdev->kind) {
+                case NETDEV_KIND_VLAN: {
+                        VLan *vlan = n->netdev->vlan;
+
+                        r = parse_ifname_or_index(vlan->master, &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", vlan->master);
+                                return r;
+                        }
+
+                        r = create_or_parse_network_file(p, &network);
+                        if (r < 0)
+                                return r;
+
+                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                        if (r < 0)
+                                return r;
+                }
+                        break;
+                case NETDEV_KIND_BOND: {
+                        Bond *b = n->netdev->bond;
+                        char **d;
+
+                        strv_foreach(d, b->interfaces) {
+                                r = parse_ifname_or_index(*d, &p);
+                                if (r < 0) {
+                                        log_warning("Failed to find device: %s", *d);
+                                        return r;
+                                }
+
+                                r = create_or_parse_network_file(p, &network);
+                                if (r < 0)
+                                        return r;
+
+                                r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                                if (r < 0)
+                                        return r;
+                        }
+                }
+                        break;
+                default:
+                        break;
+        }
+
+        return 0;
+
+}
