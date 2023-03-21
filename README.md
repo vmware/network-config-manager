@@ -175,7 +175,7 @@ network:
                 via: 10.3.0.1
 ```
 
-### Routing Policy Rule
+#### Routing Policy Rule
 ```yml
 network:
   ethernets:
@@ -191,7 +191,7 @@ network:
               table: 101
 ```
 
-### Generate link config from yml file:
+#### Generate link config from yml file:
 
 `nmctl` can generate link configuration from YAML description.
 
@@ -248,7 +248,7 @@ network:
       other-channels: 429496729
  ```
 
-### Generate VLAN configuration
+#### Generate VLAN configuration
  Configue VLan with id 10 and set it's master device to `ens33` .
  ```yml
  network:
@@ -273,7 +273,7 @@ network:
               search: [ domain1.example.com, domain2.example.com ]
 
  ```
- ### Generate Bond configuration
+ #### Generate Bond configuration
  Configue bond `bond0` with mode `active-backup`  and set slave devices to `ens33` and `ens37`.
  ```yml
  network:
@@ -289,7 +289,7 @@ network:
               mode: active-backup
 
  ```
- ### Generate Bridge configuration
+ #### Generate Bridge configuration
  Configue bridge `bridge0` and set slave master devices to `ens33` with IPv4 DHCP network.
  ```yml
  network:
@@ -304,7 +304,7 @@ network:
           interfaces:
               - ens33
  ```
-#
+
 ### Generate network config from kernel command line
 
 `nmctl` understands kernel command line specified in [dracut's](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) network configuration format and can generate [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html)'s configuration while the system boots and will persist between reboots.
