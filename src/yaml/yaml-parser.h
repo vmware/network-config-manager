@@ -14,6 +14,7 @@ typedef enum ConfType {
         CONF_TYPE_ROUTING_POLICY_RULE,
         CONF_TYPE_LINK,
         CONF_TYPE_NETDEV_VLAN,
+        CONF_TYPE_NETDEV_BOND,
         _CONF_TYPE_MAX,
         _CONF_TYPE_INVALID = -1,
 } ConfType;
@@ -31,11 +32,15 @@ int parse_yaml_uint32_or_max(const char *key, const char *value, void *data, voi
 int parse_yaml_mac_address(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_string(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_scalar_or_sequence(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_sequence(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+
 int parse_yaml_route(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_route_type(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_route_scope(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+
 int parse_yaml_auth_key_management_type(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_auth_eap_method(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+
 int parse_yaml_dhcp_client_identifier(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_dhcp_type(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_addresses(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
@@ -47,3 +52,5 @@ int parse_yaml_ipv6_address_generation_mode(const char *key, const char *value, 
 int parse_yaml_ipv6_privacy_extensions(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_rf_online(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_activation_policy(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+
+int parse_yaml_bond_mode(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);

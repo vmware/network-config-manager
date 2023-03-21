@@ -383,6 +383,27 @@ int parse_yaml_ipv6_privacy_extensions(const char *key,
         return 0;
 }
 
+int parse_yaml_bond_mode(const char *key,
+                         const char *value,
+                         void *data,
+                         void *userdata,
+                         yaml_document_t *doc,
+                         yaml_node_t *node) {
+        Bond *b;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        b = data;
+
+        b->mode = bond_name_to_mode((const char *) value);
+        return 0;
+}
+
+
 int parse_yaml_address(const char *key,
                        const char *value,
                        void *data,
@@ -547,6 +568,46 @@ int parse_yaml_scalar_or_sequence(const char *key,
 
                 steal_pointer(c);
        }
+
+        return 0;
+}
+
+int parse_yaml_sequence(const char *key,
+                        const char *value,
+                        void *data,
+                        void *userdata,
+                        yaml_document_t *doc,
+                        yaml_node_t *node) {
+
+        char ***s = (char ***) userdata;
+        yaml_node_item_t *i;
+        int r;
+
+        assert(key);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *entry = yaml_document_get_node(doc, *i);
+                _auto_cleanup_ char *c = NULL;
+
+                c = strdup(scalar(entry));
+                if (!c)
+                        return log_oom();
+
+                if (!*s) {
+                        *s = strv_new(c);
+                        if (!*s)
+                                return log_oom();
+                } else {
+                        r = strv_add(s, strdup(c));
+                        if (r < 0)
+                                return r;
+                }
+
+                steal_pointer(c);
+        }
 
         return 0;
 }
