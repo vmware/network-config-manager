@@ -381,6 +381,7 @@ void bridge_free(Bridge *b) {
         if (!b)
                 return;
 
+        strv_free(b->interfaces);
         free(b);
 }
 

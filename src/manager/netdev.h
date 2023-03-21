@@ -147,6 +147,8 @@ typedef struct Bridge {
         uint64_t hello_time;
         uint64_t max_age;
         uint64_t ageing_time;
+
+        char **interfaces;
 } Bridge;
 
 typedef struct VRF {
