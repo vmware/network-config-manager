@@ -757,6 +757,12 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
+                        if (n->tunnel->ttl > 0) {
+                                r = key_file_set_uint(key_file, "Tunnel", "TTL", n->tunnel->ttl);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
                         break;
 
