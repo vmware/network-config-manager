@@ -203,6 +203,7 @@ class TestNetworkConfigManagerYAML:
         "network-network.yml",
         "routing-policy-rule.yml",
         "vlan.yml",
+        "bond.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -214,13 +215,15 @@ class TestNetworkConfigManagerYAML:
                 os.remove(os.path.join(network_config_manager_yaml_config_path, config_file))
 
     def setup_method(self):
-        link_remove('test99')
         link_add_dummy('test99')
+        link_add_dummy('test98')
         restart_networkd()
 
     def teardown_method(self):
         self.remove_units_from_netmanager_yaml_path()
         remove_units_from_netword_unit_path()
+        link_remove('test99')
+        link_remove('test98')
 
     def test_match_driver(self):
         self.copy_yaml_file_to_netmanager_yaml_path('match-driver.yml')
@@ -399,6 +402,32 @@ class TestNetworkConfigManagerYAML:
         parsera.read(os.path.join(networkd_unit_file_path, '10-vlan10.netdev'))
 
         assert(parsera.get('VLAN', 'Id') == '10')
+
+    def test_netdev_bond(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('bond.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-bond0.netdev') == True)
+
+        assert(unit_exist('10-bond0.network') == True)
+        assert(unit_exist('10-test99.network') == True)
+        assert(unit_exist('10-test98.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+        assert(parser.get('Network', 'Bond') == 'bond0')
+
+        parsera = configparser.ConfigParser()
+        parsera.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+        assert(parsera.get('Network', 'Bond') == 'bond0')
+
+        parserb = configparser.ConfigParser()
+        parserb.read(os.path.join(networkd_unit_file_path, '10-bond0.netdev'))
+        assert(parserb.get('Bond', 'Mode') == 'active-backup')
+
+        parserc = configparser.ConfigParser()
+        parserc.read(os.path.join(networkd_unit_file_path, '10-bond0.network'))
+        assert(parserc.get('Network', 'DHCP') == 'ipv4')
 
 
 class TestKernelCommandLine:

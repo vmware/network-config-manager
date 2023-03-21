@@ -1,0 +1,11 @@
+network:
+  version: 2
+  renderer: networkd
+  bonds:
+      bond0:
+          dhcp4: yes
+          interfaces:
+              - test99
+              - test98
+          parameters:
+              mode: active-backup
