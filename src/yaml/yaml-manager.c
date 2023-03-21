@@ -40,10 +40,12 @@ static int parse_yaml_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
                                         (void) parse_ethernet_config(m, dp, n, networks);
-                        } else if (string_equal(scalar(n), "vlans")) {
+                        } else if (string_equal(scalar(n), "vlans") || string_equal(scalar(n), "bonds")) {
+                                YAMLNetDevKind kind = yaml_netdev_name_to_kind(scalar(n));
+
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
-                                        (void) parse_netdev_config(m, dp, n, networks);
+                                        (void) parse_netdev_config(m, kind, dp, n, networks);
                         } else {
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
@@ -147,8 +149,11 @@ void yaml_manager_free(YAMLManager *p) {
         g_hash_table_destroy(p->dhcp4_config);
         g_hash_table_destroy(p->dhcp6_config);
         g_hash_table_destroy(p->nameserver_config);
+
         g_hash_table_destroy(p->link_config);
+
         g_hash_table_destroy(p->netdev_vlan_config);
+        g_hash_table_destroy(p->netdev_bond_config);
 
         free(p);
 }

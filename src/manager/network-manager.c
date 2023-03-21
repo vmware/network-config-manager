@@ -2043,30 +2043,53 @@ int manager_generate_network_config_from_yaml(const char *file) {
         /* generate master device network section  */
         g_hash_table_iter_init (&iter, n->networks);
         for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+                _cleanup_(config_manager_freep) ConfigManager *m = NULL;
+                _auto_cleanup_ IfNameIndex *p = NULL;
+                _auto_cleanup_ char *network = NULL;
                 Network *net = (Network *) v;
 
-                if (net->netdev && net->netdev->master) {
-                        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
-                        _auto_cleanup_ IfNameIndex *p = NULL;
-                        _auto_cleanup_ char *network = NULL;
+                if (!net->netdev)
+                        continue;
 
+                r = netdev_ctl_name_to_configs_new(&m);
+                if (r < 0)
+                        return r;
+
+                /* VLAN */
+                if (net->netdev->master) {
                         r = parse_ifname_or_index(net->netdev->master, &p);
                         if (r < 0) {
                                 log_warning("Failed to find device: %s", net->netdev->master);
                                 return r;
                         }
 
-                        r = netdev_ctl_name_to_configs_new(&m);
-                        if (r < 0)
-                                return r;
-
                         r = create_or_parse_network_file(p, &network);
                         if (r < 0)
                                 return r;
 
+
                         r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(net->netdev->kind)), net->netdev->ifname);
                         if (r < 0)
                                 return r;
+                } else if (net->netdev->kind == NETDEV_KIND_BOND) {
+                        Bond *b = net->netdev->bond;
+                        char **d;
+
+                        strv_foreach(d, b->interfaces) {
+                                r = parse_ifname_or_index(*d, &p);
+                                if (r < 0) {
+                                        log_warning("Failed to find device: %s", *d);
+                                        return r;
+                                }
+
+                                r = create_or_parse_network_file(p, &network);
+                                if (r < 0)
+                                        return r;
+
+                                r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(net->netdev->kind)), net->netdev->ifname);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
         }
 
