@@ -206,6 +206,7 @@ class TestNetworkConfigManagerYAML:
         "bond.yml",
         "bridge.yml",
         "tunnel.yml",
+        "tunnel-keys.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -473,6 +474,28 @@ class TestNetworkConfigManagerYAML:
         assert(parserb.get('Tunnel', 'Key') == '1111')
         assert(parserb.get('Tunnel', 'InputKey') == '2222')
         assert(parserb.get('Tunnel', 'OutputKey') == '3333')
+        assert(parserb.get('Tunnel', 'TTL') == '100')
+
+    def test_netdev_tunnel_keys(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('tunnel-keys.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-he-ipv6.netdev') == True)
+
+        assert(unit_exist('10-he-ipv6.network') == True)
+        assert(unit_exist('10-test99.network') == True)
+
+        parserb = configparser.ConfigParser()
+        parserb.read(os.path.join(networkd_unit_file_path, '10-he-ipv6.netdev'))
+
+        assert(parserb.get('NetDev', 'Name') == 'he-ipv6')
+        assert(parserb.get('NetDev', 'Kind') == 'sit')
+
+        assert(parserb.get('Tunnel', 'Independent') == 'yes')
+        assert(parserb.get('Tunnel', 'Local') == '1.1.1.1')
+        assert(parserb.get('Tunnel', 'Remote') == '2.2.2.2')
+        assert(parserb.get('Tunnel', 'InputKey') == '1234')
+        assert(parserb.get('Tunnel', 'OutputKey') == '5678')
 
 class TestKernelCommandLine:
     def teardown_method(self):
