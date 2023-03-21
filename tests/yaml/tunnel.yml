@@ -16,6 +16,7 @@ network:
           input: 2222
           output: 3333
           key: 1111
+          ttl: 100
           addresses:
               - "2001:dead:beef::2/64"
           routes:
