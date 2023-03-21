@@ -16,19 +16,19 @@
 #include "yaml-parser.h"
 
 static const char *const yaml_netdev_kind_table[_YAML_NETDEV_KIND_MAX] = {
-        [YAML_NETDEV_KIND_VLAN]        = "vlans",
-        [YAML_NETDEV_KIND_BRIDGE]      = "bridges",
-        [YAML_NETDEV_KIND_BOND]        = "bonds",
-        [YAML_NETDEV_KIND_VXLAN]       = "vxlans",
-        [YAML_NETDEV_KIND_MACVLAN]     = "macvlans",
-        [YAML_NETDEV_KIND_MACVTAP]     = "macvtaps",
-        [YAML_NETDEV_KIND_IPVLAN]      = "ipvlans",
-        [YAML_NETDEV_KIND_IPVTAP]      = "ipvtaps",
-        [YAML_NETDEV_KIND_VRF]         = "vrfs",
-        [YAML_NETDEV_KIND_VETH]        = "veths",
-        [YAML_NETDEV_KIND_TUN]         = "tuns",
-        [YAML_NETDEV_KIND_TAP]         = "taps",
-        [YAML_NETDEV_KIND_TUNNELS]     = "tunnels",
+        [YAML_NETDEV_KIND_VLAN]    = "vlans",
+        [YAML_NETDEV_KIND_BRIDGE]  = "bridges",
+        [YAML_NETDEV_KIND_BOND]    = "bonds",
+        [YAML_NETDEV_KIND_VXLAN]   = "vxlans",
+        [YAML_NETDEV_KIND_MACVLAN] = "macvlans",
+        [YAML_NETDEV_KIND_MACVTAP] = "macvtaps",
+        [YAML_NETDEV_KIND_IPVLAN]  = "ipvlans",
+        [YAML_NETDEV_KIND_IPVTAP]  = "ipvtaps",
+        [YAML_NETDEV_KIND_VRF]     = "vrfs",
+        [YAML_NETDEV_KIND_VETH]    = "veths",
+        [YAML_NETDEV_KIND_TUN]     = "tuns",
+        [YAML_NETDEV_KIND_TAP]     = "taps",
+        [YAML_NETDEV_KIND_TUNNEL]  = "tunnels",
 };
 
 const char *yaml_netdev_kind_to_name(YAMLNetDevKind id) {
@@ -274,6 +274,78 @@ static int yaml_parse_netdev_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node
         return 0;
 }
 
+static ParserTable parser_netdev_tunnel_vtable[] = {
+        { "local",  CONF_TYPE_NETDEV_TUNNEL, parse_yaml_address, offsetof(Tunnel, local)},
+        { "remote", CONF_TYPE_NETDEV_TUNNEL, parse_yaml_address, offsetof(Tunnel, remote)},
+        { NULL,     _CONF_TYPE_INVALID,      0,                  0}
+};
+
+static int yaml_parse_netdev_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        _auto_cleanup_ Tunnel *tnl = NULL;
+        yaml_node_t *k, *v;
+        yaml_node_pair_t *p;
+        int r;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        r = netdev_new(&network->netdev);
+        if (r < 0)
+                return log_oom();
+
+        r = tunnel_new(&tnl);
+        if (r < 0)
+                return log_oom();
+
+        *tnl = (Tunnel) {
+                     .independent = true,
+               };
+
+        *network->netdev = (NetDev) {
+                           .ifname = strdup(network->ifname),
+                           .tunnel = tnl,
+        };
+        if (!network->netdev->ifname)
+                return log_oom();
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(m->netdev_tunnel, scalar(k));
+                if (!table) {
+                        if (string_equal(scalar(k), "mode")) {
+                                r = netdev_name_to_kind(scalar(v));
+                                if (r < 0) {
+                                        log_warning("Failed to parse tunnel mode = %s", scalar(v));
+                                        return -EINVAL;
+                                }
+                                network->netdev->kind = r;
+                        } else
+                                (void) parse_network(m, dp, node, network);
+
+                        continue;
+                }
+
+                t = (uint8_t *) tnl + table->offset;
+                if (table->parser) {
+                        (void) table->parser(scalar(k), scalar(v), tnl, t, dp, v);
+                        network->modified = true;
+                }
+        }
+
+        steal_pointer(tnl);
+        return 0;
+}
+
 int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
         yaml_node_pair_t *p;
         yaml_node_t *n;
@@ -309,6 +381,9 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                                 case YAML_NETDEV_KIND_BRIDGE:
                                         (void) yaml_parse_netdev_bridge(m, dp, n, net);
                                         break;
+                                case YAML_NETDEV_KIND_TUNNEL:
+                                        (void) yaml_parse_netdev_tunnel(m, dp, n, net);
+                                        break;
                                 default:
                                         break;
                         }
@@ -331,7 +406,7 @@ int yaml_register_netdev(YAMLManager *m) {
                 return log_oom();
 
         for (size_t i = 0; parser_netdev_vlan_vtable[i].key; i++) {
-               if (!g_hash_table_insert(m->netdev_vlan, (void *) parser_netdev_vlan_vtable[i].key, &parser_netdev_vlan_vtable[i])) {
+                if (!g_hash_table_insert(m->netdev_vlan, (void *) parser_netdev_vlan_vtable[i].key, &parser_netdev_vlan_vtable[i])) {
                         log_warning("Failed add key='%s' to VLan table", parser_netdev_vlan_vtable[i].key);
                         return -EINVAL;
                 }
@@ -342,7 +417,7 @@ int yaml_register_netdev(YAMLManager *m) {
                 return log_oom();
 
         for (size_t i = 0; parser_netdev_bond_vtable[i].key; i++) {
-               if (!g_hash_table_insert(m->netdev_bond, (void *) parser_netdev_bond_vtable[i].key, &parser_netdev_bond_vtable[i])) {
+                if (!g_hash_table_insert(m->netdev_bond, (void *) parser_netdev_bond_vtable[i].key, &parser_netdev_bond_vtable[i])) {
                         log_warning("Failed add key='%s' to Bond table", parser_netdev_bond_vtable[i].key);
                         return -EINVAL;
                 }
@@ -353,8 +428,19 @@ int yaml_register_netdev(YAMLManager *m) {
                 return log_oom();
 
         for (size_t i = 0; parser_netdev_bridge_vtable[i].key; i++) {
-               if (!g_hash_table_insert(m->netdev_bridge, (void *) parser_netdev_bridge_vtable[i].key, &parser_netdev_bridge_vtable[i])) {
+                if (!g_hash_table_insert(m->netdev_bridge, (void *) parser_netdev_bridge_vtable[i].key, &parser_netdev_bridge_vtable[i])) {
                         log_warning("Failed add key='%s' to Bridge table", parser_netdev_bridge_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        m->netdev_tunnel = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->netdev_tunnel)
+                return log_oom();
+
+        for (size_t i = 0; parser_netdev_tunnel_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->netdev_tunnel, (void *) parser_netdev_tunnel_vtable[i].key, &parser_netdev_tunnel_vtable[i])) {
+                        log_warning("Failed add key='%s' to Tunnel table", parser_netdev_tunnel_vtable[i].key);
                         return -EINVAL;
                 }
         }

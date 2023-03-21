@@ -84,7 +84,6 @@ To set the device named `eth1` get an address via DHCP4 create a YAML file with 
 
 ```yml
  network:
-  version: 2
   ethernets:
     eth1:
       dhcp4: true
@@ -95,7 +94,6 @@ To set a static IP address, use the addresses key, which takes a list of (IPv4 o
 
 ```yml
  network:
-  version: 2
   ethernets:
     eth0:
       addresses:
@@ -114,7 +112,6 @@ To set a static IP address, use the addresses key, which takes a list of (IPv4 o
 #### Directly connected gateway
 ```yml
  network:
-  version: 2
   ethernets:
       ens3:
           addresses: [ "10.10.10.1/24" ]
@@ -145,7 +142,6 @@ network:
 #### Using DHCP4 overrides
 ```yml
 network:
-  version: 2
   ethernets:
     dummy95:
       dhcp4: yes
@@ -161,7 +157,6 @@ network:
 #### Using match as MacAddress
 ```yml
 network:
-  version: 2
   ethernets:
       eth0:
           match:
@@ -197,7 +192,6 @@ network:
 
 ```yml
 network:
-  version: 2
   ethernets:
     eth1:
       receive-checksum-offload: true
@@ -252,8 +246,6 @@ network:
  Configue VLan with id 10 and set it's master device to `ens33` .
  ```yml
  network:
-  version: 2
-  renderer: networkd
   ethernets:
      ens33:
           addresses: [ "192.168.10.2/23" ]
@@ -277,8 +269,6 @@ network:
  Configue bond `bond0` with mode `active-backup`  and set slave devices to `ens33` and `ens37`.
  ```yml
  network:
-  version: 2
-  renderer: networkd
   bonds:
       bond0:
           dhcp4: yes
@@ -293,7 +283,6 @@ network:
  Configue bridge `bridge0` and set slave master devices to `ens33` with IPv4 DHCP network.
  ```yml
  network:
-  version: 2
   renderer: networkd
   ethernets:
       ens33:

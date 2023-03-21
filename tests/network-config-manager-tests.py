@@ -205,6 +205,7 @@ class TestNetworkConfigManagerYAML:
         "vlan.yml",
         "bond.yml",
         "bridge.yml",
+        "tunnel.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -450,6 +451,25 @@ class TestNetworkConfigManagerYAML:
         parserc = configparser.ConfigParser()
         parserc.read(os.path.join(networkd_unit_file_path, '10-br0.network'))
         assert(parserc.get('Network', 'DHCP') == 'ipv4')
+
+    def test_netdev_tunnel(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('tunnel.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-he-ipv6.netdev') == True)
+
+        assert(unit_exist('10-he-ipv6.network') == True)
+        assert(unit_exist('10-test99.network') == True)
+
+        parserb = configparser.ConfigParser()
+        parserb.read(os.path.join(networkd_unit_file_path, '10-he-ipv6.netdev'))
+
+        assert(parserb.get('NetDev', 'Name') == 'he-ipv6')
+        assert(parserb.get('NetDev', 'Kind') == 'sit')
+
+        assert(parserb.get('Tunnel', 'Independent') == 'yes')
+        assert(parserb.get('Tunnel', 'Local') == '1.1.1.1')
+        assert(parserb.get('Tunnel', 'Remote') == '2.2.2.2')
 
 class TestKernelCommandLine:
     def teardown_method(self):
