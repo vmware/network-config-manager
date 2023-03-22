@@ -391,6 +391,67 @@ static int yaml_parse_netdev_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_no
         return 0;
 }
 
+static ParserTable parser_netdev_vrf_vtable[] = {
+        { "interfaces", CONF_TYPE_NETDEV_VRF, parse_yaml_sequence, offsetof(VRF, interfaces)},
+        { "table",      CONF_TYPE_NETDEV_VRF, parse_yaml_uint32,   offsetof(VRF, table)},
+        { NULL,         _CONF_TYPE_INVALID,    0,                  0}
+};
+
+static int yaml_parse_netdev_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        _cleanup_(vrf_freep) VRF *vrf = NULL;
+        yaml_node_t *k, *v;
+        yaml_node_pair_t *p;
+        int r;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        r = netdev_new(&network->netdev);
+        if (r < 0)
+                return log_oom();
+
+        r = vrf_new(&vrf);
+        if (r < 0)
+                return log_oom();
+
+        *network->netdev = (NetDev) {
+                           .ifname = strdup(network->ifname),
+                           .kind = YAML_NETDEV_KIND_VRF,
+                           .vrf = vrf,
+        };
+        if (!network->netdev->ifname)
+                return log_oom();
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(m->netdev_vrf, scalar(k));
+                if (!table) {
+                        (void) parse_network(m, dp, node, network);
+
+                        continue;
+                }
+
+                t = (uint8_t *) vrf + table->offset;
+                if (table->parser) {
+                        (void) table->parser(scalar(k), scalar(v), vrf, t, dp, v);
+                        network->modified = true;
+                }
+        }
+
+        steal_pointer(vrf);
+        return 0;
+}
+
 int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
         yaml_node_pair_t *p;
         yaml_node_t *n;
@@ -428,6 +489,9 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                                         break;
                                 case YAML_NETDEV_KIND_TUNNEL:
                                         (void) yaml_parse_netdev_tunnel(m, dp, n, net);
+                                        break;
+                                case YAML_NETDEV_KIND_VRF:
+                                        (void) yaml_parse_netdev_vrf(m, dp, n, net);
                                         break;
                                 default:
                                         break;
@@ -486,6 +550,17 @@ int yaml_register_netdev(YAMLManager *m) {
         for (size_t i = 0; parser_netdev_tunnel_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->netdev_tunnel, (void *) parser_netdev_tunnel_vtable[i].key, &parser_netdev_tunnel_vtable[i])) {
                         log_warning("Failed add key='%s' to Tunnel table", parser_netdev_tunnel_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        m->netdev_vrf = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->netdev_vrf)
+                return log_oom();
+
+        for (size_t i = 0; parser_netdev_vrf_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->netdev_vrf, (void *) parser_netdev_vrf_vtable[i].key, &parser_netdev_vrf_vtable[i])) {
+                        log_warning("Failed add key='%s' to VRF table", parser_netdev_vrf_vtable[i].key);
                         return -EINVAL;
                 }
         }

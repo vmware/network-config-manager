@@ -31,6 +31,7 @@ typedef struct YAMLManager {
         GHashTable *netdev_bond;
         GHashTable *netdev_bridge;
         GHashTable *netdev_tunnel;
+        GHashTable *netdev_vrf;
 } YAMLManager;
 
 int yaml_manager_new(YAMLManager **ret);

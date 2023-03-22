@@ -1355,6 +1355,27 @@ int generate_master_device_network(Network *n) {
                                         return r;
                         }
                 }
+                        break;
+                case NETDEV_KIND_VRF: {
+                        VRF *vrf = n->netdev->vrf;
+                        char **d;
+
+                        strv_foreach(d, vrf->interfaces) {
+                                r = parse_ifname_or_index(*d, &p);
+                                if (r < 0) {
+                                        log_warning("Failed to find device: %s", *d);
+                                        return r;
+                                }
+
+                                r = create_or_parse_network_file(p, &network);
+                                if (r < 0)
+                                        return r;
+
+                                r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                                if (r < 0)
+                                        return r;
+                        }
+                }
 
                 default:
                         break;
