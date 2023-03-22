@@ -1376,11 +1376,28 @@ int generate_master_device_network(Network *n) {
                                         return r;
                         }
                 }
+                        break;
+                case NETDEV_KIND_VXLAN: {
+                        VxLan *vx = n->netdev->vxlan;
+
+                        r = parse_ifname_or_index(vx->master, &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", vx->master);
+                                return r;
+                        }
+
+                        r = create_or_parse_network_file(p, &network);
+                        if (r < 0)
+                                return r;
+
+                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                        if (r < 0)
+                                return r;
+                }
 
                 default:
                         break;
         }
 
         return 0;
-
 }
