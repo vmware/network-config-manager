@@ -18,6 +18,7 @@ typedef enum ConfType {
         CONF_TYPE_NETDEV_BOND,
         CONF_TYPE_NETDEV_TUNNEL,
         CONF_TYPE_NETDEV_VRF,
+        CONF_TYPE_NETDEV_VXLAN,
         _CONF_TYPE_MAX,
         _CONF_TYPE_INVALID = -1,
 } ConfType;
