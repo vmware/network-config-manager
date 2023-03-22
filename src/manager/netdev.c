@@ -288,6 +288,7 @@ void vxlan_free(VxLan *v) {
         if (!v)
                 return;
 
+        free(v->master);
         free(v);
 }
 
