@@ -316,6 +316,31 @@ void bond_free(Bond *b) {
         free(b);
 }
 
+int wireguard_peer_new(WireGuardPeer **ret) {
+        _auto_cleanup_ WireGuardPeer *wg = NULL;
+
+        wg = new0(WireGuardPeer, 1);
+        if (!wg)
+                return log_oom();
+
+        *ret = steal_pointer(wg);
+        return 0;
+}
+
+void wireguard_peer_free(WireGuardPeer *wg) {
+        if (!wg)
+                return;
+
+        free(wg->public_key);
+        free(wg->preshared_key);
+        free(wg->preshared_key_file);
+        free(wg->endpoint);
+
+        strv_free(wg->allowed_ips);
+
+        free(wg);
+}
+
 int wireguard_new(WireGuard **ret) {
         _auto_cleanup_ WireGuard *wg = NULL;
 
@@ -333,11 +358,8 @@ void wireguard_free(WireGuard *wg) {
 
         free(wg->private_key);
         free(wg->private_key_file);
-        free(wg->public_key);
-        free(wg->preshared_key);
-        free(wg->preshared_key_file);
-        free(wg->endpoint);
-        free(wg->allowed_ips);
+
+        g_list_free_full(g_list_first(wg->peers), free);
         free(wg);
 }
 
@@ -768,7 +790,9 @@ int generate_netdev_config(NetDev *n) {
                 }
                         break;
 
-                case NETDEV_KIND_WIREGUARD:
+                case NETDEV_KIND_WIREGUARD: {
+                        GList *iter;
+
                         if (n->wg->private_key) {
                                 r = key_file_set_string(key_file, "WireGuard", "PrivateKey", n->wg->private_key);
                                 if (r < 0)
@@ -787,41 +811,69 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
-                        if (n->wg->public_key) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "PublicKey", n->wg->public_key);
-                                if (r < 0)
-                                        return r;
-                        }
+                        for (iter = n->wg->peers; iter; iter = g_list_next (iter)) {
+                                WireGuardPeer *peer = (WireGuardPeer *) iter->data;
+                                _cleanup_(section_freep) Section *section = NULL;
 
-                        if (n->wg->endpoint) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "Endpoint", n->wg->endpoint);
+                                r = section_new("WireGuardPeer", &section);
                                 if (r < 0)
                                         return r;
-                        }
 
-                        if (n->wg->preshared_key) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "PresharedKey", n->wg->preshared_key);
-                                if (r < 0)
-                                        return r;
-                        }
+                                if (peer->public_key) {
+                                        r = add_key_to_section(section, "PublicKey", peer->public_key);
+                                        if (r < 0)
+                                                return r;
+                                }
 
-                        if (n->wg->preshared_key_file) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "PresharedKeyFile", n->wg->preshared_key_file);
-                                if (r < 0)
-                                        return r;
-                        }
+                                if (peer->endpoint) {
+                                        r = add_key_to_section(section, "Endpoint", peer->endpoint);
+                                        if (r < 0)
+                                                return r;
+                                }
 
-                        if (n->wg->allowed_ips) {
-                                r = key_file_set_string(key_file, "WireGuardPeer", "AllowedIPs", n->wg->allowed_ips);
-                                if (r < 0)
-                                        return r;
-                        }
+                                if (peer->preshared_key) {
 
-                        if (n->wg->persistent_keep_alive > 0) {
-                                r = key_file_set_uint(key_file, "WireGuardPeer", "PersistentKeepalive", n->wg->persistent_keep_alive);
+                                        r = add_key_to_section(section, "PresharedKey", peer->preshared_key);
+                                        if (r < 0)
+                                                return r;
+                                }
+
+                                if (peer->preshared_key_file) {
+                                        r = add_key_to_section(section, "PresharedKeyFile", peer->preshared_key_file);
+                                        if (r < 0)
+                                                return r;
+                                }
+
+                                if (peer->allowed_ips) {
+                                        _cleanup_(g_string_unrefp) GString *c = NULL;
+                                        char **d;
+
+                                        c = g_string_new(NULL);
+                                        if (!c)
+                                                return log_oom();
+
+                                        strv_foreach(d, peer->allowed_ips) {
+                                                g_string_append_printf(c, "%s ", *d);
+                                        }
+
+                                        r = add_key_to_section(section, "AllowedIPs", c->str);
+                                        if (r < 0)
+                                                return r;
+                                }
+
+                                if (peer->persistent_keep_alive > 0) {
+                                        r = add_key_to_section_uint(section, "PersistentKeepalive", peer->persistent_keep_alive);
+                                        if (r < 0)
+                                                return r;
+                                }
+
+                                r = add_section_to_key_file(key_file, section);
                                 if (r < 0)
                                         return r;
+
+                                steal_pointer(section);
                         }
+                }
 
                         break;
                 default:
