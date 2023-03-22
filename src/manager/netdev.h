@@ -94,8 +94,9 @@ typedef struct VLan {
 
 typedef struct WireGuardPeer{
         char *public_key;
-        char *preshared_key;
         char *preshared_key_file;
+
+        char *preshared_key;
         char *endpoint;      /* ip:port */
         char **allowed_ips;
 
