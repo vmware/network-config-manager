@@ -119,10 +119,6 @@ static int yaml_parse_netdev_bond(YAMLManager *m, yaml_document_t *dp, yaml_node
         assert(node);
         assert(network);
 
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
-
         r = bond_new(&bond);
         if (r < 0)
                 return log_oom();
@@ -181,10 +177,6 @@ static int yaml_parse_netdev_bridge(YAMLManager *m, yaml_document_t *dp, yaml_no
         assert(node);
         assert(network);
 
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
-
         r = bridge_new(&b);
         if (r < 0)
                 return log_oom();
@@ -241,10 +233,6 @@ static int yaml_parse_netdev_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node
         assert(dp);
         assert(node);
         assert(network);
-
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
 
         r = vlan_new(&vlan);
         if (r < 0)
@@ -346,10 +334,6 @@ static int yaml_parse_netdev_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_no
         assert(node);
         assert(network);
 
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
-
         r = tunnel_new(&tnl);
         if (r < 0)
                 return log_oom();
@@ -420,10 +404,6 @@ static int yaml_parse_netdev_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_
         assert(node);
         assert(network);
 
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
-
         r = vrf_new(&vrf);
         if (r < 0)
                 return log_oom();
@@ -464,6 +444,99 @@ static int yaml_parse_netdev_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_
         return 0;
 }
 
+static ParserTable parser_netdev_vxlan_vtable[] = {
+        { "id",              CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,  offsetof(VxLan, vni)},
+        { "local",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_address, offsetof(VxLan, local)},
+        { "remote",          CONF_TYPE_NETDEV_VXLAN, parse_yaml_address, offsetof(VxLan, remote)},
+        { "link",            CONF_TYPE_NETDEV_VXLAN, parse_yaml_string,  offsetof(VxLan, master)},
+        { "type-of-service", CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,  offsetof(VxLan, tos)},
+        { "mac-learning",    CONF_TYPE_NETDEV_VXLAN, parse_yaml_bool,    offsetof(VxLan, learning)},
+        { "ageing",          CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,  offsetof(VxLan, fdb_ageing)},
+        { "aging",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,  offsetof(VxLan, fdb_ageing)},
+        { "limit",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,  offsetof(VxLan, max_fdb)},
+        { NULL,              _CONF_TYPE_INVALID,    0,                  0}
+};
+
+static int yaml_parse_netdev_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        _cleanup_(vxlan_freep) VxLan *vx = NULL;
+        yaml_node_t *k, *v;
+        yaml_node_pair_t *p;
+        int r;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        r = vxlan_new(&vx);
+        if (r < 0)
+                return log_oom();
+
+        *network->netdev = (NetDev) {
+                           .ifname = strdup(network->ifname),
+                           .kind = YAML_NETDEV_KIND_VXLAN,
+                           .vxlan = vx,
+        };
+        if (!network->netdev->ifname)
+                return log_oom();
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(m->netdev_vxlan, scalar(k));
+                if (!table) {
+                        (void) parse_network(m, dp, node, network);
+
+                        continue;
+                }
+
+                t = (uint8_t *) vx + table->offset;
+                if (table->parser) {
+                        (void) table->parser(scalar(k), scalar(v), vx, t, dp, v);
+                        network->modified = true;
+                }
+        }
+
+        steal_pointer(vx);
+        return 0;
+}
+
+static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
+        yaml_node_t *k, *v;
+        yaml_node_pair_t *p;
+        int r;
+
+        assert(dp);
+        assert(node);
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                if (string_equal(scalar(k), "mode")) {
+                        r = netdev_name_to_kind(scalar(v));
+                        if (r < 0) {
+                                log_warning("Failed to parse tunnel mode = %s", scalar(v));
+                                return -EINVAL;
+                        }
+
+                        return r;
+                }
+        }
+
+        return -EINVAL;
+}
+
 int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
         yaml_node_pair_t *p;
         yaml_node_t *n;
@@ -487,6 +560,10 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                 if (!net->ifname)
                         return log_oom();
 
+                r = netdev_new(&net->netdev);
+                if (r < 0)
+                        return log_oom();
+
                 n = yaml_document_get_node(dp, p->value);
                 if (n) {
                         switch (kind) {
@@ -500,7 +577,18 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                                         (void) yaml_parse_netdev_bridge(m, dp, n, net);
                                         break;
                                 case YAML_NETDEV_KIND_TUNNEL:
-                                        (void) yaml_parse_netdev_tunnel(m, dp, n, net);
+                                        r = yaml_detect_tunnel_kind(dp, n);
+                                        if (r < 0)
+                                                return r;
+
+                                        switch (r) {
+                                                case NETDEV_KIND_VXLAN:
+                                                        (void) yaml_parse_netdev_vxlan(m, dp, n, net);
+                                                        break;
+                                                default:
+                                                        (void) yaml_parse_netdev_tunnel(m, dp, n, net);
+                                        }
+
                                         break;
                                 case YAML_NETDEV_KIND_VRF:
                                         (void) yaml_parse_netdev_vrf(m, dp, n, net);
@@ -576,6 +664,18 @@ int yaml_register_netdev(YAMLManager *m) {
                         return -EINVAL;
                 }
         }
+
+        m->netdev_vxlan = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->netdev_vxlan)
+                return log_oom();
+
+        for (size_t i = 0; parser_netdev_vxlan_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->netdev_vxlan, (void *) parser_netdev_vxlan_vtable[i].key, &parser_netdev_vxlan_vtable[i])) {
+                        log_warning("Failed add key='%s' to VRF table", parser_netdev_vxlan_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
 
         return 0;
 }
