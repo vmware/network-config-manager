@@ -207,6 +207,7 @@ class TestNetworkConfigManagerYAML:
         "bridge.yml",
         "tunnel.yml",
         "tunnel-keys.yml",
+        "vrf.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -496,6 +497,33 @@ class TestNetworkConfigManagerYAML:
         assert(parserb.get('Tunnel', 'Remote') == '2.2.2.2')
         assert(parserb.get('Tunnel', 'InputKey') == '1234')
         assert(parserb.get('Tunnel', 'OutputKey') == '5678')
+
+    def test_netdev_vrf(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('vrf.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-vrf1005.netdev') == True)
+
+        assert(unit_exist('10-vrf1005.network') == True)
+        assert(unit_exist('10-test99.network') == True)
+        assert(unit_exist('10-test98.network') == True)
+
+        parsera = configparser.ConfigParser()
+        parsera.read(os.path.join(networkd_unit_file_path, '10-vrf1005.netdev'))
+
+        assert(parsera.get('NetDev', 'Name') == 'vrf1005')
+        assert(parsera.get('NetDev', 'Kind') == 'vrf')
+
+        assert(parsera.get('VRF', 'Table') == '1005')
+
+        parserb = configparser.ConfigParser()
+        parserb.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+        assert(parserb.get('Network', 'VRF') == 'vrf1005')
+
+        parserc = configparser.ConfigParser()
+        parserc.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+        assert(parserc.get('Network', 'VRF') == 'vrf1005')
+
 
 class TestKernelCommandLine:
     def teardown_method(self):
