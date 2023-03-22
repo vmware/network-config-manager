@@ -41,9 +41,7 @@ static int yaml_parse_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
                                         (void) parse_ethernet_config(m, dp, n, networks);
-                        } else if (string_equal(scalar(n), "vlans") || string_equal(scalar(n), "bonds") ||
-                                   string_equal(scalar(n), "bridges") || string_equal(scalar(n), "tunnels") ||
-                                   string_equal(scalar(n), "vrfs")) {
+                        } else if (is_yaml_netdev_kind(scalar(n))) {
                                 YAMLNetDevKind kind = yaml_netdev_name_to_kind(scalar(n));
 
                                 n = yaml_document_get_node(dp, p->value);
