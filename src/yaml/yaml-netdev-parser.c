@@ -119,10 +119,6 @@ static int yaml_parse_netdev_bond(YAMLManager *m, yaml_document_t *dp, yaml_node
         assert(node);
         assert(network);
 
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
-
         r = bond_new(&bond);
         if (r < 0)
                 return log_oom();
@@ -181,10 +177,6 @@ static int yaml_parse_netdev_bridge(YAMLManager *m, yaml_document_t *dp, yaml_no
         assert(node);
         assert(network);
 
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
-
         r = bridge_new(&b);
         if (r < 0)
                 return log_oom();
@@ -241,10 +233,6 @@ static int yaml_parse_netdev_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node
         assert(dp);
         assert(node);
         assert(network);
-
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
 
         r = vlan_new(&vlan);
         if (r < 0)
@@ -346,10 +334,6 @@ static int yaml_parse_netdev_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_no
         assert(node);
         assert(network);
 
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
-
         r = tunnel_new(&tnl);
         if (r < 0)
                 return log_oom();
@@ -420,10 +404,6 @@ static int yaml_parse_netdev_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_
         assert(node);
         assert(network);
 
-        r = netdev_new(&network->netdev);
-        if (r < 0)
-                return log_oom();
-
         r = vrf_new(&vrf);
         if (r < 0)
                 return log_oom();
@@ -487,8 +467,13 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                 if (!net->ifname)
                         return log_oom();
 
+                r = netdev_new(&net->netdev);
+                if (r < 0)
+                        return log_oom();
+
                 n = yaml_document_get_node(dp, p->value);
                 if (n) {
+
                         switch (kind) {
                                 case YAML_NETDEV_KIND_VLAN:
                                         (void) yaml_parse_netdev_vlan(m, dp, n, net);
