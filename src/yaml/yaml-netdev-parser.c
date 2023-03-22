@@ -63,6 +63,35 @@ bool is_yaml_netdev_kind(const char *s) {
         return true;
 }
 
+static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
+        yaml_node_t *k, *v;
+        yaml_node_pair_t *p;
+        int r;
+
+        assert(dp);
+        assert(node);
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                if (string_equal(scalar(k), "mode")) {
+                        r = netdev_name_to_kind(scalar(v));
+                        if (r < 0) {
+                                log_warning("Failed to parse tunnel mode = %s", scalar(v));
+                                return -EINVAL;
+                        }
+
+                        return r;
+                }
+        }
+
+        return -EINVAL;
+}
+
 static ParserTable parser_netdev_bond_vtable[] = {
         { "interfaces", CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,  offsetof(Bond, interfaces)},
         { "mode",       CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode, offsetof(Bond, mode)},
@@ -473,10 +502,10 @@ static int yaml_parse_netdev_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_nod
                 return log_oom();
 
         *network->netdev = (NetDev) {
-                           .ifname = strdup(network->ifname),
-                           .kind = YAML_NETDEV_KIND_VXLAN,
-                           .vxlan = vx,
-        };
+                                 .ifname = strdup(network->ifname),
+                                 .kind = YAML_NETDEV_KIND_VXLAN,
+                                 .vxlan = vx,
+                           };
         if (!network->netdev->ifname)
                 return log_oom();
 
@@ -506,35 +535,6 @@ static int yaml_parse_netdev_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_nod
 
         steal_pointer(vx);
         return 0;
-}
-
-static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
-        int r;
-
-        assert(dp);
-        assert(node);
-
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
-                k = yaml_document_get_node(dp, p->key);
-                v = yaml_document_get_node(dp, p->value);
-
-                if (!k && !v)
-                        continue;
-
-                if (string_equal(scalar(k), "mode")) {
-                        r = netdev_name_to_kind(scalar(v));
-                        if (r < 0) {
-                                log_warning("Failed to parse tunnel mode = %s", scalar(v));
-                                return -EINVAL;
-                        }
-
-                        return r;
-                }
-        }
-
-        return -EINVAL;
 }
 
 int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
@@ -675,7 +675,6 @@ int yaml_register_netdev(YAMLManager *m) {
                         return -EINVAL;
                 }
         }
-
 
         return 0;
 }
