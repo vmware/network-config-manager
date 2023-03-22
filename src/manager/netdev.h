@@ -114,7 +114,30 @@ typedef struct VxLan {
 
         uint16_t destination_port;
 
+        unsigned tos;
+        unsigned ttl;
+        unsigned max_fdb;
+        unsigned flow_label;
+
+        uint64_t fdb_ageing;
+
+        bool learning;
+        bool arp_proxy;
+        bool route_short_circuit;
+        bool l2miss;
+        bool l3miss;
+        bool udpcsum;
+        bool udp6zerocsumtx;
+        bool udp6zerocsumrx;
+        bool remote_csum_tx;
+        bool remote_csum_rx;
+        bool group_policy;
+        bool generic_protocol_extension;
+        bool inherit;
+
         bool independent;
+
+        char *master;
 } VxLan;
 
 typedef struct Tunnel {
