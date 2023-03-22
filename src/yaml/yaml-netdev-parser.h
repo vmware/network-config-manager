@@ -28,6 +28,7 @@ typedef enum YAMLNetDevKind {
 const char *yaml_netdev_kind_to_name(YAMLNetDevKind id);
 int yaml_netdev_name_to_kind(const char *name);
 
-int yaml_register_netdev(YAMLManager *m);
+bool is_yaml_netdev_kind(const char *s);
 
+int yaml_register_netdev(YAMLManager *m);
 int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets);
