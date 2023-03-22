@@ -1,0 +1,13 @@
+network:
+  ethernets:
+    test99:
+      routes:
+        - to: 10.20.30.40/32
+          via: 10.20.30.1
+  tunnels:
+    vxlan1:
+      mode: vxlan
+      id: 1
+      link: test99
+      local: 192.168.1.34
+      remote: 192.168.1.35
