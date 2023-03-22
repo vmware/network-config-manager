@@ -51,6 +51,18 @@ int yaml_netdev_name_to_kind(const char *name) {
         return _YAML_NETDEV_KIND_INVALID;
 }
 
+bool is_yaml_netdev_kind(const char *s) {
+        int r;
+
+        assert(s);
+
+        r = yaml_netdev_name_to_kind(s);
+        if (r < 0)
+                return false;
+
+        return true;
+}
+
 static ParserTable parser_netdev_bond_vtable[] = {
         { "interfaces", CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,  offsetof(Bond, interfaces)},
         { "mode",       CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode, offsetof(Bond, mode)},
