@@ -208,6 +208,7 @@ class TestNetworkConfigManagerYAML:
         "tunnel.yml",
         "tunnel-keys.yml",
         "vrf.yml",
+        "vxlan.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -523,6 +524,29 @@ class TestNetworkConfigManagerYAML:
         parserc = configparser.ConfigParser()
         parserc.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
         assert(parserc.get('Network', 'VRF') == 'vrf1005')
+
+    def test_netdev_vxlan(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('vxlan.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-vxlan1.netdev') == True)
+
+        assert(unit_exist('10-vxlan1.network') == True)
+        assert(unit_exist('10-test99.network') == True)
+
+        parsera = configparser.ConfigParser()
+        parsera.read(os.path.join(networkd_unit_file_path, '10-vxlan1.netdev'))
+
+        assert(parsera.get('NetDev', 'Name') == 'vxlan1')
+        assert(parsera.get('NetDev', 'Kind') == 'vxlan')
+
+        assert(parsera.get('VXLAN', 'VNI') == '1')
+        assert(parsera.get('VXLAN', 'Local') == '192.168.1.34')
+        assert(parsera.get('VXLAN', 'Remote') == '192.168.1.35')
+
+        parserb = configparser.ConfigParser()
+        parserb.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+        assert(parserb.get('Network', 'VXLAN') == 'vxlan1')
 
 
 class TestKernelCommandLine:
