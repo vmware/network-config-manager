@@ -2027,10 +2027,8 @@ int manager_generate_network_config_from_yaml(const char *file) {
                         NetDevLink *l = net->link;
 
                         r = parse_ifname_or_index(net->ifname, &p);
-                        if (r < 0) {
-                                log_warning("Failed to find device '%s': %s", net->ifname, strerror(-r));
+                        if (r < 0)
                                 continue;
-                        }
 
                         r = netdev_link_configure(p, l);
                         if (r < 0) {

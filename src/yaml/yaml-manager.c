@@ -156,10 +156,12 @@ void yaml_manager_free(YAMLManager *p) {
 
         g_hash_table_destroy(p->link);
 
-        g_hash_table_destroy(p->netdev_vlan);
-        g_hash_table_destroy(p->netdev_bond);
-        g_hash_table_destroy(p->netdev_bridge);
-        g_hash_table_destroy(p->netdev_tunnel);
+        g_hash_table_destroy(p->vlan);
+        g_hash_table_destroy(p->bond);
+        g_hash_table_destroy(p->bridge);
+        g_hash_table_destroy(p->tunnel);
+        g_hash_table_destroy(p->wireguard);
+        g_hash_table_destroy(p->wireguard_peer);
 
         free(p);
 }

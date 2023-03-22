@@ -719,10 +719,15 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 }
 
 _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
+        _cleanup_(wireguard_peer_freep) WireGuardPeer *peer = NULL;
         _cleanup_(wireguard_freep) WireGuard *wg = NULL;
         int r;
 
         r = wireguard_new(&wg);
+        if (r < 0)
+                return log_oom();
+
+        r = wireguard_peer_new(&peer);
         if (r < 0)
                 return log_oom();
 
@@ -742,27 +747,26 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-
                 } else if (string_equal_fold(argv[i], "public-key")) {
                         parse_next_arg(argv, argc, i);
 
-                        wg->public_key = strdup(argv[i]);
-                        if (!wg->public_key)
+                        peer->public_key = strdup(argv[i]);
+                        if (!peer->public_key)
                                 return log_oom();
 
                 } else if (string_equal_fold(argv[i], "preshared-key")) {
                         parse_next_arg(argv, argc, i);
 
-                        wg->preshared_key= strdup(argv[i]);
-                        if (!wg->preshared_key)
+                        peer->preshared_key= strdup(argv[i]);
+                        if (!peer->preshared_key)
                                 return log_oom();
 
                         continue;
                 } else if (string_equal_fold(argv[i], "preshared-key-file")) {
                         parse_next_arg(argv, argc, i);
 
-                        wg->preshared_key_file = strdup(argv[i]);
-                        if (!wg->preshared_key_file)
+                        peer->preshared_key_file = strdup(argv[i]);
+                        if (!peer->preshared_key_file)
                                 return log_oom();
                         continue;
                 } else if (string_equal_fold(argv[i], "allowed-ips")) {
@@ -787,6 +791,8 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                                 return -EINVAL;
                                         }
                                 }
+                                peer->allowed_ips = s;
+                                steal_pointer(s);
                         } else {
                                 _auto_cleanup_ IPAddress *address = NULL;
 
@@ -795,11 +801,11 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                         log_warning("Failed to parse allowed ips '%s': %s", argv[i], strerror(EINVAL));
                                         return -EINVAL;
                                 }
-                        }
 
-                        wg->allowed_ips = strdup(argv[i]);
-                        if (!wg->allowed_ips)
-                                return log_oom();
+                                peer->allowed_ips = strv_new(argv[i]);
+                                if (!peer->allowed_ips)
+                                        return log_oom();
+                        }
 
                         continue;
                 } else if (string_equal_fold(argv[i], "endpoint")) {
@@ -814,8 +820,8 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 return r;
                         }
 
-                        wg->endpoint = strdup(argv[i]);
-                        if (!wg->endpoint)
+                        peer->endpoint = strdup(argv[i]);
+                        if (!peer->endpoint)
                                 return log_oom();
 
                         continue;
@@ -839,6 +845,9 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                 log_warning("Invalid ifname %s': %s", argv[1], strerror(EINVAL));
                 return r;
         }
+
+        wg->peers = g_list_append(wg->peers, peer);
+        steal_pointer(peer);
 
         r = manager_create_wireguard(argv[1], wg);
         if (r < 0) {

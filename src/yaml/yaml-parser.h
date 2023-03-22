@@ -19,6 +19,7 @@ typedef enum ConfType {
         CONF_TYPE_NETDEV_TUNNEL,
         CONF_TYPE_NETDEV_VRF,
         CONF_TYPE_NETDEV_VXLAN,
+        CONF_TYPE_NETDEV_WIREGUARD,
         _CONF_TYPE_MAX,
         _CONF_TYPE_INVALID = -1,
 } ConfType;
@@ -32,6 +33,7 @@ typedef struct ParserTable {
 
 int parse_yaml_bool(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_uint32(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_uint16(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_uint32_or_max(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_mac_address(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_string(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);

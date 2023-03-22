@@ -209,6 +209,7 @@ class TestNetworkConfigManagerYAML:
         "tunnel-keys.yml",
         "vrf.yml",
         "vxlan.yml",
+        "wireguard.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -548,6 +549,25 @@ class TestNetworkConfigManagerYAML:
         parserb.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
         assert(parserb.get('Network', 'VXLAN') == 'vxlan1')
 
+    def test_netdev_wireguard(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('wireguard.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-home0.netdev') == True)
+        assert(unit_exist('10-home0.network') == True)
+
+        parsera = configparser.ConfigParser()
+        parsera.read(os.path.join(networkd_unit_file_path, '10-home0.netdev'))
+
+        assert(parsera.get('NetDev', 'Name') == 'home0')
+        assert(parsera.get('NetDev', 'Kind') == 'wireguard')
+
+        assert(parsera.get('WireGuard', 'PrivateKeyFile') == '/etc/wireguard/laptop-private.key')
+        assert(parsera.get('WireGuard', 'ListenPort') == '51000')
+
+        assert(parsera.get('WireGuardPeer', 'PublicKey') == 'syR+psKigVdJ+PZvpEkacU5niqg9WGYxepDZT/zLGj8=')
+        assert(parsera.get('WireGuardPeer', 'Endpoint') == '10.48.132.39:51000')
+        assert(parsera.get('WireGuardPeer', 'AllowedIPs') == '10.10.11.0/24 10.10.10.0/24')
 
 class TestKernelCommandLine:
     def teardown_method(self):
