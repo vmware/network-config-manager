@@ -1,0 +1,13 @@
+network:
+  version: 2
+  tunnels:
+    home0:
+      mode: wireguard
+      key: /etc/wireguard/laptop-private.key
+      port: 51000
+      addresses: [10.10.11.2/24]
+      peers:
+        - keys:
+            public: syR+psKigVdJ+PZvpEkacU5niqg9WGYxepDZT/zLGj8=
+          endpoint: 10.48.132.39:51000
+          allowed-ips: [10.10.11.0/24, 10.10.10.0/24]
