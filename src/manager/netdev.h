@@ -92,17 +92,23 @@ typedef struct VLan {
         int reorder_header;
 } VLan;
 
-typedef struct WireGuard {
-        char *private_key;
-        char *private_key_file;
+typedef struct WireGuardPeer{
         char *public_key;
         char *preshared_key;
         char *preshared_key_file;
         char *endpoint;      /* ip:port */
-        char *allowed_ips;
+        char **allowed_ips;
 
-        uint16_t listen_port;
         int persistent_keep_alive;
+} WireGuardPeer;
+
+typedef struct WireGuard {
+        char *private_key;
+        char *private_key_file;
+        uint16_t listen_port;
+        uint32_t fwmark;
+
+        GList *peers;
 } WireGuard;
 
 typedef struct VxLan {
@@ -248,6 +254,10 @@ DEFINE_CLEANUP(VLan*, vlan_free);
 int wireguard_new(WireGuard **ret);
 void wireguard_free(WireGuard *wg);
 DEFINE_CLEANUP(WireGuard*, wireguard_free);
+
+int wireguard_peer_new(WireGuardPeer **ret);
+void wireguard_peer_free(WireGuardPeer *wg);
+DEFINE_CLEANUP(WireGuardPeer*, wireguard_peer_free);
 
 int vxlan_new(VxLan **ret);
 void vxlan_free(VxLan *v);
