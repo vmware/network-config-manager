@@ -331,7 +331,7 @@ network:
       table: 1005
       interfaces:
         - ens33
-        - test37
+        - ens37
       routes:
       - to: default
         via: 1.2.3.4
@@ -339,6 +339,27 @@ network:
       - from: 2.3.4.5
 
  ```
+ 
+ #### Generate VXLan configuration
+ Configue VXLan `vxlan1` id 1 on interface `ens33`
+ 
+ ```yml
+network:
+  ethernets:
+    ens33:
+      routes:
+        - to: 10.20.30.40/32
+          via: 10.20.30.1
+  tunnels:
+    vxlan1:
+      mode: vxlan
+      id: 1
+      link: ens33
+      local: 192.168.1.34
+      remote: 192.168.1.35
+
+ ```
+ 
 
 ### Generate network config from kernel command line
 
