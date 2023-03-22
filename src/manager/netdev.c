@@ -427,6 +427,7 @@ void vrf_free(VRF *v) {
         if (!v)
                 return;
 
+        strv_free(v->interfaces);
         free(v);
 }
 

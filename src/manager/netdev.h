@@ -161,6 +161,8 @@ typedef struct Bridge {
 
 typedef struct VRF {
         uint32_t table;
+
+        char **interfaces;
 } VRF;
 
 typedef struct Veth {
