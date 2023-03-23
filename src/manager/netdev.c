@@ -285,6 +285,11 @@ int vxlan_new(VxLan **ret) {
                 .arp_proxy = -1,
                 .l2miss = -1,
                 .l3miss = -1,
+                .udpcsum = -1,
+                .udp6zerocsumtx = -1,
+                .udp6zerocsumrx = -1,
+                .remote_csum_tx = -1,
+                .remote_csum_rx = -1,
                 .flow_label = G_MAXUINT,
              };
 
@@ -709,6 +714,37 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
+                        if (n->vxlan->udpcsum >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "UDPChecksum", n->vxlan->udpcsum);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->udp6zerocsumtx >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "UDP6ZeroChecksumTx", n->vxlan->udp6zerocsumtx);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->udp6zerocsumrx >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "UDP6ZeroChecksumRx", n->vxlan->udp6zerocsumrx);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->remote_csum_tx >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "RemoteChecksumTx", n->vxlan->remote_csum_tx);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->remote_csum_rx >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "RemoteChecksumRx", n->vxlan->remote_csum_rx);
+                                if (r < 0)
+                                        return r;
+                        }
+
                 }
                         break;
 

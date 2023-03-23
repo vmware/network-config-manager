@@ -130,20 +130,18 @@ typedef struct VxLan {
 
         int learning;
         int arp_proxy;
-
-        bool route_short_circuit;
+        int route_short_circuit;
         int l2miss;
         int l3miss;
-        bool udpcsum;
-        bool udp6zerocsumtx;
-        bool udp6zerocsumrx;
-        bool remote_csum_tx;
-        bool remote_csum_rx;
-        bool group_policy;
-        bool generic_protocol_extension;
-        bool inherit;
-
-        bool independent;
+        int udpcsum;
+        int udp6zerocsumtx;
+        int udp6zerocsumrx;
+        int remote_csum_tx;
+        int remote_csum_rx;
+        int group_policy;
+        int generic_protocol_extension;
+        int inherit;
+        int independent;
 
         char *master;
 } VxLan;
