@@ -483,6 +483,7 @@ static ParserTable parser_netdev_vxlan_vtable[] = {
         { "ageing",          CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,  offsetof(VxLan, fdb_ageing)},
         { "aging",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,  offsetof(VxLan, fdb_ageing)},
         { "limit",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,  offsetof(VxLan, max_fdb)},
+        { "arp-proxy",       CONF_TYPE_NETDEV_VXLAN, parse_yaml_bool,    offsetof(VxLan, arp_proxy)},
         { NULL,              _CONF_TYPE_INVALID,    0,                  0}
 };
 
