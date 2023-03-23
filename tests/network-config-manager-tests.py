@@ -448,9 +448,15 @@ class TestNetworkConfigManagerYAML:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
         assert(parser.get('Network', 'Bridge') == 'br0')
 
+
         parserb = configparser.ConfigParser()
         parserb.read(os.path.join(networkd_unit_file_path, '10-br0.netdev'))
-        assert(parserb.get('NetDev', 'Kind') == 'bridge')
+        assert(parserb.get('NetDev', 'Name') == 'br0')
+        assert(parserb.get('Bridge', 'STP') == 'yes')
+        assert(parserb.get('Bridge', 'ForwardDelaySec') == '12')
+        assert(parserb.get('Bridge', 'HelloTimeSec') == '6')
+        assert(parserb.get('Bridge', 'AgeingTimeSec') == '50')
+        assert(parserb.get('Bridge', 'MaxAgeSec') == '24')
 
         parserc = configparser.ConfigParser()
         parserc.read(os.path.join(networkd_unit_file_path, '10-br0.network'))
