@@ -745,6 +745,17 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->vxlan->group_policy >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "GroupPolicyExtension", n->vxlan->group_policy);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->generic_protocol_extension >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "GenericProtocolExtension", n->vxlan->generic_protocol_extension);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
                         break;
 
