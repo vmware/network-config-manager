@@ -141,6 +141,7 @@ typedef struct VxLan {
         int group_policy;
         int generic_protocol_extension;
         int inherit;
+        int df;
         int independent;
 
         char *master;
