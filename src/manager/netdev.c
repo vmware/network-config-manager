@@ -282,6 +282,7 @@ int vxlan_new(VxLan **ret) {
 
         *v = (VxLan) {
                 .learning = -1,
+                .arp_proxy = -1,
              };
 
         *ret = steal_pointer(v);
@@ -666,6 +667,12 @@ int generate_netdev_config(NetDev *n) {
 
                         if (n->vxlan->learning != -1)  {
                                 r = key_file_set_bool(key_file, "VXLAN", "MacLearning", n->vxlan->learning);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->arp_proxy != -1)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "ReduceARPProxy", n->vxlan->arp_proxy);
                                 if (r < 0)
                                         return r;
                         }
