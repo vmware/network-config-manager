@@ -132,8 +132,8 @@ typedef struct VxLan {
         int arp_proxy;
 
         bool route_short_circuit;
-        bool l2miss;
-        bool l3miss;
+        int l2miss;
+        int l3miss;
         bool udpcsum;
         bool udp6zerocsumtx;
         bool udp6zerocsumrx;
