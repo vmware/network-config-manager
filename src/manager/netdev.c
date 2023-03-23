@@ -283,6 +283,8 @@ int vxlan_new(VxLan **ret) {
         *v = (VxLan) {
                 .learning = -1,
                 .arp_proxy = -1,
+                .l2miss = -1,
+                .l3miss = -1,
                 .flow_label = G_MAXUINT,
              };
 
@@ -672,7 +674,7 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
-                        if (n->vxlan->arp_proxy != -1)  {
+                        if (n->vxlan->arp_proxy >= -1)  {
                                 r = key_file_set_bool(key_file, "VXLAN", "ReduceARPProxy", n->vxlan->arp_proxy);
                                 if (r < 0)
                                         return r;
@@ -690,6 +692,23 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->vxlan->max_fdb > 0)  {
+                                r = key_file_set_uint(key_file, "VXLAN", "MaximumFDBEntries", n->vxlan->max_fdb);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->l2miss >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "L2MissNotification", n->vxlan->l2miss);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->l3miss >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "L3MissNotification", n->vxlan->l2miss);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
                         break;
 
