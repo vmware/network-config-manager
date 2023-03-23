@@ -4,6 +4,7 @@
 #pragma once
 
 #include <netinet/in.h>
+#include <linux/if_link.h>
 
 #include "config-file.h"
 #include "network-util.h"
@@ -120,6 +121,8 @@ typedef struct VxLan {
         IPAddress group;
 
         uint16_t destination_port;
+        uint16_t low_port;
+        uint16_t high_port;
 
         unsigned tos;
         unsigned ttl;
@@ -143,6 +146,7 @@ typedef struct VxLan {
         int inherit;
         int df;
         int independent;
+
 
         char *master;
 } VxLan;

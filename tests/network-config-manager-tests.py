@@ -558,6 +558,7 @@ class TestNetworkConfigManagerYAML:
         assert(parsera.get('VXLAN', 'GroupPolicyExtension') == 'yes')
         assert(parsera.get('VXLAN', 'GenericProtocolExtension') == 'yes')
         assert(parsera.get('VXLAN', 'IPDoNotFragment') == 'yes')
+        assert(parsera.get('VXLAN', 'PortRange') == '42-442')
 
         parserb = configparser.ConfigParser()
         parserb.read(os.path.join(networkd_unit_file_path, '10-test99.network'))

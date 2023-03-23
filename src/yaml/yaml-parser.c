@@ -785,7 +785,7 @@ int parse_yaml_vxlan_csum(const char *key,
                           yaml_node_t *node) {
 
         yaml_node_item_t *i;
-        VxLan *v;;
+        VxLan *v;
 
         assert(key);
         assert(value);
@@ -840,6 +840,46 @@ int parse_yaml_vxlan_extensions(const char *key,
                         v->group_policy = true;
                 else if (string_equal(scalar(entry), "generic-protocol"))
                         v->generic_protocol_extension = true;
+        }
+
+        return 0;
+}
+
+int parse_yaml_vxlan_port_range(const char *key,
+                                const char *value,
+                                void *data,
+                                void *userdata,
+                                yaml_document_t *doc,
+                                yaml_node_t *node) {
+
+        yaml_node_item_t *i;
+        bool b = false;
+        uint16_t k;
+        VxLan *v;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        v = data;
+
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *entry = yaml_document_get_node(doc, *i);
+
+                r = parse_uint16(scalar(entry), &k);
+                if (r < 0) {
+                        log_warning("Failed to parse port range: %s", scalar(entry));
+                        return r;
+                }
+
+                if (!b) {
+                        v->low_port = k;
+                        b = true;
+                } else
+                        v->high_port = k;
         }
 
         return 0;
