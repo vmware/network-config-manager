@@ -191,9 +191,55 @@ static int yaml_parse_bond(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
 }
 
 static ParserTable parser_bridge_vtable[] = {
-        { "interfaces", CONF_TYPE_NETDEV_BRIDGE, parse_yaml_sequence,  offsetof(Bridge, interfaces)},
-        { NULL,         _CONF_TYPE_INVALID,    0,                  0}
+        { "interfaces",    CONF_TYPE_NETDEV_BRIDGE, parse_yaml_sequence, offsetof(Bridge, interfaces)},
+        { "priority",      CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, priority)},
+        { "forward-delay", CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, forward_delay)},
+        { "hello-time",    CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, hello_time)},
+        { "max-age",       CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, max_age)},
+        { "ageing-time",   CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, ageing_time)},
+        { "aging-time",    CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, ageing_time)},
+        { "stp",           CONF_TYPE_NETDEV_BRIDGE, parse_yaml_bool,     offsetof(Bridge, stp)},
+        { NULL,            _CONF_TYPE_INVALID,    0,                  0}
 };
+
+static int yaml_yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Bridge *br) {
+        yaml_node_t *k, *v;
+        yaml_node_pair_t *p;
+        yaml_node_item_t *i;
+        yaml_node_t *n;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(br);
+
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                n = yaml_document_get_node(dp, *i);
+                if (n)
+                        (void) yaml_yaml_parse_bridge_parameters(m, dp, n, br);
+        }
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(m->bridge, scalar(k));
+                if (!table)
+                        continue;
+
+                t = (uint8_t *) br + table->offset;
+                if (table->parser)
+                        (void) table->parser(scalar(k), scalar(v), br, t, dp, v);
+        }
+
+        return 0;
+}
 
 static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Bridge *b = NULL;
@@ -230,7 +276,10 @@ static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
 
                 table = g_hash_table_lookup(m->bridge, scalar(k));
                 if (!table) {
-                        (void) parse_network(m, dp, node, network);
+                        if (string_equal(scalar(k), "parameters"))
+                                yaml_yaml_parse_bridge_parameters(m, dp, v, b);
+                        else
+                                (void) parse_network(m, dp, node, network);
 
                         continue;
                 }
