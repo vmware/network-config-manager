@@ -1,5 +1,0 @@
- network:
-  device:
-     name: test99
-     dhcp: yes
-     dhcp4-client-identifier: mac

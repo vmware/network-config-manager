@@ -1,5 +1,0 @@
-network:
-   device:
-      name: test99
-      unmanaged: yes
-      mac-address: 00:0c:29:3a:bc:11

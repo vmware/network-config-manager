@@ -1,5 +1,0 @@
- network:
-  device:
-     name: test99
-     unmanaged: yes
-     mtu: 1400
