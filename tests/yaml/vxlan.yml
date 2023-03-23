@@ -17,6 +17,7 @@ network:
       checksums: [udp, zero-udp6-tx, zero-udp6-rx, remote-tx, remote-rx]
       extensions: [group-policy, generic-protocol]
       notifications: [l2-miss, l3-miss]
+      do-not-fragment: yes
       link: test99
       local: 192.168.1.34
       remote: 192.168.1.35

@@ -290,6 +290,7 @@ int vxlan_new(VxLan **ret) {
                 .udp6zerocsumrx = -1,
                 .remote_csum_tx = -1,
                 .remote_csum_rx = -1,
+                .df = -1,
                 .flow_label = G_MAXUINT,
              };
 
@@ -699,6 +700,12 @@ int generate_netdev_config(NetDev *n) {
 
                         if (n->vxlan->max_fdb > 0)  {
                                 r = key_file_set_uint(key_file, "VXLAN", "MaximumFDBEntries", n->vxlan->max_fdb);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->df >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "IPDoNotFragment", n->vxlan->df);
                                 if (r < 0)
                                         return r;
                         }
