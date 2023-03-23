@@ -1,8 +1,0 @@
- network:
-  device:
-     name: test99
-     dhcp: yes
-     link-local-address: yes
-     ipv6-accept-ra: yes
-     dhcp6-use-ntp: yes
-     dhcp6-use-dns: yes
