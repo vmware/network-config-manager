@@ -283,6 +283,7 @@ int vxlan_new(VxLan **ret) {
         *v = (VxLan) {
                 .learning = -1,
                 .arp_proxy = -1,
+                .flow_label = G_MAXUINT,
              };
 
         *ret = steal_pointer(v);
@@ -682,6 +683,13 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
+                        if (n->vxlan->flow_label != G_MAXUINT)  {
+                                r = key_file_set_uint(key_file, "VXLAN", "FlowLabel", n->vxlan->flow_label);
+                                if (r < 0)
+                                        return r;
+                        }
+
                 }
                         break;
 
