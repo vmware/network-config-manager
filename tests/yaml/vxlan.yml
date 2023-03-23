@@ -13,6 +13,7 @@ network:
       ageing: 300
       arp-proxy: yes
       flow-label: 5555
+      MaximumFDBEntries: 20
       link: test99
       local: 192.168.1.34
       remote: 192.168.1.35

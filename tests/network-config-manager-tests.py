@@ -549,6 +549,7 @@ class TestNetworkConfigManagerYAML:
         assert(parsera.get('VXLAN', 'FDBAgeingSec') == '300')
         assert(parsera.get('VXLAN', 'ReduceARPProxy') == 'yes')
         assert(parsera.get('VXLAN', 'FlowLabel') == '5555')
+        assert(parsera.get('VXLAN', 'MaximumFDBEntries') == '20')
 
         parserb = configparser.ConfigParser()
         parserb.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
