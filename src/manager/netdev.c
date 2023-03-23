@@ -670,6 +670,11 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->vxlan->fdb_ageing > 0)  {
+                                r = key_file_set_uint(key_file, "VXLAN", "FDBAgeingSec", n->vxlan->fdb_ageing);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
                         break;
 
