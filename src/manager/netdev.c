@@ -276,9 +276,13 @@ void vlan_free(VLan *v) {
 int vxlan_new(VxLan **ret) {
         _auto_cleanup_ VxLan *v = NULL;
 
-        v = new0(VxLan, 1);
+        v = new(VxLan, 1);
         if (!v)
                 return log_oom();
+
+        *v = (VxLan) {
+                .learning = -1,
+             };
 
         *ret = steal_pointer(v);
         return 0;
@@ -659,6 +663,13 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
+                        if (n->vxlan->learning != -1)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "MacLearning", n->vxlan->learning);
+                                if (r < 0)
+                                        return r;
+                        }
+
                 }
                         break;
 
