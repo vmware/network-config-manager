@@ -15,6 +15,7 @@ network:
       flow-label: 5555
       limit: 20
       checksums: [udp, zero-udp6-tx, zero-udp6-rx, remote-tx, remote-rx]
+      extensions: [group-policy, generic-protocol]
       notifications: [l2-miss, l3-miss]
       link: test99
       local: 192.168.1.34

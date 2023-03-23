@@ -487,6 +487,7 @@ static ParserTable parser_netdev_vxlan_vtable[] = {
         { "flow-label",      CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, flow_label)},
         { "notifications",   CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_notifications, offsetof(VxLan, l2miss)},
         { "checksums",       CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_csum,          offsetof(VxLan, udpcsum)},
+        { "extensions",      CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_extensions,    offsetof(VxLan, group_policy)},
         { NULL,              _CONF_TYPE_INVALID,    0,                  0}
 };
 
