@@ -243,7 +243,7 @@ network:
  ```
 
 #### Generate VLAN configuration
- Configue VLan with id 10 and set it's master device to `ens33` .
+ Configure VLan with id 10 and set it's master device to `ens33` .
  ```yml
  network:
   ethernets:
@@ -266,7 +266,7 @@ network:
 
  ```
  #### Generate Bond configuration
- Configue bond `bond0` with mode `active-backup`  and set slave devices to `ens33` and `ens37`.
+ Configure bond `bond0` with mode `active-backup`  and set slave devices to `ens33` and `ens37`.
  ```yml
  network:
   bonds:
@@ -280,7 +280,7 @@ network:
 
  ```
  #### Generate Bridge configuration
- Configue bridge `bridge0` and set slave master devices to `ens33` with IPv4 DHCP network.
+ Configure bridge `bridge0` and set slave master devices to `ens33` with IPv4 DHCP network.
  ```yml
  network:
   renderer: networkd
@@ -293,10 +293,10 @@ network:
           interfaces:
               - ens33
  ```
- 
+
  #### Generate Tunnel configuration
- Configue IPv6 tunnel sit `he-ipv6` with address and routes.
- 
+ Configure IPv6 tunnel sit `he-ipv6` with address and routes.
+
  ```yml
  network:
   ethernets:
@@ -319,12 +319,12 @@ network:
                 via: "2001:dead:beef::1"
  ```
  #### Generate VRF configuration
- Configue vrf `vrf1005` with table `1005` and interface `ens33` and `ens37`
- 
+ Configure vrf `vrf1005` with table `1005` and interface `ens33` and `ens37`
+
  ```yml
  network:
   ethernets:
-    ens33: 
+    ens33:
     dhcp4: true
   vrfs:
     vrf1005:
@@ -339,10 +339,10 @@ network:
       - from: 2.3.4.5
 
  ```
- 
+
  #### Generate VXLan configuration
- Configue VXLan `vxlan1` id 1 on interface `ens33`
- 
+ Configure VXLan `vxlan1` id 1 on interface `ens33`
+
  ```yml
 network:
   ethernets:
@@ -360,8 +360,8 @@ network:
 
  ```
  #### Generate WireGuard configuration
- Configue WIreGuard `wg1`
- 
+ Configure WIreGuard `wg1`
+
  ```yml
 network:
   tunnels:
