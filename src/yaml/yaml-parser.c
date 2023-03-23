@@ -746,3 +746,33 @@ int parse_yaml_route_scope(const char *key,
 
         return 0;
 }
+
+int parse_yaml_vxlan_notifications(const char *key,
+                                   const char *value,
+                                   void *data,
+                                   void *userdata,
+                                   yaml_document_t *doc,
+                                   yaml_node_t *node) {
+
+        yaml_node_item_t *i;
+        VxLan *v;;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        v = data;
+
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *entry = yaml_document_get_node(doc, *i);
+
+                if (string_equal(scalar(entry), "l2-miss"))
+                        v->l2miss = true;
+                else if (string_equal(scalar(entry), "l3-miss"))
+                        v->l3miss = true;
+        }
+
+        return 0;
+}
