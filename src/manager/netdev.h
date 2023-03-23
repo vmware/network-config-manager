@@ -129,7 +129,8 @@ typedef struct VxLan {
         uint64_t fdb_ageing;
 
         int learning;
-        bool arp_proxy;
+        int arp_proxy;
+
         bool route_short_circuit;
         bool l2miss;
         bool l3miss;
