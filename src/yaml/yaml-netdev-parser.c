@@ -474,21 +474,22 @@ static int yaml_parse_netdev_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_
 }
 
 static ParserTable parser_netdev_vxlan_vtable[] = {
-        { "id",              CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, vni)},
-        { "local",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_address,             offsetof(VxLan, local)},
-        { "remote",          CONF_TYPE_NETDEV_VXLAN, parse_yaml_address,             offsetof(VxLan, remote)},
-        { "link",            CONF_TYPE_NETDEV_VXLAN, parse_yaml_string,              offsetof(VxLan, master)},
-        { "type-of-service", CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, tos)},
-        { "mac-learning",    CONF_TYPE_NETDEV_VXLAN, parse_yaml_bool,                offsetof(VxLan, learning)},
-        { "ageing",          CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, fdb_ageing)},
-        { "aging",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, fdb_ageing)},
-        { "limit",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, max_fdb)},
-        { "arp-proxy",       CONF_TYPE_NETDEV_VXLAN, parse_yaml_bool,                offsetof(VxLan, arp_proxy)},
-        { "flow-label",      CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, flow_label)},
-        { "notifications",   CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_notifications, offsetof(VxLan, l2miss)},
-        { "checksums",       CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_csum,          offsetof(VxLan, udpcsum)},
-        { "extensions",      CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_extensions,    offsetof(VxLan, group_policy)},
-        { NULL,              _CONF_TYPE_INVALID,    0,                  0}
+        { "id",               CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, vni)},
+        { "local",            CONF_TYPE_NETDEV_VXLAN, parse_yaml_address,             offsetof(VxLan, local)},
+        { "remote",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_address,             offsetof(VxLan, remote)},
+        { "link",             CONF_TYPE_NETDEV_VXLAN, parse_yaml_string,              offsetof(VxLan, master)},
+        { "type-of-service",  CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, tos)},
+        { "mac-learning",     CONF_TYPE_NETDEV_VXLAN, parse_yaml_bool,                offsetof(VxLan, learning)},
+        { "ageing",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, fdb_ageing)},
+        { "aging",            CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, fdb_ageing)},
+        { "limit",            CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, max_fdb)},
+        { "arp-proxy",        CONF_TYPE_NETDEV_VXLAN, parse_yaml_bool,                offsetof(VxLan, arp_proxy)},
+        { "do-not-fragment",  CONF_TYPE_NETDEV_VXLAN, parse_yaml_bool,                offsetof(VxLan, df)},
+        { "flow-label",       CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, flow_label)},
+        { "notifications",    CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_notifications, offsetof(VxLan, l2miss)},
+        { "checksums",        CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_csum,          offsetof(VxLan, udpcsum)},
+        { "extensions",       CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_extensions,    offsetof(VxLan, group_policy)},
+        { NULL,               _CONF_TYPE_INVALID,    0,                  0}
 };
 
 static int yaml_parse_netdev_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
