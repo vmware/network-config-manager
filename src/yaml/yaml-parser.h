@@ -63,3 +63,4 @@ int parse_yaml_bond_mode(const char *key, const char *value, void *data, void *u
 int parse_yaml_vxlan_notifications(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_vxlan_csum(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_vxlan_extensions(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_vxlan_port_range(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
