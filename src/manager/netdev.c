@@ -290,6 +290,7 @@ int vxlan_new(VxLan **ret) {
                 .udp6zerocsumrx = -1,
                 .remote_csum_tx = -1,
                 .remote_csum_rx = -1,
+                .route_short_circuit = -1,
                 .df = -1,
                 .flow_label = G_MAXUINT,
              };
@@ -718,6 +719,12 @@ int generate_netdev_config(NetDev *n) {
 
                         if (n->vxlan->l3miss >= 0)  {
                                 r = key_file_set_bool(key_file, "VXLAN", "L3MissNotification", n->vxlan->l2miss);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->vxlan->route_short_circuit >= 0)  {
+                                r = key_file_set_bool(key_file, "VXLAN", "RouteShortCircuit", n->vxlan->route_short_circuit);
                                 if (r < 0)
                                         return r;
                         }

@@ -490,6 +490,7 @@ static ParserTable parser_netdev_vxlan_vtable[] = {
         { "checksums",        CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_csum,          offsetof(VxLan, udpcsum)},
         { "extensions",       CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_extensions,    offsetof(VxLan, group_policy)},
         { "port-range",       CONF_TYPE_NETDEV_VXLAN, parse_yaml_vxlan_port_range,    offsetof(VxLan, low_port)},
+        { "short-circuit",    CONF_TYPE_NETDEV_VXLAN, parse_yaml_bool,                offsetof(VxLan, route_short_circuit)},
         { NULL,               _CONF_TYPE_INVALID,    0,                  0}
 };
 
