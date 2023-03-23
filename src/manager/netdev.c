@@ -690,6 +690,11 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->vxlan->max_fdb > 0)  {
+                                r = key_file_set_uint(key_file, "VXLAN", "MaximumFDBEntries", n->vxlan->max_fdb);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
                         break;
 
