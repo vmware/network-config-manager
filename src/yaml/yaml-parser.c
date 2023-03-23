@@ -776,3 +776,41 @@ int parse_yaml_vxlan_notifications(const char *key,
 
         return 0;
 }
+
+int parse_yaml_vxlan_csum(const char *key,
+                                   const char *value,
+                                   void *data,
+                                   void *userdata,
+                                   yaml_document_t *doc,
+                                   yaml_node_t *node) {
+
+        yaml_node_item_t *i;
+        VxLan *v;;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        v = data;
+
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *entry = yaml_document_get_node(doc, *i);
+
+                if (string_equal(scalar(entry), "udp"))
+                        v->udpcsum = true;
+                else if (string_equal(scalar(entry), "zero-udp6-tx"))
+                        v->udp6zerocsumtx = true;
+                else if (string_equal(scalar(entry), "zero-udp6-rx"))
+                        v->udp6zerocsumrx = true;
+                else if (string_equal(scalar(entry), "zero-udp6-tx"))
+                        v->udp6zerocsumtx = true;
+                else if (string_equal(scalar(entry), "remote-tx"))
+                        v->remote_csum_tx = true;
+                else if (string_equal(scalar(entry), "remote-rx"))
+                        v->remote_csum_rx = true;
+        }
+
+        return 0;
+}

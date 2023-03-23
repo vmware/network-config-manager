@@ -550,6 +550,11 @@ class TestNetworkConfigManagerYAML:
         assert(parsera.get('VXLAN', 'ReduceARPProxy') == 'yes')
         assert(parsera.get('VXLAN', 'FlowLabel') == '5555')
         assert(parsera.get('VXLAN', 'MaximumFDBEntries') == '20')
+        assert(parsera.get('VXLAN', 'UDPChecksum') == 'yes')
+        assert(parsera.get('VXLAN', 'UDP6ZeroChecksumTx') == 'yes')
+        assert(parsera.get('VXLAN', 'UDP6ZeroChecksumRx') == 'yes')
+        assert(parsera.get('VXLAN', 'RemoteChecksumTx') == 'yes')
+        assert(parsera.get('VXLAN', 'RemoteChecksumRx') == 'yes')
 
         parserb = configparser.ConfigParser()
         parserb.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
