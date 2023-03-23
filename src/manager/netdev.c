@@ -409,6 +409,10 @@ int bridge_new(Bridge **ret) {
               .vlan_filtering = -1,
               .vlan_protocol = -1,
               .stp = -1,
+              .forward_delay = UINT64_MAX,
+              .hello_time = UINT64_MAX,
+              .max_age = UINT64_MAX,
+              .ageing_time = UINT64_MAX,
           };
 
         *ret = steal_pointer(t);
@@ -574,6 +578,30 @@ int generate_netdev_config(NetDev *n) {
                         }
                         if (n->bridge->stp >= 0) {
                                 r = key_file_set_string(key_file, "Bridge", "STP", bool_to_string(n->bridge->stp));
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bridge->forward_delay != UINT64_MAX) {
+                                r = key_file_set_uint(key_file, "Bridge", "ForwardDelaySec", n->bridge->forward_delay);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bridge->hello_time != UINT64_MAX) {
+                                r = key_file_set_uint(key_file, "Bridge", "HelloTimeSec", n->bridge->hello_time);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bridge->ageing_time != UINT64_MAX) {
+                                r = key_file_set_uint(key_file, "Bridge", "AgeingTimeSec", n->bridge->ageing_time);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bridge->max_age != UINT64_MAX) {
+                                r = key_file_set_uint(key_file, "Bridge", "MaxAgeSec", n->bridge->max_age);
                                 if (r < 0)
                                         return r;
                         }
