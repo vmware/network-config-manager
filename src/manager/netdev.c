@@ -763,6 +763,21 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
+                        if (n->vxlan->high_port > n->vxlan->low_port)  {
+                                _cleanup_(g_string_unrefp) GString *v = NULL;
+
+                                v = g_string_new(NULL);
+                                if (!v)
+                                        return -ENOMEM;
+
+                                g_string_append_printf(v, "%u-%u", n->vxlan->low_port, n->vxlan->high_port);
+
+                                r = key_file_set_string(key_file, "VXLAN", "PortRange", v->str);
+                                if (r < 0)
+                                        return r;
+                        }
+
                 }
                         break;
 

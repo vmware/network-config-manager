@@ -121,6 +121,8 @@ typedef struct VxLan {
         IPAddress group;
 
         uint16_t destination_port;
+        uint16_t low_port;
+        uint16_t high_port;
 
         unsigned tos;
         unsigned ttl;
@@ -145,7 +147,6 @@ typedef struct VxLan {
         int df;
         int independent;
 
-        struct ifla_vxlan_port_range port_range;
 
         char *master;
 } VxLan;
