@@ -653,6 +653,12 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
+                        if (n->vxlan->tos > 0)  {
+                                r = key_file_set_uint(key_file, "VXLAN", "TOS", n->vxlan->tos);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
                         break;
 

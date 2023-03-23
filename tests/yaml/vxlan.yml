@@ -8,6 +8,7 @@ network:
     vxlan1:
       mode: vxlan
       id: 1
+      type-of-service: 11
       link: test99
       local: 192.168.1.34
       remote: 192.168.1.35
