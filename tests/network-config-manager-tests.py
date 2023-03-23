@@ -545,6 +545,7 @@ class TestNetworkConfigManagerYAML:
         assert(parsera.get('VXLAN', 'Local') == '192.168.1.34')
         assert(parsera.get('VXLAN', 'Remote') == '192.168.1.35')
         assert(parsera.get('VXLAN', 'TOS') == '11')
+        assert(parsera.get('VXLAN', 'MacLearning') == 'yes')
 
         parserb = configparser.ConfigParser()
         parserb.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
