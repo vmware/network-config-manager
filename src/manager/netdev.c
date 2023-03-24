@@ -11,6 +11,9 @@
 #include "string-util.h"
 #include "netdev.h"
 
+#define RESEND_IGMP_MAX           255
+#define PACKETS_PER_SLAVE_MAX     65535
+
 static const char *const netdev_kind_table[_NETDEV_KIND_MAX] = {
         [NETDEV_KIND_VLAN]        = "vlan",
         [NETDEV_KIND_BRIDGE]      = "bridge",
@@ -344,6 +347,8 @@ int bond_new(Bond **ret) {
                 .xmit_hash_policy = _BOND_XMIT_HASH_POLICY_INVALID,
                 .lacp_rate = _BOND_LACP_RATE_INVALID,
                 .mii_monitor_interval = UINT64_MAX,
+                .resend_igmp = RESEND_IGMP_MAX + 1,
+                .packets_per_slave = PACKETS_PER_SLAVE_MAX + 1,
           };
 
         *ret = steal_pointer(b);
@@ -720,6 +725,18 @@ int generate_netdev_config(NetDev *n) {
 
                         if (n->bond->lp_interval > 0) {
                                 r = key_file_set_uint(key_file, "Bond", "LearnPacketIntervalSec", n->bond->lp_interval);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bond->resend_igmp <= RESEND_IGMP_MAX) {
+                                r = key_file_set_uint(key_file, "Bond", "ResendIGMP", n->bond->resend_igmp);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bond->packets_per_slave <= PACKETS_PER_SLAVE_MAX) {
+                                r = key_file_set_uint(key_file, "Bond", "PacketsPerSlave", n->bond->packets_per_slave);
                                 if (r < 0)
                                         return r;
                         }

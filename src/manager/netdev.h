@@ -185,6 +185,9 @@ typedef struct Bond {
         uint64_t lp_interval;
 
         uint32_t min_links;
+        uint32_t resend_igmp;
+        unsigned packets_per_slave;
+
         char **interfaces;
 } Bond;
 

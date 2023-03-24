@@ -16,3 +16,5 @@ network:
               up-delay: 12
               down-delay: 15
               learn-packet-interval: 32
+              resend-igmp: 45
+              packets-per-member: 11
