@@ -1113,31 +1113,43 @@ int parse_yaml_wireguard_key_or_path(const char *key,
         return 0;
 }
 
-int parse_yaml_wireguard_peer_shared_key_or_path(const char *key,
-                                                 const char *value,
-                                                 void *data,
-                                                 void *userdata,
-                                                 yaml_document_t *doc,
-                                                 yaml_node_t *node) {
+int parse_yaml_sequence_wireguard_peer_shared_key_or_path(const char *key,
+                                                          const char *value,
+                                                          void *data,
+                                                          void *userdata,
+                                                          yaml_document_t *doc,
+                                                          yaml_node_t *node) {
+
         WireGuardPeer *w;
+        yaml_node_item_t *i;
+        yaml_node_t *k, *v;
 
         assert(key);
-        assert(value);
         assert(data);
         assert(doc);
         assert(node);
 
         w = (WireGuardPeer *) data;
 
-        if (string_equal(key, "key")) {
-                if (string_has_prefix(value, "/")) {
-                        w->preshared_key_file = strdup(value);
-                        if (!w->preshared_key_file)
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                k = yaml_document_get_node(doc, *i++);
+                v = yaml_document_get_node(doc, *i);
+
+                if (string_equal(scalar(k), "shared")) {
+                        if (string_has_prefix(value, "/")) {
+                                w->preshared_key_file = strdup(scalar(v));
+                                if (!w->preshared_key_file)
+                                        return log_oom();
+                        } else {
+                                w->preshared_key = strdup(scalar(v));
+                                if (!w->preshared_key)
+                                        return log_oom();
+                        }
+                } else if (string_equal(key, "shared")) {
+                        w->public_key = strdup(scalar(v));
+                        if (!w->public_key)
                                 return log_oom();
-                } else {
-                        w->preshared_key = strdup(value);
-                        if (!w->preshared_key)
-                                return log_oom();
+
                 }
         }
 
