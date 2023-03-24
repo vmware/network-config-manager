@@ -220,6 +220,31 @@ int bond_fail_over_mac_name_to_mode(const char *name) {
         return _BOND_ARP_VALIDATE_INVALID;
 }
 
+static const char* const bond_ad_select_table[_BOND_AD_SELECT_MAX] = {
+        [BOND_AD_SELECT_STABLE]    = "stable",
+        [BOND_AD_SELECT_BANDWIDTH] = "bandwidth",
+        [BOND_AD_SELECT_COUNT]     = "count",
+};
+
+const char *bond_ad_select_mode_to_name(BondAdSelect id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(bond_ad_select_table))
+                return NULL;
+
+        return bond_ad_select_table[id];
+}
+
+int bond_ad_select_name_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i= BOND_ARP_VALIDATE_NONE; i < (size_t) ELEMENTSOF(bond_ad_select_table); i++)
+                if (bond_ad_select_table[i] && string_equal_fold(name, bond_ad_select_table[i]))
+                        return i;
+
+        return _BOND_AD_SELECT_INVALID;
+}
 
 static const char *const ipvlan_mode_table[_IP_VLAN_MODE_MAX] = {
         [IP_VLAN_MODE_L2]  = "L2",
@@ -403,6 +428,7 @@ int bond_new(Bond **ret) {
                 .arp_validate = _BOND_ARP_VALIDATE_INVALID,
                 .fail_over_mac = _BOND_FAIL_OVER_MAC_INVALID,
                 .lacp_rate = _BOND_LACP_RATE_INVALID,
+                .ad_select = _BOND_AD_SELECT_INVALID,
                 .mii_monitor_interval = UINT64_MAX,
                 .resend_igmp = RESEND_IGMP_MAX + 1,
                 .packets_per_slave = PACKETS_PER_SLAVE_MAX + 1,
@@ -761,6 +787,12 @@ int generate_netdev_config(NetDev *n) {
 
                         if (n->bond->fail_over_mac != _BOND_FAIL_OVER_MAC_INVALID) {
                                 r = key_file_set_string(key_file, "Bond", "FailOverMACPolicy", bond_fail_over_mac_mode_to_name(n->bond->fail_over_mac));
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bond->ad_select != _BOND_AD_SELECT_INVALID) {
+                                r = key_file_set_string(key_file, "Bond", "AdSelect", bond_ad_select_mode_to_name(n->bond->ad_select));
                                 if (r < 0)
                                         return r;
                         }
