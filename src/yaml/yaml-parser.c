@@ -832,6 +832,7 @@ int parse_yaml_vxlan_csum(const char *key,
                         v->udp6zerocsumtx = true;
                 else if (string_equal(scalar(entry), "zero-udp6-rx"))
                         v->udp6zerocsumrx = true;
+
                 else if (string_equal(scalar(entry), "zero-udp6-tx"))
                         v->udp6zerocsumtx = true;
                 else if (string_equal(scalar(entry), "remote-tx"))
@@ -1078,5 +1079,67 @@ int parse_yaml_bond_xmit_hash_policy(const char *key,
         }
 
         b->xmit_hash_policy = r;
+        return 0;
+}
+
+int parse_yaml_wireguard_key_or_path(const char *key,
+                                     const char *value,
+                                     void *data,
+                                     void *userdata,
+                                     yaml_document_t *doc,
+                                     yaml_node_t *node) {
+        WireGuard *w;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        w = (WireGuard *) data;
+
+        if (string_equal(key, "key")) {
+                if (string_has_prefix(value, "/")) {
+                        w->private_key_file = strdup(value);
+                        if (!w->private_key_file)
+                                return log_oom();
+                } else {
+                        w->private_key = strdup(value);
+                        if (!w->private_key)
+                                return log_oom();
+                }
+        }
+
+        return 0;
+}
+
+int parse_yaml_wireguard_peer_shared_key_or_path(const char *key,
+                                                 const char *value,
+                                                 void *data,
+                                                 void *userdata,
+                                                 yaml_document_t *doc,
+                                                 yaml_node_t *node) {
+        WireGuardPeer *w;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        w = (WireGuardPeer *) data;
+
+        if (string_equal(key, "key")) {
+                if (string_has_prefix(value, "/")) {
+                        w->preshared_key_file = strdup(value);
+                        if (!w->preshared_key_file)
+                                return log_oom();
+                } else {
+                        w->preshared_key = strdup(value);
+                        if (!w->preshared_key)
+                                return log_oom();
+                }
+        }
+
         return 0;
 }

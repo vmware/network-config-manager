@@ -72,3 +72,6 @@ int parse_yaml_bond_fail_over_mac(const char *key, const char *value, void *data
 int parse_yaml_bond_ad_select(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_bond_primary_reselect(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_bond_xmit_hash_policy(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+
+int parse_yaml_wireguard_key_or_path(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_wireguard_peer_shared_key_or_path(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
