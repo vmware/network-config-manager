@@ -99,6 +99,7 @@ static ParserTable parser_bond_vtable[] = {
         { "lacp-rate",             CONF_TYPE_NETDEV_BOND, parse_yaml_bond_lacp_rate,     offsetof(Bond, lacp_rate)},
         { "arp-validate",          CONF_TYPE_NETDEV_BOND, parse_yaml_bond_arp_validate,  offsetof(Bond, arp_validate)},
         { "fail-over-mac-policy",  CONF_TYPE_NETDEV_BOND, parse_yaml_bond_fail_over_mac, offsetof(Bond, fail_over_mac)},
+        { "ad-select",             CONF_TYPE_NETDEV_BOND, parse_yaml_bond_ad_select,     offsetof(Bond, ad_select)},
         { "mii-monitor-interval",  CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,             offsetof(Bond, mii_monitor_interval)},
         { "min-links",             CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,             offsetof(Bond, min_links)},
         { "arp-interval",          CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,             offsetof(Bond, arp_interval)},
