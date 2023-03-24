@@ -884,3 +884,31 @@ int parse_yaml_vxlan_port_range(const char *key,
 
         return 0;
 }
+
+int parse_yaml_bond_lacp_rate(const char *key,
+                              const char *value,
+                              void *data,
+                              void *userdata,
+                              yaml_document_t *doc,
+                              yaml_node_t *node) {
+
+        Bond *b;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        b = data;
+
+        r = bond_lacp_rate_to_mode(value);
+        if (r < 0) {
+                log_warning("Failed to parse bond lacp rate type='%s'\n", value);
+                return r;
+        }
+
+        b->lacp_rate = r;
+        return 0;
+}
