@@ -21,4 +21,5 @@ network:
               gratuitous-arp: 15
               all-members-active: yes
               arp-validate: active
+              fail-over-mac-policy: active
               arp-ip-targets: [ 192.168.5.1, 192.168.5.34 ]
