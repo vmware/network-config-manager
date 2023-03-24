@@ -351,6 +351,7 @@ int bond_new(Bond **ret) {
                 .resend_igmp = RESEND_IGMP_MAX + 1,
                 .packets_per_slave = PACKETS_PER_SLAVE_MAX + 1,
                 .ngrat_arp = GRATUITOUS_ARP_MAX + 1,
+                .all_slaves_active = -1,
           };
 
         *ret = steal_pointer(b);
@@ -749,6 +750,11 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->bond->all_slaves_active >= 0) {
+                                r = key_file_set_bool(key_file, "Bond", "AllSlavesActive", n->bond->all_slaves_active);
+                                if (r < 0)
+                                        return r;
+                        }
 
                         break;
 

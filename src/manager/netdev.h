@@ -189,6 +189,7 @@ typedef struct Bond {
         unsigned packets_per_slave;
         unsigned ngrat_arp;
 
+        int all_slaves_active;
         char **interfaces;
 } Bond;
 
