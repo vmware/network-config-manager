@@ -40,6 +40,34 @@ int parse_yaml_bool(const char *key,
         return 0;
 }
 
+int parse_yaml_uint64(const char *key,
+                      const char *value,
+                      void *data,
+                      void *userdata,
+                      yaml_document_t *doc,
+                      yaml_node_t *node) {
+
+        uint64_t *p, k;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        p = userdata;
+
+        r = parse_uint64(value, &k);
+        if (r < 0) {
+                log_warning("Failed to parse uint64: %s", value);
+                return r;
+        }
+
+        *p = k;
+        return 0;
+}
+
 int parse_yaml_uint32(const char *key,
                       const char *value,
                       void *data,
@@ -60,7 +88,7 @@ int parse_yaml_uint32(const char *key,
 
         r = parse_uint32(value, &k);
         if (r < 0) {
-                log_warning("Failed to parse MTU: %s", value);
+                log_warning("Failed to parse uint32: %s", value);
                 return r;
         }
 
@@ -88,7 +116,7 @@ int parse_yaml_uint16(const char *key,
 
         r = parse_uint16(value, &k);
         if (r < 0) {
-                log_warning("Failed to parse MTU: %s", value);
+                log_warning("Failed to parse uint16: %s", value);
                 return r;
         }
 
