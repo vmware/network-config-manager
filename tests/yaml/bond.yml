@@ -15,3 +15,4 @@ network:
               arp-interval: 30
               up-delay: 12
               down-delay: 15
+              learn-packet-interval: 32
