@@ -9,3 +9,4 @@ network:
               - test98
           parameters:
               mode: active-backup
+              lacp-rate: fast
