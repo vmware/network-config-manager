@@ -12,3 +12,4 @@ network:
               lacp-rate: fast
               mii-monitor-interval: 300
               min-links: 3
+              arp-interval: 30
