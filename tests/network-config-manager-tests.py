@@ -431,6 +431,7 @@ class TestNetworkConfigManagerYAML:
         parserb.read(os.path.join(networkd_unit_file_path, '10-bond0.netdev'))
         assert(parserb.get('Bond', 'Mode') == 'active-backup')
         assert(parserb.get('Bond', 'LACPTransmitRate') == 'fast')
+        assert(parserb.get('Bond', 'ARPValidate') == 'active')
         assert(parserb.get('Bond', 'MIIMonitorSec') == '300')
         assert(parserb.get('Bond', 'MinLinks') == '3')
         assert(parserb.get('Bond', 'ARPIntervalSec') == '30')
@@ -442,6 +443,7 @@ class TestNetworkConfigManagerYAML:
         assert(parserb.get('Bond', 'GratuitousARP') == '15')
         assert(parserb.get('Bond', 'AllSlavesActive') == 'yes')
         assert(parserb.get('Bond', 'ARPIPTargets') == '192.168.5.1 192.168.5.34')
+        assert(parserb.get('Bond', 'ARPValidate') == 'active')
 
         parserc = configparser.ConfigParser()
         parserc.read(os.path.join(networkd_unit_file_path, '10-bond0.network'))
