@@ -190,6 +190,7 @@ typedef struct Bond {
         unsigned ngrat_arp;
 
         int all_slaves_active;
+        char **arp_ip_targets;
         char **interfaces;
 } Bond;
 

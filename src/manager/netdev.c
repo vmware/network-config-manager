@@ -362,6 +362,7 @@ void bond_free(Bond *b) {
         if (!b)
                 return;
 
+        strv_free(b->arp_ip_targets);
         strv_free(b->interfaces);
         free(b);
 }
@@ -752,6 +753,23 @@ int generate_netdev_config(NetDev *n) {
 
                         if (n->bond->all_slaves_active >= 0) {
                                 r = key_file_set_bool(key_file, "Bond", "AllSlavesActive", n->bond->all_slaves_active);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bond->arp_ip_targets && strv_length(n->bond->arp_ip_targets) > 0) {
+                                _cleanup_(g_string_unrefp) GString *c = NULL;
+                                char **d;
+
+                                c = g_string_new(NULL);
+                                if (!c)
+                                        return log_oom();
+
+                                strv_foreach(d,n->bond->arp_ip_targets) {
+                                        g_string_append_printf(c, "%s ", *d);
+                                }
+
+                                r = key_file_set_string(key_file, "Bond", "ARPIPTargets", c->str);
                                 if (r < 0)
                                         return r;
                         }
