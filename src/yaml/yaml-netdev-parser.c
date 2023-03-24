@@ -93,20 +93,21 @@ static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
 }
 
 static ParserTable parser_bond_vtable[] = {
-        { "interfaces",            CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,       offsetof(Bond, interfaces)},
-        { "arp-ip-targets",        CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,       offsetof(Bond, arp_ip_targets)},
-        { "mode",                  CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode,      offsetof(Bond, mode)},
-        { "lacp-rate",             CONF_TYPE_NETDEV_BOND, parse_yaml_bond_lacp_rate, offsetof(Bond, lacp_rate)},
-        { "mii-monitor-interval",  CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, mii_monitor_interval)},
-        { "min-links",             CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,         offsetof(Bond, min_links)},
-        { "arp-interval",          CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, arp_interval)},
-        { "up-delay",              CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, up_delay)},
-        { "down-delay",            CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, down_delay)},
-        { "learn-packet-interval", CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, lp_interval)},
-        { "resend-igmp",           CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,         offsetof(Bond, resend_igmp)},
-        { "packets-per-member",    CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,         offsetof(Bond, packets_per_slave)},
-        { "gratuitous-arp",        CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,         offsetof(Bond, ngrat_arp)},
-        { "all-members-active",    CONF_TYPE_NETDEV_BOND, parse_yaml_bool,           offsetof(Bond, all_slaves_active)},
+        { "interfaces",            CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,          offsetof(Bond, interfaces)},
+        { "arp-ip-targets",        CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,          offsetof(Bond, arp_ip_targets)},
+        { "mode",                  CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode,         offsetof(Bond, mode)},
+        { "lacp-rate",             CONF_TYPE_NETDEV_BOND, parse_yaml_bond_lacp_rate,    offsetof(Bond, lacp_rate)},
+        { "arp-validate",          CONF_TYPE_NETDEV_BOND, parse_yaml_bond_arp_validate, offsetof(Bond, arp_validate)},
+        { "mii-monitor-interval",  CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,            offsetof(Bond, mii_monitor_interval)},
+        { "min-links",             CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,            offsetof(Bond, min_links)},
+        { "arp-interval",          CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,            offsetof(Bond, arp_interval)},
+        { "up-delay",              CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,            offsetof(Bond, up_delay)},
+        { "down-delay",            CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,            offsetof(Bond, down_delay)},
+        { "learn-packet-interval", CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,            offsetof(Bond, lp_interval)},
+        { "resend-igmp",           CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,            offsetof(Bond, resend_igmp)},
+        { "packets-per-member",    CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,            offsetof(Bond, packets_per_slave)},
+        { "gratuitous-arp",        CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,            offsetof(Bond, ngrat_arp)},
+        { "all-members-active",    CONF_TYPE_NETDEV_BOND, parse_yaml_bool,              offsetof(Bond, all_slaves_active)},
         { NULL,         _CONF_TYPE_INVALID,    0,                         0}
 };
 
