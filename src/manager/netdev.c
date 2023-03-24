@@ -110,6 +110,31 @@ int bond_xmit_hash_policy_to_mode(const char *name) {
         return _BOND_XMIT_HASH_POLICY_INVALID;
 }
 
+static const char* const bond_lacp_rate_table[_BOND_LACP_RATE_MAX] = {
+        [BOND_LACP_RATE_SLOW] = "slow",
+        [BOND_LACP_RATE_FAST] = "fast",
+};
+
+const char *bond_lacp_rate_to_name(BondLacpRate id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(bond_lacp_rate_table))
+                return NULL;
+
+        return bond_lacp_rate_table[id];
+}
+
+int bond_lacp_rate_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = BOND_LACP_RATE_SLOW; i < (size_t) ELEMENTSOF(bond_lacp_rate_table); i++)
+                if (bond_lacp_rate_table[i] && string_equal_fold(name, bond_lacp_rate_table[i]))
+                        return i;
+
+        return _BOND_LACP_RATE_INVALID;
+}
+
 static const char *const macvlan_mode_table[_MAC_VLAN_MODE_MAX] = {
         [MAC_VLAN_MODE_PRIVATE]  = "private",
         [MAC_VLAN_MODE_VEPA]     = "vepa",
@@ -317,6 +342,7 @@ int bond_new(Bond **ret) {
         *b = (Bond) {
                 .mode = BOND_MODE_ROUNDROBIN,
                 .xmit_hash_policy = _BOND_XMIT_HASH_POLICY_INVALID,
+                .lacp_rate = _BOND_LACP_RATE_INVALID,
           };
 
         *ret = steal_pointer(b);
@@ -654,6 +680,13 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
+                        if (n->bond->lacp_rate != _BOND_LACP_RATE_INVALID) {
+                                r = key_file_set_string(key_file, "Bond", "LACPTransmitRate", bond_lacp_rate_to_name(n->bond->lacp_rate));
+                                if (r < 0)
+                                        return r;
+                        }
+
 
                         break;
 
