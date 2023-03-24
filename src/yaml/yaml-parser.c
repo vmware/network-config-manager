@@ -1024,3 +1024,31 @@ int parse_yaml_bond_ad_select(const char *key,
         b->ad_select = r;
         return 0;
 }
+
+int parse_yaml_bond_primary_reselect(const char *key,
+                                     const char *value,
+                                     void *data,
+                                     void *userdata,
+                                     yaml_document_t *doc,
+                                     yaml_node_t *node) {
+
+        Bond *b;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        b = data;
+
+        r = bond_primary_reselect_name_to_mode(value);
+        if (r < 0) {
+                log_warning("Failed to parse bond primary reselect type='%s'\n", value);
+                return r;
+        }
+
+        b->primary_reselect = r;
+        return 0;
+}

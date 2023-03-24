@@ -70,3 +70,4 @@ int parse_yaml_bond_lacp_rate(const char *key, const char *value, void *data, vo
 int parse_yaml_bond_arp_validate(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_bond_fail_over_mac(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_bond_ad_select(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_bond_primary_reselect(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
