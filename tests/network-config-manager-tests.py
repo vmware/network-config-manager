@@ -431,6 +431,7 @@ class TestNetworkConfigManagerYAML:
         parserb.read(os.path.join(networkd_unit_file_path, '10-bond0.netdev'))
         assert(parserb.get('Bond', 'Mode') == 'active-backup')
         assert(parserb.get('Bond', 'LACPTransmitRate') == 'fast')
+        assert(parserb.get('Bond', 'MIIMonitorSec') == '300')
 
         parserc = configparser.ConfigParser()
         parserc.read(os.path.join(networkd_unit_file_path, '10-bond0.network'))

@@ -10,3 +10,4 @@ network:
           parameters:
               mode: active-backup
               lacp-rate: fast
+              mii-monitor-interval: 300
