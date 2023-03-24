@@ -93,14 +93,15 @@ static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
 }
 
 static ParserTable parser_bond_vtable[] = {
-        { "interfaces",           CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,       offsetof(Bond, interfaces)},
-        { "mode",                 CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode,      offsetof(Bond, mode)},
-        { "lacp-rate",            CONF_TYPE_NETDEV_BOND, parse_yaml_bond_lacp_rate, offsetof(Bond, lacp_rate)},
-        { "mii-monitor-interval", CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, mii_monitor_interval)},
-        { "min-links",            CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,         offsetof(Bond, min_links)},
-        { "arp-interval",         CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, arp_interval)},
-        { "up-delay",             CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, up_delay)},
-        { "down-delay",           CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, down_delay)},
+        { "interfaces",            CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,       offsetof(Bond, interfaces)},
+        { "mode",                  CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode,      offsetof(Bond, mode)},
+        { "lacp-rate",             CONF_TYPE_NETDEV_BOND, parse_yaml_bond_lacp_rate, offsetof(Bond, lacp_rate)},
+        { "mii-monitor-interval",  CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, mii_monitor_interval)},
+        { "min-links",             CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,         offsetof(Bond, min_links)},
+        { "arp-interval",          CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, arp_interval)},
+        { "up-delay",              CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, up_delay)},
+        { "down-delay",            CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, down_delay)},
+        { "learn-packet-interval", CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, lp_interval)},
         { NULL,         _CONF_TYPE_INVALID,    0,                         0}
 };
 
