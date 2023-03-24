@@ -97,6 +97,7 @@ static ParserTable parser_bond_vtable[] = {
         { "mode",                 CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode,      offsetof(Bond, mode)},
         { "lacp-rate",            CONF_TYPE_NETDEV_BOND, parse_yaml_bond_lacp_rate, offsetof(Bond, lacp_rate)},
         { "mii-monitor-interval", CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, mii_monitor_interval)},
+        { "min-links",            CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,         offsetof(Bond, min_links)},
         { NULL,         _CONF_TYPE_INVALID,    0,                         0}
 };
 
