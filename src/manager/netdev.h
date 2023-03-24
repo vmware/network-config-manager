@@ -104,6 +104,13 @@ typedef enum BondAdSelect {
         _BOND_AD_SELECT_INVALID = -EINVAL,
 } BondAdSelect;
 
+typedef enum BondPrimaryReselect {
+        BOND_PRIMARY_RESELECT_ALWAYS,
+        BOND_PRIMARY_RESELECT_BETTER,
+        BOND_PRIMARY_RESELECT_FAILURE,
+        _BOND_PRIMARY_RESELECT_MAX,
+        _BOND_PRIMARY_RESELECT_INVALID = -EINVAL,
+} BondPrimaryReselect;
 
 typedef struct TunTap {
         char *user;
@@ -206,6 +213,7 @@ typedef struct Bond {
         BondArpValidate arp_validate;
         BondFailOverMac fail_over_mac;
         BondAdSelect ad_select;
+        BondPrimaryReselect primary_reselect;
 
         uint64_t mii_monitor_interval;
         uint64_t arp_interval;
@@ -363,5 +371,8 @@ int bond_fail_over_mac_name_to_mode(const char *name);
 
 const char *bond_ad_select_mode_to_name(BondAdSelect id);
 int bond_ad_select_name_to_mode(const char *name);
+
+const char *bond_primary_reselect_mode_to_name(BondPrimaryReselect id);
+int bond_primary_reselect_name_to_mode(const char *name);
 
 int netdev_ctl_name_to_configs_new(ConfigManager **ret);

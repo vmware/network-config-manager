@@ -246,6 +246,32 @@ int bond_ad_select_name_to_mode(const char *name) {
         return _BOND_AD_SELECT_INVALID;
 }
 
+static const char *const bond_primary_reselect_table[_BOND_PRIMARY_RESELECT_MAX] = {
+        [BOND_PRIMARY_RESELECT_ALWAYS] = "always",
+        [BOND_PRIMARY_RESELECT_BETTER]= "better",
+        [BOND_PRIMARY_RESELECT_FAILURE]= "failure",
+};
+
+const char *bond_primary_reselect_mode_to_name(BondPrimaryReselect id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(bond_primary_reselect_table))
+                return NULL;
+
+        return bond_primary_reselect_table[id];
+}
+
+int bond_primary_reselect_name_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i= BOND_ARP_VALIDATE_NONE; i < (size_t) ELEMENTSOF(bond_primary_reselect_table); i++)
+                if (bond_primary_reselect_table[i] && string_equal_fold(name, bond_primary_reselect_table[i]))
+                        return i;
+
+        return _BOND_AD_SELECT_INVALID;
+}
+
 static const char *const ipvlan_mode_table[_IP_VLAN_MODE_MAX] = {
         [IP_VLAN_MODE_L2]  = "L2",
         [IP_VLAN_MODE_L3]  = "L3",
@@ -795,6 +821,12 @@ int generate_netdev_config(NetDev *n) {
                                 r = key_file_set_string(key_file, "Bond", "AdSelect", bond_ad_select_mode_to_name(n->bond->ad_select));
                                 if (r < 0)
                                         return r;
+                        }
+
+                        if (n->bond->primary_reselect != _BOND_PRIMARY_RESELECT_INVALID) {
+                               r = key_file_set_string(key_file, "Bond", "PrimaryReselectPolicy", bond_primary_reselect_mode_to_name(n->bond->primary_reselect));
+                               if (r < 0)
+                                       return r;
                         }
 
                         if (n->bond->mii_monitor_interval != UINT64_MAX) {
