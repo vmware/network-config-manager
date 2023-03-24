@@ -19,3 +19,4 @@ network:
               resend-igmp: 45
               packets-per-member: 11
               gratuitous-arp: 15
+              all-members-active: yes
