@@ -72,6 +72,13 @@ typedef enum BondXmitHashPolicy {
         _BOND_XMIT_HASH_POLICY_INVALID = -EINVAL,
 } BondXmitHashPolicy;
 
+typedef enum BondLacpRate {
+        BOND_LACP_RATE_SLOW,
+        BOND_LACP_RATE_FAST,
+        _BOND_LACP_RATE_MAX,
+        _BOND_LACP_RATE_INVALID = -EINVAL,
+} BondLacpRate;
+
 typedef struct TunTap {
         char *user;
         char *group;
@@ -169,6 +176,8 @@ typedef struct Tunnel {
 typedef struct Bond {
         BondMode mode;
         BondXmitHashPolicy xmit_hash_policy;
+
+        BondLacpRate lacp_rate;
 
         char **interfaces;
 } Bond;
@@ -301,5 +310,8 @@ int ipvlan_name_to_mode(const char *name);
 
 const char *bond_xmit_hash_policy_to_name(BondXmitHashPolicy id);
 int bond_xmit_hash_policy_to_mode(const char *name);
+
+const char *bond_lacp_rate_to_name(BondLacpRate id);
+int bond_lacp_rate_to_mode(const char *name);
 
 int netdev_ctl_name_to_configs_new(ConfigManager **ret);
