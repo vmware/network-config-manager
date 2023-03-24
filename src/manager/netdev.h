@@ -88,6 +88,14 @@ typedef enum BondArpValidate {
         _BOND_ARP_VALIDATE_INVALID = -EINVAL,
 } BondArpValidate;
 
+typedef enum BondFailOverMac {
+        BOND_FAIL_OVER_MAC_NONE,
+        BOND_FAIL_OVER_MAC_ACTIVE,
+        BOND_FAIL_OVER_MAC_FOLLOW,
+        _BOND_FAIL_OVER_MAC_MAX,
+        _BOND_FAIL_OVER_MAC_INVALID = -EINVAL,
+} BondFailOverMac;
+
 typedef struct TunTap {
         char *user;
         char *group;
@@ -187,6 +195,7 @@ typedef struct Bond {
         BondXmitHashPolicy xmit_hash_policy;
         BondLacpRate lacp_rate;
         BondArpValidate arp_validate;
+        BondFailOverMac fail_over_mac;
 
         uint64_t mii_monitor_interval;
         uint64_t arp_interval;
@@ -338,5 +347,8 @@ int bond_lacp_rate_to_mode(const char *name);
 
 const char *bond_arp_validate_mode_to_name(BondArpValidate id);
 int bond_arp_validate_table_name_to_mode(const char *name);
+
+const char *bond_fail_over_mac_mode_to_name(BondFailOverMac id);
+int bond_fail_over_mac_name_to_mode(const char *name);
 
 int netdev_ctl_name_to_configs_new(ConfigManager **ret);
