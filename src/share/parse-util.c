@@ -34,6 +34,23 @@ int parse_integer(const char *c, int *val) {
         return 0;
 }
 
+int parse_uint64(const char *c, uint64_t *val) {
+        char *p;
+        uint64_t r;
+
+        assert(c);
+
+        r = strtol(c, &p, 10);
+        if (!p || p == c || *p)
+                return -1;
+
+        if (r == UINT64_MAX && errno == ERANGE)
+                return -ERANGE;
+
+        *val = r;
+        return 0;
+}
+
 int parse_uint32(const char *c, unsigned *val) {
         char *p;
         long r;
