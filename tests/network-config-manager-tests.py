@@ -441,6 +441,7 @@ class TestNetworkConfigManagerYAML:
         assert(parserb.get('Bond', 'PacketsPerSlave') == '11')
         assert(parserb.get('Bond', 'GratuitousARP') == '15')
         assert(parserb.get('Bond', 'AllSlavesActive') == 'yes')
+        assert(parserb.get('Bond', 'ARPIPTargets') == '192.168.5.1 192.168.5.34')
 
         parserc = configparser.ConfigParser()
         parserc.read(os.path.join(networkd_unit_file_path, '10-bond0.network'))
