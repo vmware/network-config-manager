@@ -612,12 +612,12 @@ static int yaml_parse_netdev_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_nod
 }
 
 static ParserTable parser_wireguard_peer_vtable[] = {
-        { "public",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,   offsetof(WireGuardPeer, public_key)},
-        { "shared",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,   offsetof(WireGuardPeer, preshared_key_file)},
-        { "allowed-ips", CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence, offsetof(WireGuardPeer, allowed_ips)},
-        { "keepalive",   CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_bool,     offsetof(WireGuardPeer, persistent_keep_alive)},
-        { "endpoint",    CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,   offsetof(WireGuardPeer, endpoint)},
-        { NULL,          _CONF_TYPE_INVALID,    0,                  0}
+        { "public",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,                            offsetof(WireGuardPeer, public_key)},
+        { "shared",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_wireguard_peer_shared_key_or_path, offsetof(WireGuardPeer, preshared_key_file)},
+        { "allowed-ips", CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence,                          offsetof(WireGuardPeer, allowed_ips)},
+        { "keepalive",   CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_bool,                              offsetof(WireGuardPeer, persistent_keep_alive)},
+        { "endpoint",    CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,                            offsetof(WireGuardPeer, endpoint)},
+        { NULL,          _CONF_TYPE_INVALID,         0,                                            0}
 };
 
 static int yaml_parse_wireguard_peer(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, WireGuardPeer *peer) {
@@ -661,9 +661,9 @@ static int yaml_parse_wireguard_peer(YAMLManager *m, yaml_document_t *dp, yaml_n
 }
 
 static ParserTable parser_wireguard_vtable[] = {
-        { "key",         CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,   offsetof(WireGuard, private_key_file)},
-        { "mark",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint32,   offsetof(WireGuard, fwmark)},
-        { "port",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint16,   offsetof(WireGuard, listen_port)},
+        { "key",         CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_wireguard_key_or_path, offsetof(WireGuard, private_key_file)},
+        { "mark",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint32,                offsetof(WireGuard, fwmark)},
+        { "port",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint16,                offsetof(WireGuard, listen_port)},
         { NULL,          _CONF_TYPE_INVALID,    0,                  0}
 };
 
