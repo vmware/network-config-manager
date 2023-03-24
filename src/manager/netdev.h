@@ -180,6 +180,8 @@ typedef struct Bond {
 
         uint64_t mii_monitor_interval;
         uint64_t arp_interval;
+        uint64_t up_delay;
+        uint64_t down_delay;
 
         uint32_t min_links;
         char **interfaces;

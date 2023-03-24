@@ -706,6 +706,18 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->bond->up_delay > 0) {
+                                r = key_file_set_uint(key_file, "Bond", "UpDelaySec", n->bond->up_delay);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bond->down_delay > 0) {
+                                r = key_file_set_uint(key_file, "Bond", "DownDelaySec", n->bond->down_delay);
+                                if (r < 0)
+                                        return r;
+                        }
+
                         break;
 
                 case NETDEV_KIND_VXLAN: {
