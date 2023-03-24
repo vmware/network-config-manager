@@ -93,10 +93,10 @@ static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
 }
 
 static ParserTable parser_bond_vtable[] = {
-        { "interfaces", CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,  offsetof(Bond, interfaces)},
-        { "mode",       CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode, offsetof(Bond, mode)},
-        { "lacp-rate",  CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode, offsetof(Bond, lacp_rate)},
-        { NULL,         _CONF_TYPE_INVALID,    0,                    0}
+        { "interfaces", CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,       offsetof(Bond, interfaces)},
+        { "mode",       CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode,      offsetof(Bond, mode)},
+        { "lacp-rate",  CONF_TYPE_NETDEV_BOND, parse_yaml_bond_lacp_rate, offsetof(Bond, lacp_rate)},
+        { NULL,         _CONF_TYPE_INVALID,    0,                         0}
 };
 
 static int yaml_yaml_parse_bond_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Bond *bond) {

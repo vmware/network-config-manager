@@ -342,6 +342,7 @@ int bond_new(Bond **ret) {
         *b = (Bond) {
                 .mode = BOND_MODE_ROUNDROBIN,
                 .xmit_hash_policy = _BOND_XMIT_HASH_POLICY_INVALID,
+                .lacp_rate = _BOND_LACP_RATE_INVALID,
           };
 
         *ret = steal_pointer(b);
@@ -679,6 +680,13 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
                         }
+
+                        if (n->bond->lacp_rate != _BOND_LACP_RATE_INVALID) {
+                                r = key_file_set_string(key_file, "Bond", "LACPTransmitRate", bond_lacp_rate_to_name(n->bond->lacp_rate));
+                                if (r < 0)
+                                        return r;
+                        }
+
 
                         break;
 
