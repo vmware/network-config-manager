@@ -1145,11 +1145,10 @@ int parse_yaml_sequence_wireguard_peer_shared_key_or_path(const char *key,
                                 if (!w->preshared_key)
                                         return log_oom();
                         }
-                } else if (string_equal(key, "shared")) {
+                } else if (string_equal(scalar(k), "public")) {
                         w->public_key = strdup(scalar(v));
                         if (!w->public_key)
                                 return log_oom();
-
                 }
         }
 
