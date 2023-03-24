@@ -358,7 +358,7 @@ const char *ipvlan_mode_to_name(IPVLanMode id);
 int ipvlan_name_to_mode(const char *name);
 
 const char *bond_xmit_hash_policy_to_name(BondXmitHashPolicy id);
-int bond_xmit_hash_policy_to_mode(const char *name);
+int bond_xmit_hash_policy_name_to_mode(const char *name);
 
 const char *bond_lacp_rate_to_name(BondLacpRate id);
 int bond_lacp_rate_to_mode(const char *name);

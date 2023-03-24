@@ -24,4 +24,5 @@ network:
               fail-over-mac-policy: active
               ad-select: bandwidth
               primary-reselect-policy: better
+              transmit-hash-policy: layer3+4
               arp-ip-targets: [ 192.168.5.1, 192.168.5.34 ]

@@ -104,7 +104,7 @@ const char *bond_xmit_hash_policy_to_name(BondXmitHashPolicy id) {
         return bond_xmit_hash_policy_table[id];
 }
 
-int bond_xmit_hash_policy_to_mode(const char *name) {
+int bond_xmit_hash_policy_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = BOND_XMIT_POLICY_LAYER2; i < (size_t) ELEMENTSOF(bond_xmit_hash_policy_table); i++)

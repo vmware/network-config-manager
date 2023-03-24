@@ -95,6 +95,7 @@ static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
 static ParserTable parser_bond_vtable[] = {
         { "interfaces",              CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,              offsetof(Bond, interfaces)},
         { "arp-ip-targets",          CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,              offsetof(Bond, arp_ip_targets)},
+        { "transmit-hash-policy",    CONF_TYPE_NETDEV_BOND, parse_yaml_bond_xmit_hash_policy, offsetof(Bond, xmit_hash_policy)},
         { "mode",                    CONF_TYPE_NETDEV_BOND, parse_yaml_bond_mode,             offsetof(Bond, mode)},
         { "lacp-rate",               CONF_TYPE_NETDEV_BOND, parse_yaml_bond_lacp_rate,        offsetof(Bond, lacp_rate)},
         { "arp-validate",            CONF_TYPE_NETDEV_BOND, parse_yaml_bond_arp_validate,     offsetof(Bond, arp_validate)},

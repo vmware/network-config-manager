@@ -138,7 +138,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                 } if (string_equal_fold(argv[i], "xmit-hash-policy") || string_equal_fold(argv[i], "xhp")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = bond_xmit_hash_policy_to_mode(argv[i]);
+                        r = bond_xmit_hash_policy_name_to_mode(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse bond xmit hash policy '%s' : %s", argv[i], strerror(EINVAL));
                                 return r;

@@ -1052,3 +1052,31 @@ int parse_yaml_bond_primary_reselect(const char *key,
         b->primary_reselect = r;
         return 0;
 }
+
+int parse_yaml_bond_xmit_hash_policy(const char *key,
+                                     const char *value,
+                                     void *data,
+                                     void *userdata,
+                                     yaml_document_t *doc,
+                                     yaml_node_t *node) {
+
+        Bond *b;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        b = data;
+
+        r = bond_xmit_hash_policy_name_to_mode(value);
+        if (r < 0) {
+                log_warning("Failed to parse bond xmit hash policy type='%s'\n", value);
+                return r;
+        }
+
+        b->xmit_hash_policy = r;
+        return 0;
+}
