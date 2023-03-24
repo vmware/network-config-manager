@@ -68,3 +68,4 @@ int parse_yaml_vxlan_port_range(const char *key, const char *value, void *data, 
 
 int parse_yaml_bond_lacp_rate(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_bond_arp_validate(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_bond_fail_over_mac(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
