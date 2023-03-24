@@ -167,6 +167,33 @@ int macvlan_name_to_mode(const char *name) {
         return _MAC_VLAN_MODE_INVALID;
 }
 
+static const char *const bond_arp_validate_table[_BOND_ARP_VALIDATE_MAX] = {
+        [BOND_ARP_VALIDATE_NONE]   = "none",
+        [BOND_ARP_VALIDATE_ACTIVE] = "active",
+        [BOND_ARP_VALIDATE_BACKUP] = "backup",
+        [BOND_ARP_VALIDATE_ALL]    = "all",
+};
+
+const char *bond_arp_validate_mode_to_name(BondArpValidate id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(bond_arp_validate_table))
+                return NULL;
+
+        return bond_arp_validate_table[id];
+}
+
+int bond_arp_validate_table_name_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i= BOND_ARP_VALIDATE_NONE; i < (size_t) ELEMENTSOF(bond_arp_validate_table); i++)
+                if (bond_arp_validate_table[i] && string_equal_fold(name, bond_arp_validate_table[i]))
+                        return i;
+
+        return _BOND_ARP_VALIDATE_INVALID;
+}
+
 static const char *const ipvlan_mode_table[_IP_VLAN_MODE_MAX] = {
         [IP_VLAN_MODE_L2]  = "L2",
         [IP_VLAN_MODE_L3]  = "L3",
@@ -346,6 +373,7 @@ int bond_new(Bond **ret) {
         *b = (Bond) {
                 .mode = BOND_MODE_ROUNDROBIN,
                 .xmit_hash_policy = _BOND_XMIT_HASH_POLICY_INVALID,
+                .arp_validate = _BOND_ARP_VALIDATE_INVALID,
                 .lacp_rate = _BOND_LACP_RATE_INVALID,
                 .mii_monitor_interval = UINT64_MAX,
                 .resend_igmp = RESEND_IGMP_MAX + 1,
@@ -693,6 +721,12 @@ int generate_netdev_config(NetDev *n) {
 
                         if (n->bond->lacp_rate != _BOND_LACP_RATE_INVALID) {
                                 r = key_file_set_string(key_file, "Bond", "LACPTransmitRate", bond_lacp_rate_to_name(n->bond->lacp_rate));
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bond->arp_validate != _BOND_ARP_VALIDATE_INVALID) {
+                                r = key_file_set_string(key_file, "Bond", "ARPValidate", bond_arp_validate_mode_to_name(n->bond->arp_validate));
                                 if (r < 0)
                                         return r;
                         }
