@@ -179,6 +179,7 @@ typedef struct Bond {
         BondLacpRate lacp_rate;
 
         uint64_t mii_monitor_interval;
+        uint64_t arp_interval;
 
         uint32_t min_links;
         char **interfaces;
