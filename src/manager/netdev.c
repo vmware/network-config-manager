@@ -700,6 +700,12 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->bond->arp_interval > 0) {
+                                r = key_file_set_uint(key_file, "Bond", "ARPIntervalSec", n->bond->arp_interval);
+                                if (r < 0)
+                                        return r;
+                        }
+
                         break;
 
                 case NETDEV_KIND_VXLAN: {
