@@ -343,6 +343,7 @@ int bond_new(Bond **ret) {
                 .mode = BOND_MODE_ROUNDROBIN,
                 .xmit_hash_policy = _BOND_XMIT_HASH_POLICY_INVALID,
                 .lacp_rate = _BOND_LACP_RATE_INVALID,
+                .mii_monitor_interval = UINT64_MAX,
           };
 
         *ret = steal_pointer(b);
@@ -687,6 +688,11 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->bond->mii_monitor_interval != UINT64_MAX) {
+                                r = key_file_set_uint(key_file, "Bond", "MIIMonitorSec", n->bond->mii_monitor_interval);
+                                if (r < 0)
+                                        return r;
+                        }
 
                         break;
 
