@@ -32,6 +32,7 @@ typedef struct ParserTable {
 } ParserTable;
 
 int parse_yaml_bool(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_uint64(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_uint32(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_uint16(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_uint32_or_max(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
