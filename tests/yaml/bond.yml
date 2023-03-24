@@ -22,4 +22,5 @@ network:
               all-members-active: yes
               arp-validate: active
               fail-over-mac-policy: active
+              ad-select: bandwidth
               arp-ip-targets: [ 192.168.5.1, 192.168.5.34 ]

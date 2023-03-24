@@ -96,6 +96,15 @@ typedef enum BondFailOverMac {
         _BOND_FAIL_OVER_MAC_INVALID = -EINVAL,
 } BondFailOverMac;
 
+typedef enum BondAdSelect {
+        BOND_AD_SELECT_STABLE,
+        BOND_AD_SELECT_BANDWIDTH,
+        BOND_AD_SELECT_COUNT,
+        _BOND_AD_SELECT_MAX,
+        _BOND_AD_SELECT_INVALID = -EINVAL,
+} BondAdSelect;
+
+
 typedef struct TunTap {
         char *user;
         char *group;
@@ -196,6 +205,7 @@ typedef struct Bond {
         BondLacpRate lacp_rate;
         BondArpValidate arp_validate;
         BondFailOverMac fail_over_mac;
+        BondAdSelect ad_select;
 
         uint64_t mii_monitor_interval;
         uint64_t arp_interval;
@@ -350,5 +360,8 @@ int bond_arp_validate_table_name_to_mode(const char *name);
 
 const char *bond_fail_over_mac_mode_to_name(BondFailOverMac id);
 int bond_fail_over_mac_name_to_mode(const char *name);
+
+const char *bond_ad_select_mode_to_name(BondAdSelect id);
+int bond_ad_select_name_to_mode(const char *name);
 
 int netdev_ctl_name_to_configs_new(ConfigManager **ret);
