@@ -13,6 +13,7 @@
 
 #define RESEND_IGMP_MAX           255
 #define PACKETS_PER_SLAVE_MAX     65535
+#define GRATUITOUS_ARP_MAX        255
 
 static const char *const netdev_kind_table[_NETDEV_KIND_MAX] = {
         [NETDEV_KIND_VLAN]        = "vlan",
@@ -349,6 +350,8 @@ int bond_new(Bond **ret) {
                 .mii_monitor_interval = UINT64_MAX,
                 .resend_igmp = RESEND_IGMP_MAX + 1,
                 .packets_per_slave = PACKETS_PER_SLAVE_MAX + 1,
+                .ngrat_arp = GRATUITOUS_ARP_MAX + 1,
+                .all_slaves_active = -1,
           };
 
         *ret = steal_pointer(b);
@@ -737,6 +740,18 @@ int generate_netdev_config(NetDev *n) {
 
                         if (n->bond->packets_per_slave <= PACKETS_PER_SLAVE_MAX) {
                                 r = key_file_set_uint(key_file, "Bond", "PacketsPerSlave", n->bond->packets_per_slave);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bond->ngrat_arp <= GRATUITOUS_ARP_MAX) {
+                                r = key_file_set_uint(key_file, "Bond", "GratuitousARP", n->bond->ngrat_arp);
+                                if (r < 0)
+                                        return r;
+                        }
+
+                        if (n->bond->all_slaves_active >= 0) {
+                                r = key_file_set_bool(key_file, "Bond", "AllSlavesActive", n->bond->all_slaves_active);
                                 if (r < 0)
                                         return r;
                         }

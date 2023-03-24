@@ -187,7 +187,9 @@ typedef struct Bond {
         uint32_t min_links;
         uint32_t resend_igmp;
         unsigned packets_per_slave;
+        unsigned ngrat_arp;
 
+        int all_slaves_active;
         char **interfaces;
 } Bond;
 

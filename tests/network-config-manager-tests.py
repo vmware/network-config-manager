@@ -439,6 +439,8 @@ class TestNetworkConfigManagerYAML:
         assert(parserb.get('Bond', 'LearnPacketIntervalSec') == '32')
         assert(parserb.get('Bond', 'ResendIGMP') == '45')
         assert(parserb.get('Bond', 'PacketsPerSlave') == '11')
+        assert(parserb.get('Bond', 'GratuitousARP') == '15')
+        assert(parserb.get('Bond', 'AllSlavesActive') == 'yes')
 
         parserc = configparser.ConfigParser()
         parserc.read(os.path.join(networkd_unit_file_path, '10-bond0.network'))
