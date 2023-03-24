@@ -434,6 +434,8 @@ class TestNetworkConfigManagerYAML:
         assert(parserb.get('Bond', 'MIIMonitorSec') == '300')
         assert(parserb.get('Bond', 'MinLinks') == '3')
         assert(parserb.get('Bond', 'ARPIntervalSec') == '30')
+        assert(parserb.get('Bond', 'UpDelaySec') == '12')
+        assert(parserb.get('Bond', 'DownDelaySec') == '15')
 
         parserc = configparser.ConfigParser()
         parserc.read(os.path.join(networkd_unit_file_path, '10-bond0.network'))

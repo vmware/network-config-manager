@@ -13,3 +13,5 @@ network:
               mii-monitor-interval: 300
               min-links: 3
               arp-interval: 30
+              up-delay: 12
+              down-delay: 15
