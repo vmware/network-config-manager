@@ -694,6 +694,12 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->bond->min_links > 0) {
+                                r = key_file_set_uint(key_file, "Bond", "MinLinks", n->bond->min_links);
+                                if (r < 0)
+                                        return r;
+                        }
+
                         break;
 
                 case NETDEV_KIND_VXLAN: {
