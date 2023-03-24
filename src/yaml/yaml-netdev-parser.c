@@ -102,6 +102,7 @@ static ParserTable parser_bond_vtable[] = {
         { "up-delay",              CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, up_delay)},
         { "down-delay",            CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, down_delay)},
         { "learn-packet-interval", CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,         offsetof(Bond, lp_interval)},
+        { "resend-igmp",           CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,         offsetof(Bond, resend_igmp)},
         { NULL,         _CONF_TYPE_INVALID,    0,                         0}
 };
 
