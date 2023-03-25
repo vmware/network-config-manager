@@ -1,0 +1,19 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    test99:
+      nameservers:
+         addresses: [8.8.8.8,8.8.4.4,192.168.1.1]
+         search: [testdomain1.com testdomain2.com]
+      ntp: [ntp1.com ntp2.com]
+      addresses:
+        - 10.0.0.10/24
+        - 11.0.0.11/24
+      routes:
+        - to: default
+          via: 10.0.0.1
+          metric: 200
+        - to: default
+          via: 11.0.0.1
+          metric: 300

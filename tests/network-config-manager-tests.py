@@ -211,6 +211,7 @@ class TestNetworkConfigManagerYAML:
         "vxlan.yml",
         "wireguard.yml",
         "wg-multiple.yml",
+        "multiple-rt.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -344,6 +345,13 @@ class TestNetworkConfigManagerYAML:
         subprocess.check_call(['nmctl', 'apply'])
         assert(unit_exist('10-test99.network') == True)
 
+
+    def test_network_multiple_address_route(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('multiple-rt.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-test99.network') == True)
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -355,6 +363,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'InitialAdvertisedReceiveWindow') == '20')
         assert(parser.get('Route', 'Type') == 'local')
         assert(parser.get('Route', 'Scope') == 'link')
+
 
     def test_network_routing_policy_rule(self):
         self.copy_yaml_file_to_netmanager_yaml_path('routing-policy-rule.yml')

@@ -508,15 +508,11 @@ int parse_yaml_addresses(const char *key,
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
-                if (string_equal("addresses", key))
+                if (string_equal("addresses", key)) {
                         r = parse_address_from_string_and_add(scalar(entry), network->addresses);
-                else if (string_equal("ntps", key))
-                        r = parse_address_from_string_and_add(scalar(entry), network->ntps);
-                else
-                        continue;
-
-                if (r < 0 && r != -EEXIST)
-                        return r;
+                        if (r < 0 && r != -EEXIST)
+                                return r;
+                }
         }
 
         return 0;
