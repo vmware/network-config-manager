@@ -259,7 +259,7 @@ typedef struct Network {
         Set *addresses;
         Set *nameservers;
         Set *domains;
-        Set *ntps;
+        char **ntps;
 
         void *link;
         NetDev *netdev;

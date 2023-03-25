@@ -666,10 +666,6 @@ int network_new(Network **ret) {
         if (r < 0)
                 return r;
 
-        r = set_new(&n->ntps, g_direct_hash, g_direct_equal);
-        if (r < 0)
-                return r;
-
         *ret = steal_pointer(n);
         return 0;
 }
@@ -679,7 +675,6 @@ void network_free(Network *n) {
                 return;
 
         set_freep(&n->addresses);
-        set_freep(&n->ntps);
         set_freep(&n->nameservers);
         set_freep(&n->domains);
 
@@ -701,6 +696,7 @@ void network_free(Network *n) {
         free(n->activation_policy);
         free(n->link);
 
+        strv_free(n->ntps);
         strv_free(n->driver);
         free(n);
 }
@@ -954,19 +950,6 @@ static void append_domains(gpointer key, gpointer value, gpointer userdata) {
         g_string_append_printf(config, "%s ", (char *) key);
 }
 
-static void append_ntp(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_ char *pretty = NULL;
-        IPAddress *a = (IPAddress *) key;
-        GString *config = userdata;
-        int r;
-
-        r = ip_to_string(a->family,a, &pretty);
-        if (r < 0)
-                return;
-
-        g_string_append_printf(config, "%s ", (char *) pretty);
-}
-
 static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(section_freep) Section *section = NULL;
         _auto_cleanup_ char *addr = NULL;
@@ -1191,14 +1174,18 @@ int generate_network_config(Network *n) {
                         return r;
         }
 
-        if (n->ntps && set_size(n->ntps) > 0) {
+        if (n->ntps) {
                 _cleanup_(g_string_unrefp) GString *c = NULL;
+                char **d;
 
                 c = g_string_new(NULL);
                 if (!c)
                         return log_oom();
 
-                set_foreach(n->ntps, append_ntp, c);
+                strv_foreach(d, n->ntps) {
+                        g_string_append_printf(c, "%s ", *d);
+                }
+
                 r = set_config(key_file, "Network", "NTP", c->str);
                 if (r < 0)
                         return r;
