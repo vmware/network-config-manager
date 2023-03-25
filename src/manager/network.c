@@ -646,11 +646,11 @@ int network_new(Network **ret) {
                 .parser_type = _PARSER_TYPE_INVALID,
         };
 
-        r = set_new(&n->addresses, g_int64_hash, g_int64_equal);
+        r = set_new(&n->addresses, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
-        n->routes = g_hash_table_new_full(g_int64_hash, route_equal, NULL, g_free);
+        n->routes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
         if (!n->routes)
                 return log_oom();
 
@@ -658,11 +658,11 @@ int network_new(Network **ret) {
         if (!n->routing_policy_rules)
                 return log_oom();
 
-        r = set_new(&n->nameservers, g_bytes_hash, g_bytes_equal);
+        r = set_new(&n->nameservers, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
-        r = set_new(&n->domains, NULL, NULL);
+        r = set_new(&n->domains, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
@@ -722,6 +722,7 @@ int parse_address_from_string_and_add(const char *s, Set *a) {
         r = parse_ip_from_string(s, &address);
         if (r < 0)
                 return r;
+
 
         set_add(a, address);
         steal_pointer(address);
