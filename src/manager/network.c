@@ -542,6 +542,48 @@ void routing_policy_rule_free(RoutingPolicyRule *rule) {
         free(rule);
 }
 
+static gboolean route_equal(gconstpointer v1, gconstpointer v2) {
+        Route *a = (Route *) v1;
+        Route *b = (Route *) v2;
+        int r;
+
+        r = memcmp(&a->gw, &b->gw, sizeof(a->gw));
+        if (r != 0)
+                return r;
+
+        r = memcmp(&a->dst, &b->dst, sizeof(a->dst));
+        if (r != 0)
+                return r;
+
+        r = memcmp(&a->src, &b->src, sizeof(a->src));
+        if (r != 0)
+                return r;
+
+        r = memcmp(&a->prefsrc, &b->prefsrc, sizeof(a->prefsrc));
+        if (r != 0)
+                return r;
+
+        if (a->family != b->family)
+                return false;
+
+        if (a->priority != b->priority)
+                return false;
+
+        if (a->table != b->table)
+                return false;
+
+        if (a->mtu != b->mtu)
+                return false;
+
+        if (a->metric != b->metric)
+                return false;
+
+        if (a->flags != b->flags)
+                return false;
+
+        return true;
+}
+
 static int wifi_access_point_free (void *key, void *value, void *user_data) {
         WiFiAccessPoint *ap = value;
 
@@ -608,7 +650,7 @@ int network_new(Network **ret) {
         if (r < 0)
                 return r;
 
-        n->routes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+        n->routes = g_hash_table_new_full(g_int64_hash, route_equal, NULL, g_free);
         if (!n->routes)
                 return log_oom();
 
