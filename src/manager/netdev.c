@@ -1222,6 +1222,12 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->wg->fwmark > 0) {
+                                r = key_file_set_uint(key_file, "WireGuard", "FwMark", n->wg->fwmark);
+                                if (r < 0)
+                                        return r;
+                        }
+
                         for (iter = n->wg->peers; iter; iter = g_list_next (iter)) {
                                 WireGuardPeer *peer = (WireGuardPeer *) iter->data;
                                 _cleanup_(section_freep) Section *section = NULL;

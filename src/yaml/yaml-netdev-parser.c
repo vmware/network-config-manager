@@ -612,30 +612,30 @@ static int yaml_parse_netdev_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_nod
 }
 
 static ParserTable parser_wireguard_peer_vtable[] = {
-        { "public",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,                            offsetof(WireGuardPeer, public_key)},
-        { "shared",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_wireguard_peer_shared_key_or_path, offsetof(WireGuardPeer, preshared_key_file)},
-        { "allowed-ips", CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence,                          offsetof(WireGuardPeer, allowed_ips)},
-        { "keepalive",   CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_bool,                              offsetof(WireGuardPeer, persistent_keep_alive)},
-        { "endpoint",    CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,                            offsetof(WireGuardPeer, endpoint)},
-        { NULL,          _CONF_TYPE_INVALID,         0,                                            0}
+        { "public",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,                                     offsetof(WireGuardPeer, public_key)},
+        { "keys",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence_wireguard_peer_shared_key_or_path, offsetof(WireGuardPeer, preshared_key_file)},
+        { "allowed-ips", CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence,                                   offsetof(WireGuardPeer, allowed_ips)},
+        { "keepalive",   CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint32,                                     offsetof(WireGuardPeer, persistent_keep_alive)},
+        { "endpoint",    CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,                                     offsetof(WireGuardPeer, endpoint)},
+        { NULL,          _CONF_TYPE_INVALID,         0,                                                     0}
 };
 
-static int yaml_parse_wireguard_peer(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, WireGuardPeer *peer) {
+static int yaml_parse_wireguard_peer(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, WireGuard *wg, WireGuardPeer **peer) {
         yaml_node_t *k, *v;
         yaml_node_pair_t *p;
         yaml_node_item_t *i;
         yaml_node_t *n;
+        int r;
 
         assert(m);
         assert(dp);
         assert(node);
         assert(peer);
 
-
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 n = yaml_document_get_node(dp, *i);
                 if (n)
-                        (void) yaml_parse_wireguard_peer(m, dp, n, peer);
+                        (void) yaml_parse_wireguard_peer(m, dp, n, wg, peer);
         }
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
@@ -648,13 +648,21 @@ static int yaml_parse_wireguard_peer(YAMLManager *m, yaml_document_t *dp, yaml_n
                 if (!k && !v)
                         continue;
 
+                if (string_equal(scalar(k), "keys")) {
+                        r = wireguard_peer_new(peer);
+                        if (r < 0)
+                                return log_oom();
+
+                        wg->peers = g_list_append(wg->peers, *peer);
+                }
+
                 table = g_hash_table_lookup(m->wireguard_peer, scalar(k));
                 if (!table)
                         continue;
 
-                t = (uint8_t *) peer + table->offset;
+                t = (uint8_t *) *peer + table->offset;
                 if (table->parser)
-                        (void) table->parser(scalar(k), scalar(v), peer, t, dp, v);
+                        (void) table->parser(scalar(k), scalar(v), *peer, t, dp, v);
         }
 
         return 0;
@@ -664,7 +672,7 @@ static ParserTable parser_wireguard_vtable[] = {
         { "key",         CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_wireguard_key_or_path, offsetof(WireGuard, private_key_file)},
         { "mark",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint32,                offsetof(WireGuard, fwmark)},
         { "port",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint16,                offsetof(WireGuard, listen_port)},
-        { NULL,          _CONF_TYPE_INVALID,    0,                  0}
+        { NULL,          _CONF_TYPE_INVALID,         0,                                0}
 };
 
 static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
@@ -703,18 +711,15 @@ static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                 table = g_hash_table_lookup(m->wireguard, scalar(k));
                 if (!table) {
                         if (string_equal(scalar(k), "peers")) {
-                                _cleanup_(wireguard_peer_freep) WireGuardPeer *peer = NULL;
+                                WireGuardPeer *peer = NULL;
 
                                 r = wireguard_peer_new(&peer);
                                 if (r < 0)
                                         return log_oom();
 
-                                r = yaml_parse_wireguard_peer(m, dp, node, peer);
+                                r = yaml_parse_wireguard_peer(m, dp, node, wg, &peer);
                                 if (r < 0)
                                         return r;
-
-                                wg->peers = g_list_append(wg->peers, peer);
-                                steal_pointer(peer);
                         } else
                                 (void) parse_network(m, dp, node, network);
 
