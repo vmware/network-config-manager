@@ -217,8 +217,7 @@ static int parse_route(GHashTable *config, yaml_document_t *dp, yaml_node_t *nod
         }
 
         if (rt) {
-                if (!g_hash_table_insert(network->routes, rt, rt))
-                        return -EINVAL;
+                g_hash_table_insert(network->routes, rt, rt);
 
                 network->modified = true;
                 steal_pointer(rt);
@@ -356,7 +355,7 @@ static int parse_routing_policy_rule(GHashTable *config, yaml_document_t *dp, ya
 
         if (rule) {
                 if (!g_hash_table_insert(network->routing_policy_rules, rule, rule))
-                        return -EINVAL;
+                        return -EEXIST;
 
                 network->modified = true;
                 steal_pointer(rule);

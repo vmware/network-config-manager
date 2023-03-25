@@ -542,6 +542,48 @@ void routing_policy_rule_free(RoutingPolicyRule *rule) {
         free(rule);
 }
 
+static gboolean route_equal(gconstpointer v1, gconstpointer v2) {
+        Route *a = (Route *) v1;
+        Route *b = (Route *) v2;
+        int r;
+
+        r = memcmp(&a->gw, &b->gw, sizeof(a->gw));
+        if (r != 0)
+                return r;
+
+        r = memcmp(&a->dst, &b->dst, sizeof(a->dst));
+        if (r != 0)
+                return r;
+
+        r = memcmp(&a->src, &b->src, sizeof(a->src));
+        if (r != 0)
+                return r;
+
+        r = memcmp(&a->prefsrc, &b->prefsrc, sizeof(a->prefsrc));
+        if (r != 0)
+                return r;
+
+        if (a->family != b->family)
+                return false;
+
+        if (a->priority != b->priority)
+                return false;
+
+        if (a->table != b->table)
+                return false;
+
+        if (a->mtu != b->mtu)
+                return false;
+
+        if (a->metric != b->metric)
+                return false;
+
+        if (a->flags != b->flags)
+                return false;
+
+        return true;
+}
+
 static int wifi_access_point_free (void *key, void *value, void *user_data) {
         WiFiAccessPoint *ap = value;
 
@@ -604,7 +646,7 @@ int network_new(Network **ret) {
                 .parser_type = _PARSER_TYPE_INVALID,
         };
 
-        r = set_new(&n->addresses, g_int64_hash, g_int64_equal);
+        r = set_new(&n->addresses, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
@@ -616,11 +658,11 @@ int network_new(Network **ret) {
         if (!n->routing_policy_rules)
                 return log_oom();
 
-        r = set_new(&n->nameservers, g_bytes_hash, g_bytes_equal);
+        r = set_new(&n->nameservers, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
-        r = set_new(&n->domains, NULL, NULL);
+        r = set_new(&n->domains, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
@@ -680,6 +722,7 @@ int parse_address_from_string_and_add(const char *s, Set *a) {
         r = parse_ip_from_string(s, &address);
         if (r < 0)
                 return r;
+
 
         set_add(a, address);
         steal_pointer(address);

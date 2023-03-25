@@ -710,7 +710,9 @@ static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t
 
                 table = g_hash_table_lookup(m->wireguard, scalar(k));
                 if (!table) {
-                        if (string_equal(scalar(k), "peers")) {
+                        if (string_equal(scalar(k), "mode"))
+                                continue;
+                        else if (string_equal(scalar(k), "peers")) {
                                 WireGuardPeer *peer = NULL;
 
                                 r = wireguard_peer_new(&peer);
