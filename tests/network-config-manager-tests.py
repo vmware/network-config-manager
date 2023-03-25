@@ -210,6 +210,7 @@ class TestNetworkConfigManagerYAML:
         "vrf.yml",
         "vxlan.yml",
         "wireguard.yml",
+        "wg-multiple.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -608,6 +609,42 @@ class TestNetworkConfigManagerYAML:
         assert(parsera.get('WireGuardPeer', 'PublicKey') == 'syR+psKigVdJ+PZvpEkacU5niqg9WGYxepDZT/zLGj8=')
         assert(parsera.get('WireGuardPeer', 'Endpoint') == '10.48.132.39:51000')
         assert(parsera.get('WireGuardPeer', 'AllowedIPs') == '10.10.11.0/24 10.10.10.0/24')
+
+    def test_netdev_wireguard(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('wg-multiple.yml')
+
+        subprocess.check_call(['nmctl', 'apply'])
+        assert(unit_exist('10-wg0.netdev') == True)
+        assert(unit_exist('10-wg1.netdev') == True)
+        assert(unit_exist('10-wg1.network') == True)
+        assert(unit_exist('10-wg0.network') == True)
+
+        parsera = configparser.ConfigParser()
+        parsera.read(os.path.join(networkd_unit_file_path, '10-wg0.netdev'))
+
+        assert(parsera.get('NetDev', 'Name') == 'wg0')
+        assert(parsera.get('NetDev', 'Kind') == 'wireguard')
+
+        assert(parsera.get('WireGuard', 'PrivateKey') == '4GgaQCy68nzNsUE5aJ9fuLzHhB65tAlwbmA72MWnOm8=')
+        assert(parsera.get('WireGuard', 'ListenPort') == '51820')
+        assert(parsera.get('WireGuard', 'FwMark') == '42')
+
+        assert(parsera.get('WireGuardPeer', 'PublicKey') == 'M9nt4YujIOmNrRmpIRTmYSfMdrpvE7u6WkG8FY8WjG4=')
+        assert(parsera.get('WireGuardPeer', 'PresharedKey') == '7voRZ/ojfXgfPOlswo3Lpma1RJq7qijIEEUEMShQFV8=')
+        assert(parsera.get('WireGuardPeer', 'AllowedIPs') == '20.20.20.10/24')
+
+        parserb = configparser.ConfigParser()
+        parserb.read(os.path.join(networkd_unit_file_path, '10-wg1.netdev'))
+
+        assert(parserb.get('NetDev', 'Name') == 'wg1')
+        assert(parserb.get('NetDev', 'Kind') == 'wireguard')
+
+        assert(parserb.get('WireGuard', 'PrivateKey') == 'KPt9BzQjejRerEv8RMaFlpsD675gNexELOQRXt/AcH0=')
+
+        assert(parserb.get('WireGuardPeer', 'PublicKey') == 'rlbInAj0qV69CysWPQY7KEBnKxpYCpaWqOs/dLevdWc=')
+        assert(parserb.get('WireGuardPeer', 'PresharedKey') == '7voRZ/ojfXgfPOlswo3Lpma1RJq7qijIEEUEMShQFV8=')
+        assert(parserb.get('WireGuardPeer', 'PersistentKeepalive') == '21')
+
 
 class TestKernelCommandLine:
     def teardown_method(self):
