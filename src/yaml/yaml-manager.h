@@ -31,8 +31,8 @@ typedef struct YAMLManager {
         GHashTable *bond;
         GHashTable *bridge;
         GHashTable *tunnel;
-        GHashTable *netdev_vrf;
-        GHashTable *netdev_vxlan;
+        GHashTable *vrf;
+        GHashTable *vxlan;
         GHashTable *wireguard;
         GHashTable *wireguard_peer;
 } YAMLManager;

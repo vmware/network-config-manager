@@ -482,13 +482,13 @@ static int yaml_parse_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
         return 0;
 }
 
-static ParserTable parser_netdev_vrf_vtable[] = {
+static ParserTable parser_vrf_vtable[] = {
         { "interfaces", CONF_TYPE_NETDEV_VRF, parse_yaml_sequence, offsetof(VRF, interfaces)},
         { "table",      CONF_TYPE_NETDEV_VRF, parse_yaml_uint32,   offsetof(VRF, table)},
         { NULL,         _CONF_TYPE_INVALID,    0,                  0}
 };
 
-static int yaml_parse_netdev_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+static int yaml_parse_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _cleanup_(vrf_freep) VRF *vrf = NULL;
         yaml_node_t *k, *v;
         yaml_node_pair_t *p;
@@ -521,7 +521,7 @@ static int yaml_parse_netdev_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_
                 if (!k && !v)
                         continue;
 
-                table = g_hash_table_lookup(m->netdev_vrf, scalar(k));
+                table = g_hash_table_lookup(m->vrf, scalar(k));
                 if (!table) {
                         (void) parse_network(m, dp, node, network);
 
@@ -539,7 +539,7 @@ static int yaml_parse_netdev_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_
         return 0;
 }
 
-static ParserTable parser_netdev_vxlan_vtable[] = {
+static ParserTable parser_vxlan_vtable[] = {
         { "id",               CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, vni)},
         { "local",            CONF_TYPE_NETDEV_VXLAN, parse_yaml_address,             offsetof(VxLan, local)},
         { "remote",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_address,             offsetof(VxLan, remote)},
@@ -560,7 +560,7 @@ static ParserTable parser_netdev_vxlan_vtable[] = {
         { NULL,               _CONF_TYPE_INVALID,    0,                  0}
 };
 
-static int yaml_parse_netdev_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+static int yaml_parse_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _cleanup_(vxlan_freep) VxLan *vx = NULL;
         yaml_node_t *k, *v;
         yaml_node_pair_t *p;
@@ -593,7 +593,7 @@ static int yaml_parse_netdev_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_nod
                 if (!k && !v)
                         continue;
 
-                table = g_hash_table_lookup(m->netdev_vxlan, scalar(k));
+                table = g_hash_table_lookup(m->vxlan, scalar(k));
                 if (!table) {
                         (void) parse_network(m, dp, node, network);
 
@@ -785,7 +785,7 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
 
                                         switch (r) {
                                                 case NETDEV_KIND_VXLAN:
-                                                        (void) yaml_parse_netdev_vxlan(m, dp, n, net);
+                                                        (void) yaml_parse_vxlan(m, dp, n, net);
                                                         break;
                                                 case NETDEV_KIND_WIREGUARD:
                                                         (void) yaml_parse_wireguard(m, dp, n, net);
@@ -796,7 +796,7 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
 
                                         break;
                                 case YAML_NETDEV_KIND_VRF:
-                                        (void) yaml_parse_netdev_vrf(m, dp, n, net);
+                                        (void) yaml_parse_vrf(m, dp, n, net);
                                         break;
                                 default:
                                         break;
@@ -859,24 +859,24 @@ int yaml_register_netdev(YAMLManager *m) {
                 }
         }
 
-        m->netdev_vrf = g_hash_table_new(g_str_hash, g_str_equal);
-        if (!m->netdev_vrf)
+        m->vrf = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->vrf)
                 return log_oom();
 
-        for (size_t i = 0; parser_netdev_vrf_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->netdev_vrf, (void *) parser_netdev_vrf_vtable[i].key, &parser_netdev_vrf_vtable[i])) {
-                        log_warning("Failed add key='%s' to VRF table", parser_netdev_vrf_vtable[i].key);
+        for (size_t i = 0; parser_vrf_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->vrf, (void *) parser_vrf_vtable[i].key, &parser_vrf_vtable[i])) {
+                        log_warning("Failed add key='%s' to VRF table", parser_vrf_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        m->netdev_vxlan = g_hash_table_new(g_str_hash, g_str_equal);
-        if (!m->netdev_vxlan)
+        m->vxlan = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->vxlan)
                 return log_oom();
 
-        for (size_t i = 0; parser_netdev_vxlan_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->netdev_vxlan, (void *) parser_netdev_vxlan_vtable[i].key, &parser_netdev_vxlan_vtable[i])) {
-                        log_warning("Failed add key='%s' to VRF table", parser_netdev_vxlan_vtable[i].key);
+        for (size_t i = 0; parser_vxlan_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->vxlan, (void *) parser_vxlan_vtable[i].key, &parser_vxlan_vtable[i])) {
+                        log_warning("Failed add key='%s' to VRF table", parser_vxlan_vtable[i].key);
                         return -EINVAL;
                 }
         }
