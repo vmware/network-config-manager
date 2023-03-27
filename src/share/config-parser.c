@@ -155,6 +155,32 @@ bool key_file_config_exists(const KeyFile *key_file, const char *section, const 
         return false;
 }
 
+char *key_file_config_get(const KeyFile *key_file, const char *section, const char *k) {
+        GList *i;
+
+        assert(k);
+
+        assert(key_file);
+        assert(section);
+        assert(k);
+
+        for (i = key_file->sections; i; i = g_list_next (i)) {
+                Section *s = (Section *) i->data;
+
+                if (string_equal(s->name, section)) {
+                        for (GList *j = s->keys; j; j = g_list_next (j)) {
+                                Key *key = (Key *) j->data;
+
+                                if (string_equal(key->name, k))
+                                        return key->v;
+                        }
+                }
+        }
+
+        return false;
+}
+
+
 int parse_config_file(const char *path, const char *section, const char *k, char **ret) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         gchar *s;
