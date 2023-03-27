@@ -204,7 +204,7 @@ network:
       ifname: test99
       alias: ifalias
       description: testconf
-      mtu: 10M
+      mtu: 1600
       bitspersecond: 5G
       duplex: full
       wakeonlan: phy unicast broadcast multicast arp magic secureon
