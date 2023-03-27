@@ -6,23 +6,36 @@
 #include "alloc-util.h"
 #include "config-file.h"
 #include "config-parser.h"
-#include "dbus.h"
-#include "dracut-parser.h"
 #include "file-util.h"
 #include "log.h"
 #include "macros.h"
-#include "network-manager.h"
-#include "network.h"
-#include "networkd-api.h"
 #include "parse-util.h"
 #include "string-util.h"
+
+static int apply_yaml_file(const char *y) {
+    _auto_cleanup_ char *c = NULL, *yaml_file = NULL;
+
+    assert(y);
+
+    yaml_file = string_join("", "/run/network-config-manager-ci/yaml/", y, NULL);
+    if (!yaml_file)
+        return -ENOMEM;
+
+    c = string_join(" ", "/usr/bin/nmctl", "apply-file", yaml_file, NULL);
+    if (!c)
+        return -ENOMEM;
+
+    system(c);
+
+    return 0;
+}
 
 static void multiple_routes_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *dns = NULL;
     int r;
 
-    system("/usr/bin/nmctl apply-file /run/network-config-manager-ci/yaml/multiple-rt.yml");
+    apply_yaml_file("multiple-rt.yml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
