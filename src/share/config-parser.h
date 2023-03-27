@@ -14,6 +14,7 @@ int parse_state_file(const char *path, const char *key, char **v, GHashTable **t
 
 int parse_key_file(const char *path, KeyFile **ret);
 int display_key_file(const KeyFile *k);
+bool key_file_config_exists(const KeyFile *kf, const char *s, const char *k, const char *v);
 
 int parse_config_file(const char *path, const char *section, const char *key, char **ret);
 int parse_config_file_integer(const char *path, const char *section, const char *k, unsigned *ret);
