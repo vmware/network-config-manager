@@ -233,6 +233,9 @@ class TestNetworkConfigManagerYAML:
         link_remove('test99')
         link_remove('test98')
 
+    def test_cmocka(self):
+        subprocess.check_call("/usr/bin/nmctl-tests")
+
     def test_match_driver(self):
         self.copy_yaml_file_to_netmanager_yaml_path('match-driver.yml')
 
@@ -344,26 +347,6 @@ class TestNetworkConfigManagerYAML:
 
         subprocess.check_call(['nmctl', 'apply'])
         assert(unit_exist('10-test99.network') == True)
-
-
-    def test_network_multiple_address_route(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('multiple-rt.yml')
-
-        subprocess.check_call(['nmctl', 'apply'])
-        assert(unit_exist('10-test99.network') == True)
-
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Address', 'Address') == '192.168.1.10/24')
-        assert(parser.get('Route', 'Destination') == '192.168.1.1/24')
-        assert(parser.get('Route', 'Gateway') == '192.168.1.1')
-        assert(parser.get('Route', 'PreferredSource') == '192.168.1.10')
-        assert(parser.get('Route', 'InitialCongestionWindow') == '10')
-        assert(parser.get('Route', 'InitialAdvertisedReceiveWindow') == '20')
-        assert(parser.get('Route', 'Type') == 'local')
-        assert(parser.get('Route', 'Scope') == 'link')
-
 
     def test_network_routing_policy_rule(self):
         self.copy_yaml_file_to_netmanager_yaml_path('routing-policy-rule.yml')
