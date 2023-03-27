@@ -3,7 +3,7 @@ all: build
 .PHONY: all
 
 build:
-	meson setup --prefix=/usr build
+	meson setup -Dtests=true build
 
 clang:
 	CC=clang meson setup --prefix=/usr build-clang; ninja -C build-clang

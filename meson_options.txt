@@ -1,0 +1,5 @@
+option('version-tag', type : 'string',
+       description : 'override the git version string')
+
+option('tests', type : 'boolean', value : false,
+       description : 'enable tests')
