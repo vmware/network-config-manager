@@ -653,7 +653,7 @@ int parse_yaml_sequence(const char *key,
                         if (!*s)
                                 return log_oom();
                 } else {
-                        r = strv_add(s, strdup(c));
+                        r = strv_add(s, c);
                         if (r < 0)
                                 return r;
                 }
