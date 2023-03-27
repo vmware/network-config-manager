@@ -1,0 +1,26 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    test99:
+      addresses:
+       - 172.31.24.153/20
+       - 172.31.28.195/20
+      dhcp4: no
+      routes:
+       - to: 0.0.0.0/0
+         via: 172.31.16.1 # Default gateway
+         table: 1000
+       - to: 172.31.24.153
+         via: 0.0.0.0
+         scope: link
+         table: 1000
+       - to: 172.31.28.195
+         via: 0.0.0.0
+         scope: link
+         table: 1000
+      routing-policy:
+        - from: 172.31.24.153
+          table: 1000
+        - from: 172.31.28.195
+          table: 1000

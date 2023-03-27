@@ -47,11 +47,9 @@ static void multiple_address(void **state) {
     assert_true(g_strrstr(dns, "1.1.1.1"));
     assert_true(g_strrstr(dns, "1.0.0.1"));
 
-
     assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100/24"));
     assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.99/24"));
 }
-
 
 static void multiple_routes_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -83,6 +81,40 @@ static void multiple_routes_address(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "RouteMetric", "300"));
 }
 
+static void source_routing(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("source-routing.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "172.31.24.153/20"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "172.31.28.195/20"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "172.31.24.153"));
+    assert_true(key_file_config_exists(key_file, "Route", "Table", "1000"));
+    assert_true(key_file_config_exists(key_file, "Route", "Scope", "link"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "172.31.16.1"));
+    assert_true(key_file_config_exists(key_file, "Route", "Table", "1000"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "172.31.28.195"));
+    assert_true(key_file_config_exists(key_file, "Route", "Scope", "link"));
+    assert_true(key_file_config_exists(key_file, "Route", "Table", "1000"));
+
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "From", "172.31.28.195"));
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "1000"));
+
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "From", "172.31.24.153"));
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "1000"));
+}
+
 static int setup(void **state) {
     system("/usr/sbin/ip link add dev test99 type dummy");
 
@@ -99,6 +131,7 @@ int main(void) {
     const struct CMUnitTest tests [] = {
         cmocka_unit_test (multiple_address),
         cmocka_unit_test (multiple_routes_address),
+        cmocka_unit_test (source_routing),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
