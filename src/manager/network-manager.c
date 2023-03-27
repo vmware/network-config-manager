@@ -2030,9 +2030,6 @@ int manager_generate_network_config_from_yaml(const char *file) {
                         if (r < 0)
                                 continue;
 
-                        if (!l->macaddr)
-                                continue;
-
                         r = netdev_link_configure(p, l);
                         if (r < 0) {
                                 log_warning("Failed to configure device: %s", strerror(-r));
