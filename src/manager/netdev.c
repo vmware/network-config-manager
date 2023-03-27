@@ -486,9 +486,13 @@ int wireguard_peer_new(WireGuardPeer **ret) {
         return 0;
 }
 
-void wireguard_peer_free(WireGuardPeer *wg) {
-        if (!wg)
+void wireguard_peer_free(void *d) {
+        WireGuardPeer *wg;
+
+       if (!d)
                 return;
+
+        wg = (WireGuardPeer *) d;
 
         free(wg->public_key);
         free(wg->preshared_key);
@@ -518,7 +522,7 @@ void wireguard_free(WireGuard *wg) {
         free(wg->private_key);
         free(wg->private_key_file);
 
-        g_list_free_full(g_list_first(wg->peers), free);
+        g_list_free_full(g_list_first(wg->peers), wireguard_peer_free);
         free(wg);
 }
 
