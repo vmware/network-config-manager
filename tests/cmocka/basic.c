@@ -119,6 +119,35 @@ static void source_routing(void **state) {
     assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "1000"));
 }
 
+static void additional_gw_source_routing(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl add-addl-gw dev test99 address 192.168.10.5/24 dest 0.0.0.0 gw 172.16.85.1 table 100") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.10.5/24"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0"));
+    assert_true(key_file_config_exists(key_file, "Route", "Table", "100"));
+    assert_true(key_file_config_exists(key_file, "Route", "PreferredSource", "192.168.10.5/24"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "172.16.85.1"));
+    assert_true(key_file_config_exists(key_file, "Route", "Table", "100"));
+
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "From", "192.168.10.5/24"));
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "100"));
+
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "To", "192.168.10.5/24"));
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "100"));
+}
+
+
 static int setup(void **state) {
     system("/usr/sbin/ip link add dev test99 type dummy");
 
@@ -136,6 +165,7 @@ int main(void) {
         cmocka_unit_test (multiple_address),
         cmocka_unit_test (multiple_routes_address),
         cmocka_unit_test (source_routing),
+        cmocka_unit_test (additional_gw_source_routing),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
