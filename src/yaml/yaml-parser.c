@@ -657,8 +657,6 @@ int parse_yaml_sequence(const char *key,
                         if (r < 0)
                                 return r;
                 }
-
-                steal_pointer(c);
         }
 
         return 0;
