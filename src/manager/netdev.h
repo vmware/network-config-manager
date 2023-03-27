@@ -319,7 +319,7 @@ void wireguard_free(WireGuard *wg);
 DEFINE_CLEANUP(WireGuard*, wireguard_free);
 
 int wireguard_peer_new(WireGuardPeer **ret);
-void wireguard_peer_free(WireGuardPeer *wg);
+void wireguard_peer_free(void *wg);
 DEFINE_CLEANUP(WireGuardPeer*, wireguard_peer_free);
 
 int vxlan_new(VxLan **ret);
