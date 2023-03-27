@@ -6,7 +6,7 @@ build:
 	meson setup --prefix=/usr build
 
 clang:
-	CC=clang  meson setup --prefix=/usr build-clang; ninja -C build-clang
+	CC=clang meson setup --prefix=/usr build-clang; ninja -C build-clang
 
 clean:
 	rm -rf build/ build-clang/
@@ -15,6 +15,10 @@ clean:
 install: build
 	ninja -C build install
 .PHONY: install
+
+install-tests: build
+	install build/nmctl-tests /usr/bin
+.PHONY: install-tests
 
 format:
 	@for f in lib/*.[ch] tool/*.[ch]; do \

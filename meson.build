@@ -117,6 +117,7 @@ libmnl_dep = dependency('libmnl')
 libnftnl_dep = dependency('libnftnl')
 libnnft_dep = dependency('libnftables')
 libjson_dep = dependency('json-c')
+cmocka_dep = dependency('cmocka')
 
 includes = include_directories('src/ctl',
                                'src/dbus',
@@ -157,3 +158,11 @@ pkg.generate(libraries : network_config_managerlib,
               name : 'libnetwork_config_manager',
               filebase : 'network-config-manager',
               description : 'A library for setting the network configuration manager files.')
+
+network_config_manager_tests = executable(
+                              'nmctl-tests',
+                              [network_config_manager_sources, 'tests/cmocka/basic.c'],
+                              include_directories : includes,
+                              dependencies : [
+                              libsystemd, cmocka_dep, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnnft_dep, libjson_dep],
+                              install : false)
