@@ -1,0 +1,11 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    test99:
+      addresses:
+        - 192.168.1.100/24
+        - 192.168.1.99/24
+      gateway4: 192.168.1.1
+      nameservers:
+        addresses: [1.1.1.1, 1.0.0.1]

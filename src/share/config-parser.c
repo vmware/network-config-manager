@@ -177,7 +177,7 @@ char *key_file_config_get(const KeyFile *key_file, const char *section, const ch
                 }
         }
 
-        return false;
+        return NULL;
 }
 
 

@@ -30,6 +30,29 @@ static int apply_yaml_file(const char *y) {
     return 0;
 }
 
+static void multiple_address(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    char *dns = NULL;
+    int r;
+
+    apply_yaml_file("multiple-address.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+    assert_true(g_strrstr(dns, "1.1.1.1"));
+    assert_true(g_strrstr(dns, "1.0.0.1"));
+
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.99/24"));
+}
+
+
 static void multiple_routes_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *dns = NULL;
@@ -74,6 +97,7 @@ static int teardown (void **state) {
 
 int main(void) {
     const struct CMUnitTest tests [] = {
+        cmocka_unit_test (multiple_address),
         cmocka_unit_test (multiple_routes_address),
     };
 
