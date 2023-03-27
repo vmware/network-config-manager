@@ -203,11 +203,14 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
                    return 0;
         }
 
-        r = create_conf_file("/etc/systemd/network", s, "link", &file);
+        r = link_get_mac_address(ifname, &mac);
         if (r < 0)
                 return r;
 
-        r = link_get_mac_address(ifname, &mac);
+        if (isempty_string(mac))
+                return -ENOENT;
+
+        r = create_conf_file("/etc/systemd/network", s, "link", &file);
         if (r < 0)
                 return r;
 

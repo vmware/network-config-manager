@@ -2031,10 +2031,8 @@ int manager_generate_network_config_from_yaml(const char *file) {
                                 continue;
 
                         r = netdev_link_configure(p, l);
-                        if (r < 0) {
-                                log_warning("Failed to configure device: %s", strerror(-r));
-                                return r;
-                        }
+                        if (r < 0)
+                                log_debug("Failed to generate .link file for link '%s': %s", net->ifname, strerror(-r));
                 }
         }
 

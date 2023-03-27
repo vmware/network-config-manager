@@ -171,7 +171,7 @@ static int yaml_parse_bond(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
 
         *network->netdev = (NetDev) {
                            .ifname = strdup(network->ifname),
-                           .kind = YAML_NETDEV_KIND_BOND,
+                           .kind = NETDEV_KIND_BOND,
                            .bond = bond,
         };
         if (!network->netdev->ifname)
@@ -275,7 +275,7 @@ static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
 
         *network->netdev = (NetDev) {
                            .ifname = strdup(network->ifname),
-                           .kind = YAML_NETDEV_KIND_BRIDGE,
+                           .kind = NETDEV_KIND_BRIDGE,
                            .bridge = b,
         };
         if (!network->netdev->ifname)
@@ -335,7 +335,7 @@ static int yaml_parse_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
 
         *network->netdev = (NetDev) {
                            .ifname = strdup(network->ifname),
-                           .kind = YAML_NETDEV_KIND_VLAN,
+                           .kind = NETDEV_KIND_VLAN,
                            .vlan = vlan,
         };
         if (!network->netdev->ifname)
@@ -505,7 +505,7 @@ static int yaml_parse_netdev_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_
 
         *network->netdev = (NetDev) {
                            .ifname = strdup(network->ifname),
-                           .kind = YAML_NETDEV_KIND_VRF,
+                           .kind = NETDEV_KIND_VRF,
                            .vrf = vrf,
         };
         if (!network->netdev->ifname)
@@ -577,7 +577,7 @@ static int yaml_parse_netdev_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_nod
 
         *network->netdev = (NetDev) {
                                  .ifname = strdup(network->ifname),
-                                 .kind = YAML_NETDEV_KIND_VXLAN,
+                                 .kind = NETDEV_KIND_VXLAN,
                                  .vxlan = vx,
                            };
         if (!network->netdev->ifname)
