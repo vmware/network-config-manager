@@ -25,7 +25,7 @@ static int apply_yaml_file(const char *y) {
     if (!c)
         return -ENOMEM;
 
-    system(c);
+    assert_true(system(c) >= 0);
 
     return 0;
 }
