@@ -570,6 +570,9 @@ int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **
         if (!path)
                 return log_oom();
 
+        if (!g_file_test(path, G_FILE_TEST_EXISTS))
+               return -ENOENT;
+
         r = read_one_line(path, &line);
         if (r < 0)
                 return r;
