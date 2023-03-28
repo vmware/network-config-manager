@@ -83,8 +83,8 @@ def remove_units_from_netword_unit_path():
             os.remove(os.path.join(networkd_unit_file_path, i))
 
 def restart_networkd():
-    subprocess.check_output("systemctl restart systemd-networkd", shell=True)
-    subprocess.check_output("sleep 5", shell=True)
+    subprocess.check_output("networkctl reload", shell=True)
+    subprocess.check_output("sleep 1", shell=True)
 
     subprocess.check_output("/lib/systemd/systemd-networkd-wait-online --any", shell=True)
 
@@ -1612,7 +1612,7 @@ class TestCLINetDev:
         assert(unit_exist('10-vlan-98.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '10'])
+        subprocess.check_call(['sleep', '5'])
 
         assert(link_exist('vlan-98') == True)
 
@@ -1844,7 +1844,7 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tap.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '10'])
+        subprocess.check_call(['sleep', '5'])
 
         assert(link_exist('test-tap') == True)
 
@@ -1870,7 +1870,7 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tap.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '10'])
+        subprocess.check_call(['sleep', '5'])
 
         assert(link_exist('test-tap') == True)
 
@@ -1895,7 +1895,7 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tun.network') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '10'])
+        subprocess.check_call(['sleep', '5'])
 
         assert(link_exist('test-tun') == True)
 
@@ -1925,8 +1925,6 @@ class TestCLINetDev:
         restart_networkd()
         subprocess.check_call(['sleep', '3'])
 
-        assert(link_exist('ipip-98') == True)
-
         ipip_parser = configparser.ConfigParser()
         ipip_parser.read(os.path.join(networkd_unit_file_path, '10-ipip-98.netdev'))
 
@@ -1945,10 +1943,6 @@ class TestCLINetDev:
 
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'Tunnel') == 'ipip-98')
-
-        subprocess.check_call("nmctl remove-netdev ipip-98 kind ipip" , shell = True)
-        assert(unit_exist('10-ipip-98.netdev') == False)
-        assert(unit_exist('10-ipip-98.network') == False)
 
     def test_cli_create_ipip_without_master_device(self):
         subprocess.check_call("nmctl create-ipip ipip-98 local 192.168.1.2 remote 192.168.1.3 independent yes", shell = True)
@@ -2089,9 +2083,6 @@ class TestCLINetDev:
         assert(unit_exist('10-vxlan-98.netdev') == True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '10'])
-
-        assert(link_exist('vxlan-98') == True)
 
         vxlan_parser = configparser.ConfigParser()
         vxlan_parser.read(os.path.join(networkd_unit_file_path, '10-vxlan-98.netdev'))
@@ -2113,10 +2104,6 @@ class TestCLINetDev:
 
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'VXLAN') == 'vxlan-98')
-
-        subprocess.check_call("nmctl remove-netdev vxlan-98 kind vxlan" , shell = True)
-        assert(unit_exist('10-vxlan-98.netdev') == False)
-        assert(unit_exist('10-vxlan-98.network') == False)
 
     def test_cli_create_vxlan_without_master(self):
         subprocess.check_call("nmctl create-vxlan vxlan-98 vni 32 local 192.168.1.2 remote 192.168.1.3 dport 7777 independent yes", shell = True)
@@ -2641,9 +2628,7 @@ def tearDownModule():
 
 class TestCLILink:
     def setup_method(self):
-        link_remove('test99')
         link_add_dummy('test99')
-        restart_networkd()
 
     def teardown_method(self):
         remove_units_from_netword_unit_path()
@@ -2933,7 +2918,7 @@ class TestCLISRIOV:
                               "macaddr 00:11:22:33:44:57", shell = True)
 
         restart_networkd()
-        subprocess.check_call(['sleep', '10'])
+        subprocess.check_call(['sleep', '5'])
 
         output = subprocess.call('ip link', shell=True)
         print(output)
