@@ -122,7 +122,7 @@ bool is_uint32_or_max(const char *c) {
 
         assert(c);
 
-        if (string_equal(c, "max"))
+        if (str_equal(c, "max"))
             return true;
 
         r = parse_uint32(c, &v);
@@ -165,13 +165,13 @@ int parse_boolean(const char *v) {
         if (!v)
                 return -EINVAL;
 
-        if (string_equal(v, "1") || string_equal_fold(v, "yes") || string_equal_fold(v, "y") ||
-            string_equal_fold(v, "true") || string_equal_fold(v, "t") || string_equal_fold(v, "on") ||
-            string_equal_fold(v, "enable"))
+        if (str_equal(v, "1") || str_equal_fold(v, "yes") || str_equal_fold(v, "y") ||
+            str_equal_fold(v, "true") || str_equal_fold(v, "t") || str_equal_fold(v, "on") ||
+            str_equal_fold(v, "enable"))
                 return 1;
-        else if (string_equal(v, "0") || string_equal_fold(v, "no") || string_equal_fold(v, "n") ||
-                 string_equal_fold(v, "false") || string_equal_fold(v, "f") || string_equal_fold(v, "off") ||
-                 string_equal_fold(v, "disable"))
+        else if (str_equal(v, "0") || str_equal_fold(v, "no") || str_equal_fold(v, "n") ||
+                 str_equal_fold(v, "false") || str_equal_fold(v, "f") || str_equal_fold(v, "off") ||
+                 str_equal_fold(v, "disable"))
                 return 0;
 
         return -EINVAL;
@@ -181,13 +181,13 @@ const char *parse_boolean_or_ip_family(const char *v) {
         if (!v)
                 return NULL;
 
-        if (string_equal(v, "1") || string_equal_fold(v, "yes") || string_equal_fold(v, "y") ||
-            string_equal_fold(v, "true") || string_equal_fold(v, "t") || string_equal_fold(v, "on"))
+        if (str_equal(v, "1") || str_equal_fold(v, "yes") || str_equal_fold(v, "y") ||
+            str_equal_fold(v, "true") || str_equal_fold(v, "t") || str_equal_fold(v, "on"))
                 return "yes";
-        else if (string_equal(v, "0") || string_equal_fold(v, "no") || string_equal_fold(v, "n") ||
-                 string_equal_fold(v, "false") || string_equal_fold(v, "f") || string_equal_fold(v, "off"))
+        else if (str_equal(v, "0") || str_equal_fold(v, "no") || str_equal_fold(v, "n") ||
+                 str_equal_fold(v, "false") || str_equal_fold(v, "f") || str_equal_fold(v, "off"))
                 return "no";
-        else if (string_equal(v, "ipv4") || string_equal_fold(v, "ipv6"))
+        else if (str_equal(v, "ipv4") || str_equal_fold(v, "ipv6"))
                return v;
 
         return NULL;
@@ -196,7 +196,7 @@ const char *parse_boolean_or_ip_family(const char *v) {
 int parse_link_alias(const char *c) {
         assert(c);
 
-        if (!string_equal(c, "ifalias"))
+        if (!str_equal(c, "ifalias"))
                 return -EINVAL;
 
         return 0;
@@ -205,7 +205,7 @@ int parse_link_alias(const char *c) {
 int parse_link_macpolicy(const char *c) {
         assert(c);
 
-        if ((!string_equal(c, "persistent")) && (!string_equal(c, "random")) && (!string_equal(c, "none")))
+        if ((!str_equal(c, "persistent")) && (!str_equal(c, "random")) && (!str_equal(c, "none")))
                 return -EINVAL;
 
         return 0;
@@ -227,10 +227,10 @@ bool valid_address_label(char *c) {
 int parse_link_namepolicy(const char *c) {
         assert(c);
 
-        if ((!string_equal(c, "kernel")) && (!string_equal(c, "database")) &&
-            (!string_equal(c, "onboard")) && (!string_equal(c, "slot")) &&
-            (!string_equal(c, "path")) && (!string_equal(c, "mac")) &&
-            (!string_equal(c, "keep")))
+        if ((!str_equal(c, "kernel")) && (!str_equal(c, "database")) &&
+            (!str_equal(c, "onboard")) && (!str_equal(c, "slot")) &&
+            (!str_equal(c, "path")) && (!str_equal(c, "mac")) &&
+            (!str_equal(c, "keep")))
                 return -EINVAL;
 
         return 0;
@@ -248,8 +248,8 @@ int parse_link_name(const char *c) {
 int parse_link_altnamepolicy(const char *c) {
         assert(c);
 
-        if ((!string_equal(c, "database")) && (!string_equal(c, "onboard")) &&
-            (!string_equal(c, "slot")) && (!string_equal(c, "path")) && (!string_equal(c, "mac")))
+        if ((!str_equal(c, "database")) && (!str_equal(c, "onboard")) &&
+            (!str_equal(c, "slot")) && (!str_equal(c, "path")) && (!str_equal(c, "mac")))
                 return -EINVAL;
 
         return 0;
@@ -274,7 +274,7 @@ int parse_link_bytes(const char *c) {
 int parse_link_duplex(const char *c) {
         assert(c);
 
-        if ((!string_equal(c, "full")) && (!string_equal(c, "half")))
+        if ((!str_equal(c, "full")) && (!str_equal(c, "half")))
                 return -EINVAL;
 
         return 0;
@@ -283,9 +283,9 @@ int parse_link_duplex(const char *c) {
 int parse_link_wakeonlan(const char *c) {
         assert(c);
 
-        if((!string_equal(c, "off")) && (!string_equal(c, "phy")) && (!string_equal(c, "unicast")) &&
-           (!string_equal(c, "multicast")) && (!string_equal(c, "broadcast")) &&
-           (!string_equal(c, "arp")) && (!string_equal(c, "magic")) && (!string_equal(c, "secureon")))
+        if((!str_equal(c, "off")) && (!str_equal(c, "phy")) && (!str_equal(c, "unicast")) &&
+           (!str_equal(c, "multicast")) && (!str_equal(c, "broadcast")) &&
+           (!str_equal(c, "arp")) && (!str_equal(c, "magic")) && (!str_equal(c, "secureon")))
                 return -EINVAL;
 
         return 0;
@@ -294,8 +294,8 @@ int parse_link_wakeonlan(const char *c) {
 int parse_link_port(const char *c) {
         assert(c);
 
-        if((!string_equal(c, "tp")) && (!string_equal(c, "aui")) && (!string_equal(c, "bnc")) &&
-           (!string_equal(c, "mii")) && (!string_equal(c, "fibre")))
+        if((!str_equal(c, "tp")) && (!str_equal(c, "aui")) && (!str_equal(c, "bnc")) &&
+           (!str_equal(c, "mii")) && (!str_equal(c, "fibre")))
                 return -EINVAL;
 
         return 0;
@@ -304,11 +304,11 @@ int parse_link_port(const char *c) {
 int parse_link_advertise(const char *c) {
         assert(c);
 
-        if((!string_equal(c, "10baset-half")) && (!string_equal(c, "10baset-full")) && (!string_equal(c, "100baset-half")) &&
-           (!string_equal(c, "100baset-full")) && (!string_equal(c, "1000baset-half")) && (!string_equal(c, "1000baset-full")) &&
-           (!string_equal(c, "10000baset-full")) && (!string_equal(c, "2500basex-full")) && (!string_equal(c, "1000basekx-full")) &&
-           (!string_equal(c, "10000basekx4-full")) && (!string_equal(c, "10000basekr-full")) && (!string_equal(c, "10000baser-fec")) &&
-           (!string_equal(c, "20000basemld2-full")) && (!string_equal(c, "20000basekr2-full")))
+        if((!str_equal(c, "10baset-half")) && (!str_equal(c, "10baset-full")) && (!str_equal(c, "100baset-half")) &&
+           (!str_equal(c, "100baset-full")) && (!str_equal(c, "1000baset-half")) && (!str_equal(c, "1000baset-full")) &&
+           (!str_equal(c, "10000baset-full")) && (!str_equal(c, "2500basex-full")) && (!str_equal(c, "1000basekx-full")) &&
+           (!str_equal(c, "10000basekx4-full")) && (!str_equal(c, "10000basekr-full")) && (!str_equal(c, "10000baser-fec")) &&
+           (!str_equal(c, "20000basemld2-full")) && (!str_equal(c, "20000basekr2-full")))
                 return -EINVAL;
 
         return 0;
@@ -317,7 +317,7 @@ int parse_link_advertise(const char *c) {
 int parse_sriov_vlanprotocol(const char *c) {
         assert(c);
 
-        if((!string_equal(c, "802.1Q")) && (!string_equal(c, "802.1ad")))
+        if((!str_equal(c, "802.1Q")) && (!str_equal(c, "802.1ad")))
                 return -EINVAL;
 
         return 0;

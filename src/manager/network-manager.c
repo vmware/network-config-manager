@@ -440,7 +440,7 @@ int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac) {
 
         r = parse_config_file(network, "Link", "MACAddress", &config_mac);
         if (r >= 0) {
-                if (string_equal(config_mac, mac))
+                if (str_equal(config_mac, mac))
                         return 0;
         }
 
@@ -1336,7 +1336,7 @@ int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool syste
         assert(ifidx);
 
         r = network_parse_link_setup_state(ifidx->ifindex, &setup);
-        if (r < 0 || string_equal(setup, "unmanaged"))
+        if (r < 0 || str_equal(setup, "unmanaged"))
                 return dbus_add_dns_server(ifidx->ifindex, dns);
 
         r = create_or_parse_network_file(ifidx, &network);
@@ -1357,7 +1357,7 @@ int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool syste
 
         r = parse_config_file(network, "Network", "DNS", &config_dns);
         if (r >= 0) {
-                if (string_equal(a, config_dns))
+                if (str_equal(a, config_dns))
                         return 0;
         }
 
@@ -1385,7 +1385,7 @@ int manager_add_dns_server_domain(const IfNameIndex *ifidx, char **domains, bool
         assert(ifidx);
 
         r = network_parse_link_setup_state(ifidx->ifindex, &setup);
-        if (r < 0 || string_equal(setup, "unmanaged"))
+        if (r < 0 || str_equal(setup, "unmanaged"))
                 return dbus_add_dns_domains(ifidx->ifindex, domains);
 
         r = network_parse_link_network_file(ifidx->ifindex, &network);
@@ -1403,7 +1403,7 @@ int manager_add_dns_server_domain(const IfNameIndex *ifidx, char **domains, bool
 
         r = parse_config_file(network, "Network", "Domains", &config_domain);
         if (r >= 0) {
-                if (string_equal(a, config_domain))
+                if (str_equal(a, config_domain))
                         return 0;
         }
 
@@ -1435,7 +1435,7 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *ifidx) {
         assert(ifidx);
 
         r = network_parse_link_setup_state(ifidx->ifindex, &setup);
-        if (r < 0 || string_equal(setup, "unmanaged"))
+        if (r < 0 || str_equal(setup, "unmanaged"))
                 return dbus_revert_resolve_link(ifidx->ifindex);
 
         r = network_parse_link_network_file(ifidx->ifindex, &network);
@@ -1541,7 +1541,7 @@ int manager_add_ntp_addresses(const IfNameIndex *ifidx, char **ntps, bool add) {
 
         r = parse_config_file(network, "Network", "NTP", &config_ntp);
         if (r >= 0) {
-                if (string_equal(a, config_ntp))
+                if (str_equal(a, config_ntp))
                         return 0;
         }
 
@@ -2046,6 +2046,7 @@ int manager_generate_network_config_from_yaml(const char *file) {
 
                 r = generate_master_device_network(net);
                 if (r < 0) {
+
                         log_warning("Failed to configure device: %s", strerror(-r));
                 }
         }

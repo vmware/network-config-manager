@@ -11,8 +11,8 @@
 #define QUOTES            "\"\'"
 #define COMMENTS          "#;"
 
-#define string_equal(a,b) (strcmp((a),(b)) == 0)
-#define string_equal_fold(a,b) (strcasecmp((a),(b)) == 0)
+#define str_equal(a,b) (strcmp((a),(b)) == 0)
+#define str_equal_fold(a,b) (strcasecmp((a),(b)) == 0)
 
 #define string_join g_strjoin
 #define strsplit g_strsplit

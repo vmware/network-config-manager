@@ -20,7 +20,7 @@ static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         const char *file = NULL;
         int r;
 
-        if (string_equal(argv[0], "apply")) {
+        if (str_equal(argv[0], "apply")) {
                 dir = g_dir_open("/etc/network-config-manager/yaml", 0, &e);
                 if (!dir) {
                         log_warning("Failed to open directory '/etc/network-config-manager/yaml': %s", e->message);

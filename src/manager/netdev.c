@@ -50,7 +50,7 @@ int netdev_name_to_kind(const char *name) {
         assert(name);
 
         for (size_t i = NETDEV_KIND_VLAN; i < (int) ELEMENTSOF(netdev_kind_table); i++)
-                if (netdev_kind_table[i] && string_equal_fold(name, netdev_kind_table[i]))
+                if (netdev_kind_table[i] && str_equal_fold(name, netdev_kind_table[i]))
                         return i;
 
         return _NETDEV_KIND_INVALID;
@@ -80,7 +80,7 @@ int bond_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = BOND_MODE_ROUNDROBIN; i < (size_t) ELEMENTSOF(bond_mode_table); i++)
-                if (bond_mode_table[i] && string_equal_fold(name, bond_mode_table[i]))
+                if (bond_mode_table[i] && str_equal_fold(name, bond_mode_table[i]))
                         return i;
 
         return _BOND_MODE_INVALID;
@@ -109,7 +109,7 @@ int bond_xmit_hash_policy_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = BOND_XMIT_POLICY_LAYER2; i < (size_t) ELEMENTSOF(bond_xmit_hash_policy_table); i++)
-                if (bond_xmit_hash_policy_table[i] && string_equal_fold(name, bond_xmit_hash_policy_table[i]))
+                if (bond_xmit_hash_policy_table[i] && str_equal_fold(name, bond_xmit_hash_policy_table[i]))
                         return i;
 
         return _BOND_XMIT_HASH_POLICY_INVALID;
@@ -134,7 +134,7 @@ int bond_lacp_rate_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = BOND_LACP_RATE_SLOW; i < (size_t) ELEMENTSOF(bond_lacp_rate_table); i++)
-                if (bond_lacp_rate_table[i] && string_equal_fold(name, bond_lacp_rate_table[i]))
+                if (bond_lacp_rate_table[i] && str_equal_fold(name, bond_lacp_rate_table[i]))
                         return i;
 
         return _BOND_LACP_RATE_INVALID;
@@ -162,7 +162,7 @@ int macvlan_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i= MAC_VLAN_MODE_PRIVATE; i < (size_t) ELEMENTSOF(macvlan_mode_table); i++)
-                if (macvlan_mode_table[i] && string_equal_fold(name, macvlan_mode_table[i]))
+                if (macvlan_mode_table[i] && str_equal_fold(name, macvlan_mode_table[i]))
                         return i;
 
         return _MAC_VLAN_MODE_INVALID;
@@ -189,7 +189,7 @@ int bond_arp_validate_table_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i= BOND_ARP_VALIDATE_NONE; i < (size_t) ELEMENTSOF(bond_arp_validate_table); i++)
-                if (bond_arp_validate_table[i] && string_equal_fold(name, bond_arp_validate_table[i]))
+                if (bond_arp_validate_table[i] && str_equal_fold(name, bond_arp_validate_table[i]))
                         return i;
 
         return _BOND_ARP_VALIDATE_INVALID;
@@ -215,7 +215,7 @@ int bond_fail_over_mac_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i= BOND_ARP_VALIDATE_NONE; i < (size_t) ELEMENTSOF(bond_fail_over_mac_table); i++)
-                if (bond_fail_over_mac_table[i] && string_equal_fold(name, bond_fail_over_mac_table[i]))
+                if (bond_fail_over_mac_table[i] && str_equal_fold(name, bond_fail_over_mac_table[i]))
                         return i;
 
         return _BOND_ARP_VALIDATE_INVALID;
@@ -241,7 +241,7 @@ int bond_ad_select_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i= BOND_ARP_VALIDATE_NONE; i < (size_t) ELEMENTSOF(bond_ad_select_table); i++)
-                if (bond_ad_select_table[i] && string_equal_fold(name, bond_ad_select_table[i]))
+                if (bond_ad_select_table[i] && str_equal_fold(name, bond_ad_select_table[i]))
                         return i;
 
         return _BOND_AD_SELECT_INVALID;
@@ -267,7 +267,7 @@ int bond_primary_reselect_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i= BOND_ARP_VALIDATE_NONE; i < (size_t) ELEMENTSOF(bond_primary_reselect_table); i++)
-                if (bond_primary_reselect_table[i] && string_equal_fold(name, bond_primary_reselect_table[i]))
+                if (bond_primary_reselect_table[i] && str_equal_fold(name, bond_primary_reselect_table[i]))
                         return i;
 
         return _BOND_AD_SELECT_INVALID;
@@ -293,7 +293,7 @@ int ipvlan_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IP_VLAN_MODE_L2; i < (int) ELEMENTSOF(ipvlan_mode_table); i++)
-                if (ipvlan_mode_table[i] && string_equal_fold(name, ipvlan_mode_table[i]))
+                if (ipvlan_mode_table[i] && str_equal_fold(name, ipvlan_mode_table[i]))
                         return i;
 
         return _IP_VLAN_MODE_INVALID;

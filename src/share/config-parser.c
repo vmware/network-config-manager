@@ -139,11 +139,11 @@ bool key_file_config_exists(const KeyFile *key_file, const char *section, const 
         for (i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
-                if (string_equal(s->name, section)) {
+                if (str_equal(s->name, section)) {
                         for (GList *j = s->keys; j; j = g_list_next (j)) {
                                 Key *key = (Key *) j->data;
 
-                                if (string_equal(key->name, k) && string_equal(key->v, v))
+                                if (str_equal(key->name, k) && str_equal(key->v, v))
                                         return true;
                         }
                 }
@@ -164,11 +164,11 @@ char *key_file_config_get(const KeyFile *key_file, const char *section, const ch
         for (i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
-                if (string_equal(s->name, section)) {
+                if (str_equal(s->name, section)) {
                         for (GList *j = s->keys; j; j = g_list_next (j)) {
                                 Key *key = (Key *) j->data;
 
-                                if (string_equal(key->name, k))
+                                if (str_equal(key->name, k))
                                         return key->v;
                         }
                 }

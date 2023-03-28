@@ -52,7 +52,7 @@ int link_name_to_state(char *name) {
         assert(name);
 
         for (size_t i = LINK_STATE_DOWN; i < (int) ELEMENTSOF(link_states_table); i++)
-                if (string_equal_fold(name, link_states_table[i]))
+                if (str_equal_fold(name, link_states_table[i]))
                         return i;
 
         return _LINK_STATE_INVALID;
