@@ -1400,7 +1400,7 @@ int generate_master_device_network(Network *n) {
                                         return r;
                                 }
 
-                                r = create_or_parse_network_file(p, &network);
+                                r = parse_network_file(p, &network);
                                 if (r < 0)
                                         return r;
 
@@ -1421,7 +1421,7 @@ int generate_master_device_network(Network *n) {
                                         return r;
                                 }
 
-                                r = create_or_parse_network_file(p, &network);
+                                r = parse_network_file(p, &network);
                                 if (r < 0)
                                         return r;
 
@@ -1442,7 +1442,7 @@ int generate_master_device_network(Network *n) {
                                         return r;
                                 }
 
-                                r = create_or_parse_network_file(p, &network);
+                                r = parse_network_file(p, &network);
                                 if (r < 0)
                                         return r;
 
@@ -1461,7 +1461,7 @@ int generate_master_device_network(Network *n) {
                                 return r;
                         }
 
-                        r = create_or_parse_network_file(p, &network);
+                        r = parse_network_file(p, &network);
                         if (r < 0)
                                 return r;
 
