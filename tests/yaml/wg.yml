@@ -1,0 +1,19 @@
+tunnels:
+  wg0:
+    mode: wireguard
+    key: /path/to/private.key
+    mark: 42
+    port: 5182
+    peers:
+      - keys:
+          public: rlbInAj0qV69CysWPQY7KEBnKxpYCpaWqOs/dLevdWc=
+        allowed-ips: [0.0.0.0/0, "2001:fe:ad:de:ad:be:ef:1/24"]
+        keepalive: 23
+        endpoint: 1.2.3.4:5
+      - keys:
+          public: M9nt4YujIOmNrRmpIRTmYSfMdrpvE7u6WkG8FY8WjG4=
+          shared: /some/shared.key
+        allowed-ips: [10.10.10.20/24]
+        keepalive: 22
+        endpoint: 5.4.3.2:1
+
