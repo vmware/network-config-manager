@@ -612,7 +612,7 @@ static int yaml_parse_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *no
 }
 
 static ParserTable parser_wireguard_peer_vtable[] = {
-        { "public",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_string,                                     offsetof(WireGuardPeer, public_key)},
+        { "public",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence_wireguard_peer_shared_key_or_path, offsetof(WireGuardPeer, public_key)},
         { "keys",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence_wireguard_peer_shared_key_or_path, offsetof(WireGuardPeer, preshared_key_file)},
         { "allowed-ips", CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence,                                   offsetof(WireGuardPeer, allowed_ips)},
         { "keepalive",   CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint32,                                     offsetof(WireGuardPeer, persistent_keep_alive)},
