@@ -571,8 +571,10 @@ int parse_yaml_domains(const char *key,
                 if (!p)
                         return log_oom();
 
-                set_add(network->domains, p);
-                steal_pointer(p);
+                if (!set_contains(network->domains, p)) {
+                        set_add(network->domains, p);
+                        steal_pointer(p);
+                }
         }
 
         return 0;
@@ -651,9 +653,11 @@ int parse_yaml_sequence(const char *key,
                         if (!*s)
                                 return log_oom();
                 } else {
-                        r = strv_add(s, c);
-                        if (r < 0)
-                                return r;
+                        if (!strv_contains((const char **)*s, c)) {
+                                r = strv_add(s, c);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
         }
 

@@ -2046,6 +2046,7 @@ int manager_generate_network_config_from_yaml(const char *file) {
 
                 r = generate_master_device_network(net);
                 if (r < 0) {
+
                         log_warning("Failed to configure device: %s", strerror(-r));
                 }
         }

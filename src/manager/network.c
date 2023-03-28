@@ -703,11 +703,11 @@ int network_new(Network **ret) {
         if (!n->routing_policy_rules)
                 return log_oom();
 
-        r = set_new(&n->nameservers, g_direct_hash, g_direct_equal);
+        r = set_new(&n->nameservers, g_str_hash, g_str_equal);
         if (r < 0)
                 return r;
 
-        r = set_new(&n->domains, g_direct_hash, g_direct_equal);
+        r = set_new(&n->domains, g_str_hash, g_str_equal);
         if (r < 0)
                 return r;
 
