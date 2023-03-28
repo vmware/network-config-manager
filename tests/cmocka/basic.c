@@ -55,6 +55,31 @@ static void multiple_address(void **state) {
     assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.99/24"));
 }
 
+static void static_address(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    char *dns = NULL;
+    int r;
+
+    apply_yaml_file("static-address.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+    assert_true(g_strrstr(dns, "8.8.8.8"));
+    assert_true(g_strrstr(dns, "192.168.1.1"));
+    assert_true(g_strrstr(dns, "8.8.4.4"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.202/24"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.101"));
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "172.16.0.0/24"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.100"));
+}
+
 static void multiple_routes_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *dns = NULL;
@@ -197,6 +222,7 @@ int main(void) {
         cmocka_unit_test (source_routing),
         cmocka_unit_test (additional_gw_source_routing),
         cmocka_unit_test (wireguard_multiple_peers),
+        cmocka_unit_test (static_address),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

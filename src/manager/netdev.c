@@ -4,6 +4,7 @@
 
 #include "alloc-util.h"
 #include "config-parser.h"
+#include "dbus.h"
 #include "file-util.h"
 #include "log.h"
 #include "macros.h"
@@ -1307,5 +1308,8 @@ int generate_netdev_config(NetDev *n) {
                 return r;
         }
 
-        return set_file_permisssion(key_file->name, "systemd-network");
+        (void) set_file_permisssion(key_file->name, "systemd-network");
+        (void) dbus_network_reload();
+
+        return 0;
 }
