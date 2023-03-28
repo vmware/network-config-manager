@@ -722,8 +722,6 @@ static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                                 r = yaml_parse_wireguard_peer(m, dp, node, wg, &peer);
                                 if (r < 0)
                                         return r;
-
-                                wg->peers = g_list_append(wg->peers, peer);
                         } else
                                 (void) parse_network(m, dp, node, network);
 

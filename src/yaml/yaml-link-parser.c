@@ -84,6 +84,35 @@ static ParserTable parser_link_vtable[] = {
         { NULL,                                        _CONF_TYPE_INVALID,       0,                                  0}
 };
 
+int parse_link(YAMLManager *m, yaml_document_t *dp, yaml_node_t *k, yaml_node_t *v, Network *network) {
+        ParserTable *link_table;
+        void *t;
+        int r;
+
+        assert(m);
+
+        link_table = g_hash_table_lookup(m->link, scalar(k));
+        if (!link_table)
+                return -ENOENT;
+
+        if (!network->link) {
+                NetDevLink *l;
+
+                r = netdev_link_new((NetDevLink **) &network->link);
+                if (r < 0)
+                        return r;
+
+                l = network->link;
+                l->parser_type = PARSER_TYPE_YAML;
+        }
+
+        t = (uint8_t *) network->link + link_table->offset;
+        if (link_table->parser)
+                (void) link_table->parser(scalar(k), scalar(v), link, t, dp, v);
+
+        return 0;
+}
+
 int yaml_register_link(YAMLManager *m) {
         assert(m);
 

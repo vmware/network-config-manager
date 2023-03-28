@@ -7,6 +7,7 @@
 
 #include "yaml-manager.h"
 #include "network.h"
+#include "yaml-link-parser.h"
 
 int yaml_register_network(YAMLManager *p);
 

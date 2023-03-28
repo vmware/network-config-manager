@@ -8,3 +8,4 @@
 #include "yaml-manager.h"
 
 int yaml_register_link(YAMLManager *m);
+int parse_link(YAMLManager *m, yaml_document_t *dp, yaml_node_t *k, yaml_node_t *v, Network *network);

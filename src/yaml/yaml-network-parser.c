@@ -438,31 +438,23 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
                                 r = parse_routing_policy_rule(m->routing_policy_rule, dp, v, network);
                                 if (r < 0)
                                         return r;
-                        } else if (string_equal(scalar(k), "nameservers"))
+                        } else if (string_equal(scalar(k), "nameservers")) {
                                 r = parse_config(m->nameserver, dp, v, network);
-                        else if (v)
+                                if (r < 0)
+                                        return r;
+                        } else if (string_equal(scalar(k), "link")) {
+                                r = parse_link(m, dp, k, v, network);
+                                if (r < 0)
+                                        return r;
+                        } else if (v) {
                                 r = parse_network(m, dp, v, network);
-                        if (r < 0)
-                                return r;
-
-                        /* .link  */
-                        link_table = g_hash_table_lookup(m->link, scalar(k));
-                        if (link_table) {
-                                if (!network->link) {
-                                        NetDevLink *l;
-
-                                        r = netdev_link_new((NetDevLink **) &network->link);
-                                        if (r < 0)
-                                                return r;
-
-                                        l = network->link;
-                                        l->parser_type = PARSER_TYPE_YAML;
-                                }
-
-                                t = (uint8_t *) network->link + link_table->offset;
-                                if (link_table->parser)
-                                        (void) link_table->parser(scalar(k), scalar(v), link, t, dp, v);
+                                if (r < 0)
+                                        return r;
                         }
+                        /* .link  */
+                        r = parse_link(m, dp, k, v, network);
+                        if (r <= 0)
+                                log_debug("Failed find key='%s' in link table", scalar(k));
 
                         continue;
                 }
