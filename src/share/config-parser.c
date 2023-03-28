@@ -91,9 +91,6 @@ int parse_key_file(const char *path, KeyFile **ret) {
                         r = add_key_to_section(section, k, v);
                         if (r < 0)
                                 return r;
-
-                        steal_pointer(k);
-                        steal_pointer(v);
                 }
         }
 
