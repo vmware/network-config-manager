@@ -77,7 +77,7 @@ int split_pair(const char *s, const char *sep, char **l, char **r) {
         if (isempty_string(sep))
                 return -EINVAL;
 
-        x = g_strsplit(s, sep, 0);
+        x = g_strsplit(s, sep, 2);
         if (!x)
                 return -EINVAL;
 

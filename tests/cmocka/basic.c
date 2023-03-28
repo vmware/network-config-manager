@@ -119,6 +119,36 @@ static void source_routing(void **state) {
     assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "1000"));
 }
 
+static void wireguard_multiple_peers(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("wg.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-wg0.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "wg0"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "wireguard"));
+
+    assert_true(key_file_config_exists(key_file, "WireGuard", "PrivateKeyFile", "/path/to/private.key"));
+    assert_true(key_file_config_exists(key_file, "WireGuard", "ListenPort", "5182"));
+    assert_true(key_file_config_exists(key_file, "WireGuard", "FwMark", "42"));
+
+    assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PublicKey", "rlbInAj0qV69CysWPQY7KEBnKxpYCpaWqOs/dLevdWc="));
+    assert_true(key_file_config_exists(key_file, "WireGuardPeer", "Endpoint", "1.2.3.4:5"));
+    assert_true(key_file_config_exists(key_file, "WireGuardPeer", "AllowedIPs", "0.0.0.0/0 2001:fe:ad:de:ad:be:ef:1/24"));
+    assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PersistentKeepalive", "23"));
+
+    assert_true(key_file_config_exists(key_file, "WireGuardPeer", "Endpoint", "5.4.3.2:1"));
+    assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PresharedKey", "/some/shared.key"));
+    assert_true(key_file_config_exists(key_file, "WireGuardPeer", "AllowedIPs", "10.10.10.20/24"));
+    assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PersistentKeepalive", "22"));
+    assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PublicKey", "M9nt4YujIOmNrRmpIRTmYSfMdrpvE7u6WkG8FY8WjG4="));
+}
+
 static void additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -166,6 +196,7 @@ int main(void) {
         cmocka_unit_test (multiple_routes_address),
         cmocka_unit_test (source_routing),
         cmocka_unit_test (additional_gw_source_routing),
+        cmocka_unit_test (wireguard_multiple_peers),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

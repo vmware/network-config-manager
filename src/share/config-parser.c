@@ -124,7 +124,7 @@ static void display_sections(gpointer data_ptr, gpointer ignored) {
 int display_key_file(const KeyFile *k) {
         assert(k);
 
-        printf("File: %s, sections: %ld\n\n", k->name, k->nsections);
+        printf("File: %s, sections: %ld\n", k->name, k->nsections);
 
         g_list_foreach(k->sections, display_sections, NULL);
         return 0;
