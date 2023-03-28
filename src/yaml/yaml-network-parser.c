@@ -137,7 +137,7 @@ static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc,
                 key = yaml_document_get_node(doc, entry->key);
                 value = yaml_document_get_node(doc, entry->value);
 
-                if (string_equal(scalar(key), "ssid-name")) {
+                if (str_equal(scalar(key), "ssid-name")) {
                         wifi_access_point = new0(WiFiAccessPoint, 1);
                         if (!wifi_access_point)
                                 return log_oom();
@@ -259,12 +259,12 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                                 return log_oom();
                 }
 
-                if (string_equal(scalar(k), "lifetime")) {
+                if (str_equal(scalar(k), "lifetime")) {
                         free(a->lifetime);
                         a->lifetime = strdup(scalar(v));
                         if (!a->lifetime)
                                 return log_oom();
-                } else if (string_equal(scalar(k), "label")) {
+                } else if (str_equal(scalar(k), "label")) {
                         free(a->label);
                         a->label = strdup(scalar(v));
                         if (!a->label)
@@ -412,33 +412,33 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
 
                 table = g_hash_table_lookup(m->network, scalar(k));
                 if (!table) {
-                        if (string_equal(scalar(k), "match")) {
+                        if (str_equal(scalar(k), "match")) {
                                 r = parse_config(m->match, dp, v, network);
                                 if (r < 0)
                                         return r;
-                        } else if (string_equal(scalar(k), "dhcp4-overrides")) {
+                        } else if (str_equal(scalar(k), "dhcp4-overrides")) {
                                 r = parse_config(m->dhcp4, dp, v, network);
                                 if (r < 0)
                                         return r;
-                        } else if (string_equal(scalar(k), "dhcp6-overrides")) {
+                        } else if (str_equal(scalar(k), "dhcp6-overrides")) {
                                 r = parse_config(m->dhcp6, dp, v, network);
                                 if (r < 0)
                                         return r;
-                        } else if (string_equal(scalar(k), "addresses")) {
+                        } else if (str_equal(scalar(k), "addresses")) {
                                 IPAddress *a = NULL;
 
                                 r = parse_address(m, dp, v, network, &a);
                                 if (r < 0)
                                         return r;
-                        } else if (string_equal(scalar(k), "routes")) {
+                        } else if (str_equal(scalar(k), "routes")) {
                                 r = parse_route(m->route, dp, v, network);
                                 if (r < 0)
                                         return r;
-                        } else if (string_equal(scalar(k), "routing-policy")) {
+                        } else if (str_equal(scalar(k), "routing-policy")) {
                                 r = parse_routing_policy_rule(m->routing_policy_rule, dp, v, network);
                                 if (r < 0)
                                         return r;
-                        } else if (string_equal(scalar(k), "nameservers")) {
+                        } else if (str_equal(scalar(k), "nameservers")) {
                                 r = parse_config(m->nameserver, dp, v, network);
                                 if (r < 0)
                                         return r;

@@ -132,7 +132,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
         bool have_vf = false, link = false;
         int r;
 
-        if (string_equal(argv[0], "add-link-sr-iov") || string_equal(argv[0], "lsriov"))
+        if (str_equal(argv[0], "add-link-sr-iov") || str_equal(argv[0], "lsriov"))
                 link = true;
 
         r = sriov_new(&s);
@@ -142,7 +142,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
         for (int i = 1; i < argc; i++) {
                 unsigned v;
 
-                if (string_equal_fold(argv[i], "dev")) {
+                if (str_equal_fold(argv[i], "dev")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -152,7 +152,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                         }
                         continue;
 
-                } else if (string_equal_fold(argv[i], "vf")) {
+                } else if (str_equal_fold(argv[i], "vf")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v);
@@ -167,7 +167,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         have_vf = true;
                         continue;
-                } else if (string_equal_fold(argv[i], "vlanid")) {
+                } else if (str_equal_fold(argv[i], "vlanid")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v);
@@ -181,7 +181,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal_fold(argv[i], "qos")) {
+                } else if (str_equal_fold(argv[i], "qos")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v);
@@ -195,7 +195,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal_fold(argv[i], "vlanproto")) {
+                } else if (str_equal_fold(argv[i], "vlanproto")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_sriov_vlanprotocol(argv[i]);
@@ -209,7 +209,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal_fold(argv[i], "macspoofck")) {
+                } else if (str_equal_fold(argv[i], "macspoofck")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -220,7 +220,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         s->macspoofck = r;
                         continue;
-                } else if (string_equal_fold(argv[i], "qrss")) {
+                } else if (str_equal_fold(argv[i], "qrss")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -231,7 +231,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         s->qrss = r;
                         continue;
-                } else  if (string_equal_fold(argv[i], "trust")) {
+                } else  if (str_equal_fold(argv[i], "trust")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -242,10 +242,10 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         s->trust = r;
                         continue;
-                } else if (string_equal_fold(argv[i], "linkstate")) {
+                } else if (str_equal_fold(argv[i], "linkstate")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (!string_equal_fold(argv[i], "auto")) {
+                        if (!str_equal_fold(argv[i], "auto")) {
                                 r = parse_boolean(argv[i]);
                                 if (r < 0) {
                                         log_warning("Failed to parse sriov linkstate '%s': %s", argv[i], strerror(-r));
@@ -258,7 +258,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal_fold(argv[i], "macaddr")) {
+                } else if (str_equal_fold(argv[i], "macaddr")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_ether_address(argv[i])) {

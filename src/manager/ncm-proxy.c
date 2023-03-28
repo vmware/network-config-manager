@@ -22,7 +22,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
         int r, enable = -1;
 
         for (int i = 1; i < argc; i++) {
-                if (string_equal(argv[i], "enable")) {
+                if (str_equal(argv[i], "enable")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -33,10 +33,10 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
 
                         enable = r;
                         continue;
-                } else if (string_equal(argv[i], "http") || string_equal(argv[i], "none")) {
+                } else if (str_equal(argv[i], "http") || str_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (string_equal(argv[i], "none"))
+                        if (str_equal(argv[i], "none"))
                                 http = strdup("");
                         else
                                 http = strdup(argv[i]);
@@ -44,10 +44,10 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal(argv[i], "https") || string_equal(argv[i], "none")) {
+                } else if (str_equal(argv[i], "https") || str_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (string_equal(argv[i], "none"))
+                        if (str_equal(argv[i], "none"))
                                 https = strdup("");
                         else
                                 https = strdup(argv[i]);
@@ -55,10 +55,10 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal(argv[i], "ftp") || string_equal(argv[i], "none")) {
+                } else if (str_equal(argv[i], "ftp") || str_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (string_equal(argv[i], "none"))
+                        if (str_equal(argv[i], "none"))
                                 ftp = strdup("");
                         else
                                 ftp = strdup(argv[i]);
@@ -66,10 +66,10 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal(argv[i], "gopher") || string_equal(argv[i], "none")) {
+                } else if (str_equal(argv[i], "gopher") || str_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (string_equal(argv[i], "none"))
+                        if (str_equal(argv[i], "none"))
                                 gopher = strdup("");
                         else
                                 gopher = strdup(argv[i]);
@@ -77,10 +77,10 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal(argv[i], "socks") || string_equal(argv[i], "none")) {
+                } else if (str_equal(argv[i], "socks") || str_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (string_equal(argv[i], "none"))
+                        if (str_equal(argv[i], "none"))
                                 socks = strdup("");
                         else
                                 socks = strdup(argv[i]);
@@ -88,10 +88,10 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal(argv[i], "socks5") || string_equal(argv[i], "none")) {
+                } else if (str_equal(argv[i], "socks5") || str_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (string_equal(argv[i], "none"))
+                        if (str_equal(argv[i], "none"))
                                 socks5 = strdup("");
                         else
                                 socks5 = strdup(argv[i]);
@@ -99,10 +99,10 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (string_equal(argv[i], "noproxy") || string_equal(argv[i], "none")) {
+                } else if (str_equal(argv[i], "noproxy") || str_equal(argv[i], "none")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (string_equal(argv[i], "none"))
+                        if (str_equal(argv[i], "none"))
                                 no_proxy = strdup("");
                         else
                                 no_proxy = strdup(argv[i]);
