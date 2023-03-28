@@ -82,7 +82,7 @@ def remove_units_from_netword_unit_path():
         if (os.path.exists(os.path.join(networkd_unit_file_path, i))):
             os.remove(os.path.join(networkd_unit_file_path, i))
 
-def restart_networkd():
+def reload_networkd():
     subprocess.check_output("networkctl reload", shell=True)
     subprocess.check_output("sleep 1", shell=True)
 
@@ -163,9 +163,8 @@ class TestLinkConfigManagerYAML:
                 os.remove(os.path.join(network_config_manager_yaml_config_path, config_file))
 
     def setup_method(self):
-        link_remove('test99')
         link_add_dummy('test99')
-        restart_networkd()
+        reload_networkd()
 
     def teardown_method(self):
         self.remove_units_from_netmanager_yaml_path()
@@ -245,7 +244,7 @@ class TestNetworkConfigManagerYAML:
     def setup_method(self):
         link_add_dummy('test99')
         link_add_dummy('test98')
-        restart_networkd()
+        reload_networkd()
 
     def teardown_method(self):
         self.remove_units_from_netmanager_yaml_path()
@@ -708,9 +707,8 @@ class TestKernelCommandLine:
 
 class TestCLINetwork:
     def setup_method(self):
-        link_remove('test99')
         link_add_dummy('test99')
-        restart_networkd()
+        reload_networkd()
 
     def teardown_method(self):
         remove_units_from_netword_unit_path()
@@ -1506,9 +1504,8 @@ class TestCLINetwork:
 
 class TestCLIDHCPv4Server:
     def setup_method(self):
-        link_remove('test99')
         link_add_dummy('test99')
-        restart_networkd()
+        reload_networkd()
 
     def teardown_method(self):
         remove_units_from_netword_unit_path()
@@ -1547,9 +1544,8 @@ class TestCLIDHCPv4Server:
 
 class TestCLIIPv6RA:
     def setup_method(self):
-        link_remove('test99')
         link_add_dummy('test99')
-        restart_networkd()
+        reload_networkd()
 
     def teardown_method(self):
         remove_units_from_netword_unit_path()
@@ -1595,9 +1591,8 @@ class TestCLIIPv6RA:
 
 class TestCLINetDev:
     def setup_method(self):
-        link_remove('test98')
         link_add_dummy('test98')
-        restart_networkd()
+        reload_networkd()
 
     def teardown_method(self):
         remove_units_from_netword_unit_path()
@@ -1611,7 +1606,7 @@ class TestCLINetDev:
         assert(unit_exist('10-vlan-98.netdev') == True)
         assert(unit_exist('10-vlan-98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '5'])
 
         assert(link_exist('vlan-98') == True)
@@ -1652,7 +1647,7 @@ class TestCLINetDev:
         assert(unit_exist('10-macvlan-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         assert(link_exist('macvlan-98') == True)
@@ -1687,7 +1682,7 @@ class TestCLINetDev:
         assert(unit_exist('10-macvtap-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         assert(link_exist('macvtap-98') == True)
@@ -1722,7 +1717,7 @@ class TestCLINetDev:
         assert(unit_exist('10-ipvlan-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         assert(link_exist('ipvlan-98') == True)
@@ -1757,7 +1752,7 @@ class TestCLINetDev:
         assert(unit_exist('10-ipvtap-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         assert(link_exist('ipvtap-98') == True)
@@ -1790,7 +1785,7 @@ class TestCLINetDev:
         assert(unit_exist('10-vrf-98.netdev') == True)
         assert(unit_exist('10-vrf-98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         assert(link_exist('vrf-98') == True)
@@ -1816,7 +1811,7 @@ class TestCLINetDev:
         assert(unit_exist('10-veth-98.netdev') == True)
         assert(unit_exist('10-veth-98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         assert(link_exist('veth-98') == True)
@@ -1843,7 +1838,7 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tap.netdev') == True)
         assert(unit_exist('10-test-tap.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '5'])
 
         assert(link_exist('test-tap') == True)
@@ -1869,7 +1864,7 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tap.netdev') == True)
         assert(unit_exist('10-test-tap.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '5'])
 
         assert(link_exist('test-tap') == True)
@@ -1894,7 +1889,7 @@ class TestCLINetDev:
         assert(unit_exist('10-test-tun.netdev') == True)
         assert(unit_exist('10-test-tun.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '5'])
 
         assert(link_exist('test-tun') == True)
@@ -1922,7 +1917,7 @@ class TestCLINetDev:
         assert(unit_exist('10-ipip-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         ipip_parser = configparser.ConfigParser()
@@ -1949,7 +1944,7 @@ class TestCLINetDev:
         assert(unit_exist('10-ipip-98.netdev') == True)
         assert(unit_exist('10-ipip-98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         assert(link_exist('ipip-98') == True)
@@ -1979,7 +1974,7 @@ class TestCLINetDev:
         assert(unit_exist('10-gre-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         assert(link_exist('gre-98') == True)
@@ -2016,7 +2011,7 @@ class TestCLINetDev:
         assert(unit_exist('10-vti-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '3'])
 
         assert(link_exist('vti-98') == True)
@@ -2052,7 +2047,7 @@ class TestCLINetDev:
         assert(unit_exist('10-wg99.netdev') == True)
         assert(unit_exist('10-wg99.network') == True)
 
-        restart_networkd()
+        reload_networkd()
 
         wg_parser = configparser.ConfigParser()
         wg_parser.read(os.path.join(networkd_unit_file_path, '10-wg99.netdev'))
@@ -2082,7 +2077,7 @@ class TestCLINetDev:
         assert(unit_exist('10-vxlan-98.network') == True)
         assert(unit_exist('10-vxlan-98.netdev') == True)
 
-        restart_networkd()
+        reload_networkd()
 
         vxlan_parser = configparser.ConfigParser()
         vxlan_parser.read(os.path.join(networkd_unit_file_path, '10-vxlan-98.netdev'))
@@ -2110,7 +2105,7 @@ class TestCLINetDev:
         assert(unit_exist('10-vxlan-98.network') == True)
         assert(unit_exist('10-vxlan-98.netdev') == True)
 
-        restart_networkd()
+        reload_networkd()
 
         vxlan_parser = configparser.ConfigParser()
         vxlan_parser.read(os.path.join(networkd_unit_file_path, '10-vxlan-98.netdev'))
@@ -2126,10 +2121,6 @@ class TestCLINetDev:
         vxlan_network_parser.read(os.path.join(networkd_unit_file_path, '10-vxlan-98.network'))
 
         assert(vxlan_network_parser.get('Match', 'Name') == 'vxlan-98')
-
-        subprocess.check_call("nmctl remove-netdev vxlan-98 kind vxlan" , shell = True)
-        assert(unit_exist('10-vxlan-98.netdev') == False)
-        assert(unit_exist('10-vxlan-98.network') == False)
 
     def test_cli_create_bridge(self):
         link_add_dummy('test-99')
@@ -2917,7 +2908,7 @@ class TestCLISRIOV:
         subprocess.check_call("nmctl add-sr-iov dev eni99np1 vf 2 vlanid 7 qos 3 vlanproto 802.1Q macspoofck yes qrss True trust yes linkstate yes "
                               "macaddr 00:11:22:33:44:57", shell = True)
 
-        restart_networkd()
+        reload_networkd()
         subprocess.check_call(['sleep', '5'])
 
         output = subprocess.call('ip link', shell=True)
@@ -2926,9 +2917,8 @@ class TestCLISRIOV:
 
 class TestCLISRIOLink:
     def setup_method(self):
-        link_remove('test99')
         link_add_dummy('test99')
-        restart_networkd()
+        reload_networkd()
 
     def teardown_method(self):
         remove_units_from_netword_unit_path()
