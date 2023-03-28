@@ -279,6 +279,58 @@ static void additional_gw_source_routing(void **state) {
     assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "100"));
 }
 
+static void netdev_vlan(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    char *domains = NULL;
+    char *dns = NULL;
+    int r;
+
+    apply_yaml_file("vlan.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+    assert_true(g_strrstr(dns, "8.8.8.8"));
+    assert_true(g_strrstr(dns, "8.8.4.4"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "Domains", "example.com"));
+    assert_true(key_file_config_exists(key_file, "Network", "VLAN", "vlan-98"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.0.5/23"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "10.3.0.1"));
+
+    r = parse_key_file("/etc/systemd/network/10-vlan-98.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "vlan-98"));
+
+    assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+    assert_true(g_strrstr(dns, "127.0.0.1"));
+
+    assert_true(domains=key_file_config_get(key_file, "Network", "Domains"));
+    assert_true(g_strrstr(domains, "domain1.example.com"));
+    assert_true(g_strrstr(domains, "domain2.example.com"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.98.5/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.98.5/24"));
+
+    r = parse_key_file("/etc/systemd/network/10-vlan-98.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vlan-98"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vlan"));
+    assert_true(key_file_config_exists(key_file, "VLAN", "Id", "10"));
+
+    assert_true(system("nmctl remove-netdev vlan-98") >= 0);
+}
 
 static int setup(void **state) {
     system("/usr/sbin/ip link add dev test99 type dummy");
@@ -301,6 +353,7 @@ int main(void) {
         cmocka_unit_test (wireguard_multiple_peers),
         cmocka_unit_test (static_address),
         cmocka_unit_test (netdev_vlans),
+        cmocka_unit_test (netdev_vlan),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

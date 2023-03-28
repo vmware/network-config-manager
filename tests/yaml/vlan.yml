@@ -11,7 +11,7 @@ network:
               - to: default
                 via: 10.3.0.1
   vlans:
-      vlan10:
+      vlan-98:
           id: 10
           link: test99
           addresses: [ "10.3.98.5/24" ]

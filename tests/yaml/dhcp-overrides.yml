@@ -1,7 +1,7 @@
 network:
   version: 2
   ethernets:
-    dummy95:
+    test98:
       dhcp4: yes
       dhcp4-overrides:
         route-metric: 100
