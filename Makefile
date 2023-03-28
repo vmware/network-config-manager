@@ -3,10 +3,10 @@ all: build
 .PHONY: all
 
 build:
-	meson setup -Dtests=true build
+	meson setup --prefix=/usr -Dtests=true build
 
 clang:
-	CC=clang meson setup --prefix=/usr build-clang; ninja -C build-clang
+	CC=clang meson setup --prefix=/usr -Dtests=true build-clang; ninja -C build-clang
 
 clean:
 	rm -rf build/ build-clang/
