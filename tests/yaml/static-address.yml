@@ -1,0 +1,14 @@
+
+network:
+    ethernets:
+        test99:
+            dhcp4: false
+            addresses: [192.168.1.202/24]
+            nameservers:
+              addresses: [8.8.8.8,8.8.4.4,192.168.1.1]
+            routes:
+            - to: 172.16.0.0/24
+              via: 192.168.1.100
+            - to: 172.16.0.0/24
+              via: 192.168.1.101
+    version: 2
