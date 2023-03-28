@@ -41,6 +41,28 @@ int set_file_permisssion(const char *path, const char *user) {
         return 0;
 }
 
+int determine_conf_file(const char *path, const char *ifname, const char *extension, char **ret) {
+        _auto_cleanup_ char *p = NULL, *f = NULL;
+        _auto_cleanup_close_ int fd = -1;
+        int r;
+
+        assert(path);
+        assert(ifname);
+        assert(extension);
+
+        f = string_join(".", ifname, extension, NULL);
+        if (!f)
+                return -ENOMEM;
+
+        p = g_build_path("/", path, f, NULL);
+        if (!p)
+                return -ENOMEM;
+
+
+        *ret = steal_pointer(p);
+        return 0;
+}
+
 int create_conf_file(const char *path, const char *ifname, const char *extension, char **ret) {
         _auto_cleanup_ char *p = NULL, *f = NULL;
         _auto_cleanup_close_ int fd = -1;

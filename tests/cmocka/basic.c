@@ -174,6 +174,83 @@ static void wireguard_multiple_peers(void **state) {
     assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PublicKey", "M9nt4YujIOmNrRmpIRTmYSfMdrpvE7u6WkG8FY8WjG4="));
 }
 
+static void netdev_vlans(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    char *dns = NULL, *d = NULL;
+    int r;
+
+    apply_yaml_file("vlans.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+    assert_true(key_file_config_exists(key_file, "Match", "MACAddress", "de:ad:be:ef:ca:fe"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "Domains", "example.com"));
+    assert_true(key_file_config_exists(key_file, "Network", "VLAN", "vlan15"));
+    assert_true(key_file_config_exists(key_file, "Network", "VLAN", "vlan10"));
+
+    assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+    assert_true(g_strrstr(dns, "8.8.4.4"));
+    assert_true(g_strrstr(dns, "8.8.8.8"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.0.5/23"));
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "10.3.0.1"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vlan15.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vlan15"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vlan"));
+    assert_true(key_file_config_exists(key_file, "VLAN", "Id", "15"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vlan10.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vlan10"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vlan"));
+    assert_true(key_file_config_exists(key_file, "VLAN", "Id", "10"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vlan15.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "vlan15"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.99.5/24"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vlan10.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "vlan10"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.98.5/24"));
+
+    assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+    assert_true(g_strrstr(dns, "127.0.0.1"));
+
+    assert_true(d=key_file_config_get(key_file, "Network", "Domains"));
+    assert_true(g_strrstr(d, "domain2.example.com"));
+    assert_true(g_strrstr(d, "domain1.example.com"));
+}
+
 static void additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -223,6 +300,7 @@ int main(void) {
         cmocka_unit_test (additional_gw_source_routing),
         cmocka_unit_test (wireguard_multiple_peers),
         cmocka_unit_test (static_address),
+        cmocka_unit_test (netdev_vlans),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

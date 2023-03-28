@@ -485,11 +485,31 @@ int create_network_conf_file(const char *ifname, char **ret) {
         return dbus_network_reload();
 }
 
+int determine_network_conf_file(const char *ifname, char **ret) {
+        _auto_cleanup_ char *file = NULL, *network = NULL;
+        int r;
+
+        assert(ifname);
+
+        file = string_join("-", "10", ifname, NULL);
+        if (!file)
+                return log_oom();
+
+        r = determine_conf_file("/etc/systemd/network", file, "network", &network);
+        if (r < 0)
+                return r;
+
+        *ret = steal_pointer(network);
+        return 0;
+}
+
 int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
         _auto_cleanup_ char *setup = NULL, *network = NULL;
         int r;
 
         assert(ifidx);
+
+        (void) dbus_network_reload();
 
         r = network_parse_link_setup_state(ifidx->ifindex, &setup);
         if (r < 0) {
@@ -509,6 +529,31 @@ int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
                 r = create_network_conf_file(ifidx->ifname, &network);
                 if (r < 0)
                         return r;
+        }
+
+        *ret = steal_pointer(network);
+        return 0;
+}
+
+int parse_network_file(const IfNameIndex *ifidx, char **ret) {
+        _auto_cleanup_ char *setup = NULL, *network = NULL;
+        int r;
+
+        assert(ifidx);
+
+        (void) dbus_network_reload();
+
+        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        if (r < 0) {
+                r = determine_network_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
+
+                if (!g_file_test(network, G_FILE_TEST_EXISTS)) {
+                        r = create_network_conf_file(ifidx->ifname, &network);
+                        if (r < 0)
+                                return r;
+                }
         }
 
         *ret = steal_pointer(network);
@@ -1335,7 +1380,7 @@ int generate_master_device_network(Network *n) {
                                 return r;
                         }
 
-                        r = create_or_parse_network_file(p, &network);
+                        r = parse_network_file(p, &network);
                         if (r < 0)
                                 return r;
 
