@@ -1,0 +1,26 @@
+network:
+  version: 2
+  ethernets:
+    test99: 
+    dhcp4: true
+  vrfs:
+    vrf1005:
+      table: 1005
+      interfaces:
+        - test99
+        - test98
+      routes:
+      - to: default
+        via: 1.2.3.4
+      routing-policy:
+      - from: 2.3.4.5
+    vrf1006:
+      table: 1006
+      interfaces:
+        - test99
+        - test98
+      routes:
+      - to: default
+        via: 2.3.4.5
+      routing-policy:
+      - from: 3.4.5.6

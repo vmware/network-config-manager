@@ -256,6 +256,89 @@ static void netdev_vlans(void **state) {
     system("nmctl remove-netdev vlan15 kind vlan");
 }
 
+static void netdev_vrfs(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    char *dns = NULL, *d = NULL;
+    int r;
+
+    apply_yaml_file("vrfs.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "VRF", "vrf1005"));
+    assert_true(key_file_config_exists(key_file, "Network", "VRF", "vrf1006"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-test98.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test98"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "VRF", "vrf1005"));
+    assert_true(key_file_config_exists(key_file, "Network", "VRF", "vrf1006"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vrf1005.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vrf1005"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vrf"));
+    assert_true(key_file_config_exists(key_file, "VRF", "Table", "1005"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vrf1006.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vrf1006"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vrf"));
+    assert_true(key_file_config_exists(key_file, "VRF", "Table", "1006"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vrf1005.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "vrf1005"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "1.2.3.4"));
+
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "From", "2.3.4.5"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vrf1006.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "vrf1006"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "2.3.4.5"));
+
+    assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "From", "3.4.5.6"));
+
+    system("nmctl remove-netdev vrf1005 kind vrf");
+    system("nmctl remove-netdev vrf1006 kind vrf");
+}
+
 static void additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -334,7 +417,7 @@ static void netdev_vlan(void **state) {
     assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vlan"));
     assert_true(key_file_config_exists(key_file, "VLAN", "Id", "10"));
 
-    assert_true(system("nmctl remove-netdev vlan-98") >= 0);
+    system("nmctl remove-netdev vlan-98 kind vlan");
 }
 
 static int setup(void **state) {
@@ -359,6 +442,7 @@ int main(void) {
         cmocka_unit_test (static_address),
         cmocka_unit_test (netdev_vlans),
         cmocka_unit_test (netdev_vlan),
+        cmocka_unit_test (netdev_vrfs),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
