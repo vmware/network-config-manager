@@ -58,7 +58,7 @@ static int apply_yaml_file(const char *y) {
     return 0;
 }
 
-static void multiple_address(void **state) {
+static void test_multiple_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *dns = NULL;
     int r;
@@ -79,7 +79,7 @@ static void multiple_address(void **state) {
     assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.99/24"));
 }
 
-static void static_address(void **state) {
+static void test_static_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *dns = NULL;
     int r;
@@ -104,7 +104,7 @@ static void static_address(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.100"));
 }
 
-static void multiple_routes_address(void **state) {
+static void test_multiple_routes_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *dns = NULL;
     int r;
@@ -134,7 +134,7 @@ static void multiple_routes_address(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "RouteMetric", "300"));
 }
 
-static void source_routing(void **state) {
+static void test_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
@@ -168,7 +168,7 @@ static void source_routing(void **state) {
     assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "1000"));
 }
 
-static void wireguard_multiple_peers(void **state) {
+static void test_wireguard_multiple_peers(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
@@ -200,7 +200,7 @@ static void wireguard_multiple_peers(void **state) {
     system("nmctl remove-netdev wg0");
 }
 
-static void netdev_vlans(void **state) {
+static void test_test_netdev_vlans(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *dns = NULL, *d = NULL;
     int r;
@@ -280,7 +280,7 @@ static void netdev_vlans(void **state) {
     system("nmctl remove-netdev vlan15 kind vlan");
 }
 
-static void netdev_vrfs(void **state) {
+static void test_netdev_vrfs(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
@@ -362,7 +362,7 @@ static void netdev_vrfs(void **state) {
     system("nmctl remove-netdev vrf1006 kind vrf");
 }
 
-static void netdev_vxlans(void **state) {
+static void test_netdev_vxlans(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
@@ -460,7 +460,7 @@ static void netdev_vxlans(void **state) {
     system("nmctl remove-netdev vxlan2 kind vxlan");
 }
 
-static void additional_gw_source_routing(void **state) {
+static void test_additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
@@ -488,7 +488,7 @@ static void additional_gw_source_routing(void **state) {
     assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "100"));
 }
 
-static void netdev_vlan(void **state) {
+static void test_netdev_vlan(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *domains = NULL;
     char *dns = NULL;
@@ -543,7 +543,7 @@ static void netdev_vlan(void **state) {
     system("nmctl remove-netdev vlan-98 kind vlan");
 }
 
-static void netdev_bond_parametres(void **state) {
+static void test_netdev_bond_parametres(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
@@ -599,17 +599,17 @@ static int teardown (void **state) {
 
 int main(void) {
     const struct CMUnitTest tests [] = {
-        cmocka_unit_test (multiple_address),
-        cmocka_unit_test (multiple_routes_address),
-        cmocka_unit_test (source_routing),
-        cmocka_unit_test (additional_gw_source_routing),
-        cmocka_unit_test (wireguard_multiple_peers),
-        cmocka_unit_test (static_address),
-        cmocka_unit_test (netdev_vlans),
-        cmocka_unit_test (netdev_vlan),
-        cmocka_unit_test (netdev_vrfs),
-        cmocka_unit_test (netdev_bond_parametres),
-        cmocka_unit_test (netdev_vxlans),
+        cmocka_unit_test (test_multiple_address),
+        cmocka_unit_test (test_multiple_routes_address),
+        cmocka_unit_test (test_source_routing),
+        cmocka_unit_test (test_additional_gw_source_routing),
+        cmocka_unit_test (test_wireguard_multiple_peers),
+        cmocka_unit_test (test_static_address),
+        cmocka_unit_test (test_test_netdev_vlans),
+        cmocka_unit_test (test_netdev_vlan),
+        cmocka_unit_test (test_netdev_vrfs),
+        cmocka_unit_test (test_netdev_bond_parametres),
+        cmocka_unit_test (test_netdev_vxlans),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
