@@ -755,7 +755,14 @@ int generate_netdev_config(NetDev *n) {
                                         return r;
                         }
 
+                        if (n->bridge->priority != UINT16_MAX) {
+                                r = key_file_set_uint(key_file, "Bridge", "Priority", n->bridge->priority);
+                                if (r < 0)
+                                        return r;
+                        }
+
                         break;
+
                 case NETDEV_KIND_VLAN:
                         r = key_file_set_uint(key_file, "VLAN", "Id", n->vlan->id);
                         if (r < 0)

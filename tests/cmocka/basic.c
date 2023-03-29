@@ -192,7 +192,6 @@ static void test_wireguard_multiple_peers(void **state) {
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "NetDev", "Name", "wg0"));
     assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "wireguard"));
 
@@ -225,7 +224,6 @@ static void test_test_netdev_vlans(void **state) {
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
     assert_true(key_file_config_exists(key_file, "Match", "MACAddress", "de:ad:be:ef:ca:fe"));
 
@@ -242,44 +240,36 @@ static void test_test_netdev_vlans(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "10.3.0.1"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vlan15.netdev", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vlan15"));
     assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vlan"));
     assert_true(key_file_config_exists(key_file, "VLAN", "Id", "15"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vlan10.netdev", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vlan10"));
     assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vlan"));
     assert_true(key_file_config_exists(key_file, "VLAN", "Id", "10"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vlan15.network", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "vlan15"));
     assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.99.5/24"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vlan10.network", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "vlan10"));
     assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.98.5/24"));
 
@@ -304,53 +294,44 @@ static void test_netdev_vrfs(void **state) {
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
 
     assert_true(key_file_config_exists(key_file, "Network", "VRF", "vrf1005"));
     assert_true(key_file_config_exists(key_file, "Network", "VRF", "vrf1006"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-test98.network", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "test98"));
 
     assert_true(key_file_config_exists(key_file, "Network", "VRF", "vrf1005"));
     assert_true(key_file_config_exists(key_file, "Network", "VRF", "vrf1006"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vrf1005.netdev", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vrf1005"));
     assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vrf"));
     assert_true(key_file_config_exists(key_file, "VRF", "Table", "1005"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vrf1006.netdev", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vrf1006"));
     assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vrf"));
     assert_true(key_file_config_exists(key_file, "VRF", "Table", "1006"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vrf1005.network", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "vrf1005"));
 
     assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
@@ -359,12 +340,10 @@ static void test_netdev_vrfs(void **state) {
     assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "From", "2.3.4.5"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vrf1006.network", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "vrf1006"));
 
     assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
@@ -386,19 +365,16 @@ static void test_netdev_vxlans(void **state) {
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
 
     assert_true(key_file_config_exists(key_file, "Network", "VXLAN", "vxlan1"));
     assert_true(key_file_config_exists(key_file, "Network", "VXLAN", "vxlan2"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vxlan1.netdev", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vxlan1"));
     assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vxlan"));
 
@@ -425,12 +401,10 @@ static void test_netdev_vxlans(void **state) {
     assert_true(key_file_config_exists(key_file, "VXLAN", "PortRange", "42-442"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vxlan2.netdev", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vxlan2"));
     assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vxlan"));
 
@@ -453,21 +427,17 @@ static void test_netdev_vxlans(void **state) {
     assert_true(key_file_config_exists(key_file, "VXLAN", "PortRange", "43-444"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vxlan1.network", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "vxlan1"));
 
     key_file_free(key_file);
-
     r = parse_key_file("/etc/systemd/network/10-vxlan2.network", &key_file);
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "vxlan2"));
 
     system("nmctl remove-netdev vxlan1 kind vxlan");
@@ -624,7 +594,6 @@ static void test_netdev_bond(void **state) {
     assert_true(r >= 0);
 
     display_key_file(key_file);
-
     assert_true(key_file_config_exists(key_file, "Match", "Name", "bond0"));
 
     assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
@@ -635,6 +604,71 @@ static void test_netdev_bond(void **state) {
 
     reload_networkd("bond0");
     system("nmctl remove-netdev bond0 kind bond");
+}
+
+static void test_netdev_bridges(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("bridges.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "Bridge", "br0"));
+    assert_true(key_file_config_exists(key_file, "Network", "Bridge", "br1"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-br0.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "br0"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "bridge"));
+
+    assert_true(key_file_config_exists(key_file, "Bridge", "STP", "yes"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "ForwardDelaySec", "12"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "HelloTimeSec", "6"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "AgeingTimeSec", "50"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "MaxAgeSec", "24"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "Priority", "1000"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-br1.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "br1"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "bridge"));
+
+    assert_true(key_file_config_exists(key_file, "Bridge", "STP", "yes"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "ForwardDelaySec", "13"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "HelloTimeSec", "7"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "AgeingTimeSec", "60"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "MaxAgeSec", "25"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "Priority", "2000"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-br0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "br0"));
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-br1.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "br1"));
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+
+    system("nmctl remove-netdev br0 kind bridge");
+    system("nmctl remove-netdev br1 kind bridge");
 }
 
 static int setup(void **state) {
@@ -661,6 +695,7 @@ int main(void) {
         cmocka_unit_test (test_netdev_bond_parametres),
         cmocka_unit_test (test_netdev_vxlans),
         cmocka_unit_test (test_netdev_bond),
+        cmocka_unit_test (test_netdev_bridges),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
