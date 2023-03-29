@@ -1,0 +1,29 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+      test99:
+          dhcp4: no
+  bridges:
+      br0:
+          dhcp4: yes
+          interfaces:
+              - test99
+          parameters:
+              ageing-time: 50
+              forward-delay: 12
+              hello-time: 6
+              max-age: 24
+              priority: 1000
+              stp: true
+      br1:
+          dhcp4: yes
+          interfaces:
+              - test99
+          parameters:
+              ageing-time: 60
+              forward-delay: 13
+              hello-time: 7
+              max-age: 25
+              priority: 2000
+              stp: true
