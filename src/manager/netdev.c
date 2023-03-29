@@ -338,7 +338,7 @@ static int create_or_parse_netdev_conf_file(const char *ifname, KeyFile **ret) {
 
         assert(ifname);
 
-        file = string_join("-", "10", ifname, NULL);
+        file = strjoin("-", "10", ifname, NULL);
         if (!file)
                 return log_oom();
 

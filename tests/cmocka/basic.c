@@ -19,7 +19,7 @@
 static int link_add(const char *s) {
     _auto_cleanup_ char *c = NULL;
 
-    c = string_join(" ", "/usr/sbin/ip", "link", "add", "dev", s, "type", "dummy", NULL);
+    c = strjoin(" ", "/usr/sbin/ip", "link", "add", "dev", s, "type", "dummy", NULL);
     if (!c)
         return -ENOMEM;
 
@@ -31,7 +31,7 @@ static int link_add(const char *s) {
 static int link_remove (const char *s) {
     _auto_cleanup_ char *c = NULL, *yaml_file = NULL;
 
-    c = string_join(" ", "/usr/sbin/ip", "link", "del", s, NULL);
+    c = strjoin(" ", "/usr/sbin/ip", "link", "del", s, NULL);
     if (!c)
         return -ENOMEM;
 
@@ -45,11 +45,11 @@ static int apply_yaml_file(const char *y) {
 
     assert(y);
 
-    yaml_file = string_join("", "/run/network-config-manager-ci/yaml/", y, NULL);
+    yaml_file = strjoin("", "/run/network-config-manager-ci/yaml/", y, NULL);
     if (!yaml_file)
         return -ENOMEM;
 
-    c = string_join(" ", "/usr/bin/nmctl", "apply-file", yaml_file, NULL);
+    c = strjoin(" ", "/usr/bin/nmctl", "apply-file", yaml_file, NULL);
     if (!c)
         return -ENOMEM;
 

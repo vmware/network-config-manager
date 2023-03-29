@@ -186,11 +186,11 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
 
         assert(ifname);
 
-        s = string_join("-", "10", ifname, NULL);
+        s = strjoin("-", "10", ifname, NULL);
         if (!s)
                 return -ENOMEM;
 
-        file = string_join(".", s, "link", NULL);
+        file = strjoin(".", s, "link", NULL);
         if (!file)
                 return -ENOMEM;
 

@@ -1349,7 +1349,7 @@ int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool syste
 
                 r = ip_to_string(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
-                        a = string_join(" ", pretty, a, NULL);
+                        a = strjoin(" ", pretty, a, NULL);
                         if (!a)
                                 return log_oom();
                 }
@@ -1396,7 +1396,7 @@ int manager_add_dns_server_domain(const IfNameIndex *ifidx, char **domains, bool
         }
 
         strv_foreach(d, domains) {
-                a = string_join(" ", *d, a, NULL);
+                a = strjoin(" ", *d, a, NULL);
                 if (!a)
                         return log_oom();
         }
@@ -1534,7 +1534,7 @@ int manager_add_ntp_addresses(const IfNameIndex *ifidx, char **ntps, bool add) {
                 return r;
 
         strv_foreach(d, ntps) {
-                a = string_join(" ", *d, a, NULL);
+                a = strjoin(" ", *d, a, NULL);
                 if (!a)
                         return log_oom();
         }
@@ -1662,7 +1662,7 @@ int manager_write_network_config(const Network *n, const GString *config) {
         assert(n);
         assert(config);
 
-        config_file = string_join("-", "10", n->ifname, NULL);
+        config_file = strjoin("-", "10", n->ifname, NULL);
         if (!config_file)
                 return log_oom();
 
@@ -1700,7 +1700,7 @@ int manager_show_link_network_config(const IfNameIndex *ifidx, char **ret) {
         if (r < 0)
                 return r;
 
-        c = string_join("\n\n", network, config, NULL);
+        c = strjoin("\n\n", network, config, NULL);
         if (!c)
                 return log_oom();
 

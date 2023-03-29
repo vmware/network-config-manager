@@ -49,7 +49,7 @@ int determine_conf_file(const char *path, const char *ifname, const char *extens
         assert(ifname);
         assert(extension);
 
-        f = string_join(".", ifname, extension, NULL);
+        f = strjoin(".", ifname, extension, NULL);
         if (!f)
                 return -ENOMEM;
 
@@ -71,7 +71,7 @@ int create_conf_file(const char *path, const char *ifname, const char *extension
         assert(ifname);
         assert(extension);
 
-        f = string_join(".", ifname, extension, NULL);
+        f = strjoin(".", ifname, extension, NULL);
         if (!f)
                 return -ENOMEM;
 

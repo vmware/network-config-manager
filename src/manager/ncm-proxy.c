@@ -190,7 +190,7 @@ _public_ int ncm_get_proxy(char ***proxy) {
         for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
                 _auto_cleanup_ char *p = NULL;
 
-                p = string_join(":", k, v, NULL);
+                p = strjoin(":", k, v, NULL);
                 if (!p)
                         return log_oom();
 

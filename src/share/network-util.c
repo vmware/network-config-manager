@@ -143,7 +143,7 @@ int ip_to_string_prefix(int family, const struct IPAddress *u, char **ret) {
 
         if (u->prefix_len > 0) {
                 sprintf(buf, "%d", u->prefix_len);
-                y = string_join("/", x, buf, NULL);
+                y = strjoin("/", x, buf, NULL);
                 if (!y)
                         return -ENOMEM;
         } else {
