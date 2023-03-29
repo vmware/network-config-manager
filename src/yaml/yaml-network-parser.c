@@ -354,8 +354,7 @@ static int parse_routing_policy_rule(GHashTable *config, yaml_document_t *dp, ya
         }
 
         if (rule) {
-                if (!g_hash_table_insert(network->routing_policy_rules, rule, rule))
-                        return -EEXIST;
+                g_hash_table_insert(network->routing_policy_rules, rule, rule);
 
                 network->modified = true;
                 steal_pointer(rule);
@@ -492,10 +491,8 @@ int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
                 if (n)
                         (void) parse_network(m, dp, n, net);
 
-                if (!g_hash_table_insert(nets->networks, (gpointer *) net->ifname, (gpointer *) net))
-                        return log_oom();
-
-                steal_pointer(net);
+                if (g_hash_table_insert(nets->networks, (gpointer *) net->ifname, (gpointer *) net))
+                        steal_pointer(net);
         }
 
         return 0;

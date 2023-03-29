@@ -587,6 +587,27 @@ void routing_policy_rule_free(RoutingPolicyRule *rule) {
         free(rule);
 }
 
+static gboolean routing_policy_rule_equal(gconstpointer v1, gconstpointer v2) {
+        RoutingPolicyRule *a = (RoutingPolicyRule *) v1;
+        RoutingPolicyRule *b = (RoutingPolicyRule *) v2;
+
+        if (!memcmp(&a->to, &b->to, sizeof(a->to)) &&
+            !memcmp(&a->from, &b->from, sizeof(a->from)) &&
+            !memcmp(&a->iif, &b->iif, sizeof(a->iif)) &&
+            !memcmp(&a->oif, &b->oif, sizeof(a->oif)) &&
+            a->table == b->table &&
+            a->priority == b->priority &&
+            a->table == b->table &&
+            a->fwmark == b->fwmark &&
+            a->type == b->type &&
+            a->tos == b->tos &&
+            a->invert == b->invert )
+                return true;
+
+        return false;
+}
+
+
 static gboolean route_equal(gconstpointer v1, gconstpointer v2) {
         Route *a = (Route *) v1;
         Route *b = (Route *) v2;
@@ -703,7 +724,7 @@ int network_new(Network **ret) {
         if (!n->routes)
                 return log_oom();
 
-        n->routing_policy_rules = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+        n->routing_policy_rules = g_hash_table_new_full(g_str_hash, routing_policy_rule_equal, NULL, g_free);
         if (!n->routing_policy_rules)
                 return log_oom();
 
