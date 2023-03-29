@@ -1,0 +1,18 @@
+network:
+  version: 2
+  ethernets:
+    test99:
+      match:
+        name: test99
+      optional: true
+  bonds:
+    bond0:
+      interfaces: [test99]
+      addresses: [78.41.207.45/24]
+      gateway4: 78.41.207.1
+      nameservers:
+        addresses: [89.207.128.252, 89.207.130.252]
+      parameters:
+        mode: 802.3ad
+        lacp-rate: fast
+        mii-monitor-interval: 100

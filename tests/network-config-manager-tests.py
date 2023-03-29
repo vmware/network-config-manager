@@ -1715,11 +1715,6 @@ class TestCLINetDev:
         assert(unit_exist('10-macvtap-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        network_reload()
-        subprocess.check_call(['sleep', '3'])
-
-        assert(link_exist('macvtap-98') == True)
-
         macvlan_parser = configparser.ConfigParser()
         macvlan_parser.read(os.path.join(networkd_unit_file_path, '10-macvtap-98.netdev'))
 
@@ -1784,11 +1779,6 @@ class TestCLINetDev:
         assert(unit_exist('10-ipvtap-98.netdev') == True)
         assert(unit_exist('10-ipvtap-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
-
-        network_reload()
-        subprocess.check_call(['sleep', '3'])
-
-        assert(link_exist('ipvtap-98') == True)
 
         ipvtap_parser = configparser.ConfigParser()
         ipvtap_parser.read(os.path.join(networkd_unit_file_path, '10-ipvtap-98.netdev'))

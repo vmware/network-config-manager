@@ -40,6 +40,20 @@ static int link_remove (const char *s) {
     return 0;
 }
 
+static int reload_networkd (const char *s) {
+    _auto_cleanup_ char *c = NULL;
+
+    system("networkctl reload");
+
+    c = strjoin(" ", "/lib/systemd/systemd-networkd-wait-online", "-i", s, NULL);
+    if (!c)
+        return -ENOMEM;
+
+    system(c);
+
+    return 0;
+}
+
 static int apply_yaml_file(const char *y) {
     _auto_cleanup_ char *c = NULL, *yaml_file = NULL;
 
@@ -581,9 +595,45 @@ static void test_netdev_bond_parametres(void **state) {
 
     display_key_file(key_file);
     assert_true(key_file_config_exists(key_file, "Match", "Name", "bond0"));
-
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
 
+    system("nmctl remove-netdev bond0 kind bond");
+}
+
+static void test_netdev_bond(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    char *dns = NULL;
+    int r;
+
+    apply_yaml_file("bond-interface.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-bond0.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "bond0"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "bond"));
+
+    assert_true(key_file_config_exists(key_file, "Bond", "Mode", "802.3ad"));
+    assert_true(key_file_config_exists(key_file, "Bond", "LACPTransmitRate", "fast"));
+    assert_true(key_file_config_exists(key_file, "Bond", "PrimaryReselectPolicy", "always"));
+    assert_true(key_file_config_exists(key_file, "Bond", "MIIMonitorSec", "100"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-bond0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "bond0"));
+
+    assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+    assert_true(g_strrstr(dns, "89.207.130.252"));
+    assert_true(g_strrstr(dns, "89.207.128.252"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "78.41.207.45/24"));
+
+    reload_networkd("bond0");
     system("nmctl remove-netdev bond0 kind bond");
 }
 
@@ -610,6 +660,7 @@ int main(void) {
         cmocka_unit_test (test_netdev_vrfs),
         cmocka_unit_test (test_netdev_bond_parametres),
         cmocka_unit_test (test_netdev_vxlans),
+        cmocka_unit_test (test_netdev_bond),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
