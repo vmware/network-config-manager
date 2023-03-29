@@ -172,6 +172,8 @@ static void wireguard_multiple_peers(void **state) {
     assert_true(key_file_config_exists(key_file, "WireGuardPeer", "AllowedIPs", "10.10.10.20/24"));
     assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PersistentKeepalive", "22"));
     assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PublicKey", "M9nt4YujIOmNrRmpIRTmYSfMdrpvE7u6WkG8FY8WjG4="));
+
+    system("nmctl remove-netdev wg0");
 }
 
 static void netdev_vlans(void **state) {
@@ -249,6 +251,9 @@ static void netdev_vlans(void **state) {
     assert_true(d=key_file_config_get(key_file, "Network", "Domains"));
     assert_true(g_strrstr(d, "domain2.example.com"));
     assert_true(g_strrstr(d, "domain1.example.com"));
+
+    system("nmctl remove-netdev vlan10 kind vlan");
+    system("nmctl remove-netdev vlan15 kind vlan");
 }
 
 static void additional_gw_source_routing(void **state) {

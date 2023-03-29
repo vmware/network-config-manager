@@ -1384,6 +1384,9 @@ int generate_master_device_network(Network *n) {
                         if (r < 0)
                                 return r;
 
+                        if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
+                                break;
+
                         r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                         if (r < 0)
                                 return r;
@@ -1403,6 +1406,9 @@ int generate_master_device_network(Network *n) {
                                 r = parse_network_file(p, &network);
                                 if (r < 0)
                                         return r;
+
+                                if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
+                                        break;
 
                                 r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                                 if (r < 0)
@@ -1425,6 +1431,9 @@ int generate_master_device_network(Network *n) {
                                 if (r < 0)
                                         return r;
 
+                                if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
+                                        break;
+
                                 r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                                 if (r < 0)
                                         return r;
@@ -1446,6 +1455,9 @@ int generate_master_device_network(Network *n) {
                                 if (r < 0)
                                         return r;
 
+                                if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
+                                        break;
+
                                 r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                                 if (r < 0)
                                         return r;
@@ -1464,6 +1476,9 @@ int generate_master_device_network(Network *n) {
                         r = parse_network_file(p, &network);
                         if (r < 0)
                                 return r;
+
+                        if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
+                                break;
 
                         r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                         if (r < 0)

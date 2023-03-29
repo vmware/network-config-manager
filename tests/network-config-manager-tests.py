@@ -2149,6 +2149,7 @@ class TestCLINetDev:
         network_parser.read(os.path.join(networkd_unit_file_path, '10-wg99.network'))
 
         assert(network_parser.get('Match', 'Name') == 'wg99')
+        subprocess.call("nmctl remove-netdev wg99", shell = True)
 
     def test_cli_create_vxlan(self):
         assert(link_exist('test98') == True)

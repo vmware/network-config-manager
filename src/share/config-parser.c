@@ -127,6 +127,22 @@ int display_key_file(const KeyFile *k) {
         return 0;
 }
 
+bool config_exists(const char *path, const char *section, const char *k, const char *v) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert(k);
+        assert(path);
+        assert(section);
+        assert(k);
+
+        r = parse_key_file(path, &key_file);
+        if (r < 0)
+                return r;
+
+        return key_file_config_exists(key_file, section, k, v);
+}
+
 bool key_file_config_exists(const KeyFile *key_file, const char *section, const char *k, const char *v) {
         GList *i;
 
