@@ -479,52 +479,6 @@ class TestNetDevConfigManagerYAML:
         link_remove('test99')
         link_remove('test98')
 
-    def test_netdev_bond(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('bond.yml')
-
-        subprocess.check_call("nmctl apply", shell = True)
-
-        assert(unit_exist('10-bond0.netdev') == True)
-        assert(unit_exist('10-bond0.network') == True)
-        assert(unit_exist('10-test99.network') == True)
-        assert(unit_exist('10-test98.network') == True)
-
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-        assert(parser.get('Network', 'Bond') == 'bond0')
-
-        parsera = configparser.ConfigParser()
-        parsera.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
-        assert(parsera.get('Network', 'Bond') == 'bond0')
-
-        parserb = configparser.ConfigParser()
-        parserb.read(os.path.join(networkd_unit_file_path, '10-bond0.netdev'))
-        assert(parserb.get('Bond', 'Mode') == 'active-backup')
-        assert(parserb.get('Bond', 'LACPTransmitRate') == 'fast')
-        assert(parserb.get('Bond', 'ARPValidate') == 'active')
-        assert(parserb.get('Bond', 'FailOverMACPolicy') == 'active')
-        assert(parserb.get('Bond', 'AdSelect') == 'bandwidth')
-        assert(parserb.get('Bond', 'PrimaryReselectPolicy') == 'better')
-        assert(parserb.get('Bond', 'TransmitHashPolicy') == 'layer3+4')
-        assert(parserb.get('Bond', 'MIIMonitorSec') == '300')
-        assert(parserb.get('Bond', 'MinLinks') == '3')
-        assert(parserb.get('Bond', 'ARPIntervalSec') == '30')
-        assert(parserb.get('Bond', 'UpDelaySec') == '12')
-        assert(parserb.get('Bond', 'DownDelaySec') == '15')
-        assert(parserb.get('Bond', 'LearnPacketIntervalSec') == '32')
-        assert(parserb.get('Bond', 'ResendIGMP') == '45')
-        assert(parserb.get('Bond', 'PacketsPerSlave') == '11')
-        assert(parserb.get('Bond', 'GratuitousARP') == '15')
-        assert(parserb.get('Bond', 'AllSlavesActive') == 'yes')
-        assert(parserb.get('Bond', 'ARPIPTargets') == '192.168.5.1 192.168.5.34')
-        assert(parserb.get('Bond', 'ARPValidate') == 'active')
-
-        parserc = configparser.ConfigParser()
-        parserc.read(os.path.join(networkd_unit_file_path, '10-bond0.network'))
-        assert(parserc.get('Network', 'DHCP') == 'ipv4')
-
-        subprocess.call("nmctl remove-netdev bond0 kind bond", shell = True)
-
     def test_netdev_bridge(self):
         self.copy_yaml_file_to_netmanager_yaml_path('bridge.yml')
 

@@ -16,6 +16,30 @@
 #include "parse-util.h"
 #include "string-util.h"
 
+static int link_add(const char *s) {
+    _auto_cleanup_ char *c = NULL;
+
+    c = string_join(" ", "/usr/sbin/ip", "link", "add", "dev", s, "type", "dummy", NULL);
+    if (!c)
+        return -ENOMEM;
+
+    system(c);
+
+    return 0;
+}
+
+static int link_remove (const char *s) {
+    _auto_cleanup_ char *c = NULL, *yaml_file = NULL;
+
+    c = string_join(" ", "/usr/sbin/ip", "link", "del", s, NULL);
+    if (!c)
+        return -ENOMEM;
+
+    system(c);
+
+    return 0;
+}
+
 static int apply_yaml_file(const char *y) {
     _auto_cleanup_ char *c = NULL, *yaml_file = NULL;
 
@@ -258,7 +282,6 @@ static void netdev_vlans(void **state) {
 
 static void netdev_vrfs(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-    char *dns = NULL, *d = NULL;
     int r;
 
     apply_yaml_file("vrfs.yml");
@@ -393,6 +416,7 @@ static void netdev_vlan(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "10.3.0.1"));
 
+    key_file_free(key_file);
     r = parse_key_file("/etc/systemd/network/10-vlan-98.network", &key_file);
     assert_true(r >= 0);
 
@@ -409,6 +433,7 @@ static void netdev_vlan(void **state) {
     assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.98.5/24"));
     assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.98.5/24"));
 
+    key_file_free(key_file);
     r = parse_key_file("/etc/systemd/network/10-vlan-98.netdev", &key_file);
     assert_true(r >= 0);
 
@@ -420,15 +445,55 @@ static void netdev_vlan(void **state) {
     system("nmctl remove-netdev vlan-98 kind vlan");
 }
 
-static int setup(void **state) {
-    system("/usr/sbin/ip link add dev test99 type dummy");
+static void netdev_bond_parametres(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
 
+    apply_yaml_file("bond.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-bond0.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "bond0"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "bond"));
+
+    assert_true(key_file_config_exists(key_file, "Bond", "Mode", "active-backup"));
+    assert_true(key_file_config_exists(key_file, "Bond", "TransmitHashPolicy", "layer3+4"));
+    assert_true(key_file_config_exists(key_file, "Bond", "LACPTransmitRate", "fast"));
+    assert_true(key_file_config_exists(key_file, "Bond", "ARPValidate", "active"));
+    assert_true(key_file_config_exists(key_file, "Bond", "FailOverMACPolicy", "active"));
+    assert_true(key_file_config_exists(key_file, "Bond", "AdSelect", "bandwidth"));
+    assert_true(key_file_config_exists(key_file, "Bond", "PrimaryReselectPolicy", "better"));
+    assert_true(key_file_config_exists(key_file, "Bond", "MIIMonitorSec", "300"));
+    assert_true(key_file_config_exists(key_file, "Bond", "MinLinks", "3"));
+    assert_true(key_file_config_exists(key_file, "Bond", "ARPIntervalSec", "30"));
+    assert_true(key_file_config_exists(key_file, "Bond", "UpDelaySec", "12"));
+    assert_true(key_file_config_exists(key_file, "Bond", "DownDelaySec", "15"));
+    assert_true(key_file_config_exists(key_file, "Bond", "LearnPacketIntervalSec", "32"));
+    assert_true(key_file_config_exists(key_file, "Bond", "ResendIGMP", "45"));
+    assert_true(key_file_config_exists(key_file, "Bond", "PacketsPerSlave", "11"));
+    assert_true(key_file_config_exists(key_file, "Bond", "GratuitousARP", "15"));
+    assert_true(key_file_config_exists(key_file, "Bond", "AllSlavesActive", "yes"));
+    assert_true(key_file_config_exists(key_file, "Bond", "ARPIPTargets", "192.168.5.1 192.168.5.34"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-bond0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "bond0"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+}
+
+static int setup(void **state) {
+    link_add("test99");
     return 0;
 }
 
 static int teardown (void **state) {
-    system("/usr/sbin/ip link del test99 ");
-
+    link_remove("test99");
     return 0;
 }
 
@@ -443,6 +508,7 @@ int main(void) {
         cmocka_unit_test (netdev_vlans),
         cmocka_unit_test (netdev_vlan),
         cmocka_unit_test (netdev_vrfs),
+        cmocka_unit_test (netdev_bond_parametres),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
