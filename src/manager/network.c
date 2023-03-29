@@ -590,7 +590,6 @@ void routing_policy_rule_free(RoutingPolicyRule *rule) {
 static gboolean route_equal(gconstpointer v1, gconstpointer v2) {
         Route *a = (Route *) v1;
         Route *b = (Route *) v2;
-        int r;
 
         if (!memcmp(&a->gw, &b->gw, sizeof(a->gw)) &&
             !memcmp(&a->dst, &b->dst, sizeof(a->dst)) &&
