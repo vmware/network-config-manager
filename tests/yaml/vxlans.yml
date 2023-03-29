@@ -1,0 +1,43 @@
+network:
+  ethernets:
+    test99:
+      routes:
+        - to: 10.20.30.40/32
+          via: 10.20.30.1
+  tunnels:
+    vxlan1:
+      mode: vxlan
+      id: 1
+      type-of-service: 11
+      mac-learning: yes
+      ageing: 300
+      arp-proxy: yes
+      flow-label: 5555
+      limit: 20
+      checksums: [udp, zero-udp6-tx, zero-udp6-rx, remote-tx, remote-rx]
+      extensions: [group-policy, generic-protocol]
+      notifications: [l2-miss, l3-miss]
+      do-not-fragment: yes
+      port-range: [42, 442]
+      short-circuit: yes
+      link: test99
+      local: 192.168.1.34
+      remote: 192.168.1.35
+    vxlan2:
+      mode: vxlan
+      id: 2
+      type-of-service: 12
+      mac-learning: yes
+      ageing: 400
+      arp-proxy: yes
+      flow-label: 6666
+      limit: 30
+      checksums: [udp, remote-tx, remote-rx]
+      extensions: [group-policy]
+      notifications: [l2-miss]
+      do-not-fragment: yes
+      port-range: [43, 444]
+      short-circuit: yes
+      link: test99
+      local: 192.168.1.35
+      remote: 192.168.1.36

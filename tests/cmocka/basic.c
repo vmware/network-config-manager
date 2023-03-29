@@ -362,6 +362,104 @@ static void netdev_vrfs(void **state) {
     system("nmctl remove-netdev vrf1006 kind vrf");
 }
 
+static void netdev_vxlans(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("vxlans.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "VXLAN", "vxlan1"));
+    assert_true(key_file_config_exists(key_file, "Network", "VXLAN", "vxlan2"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vxlan1.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vxlan1"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vxlan"));
+
+    assert_true(key_file_config_exists(key_file, "VXLAN", "VNI", "1"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "Local", "192.168.1.34"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "Remote", "192.168.1.35"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "TOS", "11"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "MacLearning", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "ReduceARPProxy", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "FDBAgeingSec", "300"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "FlowLabel", "5555"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "MaximumFDBEntries", "20"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "IPDoNotFragment", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "L2MissNotification", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "L3MissNotification", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "RouteShortCircuit", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "UDPChecksum", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "UDP6ZeroChecksumTx", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "UDP6ZeroChecksumRx", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "RemoteChecksumTx", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "RemoteChecksumRx", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "GroupPolicyExtension", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "GenericProtocolExtension", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "PortRange", "42-442"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vxlan2.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vxlan2"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vxlan"));
+
+    assert_true(key_file_config_exists(key_file, "VXLAN", "VNI", "2"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "Local", "192.168.1.35"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "Remote", "192.168.1.36"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "TOS", "12"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "MacLearning", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "ReduceARPProxy", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "FDBAgeingSec", "400"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "FlowLabel", "6666"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "MaximumFDBEntries", "30"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "IPDoNotFragment", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "L2MissNotification", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "RouteShortCircuit", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "UDPChecksum", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "RemoteChecksumTx", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "RemoteChecksumRx", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "GroupPolicyExtension", "yes"));
+    assert_true(key_file_config_exists(key_file, "VXLAN", "PortRange", "43-444"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vxlan1.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "vxlan1"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vxlan2.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "vxlan2"));
+
+    system("nmctl remove-netdev vxlan1 kind vxlan");
+    system("nmctl remove-netdev vxlan2 kind vxlan");
+}
+
 static void additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -485,6 +583,8 @@ static void netdev_bond_parametres(void **state) {
     assert_true(key_file_config_exists(key_file, "Match", "Name", "bond0"));
 
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+
+    system("nmctl remove-netdev bond0 kind bond");
 }
 
 static int setup(void **state) {
@@ -509,6 +609,7 @@ int main(void) {
         cmocka_unit_test (netdev_vlan),
         cmocka_unit_test (netdev_vrfs),
         cmocka_unit_test (netdev_bond_parametres),
+        cmocka_unit_test (netdev_vxlans),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
