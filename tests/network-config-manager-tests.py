@@ -222,16 +222,8 @@ class TestNetworkConfigManagerYAML:
         "network-link.yml",
         "network-network.yml",
         "routing-policy-rule.yml",
-        "vlan.yml",
-        "bond.yml",
-        "bridge.yml",
-        "tunnel.yml",
-        "tunnel-keys.yml",
-        "vrf.yml",
-        "vxlan.yml",
-        "wireguard.yml",
-        "wg-multiple.yml",
         "multiple-rt.yml",
+        "vlan.yml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -268,6 +260,13 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Match', 'Driver') == 'test-driver')
 
+        assert(parser.get('Network', 'Domains') == 'example.com')
+
+        assert(parser.get('Address', 'Address') == '10.3.0.5/23')
+
+        assert(parser.get('Route', 'Destination') == '0.0.0.0/0')
+        assert(parser.get('Route', 'Gateway') == '10.3.0.1')
+
     def test_network_link(self):
         self.copy_yaml_file_to_netmanager_yaml_path('network-link.yml')
 
@@ -278,8 +277,14 @@ class TestNetworkConfigManagerYAML:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Link', 'ActivationPolicy') == 'up')
+
         assert(parser.get('Link', 'MACAddress') == 'c2:b0:bb:e3:4d:88')
+        assert(parser.get('Link', 'ActivationPolicy') == 'up')
+
+        assert(parser.get('Address', 'Address') == '10.100.1.37/24')
+
+        assert(parser.get('Route', 'Destination') == '0.0.0.0/0')
+        assert(parser.get('Route', 'Gateway') == '10.100.1.1')
 
     def test_network_network(self):
         self.copy_yaml_file_to_netmanager_yaml_path('network-network.yml')
@@ -291,9 +296,15 @@ class TestNetworkConfigManagerYAML:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
+
         assert(parser.get('Network', 'IPv6LinkLocalAddressGenerationMode') == 'eui64')
         assert(parser.get('Network', 'IPv6PrivacyExtensions') == 'no')
         assert(parser.get('Network', 'IPv6MTUBytes') == '1800')
+
+        assert(parser.get('Address', 'Address') == '10.100.1.37/24')
+
+        assert(parser.get('Route', 'Destination') == '0.0.0.0/0')
+        assert(parser.get('Route', 'Gateway') == '10.100.1.1')
 
     def test_basic_dhcp4(self):
         self.copy_yaml_file_to_netmanager_yaml_path('dhcp4.yml')
@@ -305,6 +316,7 @@ class TestNetworkConfigManagerYAML:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
+
         assert(parser.get('Network', 'DHCP') == 'ipv4')
 
     def test_dhcp4_client_identifier(self):
@@ -317,7 +329,9 @@ class TestNetworkConfigManagerYAML:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
+
         assert(parser.get('Network', 'DHCP') == 'ipv4')
+
         assert(parser.get('DHCPv4', 'ClientIdentifier') == 'mac')
 
     def test_dhcp4_overrides(self):
@@ -325,15 +339,26 @@ class TestNetworkConfigManagerYAML:
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
-        assert(unit_exist('10-dummy95.network') == True)
+        assert(unit_exist('10-test98.network') == True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
+
         assert(parser.get('Network', 'DHCP') == 'ipv4')
+
         assert(parser.get('DHCPv4', 'RouteMetric') == '200')
+
         assert(parser.get('DHCPv6', 'UseDNS') == 'yes')
+
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+
+        assert(parser.get('Network', 'DHCP') == 'ipv4')
+
+        assert(parser.get('DHCPv4', 'RouteMetric') == '100')
 
     def test_network_static_address_label_configuration(self):
         self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yml')
@@ -358,6 +383,7 @@ class TestNetworkConfigManagerYAML:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Address', 'Address') == '10.10.10.1/24')
+
         assert(parser.get('Route', 'Destination') == '0.0.0.0/0')
         assert(parser.get('Route', 'Gateway') == '9.9.9.9')
         assert(parser.get('Route', 'Onlink') == 'yes')
@@ -368,6 +394,21 @@ class TestNetworkConfigManagerYAML:
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
 
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+        assert(parser.get('Address', 'Address') == '192.168.1.10/24')
+
+        assert(parser.get('Route', 'Destination') == '192.168.1.1/24')
+        assert(parser.get('Route', 'Gateway') == '192.168.1.1')
+        assert(parser.get('Route', 'PreferredSource') == '192.168.1.10')
+        assert(parser.get('Route', 'Scope') == 'link')
+        assert(parser.get('Route', 'Type') == 'local')
+        assert(parser.get('Route', 'InitialCongestionWindow') == '10')
+        assert(parser.get('Route', 'InitialAdvertisedReceiveWindow') == '20')
+
     def test_network_routing_policy_rule(self):
         self.copy_yaml_file_to_netmanager_yaml_path('routing-policy-rule.yml')
 
@@ -376,6 +417,8 @@ class TestNetworkConfigManagerYAML:
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
 
         assert(parser.get('Address', 'Address') == '10.100.1.5/24')
 
@@ -398,30 +441,44 @@ class TestNetworkConfigManagerYAML:
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
+        assert(parser.get('Match', 'Name') == 'test99')
+
         assert(parser.get('Address', 'Address') == '2001:cafe:face:beef::dead:dead/64')
+
         assert(parser.get('Route', 'Destination') == '::/0')
         assert(parser.get('Route', 'Gateway') == '2001:cafe:face::1')
         assert(parser.get('Route', 'Onlink') == 'yes')
 
-    def test_netdev_vlan(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('vlan.yml')
+class TestNetDevConfigManagerYAML:
+    yaml_configs = [
+        "bond.yml",
+        "bridge.yml",
+        "tunnel.yml",
+        "tunnel-keys.yml",
+        "vrf.yml",
+        "vxlan.yml",
+        "wireguard.yml",
+        "wg-multiple.yml",
+    ]
 
-        subprocess.check_call("nmctl apply", shell = True)
-        assert(unit_exist('10-vlan10.netdev') == True)
+    def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
+        shutil.copy(os.path.join(network_config_manager_ci_yaml_path, config_file), network_config_manager_yaml_config_path)
 
-        assert(unit_exist('10-test99.network') == True)
-        assert(unit_exist('10-vlan10.network') == True)
+    def remove_units_from_netmanager_yaml_path(self):
+        for config_file in self.yaml_configs:
+            if (os.path.exists(os.path.join(network_config_manager_yaml_config_path, config_file))):
+                os.remove(os.path.join(network_config_manager_yaml_config_path, config_file))
 
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+    def setup_method(self):
+        link_add_dummy('test99')
+        link_add_dummy('test98')
+        network_reload()
 
-        assert(parser.get('Network', 'VLAN') == 'vlan10')
-
-        parsera = configparser.ConfigParser()
-        parsera.read(os.path.join(networkd_unit_file_path, '10-vlan10.netdev'))
-
-        assert(parsera.get('VLAN', 'Id') == '10')
-        subprocess.call("nmctl remove-netdev vlan10 kind vlan", shell = True)
+    def teardown_method(self):
+        self.remove_units_from_netmanager_yaml_path()
+        remove_units_from_netword_unit_path()
+        link_remove('test99')
+        link_remove('test98')
 
     def test_netdev_bond(self):
         self.copy_yaml_file_to_netmanager_yaml_path('bond.yml')
@@ -467,6 +524,8 @@ class TestNetworkConfigManagerYAML:
         parserc = configparser.ConfigParser()
         parserc.read(os.path.join(networkd_unit_file_path, '10-bond0.network'))
         assert(parserc.get('Network', 'DHCP') == 'ipv4')
+
+        subprocess.call("nmctl remove-netdev bond0 kind bond", shell = True)
 
     def test_netdev_bridge(self):
         self.copy_yaml_file_to_netmanager_yaml_path('bridge.yml')
