@@ -13,7 +13,7 @@ int route_new(Route **ret) {
 
         assert(ret);
 
-        route = new0(Route, 1);
+        route = new(Route, 1);
         if (!route)
                 return log_oom();
 
