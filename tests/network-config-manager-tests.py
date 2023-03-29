@@ -163,7 +163,6 @@ class TestLinkConfigManagerYAML:
                 os.remove(os.path.join(network_config_manager_yaml_config_path, config_file))
 
     def setup_method(self):
-        link_remove('test99')
         link_add_dummy('test99')
         network_reload()
 
@@ -484,7 +483,6 @@ class TestNetDevConfigManagerYAML:
         self.copy_yaml_file_to_netmanager_yaml_path('bond.yml')
 
         subprocess.check_call("nmctl apply", shell = True)
-        subprocess.check_call(['sleep', '5'])
 
         assert(unit_exist('10-bond0.netdev') == True)
         assert(unit_exist('10-bond0.network') == True)
@@ -2204,7 +2202,7 @@ class TestCLINetDev:
 
         assert(vxlan_network_parser.get('Match', 'Name') == 'vxlan-98')
 
-        subprocess.check_call("nmctl remove-netdev vxlan-98 kind vxlan" , shell = True)
+        subprocess.call("nmctl remove-netdev vxlan-98 kind vxlan" , shell = True)
         assert(unit_exist('10-vxlan-98.netdev') == False)
         assert(unit_exist('10-vxlan-98.network') == False)
 
@@ -2248,7 +2246,7 @@ class TestCLINetDev:
         assert(test99_parser.get('Match', 'Name') == 'test-99')
         assert(test99_parser.get('Network', 'Bridge') == 'bridge-98')
 
-        subprocess.check_call("nmctl remove-netdev bridge-98 kind bridge" , shell = True)
+        subprocess.call("nmctl remove-netdev bridge-98 kind bridge" , shell = True)
         assert(unit_exist('10-bridge-98.netdev') == False)
         assert(unit_exist('10-bridge-98.network') == False)
 
@@ -2295,7 +2293,7 @@ class TestCLINetDev:
         assert(test99_parser.get('Match', 'Name') == 'test-99')
         assert(test99_parser.get('Network', 'Bond') == 'bond-98')
 
-        subprocess.check_call("nmctl remove-netdev bond-98 kind bond" , shell = True)
+        subprocess.call("nmctl remove-netdev bond-98 kind bond" , shell = True)
         assert(unit_exist('10-bond-98.netdev') == False)
         assert(unit_exist('10-bond-98.network') == False)
 
@@ -3003,7 +3001,6 @@ class TestCLISRIOV:
 
 class TestCLISRIOLink:
     def setup_method(self):
-        link_remove('test99')
         link_add_dummy('test99')
         network_reload()
 
