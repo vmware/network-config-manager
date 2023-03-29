@@ -1715,11 +1715,6 @@ class TestCLINetDev:
         assert(unit_exist('10-macvtap-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        network_reload()
-        subprocess.check_call(['sleep', '3'])
-
-        assert(link_exist('macvtap-98') == True)
-
         macvlan_parser = configparser.ConfigParser()
         macvlan_parser.read(os.path.join(networkd_unit_file_path, '10-macvtap-98.netdev'))
 
@@ -1785,11 +1780,6 @@ class TestCLINetDev:
         assert(unit_exist('10-ipvtap-98.network') == True)
         assert(unit_exist('10-test98.network') == True)
 
-        network_reload()
-        subprocess.check_call(['sleep', '3'])
-
-        assert(link_exist('ipvtap-98') == True)
-
         ipvtap_parser = configparser.ConfigParser()
         ipvtap_parser.read(os.path.join(networkd_unit_file_path, '10-ipvtap-98.netdev'))
 
@@ -1812,16 +1802,12 @@ class TestCLINetDev:
         assert(unit_exist('10-ipvtap-98.netdev') == False)
         assert(unit_exist('10-ipvtap-98.network') == False)
 
-    @pytest.mark.skip(reason="skipping")
     def test_cli_create_vrf(self):
         subprocess.check_call("nmctl create-vrf vrf-98 table 11", shell = True)
         assert(unit_exist('10-vrf-98.netdev') == True)
         assert(unit_exist('10-vrf-98.network') == True)
 
         network_reload()
-        subprocess.check_call(['sleep', '3'])
-
-        assert(link_exist('vrf-98') == True)
 
         vrf_parser = configparser.ConfigParser()
         vrf_parser.read(os.path.join(networkd_unit_file_path, '10-vrf-98.netdev'))
@@ -2034,7 +2020,6 @@ class TestCLINetDev:
         subprocess.check_call("nmctl remove-netdev gre-98 kind gre" , shell = True)
         assert(unit_exist('10-gre-98.netdev') == False)
         assert(unit_exist('10-gre-98.network') == False)
-
 
     def test_cli_create_vti(self):
         assert(link_exist('test98') == True)

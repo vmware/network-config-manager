@@ -686,7 +686,7 @@ int nft_get_rules(const char *table, GString **ret) {
         assert(ret);
         assert(table);
 
-        c = string_join(" ", "list table", table, NULL);
+        c = strjoin(" ", "list table", table, NULL);
         if (!c)
                 return -ENOMEM;
 

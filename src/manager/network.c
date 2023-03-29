@@ -462,7 +462,7 @@ int create_network_conf_file(const char *ifname, char **ret) {
 
         assert(ifname);
 
-        file = string_join("-", "10", ifname, NULL);
+        file = strjoin("-", "10", ifname, NULL);
         if (!file)
                 return log_oom();
 
@@ -491,7 +491,7 @@ int determine_network_conf_file(const char *ifname, char **ret) {
 
         assert(ifname);
 
-        file = string_join("-", "10", ifname, NULL);
+        file = strjoin("-", "10", ifname, NULL);
         if (!file)
                 return log_oom();
 
@@ -592,42 +592,47 @@ static gboolean route_equal(gconstpointer v1, gconstpointer v2) {
         Route *b = (Route *) v2;
         int r;
 
-        r = memcmp(&a->gw, &b->gw, sizeof(a->gw));
-        if (r != 0)
-                return r;
+        if (!memcmp(&a->gw, &b->gw, sizeof(a->gw)) &&
+            !memcmp(&a->dst, &b->dst, sizeof(a->dst)) &&
+            !memcmp(&a->src, &b->src, sizeof(a->src)) &&
+            !memcmp(&a->prefsrc, &b->prefsrc, sizeof(a->prefsrc)) &&
+            a->family == b->family &&
+            a->priority == b->priority &&
+            a->table == b->table &&
+            a->mtu == b->mtu &&
+            a->metric == b->metric &&
+            a->flags == b->flags)
+                return true;
 
-        r = memcmp(&a->dst, &b->dst, sizeof(a->dst));
-        if (r != 0)
-                return r;
-
-        r = memcmp(&a->src, &b->src, sizeof(a->src));
-        if (r != 0)
-                return r;
-
-        r = memcmp(&a->prefsrc, &b->prefsrc, sizeof(a->prefsrc));
-        if (r != 0)
-                return r;
-
-        if (a->family != b->family)
-                return false;
-
-        if (a->priority != b->priority)
-                return false;
-
-        if (a->table != b->table)
-                return false;
-
-        if (a->mtu != b->mtu)
-                return false;
-
-        if (a->metric != b->metric)
-                return false;
-
-        if (a->flags != b->flags)
-                return false;
-
-        return true;
+        return false;
 }
+
+static gboolean address_equal(gconstpointer v1, gconstpointer v2) {
+        IPAddress *a = (IPAddress *) v1;
+        IPAddress *b = (IPAddress *) v2;
+        int r;
+
+        switch (a->family) {
+                case AF_INET:
+                        r = memcmp(&a->in, &b->in, sizeof(a->in));
+                        if (!r)
+                                true;
+                        break;
+                case AF_INET6:
+                        r = memcmp(&a->in6, &b->in6, sizeof(a->in6));
+                        if (!r)
+                                true;
+                        break;
+                default:
+                        break;
+        }
+
+        if (a->family == b->family)
+                return true;
+
+        return false;
+}
+
 
 static int wifi_access_point_free (void *key, void *value, void *user_data) {
         WiFiAccessPoint *ap = value;
@@ -691,11 +696,11 @@ int network_new(Network **ret) {
                 .parser_type = _PARSER_TYPE_INVALID,
         };
 
-        r = set_new(&n->addresses, g_direct_hash, g_direct_equal);
+        r = set_new(&n->addresses, g_str_hash, address_equal);
         if (r < 0)
                 return r;
 
-        n->routes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+        n->routes = g_hash_table_new_full(g_str_hash, route_equal, NULL, g_free);
         if (!n->routes)
                 return log_oom();
 
