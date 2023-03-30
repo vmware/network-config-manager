@@ -671,6 +671,63 @@ static void test_netdev_bridges(void **state) {
     system("nmctl remove-netdev br1 kind bridge");
 }
 
+static void test_netdev_vlan_bridge(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("vlan-bridge.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-br0.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "br0"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "bridge"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vlan15.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "vlan15"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "vlan"));
+
+    assert_true(key_file_config_exists(key_file, "VLAN", "Id", "15"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-br0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "br0"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.99.25/24"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-vlan15.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "vlan15"));
+    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "no"));
+    assert_true(key_file_config_exists(key_file, "Network", "Bridge", "br0"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+    assert_true(key_file_config_exists(key_file, "Network", "VLAN", "vlan15"));
+
+    system("nmctl remove-netdev br0 kind bridge");
+    system("nmctl remove-netdev vlan15 kind vlan");
+}
+
 static int setup(void **state) {
     link_add("test99");
     return 0;
@@ -696,6 +753,7 @@ int main(void) {
         cmocka_unit_test (test_netdev_vxlans),
         cmocka_unit_test (test_netdev_bond),
         cmocka_unit_test (test_netdev_bridges),
+        cmocka_unit_test (test_netdev_vlan_bridge),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
