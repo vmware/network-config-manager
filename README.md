@@ -42,8 +42,8 @@ Configure
 
 Please see [systemd.link](https://www.freedesktop.org/software/systemd/man/systemd.link.html) for more information.
 
-Generates networkd unit configs from
- - [YML](https://yaml.org) file.
+Generates networkd unit configuration from
+ - Flexible netplan like network configuration from [YML](https://yaml.org) file.
  - [Dracut](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) kernel command line network config.
 
 Introspect
