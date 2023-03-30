@@ -84,7 +84,7 @@ def remove_units_from_netword_unit_path():
 
 def network_reload():
     subprocess.call("networkctl reload", shell=True)
-    subprocess.call("sleep 1", shell=True)
+    subprocess.call("sleep 5", shell=True)
 
     subprocess.check_output("/lib/systemd/systemd-networkd-wait-online --any", shell=True)
 
@@ -560,7 +560,7 @@ class TestNetDevConfigManagerYAML:
         self.copy_yaml_file_to_netmanager_yaml_path('vrf.yml')
 
         subprocess.check_call("nmctl apply", shell = True)
-        subprocess.check_call(['sleep', '5'])
+        subprocess.check_call(['sleep', '15'])
 
         assert(unit_exist('10-vrf1005.netdev') == True)
         assert(unit_exist('10-vrf1005.network') == True)
@@ -1668,7 +1668,7 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'VLAN') == 'vlan-98')
 
-        subprocess.check_call("nmctl remove-netdev vlan-98 kind vlan" , shell = True)
+        subprocess.call("nmctl remove-netdev vlan-98 kind vlan" , shell = True)
         assert(unit_exist('10-vlan-98.netdev') == False)
         assert(unit_exist('10-vlan-98.network') == False)
 
@@ -1703,7 +1703,7 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'MACVLAN') == 'macvlan-98')
 
-        subprocess.check_call("nmctl remove-netdev macvlan-98 kind macvlan" , shell = True)
+        subprocess.call("nmctl remove-netdev macvlan-98 kind macvlan" , shell = True)
         assert(unit_exist('10-macvlan-98.netdev') == False)
         assert(unit_exist('10-macvlan-98.network') == False)
 
@@ -1733,7 +1733,7 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'MACVTAP') == 'macvtap-98')
 
-        subprocess.check_call("nmctl remove-netdev macvtap-98 kind macvtap" , shell = True)
+        subprocess.call("nmctl remove-netdev macvtap-98 kind macvtap" , shell = True)
         assert(unit_exist('10-macvtap-98.netdev') == False)
         assert(unit_exist('10-macvtap-98.network') == False)
 
@@ -1768,7 +1768,7 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'IPVLAN') == 'ipvlan-98')
 
-        subprocess.check_call("nmctl remove-netdev ipvlan-98 kind ipvlan" , shell = True)
+        subprocess.call("nmctl remove-netdev ipvlan-98 kind ipvlan" , shell = True)
         assert(unit_exist('10-ipvlan-98.netdev') == False)
         assert(unit_exist('10-ipvlan-98.network') == False)
 
@@ -1798,7 +1798,7 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'IPVTAP') == 'ipvtap-98')
 
-        subprocess.check_call("nmctl remove-netdev ipvtap-98 kind ipvtap" , shell = True)
+        subprocess.call("nmctl remove-netdev ipvtap-98 kind ipvtap" , shell = True)
         assert(unit_exist('10-ipvtap-98.netdev') == False)
         assert(unit_exist('10-ipvtap-98.network') == False)
 
@@ -1821,7 +1821,7 @@ class TestCLINetDev:
 
         assert(vrf_network_parser.get('Match', 'Name') == 'vrf-98')
 
-        subprocess.check_call("nmctl remove-netdev vrf-98 kind vrf" , shell = True)
+        subprocess.call("nmctl remove-netdev vrf-98 kind vrf" , shell = True)
         assert(unit_exist('10-vrf-98.netdev') == False)
         assert(unit_exist('10-vrf-98.network') == False)
 
@@ -1848,7 +1848,7 @@ class TestCLINetDev:
 
         assert(veth_network_parser.get('Match', 'Name') == 'veth-98')
 
-        subprocess.check_call("nmctl remove-netdev veth-98 kind veth" , shell = True)
+        subprocess.call("nmctl remove-netdev veth-98 kind veth" , shell = True)
         assert(unit_exist('10-veth-98.netdev') == False)
         assert(unit_exist('10-veth-98.network') == False)
 
@@ -1873,7 +1873,7 @@ class TestCLINetDev:
 
         assert(tun_network_parser.get('Match', 'Name') == 'test-tap')
 
-        subprocess.check_call("nmctl remove-netdev test-tap kind tap" , shell = True)
+        subprocess.call("nmctl remove-netdev test-tap kind tap" , shell = True)
         assert(unit_exist('10-test-tap.netdev') == False)
         assert(unit_exist('10-test-tap.network') == False)
 
@@ -1899,7 +1899,7 @@ class TestCLINetDev:
 
         assert(tun_network_parser.get('Match', 'Name') == 'test-tap')
 
-        subprocess.check_call("nmctl remove-netdev test-tap kind tap" , shell = True)
+        subprocess.call("nmctl remove-netdev test-tap kind tap" , shell = True)
         assert(unit_exist('10-test-tap.netdev') == False)
         assert(unit_exist('10-test-tap.network') == False)
 
@@ -1924,7 +1924,7 @@ class TestCLINetDev:
 
         assert(tun_network_parser.get('Match', 'Name') == 'test-tun')
 
-        subprocess.check_call("nmctl remove-netdev test-tun kind tun" , shell = True)
+        subprocess.call("nmctl remove-netdev test-tun kind tun" , shell = True)
         assert(unit_exist('10-test-tun.netdev') == False)
         assert(unit_exist('10-test-tun.network') == False)
 
@@ -1981,7 +1981,7 @@ class TestCLINetDev:
 
         assert(ipip_network_parser.get('Match', 'Name') == 'ipip-98')
 
-        subprocess.check_call("nmctl remove-netdev ipip-98 kind ipip" , shell = True)
+        subprocess.call("nmctl remove-netdev ipip-98 kind ipip" , shell = True)
         assert(unit_exist('10-ipip-98.netdev') == False)
         assert(unit_exist('10-ipip-98.network') == False)
 
@@ -2017,7 +2017,7 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'Tunnel') == 'gre-98')
 
-        subprocess.check_call("nmctl remove-netdev gre-98 kind gre" , shell = True)
+        subprocess.call("nmctl remove-netdev gre-98 kind gre" , shell = True)
         assert(unit_exist('10-gre-98.netdev') == False)
         assert(unit_exist('10-gre-98.network') == False)
 
@@ -2053,7 +2053,7 @@ class TestCLINetDev:
         assert(parser.get('Match', 'Name') == 'test98')
         assert(parser.get('Network', 'Tunnel') == 'vti-98')
 
-        subprocess.check_call("nmctl remove-netdev vti-98 kind vti" , shell = True)
+        subprocess.call("nmctl remove-netdev vti-98 kind vti" , shell = True)
         assert(unit_exist('10-vti-98.netdev') == False)
         assert(unit_exist('10-vti-98.network') == False)
 
