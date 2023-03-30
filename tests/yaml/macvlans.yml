@@ -1,0 +1,22 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+      test99:
+          match:
+              macaddress: "de:ad:be:ef:ca:fe"
+          set-name: test99
+          addresses: [ "10.3.0.5/23" ]
+          nameservers:
+              addresses: [ "8.8.8.8", "8.8.4.4" ]
+              search: [ example.com ]
+          routes:
+              - to: default
+                via: 10.3.0.1
+  macvlans:
+      macvlan1:
+          mode: private
+          link: test99
+      macvlan2:
+          mode: source
+          link: test99

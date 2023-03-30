@@ -262,6 +262,7 @@ typedef struct Veth {
 } Veth;
 
 typedef struct MACVLan {
+         char *master;
          MACVLanMode mode;
 } MACVLan;
 

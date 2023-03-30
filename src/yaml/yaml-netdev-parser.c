@@ -739,6 +739,63 @@ static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t
         return 0;
 }
 
+static ParserTable parser_macvlan_vtable[] = {
+        { "mode",                  CONF_TYPE_NETDEV_MACVLAN, parse_yaml_macvlan_mode,  offsetof(MACVLan, mode)},
+        { "link",                  CONF_TYPE_NETDEV_MACVLAN, parse_yaml_string,        offsetof(MACVLan, master)},
+        { NULL,                    _CONF_TYPE_INVALID,       0,                        0}
+};
+
+static int yaml_parse_macvlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        _auto_cleanup_ MACVLan *macvlan = NULL;
+        yaml_node_t *k, *v;
+        yaml_node_pair_t *p;
+        int r;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        r = macvlan_new(&macvlan);
+        if (r < 0)
+                return log_oom();
+
+        *network->netdev = (NetDev) {
+                           .ifname = strdup(network->ifname),
+                           .kind = NETDEV_KIND_MACVLAN,
+                           .macvlan = macvlan,
+        };
+        if (!network->netdev->ifname)
+                return log_oom();
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(m->macvlan, scalar(k));
+                if (!table) {
+                        (void) parse_network(m, dp, node, network);
+
+                        continue;
+                }
+
+                t = (uint8_t *) macvlan + table->offset;
+                if (table->parser) {
+                        (void) table->parser(scalar(k), scalar(v), macvlan, t, dp, v);
+                        network->modified = true;
+                }
+        }
+
+        steal_pointer(macvlan);
+        return 0;
+}
+
 int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
         yaml_node_pair_t *p;
         yaml_node_t *n;
@@ -769,6 +826,9 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                 n = yaml_document_get_node(dp, p->value);
                 if (n) {
                         switch (kind) {
+                                case YAML_NETDEV_KIND_MACVLAN:
+                                        (void) yaml_parse_macvlan(m, dp, n, net);
+                                        break;
                                 case YAML_NETDEV_KIND_VLAN:
                                         (void) yaml_parse_vlan(m, dp, n, net);
                                         break;
@@ -814,6 +874,17 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
 
 int yaml_register_netdev(YAMLManager *m) {
         assert(m);
+
+        m->macvlan = g_hash_table_new(g_str_hash, g_str_equal);
+        if (!m->macvlan)
+                return log_oom();
+
+        for (size_t i = 0; parser_macvlan_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->macvlan, (void *) parser_macvlan_vtable[i].key, &parser_macvlan_vtable[i])) {
+                        log_warning("Failed add key='%s' to MACVLan table", parser_macvlan_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
 
         m->vlan = g_hash_table_new(g_str_hash, g_str_equal);
         if (!m->vlan)
@@ -902,7 +973,6 @@ int yaml_register_netdev(YAMLManager *m) {
                         return -EINVAL;
                 }
         }
-
 
         return 0;
 }

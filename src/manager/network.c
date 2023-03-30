@@ -1403,8 +1403,29 @@ int generate_master_device_network(Network *n) {
         if (r < 0)
                 return r;
 
-        /* VLAN */
+        /* MACVLAN */
         switch (n->netdev->kind) {
+                case NETDEV_KIND_MACVLAN: {
+                        MACVLan *macvlan = n->netdev->macvlan;
+
+                        r = parse_ifname_or_index(macvlan->master, &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", macvlan->master);
+                                return r;
+                        }
+
+                        r = parse_network_file(p ? p->ifindex : -1, macvlan->master, &network);
+                        if (r < 0)
+                                return r;
+
+                        if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
+                                break;
+
+                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                        if (r < 0)
+                                return r;
+                }
+                        break;
                 case NETDEV_KIND_VLAN: {
                         VLan *vlan = n->netdev->vlan;
 

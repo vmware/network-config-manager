@@ -157,6 +157,7 @@ void yaml_manager_free(YAMLManager *p) {
         g_hash_table_destroy(p->link);
 
         g_hash_table_destroy(p->vlan);
+        g_hash_table_destroy(p->macvlan);
         g_hash_table_destroy(p->vxlan);
         g_hash_table_destroy(p->vrf);
         g_hash_table_destroy(p->bond);

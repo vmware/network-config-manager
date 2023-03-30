@@ -14,6 +14,7 @@ typedef enum ConfType {
         CONF_TYPE_ROUTING_POLICY_RULE,
         CONF_TYPE_LINK,
         CONF_TYPE_NETDEV_VLAN,
+        CONF_TYPE_NETDEV_MACVLAN,
         CONF_TYPE_NETDEV_BRIDGE,
         CONF_TYPE_NETDEV_BOND,
         CONF_TYPE_NETDEV_TUNNEL,
@@ -75,3 +76,5 @@ int parse_yaml_bond_xmit_hash_policy(const char *key, const char *value, void *d
 
 int parse_yaml_wireguard_key_or_path(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_sequence_wireguard_peer_shared_key_or_path(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+
+int parse_yaml_macvlan_mode(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
