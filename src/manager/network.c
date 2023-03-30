@@ -535,25 +535,34 @@ int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
         return 0;
 }
 
-int parse_network_file(const IfNameIndex *ifidx, char **ret) {
+int parse_network_file(const int ifindex, const char *ifname, char **ret) {
         _auto_cleanup_ char *setup = NULL, *network = NULL;
         int r;
 
-        assert(ifidx);
+        if (ifindex > 0) {
+                r = network_parse_link_network_file(ifindex, &network);
+                if (r < 0) {
+                        r = determine_network_conf_file(ifname, &network);
+                        if (r < 0)
+                                return r;
 
-        (void) dbus_network_reload();
-
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
-        if (r < 0) {
-                r = determine_network_conf_file(ifidx->ifname, &network);
+                        if (!g_file_test(network, G_FILE_TEST_EXISTS)) {
+                                r = create_network_conf_file(ifname, &network);
+                                if (r < 0)
+                                        return r;
+                        }
+                }
+        } else {
+                r = determine_network_conf_file(ifname, &network);
                 if (r < 0)
                         return r;
 
                 if (!g_file_test(network, G_FILE_TEST_EXISTS)) {
-                        r = create_network_conf_file(ifidx->ifname, &network);
-                        if (r < 0)
-                                return r;
+                                r = create_network_conf_file(ifname, &network);
+                                if (r < 0)
+                                        return r;
                 }
+
         }
 
         *ret = steal_pointer(network);
@@ -1400,12 +1409,10 @@ int generate_master_device_network(Network *n) {
                         VLan *vlan = n->netdev->vlan;
 
                         r = parse_ifname_or_index(vlan->master, &p);
-                        if (r < 0) {
-                                log_warning("Failed to find device: %s", vlan->master);
-                                return r;
-                        }
+                        if (r < 0)
+                                log_debug("Failed to find device: %s", vlan->master);
 
-                        r = parse_network_file(p, &network);
+                        r = parse_network_file(p ? p->ifindex : -1, vlan->master, &network);
                         if (r < 0)
                                 return r;
 
@@ -1423,12 +1430,10 @@ int generate_master_device_network(Network *n) {
 
                         strv_foreach(d, b->interfaces) {
                                 r = parse_ifname_or_index(*d, &p);
-                                if (r < 0) {
-                                        log_warning("Failed to find device: %s", *d);
-                                        return r;
-                                }
+                                if (r < 0)
+                                        log_debug("Failed to find device: %s", *d);
 
-                                r = parse_network_file(p, &network);
+                                r = parse_network_file(p ? p->ifindex : -1, *d, &network);
                                 if (r < 0)
                                         return r;
 
@@ -1447,12 +1452,10 @@ int generate_master_device_network(Network *n) {
 
                         strv_foreach(d, b->interfaces) {
                                 r = parse_ifname_or_index(*d, &p);
-                                if (r < 0) {
-                                        log_warning("Failed to find device: %s", *d);
-                                        return r;
-                                }
+                                if (r < 0)
+                                        log_debug("Failed to find device: %s", *d);
 
-                                r = parse_network_file(p, &network);
+                                r = parse_network_file(p ? p->ifindex : -1, *d, &network);
                                 if (r < 0)
                                         return r;
 
@@ -1471,12 +1474,10 @@ int generate_master_device_network(Network *n) {
 
                         strv_foreach(d, vrf->interfaces) {
                                 r = parse_ifname_or_index(*d, &p);
-                                if (r < 0) {
-                                        log_warning("Failed to find device: %s", *d);
-                                        return r;
-                                }
+                                if (r < 0)
+                                        log_debug("Failed to find device: %s", *d);
 
-                                r = parse_network_file(p, &network);
+                                r = parse_network_file(p ? p->ifindex : -1, *d, &network);
                                 if (r < 0)
                                         return r;
 
@@ -1493,12 +1494,10 @@ int generate_master_device_network(Network *n) {
                         VxLan *vx = n->netdev->vxlan;
 
                         r = parse_ifname_or_index(vx->master, &p);
-                        if (r < 0) {
-                                log_warning("Failed to find device: %s", vx->master);
-                                return r;
-                        }
+                        if (r < 0)
+                                log_debug("Failed to find device: %s", vx->master);
 
-                        r = parse_network_file(p, &network);
+                        r = parse_network_file(p ? p->ifindex : -1, vx->master, &network);
                         if (r < 0)
                                 return r;
 

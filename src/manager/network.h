@@ -285,7 +285,7 @@ int parse_address_from_string_and_add(const char *s, Set *a);
 int create_network_conf_file(const char *ifname, char **ret);
 int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret);
 int determine_network_conf_file(const char *ifname, char **ret);
-int parse_network_file(const IfNameIndex *ifidx, char **ret);
+int parse_network_file(const int ifindex, const char *ifname, char **ret);
 
 const char *dhcp_client_modes_to_name(int id);
 int dhcp_client_name_to_mode(char *name);
