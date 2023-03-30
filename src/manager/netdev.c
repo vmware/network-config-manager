@@ -562,6 +562,7 @@ int bridge_new(Bridge **ret) {
               .hello_time = UINT64_MAX,
               .max_age = UINT64_MAX,
               .ageing_time = UINT64_MAX,
+              .priority = UINT16_MAX,
           };
 
         *ret = steal_pointer(t);
