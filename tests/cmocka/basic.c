@@ -790,6 +790,141 @@ static void test_netdev_macvlans(void **state) {
     system("nmctl remove-netdev macvlan2 kind vlan");
 }
 
+static void test_netdev_bond_bridge(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    char *dns = NULL;
+    int r;
+
+    apply_yaml_file("bonds.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-bond-lan.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "bond-lan"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "bond"));
+
+    assert_true(key_file_config_exists(key_file, "Bond", "Mode", "802.3ad"));
+    assert_true(key_file_config_exists(key_file, "Bond", "PrimaryReselectPolicy", "always"));
+    assert_true(key_file_config_exists(key_file, "Bond", "MIIMonitorSec", "1"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-bond-wan.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "bond-wan"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "bond"));
+
+    assert_true(key_file_config_exists(key_file, "Bond", "Mode", "active-backup"));
+    assert_true(key_file_config_exists(key_file, "Bond", "PrimaryReselectPolicy", "always"));
+    assert_true(key_file_config_exists(key_file, "Bond", "MIIMonitorSec", "1"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-bond-conntrack.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "bond-conntrack"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "bond"));
+
+    assert_true(key_file_config_exists(key_file, "Bond", "Mode", "balance-rr"));
+    assert_true(key_file_config_exists(key_file, "Bond", "PrimaryReselectPolicy", "always"));
+    assert_true(key_file_config_exists(key_file, "Bond", "MIIMonitorSec", "1"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-bond-lan.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "bond-lan"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.93.2/24"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-bond-wan.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "bond-wan"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.252/24"));
+    assert_true(key_file_config_exists(key_file, "Network", "Domains", "local"));
+
+    assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+    assert_true(g_strrstr(dns, "8.8.4.4"));
+    assert_true(g_strrstr(dns, "8.8.8.8"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-bond-conntrack.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "bond-conntrack"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.254.2/24"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-enp2s0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "enp2s0"));
+    assert_true(key_file_config_exists(key_file, "Network", "Bond", "bond-lan"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-enp3s0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "enp3s0"));
+    assert_true(key_file_config_exists(key_file, "Network", "Bond", "bond-lan"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-enp1s0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "enp1s0"));
+    assert_true(key_file_config_exists(key_file, "Network", "Bond", "bond-wan"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-enp4s0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "enp4s0"));
+    assert_true(key_file_config_exists(key_file, "Network", "Bond", "bond-wan"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-enp5s0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "enp5s0"));
+    assert_true(key_file_config_exists(key_file, "Network", "Bond", "bond-conntrack"));
+
+    key_file_free(key_file);
+
+    r = parse_key_file("/etc/systemd/network/10-enp6s0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "enp6s0"));
+    assert_true(key_file_config_exists(key_file, "Network", "Bond", "bond-conntrack"));
+
+}
+
 static int setup(void **state) {
     link_add("test99");
     return 0;
@@ -817,6 +952,7 @@ int main(void) {
         cmocka_unit_test (test_netdev_bridges),
         cmocka_unit_test (test_netdev_vlan_bridge),
         cmocka_unit_test (test_netdev_macvlans),
+        cmocka_unit_test (test_netdev_bond_bridge),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
