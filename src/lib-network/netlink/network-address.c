@@ -28,7 +28,7 @@ static int addresses_new(Addresses **ret) {
         if (!h)
                 return log_oom();
 
-        r = set_new(&h->addresses, g_bytes_hash, g_bytes_equal);
+        r = set_new(&h->addresses, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
