@@ -110,7 +110,7 @@ static ParserTable parser_bond_vtable[] = {
         { "learn-packet-interval",   CONF_TYPE_NETDEV_BOND, parse_yaml_uint64,                offsetof(Bond, lp_interval)},
         { "resend-igmp",             CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,                offsetof(Bond, resend_igmp)},
         { "packets-per-member",      CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,                offsetof(Bond, packets_per_slave)},
-        { "gratuitous-arp",          CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,                offsetof(Bond, ngrat_arp)},
+        { "gratuitious-arp",         CONF_TYPE_NETDEV_BOND, parse_yaml_uint32,                offsetof(Bond, ngrat_arp)},
         { "all-members-active",      CONF_TYPE_NETDEV_BOND, parse_yaml_bool,                  offsetof(Bond, all_slaves_active)},
         { NULL,         _CONF_TYPE_INVALID,    0,                         0}
 };
