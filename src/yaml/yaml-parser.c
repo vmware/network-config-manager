@@ -459,6 +459,26 @@ int parse_yaml_bond_mode(const char *key,
         return 0;
 }
 
+int parse_yaml_macvlan_mode(const char *key,
+                            const char *value,
+                            void *data,
+                            void *userdata,
+                            yaml_document_t *doc,
+                            yaml_node_t *node) {
+        MACVLan *m;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        m = data;
+
+        m->mode = macvlan_name_to_mode((const char *) value);
+        return 0;
+}
+
 
 int parse_yaml_address(const char *key,
                        const char *value,

@@ -213,7 +213,7 @@ static void test_wireguard_multiple_peers(void **state) {
     system("nmctl remove-netdev wg0");
 }
 
-static void test_test_netdev_vlans(void **state) {
+static void test_netdev_vlans(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *dns = NULL, *d = NULL;
     int r;
@@ -728,6 +728,68 @@ static void test_netdev_vlan_bridge(void **state) {
     system("nmctl remove-netdev vlan15 kind vlan");
 }
 
+static void test_netdev_macvlans(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    char *dns = NULL;
+    int r;
+
+    apply_yaml_file("macvlans.yml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+    assert_true(key_file_config_exists(key_file, "Match", "MACAddress", "de:ad:be:ef:ca:fe"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "Domains", "example.com"));
+    assert_true(key_file_config_exists(key_file, "Network", "MACVLAN", "macvlan1"));
+    assert_true(key_file_config_exists(key_file, "Network", "MACVLAN", "macvlan2"));
+
+    assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+    assert_true(g_strrstr(dns, "8.8.4.4"));
+    assert_true(g_strrstr(dns, "8.8.8.8"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "10.3.0.5/23"));
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "10.3.0.1"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-macvlan1.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "macvlan1"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "macvlan"));
+    assert_true(key_file_config_exists(key_file, "MACVLAN", "Mode", "private"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-macvlan2.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "macvlan2"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "macvlan"));
+    assert_true(key_file_config_exists(key_file, "MACVLAN", "Mode", "source"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-macvlan1.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "macvlan1"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-macvlan2.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "macvlan2"));
+
+    system("nmctl remove-netdev macvlan1 kind vlan");
+    system("nmctl remove-netdev macvlan2 kind vlan");
+}
+
 static int setup(void **state) {
     link_add("test99");
     return 0;
@@ -746,7 +808,7 @@ int main(void) {
         cmocka_unit_test (test_additional_gw_source_routing),
         cmocka_unit_test (test_wireguard_multiple_peers),
         cmocka_unit_test (test_static_address),
-        cmocka_unit_test (test_test_netdev_vlans),
+        cmocka_unit_test (test_netdev_vlans),
         cmocka_unit_test (test_netdev_vlan),
         cmocka_unit_test (test_netdev_vrfs),
         cmocka_unit_test (test_netdev_bond_parametres),
@@ -754,6 +816,7 @@ int main(void) {
         cmocka_unit_test (test_netdev_bond),
         cmocka_unit_test (test_netdev_bridges),
         cmocka_unit_test (test_netdev_vlan_bridge),
+        cmocka_unit_test (test_netdev_macvlans),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

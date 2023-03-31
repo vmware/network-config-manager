@@ -661,6 +661,7 @@ void macvlan_free(MACVLan *m) {
         if (!m)
                 return;
 
+        free(m->master);
         free(m);
 }
 
@@ -802,9 +803,11 @@ int generate_netdev_config(NetDev *n) {
                         break;
 
                 case NETDEV_KIND_BOND:
-                        r = key_file_set_string(key_file, "Bond", "Mode", bond_mode_to_name(n->bond->mode));
-                        if (r < 0)
-                                return r;
+                        if (n->bond->mode != _BOND_MODE_INVALID) {
+                                r = key_file_set_string(key_file, "Bond", "Mode", bond_mode_to_name(n->bond->mode));
+                                if (r < 0)
+                                        return r;
+                        }
 
                         if (n->bond->xmit_hash_policy != _BOND_XMIT_HASH_POLICY_INVALID) {
                                 r = key_file_set_string(key_file, "Bond", "TransmitHashPolicy", bond_xmit_hash_policy_to_name(n->bond->xmit_hash_policy));
@@ -1081,9 +1084,11 @@ int generate_netdev_config(NetDev *n) {
                         break;
 
                 case NETDEV_KIND_MACVLAN:
-                        r = key_file_set_string(key_file, "MACVLAN", "Mode", macvlan_mode_to_name(n->macvlan->mode));
-                        if (r < 0)
-                                return r;
+                        if (n->macvlan->mode != _MAC_VLAN_MODE_INVALID) {
+                                r = key_file_set_string(key_file, "MACVLAN", "Mode", macvlan_mode_to_name(n->macvlan->mode));
+                                if (r < 0)
+                                        return r;
+                        }
 
                         break;
 

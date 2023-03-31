@@ -28,6 +28,7 @@ typedef struct YAMLManager {
         GHashTable *link;
 
         GHashTable *vlan;
+        GHashTable *macvlan;
         GHashTable *bond;
         GHashTable *bridge;
         GHashTable *tunnel;
