@@ -29,7 +29,7 @@ static int link_add(const char *s) {
 }
 
 static int link_remove (const char *s) {
-    _auto_cleanup_ char *c = NULL, *yaml_file = NULL;
+    _auto_cleanup_ char *c = NULL;
 
     c = strjoin(" ", "/usr/sbin/ip", "link", "del", s, NULL);
     if (!c)
