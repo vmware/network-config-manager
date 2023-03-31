@@ -151,7 +151,7 @@ def expectedFailureIfNetdevsimWithSRIOVIsNotAvailable():
 
 class TestLinkConfigManagerYAML:
     yaml_configs = [
-        "link.yml",
+        "link.yaml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -172,7 +172,7 @@ class TestLinkConfigManagerYAML:
 
     def test_link(self):
         assert(link_exist('test99') == True)
-        self.copy_yaml_file_to_netmanager_yaml_path('link.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('link.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.link') == True)
@@ -210,19 +210,19 @@ class TestLinkConfigManagerYAML:
 
 class TestNetworkConfigManagerYAML:
     yaml_configs = [
-        "dhcp4.yml",
-        "match-driver.yml",
-        "static-address-label.yml",
-        "dhcp-overrides.yml",
-        "dhcp-client-identifier.yml",
-        "gw-onlink.yml",
-        "ipv6-config.yml",
-        "static-gw.yml",
-        "network-link.yml",
-        "network-network.yml",
-        "routing-policy-rule.yml",
-        "multiple-rt.yml",
-        "vlan.yml",
+        "dhcp4.yaml",
+        "match-driver.yaml",
+        "static-address-label.yaml",
+        "dhcp-overrides.yaml",
+        "dhcp-client-identifier.yaml",
+        "gw-onlink.yaml",
+        "ipv6-config.yaml",
+        "static-gw.yaml",
+        "network-link.yaml",
+        "network-network.yaml",
+        "routing-policy-rule.yaml",
+        "multiple-rt.yaml",
+        "vlan.yaml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -248,7 +248,7 @@ class TestNetworkConfigManagerYAML:
         subprocess.check_call("/usr/bin/nmctl-tests")
 
     def test_match_driver(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('match-driver.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('match-driver.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -267,7 +267,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'Gateway') == '10.3.0.1')
 
     def test_network_link(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('network-link.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('network-link.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -287,7 +287,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'Gateway') == '10.100.1.1')
 
     def test_network_network(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('network-network.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('network-network.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -307,7 +307,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'Gateway') == '10.100.1.1')
 
     def test_basic_dhcp4(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('dhcp4.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('dhcp4.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -320,7 +320,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Network', 'DHCP') == 'ipv4')
 
     def test_dhcp4_client_identifier(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('dhcp-client-identifier.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('dhcp-client-identifier.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -335,7 +335,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('DHCPv4', 'ClientIdentifier') == 'mac')
 
     def test_dhcp4_overrides(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('dhcp-overrides.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('dhcp-overrides.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -361,7 +361,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('DHCPv4', 'RouteMetric') == '100')
 
     def test_network_static_address_label_configuration(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -374,7 +374,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Address', 'PreferredLifetime') == '2000')
 
     def test_network_gw_onlink(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('gw-onlink.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('gw-onlink.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -389,7 +389,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'Onlink') == 'yes')
 
     def test_network_static_gw(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('static-gw.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('static-gw.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -410,7 +410,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'InitialAdvertisedReceiveWindow') == '20')
 
     def test_network_routing_policy_rule(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('routing-policy-rule.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('routing-policy-rule.yaml')
 
         subprocess.check_call("nmctl apply" , shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -433,7 +433,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('RoutingPolicyRule', 'FirewallMark') == '21')
 
     def test_network_ipv6(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('ipv6-config.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('ipv6-config.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-test99.network') == True)
@@ -451,14 +451,14 @@ class TestNetworkConfigManagerYAML:
 
 class TestNetDevConfigManagerYAML:
     yaml_configs = [
-        "bond.yml",
-        "bridge.yml",
-        "tunnel.yml",
-        "tunnel-keys.yml",
-        "vrf.yml",
-        "vxlan.yml",
-        "wireguard.yml",
-        "wg-multiple.yml",
+        "bond.yaml",
+        "bridge.yaml",
+        "tunnel.yaml",
+        "tunnel-keys.yaml",
+        "vrf.yaml",
+        "vxlan.yaml",
+        "wireguard.yaml",
+        "wg-multiple.yaml",
     ]
 
     def copy_yaml_file_to_netmanager_yaml_path(self, config_file):
@@ -481,7 +481,7 @@ class TestNetDevConfigManagerYAML:
         link_remove('test98')
 
     def test_netdev_bridge(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('bridge.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('bridge.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-br0.netdev') == True)
@@ -510,7 +510,7 @@ class TestNetDevConfigManagerYAML:
         subprocess.call("nmctl remove-netdev br0 kind bridge", shell = True)
 
     def test_netdev_tunnel(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('tunnel.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('tunnel.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-he-ipv6.netdev') == True)
@@ -535,7 +535,7 @@ class TestNetDevConfigManagerYAML:
         subprocess.call("nmctl remove-netdev he-ipv6 kind sit", shell = True)
 
     def test_netdev_tunnel_keys(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('tunnel-keys.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('tunnel-keys.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-he-ipv6.netdev') == True)
@@ -558,7 +558,7 @@ class TestNetDevConfigManagerYAML:
         subprocess.call("nmctl remove-netdev he-ipv6 kind sit", shell = True)
 
     def test_netdev_vrf(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('vrf.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('vrf.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         subprocess.check_call(['sleep', '15'])
@@ -587,7 +587,7 @@ class TestNetDevConfigManagerYAML:
         subprocess.call("nmctl remove-netdev vrf1005 kind vrf", shell = True)
 
     def test_netdev_vxlan(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('vxlan.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('vxlan.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-vxlan1.netdev') == True)
@@ -628,7 +628,7 @@ class TestNetDevConfigManagerYAML:
         subprocess.call("nmctl remove-netdev vxlan1 kind vxlan", shell = True)
 
     def test_netdev_wireguard(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('wireguard.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('wireguard.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-home0.netdev') == True)
@@ -650,7 +650,7 @@ class TestNetDevConfigManagerYAML:
         subprocess.call("nmctl remove-netdev home0", shell = True)
 
     def test_netdev_wireguard_multiple_peer(self):
-        self.copy_yaml_file_to_netmanager_yaml_path('wg-multiple.yml')
+        self.copy_yaml_file_to_netmanager_yaml_path('wg-multiple.yaml')
 
         subprocess.check_call("nmctl apply", shell = True)
         assert(unit_exist('10-wg0.netdev') == True)
