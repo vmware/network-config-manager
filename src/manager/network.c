@@ -699,6 +699,7 @@ int network_new(Network **ret) {
                 .all_multicast = -1,
                 .promiscuous = -1,
                 .req_for_online = -1,
+                .optional = -1,
                 .dhcp_type = _DHCP_CLIENT_INVALID,
                 .dhcp4 = -1,
                 .dhcp6 = -1,
@@ -1146,6 +1147,12 @@ int generate_network_config(Network *n) {
 
                 if (n->req_for_online >= 0) {
                         r = set_config(key_file, "Link", "RequiredForOnline", bool_to_string(n->req_for_online));
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->optional >= 0) {
+                        r = set_config(key_file, "Link", "RequiredForOnline", bool_to_string(!n->optional));
                         if (r < 0)
                                 return r;
                 }

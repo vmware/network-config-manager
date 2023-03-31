@@ -279,6 +279,7 @@ class TestNetworkConfigManagerYAML:
 
         assert(parser.get('Link', 'MACAddress') == 'c2:b0:bb:e3:4d:88')
         assert(parser.get('Link', 'ActivationPolicy') == 'up')
+        assert(parser.get('Link', 'RequiredForOnline') == 'no')
 
         assert(parser.get('Address', 'Address') == '10.100.1.37/24')
 

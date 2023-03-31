@@ -1,6 +1,7 @@
 network:
   ethernets:
     test99:
+      optional: true
       activation-mode: up
       macaddress: c2:b0:bb:e3:4d:88
       addresses:
