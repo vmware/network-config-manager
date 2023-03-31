@@ -37,7 +37,7 @@ static int routes_new(Routes **ret) {
         if (!rt)
                 return log_oom();
 
-        r = set_new(&rt->routes, g_bytes_hash, g_bytes_equal);
+        r = set_new(&rt->routes, g_direct_hash, g_direct_equal);
         if (r < 0)
                 return r;
 
@@ -167,6 +167,7 @@ static int route_data_ipv6_attr_cb(const struct nlattr *attr, void *data) {
 static int fill_link_route_message(Route *rt, int ifindex , struct nlattr *tb[]) {
         if (tb[RTA_TABLE])
                 rt->table = mnl_attr_get_u32(tb[RTA_TABLE]);
+
 
         if (tb[RTA_DST]) {
                 if (rt->family == AF_INET)
