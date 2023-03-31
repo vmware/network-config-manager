@@ -14,6 +14,7 @@ clean:
 
 install: build
 	ninja -C build install
+	install units/01-dhcp.yml /etc/network-config-manager/yaml
 .PHONY: install
 
 install-tests: build

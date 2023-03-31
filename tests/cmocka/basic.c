@@ -77,7 +77,7 @@ static void test_multiple_address(void **state) {
     char *dns = NULL;
     int r;
 
-    apply_yaml_file("multiple-address.yml");
+    apply_yaml_file("multiple-address.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -98,7 +98,7 @@ static void test_static_address(void **state) {
     char *dns = NULL;
     int r;
 
-    apply_yaml_file("static-address.yml");
+    apply_yaml_file("static-address.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -123,7 +123,7 @@ static void test_multiple_routes_address(void **state) {
     char *dns = NULL;
     int r;
 
-    apply_yaml_file("multiple-rt.yml");
+    apply_yaml_file("multiple-rt.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -152,7 +152,7 @@ static void test_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    apply_yaml_file("source-routing.yml");
+    apply_yaml_file("source-routing.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -186,7 +186,7 @@ static void test_wireguard_multiple_peers(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    apply_yaml_file("wg.yml");
+    apply_yaml_file("wg.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-wg0.netdev", &key_file);
     assert_true(r >= 0);
@@ -218,7 +218,7 @@ static void test_netdev_vlans(void **state) {
     char *dns = NULL, *d = NULL;
     int r;
 
-    apply_yaml_file("vlans.yml");
+    apply_yaml_file("vlans.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -288,7 +288,7 @@ static void test_netdev_vrfs(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    apply_yaml_file("vrfs.yml");
+    apply_yaml_file("vrfs.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -359,7 +359,7 @@ static void test_netdev_vxlans(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    apply_yaml_file("vxlans.yml");
+    apply_yaml_file("vxlans.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -478,7 +478,7 @@ static void test_netdev_vlan(void **state) {
     char *dns = NULL;
     int r;
 
-    apply_yaml_file("vlan.yml");
+    apply_yaml_file("vlan.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -531,7 +531,7 @@ static void test_netdev_bond_parametres(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    apply_yaml_file("bond.yml");
+    apply_yaml_file("bond.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-bond0.netdev", &key_file);
     assert_true(r >= 0);
@@ -575,7 +575,7 @@ static void test_netdev_bond(void **state) {
     char *dns = NULL;
     int r;
 
-    apply_yaml_file("bond-interface.yml");
+    apply_yaml_file("bond-interface.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-bond0.netdev", &key_file);
     assert_true(r >= 0);
@@ -610,7 +610,7 @@ static void test_netdev_bridges(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    apply_yaml_file("bridges.yml");
+    apply_yaml_file("bridges.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -675,7 +675,7 @@ static void test_netdev_vlan_bridge(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    apply_yaml_file("vlan-bridge.yml");
+    apply_yaml_file("vlan-bridge.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-br0.netdev", &key_file);
     assert_true(r >= 0);
@@ -733,7 +733,7 @@ static void test_netdev_macvlans(void **state) {
     char *dns = NULL;
     int r;
 
-    apply_yaml_file("macvlans.yml");
+    apply_yaml_file("macvlans.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -795,7 +795,7 @@ static void test_netdev_bond_bridge(void **state) {
     char *dns = NULL;
     int r;
 
-    apply_yaml_file("bonds.yml");
+    apply_yaml_file("bonds.yaml");
 
     r = parse_key_file("/etc/systemd/network/10-bond-lan.netdev", &key_file);
     assert_true(r >= 0);

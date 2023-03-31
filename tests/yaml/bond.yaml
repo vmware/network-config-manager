@@ -18,7 +18,7 @@ network:
               learn-packet-interval: 32
               resend-igmp: 45
               packets-per-member: 11
-              gratuitous-arp: 15
+              gratuitious-arp: 15
               all-members-active: yes
               arp-validate: active
               fail-over-mac-policy: active
