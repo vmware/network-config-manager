@@ -820,6 +820,7 @@ static void test_netdev_bond_bridge(void **state) {
     assert_true(key_file_config_exists(key_file, "Bond", "Mode", "active-backup"));
     assert_true(key_file_config_exists(key_file, "Bond", "PrimaryReselectPolicy", "always"));
     assert_true(key_file_config_exists(key_file, "Bond", "MIIMonitorSec", "1"));
+    assert_true(key_file_config_exists(key_file, "Bond", "GratuitousARP", "5"));
 
     key_file_free(key_file);
 
