@@ -7,6 +7,7 @@
 
 #include "alloc-util.h"
 #include "ctl-display.h"
+#include "file-util.h"
 #include "ctl.h"
 #include "log.h"
 #include "macros.h"
@@ -14,33 +15,42 @@
 
 static bool alias = false;
 
+static int load_yaml_files(void) {
+        g_autoptr(GHashTable) configs = NULL;
+        g_autoptr(GList) config_keys = NULL;
+        _cleanup_(globfree) glob_t g = {};
+        int r;
+
+        r = glob_files("/etc/network-config-manager/yaml/*.yaml", 0, &g);
+        if (r != -ENOENT)
+                return r;
+
+        configs = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+        if (!configs)
+                return log_oom();
+
+        for (size_t i = 0; i < g.gl_pathc; ++i)
+                g_hash_table_insert(configs, g_path_get_basename(g.gl_pathv[i]), g.gl_pathv[i]);
+
+        config_keys = g_list_sort(g_hash_table_get_keys(configs), (GCompareFunc) strcmp);
+
+        for (GList* i = config_keys; i != NULL; i = i->next) {
+                r = manager_generate_network_config_from_yaml(g_hash_table_lookup(configs, i->data));
+                if (r < 0)
+                        return r;
+        }
+
+        return 0;
+}
+
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
-        _cleanup_(g_error_freep) GError *e = NULL;
-        _cleanup_(g_dir_closep) GDir *dir = NULL;
-        const char *file = NULL;
         int r;
 
         if (str_equal(argv[0], "apply")) {
-                dir = g_dir_open("/etc/network-config-manager/yaml", 0, &e);
-                if (!dir) {
-                        log_warning("Failed to open directory '/etc/network-config-manager/yaml': %s", e->message);
-                        return -e->code;
-                }
-
-                for (;;) {
-                        _auto_cleanup_ char *path = NULL;
-
-                        file = g_dir_read_name(dir);
-                        if (!file)
-                                break;
-
-                        path = g_build_path("/", "/etc/network-config-manager/yaml", file, NULL);
-                        if (!path)
-                                return log_oom();
-
-                        r = manager_generate_network_config_from_yaml(path);
-                        if (r < 0)
-                                return r;
+                r = load_yaml_files();
+                if (r < 0) {
+                        log_warning("Failed to process yaml directory '/etc/network-config-manager/yaml': %s", strerror(r));
+                        return r;
                 }
         } else {
                 for (int i = 1; i < argc; i++) {
