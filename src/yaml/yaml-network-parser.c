@@ -47,6 +47,7 @@ static ParserTable parser_network_vtable[] = {
         { "allmulticast",               CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, all_multicast)},
         { "promiscuous",                CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, promiscuous)},
         { "required-for-online",        CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, req_for_online)},
+        { "optional",                   CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, optional)},
         { "required-family-for-online", CONF_TYPE_NETWORK,     parse_yaml_rf_online,                    offsetof(Network, req_family_for_online)},
         { "activation-mode",            CONF_TYPE_NETWORK,     parse_yaml_activation_policy,            offsetof(Network, activation_policy)},
         { "macaddress",                 CONF_TYPE_NETWORK,     parse_yaml_mac_address,                  offsetof(Network, mac)},
