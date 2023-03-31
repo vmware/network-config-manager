@@ -34,7 +34,7 @@ static int load_yaml_files(void) {
 
         config_keys = g_list_sort(g_hash_table_get_keys(configs), (GCompareFunc) strcmp);
 
-        for (GList* i = config_keys; i != NULL; i = i->next) {
+        for (GList *i = config_keys; i ; i = i->next) {
                 r = manager_generate_network_config_from_yaml(g_hash_table_lookup(configs, i->data));
                 if (r < 0)
                         return r;
@@ -437,7 +437,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-sr-iov",                    "sriov",            2,        WORD_ANY, false, ncm_configure_sr_iov},
                 { "set-proxy",                     "pxy",              1,        WORD_ANY, false, ncm_configure_proxy },
                 { "show-proxy",                    "spxy",             WORD_ANY, WORD_ANY, false, ncm_show_proxy },
-                { "apply-file",                    "applyf",           1,        WORD_ANY, false, generate_networkd_config_from_yaml },
+                { "apply-file",                    "af",               1,        WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply",                         "apply",            WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply-cmdline",                 "applycmd",         WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
                 { "add-nft-table",                 "atable",           2,        WORD_ANY, false, ncm_nft_add_tables },
