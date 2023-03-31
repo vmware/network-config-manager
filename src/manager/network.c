@@ -536,7 +536,7 @@ int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
 }
 
 int parse_network_file(const int ifindex, const char *ifname, char **ret) {
-        _auto_cleanup_ char *setup = NULL, *network = NULL;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
         if (ifindex > 0) {
