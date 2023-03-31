@@ -403,7 +403,7 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
         assert(network);
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
-                ParserTable *table, *link_table;
+                ParserTable *table;
                 void *t;
 
                 k = yaml_document_get_node(dp, p->key);
