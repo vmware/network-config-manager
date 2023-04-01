@@ -1613,6 +1613,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt = NULL;
         uint32_t table = random() % 999;
+        bool b = false;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -1637,11 +1638,14 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         continue;
                 } else if (str_equal_fold(argv[i], "destination") || str_equal_fold(argv[i], "dest")) {
                         parse_next_arg(argv, argc, i);
-
-                        r = parse_ip_from_string(argv[i], &destination);
-                        if (r < 0) {
-                                log_warning("Failed to parse destination '%s': %s", argv[i], strerror(-r));
-                                return r;
+                        if (str_equal("default", argv[i]))
+                                b = true;
+                        else {
+                                r = parse_ip_from_string(argv[i], &destination);
+                                if (r < 0) {
+                                        log_warning("Failed to parse destination '%s': %s", argv[i], strerror(-r));
+                                        return r;
+                                }
                         }
 
                         continue;
@@ -1684,10 +1688,14 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                 .family = a->family,
                 .ifindex = p->ifindex,
                 .table = table,
-                .dst_prefixlen = destination->prefix_len,
-                .dst = *destination,
+                .to_default = b,
                 .gw = *gw,
         };
+
+        if (destination) {
+                rt->dst_prefixlen = destination->prefix_len;
+                rt->dst = *destination;
+        }
 
         r = manager_configure_additional_gw(p, a, rt);
         if (r < 0) {

@@ -906,46 +906,16 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
                 r = key_file_set_string(key_file, "Address", "Address", address);
                 if (r < 0)
                         return r;
-        } else {
-                r = parse_config_file(network, "Network", "Address", &address);
-                if (r < 0) {
-                        r = parse_config_file(network, "Address", "Address", &address);
-                        if (r < 0) {
-                                log_warning("Failed to find Address= for device '%s': %s", ifidx->ifname, strerror(-r));
-                                return r;
-                        }
-                }
         }
+
         pref_source = strdup(address);
         if (!pref_source)
                 return log_oom();
-
-        if (!ip_is_null(&rt->dst)) {
-                r = ip_to_string(rt->dst.family, &rt->dst, &destination);
-                if (r < 0)
-                        return r;
-        } else {
-                r = parse_config_file(network, "Route", "Destination", &destination);
-                if (r < 0) {
-                        destination = strdup("0.0.0.0");
-                        if (!destination)
-                                return log_oom();
-                }
-        }
 
         if (!ip_is_null(&rt->gw)) {
                 r = ip_to_string(rt->gw.family, &rt->gw, &gw);
                 if (r < 0)
                         return r;
-        } else {
-                r = parse_config_file(network, "Network", "Gateway", &destination);
-                if (r < 0) {
-                        r = parse_config_file(network, "Route", "Gateway", &address);
-                        if (r < 0) {
-                                log_warning("AFailed to find Gateway= for device '%s': %s", ifidx->ifname, strerror(-r));
-                                return r;
-                        }
-                }
         }
 
         r = section_new("Route", &section);
@@ -959,6 +929,25 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         r = add_key_to_section(section, "PreferredSource", pref_source);
         if (r < 0)
                 return r;
+
+        if (!ip_is_null(&rt->dst)) {
+                r = ip_to_string(rt->dst.family, &rt->dst, &destination);
+                if (r < 0)
+                        return r;
+        } else if (rt->to_default || ip_is_null(&rt->dst)) {
+                switch(rt->family) {
+                        case AF_INET:
+                                destination = strdup("0.0.0.0/0");
+                                if (!destination)
+                                        return log_oom();
+                                break;
+                        case AF_INET6:
+                                destination = strdup("::/0");
+                                if (!destination)
+                                        return log_oom();
+                                break;
+                }
+        }
 
         r = add_key_to_section(section, "Destination", destination);
         if (r < 0)
