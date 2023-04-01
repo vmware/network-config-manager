@@ -624,7 +624,8 @@ int manager_configure_route(const IfNameIndex *ifidx,
                             const RouteTable table,
                             const uint32_t mtu,
                             const int metric,
-                            const int onlink) {
+                            const int onlink,
+                            const bool b) {
 
         _auto_cleanup_ char *network = NULL, *gw = NULL, *dest = NULL, *src = NULL, *pref_src = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -678,6 +679,15 @@ int manager_configure_route(const IfNameIndex *ifidx,
                         return r;
 
                 add_key_to_section(section, "Destination", dest);
+        } else if (b) {
+                switch(gateway->family) {
+                        case AF_INET:
+                                add_key_to_section(section, "Destination", "0.0.0.0/0");
+                                break;
+                        case AF_INET6:
+                                add_key_to_section(section, "Destination", "::/0");
+                                break;
+                }
         }
 
         if (metric > 0)

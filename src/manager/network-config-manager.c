@@ -1367,6 +1367,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t metric = 0, mtu = 0;
         int onlink = -1, r;
+        bool b = false;
 
         for (int i = 1; i < argc; i++) {
                 if (str_equal_fold(argv[i], "dev")) {
@@ -1390,10 +1391,14 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "destination") || str_equal_fold(argv[i], "dest")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &dst);
-                        if (r < 0) {
-                                log_warning("Failed to parse route destination address '%s': %s", argv[2], strerror(-r));
-                                return r;
+                        if (str_equal("default", argv[i]))
+                                b = true;
+                        else {
+                                r = parse_ip_from_string(argv[i], &dst);
+                                if (r < 0) {
+                                        log_warning("Failed to parse route destination address '%s': %s", argv[2], strerror(-r));
+                                        return r;
+                                }
                         }
                         continue;
                 } else if (str_equal_fold(argv[i], "source") || str_equal_fold(argv[i], "src")) {
@@ -1518,7 +1523,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_configure_route(p, gw, dst, source , pref_source, rt_pref, protocol, scope, type, table, mtu, metric, onlink);
+        r = manager_configure_route(p, gw, dst, source , pref_source, rt_pref, protocol, scope, type, table, mtu, metric, onlink, b);
         if (r < 0) {
                 log_warning("Failed to configure route on device '%s': %s", argv[1], strerror(-r));
                 return r;

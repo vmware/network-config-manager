@@ -59,7 +59,8 @@ int manager_configure_route(const IfNameIndex *ifidx,
                             const RouteTable table,
                             const uint32_t mtu,
                             const int metric,
-                            const int onlink);
+                            const int onlink,
+                            const bool b);
 
 int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway);
 
