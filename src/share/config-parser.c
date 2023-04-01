@@ -144,15 +144,12 @@ bool config_exists(const char *path, const char *section, const char *k, const c
 }
 
 bool key_file_config_exists(const KeyFile *key_file, const char *section, const char *k, const char *v) {
-        GList *i;
-
         assert(k);
-
         assert(key_file);
         assert(section);
         assert(k);
 
-        for (i = key_file->sections; i; i = g_list_next (i)) {
+        for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
                 if (str_equal(s->name, section)) {
@@ -169,15 +166,12 @@ bool key_file_config_exists(const KeyFile *key_file, const char *section, const 
 }
 
 char *key_file_config_get(const KeyFile *key_file, const char *section, const char *k) {
-        GList *i;
-
         assert(k);
-
         assert(key_file);
         assert(section);
         assert(k);
 
-        for (i = key_file->sections; i; i = g_list_next (i)) {
+        for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
                 if (str_equal(s->name, section)) {

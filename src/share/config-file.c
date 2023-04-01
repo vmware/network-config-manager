@@ -101,7 +101,6 @@ void key_file_free(KeyFile *k) {
 
 int key_file_save(KeyFile *key_file) {
         _cleanup_(g_string_unrefp) GString *config = NULL;
-        GList *iter;
 
         assert(key_file);
 
@@ -109,7 +108,7 @@ int key_file_save(KeyFile *key_file) {
         if (!config)
                 return log_oom();
 
-        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
                 if (g_list_length(s->keys) <= 0)
@@ -222,14 +221,13 @@ const char *ctl_to_config(const ConfigManager *m, const char *name) {
 
 int set_config(KeyFile *key_file, const char *section, const char *k, const char *v) {
         _cleanup_(section_freep) Section *sec = NULL;
-        GList *iter;
         int r;
 
         assert(key_file);
         assert(section);
         assert(k);
 
-        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
                 if (str_equal(s->name, section)) {
@@ -415,7 +413,6 @@ int add_config_file_string(const char *path, const char *section, const char *k,
 int add_key_to_section_string(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         bool b = false;
-        GList *iter;
         int r;
 
         assert(path);
@@ -427,7 +424,7 @@ int add_key_to_section_string(const char *path, const char *section, const char 
         if (r < 0)
                 return r;
 
-        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
                 if (str_equal(s->name, section)) {
@@ -475,13 +472,11 @@ int key_file_add_string(KeyFile *key_file, const char *section, const char *k, c
 }
 
 int key_file_parse_string(KeyFile *key_file, const char *section, const char *k, char **v) {
-        GList *iter;
-
         assert(key_file);
         assert(section);
         assert(k);
 
-        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
                 if (str_equal(s->name, section)) {
@@ -538,7 +533,7 @@ int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, uin
 int remove_key_from_config_file(const char *path, const char *section, const char *k) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_ (key_freep) Key *p = NULL;
-        GList *iter, *l = NULL;
+        GList *l = NULL;
         int r;
 
         assert(path);
@@ -549,7 +544,7 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
         if (r < 0)
                 return r;
 
-        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
                 if (str_equal(s->name, section)) {
@@ -577,7 +572,7 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
 
 int remove_key_value_from_config_file(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        GList *iter, *l = NULL;
+        GList *l = NULL;
         int r;
 
         assert(path);
@@ -588,7 +583,7 @@ int remove_key_value_from_config_file(const char *path, const char *section, con
         if (r < 0)
                 return r;
 
-        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
                 if (str_equal(s->name, section)) {
@@ -613,11 +608,10 @@ int remove_key_value_from_config_file(const char *path, const char *section, con
         return set_file_permisssion(path, "systemd-network");
 }
 
-
 int remove_section_from_config_file(const char *path, const char *section) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_ (section_freep) Section *sec = NULL;
-        GList *iter, *l = NULL;
+        GList *l = NULL;
         int r;
 
         assert(path);
@@ -627,7 +621,7 @@ int remove_section_from_config_file(const char *path, const char *section) {
         if (r < 0)
                 return r;
 
-        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
                 if (str_equal(s->name, section)) {
@@ -650,7 +644,7 @@ int remove_section_from_config_file(const char *path, const char *section) {
 int remove_section_from_config_file_key(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_ (section_freep) Section *sec = NULL;
-        GList *iter, *l = NULL;
+        GList *l = NULL;
         int r;
 
         assert(path);
@@ -660,7 +654,7 @@ int remove_section_from_config_file_key(const char *path, const char *section, c
         if (r < 0)
                 return r;
 
-        for (iter = key_file->sections; iter; iter = g_list_next (iter)) {
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
                 if (str_equal(s->name, section)) {
