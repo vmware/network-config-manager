@@ -103,6 +103,7 @@ subdir('include')
 subdir('src')
 #subdir('doc')
 subdir('units')
+subdir('conf')
 
 ############################################################
 
