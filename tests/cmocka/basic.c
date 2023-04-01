@@ -448,7 +448,7 @@ static void test_additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    assert_true(system("nmctl add-addl-gw dev test99 address 192.168.10.5/24 dest 0.0.0.0 gw 172.16.85.1 table 100") >= 0);
+    assert_true(system("nmctl add-addl-gw dev test99 address 192.168.10.5/24 dest default gw 172.16.85.1 table 100") >= 0);
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -458,7 +458,7 @@ static void test_additional_gw_source_routing(void **state) {
 
     assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.10.5/24"));
 
-    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0"));
+    assert_true(key_file_config_exists(key_file, "Route", "Destination", "0.0.0.0/0"));
     assert_true(key_file_config_exists(key_file, "Route", "Table", "100"));
     assert_true(key_file_config_exists(key_file, "Route", "PreferredSource", "192.168.10.5/24"));
 
