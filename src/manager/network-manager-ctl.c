@@ -21,7 +21,7 @@ static int load_yaml_files(void) {
         _cleanup_(globfree) glob_t g = {};
         int r;
 
-        r = glob_files("/etc/network-config-manager/yaml/*.yaml", 0, &g);
+        r = glob_files("/etc/network-config-manager/yaml/*.y*ml", 0, &g);
         if (r != -ENOENT)
                 return r;
 
