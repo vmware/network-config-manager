@@ -399,6 +399,7 @@ class TestNetworkConfigManagerYAML:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'ConfigureWithoutCarrier') == 'yes')
+        assert(parser.get('Network', 'KeepConfiguration') == 'dhcp')
 
         assert(parser.get('Bridge', 'NeighborSuppression') == 'yes')
 
