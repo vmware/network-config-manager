@@ -263,6 +263,34 @@ int ip_duplicate_address_detection_type_to_mode(const char *name) {
         return _IP_DUPLICATE_ADDRESS_DETECTION_INVALID;
 }
 
+static const char* const keep_configuration_table[_KEEP_CONFIGURATION_MAX] = {
+        [KEEP_CONFIGURATION_NO]           = "no",
+        [KEEP_CONFIGURATION_DHCP_ON_STOP] = "dhcp-on-stop",
+        [KEEP_CONFIGURATION_DHCP]         = "dhcp",
+        [KEEP_CONFIGURATION_STATIC]       = "static",
+        [KEEP_CONFIGURATION_YES]          = "yes",
+};
+
+const char *keep_configuration_type_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(keep_configuration_table))
+                return NULL;
+
+        return keep_configuration_table[id];
+}
+
+int keep_configuration_type_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = KEEP_CONFIGURATION_NO; i < (size_t) ELEMENTSOF(keep_configuration_table); i++)
+                if (str_equal_fold(name, keep_configuration_table[i]))
+                        return i;
+
+        return _KEEP_CONFIGURATION_INVALID;
+}
+
 static const char *const route_scope_type[_ROUTE_SCOPE_MAX] =  {
         [ROUTE_SCOPE_UNIVERSE] = "global",
         [ROUTE_SCOPE_SITE]     = "site",
@@ -722,6 +750,7 @@ int network_new(Network **ret) {
                 .lldp = -1,
                 .emit_lldp = -1,
                 .ipv6_accept_ra = -1,
+                .keep_configuration = _KEEP_CONFIGURATION_INVALID,
                 .dhcp_client_identifier_type = _DHCP_CLIENT_IDENTIFIER_INVALID,
                 .link_local = _LINK_LOCAL_ADDRESS_INVALID,
                 .ipv6_address_generation = _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID,
@@ -1191,6 +1220,12 @@ int generate_network_config(Network *n) {
                         r = set_config(key_file, "Network", "DHCP", dhcp_client_modes_to_name(n->dhcp_type));
                 else
                         r = set_config(key_file, "Network", "DHCP", dracut_to_networkd_dhcp_mode_to_name(n->dhcp_type));
+        }
+
+        if (n->keep_configuration != _KEEP_CONFIGURATION_INVALID) {
+                r = set_config(key_file, "Network", "KeepConfiguration", keep_configuration_type_to_name(n->keep_configuration));
+                if (r < 0)
+                        return r;
         }
 
         if (n->dhcp4 >= 0 || n->dhcp6 >= 0) {

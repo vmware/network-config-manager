@@ -134,6 +134,16 @@ typedef enum RouteTable {
        _ROUTE_TABLE_INVALID = -EINVAL
 } RouteTable;
 
+typedef enum KeepConfiguration {
+        KEEP_CONFIGURATION_NO,
+        KEEP_CONFIGURATION_DHCP_ON_STOP,
+        KEEP_CONFIGURATION_DHCP,
+        KEEP_CONFIGURATION_STATIC,
+        KEEP_CONFIGURATION_YES,
+        _KEEP_CONFIGURATION_MAX,
+        _KEEP_CONFIGURATION_INVALID = -EINVAL,
+} KeepConfiguration;
+
 typedef enum AuthKeyManagement {
         AUTH_KEY_MANAGEMENT_NONE,
         AUTH_KEY_MANAGEMENT_WPA_PSK,
@@ -220,6 +230,7 @@ typedef struct Network {
         LinkLocalAddress link_local;
         IPv6LinkLocalAddressGenMode ipv6_address_generation;
         IPv6PrivacyExtensions ipv6_privacy;
+        KeepConfiguration keep_configuration;
 
         int unmanaged;
         int arp;
@@ -341,6 +352,9 @@ int route_protocol_to_mode(const char *name);
 
 const char *route_table_to_name(int id);
 int route_table_to_mode(const char *name);
+
+const char *keep_configuration_type_to_name(int id);
+int keep_configuration_type_to_mode(const char *name);
 
 int generate_network_config(Network *n);
 int generate_master_device_network(Network *n);
