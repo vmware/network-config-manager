@@ -13,7 +13,7 @@ int ctl_manager_new(const Ctl *ctl_commands, CtlManager **ret) {
         assert(ctl_commands);
         assert(ret);
 
-        m = new0(CtlManager, 1);
+        m = new(CtlManager, 1);
         if (!m)
                 return log_oom();
 
