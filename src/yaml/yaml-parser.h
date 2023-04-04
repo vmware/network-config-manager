@@ -42,6 +42,7 @@ int parse_yaml_string(const char *key, const char *value, void *data, void *user
 int parse_yaml_scalar_or_sequence(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_sequence(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 
+int parse_yaml_keep_configuration(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_route(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_route_type(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_route_scope(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);

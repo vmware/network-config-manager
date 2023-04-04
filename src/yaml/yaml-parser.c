@@ -399,6 +399,29 @@ int parse_yaml_link_local_type(const char *key,
         return 0;
 }
 
+int parse_yaml_keep_configuration(const char *key,
+                                  const char *value,
+                                  void *data,
+                                  void *userdata,
+                                  yaml_document_t *doc,
+                                  yaml_node_t *node) {
+        Network *n;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        n = data;
+
+        printf("%s %s\n", key, value);
+
+        n->keep_configuration = keep_configuration_type_to_mode((const char *) value);
+        return 0;
+}
+
+
 int parse_yaml_ipv6_address_generation_mode(const char *key,
                                             const char *value,
                                             void *data,
