@@ -266,6 +266,7 @@ typedef struct Network {
         /* bridge */
         uint32_t cost;
         uint16_t priority;
+        int neighbor_suppression;
 
         void *link;
         NetDev *netdev;
