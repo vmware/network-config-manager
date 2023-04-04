@@ -671,6 +671,48 @@ static void test_netdev_bridges(void **state) {
     system("nmctl remove-netdev br1 kind bridge");
 }
 
+static void test_netdev_bridge_cost_network_file(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("bridge-cost.yaml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "Bridge", "br1"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "Cost" , "70"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-br1.netdev", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "NetDev", "Name", "br1"));
+    assert_true(key_file_config_exists(key_file, "NetDev", "Kind", "bridge"));
+
+    assert_true(key_file_config_exists(key_file, "Bridge", "STP", "yes"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "ForwardDelaySec", "13"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "HelloTimeSec", "7"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "AgeingTimeSec", "60"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "MaxAgeSec", "25"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "Priority", "2000"));
+
+    key_file_free(key_file);
+    r = parse_key_file("/etc/systemd/network/10-br1.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "br1"));
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+
+    system("nmctl remove-netdev br1 kind bridge");
+}
+
+
 static void test_netdev_vlan_bridge(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -951,6 +993,7 @@ int main(void) {
         cmocka_unit_test (test_netdev_vxlans),
         cmocka_unit_test (test_netdev_bond),
         cmocka_unit_test (test_netdev_bridges),
+        cmocka_unit_test (test_netdev_bridge_cost_network_file),
         cmocka_unit_test (test_netdev_vlan_bridge),
         cmocka_unit_test (test_netdev_macvlans),
         cmocka_unit_test (test_netdev_bond_bridge),
