@@ -400,6 +400,8 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'ConfigureWithoutCarrier') == 'yes')
 
+        assert(parser.get('Bridge', 'NeighborSuppression') == 'yes')
+
         assert(parser.get('Address', 'Address') == '192.168.1.10/24')
 
         assert(parser.get('Route', 'Destination') == '192.168.1.1/24')
