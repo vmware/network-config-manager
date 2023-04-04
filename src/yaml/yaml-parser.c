@@ -1213,3 +1213,46 @@ int parse_yaml_bridge_path_cost(const char *key,
 
         return 0;
 }
+
+int parse_yaml_bridge_port_priority(const char *key,
+                                    const char *value,
+                                    void *data,
+                                    void *userdata,
+                                    yaml_document_t *doc,
+                                    yaml_node_t *node) {
+
+        yaml_node_item_t *i;
+        Networks *p;
+        uint16_t t;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        p = data;
+
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *k = yaml_document_get_node(doc, *i++);
+                yaml_node_t *v = yaml_document_get_node(doc, *i);
+                Network *n = g_hash_table_lookup(p->networks, scalar(k));
+
+                r = parse_uint16(scalar(v), &t);
+                if (r < 0)
+                        log_warning("Failed to parse bridge cost='%s'\n", scalar(v));
+
+                if (!n) {
+                        r = yaml_network_new(scalar(k), &n);
+                        if (r < 0)
+                                return r;
+
+                        if (!g_hash_table_insert(p->networks, (gpointer *) n->ifname, (gpointer *) n))
+                                return log_oom();
+                }
+                n->priority = t;
+        }
+
+        return 0;
+}

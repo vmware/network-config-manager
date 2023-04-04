@@ -249,6 +249,9 @@ static int yaml_yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp
                 if (g_str_equal("path-cost", scalar(k))) {
                         parse_yaml_bridge_path_cost(scalar(k), scalar(v), networks, NULL, dp, v);
                         continue;
+                } else if (g_str_equal("port-priority", scalar(k))) {
+                        parse_yaml_bridge_port_priority(scalar(k), scalar(v), networks, NULL, dp, v);
+                        continue;
                 }
 
                 table = g_hash_table_lookup(m->bridge, scalar(k));
