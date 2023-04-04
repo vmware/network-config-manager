@@ -216,10 +216,10 @@ static ParserTable parser_bridge_vtable[] = {
         { "ageing-time",   CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, ageing_time)},
         { "aging-time",    CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, ageing_time)},
         { "stp",           CONF_TYPE_NETDEV_BRIDGE, parse_yaml_bool,     offsetof(Bridge, stp)},
-        { NULL,            _CONF_TYPE_INVALID,    0,                  0}
+        { NULL,            _CONF_TYPE_INVALID,      0,                  0}
 };
 
-static int yaml_yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Bridge *br) {
+static int yaml_yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Bridge *br, Networks *networks) {
         yaml_node_t *k, *v;
         yaml_node_pair_t *p;
         yaml_node_item_t *i;
@@ -233,7 +233,7 @@ static int yaml_yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 n = yaml_document_get_node(dp, *i);
                 if (n)
-                        (void) yaml_yaml_parse_bridge_parameters(m, dp, n, br);
+                        (void) yaml_yaml_parse_bridge_parameters(m, dp, n, br, networks);
         }
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
@@ -245,6 +245,11 @@ static int yaml_yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp
 
                 if (!k && !v)
                         continue;
+
+                if (g_str_equal("path-cost", scalar(k))) {
+                        parse_yaml_bridge_path_cost(scalar(k), scalar(v), networks, NULL, dp, v);
+                        continue;
+                }
 
                 table = g_hash_table_lookup(m->bridge, scalar(k));
                 if (!table)
@@ -258,7 +263,7 @@ static int yaml_yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp
         return 0;
 }
 
-static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network, Networks *networks) {
         _auto_cleanup_ Bridge *b = NULL;
         yaml_node_t *k, *v;
         yaml_node_pair_t *p;
@@ -294,7 +299,7 @@ static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
                 table = g_hash_table_lookup(m->bridge, scalar(k));
                 if (!table) {
                         if (str_equal(scalar(k), "parameters"))
-                                yaml_yaml_parse_bridge_parameters(m, dp, v, b);
+                                yaml_yaml_parse_bridge_parameters(m, dp, v, b, networks);
                         else
                                 (void) parse_network(m, dp, node, network);
 
@@ -796,7 +801,7 @@ static int yaml_parse_macvlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *
         return 0;
 }
 
-int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
+int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *networks) {
         yaml_node_pair_t *p;
         yaml_node_t *n;
         int r;
@@ -804,7 +809,7 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
         assert(m);
         assert(dp);
         assert(node);
-        assert(nets);
+        assert(networks);
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                 _cleanup_(network_freep) Network *net = NULL;
@@ -836,7 +841,7 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                                         (void) yaml_parse_bond(m, dp, n, net);
                                         break;
                                 case YAML_NETDEV_KIND_BRIDGE:
-                                        (void) yaml_parse_bridge(m, dp, n, net);
+                                        (void) yaml_parse_bridge(m, dp, n, net, networks);
                                         break;
                                 case YAML_NETDEV_KIND_TUNNEL:
                                         r = yaml_detect_tunnel_kind(dp, n);
@@ -863,7 +868,7 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                         }
                 }
 
-                if (!g_hash_table_insert(nets->networks, (gpointer *) net->ifname, (gpointer *) net))
+                if (!g_hash_table_insert(networks->networks, (gpointer *) net->ifname, (gpointer *) net))
                         return log_oom();
 
                 steal_pointer(net);
