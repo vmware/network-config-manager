@@ -483,14 +483,9 @@ int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
                 _cleanup_(network_freep) Network *net = NULL;
                 n = yaml_document_get_node(dp, p->key);
 
-                r = network_new(&net);
+                r = yaml_network_new(scalar(n), &net);
                 if (r < 0)
                         return r;
-
-                net->parser_type = PARSER_TYPE_YAML;
-                net->ifname = strdup(scalar(n));
-                if (!net->ifname)
-                        return log_oom();
 
                 n = yaml_document_get_node(dp, p->value);
                 if (n)
@@ -500,6 +495,23 @@ int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
                         steal_pointer(net);
         }
 
+        return 0;
+}
+
+int yaml_network_new(const char *ifname, Network **ret) {
+        _cleanup_(network_freep) Network *n = NULL;
+        int r;
+
+        r = network_new(&n);
+        if (r < 0)
+                return r;
+
+        n->parser_type = PARSER_TYPE_YAML;
+        n->ifname = strdup(ifname);
+        if (!n->ifname)
+                return log_oom();
+
+        *ret = steal_pointer(n);
         return 0;
 }
 

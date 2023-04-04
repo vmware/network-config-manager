@@ -815,14 +815,9 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                 _cleanup_(network_freep) Network *net = NULL;
                 n = yaml_document_get_node(dp, p->key);
 
-                r = network_new(&net);
+                r = yaml_network_new(scalar(n), &net);
                 if (r < 0)
                         return r;
-
-                net->parser_type = PARSER_TYPE_YAML;
-                net->ifname = strdup(scalar(n));
-                if (!net->ifname)
-                        return log_oom();
 
                 r = netdev_new(&net->netdev);
                 if (r < 0)

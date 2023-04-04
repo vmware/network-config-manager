@@ -1180,6 +1180,7 @@ int parse_yaml_bridge_path_cost(const char *key,
 
         yaml_node_item_t *i;
         Networks *p;
+        uint32_t t;
         int r;
 
         assert(key);
@@ -1195,24 +1196,19 @@ int parse_yaml_bridge_path_cost(const char *key,
                 yaml_node_t *v = yaml_document_get_node(doc, *i);
                 Network *n = g_hash_table_lookup(p->networks, scalar(k));
 
-                if (!n) {
-                        r = network_new(&n);
-                        if (r < 0)
-                                return r;
-
-                        n->parser_type = PARSER_TYPE_YAML;
-                        n->ifname = strdup(scalar(k));
-                        if (!n->ifname)
-                                return log_oom();
-                }
-
-                r = parse_uint32(scalar(v), &n->cost);
+                r = parse_uint32(scalar(v), &t);
                 if (r < 0)
                         log_warning("Failed to parse bridge cost='%s'\n", scalar(v));
 
-                if (!g_hash_table_insert(p->networks, (gpointer *) n->ifname, (gpointer *) n))
-                        return log_oom();
+                if (!n) {
+                        r = yaml_network_new(scalar(k), &n);
+                        if (r < 0)
+                                return r;
 
+                        if (!g_hash_table_insert(p->networks, (gpointer *) n->ifname, (gpointer *) n))
+                                return log_oom();
+                }
+                n->cost = t;
         }
 
         return 0;
