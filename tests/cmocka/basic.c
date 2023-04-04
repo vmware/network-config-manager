@@ -685,6 +685,7 @@ static void test_netdev_bridge_cost_network_file(void **state) {
 
     assert_true(key_file_config_exists(key_file, "Network", "Bridge", "br1"));
     assert_true(key_file_config_exists(key_file, "Bridge", "Cost" , "70"));
+    assert_true(key_file_config_exists(key_file, "Bridge", "Priority" , "14"));
 
     key_file_free(key_file);
     r = parse_key_file("/etc/systemd/network/10-br1.netdev", &key_file);
