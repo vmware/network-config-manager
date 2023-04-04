@@ -718,6 +718,7 @@ int network_new(Network **ret) {
                 .dhcp6_use_address = -1,
                 .dhcp6_use_hostname = -1,
                 .gateway_onlink = -1,
+                .configure_without_carrier = -1,
                 .lldp = -1,
                 .emit_lldp = -1,
                 .ipv6_accept_ra = -1,
@@ -1233,6 +1234,12 @@ int generate_network_config(Network *n) {
 
         if (n->ipv6_mtu > 0) {
                 r = set_config_uint(key_file, "Network", "IPv6MTUBytes", n->ipv6_mtu);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->configure_without_carrier >= 0) {
+                r = set_config(key_file, "Network", "ConfigureWithoutCarrier", bool_to_string(n->configure_without_carrier));
                 if (r < 0)
                         return r;
         }

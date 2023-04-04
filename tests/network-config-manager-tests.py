@@ -398,6 +398,7 @@ class TestNetworkConfigManagerYAML:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'ConfigureWithoutCarrier') == 'yes')
 
         assert(parser.get('Address', 'Address') == '192.168.1.10/24')
 
