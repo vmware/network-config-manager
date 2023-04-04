@@ -1383,6 +1383,13 @@ int generate_network_config(Network *n) {
         if (n->routing_policy_rules && g_hash_table_size(n->routing_policy_rules) > 0)
                 g_hash_table_foreach(n->routing_policy_rules, append_routing_policy_rules, key_file);
 
+
+        if (n->cost > 0) {
+                r = set_config_uint(key_file, "Bridge", "Cost", n->cost);
+                if (r < 0)
+                        return r;
+        }
+
         r = key_file_save (key_file);
         if (r < 0) {
                 log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));

@@ -78,3 +78,5 @@ int parse_yaml_wireguard_key_or_path(const char *key, const char *value, void *d
 int parse_yaml_sequence_wireguard_peer_shared_key_or_path(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 
 int parse_yaml_macvlan_mode(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+
+int parse_yaml_bridge_path_cost(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);

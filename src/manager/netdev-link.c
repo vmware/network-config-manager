@@ -87,7 +87,7 @@ int netdev_link_new(NetDevLink **ret) {
         NetDevLink *n = NULL;
         int r;
 
-        n = new0(NetDevLink, 1);
+        n = new(NetDevLink, 1);
         if (!n)
                 return log_oom();
 

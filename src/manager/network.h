@@ -262,6 +262,10 @@ typedef struct Network {
         Set *domains;
         char **ntps;
 
+        /* bridge */
+        uint32_t cost;
+        uint16_t priority;
+
         void *link;
         NetDev *netdev;
 
