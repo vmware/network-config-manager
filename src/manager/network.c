@@ -16,6 +16,8 @@
 #include "parse-util.h"
 #include "string-util.h"
 
+#define BRIDGE_PRIORITY_MAX 63
+
 static const char *const dhcp_client_mode_table[_DHCP_CLIENT_MAX] = {
         [DHCP_CLIENT_NO]   = "no",
         [DHCP_CLIENT_YES]  = "yes",
@@ -724,6 +726,7 @@ int network_new(Network **ret) {
                 .ipv6_address_generation = _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID,
                 .ipv6_privacy = _IPV6_PRIVACY_EXTENSIONS_INVALID,
                 .parser_type = _PARSER_TYPE_INVALID,
+                .priority = BRIDGE_PRIORITY_MAX + 1,
         };
 
         r = set_new(&n->addresses, g_str_hash, address_equal);
@@ -1386,6 +1389,12 @@ int generate_network_config(Network *n) {
 
         if (n->cost > 0) {
                 r = set_config_uint(key_file, "Bridge", "Cost", n->cost);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->priority <= BRIDGE_PRIORITY_MAX) {
+                r = set_config_uint(key_file, "Bridge", "Priority", n->priority);
                 if (r < 0)
                         return r;
         }
