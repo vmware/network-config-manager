@@ -5,6 +5,7 @@ network:
       dhcp4: false
       ignore-carrier: true
       neigh-suppress: true
+      keep-configuration: dhcp
       addresses:
       - 192.168.1.10/24
       routes:
