@@ -228,6 +228,7 @@ typedef struct Network {
         int promiscuous;
         int req_for_online;
         int optional;
+        int configure_without_carrier;
         uint32_t mtu;
         uint32_t ipv6_mtu;
 
