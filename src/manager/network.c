@@ -1394,6 +1394,12 @@ int generate_network_config(Network *n) {
                 g_hash_table_foreach(n->routing_policy_rules, append_routing_policy_rules, key_file);
 
 
+        if (n->neighbor_suppression > 0) {
+                r = set_config(key_file, "Bridge", "NeighborSuppression", bool_to_string(n->neighbor_suppression));
+                if (r < 0)
+                        return r;
+        }
+
         if (n->cost > 0) {
                 r = set_config_uint(key_file, "Bridge", "Cost", n->cost);
                 if (r < 0)
