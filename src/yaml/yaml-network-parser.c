@@ -49,6 +49,7 @@ static ParserTable parser_network_vtable[] = {
         { "required-for-online",        CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, req_for_online)},
         { "optional",                   CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, optional)},
         { "ignore-carrier",             CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, configure_without_carrier)},
+        { "neigh-suppress",             CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, neighbor_suppression)},
         { "required-family-for-online", CONF_TYPE_NETWORK,     parse_yaml_rf_online,                    offsetof(Network, req_family_for_online)},
         { "activation-mode",            CONF_TYPE_NETWORK,     parse_yaml_activation_policy,            offsetof(Network, activation_policy)},
         { "macaddress",                 CONF_TYPE_NETWORK,     parse_yaml_mac_address,                  offsetof(Network, mac)},
