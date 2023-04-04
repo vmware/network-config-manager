@@ -8,7 +8,7 @@
 int ip_link_message_new(int type, int family, int ifindex, IPlinkMessage **ret) {
         IPlinkMessage *m;
 
-        m = new0(IPlinkMessage, 1);
+        m = new(IPlinkMessage, 1);
         if (!m)
                 return log_oom();
 
@@ -29,7 +29,7 @@ int ip_link_message_new(int type, int family, int ifindex, IPlinkMessage **ret) 
 int ip_address_message_new(int type, int family, int ifindex, IPAddressMessage **ret) {
         IPAddressMessage *m;
 
-        m = new0(IPAddressMessage, 1);
+        m = new(IPAddressMessage, 1);
         if (!m)
                 return log_oom();
 
@@ -50,7 +50,7 @@ int ip_address_message_new(int type, int family, int ifindex, IPAddressMessage *
 int ip_route_message_new(int type, int family, char rtm_protocol, IPRouteMessage **ret) {
         IPRouteMessage *m;
 
-        m = new0(IPRouteMessage, 1);
+        m = new(IPRouteMessage, 1);
         if (!m)
                 return log_oom();
 

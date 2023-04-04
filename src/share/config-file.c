@@ -187,7 +187,7 @@ int config_manager_new(const Config *configs, ConfigManager **ret) {
         assert(configs);
         assert(ret);
 
-        m = new0(ConfigManager, 1);
+        m = new(ConfigManager, 1);
         if (!m)
                 return log_oom();
 
