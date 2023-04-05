@@ -5,3 +5,4 @@ network:
       dhcp6-overrides:
         use-dns: true
         send-release: no
+        without-ra: solicit
