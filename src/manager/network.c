@@ -877,7 +877,7 @@ void g_network_free (gpointer data) {
         network_freep(&n);
 }
 
-int parse_address_from_string_and_add(const char *s, Set *a) {
+int parse_address_from_str_and_add(const char *s, Set *a) {
         _auto_cleanup_ IPAddress *address = NULL;
         int r;
 

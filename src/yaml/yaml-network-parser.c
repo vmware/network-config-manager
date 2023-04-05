@@ -301,7 +301,7 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                         network->modified = true;
 
                         if (v) {
-                                r = parse_address_from_string_and_add(scalar(v), network->addresses);
+                                r = parse_address_from_str_and_add(scalar(v), network->addresses);
                                 if (r < 0)
                                         continue;
                         }

@@ -123,7 +123,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
                 return -EINVAL;
 
         if (strv_length(s) > 0 && !isempty_str(s[0])) {
-                r = parse_address_from_string_and_add(s[0], n->addresses);
+                r = parse_address_from_str_and_add(s[0], n->addresses);
                 if (r < 0)
                         return r;
         }
@@ -187,13 +187,13 @@ static int dracut_parse_mac(char *mac, Network *n) {
 
         if (r < 0) {
                 if (strv_length(s) >= 7 && !isempty_str(s[7])) {
-                        r = parse_address_from_string_and_add(s[7], n->nameservers);
+                        r = parse_address_from_str_and_add(s[7], n->nameservers);
                         if (r < 0)
                                 return r;
                 }
 
                 if (strv_length(s) >= 7 && !isempty_str(s[8])) {
-                        r = parse_address_from_string_and_add(s[8], n->nameservers);
+                        r = parse_address_from_str_and_add(s[8], n->nameservers);
                         if (r < 0)
                                 return r;
                 }
@@ -261,7 +261,7 @@ static int parse_command_line_nameserver(const char *line, Network *n) {
         assert(line);
         assert(n);
 
-        r = parse_address_from_string_and_add(line, n->nameservers);
+        r = parse_address_from_str_and_add(line, n->nameservers);
         if (r < 0) {
                 log_warning("Failed to parse nameserver: %s", line);
                 return r;
