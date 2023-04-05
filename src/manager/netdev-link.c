@@ -177,6 +177,7 @@ void netdev_link_free(NetDevLink *n) {
         free(n->rx_jumbo_buf);
         free(n->tx_buf);
 
+        strv_free(n->driver);
         free(n);
 }
 
@@ -232,6 +233,23 @@ int netdev_link_configure(const IfNameIndex *ifidx, NetDevLink *n) {
         r = create_or_parse_netdev_link_conf_file(ifidx->ifname, &path);
         if (r < 0)
                 return r;
+
+        if (n->driver) {
+                _cleanup_(g_string_unrefp) GString *c = NULL;
+                char **d;
+
+                c = g_string_new(NULL);
+                if (!c)
+                        return log_oom();
+
+                strv_foreach(d, n->driver) {
+                        g_string_append_printf(c, "%s ", *d);
+                }
+
+                r = set_config_file_string(path, "Match", "Driver", c->str);
+                if (r < 0)
+                        return r;
+        }
 
         if (n->alias) {
                 r = set_config_file_string(path, "Link", ctl_to_config(n->m, "alias"), n->alias);
