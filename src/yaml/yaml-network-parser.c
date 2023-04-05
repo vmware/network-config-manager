@@ -92,6 +92,7 @@ static ParserTable parser_dhcp6_overrides_vtable[] = {
         { "use-hostname",  CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, dhcp6_use_hostname)},
         { "send-release",  CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, dhcp6_send_release)},
         { "without-ra",    CONF_TYPE_NETWORK,     parse_yaml_dhcp6_without_ra, offsetof(Network, dhcp6_client_start_mode)},
+        { "rapid-commit",  CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, dhcp6_rapid_commit)},
         { NULL,            _CONF_TYPE_INVALID,    0,                           0}
 };
 

@@ -162,6 +162,12 @@ static void test_dhcp6_overrides(void **state) {
 
     assert_true(key_file_config_exists(key_file, "DHCPv6", "SendRelease", "no"));
     assert_true(key_file_config_exists(key_file, "DHCPv6", "WithoutRA", "solicit"));
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "UseDNS", "yes"));
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "UseNTP", "yes"));
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "UseHostname", "yes"));
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "UseDomains", "yes"));
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "RapidCommit", "no"));
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "UseAddress", "yes"));
 }
 
 static void test_source_routing(void **state) {
