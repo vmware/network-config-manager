@@ -1093,6 +1093,9 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
        if (route->initrwnd > 0)
                (void) add_key_to_section_uint(section, "InitialAdvertisedReceiveWindow", route->initrwnd);
 
+       if (route->quick_ack >= 0)
+               (void) add_key_to_section(section, "QuickAck", bool_to_string(route->quick_ack));
+
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
                 return;

@@ -32,6 +32,7 @@ typedef struct Route {
         int scope;
 
         int onlink;
+        int quick_ack;
         bool to_default;
 
         IPAddress src;
