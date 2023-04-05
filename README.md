@@ -139,20 +139,28 @@ network:
           - to: default
             via: 10.100.1.1
  ```
-#### Using DHCP4 overrides
+#### Using DHCP4 and dhcp6 overrides
 ```yml
 network:
   ethernets:
-    dummy95:
+    eth0:
       dhcp4: yes
+      dhcp6: yes
       dhcp4-overrides:
         route-metric: 200
-    test99:
+    eth1:
       dhcp4: yes
       dhcp4-overrides:
         route-metric: 300
       dhcp6-overrides:
         use-dns: true
+        use-domain: true
+        use-address: true
+        use-hostname: true
+        use-ntp: true
+        rapid-commit: false
+        send-release: no
+        without-ra: solicit
 ```
 #### Using match as MacAddress
 ```yml
