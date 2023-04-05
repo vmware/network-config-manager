@@ -105,6 +105,9 @@ int parse_link(YAMLManager *m, yaml_document_t *dp, yaml_node_t *k, yaml_node_t 
 
                 l = network->link;
                 l->parser_type = PARSER_TYPE_YAML;
+                l->ifname = strdup(network->ifname);
+                if (!l->ifname)
+                        return log_oom();
         }
 
         t = (uint8_t *) network->link + link_table->offset;
@@ -138,7 +141,7 @@ int yaml_parse_link_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t 
                 if (!k && !v)
                         continue;
 
-                parse_link(m, dp, k, v, network);
+                (void) parse_link(m, dp, k, v, network);
         }
 
         return 0;
