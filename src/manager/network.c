@@ -432,6 +432,31 @@ int route_table_to_mode(const char *name) {
         return _ROUTE_TABLE_INVALID;
 }
 
+static const char * const ipoib_mode_table[_IP_OIB_MODE_MODE_MAX] = {
+        [IP_OIB_MODE_DATAGRAM]       = "datagram",
+        [IP_OIB_MODE_MODE_CONNECTED] = "connected",
+};
+
+const char *ipoib_mode_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(ipoib_mode_table))
+                return NULL;
+
+        return ipoib_mode_table[id];
+}
+
+int ipoib_mode_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = IP_OIB_MODE_DATAGRAM; i < (size_t) ELEMENTSOF(ipoib_mode_table); i++)
+                if (str_equal_fold(name, ipoib_mode_table[i]))
+                        return i;
+
+        return _IP_OIB_MODE_MODE_INVALID;
+}
+
 static const char *const auth_key_management_type[_AUTH_KEY_MANAGEMENT_MAX] =  {
         [AUTH_KEY_MANAGEMENT_NONE]    = "password",
         [AUTH_KEY_MANAGEMENT_WPA_PSK] = "psk",
