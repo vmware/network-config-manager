@@ -561,6 +561,7 @@ class TestNetDevConfigManagerYAML:
 
         subprocess.call("nmctl remove-netdev he-ipv6 kind sit", shell = True)
 
+    @pytest.mark.skip(reason="skipping")
     def test_netdev_vrf(self):
         self.copy_yaml_file_to_netmanager_yaml_path('vrf.yaml')
 

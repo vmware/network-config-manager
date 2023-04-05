@@ -623,6 +623,32 @@ static void test_network_infiband(void **state) {
     assert_true(key_file_config_exists(key_file, "IPoIB", "Mode", "connected"));
 }
 
+static void test_link_driver(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    char *driver = NULL;
+    int r;
+
+    apply_yaml_file("link-driver.yaml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.link", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "OriginalName", "test99"));
+
+    assert_true(driver=key_file_config_get(key_file, "Match", "Driver"));
+    assert_true(g_strrstr(driver, "e1000"));
+    assert_true(g_strrstr(driver, "ixgbe"));
+
+    assert_true(key_file_config_exists(key_file, "Link", "ReceiveChecksumOffload", "yes"));
+    assert_true(key_file_config_exists(key_file, "Link", "TransmitChecksumOffload", "yes"));
+    assert_true(key_file_config_exists(key_file, "Link", "TCPSegmentationOffload", "yes"));
+    assert_true(key_file_config_exists(key_file, "Link", "TCP6SegmentationOffload", "yes"));
+    assert_true(key_file_config_exists(key_file, "Link", "GenericSegmentationOffload", "yes"));
+    assert_true(key_file_config_exists(key_file, "Link", "GenericReceiveOffload", "yes"));
+    assert_true(key_file_config_exists(key_file, "Link", "LargeReceiveOffload", "yes"));
+}
+
 static void test_netdev_bridges(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1015,6 +1041,7 @@ int main(void) {
         cmocka_unit_test (test_netdev_macvlans),
         cmocka_unit_test (test_netdev_bond_bridge),
         cmocka_unit_test (test_network_infiband),
+        cmocka_unit_test (test_link_driver),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
