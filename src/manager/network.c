@@ -551,7 +551,7 @@ int create_network_conf_file(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Match", "Name", ifname);
+        r = set_config_file_str(network, "Match", "Name", ifname);
         if (r < 0)
                 return r;
 

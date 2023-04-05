@@ -63,7 +63,7 @@ int add_section_to_key_file(KeyFile *k, Section *s);
 
 const char *ctl_to_config(const ConfigManager *m, const char *name);
 
-int set_config_file_string(const char *path, const char *section, const char *k, const char *v);
+int set_config_file_str(const char *path, const char *section, const char *k, const char *v);
 int set_config_file_bool(const char *path, const char *section, const char *k, bool b);
 int set_config_file_integer(const char *path, const char *section, const char *k, int v);
 

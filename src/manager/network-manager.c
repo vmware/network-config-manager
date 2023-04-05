@@ -143,7 +143,7 @@ int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Link", k, v);
+        r = set_config_file_str(network, "Link", k, v);
         if (r < 0)
                 return r;
 
@@ -160,7 +160,7 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", "DHCP", dhcp_client_modes_to_name(mode));
+        r = set_config_file_str(network, "Network", "DHCP", dhcp_client_modes_to_name(mode));
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
@@ -201,7 +201,7 @@ int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHC
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(identifier));
+        r = set_config_file_str(network, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(identifier));
         if (r < 0) {
                 log_warning("Failed to update DHCP4 ClientIdentifier= to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -284,14 +284,14 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                         return r;
         }
 
-        r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
+        r = set_config_file_str(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
         if (r < 0) {
                 log_warning("Failed to update %s DUIDType= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, strerror(-r));
                 return r;
         }
 
         if (raw_data) {
-                r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDRawData", raw_data);
+                r = set_config_file_str(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDRawData", raw_data);
                 if (r < 0) {
                         log_warning("Failed to update %s DUIDRawData= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, strerror(-r));
                         return r;
@@ -313,7 +313,7 @@ int manager_set_link_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
                 return r;
 
         asprintf(&config_update_mtu, "%u", mtu);
-        r = set_config_file_string(network, "Link", "MTUBytes", config_update_mtu);
+        r = set_config_file_str(network, "Link", "MTUBytes", config_update_mtu);
         if (r < 0) {
                 log_warning("Failed to update MTUBytes= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
@@ -335,7 +335,7 @@ int manager_set_link_group(const IfNameIndex *ifidx, uint32_t group) {
 
         asprintf(&config_update_group, "%u", group);
 
-        r = set_config_file_string(network, "Link", "Group", config_update_group);
+        r = set_config_file_str(network, "Link", "Group", config_update_group);
         if (r < 0) {
                 log_warning("Failed to update Group= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
@@ -356,7 +356,7 @@ int manager_set_link_rf_online(const IfNameIndex *ifidx, const char *addrfamily)
                 return r;
 
         asprintf(&config_update_family, "%s", addrfamily);
-        r = set_config_file_string(network, "Link", "RequiredFamilyForOnline", config_update_family);
+        r = set_config_file_str(network, "Link", "RequiredFamilyForOnline", config_update_family);
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
@@ -377,7 +377,7 @@ int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy)
                 return r;
 
         asprintf(&config_update_policy, "%s", actpolicy);
-        r = set_config_file_string(network, "Link", "ActivationPolicy", config_update_policy);
+        r = set_config_file_str(network, "Link", "ActivationPolicy", config_update_policy);
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
@@ -418,7 +418,7 @@ int manager_set_link_local_address(const IfNameIndex *ifidx, const char *k, cons
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", k, v);
+        r = set_config_file_str(network, "Network", k, v);
         if (r < 0) {
                 log_warning("Failed to update LinkLocalAddressing= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
@@ -445,7 +445,7 @@ int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac) {
         }
 
         asprintf(&config_update_mac, "%s", mac);
-        r = set_config_file_string(network, "Link", "MACAddress", config_update_mac);
+        r = set_config_file_str(network, "Link", "MACAddress", config_update_mac);
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
@@ -595,14 +595,14 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Route", "Gateway", a);
+        r = set_config_file_str(network, "Route", "Gateway", a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
         }
 
         if (rt->onlink > 0) {
-                r = set_config_file_string(network, "Route", "GatewayOnlink", bool_to_string(rt->onlink));
+                r = set_config_file_str(network, "Route", "GatewayOnlink", bool_to_string(rt->onlink));
                 if (r < 0) {
                         log_warning("Failed to write to configuration file: %s", network);
                         return r;
@@ -1360,7 +1360,7 @@ int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool syste
                         return 0;
         }
 
-        r = set_config_file_string(network, "Network", "DNS", a);
+        r = set_config_file_str(network, "Network", "DNS", a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -1406,7 +1406,7 @@ int manager_add_dns_server_domain(const IfNameIndex *ifidx, char **domains, bool
                         return 0;
         }
 
-        r = set_config_file_string(network, "Network", "Domains", a);
+        r = set_config_file_str(network, "Network", "Domains", a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -1489,7 +1489,7 @@ int manager_set_network_section(const IfNameIndex *ifidx, const char *k, const c
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", k, v);
+        r = set_config_file_str(network, "Network", k, v);
         if (r < 0)
                 return r;
 
@@ -1550,7 +1550,7 @@ int manager_add_ntp_addresses(const IfNameIndex *ifidx, char **ntps, bool add) {
                         return log_oom();
         }
 
-        r = set_config_file_string(network, "Network", "NTP", add ? b : a);
+        r = set_config_file_str(network, "Network", "NTP", add ? b : a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -1594,16 +1594,16 @@ int manager_enable_ipv6(const IfNameIndex *ifidx, bool enable) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", "DHCP", "ipv4");
+        r = set_config_file_str(network, "Network", "DHCP", "ipv4");
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
         if (enable)
-                r = set_config_file_string(network, "Network", "LinkLocalAddressing", "ipv6");
+                r = set_config_file_str(network, "Network", "LinkLocalAddressing", "ipv6");
         else
-                r = set_config_file_string(network, "Network", "LinkLocalAddressing", "no");
+                r = set_config_file_str(network, "Network", "LinkLocalAddressing", "no");
 
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));

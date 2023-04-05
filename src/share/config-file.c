@@ -287,7 +287,7 @@ int set_config_uint(KeyFile *key_file, const char *section, const char *k, uint 
         return 0;
 }
 
-int set_config_file_string(const char *path, const char *section, const char *k, const char *v) {
+int set_config_file_str(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
@@ -343,7 +343,7 @@ int set_config_file_bool(const char *path, const char *section, const char *k, b
         assert(section);
         assert(k);
 
-        return set_config_file_string(path, section, k, bool_to_string(b));
+        return set_config_file_str(path, section, k, bool_to_string(b));
 }
 
 int key_file_set_string(KeyFile *key_file, const char *section, const char *k, const char *v) {
