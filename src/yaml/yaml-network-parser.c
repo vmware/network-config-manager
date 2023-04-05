@@ -90,6 +90,7 @@ static ParserTable parser_dhcp6_overrides_vtable[] = {
         { "use-ntp",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_ntp)},
         { "use-address",        CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_address)},
         { "use-hostname",       CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_hostname)},
+        { "send-release",       CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_send_release)},
         { NULL,                _CONF_TYPE_INVALID,    0,                  0}
 };
 
