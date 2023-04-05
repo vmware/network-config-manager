@@ -276,9 +276,10 @@ typedef struct Network {
         int dhcp6_use_dns;
         int dhcp6_use_ntp;
         int dhcp6_use_domains;
-        int dhcp6_use_address;
         int dhcp6_use_hostname;
         int dhcp6_send_release;
+        int dhcp6_rapid_commit;
+        int dhcp6_use_address;
 
         /* Network section */
         int lldp;
