@@ -1,0 +1,6 @@
+network:
+  version: 2
+  ethernets:
+    test99:
+      wakeonlan: off
+      dhcp4: true
