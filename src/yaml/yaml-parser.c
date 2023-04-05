@@ -440,11 +440,11 @@ int parse_yaml_ipv6_address_generation_mode(const char *key,
 }
 
 int parse_yaml_infiniband_mode(const char *key,
-                              const char *value,
-                              void *data,
-                              void *userdata,
-                              yaml_document_t *doc,
-                              yaml_node_t *node) {
+                               const char *value,
+                               void *data,
+                               void *userdata,
+                               yaml_document_t *doc,
+                               yaml_node_t *node) {
         Network *n;
 
         assert(key);
@@ -456,6 +456,26 @@ int parse_yaml_infiniband_mode(const char *key,
         n = data;
 
         n->ipoib_mode = ipoib_name_to_mode((const char *) value);
+        return 0;
+}
+
+int parse_yaml_dhcp6_without_ra(const char *key,
+                                const char *value,
+                                void *data,
+                                void *userdata,
+                                yaml_document_t *doc,
+                                yaml_node_t *node) {
+        Network *n;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        n = data;
+
+        n->dhcp6_client_start_mode = dhcp6_client_start_name_to_mode((const char *) value);
         return 0;
 }
 
