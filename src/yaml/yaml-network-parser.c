@@ -71,27 +71,28 @@ static ParserTable parser_network_vtable[] = {
 };
 
 static ParserTable parser_dhcp4_overrides_vtable[] = {
-        { "use-dns",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_dns)},
-        { "use-domain",         CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_domains)},
-        { "use-ntp",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_ntp)},
-        { "use-mtu",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_mtu)},
-        { "use-routes",         CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_routes)},
-        { "use-hostname",       CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_hostname)},
-        { "send-hostname",      CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_send_hostname)},
-        { "send-release",       CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_send_release)},
-        { "route-metric",       CONF_TYPE_NETWORK,     parse_yaml_uint32, offsetof(Network, dhcp4_route_metric)},
-        { "hostname",           CONF_TYPE_NETWORK,     parse_yaml_string, offsetof(Network, dhcp4_hostname)},
-        { NULL,                _CONF_TYPE_INVALID,    0,                  0}
+        { "use-dns",        CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_dns)},
+        { "use-domain",     CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_domains)},
+        { "use-ntp",        CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_ntp)},
+        { "use-mtu",        CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_mtu)},
+        { "use-routes",     CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_routes)},
+        { "use-hostname",   CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_hostname)},
+        { "send-hostname",  CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_send_hostname)},
+        { "send-release",   CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_send_release)},
+        { "route-metric",   CONF_TYPE_NETWORK,     parse_yaml_uint32, offsetof(Network, dhcp4_route_metric)},
+        { "hostname",       CONF_TYPE_NETWORK,     parse_yaml_string, offsetof(Network, dhcp4_hostname)},
+        { NULL,             _CONF_TYPE_INVALID,    0,                 0}
 };
 
 static ParserTable parser_dhcp6_overrides_vtable[] = {
-        { "use-dns",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_dns)},
-        { "use-domain",         CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_domains)},
-        { "use-ntp",            CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_ntp)},
-        { "use-address",        CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_address)},
-        { "use-hostname",       CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_use_hostname)},
-        { "send-release",       CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp6_send_release)},
-        { NULL,                _CONF_TYPE_INVALID,    0,                  0}
+        { "use-dns",       CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, dhcp6_use_dns)},
+        { "use-domain",    CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, dhcp6_use_domains)},
+        { "use-ntp",       CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, dhcp6_use_ntp)},
+        { "use-address",   CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, dhcp6_use_address)},
+        { "use-hostname",  CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, dhcp6_use_hostname)},
+        { "send-release",  CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, dhcp6_send_release)},
+        { "without-ra",    CONF_TYPE_NETWORK,     parse_yaml_dhcp6_without_ra, offsetof(Network, dhcp6_client_start_mode)},
+        { NULL,            _CONF_TYPE_INVALID,    0,                           0}
 };
 
 static ParserTable parser_address_vtable[] = {
