@@ -1,0 +1,7 @@
+network:
+  version: 2
+  ethernets:
+    test99:
+      links:
+         mtu: 1600
+      dhcp4: true
