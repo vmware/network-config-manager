@@ -4,5 +4,10 @@ network:
     test99:
       dhcp6-overrides:
         use-dns: true
+        use-domain: true
+        use-address: true
+        use-hostname: true
+        use-ntp: true
+        rapid-commit: false
         send-release: no
         without-ra: solicit
