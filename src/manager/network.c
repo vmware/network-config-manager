@@ -884,7 +884,7 @@ int parse_address_from_string_and_add(const char *s, Set *a) {
         assert(s);
         assert(a);
 
-        r = parse_ip_from_string(s, &address);
+        r = parse_ip_from_str(s, &address);
         if (r < 0)
                 return r;
 

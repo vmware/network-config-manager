@@ -1082,7 +1082,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "address") || str_equal_fold(argv[i], "a") || str_equal_fold(argv[i], "addr")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &address);
+                        r = parse_ip_from_str(argv[i], &address);
                         if (r < 0) {
                                 log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -1091,7 +1091,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "peer")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &peer);
+                        r = parse_ip_from_str(argv[i], &peer);
                         if (r < 0) {
                                 log_warning("Failed to parse peer address '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -1212,7 +1212,7 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "address") || str_equal_fold(argv[i], "a") || str_equal_fold(argv[i], "addr")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &address);
+                        r = parse_ip_from_str(argv[i], &address);
                         if (r < 0) {
                                 log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -1311,7 +1311,7 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "gateway") || str_equal_fold(argv[i], "gw")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &gw);
+                        r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
                                 log_warning("Failed to parse gateway address '%s': %s", argv[2], strerror(-r));
                                 return r;
@@ -1382,7 +1382,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "gateway") || str_equal_fold(argv[i], "gw")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &gw);
+                        r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
                                 log_warning("Failed to parse route gateway address '%s': %s", argv[2], strerror(-r));
                                 return r;
@@ -1394,7 +1394,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                         if (str_equal("default", argv[i]))
                                 b = true;
                         else {
-                                r = parse_ip_from_string(argv[i], &dst);
+                                r = parse_ip_from_str(argv[i], &dst);
                                 if (r < 0) {
                                         log_warning("Failed to parse route destination address '%s': %s", argv[2], strerror(-r));
                                         return r;
@@ -1404,7 +1404,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "source") || str_equal_fold(argv[i], "src")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &source);
+                        r = parse_ip_from_str(argv[i], &source);
                         if (r < 0) {
                                 log_warning("Failed to parse route source address '%s': %s", argv[2], strerror(-r));
                                 return r;
@@ -1413,7 +1413,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "pref-source") || str_equal_fold(argv[i], "pfsrc")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &pref_source);
+                        r = parse_ip_from_str(argv[i], &pref_source);
                         if (r < 0) {
                                 log_warning("Failed to parse route preferred source address '%s': %s", argv[2], strerror(-r));
                                 return r;
@@ -1634,7 +1634,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "address") || str_equal_fold(argv[i], "addr") || str_equal_fold(argv[i], "a")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &a);
+                        r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
                                 log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -1646,7 +1646,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         if (str_equal("default", argv[i]))
                                 b = true;
                         else {
-                                r = parse_ip_from_string(argv[i], &destination);
+                                r = parse_ip_from_str(argv[i], &destination);
                                 if (r < 0) {
                                         log_warning("Failed to parse destination '%s': %s", argv[i], strerror(-r));
                                         return r;
@@ -1657,7 +1657,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "gw")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &gw);
+                        r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
                                 log_warning("Failed to parse gateway '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -1761,7 +1761,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
 
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &a);
+                        r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
                                 log_warning("Failed to parse from address '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -1774,7 +1774,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
 
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &a);
+                        r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
                                 log_warning("Failed to parse ntp address '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -1936,7 +1936,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "dns")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &dns);
+                        r = parse_ip_from_str(argv[i], &dns);
                         if (r < 0) {
                                 log_warning("Failed to parse dns address '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -1946,7 +1946,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "ntp")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &ntp);
+                        r = parse_ip_from_str(argv[i], &ntp);
                         if (r < 0) {
                                 log_warning("Failed to parse ntp address '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2099,7 +2099,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "prefix")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &prefix);
+                        r = parse_ip_from_str(argv[i], &prefix);
                         if (r < 0) {
                                 log_warning("Failed to parse prefix address '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2109,7 +2109,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "route-prefix")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &route_prefix);
+                        r = parse_ip_from_str(argv[i], &route_prefix);
                         if (r < 0) {
                                 log_warning("Failed to parse route prefix address '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2119,7 +2119,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 } else if (str_equal_fold(argv[i], "dns")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &dns);
+                        r = parse_ip_from_str(argv[i], &dns);
                         if (r < 0) {
                                 log_warning("Failed to parse dns address '%s': %s", argv[i], strerror(EINVAL));
                                 return r;

@@ -129,7 +129,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
         }
 
         if (strv_length(s) >= 1 && !isempty_str(s[1])) {
-                r = parse_ip_from_string(s[1], &peer);
+                r = parse_ip_from_str(s[1], &peer);
                 if (r < 0)
                         return r;
 
@@ -145,7 +145,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
                 if (r < 0)
                         return r;
 
-                r = parse_ip_from_string(s[2], &ip);
+                r = parse_ip_from_str(s[2], &ip);
                 if (r < 0)
                         return r;
 
@@ -156,7 +156,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
         }
 
         if (strv_length(s) >= 3 && !isempty_str(s[3])) {
-                r = parse_ip_from_string(s[3], &prefix);
+                r = parse_ip_from_str(s[3], &prefix);
                  if (r >= 0)
                          route->gw.prefix_len = ipv4_netmask_to_prefixlen(prefix);
                  else
@@ -289,7 +289,7 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
                 return r;
 
         if (!isempty_str(s[0])) {
-                r = parse_ip_from_string(s[0], &destination);
+                r = parse_ip_from_str(s[0], &destination);
                 if (r < 0)
                         return r;
 
@@ -298,7 +298,7 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
         }
 
        if (!isempty_str(s[1])) {
-                r = parse_ip_from_string(s[1], &gw);
+                r = parse_ip_from_str(s[1], &gw);
                 if (r < 0)
                         return r;
 

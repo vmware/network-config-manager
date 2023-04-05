@@ -558,7 +558,7 @@ int parse_yaml_address(const char *key,
 
         addr = (IPAddress **) userdata;
 
-        r = parse_ip_from_string(value, &address);
+        r = parse_ip_from_str(value, &address);
         if (r < 0) {
                 log_warning("Failed to parse address %s = %s", key, value);
                 return r;
@@ -763,7 +763,7 @@ int parse_yaml_route(const char *key,
                 _auto_cleanup_ IPAddress *address = NULL;
                 bool b = false;
 
-                r = parse_ip_from_string(value, &address);
+                r = parse_ip_from_str(value, &address);
                 if (r < 0) {
                         if (str_equal("default", value))
                                 b = true;

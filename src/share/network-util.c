@@ -209,7 +209,7 @@ int parse_ip(const char *s, IPAddress **ret) {
         return parse_ipv6(s, ret);
 }
 
-int parse_ip_from_string(const char *s, IPAddress **ret) {
+int parse_ip_from_str(const char *s, IPAddress **ret) {
         _auto_cleanup_ char *m = NULL;
         char *p, *k;
         long l;
@@ -272,7 +272,7 @@ int parse_ip_port(const char *s, IPAddress **ret, uint16_t *port) {
                 *port = k;
         }
 
-        return parse_ip_from_string(c, ret);
+        return parse_ip_from_str(c, ret);
 }
 
 int parse_ifname_or_index(const char *s, IfNameIndex **ret) {

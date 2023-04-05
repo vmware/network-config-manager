@@ -281,7 +281,7 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                 } else {
                         _auto_cleanup_ IPAddress *address = NULL;
 
-                        r = parse_ip_from_string(scalar(k), &address);
+                        r = parse_ip_from_str(scalar(k), &address);
                         if (r < 0)
                                 return r;
 

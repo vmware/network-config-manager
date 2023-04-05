@@ -68,7 +68,7 @@ int parse_ipv6(const char *s, IPAddress **ret);
 int parse_ip(const char *s, IPAddress **ret);
 int parse_ip_port(const char *s, IPAddress **ret, uint16_t *port);
 
-int parse_ip_from_string(const char *s, IPAddress **ret);
+int parse_ip_from_str(const char *s, IPAddress **ret);
 int ipv4_netmask_to_prefixlen(IPAddress *addr);
 
 bool ip4_addr_is_null(const IPAddress *a);
