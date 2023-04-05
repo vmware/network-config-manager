@@ -23,6 +23,7 @@ int route_new(Route **ret) {
                 .protocol = RTPROT_UNSPEC,
                 .table = RT_TABLE_MAIN,
                 .onlink = -1,
+                .quick_ack = -1,
         };
 
         *ret = route;
