@@ -122,13 +122,13 @@ static int dracut_parse_mac(char *mac, Network *n) {
         if (!s)
                 return -EINVAL;
 
-        if (strv_length(s) > 0 && !isempty_string(s[0])) {
+        if (strv_length(s) > 0 && !isempty_str(s[0])) {
                 r = parse_address_from_string_and_add(s[0], n->addresses);
                 if (r < 0)
                         return r;
         }
 
-        if (strv_length(s) >= 1 && !isempty_string(s[1])) {
+        if (strv_length(s) >= 1 && !isempty_str(s[1])) {
                 r = parse_ip_from_string(s[1], &peer);
                 if (r < 0)
                         return r;
@@ -138,7 +138,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
 
         steal_pointer(a);
 
-        if (strv_length(s) >= 2 && !isempty_string(s[2])) {
+        if (strv_length(s) >= 2 && !isempty_str(s[2])) {
                 _auto_cleanup_ IPAddress *ip = NULL;
 
                 r = route_new(&route);
@@ -155,7 +155,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
                         return -EINVAL;
         }
 
-        if (strv_length(s) >= 3 && !isempty_string(s[3])) {
+        if (strv_length(s) >= 3 && !isempty_str(s[3])) {
                 r = parse_ip_from_string(s[3], &prefix);
                  if (r >= 0)
                          route->gw.prefix_len = ipv4_netmask_to_prefixlen(prefix);
@@ -164,35 +164,35 @@ static int dracut_parse_mac(char *mac, Network *n) {
         }
         steal_pointer(route);
 
-        if (strv_length(s) >= 4 && !isempty_string(s[4])) {
+        if (strv_length(s) >= 4 && !isempty_str(s[4])) {
                 n->hostname = g_strdup(s[4]);
                 if (!n->hostname)
                         return log_oom();
         }
 
-        if (strv_length(s) >= 5 && !isempty_string(s[5])) {
+        if (strv_length(s) >= 5 && !isempty_str(s[5])) {
                 n->ifname = g_strdup(s[5]);
                 if (!n->ifname)
                         return log_oom();
         }
 
-        if (strv_length(s) >= 6 && !isempty_string(s[6]))
+        if (strv_length(s) >= 6 && !isempty_str(s[6]))
                 (void) parse_dhcp_type(s[6], n);
 
-        if (strv_length(s) >= 7 && !isempty_string(s[7]))
+        if (strv_length(s) >= 7 && !isempty_str(s[7]))
                 r = dracut_parse_mtu(s[7], n);
 
-        if (strv_length(s) >= 8 && !isempty_string(s[8]))
+        if (strv_length(s) >= 8 && !isempty_str(s[8]))
                 r = dracut_parse_mac(s[8], n);
 
         if (r < 0) {
-                if (strv_length(s) >= 7 && !isempty_string(s[7])) {
+                if (strv_length(s) >= 7 && !isempty_str(s[7])) {
                         r = parse_address_from_string_and_add(s[7], n->nameservers);
                         if (r < 0)
                                 return r;
                 }
 
-                if (strv_length(s) >= 7 && !isempty_string(s[8])) {
+                if (strv_length(s) >= 7 && !isempty_str(s[8])) {
                         r = parse_address_from_string_and_add(s[8], n->nameservers);
                         if (r < 0)
                                 return r;
@@ -213,7 +213,7 @@ static int parse_command_line_ip_dhcp_interface(const char *line, Network *n) {
         if (!s)
                 return -EINVAL;
 
-        if (isempty_string(s[0]) || isempty_string(s[1]))
+        if (isempty_str(s[0]) || isempty_str(s[1]))
             return -EINVAL;
 
         n->ifname = g_strdup(s[0]);
@@ -222,10 +222,10 @@ static int parse_command_line_ip_dhcp_interface(const char *line, Network *n) {
 
         (void) parse_dhcp_type(s[1], n);
 
-        if (g_strv_length(s) >= 2 && !isempty_string(s[2]))
+        if (g_strv_length(s) >= 2 && !isempty_str(s[2]))
                 (void) dracut_parse_mtu(s[2], n);
 
-        if (g_strv_length(s) >= 3 && !isempty_string(s[3]))
+        if (g_strv_length(s) >= 3 && !isempty_str(s[3]))
                 (void) dracut_parse_mac(s[3], n);
 
         return 0;
@@ -288,7 +288,7 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
         if (r < 0)
                 return r;
 
-        if (!isempty_string(s[0])) {
+        if (!isempty_str(s[0])) {
                 r = parse_ip_from_string(s[0], &destination);
                 if (r < 0)
                         return r;
@@ -297,7 +297,7 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
                 route->family = destination->family;
         }
 
-       if (!isempty_string(s[1])) {
+       if (!isempty_str(s[1])) {
                 r = parse_ip_from_string(s[1], &gw);
                 if (r < 0)
                         return r;
@@ -310,7 +310,7 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
                 steal_pointer(route);
        }
 
-        if (!isempty_string(s[2])) {
+        if (!isempty_str(s[2])) {
                n->ifname = g_strdup(s[2]);
                if (!n->ifname)
                        return log_oom();

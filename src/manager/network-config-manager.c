@@ -2744,7 +2744,7 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
 _public_ int ncm_set_system_hostname(int argc, char *argv[]) {
         int r;
 
-        if (isempty_string(argv[1])) {
+        if (isempty_str(argv[1])) {
                 log_warning("Invalid hostname. Ignoring");
                 return -EINVAL;
         }

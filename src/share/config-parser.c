@@ -54,7 +54,7 @@ int parse_key_file(const char *path, KeyFile **ret) {
                 if (n <= 0)
                         continue;
 
-                if (isempty_string(s) || strchr(COMMENTS, *s))
+                if (isempty_str(s) || strchr(COMMENTS, *s))
                         continue;
 
                 e = find_chars_or_comment(s, NULL);
@@ -225,7 +225,7 @@ int parse_line(const char *line, char **key, char **value) {
         if (!s)
                 return -ENODATA;
 
-        if (isempty_string(s) || *s == '#')
+        if (isempty_str(s) || *s == '#')
                 return -ENODATA;
 
         return split_pair(s, "=", key, value);

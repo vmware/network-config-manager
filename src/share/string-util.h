@@ -26,7 +26,7 @@ static inline const char *string_na(const char *s) {
         return s ?: "n/a";
 }
 
-static inline bool isempty_string(const char *p) {
+static inline bool isempty_str(const char *p) {
         return !p || !p[0];
 }
 

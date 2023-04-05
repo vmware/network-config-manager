@@ -479,10 +479,10 @@ static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
                steal_pointer(js);
         }
 
-        if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 && !isempty_string(t)) {
+        if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 && !isempty_str(t)) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-               if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_string(t))
+               if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_str(t))
                         js = json_object_new_string(t);
                else
                        js = json_object_new_string(string_na(arphrd_to_name(l->iftype)));

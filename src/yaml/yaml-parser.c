@@ -673,7 +673,7 @@ int parse_yaml_scalar_or_sequence(const char *key,
         assert(doc);
         assert(node);
 
-        if (!isempty_string(key) && !isempty_string(value)) {
+        if (!isempty_str(key) && !isempty_str(value)) {
                 *s = strv_new(value);
                 if (!*s)
                         return -ENOMEM;
