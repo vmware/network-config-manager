@@ -239,7 +239,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_link_flag(p, ctl_to_config(m, "manage"), bool_to_string(!k));
+        r = manager_set_link_flag(p, ctl_to_config(m, "manage"), bool_to_str(!k));
         if (r < 0) {
                 printf("Failed to set device manage '%s': %s\n", p->ifname, strerror(-r));
                 return r;
@@ -288,7 +288,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, ctl_to_config(m, "arp"), bool_to_string(k));
+                        r = manager_set_link_flag(p, ctl_to_config(m, "arp"), bool_to_str(k));
                         if (r < 0) {
                                 log_warning("Failed to set arp on device='%s': %s", p->ifname, strerror(-r));
                                 return r;
@@ -305,7 +305,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
+                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_str(k));
                         if (r < 0) {
                                 log_warning("Failed to set multicast on device '%s': %s", p->ifname, strerror(-r));
                                 return r;
@@ -322,7 +322,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
+                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_str(k));
                         if (r < 0) {
                                 printf("Failed to set device arp '%s': %s\n", p->ifname, strerror(-r));
                                 return r;
@@ -339,7 +339,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                         }
 
                         k = r;
-                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_string(k));
+                        r = manager_set_link_flag(p, ctl_to_config(m, argv[i-1]), bool_to_str(k));
                         if (r < 0) {
                                 log_warning("Failed to set device arp on device '%s': %s", p->ifname, strerror(-r));
                                 return r;

@@ -56,7 +56,7 @@ char *string_copy(char *dest, const char *src, size_t size) {
         return dest;
 }
 
-const char *bool_to_string(bool x) {
+const char *bool_to_str(bool x) {
         if (x)
                 return "yes";
         else

@@ -522,7 +522,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
                 add_key_to_section(section, "Label", label);
 
         if (prefix_route >= 0)
-                add_key_to_section(section, "AddPrefixRoute", bool_to_string(prefix_route));
+                add_key_to_section(section, "AddPrefixRoute", bool_to_str(prefix_route));
 
         if (dad != _IP_DUPLICATE_ADDRESS_DETECTION_INVALID)
                 add_key_to_section(section, "DuplicateAddressDetection", ip_duplicate_address_detection_type_to_name(dad));
@@ -602,7 +602,7 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
         }
 
         if (rt->onlink > 0) {
-                r = set_config_file_str(network, "Route", "GatewayOnlink", bool_to_string(rt->onlink));
+                r = set_config_file_str(network, "Route", "GatewayOnlink", bool_to_str(rt->onlink));
                 if (r < 0) {
                         log_warning("Failed to write to configuration file: %s", network);
                         return r;
@@ -655,7 +655,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
         }
 
         if (onlink >= 0)
-                add_key_to_section(section, "GatewayOnLink", bool_to_string(onlink));
+                add_key_to_section(section, "GatewayOnLink", bool_to_str(onlink));
 
         if (source) {
                 r = ip_to_str_prefix(gateway->family, source, &src);
@@ -830,7 +830,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
                 add_key_to_section(section, "OutgoingInterface", rule->oif.ifname);
 
         if (rule->invert)
-                add_key_to_section(section, "Invert", bool_to_string(rule->invert));
+                add_key_to_section(section, "Invert", bool_to_str(rule->invert));
 
         if (rule->sport)
                 add_key_to_section(section, "SourcePort", rule->sport);
@@ -1102,16 +1102,16 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifidx,
                 add_key_to_section(section, "DNS", dns);
 
         if (emit_dns >= 0)
-                add_key_to_section(section, "EmitDNS", bool_to_string(emit_dns));
+                add_key_to_section(section, "EmitDNS", bool_to_str(emit_dns));
 
         if (ntp)
                 add_key_to_section(section, "NTP", ntp);
 
         if (emit_ntp >= 0)
-                add_key_to_section(section, "EmitNTP", bool_to_string(emit_ntp));
+                add_key_to_section(section, "EmitNTP", bool_to_str(emit_ntp));
 
         if (emit_router >= 0)
-                add_key_to_section(section, "EmitRouter", bool_to_string(emit_router));
+                add_key_to_section(section, "EmitRouter", bool_to_str(emit_router));
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
@@ -1238,7 +1238,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifidx,
                 add_key_to_section(ipv6_sendra_section, "DNS", d);
 
         if (emit_dns >= 0)
-                add_key_to_section(ipv6_sendra_section, "EmitDNS", bool_to_string(emit_dns));
+                add_key_to_section(ipv6_sendra_section, "EmitDNS", bool_to_str(emit_dns));
 
         if (dns_lifetime > 0)
                 add_key_to_section_integer(ipv6_sendra_section, "DNSLifetimeSec", dns_lifetime);
@@ -1247,7 +1247,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifidx,
                 add_key_to_section(ipv6_sendra_section, "Domains", domain);
 
         if (assign >= 0)
-                add_key_to_section(ipv6_sendra_section, "Assign", bool_to_string(assign));
+                add_key_to_section(ipv6_sendra_section, "Assign", bool_to_str(assign));
 
         r = section_new("IPv6RoutePrefix", &ipv6_route_prefix_section);
         if (r < 0)
@@ -1950,7 +1950,7 @@ int manager_configure_proxy(int enable,
         if (enable >= 0) {
                 _auto_cleanup_ char *p = NULL, *t = NULL;
 
-                t = strdup(bool_to_string(enable));
+                t = strdup(bool_to_str(enable));
                 if (!t)
                         return log_oom();
 

@@ -53,4 +53,4 @@ int strv_add(char ***l, const char *value);
 #define strv_parse_shell g_shell_parse_argv
 int skip_first_word_and_split(char *line, const char *first_word, const char *sep, char ***ret);
 int argv_to_strv(int argc, char *argv[], char ***ret);
-const char *bool_to_string(bool x);
+const char *bool_to_str(bool x);

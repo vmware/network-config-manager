@@ -343,7 +343,7 @@ int set_config_file_bool(const char *path, const char *section, const char *k, b
         assert(section);
         assert(k);
 
-        return set_config_file_str(path, section, k, bool_to_string(b));
+        return set_config_file_str(path, section, k, bool_to_str(b));
 }
 
 int key_file_set_str(KeyFile *key_file, const char *section, const char *k, const char *v) {
@@ -359,7 +359,7 @@ int key_file_set_bool(KeyFile *key_file, const char *section, const char *k, con
         assert(section);
         assert(k);
 
-        return set_config(key_file, section, k, bool_to_string(b));
+        return set_config(key_file, section, k, bool_to_str(b));
 }
 
 
