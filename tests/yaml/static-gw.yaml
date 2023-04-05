@@ -16,3 +16,4 @@ network:
            scope: link
            congestion-window: 10
            advertised-receive-window: 20
+           quick-ack: true
