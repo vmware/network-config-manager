@@ -359,6 +359,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Network', 'DHCP') == 'ipv4')
 
         assert(parser.get('DHCPv4', 'RouteMetric') == '100')
+        assert(parser.get('DHCPv4', 'SendRelease') == 'no')
 
     def test_network_static_address_label_configuration(self):
         self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yaml')

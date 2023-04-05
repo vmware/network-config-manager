@@ -260,6 +260,7 @@ typedef struct Network {
         int dhcp4_use_routes;
         int dhcp4_use_hostname;
         int dhcp4_send_hostname;
+        int dhcp4_send_release;
         char *dhcp4_hostname;
 
         /* dhcp6 section  */
