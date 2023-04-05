@@ -207,14 +207,17 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        if (isempty_string(mac))
-                return -ENOENT;
-
         r = create_conf_file("/etc/systemd/network", s, "link", &file);
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(path, "Match", "MACAddress", mac);
+        if (!isempty_string(mac)) {
+                r = set_config_file_string(path, "Match", "MACAddress", mac);
+                if (r < 0)
+                        return r;
+        }
+
+        r = set_config_file_string(path, "Match", "OriginalName", ifname);
         if (r < 0)
                 return r;
 
