@@ -208,7 +208,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
                         _auto_cleanup_ char *pretty = NULL;
                         DNSServer *d =  g_sequence_get(i);
 
-                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r < 0)
                                 continue;
 
@@ -284,7 +284,7 @@ int add_dns_server_and_domain_to_resolved_conf(DNSServers *dns, char **domains) 
                         _auto_cleanup_ char *pretty = NULL;
                         DNSServer *d =  g_sequence_get(i);
 
-                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r < 0)
                                 continue;
 

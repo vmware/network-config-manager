@@ -318,7 +318,7 @@ int routing_policy_rule_new(RoutingPolicyRule **ret);
 void routing_policy_rule_free(RoutingPolicyRule *rule);
 DEFINE_CLEANUP(RoutingPolicyRule*, routing_policy_rule_free);
 
-int parse_address_from_string_and_add(const char *s, Set *a);
+int parse_address_from_str_and_add(const char *s, Set *a);
 
 int create_network_conf_file(const char *ifname, char **ret);
 int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret);

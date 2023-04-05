@@ -93,13 +93,13 @@ int sriov_configure(const IfNameIndex *ifidx, SRIOV *s, bool link) {
                 add_key_to_section(section, "VLANProtocol", s->vlanproto);
 
         if (s->macspoofck >= 0)
-                add_key_to_section(section, "MACSpoofCheck", bool_to_string(s->macspoofck));
+                add_key_to_section(section, "MACSpoofCheck", bool_to_str(s->macspoofck));
 
         if (s->qrss >= 0)
-                add_key_to_section(section, "QueryReceiveSideScaling", bool_to_string(s->qrss));
+                add_key_to_section(section, "QueryReceiveSideScaling", bool_to_str(s->qrss));
 
         if (s->trust >= 0)
-                add_key_to_section(section, "Trust", bool_to_string(s->trust));
+                add_key_to_section(section, "Trust", bool_to_str(s->trust));
 
         if (s->linkstate)
                 add_key_to_section(section, "LinkState", s->linkstate);

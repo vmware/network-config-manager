@@ -143,7 +143,7 @@ int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Link", k, v);
+        r = set_config_file_str(network, "Link", k, v);
         if (r < 0)
                 return r;
 
@@ -160,7 +160,7 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", "DHCP", dhcp_client_modes_to_name(mode));
+        r = set_config_file_str(network, "Network", "DHCP", dhcp_client_modes_to_name(mode));
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
@@ -201,7 +201,7 @@ int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHC
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(identifier));
+        r = set_config_file_str(network, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(identifier));
         if (r < 0) {
                 log_warning("Failed to update DHCP4 ClientIdentifier= to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -284,14 +284,14 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                         return r;
         }
 
-        r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
+        r = set_config_file_str(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
         if (r < 0) {
                 log_warning("Failed to update %s DUIDType= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, strerror(-r));
                 return r;
         }
 
         if (raw_data) {
-                r = set_config_file_string(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDRawData", raw_data);
+                r = set_config_file_str(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDRawData", raw_data);
                 if (r < 0) {
                         log_warning("Failed to update %s DUIDRawData= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, strerror(-r));
                         return r;
@@ -313,7 +313,7 @@ int manager_set_link_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
                 return r;
 
         asprintf(&config_update_mtu, "%u", mtu);
-        r = set_config_file_string(network, "Link", "MTUBytes", config_update_mtu);
+        r = set_config_file_str(network, "Link", "MTUBytes", config_update_mtu);
         if (r < 0) {
                 log_warning("Failed to update MTUBytes= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
@@ -335,7 +335,7 @@ int manager_set_link_group(const IfNameIndex *ifidx, uint32_t group) {
 
         asprintf(&config_update_group, "%u", group);
 
-        r = set_config_file_string(network, "Link", "Group", config_update_group);
+        r = set_config_file_str(network, "Link", "Group", config_update_group);
         if (r < 0) {
                 log_warning("Failed to update Group= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
@@ -356,7 +356,7 @@ int manager_set_link_rf_online(const IfNameIndex *ifidx, const char *addrfamily)
                 return r;
 
         asprintf(&config_update_family, "%s", addrfamily);
-        r = set_config_file_string(network, "Link", "RequiredFamilyForOnline", config_update_family);
+        r = set_config_file_str(network, "Link", "RequiredFamilyForOnline", config_update_family);
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
@@ -377,7 +377,7 @@ int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy)
                 return r;
 
         asprintf(&config_update_policy, "%s", actpolicy);
-        r = set_config_file_string(network, "Link", "ActivationPolicy", config_update_policy);
+        r = set_config_file_str(network, "Link", "ActivationPolicy", config_update_policy);
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
@@ -418,7 +418,7 @@ int manager_set_link_local_address(const IfNameIndex *ifidx, const char *k, cons
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", k, v);
+        r = set_config_file_str(network, "Network", k, v);
         if (r < 0) {
                 log_warning("Failed to update LinkLocalAddressing= to configuration file '%s' = %s", network, strerror(-r));
                 return r;
@@ -445,7 +445,7 @@ int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac) {
         }
 
         asprintf(&config_update_mac, "%s", mac);
-        r = set_config_file_string(network, "Link", "MACAddress", config_update_mac);
+        r = set_config_file_str(network, "Link", "MACAddress", config_update_mac);
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
@@ -490,18 +490,18 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
 
         if (address) {
                 if (!address->prefix_len)
-                        r = ip_to_string(address->family, address, &a);
+                        r = ip_to_str(address->family, address, &a);
                 else
-                        r = ip_to_string_prefix(address->family, address, &a);
+                        r = ip_to_str_prefix(address->family, address, &a);
                 if (r < 0)
                         return r;
         }
 
         if (peer) {
                 if (!peer->prefix_len)
-                        r = ip_to_string(peer->family, peer, &p);
+                        r = ip_to_str(peer->family, peer, &p);
                 else
-                        r = ip_to_string_prefix(peer->family, peer, &p);
+                        r = ip_to_str_prefix(peer->family, peer, &p);
                 if (r < 0)
                         return r;
         }
@@ -522,7 +522,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
                 add_key_to_section(section, "Label", label);
 
         if (prefix_route >= 0)
-                add_key_to_section(section, "AddPrefixRoute", bool_to_string(prefix_route));
+                add_key_to_section(section, "AddPrefixRoute", bool_to_str(prefix_route));
 
         if (dad != _IP_DUPLICATE_ADDRESS_DETECTION_INVALID)
                 add_key_to_section(section, "DuplicateAddressDetection", ip_duplicate_address_detection_type_to_name(dad));
@@ -591,18 +591,18 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
                 return r;
         }
 
-        r = ip_to_string(rt->gw.family, &rt->gw, &a);
+        r = ip_to_str(rt->gw.family, &rt->gw, &a);
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Route", "Gateway", a);
+        r = set_config_file_str(network, "Route", "Gateway", a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file: %s", network);
                 return r;
         }
 
         if (rt->onlink > 0) {
-                r = set_config_file_string(network, "Route", "GatewayOnlink", bool_to_string(rt->onlink));
+                r = set_config_file_str(network, "Route", "GatewayOnlink", bool_to_str(rt->onlink));
                 if (r < 0) {
                         log_warning("Failed to write to configuration file: %s", network);
                         return r;
@@ -647,7 +647,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
                 return r;
 
         if (gateway) {
-                r = ip_to_string(gateway->family, gateway, &gw);
+                r = ip_to_str(gateway->family, gateway, &gw);
                 if (r < 0)
                         return r;
 
@@ -655,10 +655,10 @@ int manager_configure_route(const IfNameIndex *ifidx,
         }
 
         if (onlink >= 0)
-                add_key_to_section(section, "GatewayOnLink", bool_to_string(onlink));
+                add_key_to_section(section, "GatewayOnLink", bool_to_str(onlink));
 
         if (source) {
-                r = ip_to_string_prefix(gateway->family, source, &src);
+                r = ip_to_str_prefix(gateway->family, source, &src);
                 if (r < 0)
                         return r;
 
@@ -666,7 +666,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
         }
 
         if (pref_source) {
-                r = ip_to_string_prefix(pref_source->family, pref_source, &pref_src);
+                r = ip_to_str_prefix(pref_source->family, pref_source, &pref_src);
                 if (r < 0)
                         return r;
 
@@ -674,7 +674,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
         }
 
         if (destination) {
-                r = ip_to_string_prefix(destination->family, destination, &dest);
+                r = ip_to_str_prefix(destination->family, destination, &dest);
                 if (r < 0)
                         return r;
 
@@ -797,11 +797,11 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
         if (r < 0)
                 return r;
 
-        r = ip_to_string_prefix(rule->to.family, &rule->to, &to);
+        r = ip_to_str_prefix(rule->to.family, &rule->to, &to);
         if (r < 0)
                 return r;
 
-        r = ip_to_string_prefix(rule->from.family, &rule->from, &from);
+        r = ip_to_str_prefix(rule->from.family, &rule->from, &from);
         if (r < 0)
                 return r;
 
@@ -830,7 +830,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
                 add_key_to_section(section, "OutgoingInterface", rule->oif.ifname);
 
         if (rule->invert)
-                add_key_to_section(section, "Invert", bool_to_string(rule->invert));
+                add_key_to_section(section, "Invert", bool_to_str(rule->invert));
 
         if (rule->sport)
                 add_key_to_section(section, "SourcePort", rule->sport);
@@ -904,16 +904,16 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        r = ip_to_string(rt->gw.family, &rt->gw, &gw);
+        r = ip_to_str(rt->gw.family, &rt->gw, &gw);
         if (r < 0)
                 return r;
 
         if (a) {
-                r = ip_to_string_prefix(a->family, a, &address);
+                r = ip_to_str_prefix(a->family, a, &address);
                 if (r < 0)
                         return r;
 
-                r = key_file_set_string(key_file, "Address", "Address", address);
+                r = key_file_set_str(key_file, "Address", "Address", address);
                 if (r < 0)
                         return r;
         }
@@ -923,7 +923,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
                 return log_oom();
 
         if (!ip_is_null(&rt->gw)) {
-                r = ip_to_string(rt->gw.family, &rt->gw, &gw);
+                r = ip_to_str(rt->gw.family, &rt->gw, &gw);
                 if (r < 0)
                         return r;
         }
@@ -941,7 +941,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
                 return r;
 
         if (!ip_is_null(&rt->dst)) {
-                r = ip_to_string(rt->dst.family, &rt->dst, &destination);
+                r = ip_to_str(rt->dst.family, &rt->dst, &destination);
                 if (r < 0)
                         return r;
         } else if (rt->to_default || ip_is_null(&rt->dst)) {
@@ -1067,13 +1067,13 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifidx,
                 return r;
 
         if (dns_address) {
-                r = ip_to_string(dns_address->family, dns_address, &dns);
+                r = ip_to_str(dns_address->family, dns_address, &dns);
                 if (r < 0)
                         return r;
         }
 
         if (ntp_address) {
-                r = ip_to_string(ntp_address->family, ntp_address, &ntp);
+                r = ip_to_str(ntp_address->family, ntp_address, &ntp);
                 if (r < 0)
                         return r;
         }
@@ -1102,16 +1102,16 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifidx,
                 add_key_to_section(section, "DNS", dns);
 
         if (emit_dns >= 0)
-                add_key_to_section(section, "EmitDNS", bool_to_string(emit_dns));
+                add_key_to_section(section, "EmitDNS", bool_to_str(emit_dns));
 
         if (ntp)
                 add_key_to_section(section, "NTP", ntp);
 
         if (emit_ntp >= 0)
-                add_key_to_section(section, "EmitNTP", bool_to_string(emit_ntp));
+                add_key_to_section(section, "EmitNTP", bool_to_str(emit_ntp));
 
         if (emit_router >= 0)
-                add_key_to_section(section, "EmitRouter", bool_to_string(emit_router));
+                add_key_to_section(section, "EmitRouter", bool_to_str(emit_router));
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
@@ -1189,19 +1189,19 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifidx,
                 return r;
 
         if (prefix) {
-                r = ip_to_string_prefix(dns->family, prefix, &p);
+                r = ip_to_str_prefix(dns->family, prefix, &p);
                 if (r < 0)
                         return r;
         }
 
         if (route_prefix) {
-                r = ip_to_string_prefix(dns->family, route_prefix, &rt);
+                r = ip_to_str_prefix(dns->family, route_prefix, &rt);
                 if (r < 0)
                         return r;
         }
 
         if (dns) {
-                r = ip_to_string(dns->family, dns, &d);
+                r = ip_to_str(dns->family, dns, &d);
                 if (r < 0)
                         return r;
         }
@@ -1238,7 +1238,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifidx,
                 add_key_to_section(ipv6_sendra_section, "DNS", d);
 
         if (emit_dns >= 0)
-                add_key_to_section(ipv6_sendra_section, "EmitDNS", bool_to_string(emit_dns));
+                add_key_to_section(ipv6_sendra_section, "EmitDNS", bool_to_str(emit_dns));
 
         if (dns_lifetime > 0)
                 add_key_to_section_integer(ipv6_sendra_section, "DNSLifetimeSec", dns_lifetime);
@@ -1247,7 +1247,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifidx,
                 add_key_to_section(ipv6_sendra_section, "Domains", domain);
 
         if (assign >= 0)
-                add_key_to_section(ipv6_sendra_section, "Assign", bool_to_string(assign));
+                add_key_to_section(ipv6_sendra_section, "Assign", bool_to_str(assign));
 
         r = section_new("IPv6RoutePrefix", &ipv6_route_prefix_section);
         if (r < 0)
@@ -1346,7 +1346,7 @@ int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool syste
                 _auto_cleanup_ char *pretty = NULL;
                 DNSServer *d = g_sequence_get(i);
 
-                r = ip_to_string(d->address.family, &d->address, &pretty);
+                r = ip_to_str(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
                         a = strjoin(" ", pretty, a, NULL);
                         if (!a)
@@ -1360,7 +1360,7 @@ int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool syste
                         return 0;
         }
 
-        r = set_config_file_string(network, "Network", "DNS", a);
+        r = set_config_file_str(network, "Network", "DNS", a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -1406,7 +1406,7 @@ int manager_add_dns_server_domain(const IfNameIndex *ifidx, char **domains, bool
                         return 0;
         }
 
-        r = set_config_file_string(network, "Network", "Domains", a);
+        r = set_config_file_str(network, "Network", "Domains", a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -1489,7 +1489,7 @@ int manager_set_network_section(const IfNameIndex *ifidx, const char *k, const c
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", k, v);
+        r = set_config_file_str(network, "Network", k, v);
         if (r < 0)
                 return r;
 
@@ -1550,7 +1550,7 @@ int manager_add_ntp_addresses(const IfNameIndex *ifidx, char **ntps, bool add) {
                         return log_oom();
         }
 
-        r = set_config_file_string(network, "Network", "NTP", add ? b : a);
+        r = set_config_file_str(network, "Network", "NTP", add ? b : a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -1594,16 +1594,16 @@ int manager_enable_ipv6(const IfNameIndex *ifidx, bool enable) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Network", "DHCP", "ipv4");
+        r = set_config_file_str(network, "Network", "DHCP", "ipv4");
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
         }
 
         if (enable)
-                r = set_config_file_string(network, "Network", "LinkLocalAddressing", "ipv6");
+                r = set_config_file_str(network, "Network", "LinkLocalAddressing", "ipv6");
         else
-                r = set_config_file_string(network, "Network", "LinkLocalAddressing", "no");
+                r = set_config_file_str(network, "Network", "LinkLocalAddressing", "no");
 
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
@@ -1950,7 +1950,7 @@ int manager_configure_proxy(int enable,
         if (enable >= 0) {
                 _auto_cleanup_ char *p = NULL, *t = NULL;
 
-                t = strdup(bool_to_string(enable));
+                t = strdup(bool_to_str(enable));
                 if (!t)
                         return log_oom();
 

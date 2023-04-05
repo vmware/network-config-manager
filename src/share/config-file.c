@@ -280,14 +280,14 @@ int set_config_uint(KeyFile *key_file, const char *section, const char *k, uint 
         if (!s)
                 return -ENOMEM;
 
-        r = key_file_set_string(key_file, section, k, s);
+        r = key_file_set_str(key_file, section, k, s);
         if (r < 0)
                 return r;
 
         return 0;
 }
 
-int set_config_file_string(const char *path, const char *section, const char *k, const char *v) {
+int set_config_file_str(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
@@ -327,7 +327,7 @@ int set_config_file_integer(const char *path, const char *section, const char *k
         if (!s)
                 return -ENOMEM;
 
-        r = key_file_set_string(key_file, section, k, s);
+        r = key_file_set_str(key_file, section, k, s);
         if (r < 0)
                 return r;
 
@@ -343,10 +343,10 @@ int set_config_file_bool(const char *path, const char *section, const char *k, b
         assert(section);
         assert(k);
 
-        return set_config_file_string(path, section, k, bool_to_string(b));
+        return set_config_file_str(path, section, k, bool_to_str(b));
 }
 
-int key_file_set_string(KeyFile *key_file, const char *section, const char *k, const char *v) {
+int key_file_set_str(KeyFile *key_file, const char *section, const char *k, const char *v) {
         assert(key_file);
         assert(section);
         assert(k);
@@ -359,7 +359,7 @@ int key_file_set_bool(KeyFile *key_file, const char *section, const char *k, con
         assert(section);
         assert(k);
 
-        return set_config(key_file, section, k, bool_to_string(b));
+        return set_config(key_file, section, k, bool_to_str(b));
 }
 
 
@@ -410,7 +410,7 @@ int add_config_file_string(const char *path, const char *section, const char *k,
         return set_file_permisssion(path, "systemd-network");
 }
 
-int add_key_to_section_string(const char *path, const char *section, const char *k, const char *v) {
+int add_key_to_section_str(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         bool b = false;
         int r;
@@ -523,7 +523,7 @@ int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, uin
         if (!s)
                 return -ENOMEM;
 
-        r = key_file_set_string(key_file, section, k, s);
+        r = key_file_set_str(key_file, section, k, s);
         if (r < 0)
                 return r;
 

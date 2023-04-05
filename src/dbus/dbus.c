@@ -568,7 +568,7 @@ int dbus_acquire_dns_domains_from_resolved(DNSDomains **domains) {
                 if (r == 0)
                         break;
 
-                if (isempty_string(domain))
+                if (isempty_str(domain))
                         continue;
 
                 r = sd_bus_message_exit_container(m);

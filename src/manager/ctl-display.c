@@ -119,7 +119,7 @@ static int list_links(int argc, char *argv[]) {
                 display(arg_beautify, ansi_color_bold_cyan(), "  %-15s ", link->name);
 
                 (void) device_new_from_ifname(&sd_device, link->name);
-                if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_string(t))
+                if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_str(t))
                         display(arg_beautify, ansi_color_blue_magenta(), "%-12s ", t);
                 else
                         display(arg_beautify, ansi_color_blue_magenta(), "%-12s ", arphrd_to_name(link->iftype));
@@ -140,7 +140,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
         int r;
 
         a = (Address *) g_bytes_get_data(key, &size);
-        (void) ip_to_string_prefix(a->family, &a->address, &c);
+        (void) ip_to_str_prefix(a->family, &a->address, &c);
         if (first) {
                 printf("%s", c);
                 first = false;
@@ -216,7 +216,7 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
                 Address *a = (Address *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL;
 
-                r = ip_to_string_prefix(a->family, &a->address, &c);
+                r = ip_to_str_prefix(a->family, &a->address, &c);
                 if (r < 0)
                         return r;
 
@@ -257,7 +257,7 @@ static int display_one_link_device(Link *l, bool show, char **link_file) {
         }
 
         display(arg_beautify, ansi_color_bold_cyan(), "                        Type: ");
-        if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_string(t))
+        if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_str(t))
                 printf("%s\n", t);
         else
                 printf("%s\n", string_na(arphrd_to_name(l->iftype)));
@@ -303,7 +303,7 @@ static void list_link_attributes(Link *l) {
         (void) link_read_sysfs_attribute(l->name, "duplex", &duplex);
         (void) link_read_sysfs_attribute(l->name, "address", &ether);
 
-        if (!isempty_string(ether)) {
+        if (!isempty_str(ether)) {
                 _auto_cleanup_ char *desc = NULL;
                  hwdb_get_description((uint8_t *) &l->mac_address.ether_addr_octet, &desc);
 
@@ -314,15 +314,15 @@ static void list_link_attributes(Link *l) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                         MTU: ");
                 printf("%d (min: %d max: %d) \n", l->mtu, l->min_mtu, l->max_mtu);
         }
-        if (!isempty_string(duplex)) {
+        if (!isempty_str(duplex)) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                      Duplex: ");
                 printf("%s\n", duplex);
         }
-        if (!isempty_string(speed)) {
+        if (!isempty_str(speed)) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                       Speed: ");
                 printf("%s\n", speed);
         }
-        if (!isempty_string(l->qdisc)) {
+        if (!isempty_str(l->qdisc)) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                       QDISC: ");
                 printf("%s \n", l->qdisc);
         }
@@ -502,7 +502,7 @@ static int list_one_link(char *argv[]) {
                         if (ip_is_null(&rt->gw))
                             continue;
 
-                        (void) ip_to_string(rt->family, &rt->gw, &c);
+                        (void) ip_to_str(rt->family, &rt->gw, &c);
                         printf("%s\n", c);
                         break;
                 }
@@ -624,7 +624,7 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
         a = (Address *) g_bytes_get_data(key, &size);
         if_indextoname(a->ifindex, buf);
 
-        (void) ip_to_string_prefix(a->family, &a->address, &c);
+        (void) ip_to_str_prefix(a->family, &a->address, &c);
         if (first) {
                 printf("%-30s on device ", c);
                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
@@ -750,7 +750,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                                 continue;
 
                         if_indextoname(rt->ifindex, buf);
-                        (void) ip_to_string(rt->family, &rt->gw, &c);
+                        (void) ip_to_str(rt->family, &rt->gw, &c);
                         if (first) {
                                 printf("%-30s on device ", c);
                                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);

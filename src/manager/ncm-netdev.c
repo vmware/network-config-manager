@@ -352,7 +352,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &ip);
+                        r = parse_ip_from_str(argv[i], &ip);
                         if (r < 0) {
                                 log_warning("Failed to parse local address : %s", argv[i]);
                                 return r;
@@ -364,7 +364,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                        parse_next_arg(argv, argc, i);
 
-                       r = parse_ip_from_string(argv[i], &ip);
+                       r = parse_ip_from_str(argv[i], &ip);
                        if (r < 0) {
                                log_warning("Failed to parse remote address : %s", argv[i]);
                                return r;
@@ -376,7 +376,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                        parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &ip);
+                        r = parse_ip_from_str(argv[i], &ip);
                         if (r < 0) {
                                 log_warning("Failed to parse greoup address : %s", argv[i]);
                                 return r;
@@ -664,7 +664,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &a);
+                        r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
                                 log_warning("Failed to parse local address : %s", argv[i]);
                                 return r;
@@ -676,7 +676,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
 
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_string(argv[i], &a);
+                        r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
                                 log_warning("Failed to parse remote address : %s", argv[i]);
                                 return r;
@@ -785,7 +785,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 strv_foreach(d, s) {
                                         _auto_cleanup_ IPAddress *address = NULL;
 
-                                        r = parse_ip_from_string(*d, &address);
+                                        r = parse_ip_from_str(*d, &address);
                                         if (r < 0) {
                                                 log_warning("Failed to parse allowed ips '%s': %s", argv[i], strerror(EINVAL));
                                                 return -EINVAL;
@@ -796,7 +796,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                         } else {
                                 _auto_cleanup_ IPAddress *address = NULL;
 
-                                r = parse_ip_from_string(argv[i], &address);
+                                r = parse_ip_from_str(argv[i], &address);
                                 if (r < 0) {
                                         log_warning("Failed to parse allowed ips '%s': %s", argv[i], strerror(EINVAL));
                                         return -EINVAL;

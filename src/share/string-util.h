@@ -26,7 +26,7 @@ static inline const char *string_na(const char *s) {
         return s ?: "n/a";
 }
 
-static inline bool isempty_string(const char *p) {
+static inline bool isempty_str(const char *p) {
         return !p || !p[0];
 }
 
@@ -38,7 +38,7 @@ char *string_copy(char *dest, const char *src, size_t size);
 int split_pair(const char *s, const char *sep, char **l, char **r);
 
 char *truncate_newline(char *s);
-char *string_strip(char *s);
+char *str_strip(char *s);
 
 #define strv_foreach(s, l)                      \
         for ((s) = (l); (s) && *(s); (s)++)
@@ -53,4 +53,4 @@ int strv_add(char ***l, const char *value);
 #define strv_parse_shell g_shell_parse_argv
 int skip_first_word_and_split(char *line, const char *first_word, const char *sep, char ***ret);
 int argv_to_strv(int argc, char *argv[], char ***ret);
-const char *bool_to_string(bool x);
+const char *bool_to_str(bool x);

@@ -666,7 +666,7 @@ int nft_run_command(char **command, GString **ret) {
                 return -ENODATA;
 
         v = nft_ctx_get_output_buffer(nft);
-        if (isempty_string(v))
+        if (isempty_str(v))
                 return -ENODATA;
 
         o = g_string_new(v);
@@ -698,7 +698,7 @@ int nft_get_rules(const char *table, GString **ret) {
                 return -ENODATA;
 
         v = nft_ctx_get_output_buffer(nft);
-        if (isempty_string(v))
+        if (isempty_str(v))
                 return -ENODATA;
 
         o = g_string_new(v);

@@ -56,7 +56,7 @@ char *string_copy(char *dest, const char *src, size_t size) {
         return dest;
 }
 
-const char *bool_to_string(bool x) {
+const char *bool_to_str(bool x) {
         if (x)
                 return "yes";
         else
@@ -74,7 +74,7 @@ int split_pair(const char *s, const char *sep, char **l, char **r) {
         assert(l);
         assert(r);
 
-        if (isempty_string(sep))
+        if (isempty_str(sep))
                 return -EINVAL;
 
         x = g_strsplit(s, sep, 2);
@@ -105,7 +105,7 @@ char *truncate_newline(char *s) {
         return s;
 }
 
-char *string_strip(char *s) {
+char *str_strip(char *s) {
         char *t = NULL;
 
         if (!s)
@@ -138,7 +138,7 @@ int skip_first_word_and_split(char *line, const char *first_word, const char *se
         if (string_has_prefix(line, first_word)) {
                 n = strspn(line, first_word);
                 k = line + n;
-                k = string_strip(k);
+                k = str_strip(k);
 
                 a = strsplit(k, sep, 0);
                 if (!a)
@@ -199,14 +199,14 @@ int argv_to_strv(int argc, char *argv[], char ***ret) {
 
         for (int i = 0; i < argc; i++) {
                 if (!s) {
-                        s = strv_new(string_strip(argv[i]));
+                        s = strv_new(str_strip(argv[i]));
                         if (!s)
                                 return -ENOMEM;
 
                         continue;
                 }
 
-                r = strv_add(&s, string_strip(argv[i]));
+                r = strv_add(&s, str_strip(argv[i]));
                 if (r < 0)
                         return r;
         }

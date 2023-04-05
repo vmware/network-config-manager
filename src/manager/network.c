@@ -551,7 +551,7 @@ int create_network_conf_file(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_string(network, "Match", "Name", ifname);
+        r = set_config_file_str(network, "Match", "Name", ifname);
         if (r < 0)
                 return r;
 
@@ -877,14 +877,14 @@ void g_network_free (gpointer data) {
         network_freep(&n);
 }
 
-int parse_address_from_string_and_add(const char *s, Set *a) {
+int parse_address_from_str_and_add(const char *s, Set *a) {
         _auto_cleanup_ IPAddress *address = NULL;
         int r;
 
         assert(s);
         assert(a);
 
-        r = parse_ip_from_string(s, &address);
+        r = parse_ip_from_str(s, &address);
         if (r < 0)
                 return r;
 
@@ -1006,12 +1006,12 @@ static void append_routing_policy_rules(gpointer key, gpointer value, gpointer u
                 return;
 
         if (!ip_is_null(&rule->from)) {
-                (void) ip_to_string_prefix(rule->from.family, &rule->from, &from);
+                (void) ip_to_str_prefix(rule->from.family, &rule->from, &from);
                 (void ) add_key_to_section(section, "From", from);
         }
 
         if (!ip_is_null(&rule->to)) {
-                (void) ip_to_string_prefix(rule->to.family, &rule->to, &to);
+                (void) ip_to_str_prefix(rule->to.family, &rule->to, &to);
                 (void ) add_key_to_section(section, "To", to);
         }
 
@@ -1049,7 +1049,7 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
                 return;
 
         if (!ip_is_null(&route->dst)) {
-                (void) ip_to_string_prefix(route->dst.family, &route->dst, &destination);
+                (void) ip_to_str_prefix(route->dst.family, &route->dst, &destination);
                 (void ) add_key_to_section(section, "Destination", destination);
         } else if (route->to_default) {
                 switch(route->family) {
@@ -1063,17 +1063,17 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         }
 
         if (!ip_is_null(&route->gw)) {
-                (void) ip_to_string_prefix(route->gw.family, &route->gw, &gateway);
+                (void) ip_to_str_prefix(route->gw.family, &route->gw, &gateway);
                 (void) add_key_to_section(section, "Gateway", gateway);
         }
 
         if (!ip_is_null(&route->prefsrc)) {
-                (void) ip_to_string_prefix(route->prefsrc.family, &route->prefsrc, &prefsrc);
+                (void) ip_to_str_prefix(route->prefsrc.family, &route->prefsrc, &prefsrc);
                 (void) add_key_to_section(section, "PreferredSource", prefsrc);
         }
 
         if (route->onlink >= 0)
-                (void) add_key_to_section(section, "Onlink", bool_to_string(route->onlink));
+                (void) add_key_to_section(section, "Onlink", bool_to_str(route->onlink));
 
         if (route->table > 0 && route->table != RT_TABLE_MAIN)
                 (void) add_key_to_section_uint(section, "Table", route->table);
@@ -1094,7 +1094,7 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
                (void) add_key_to_section_uint(section, "InitialAdvertisedReceiveWindow", route->initrwnd);
 
        if (route->quick_ack >= 0)
-               (void) add_key_to_section(section, "QuickAck", bool_to_string(route->quick_ack));
+               (void) add_key_to_section(section, "QuickAck", bool_to_str(route->quick_ack));
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
@@ -1109,7 +1109,7 @@ static void append_nameservers(gpointer key, gpointer value, gpointer userdata) 
         GString *config = userdata;
         int r;
 
-        r = ip_to_string(a->family,a, &pretty);
+        r = ip_to_str(a->family,a, &pretty);
         if (r < 0)
                 return;
 
@@ -1133,7 +1133,7 @@ static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
         if (r < 0)
                 return;
 
-        r = ip_to_string_prefix(a->family, a, &addr);
+        r = ip_to_str_prefix(a->family, a, &addr);
         if (r < 0)
                 return;
 
@@ -1202,7 +1202,7 @@ int generate_network_config(Network *n) {
             n->req_for_online >= 0 || n->mtu > 0 || n->mac || n->req_family_for_online || n->activation_policy || n->mac) {
 
                 if (n->unmanaged >= 0) {
-                        r = set_config(key_file, "Link", "Unmanaged", bool_to_string(!n->unmanaged));
+                        r = set_config(key_file, "Link", "Unmanaged", bool_to_str(!n->unmanaged));
                         if (r < 0)
                                 return r;
                 }
@@ -1214,37 +1214,37 @@ int generate_network_config(Network *n) {
                 }
 
                 if (n->arp >= 0) {
-                        r = set_config(key_file, "Link", "ARP", bool_to_string(n->arp));
+                        r = set_config(key_file, "Link", "ARP", bool_to_str(n->arp));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->multicast >= 0) {
-                        r = set_config(key_file, "Link", "Multicast", bool_to_string(n->multicast));
+                        r = set_config(key_file, "Link", "Multicast", bool_to_str(n->multicast));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->all_multicast >= 0) {
-                        r = set_config(key_file, "Link", "AllMulticast", bool_to_string(n->all_multicast));
+                        r = set_config(key_file, "Link", "AllMulticast", bool_to_str(n->all_multicast));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->promiscuous >= 0) {
-                        r = set_config(key_file, "Link", "Promiscuous", bool_to_string(n->promiscuous));
+                        r = set_config(key_file, "Link", "Promiscuous", bool_to_str(n->promiscuous));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->req_for_online >= 0) {
-                        r = set_config(key_file, "Link", "RequiredForOnline", bool_to_string(n->req_for_online));
+                        r = set_config(key_file, "Link", "RequiredForOnline", bool_to_str(n->req_for_online));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->optional >= 0) {
-                        r = set_config(key_file, "Link", "RequiredForOnline", bool_to_string(!n->optional));
+                        r = set_config(key_file, "Link", "RequiredForOnline", bool_to_str(!n->optional));
                         if (r < 0)
                                 return r;
                 }
@@ -1297,7 +1297,7 @@ int generate_network_config(Network *n) {
         }
 
         if (n->lldp >= 0) {
-                r = set_config(key_file, "Network", "LLDP", bool_to_string(n->lldp));
+                r = set_config(key_file, "Network", "LLDP", bool_to_str(n->lldp));
                 if (r < 0)
                         return r;
         }
@@ -1321,7 +1321,7 @@ int generate_network_config(Network *n) {
         }
 
         if (n->ipv6_accept_ra >= 0) {
-                r = set_config(key_file, "Network", "IPv6AcceptRA", bool_to_string(n->ipv6_accept_ra));
+                r = set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(n->ipv6_accept_ra));
                 if (r < 0)
                         return r;
         }
@@ -1333,7 +1333,7 @@ int generate_network_config(Network *n) {
         }
 
         if (n->configure_without_carrier >= 0) {
-                r = set_config(key_file, "Network", "ConfigureWithoutCarrier", bool_to_string(n->configure_without_carrier));
+                r = set_config(key_file, "Network", "ConfigureWithoutCarrier", bool_to_str(n->configure_without_carrier));
                 if (r < 0)
                         return r;
         }
@@ -1392,49 +1392,49 @@ int generate_network_config(Network *n) {
                 }
 
                 if (n->dhcp4_use_dns >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseDNS", bool_to_string(n->dhcp4_use_dns));
+                        r = set_config(key_file, "DHCPv4", "UseDNS", bool_to_str(n->dhcp4_use_dns));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp4_use_domains >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseDomains", bool_to_string(n->dhcp4_use_domains));
+                        r = set_config(key_file, "DHCPv4", "UseDomains", bool_to_str(n->dhcp4_use_domains));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp4_use_ntp >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseNTP", bool_to_string(n->dhcp4_use_ntp));
+                        r = set_config(key_file, "DHCPv4", "UseNTP", bool_to_str(n->dhcp4_use_ntp));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp4_use_mtu >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseMTU", bool_to_string(n->dhcp4_use_mtu));
+                        r = set_config(key_file, "DHCPv4", "UseMTU", bool_to_str(n->dhcp4_use_mtu));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp4_use_routes >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseRoutes", bool_to_string(n->dhcp4_use_routes));
+                        r = set_config(key_file, "DHCPv4", "UseRoutes", bool_to_str(n->dhcp4_use_routes));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp4_use_hostname >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseHostname", bool_to_string(n->dhcp4_use_hostname));
+                        r = set_config(key_file, "DHCPv4", "UseHostname", bool_to_str(n->dhcp4_use_hostname));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp4_send_hostname >= 0) {
-                        r = set_config(key_file, "DHCPv4", "SendHostname", bool_to_string(n->dhcp4_send_hostname));
+                        r = set_config(key_file, "DHCPv4", "SendHostname", bool_to_str(n->dhcp4_send_hostname));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp4_send_release >= 0) {
-                        r = set_config(key_file, "DHCPv4", "SendRelease", bool_to_string(n->dhcp4_send_release));
+                        r = set_config(key_file, "DHCPv4", "SendRelease", bool_to_str(n->dhcp4_send_release));
                         if (r < 0)
                                 return r;
                 }
@@ -1457,43 +1457,43 @@ int generate_network_config(Network *n) {
              n->dhcp6_use_address >= 0) {
 
                 if (n->dhcp6_use_dns >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_string(n->dhcp6_use_dns));
+                        r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_str(n->dhcp6_use_dns));
                          if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp6_use_ntp >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseNTP", bool_to_string(n->dhcp6_use_ntp));
+                        r = set_config(key_file, "DHCPv6", "UseNTP", bool_to_str(n->dhcp6_use_ntp));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp6_use_hostname >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseHostname", bool_to_string(n->dhcp6_use_hostname));
+                        r = set_config(key_file, "DHCPv6", "UseHostname", bool_to_str(n->dhcp6_use_hostname));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp6_use_domains >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseDomains", bool_to_string(n->dhcp6_use_domains));
+                        r = set_config(key_file, "DHCPv6", "UseDomains", bool_to_str(n->dhcp6_use_domains));
                         if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp6_rapid_commit >= 0) {
-                        r = set_config(key_file, "DHCPv6", "RapidCommit", bool_to_string(n->dhcp6_rapid_commit));
+                        r = set_config(key_file, "DHCPv6", "RapidCommit", bool_to_str(n->dhcp6_rapid_commit));
                          if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp6_use_address >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseAddress", bool_to_string(n->dhcp6_use_address));
+                        r = set_config(key_file, "DHCPv6", "UseAddress", bool_to_str(n->dhcp6_use_address));
                          if (r < 0)
                                 return r;
                 }
 
                 if (n->dhcp6_send_release >= 0) {
-                        r = set_config(key_file, "DHCPv6", "SendRelease", bool_to_string(n->dhcp6_send_release));
+                        r = set_config(key_file, "DHCPv6", "SendRelease", bool_to_str(n->dhcp6_send_release));
                         if (r < 0)
                                 return r;
                 }
@@ -1516,7 +1516,7 @@ int generate_network_config(Network *n) {
 
 
         if (n->neighbor_suppression > 0) {
-                r = set_config(key_file, "Bridge", "NeighborSuppression", bool_to_string(n->neighbor_suppression));
+                r = set_config(key_file, "Bridge", "NeighborSuppression", bool_to_str(n->neighbor_suppression));
                 if (r < 0)
                         return r;
         }
@@ -1584,7 +1584,7 @@ int generate_master_device_network(Network *n) {
                         if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                 break;
 
-                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                        r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                         if (r < 0)
                                 return r;
                 }
@@ -1603,7 +1603,7 @@ int generate_master_device_network(Network *n) {
                         if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                 break;
 
-                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                        r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                         if (r < 0)
                                 return r;
                 }
@@ -1624,7 +1624,7 @@ int generate_master_device_network(Network *n) {
                                 if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                         break;
 
-                                r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                                r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                                 if (r < 0)
                                         return r;
                         }
@@ -1646,7 +1646,7 @@ int generate_master_device_network(Network *n) {
                                 if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                         break;
 
-                                r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                                r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                                 if (r < 0)
                                         return r;
                         }
@@ -1668,7 +1668,7 @@ int generate_master_device_network(Network *n) {
                                 if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                         break;
 
-                                r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                                r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                                 if (r < 0)
                                         return r;
                         }
@@ -1688,7 +1688,7 @@ int generate_master_device_network(Network *n) {
                         if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                 break;
 
-                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                        r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                         if (r < 0)
                                 return r;
                 }

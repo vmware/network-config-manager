@@ -697,38 +697,38 @@ int generate_netdev_config(NetDev *n) {
         if (r < 0)
                 return 0;
 
-        r = key_file_set_string(key_file, "NetDev", "Name", n->ifname);
+        r = key_file_set_str(key_file, "NetDev", "Name", n->ifname);
         if (r < 0)
                 return r;
 
-        r = key_file_set_string(key_file, "NetDev", "Kind", netdev_kind_to_name(n->kind));
+        r = key_file_set_str(key_file, "NetDev", "Kind", netdev_kind_to_name(n->kind));
         if (r < 0)
                 return r;
 
         switch (n->kind) {
                 case NETDEV_KIND_BRIDGE:
                         if (n->bridge->mcast_querier >= 0) {
-                                r = key_file_set_string(key_file, "Bridge", "MulticastQuerier", bool_to_string(n->bridge->mcast_querier));
+                                r = key_file_set_str(key_file, "Bridge", "MulticastQuerier", bool_to_str(n->bridge->mcast_querier));
                                 if (r < 0)
                                         return r;
                         }
                         if (n->bridge->mcast_snooping >= 0) {
-                                r = key_file_set_string(key_file, "Bridge", "MulticastSnooping", bool_to_string(n->bridge->mcast_snooping));
+                                r = key_file_set_str(key_file, "Bridge", "MulticastSnooping", bool_to_str(n->bridge->mcast_snooping));
                                 if (r < 0)
                                         return r;
                         }
                         if (n->bridge->vlan_filtering >= 0) {
-                                r = key_file_set_string(key_file, "Bridge", "VLANFiltering", bool_to_string(n->bridge->vlan_filtering));
+                                r = key_file_set_str(key_file, "Bridge", "VLANFiltering", bool_to_str(n->bridge->vlan_filtering));
                                 if (r < 0)
                                         return r;
                         }
                         if (n->bridge->vlan_protocol >= 0) {
-                                r = key_file_set_string(key_file, "Bridge", "VLANProtocol", bool_to_string(n->bridge->vlan_protocol));
+                                r = key_file_set_str(key_file, "Bridge", "VLANProtocol", bool_to_str(n->bridge->vlan_protocol));
                                 if (r < 0)
                                         return r;
                         }
                         if (n->bridge->stp >= 0) {
-                                r = key_file_set_string(key_file, "Bridge", "STP", bool_to_string(n->bridge->stp));
+                                r = key_file_set_str(key_file, "Bridge", "STP", bool_to_str(n->bridge->stp));
                                 if (r < 0)
                                         return r;
                         }
@@ -771,31 +771,31 @@ int generate_netdev_config(NetDev *n) {
                                 return r;
 
                         if (n->vlan->proto) {
-                                r = key_file_set_string(key_file, "VLAN", "Protocol", n->vlan->proto);
+                                r = key_file_set_str(key_file, "VLAN", "Protocol", n->vlan->proto);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->vlan->gvrp >= 0) {
-                                r = key_file_set_string(key_file, "VLAN", "GVRP", bool_to_string(n->vlan->gvrp));
+                                r = key_file_set_str(key_file, "VLAN", "GVRP", bool_to_str(n->vlan->gvrp));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->vlan->mvrp >= 0) {
-                                r = key_file_set_string(key_file, "VLAN", "MVRP", bool_to_string(n->vlan->mvrp));
+                                r = key_file_set_str(key_file, "VLAN", "MVRP", bool_to_str(n->vlan->mvrp));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->vlan->loose_binding >= 0) {
-                                r = key_file_set_string(key_file, "VLAN", "LooseBinding", bool_to_string(n->vlan->loose_binding));
+                                r = key_file_set_str(key_file, "VLAN", "LooseBinding", bool_to_str(n->vlan->loose_binding));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->vlan->reorder_header >= 0) {
-                                r = key_file_set_string(key_file, "VLAN", "ReorderHeader", bool_to_string(n->vlan->reorder_header));
+                                r = key_file_set_str(key_file, "VLAN", "ReorderHeader", bool_to_str(n->vlan->reorder_header));
                                 if (r < 0)
                                         return r;
                         }
@@ -804,43 +804,43 @@ int generate_netdev_config(NetDev *n) {
 
                 case NETDEV_KIND_BOND:
                         if (n->bond->mode != _BOND_MODE_INVALID) {
-                                r = key_file_set_string(key_file, "Bond", "Mode", bond_mode_to_name(n->bond->mode));
+                                r = key_file_set_str(key_file, "Bond", "Mode", bond_mode_to_name(n->bond->mode));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->bond->xmit_hash_policy != _BOND_XMIT_HASH_POLICY_INVALID) {
-                                r = key_file_set_string(key_file, "Bond", "TransmitHashPolicy", bond_xmit_hash_policy_to_name(n->bond->xmit_hash_policy));
+                                r = key_file_set_str(key_file, "Bond", "TransmitHashPolicy", bond_xmit_hash_policy_to_name(n->bond->xmit_hash_policy));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->bond->lacp_rate != _BOND_LACP_RATE_INVALID) {
-                                r = key_file_set_string(key_file, "Bond", "LACPTransmitRate", bond_lacp_rate_to_name(n->bond->lacp_rate));
+                                r = key_file_set_str(key_file, "Bond", "LACPTransmitRate", bond_lacp_rate_to_name(n->bond->lacp_rate));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->bond->arp_validate != _BOND_ARP_VALIDATE_INVALID) {
-                                r = key_file_set_string(key_file, "Bond", "ARPValidate", bond_arp_validate_mode_to_name(n->bond->arp_validate));
+                                r = key_file_set_str(key_file, "Bond", "ARPValidate", bond_arp_validate_mode_to_name(n->bond->arp_validate));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->bond->fail_over_mac != _BOND_FAIL_OVER_MAC_INVALID) {
-                                r = key_file_set_string(key_file, "Bond", "FailOverMACPolicy", bond_fail_over_mac_mode_to_name(n->bond->fail_over_mac));
+                                r = key_file_set_str(key_file, "Bond", "FailOverMACPolicy", bond_fail_over_mac_mode_to_name(n->bond->fail_over_mac));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->bond->ad_select != _BOND_AD_SELECT_INVALID) {
-                                r = key_file_set_string(key_file, "Bond", "AdSelect", bond_ad_select_mode_to_name(n->bond->ad_select));
+                                r = key_file_set_str(key_file, "Bond", "AdSelect", bond_ad_select_mode_to_name(n->bond->ad_select));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->bond->primary_reselect != _BOND_PRIMARY_RESELECT_INVALID) {
-                               r = key_file_set_string(key_file, "Bond", "PrimaryReselectPolicy", bond_primary_reselect_mode_to_name(n->bond->primary_reselect));
+                               r = key_file_set_str(key_file, "Bond", "PrimaryReselectPolicy", bond_primary_reselect_mode_to_name(n->bond->primary_reselect));
                                if (r < 0)
                                        return r;
                         }
@@ -917,7 +917,7 @@ int generate_netdev_config(NetDev *n) {
                                         g_string_append_printf(c, "%s ", *d);
                                 }
 
-                                r = key_file_set_string(key_file, "Bond", "ARPIPTargets", c->str);
+                                r = key_file_set_str(key_file, "Bond", "ARPIPTargets", c->str);
                                 if (r < 0)
                                         return r;
                         }
@@ -932,22 +932,22 @@ int generate_netdev_config(NetDev *n) {
                                 return r;
 
                         if (!ip_is_null(&n->vxlan->local)) {
-                                (void) ip_to_string(n->vxlan->local.family, &n->vxlan->local, &local);
-                                r = key_file_set_string(key_file, "VXLAN", "Local", local);
+                                (void) ip_to_str(n->vxlan->local.family, &n->vxlan->local, &local);
+                                r = key_file_set_str(key_file, "VXLAN", "Local", local);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (!ip_is_null(&n->vxlan->remote)) {
-                                (void) ip_to_string(n->vxlan->remote.family, &n->vxlan->remote, &remote);
-                                r = key_file_set_string(key_file, "VXLAN", "Remote", remote);
+                                (void) ip_to_str(n->vxlan->remote.family, &n->vxlan->remote, &remote);
+                                r = key_file_set_str(key_file, "VXLAN", "Remote", remote);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (!ip_is_null(&n->vxlan->group)) {
-                                (void) ip_to_string(n->vxlan->group.family, &n->vxlan->group, &group);
-                                r = key_file_set_string(key_file, "VXLAN", "Group", group);
+                                (void) ip_to_str(n->vxlan->group.family, &n->vxlan->group, &group);
+                                r = key_file_set_str(key_file, "VXLAN", "Group", group);
                                 if (r < 0)
                                         return r;
                         }
@@ -1075,7 +1075,7 @@ int generate_netdev_config(NetDev *n) {
 
                                 g_string_append_printf(v, "%u-%u", n->vxlan->low_port, n->vxlan->high_port);
 
-                                r = key_file_set_string(key_file, "VXLAN", "PortRange", v->str);
+                                r = key_file_set_str(key_file, "VXLAN", "PortRange", v->str);
                                 if (r < 0)
                                         return r;
                         }
@@ -1085,7 +1085,7 @@ int generate_netdev_config(NetDev *n) {
 
                 case NETDEV_KIND_MACVLAN:
                         if (n->macvlan->mode != _MAC_VLAN_MODE_INVALID) {
-                                r = key_file_set_string(key_file, "MACVLAN", "Mode", macvlan_mode_to_name(n->macvlan->mode));
+                                r = key_file_set_str(key_file, "MACVLAN", "Mode", macvlan_mode_to_name(n->macvlan->mode));
                                 if (r < 0)
                                         return r;
                         }
@@ -1093,21 +1093,21 @@ int generate_netdev_config(NetDev *n) {
                         break;
 
                 case NETDEV_KIND_MACVTAP:
-                        r = key_file_set_string(key_file, "MACVTAP", "Mode", macvlan_mode_to_name(n->macvlan->mode));
+                        r = key_file_set_str(key_file, "MACVTAP", "Mode", macvlan_mode_to_name(n->macvlan->mode));
                         if (r < 0)
                                 return r;
 
                         break;
 
                 case NETDEV_KIND_IPVLAN:
-                        r = key_file_set_string(key_file, "IPVLAN", "Mode", ipvlan_mode_to_name(n->ipvlan->mode));
+                        r = key_file_set_str(key_file, "IPVLAN", "Mode", ipvlan_mode_to_name(n->ipvlan->mode));
                         if (r < 0)
                                 return r;
 
                         break;
 
                 case NETDEV_KIND_IPVTAP:
-                        r = key_file_set_string(key_file, "IPVTAP", "Mode", ipvlan_mode_to_name(n->ipvlan->mode));
+                        r = key_file_set_str(key_file, "IPVTAP", "Mode", ipvlan_mode_to_name(n->ipvlan->mode));
                         if (r < 0)
                                 return r;
 
@@ -1115,7 +1115,7 @@ int generate_netdev_config(NetDev *n) {
 
                 case NETDEV_KIND_VETH:
                         if (n->veth && n->veth->peer) {
-                                r = key_file_set_string(key_file, "Peer", "Name", n->veth->peer);
+                                r = key_file_set_str(key_file, "Peer", "Name", n->veth->peer);
                                 if (r < 0)
                                         return r;
                         }
@@ -1130,37 +1130,37 @@ int generate_netdev_config(NetDev *n) {
                 case NETDEV_KIND_TUN:
                 case NETDEV_KIND_TAP:
                         if (n->tun_tap->user) {
-                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "User", n->tun_tap->user);
+                                r = key_file_set_str(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "User", n->tun_tap->user);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap->group) {
-                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "Group", n->tun_tap->group);
+                                r = key_file_set_str(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "Group", n->tun_tap->group);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap->packet_info >= 0) {
-                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "PacketInfo", bool_to_string(n->tun_tap->packet_info));
+                                r = key_file_set_str(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "PacketInfo", bool_to_str(n->tun_tap->packet_info));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap->vnet_hdr >= 0) {
-                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "VNetHeader", bool_to_string(n->tun_tap->vnet_hdr));
+                                r = key_file_set_str(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "VNetHeader", bool_to_str(n->tun_tap->vnet_hdr));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap->keep_carrier >= 0) {
-                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "KeepCarrier", bool_to_string(n->tun_tap->keep_carrier));
+                                r = key_file_set_str(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "KeepCarrier", bool_to_str(n->tun_tap->keep_carrier));
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->tun_tap->multi_queue >= 0) {
-                                r = key_file_set_string(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "MultiQueue", bool_to_string(n->tun_tap->multi_queue));
+                                r = key_file_set_str(key_file, n->kind == NETDEV_KIND_TUN ? "Tun" : "Tap", "MultiQueue", bool_to_str(n->tun_tap->multi_queue));
                                 if (r < 0)
                                         return r;
                         }
@@ -1180,15 +1180,15 @@ int generate_netdev_config(NetDev *n) {
                         }
 
                         if (!ip_is_null(&n->tunnel->local)) {
-                                (void) ip_to_string(n->tunnel->local.family, &n->tunnel->local, &local);
-                                r = key_file_set_string(key_file, "Tunnel", "Local", local);
+                                (void) ip_to_str(n->tunnel->local.family, &n->tunnel->local, &local);
+                                r = key_file_set_str(key_file, "Tunnel", "Local", local);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (!ip_is_null(&n->tunnel->remote)) {
-                                (void) ip_to_string(n->tunnel->remote.family, &n->tunnel->remote, &remote);
-                                r = key_file_set_string(key_file, "Tunnel", "Remote", remote);
+                                (void) ip_to_str(n->tunnel->remote.family, &n->tunnel->remote, &remote);
+                                r = key_file_set_str(key_file, "Tunnel", "Remote", remote);
                                 if (r < 0)
                                         return r;
                         }
@@ -1223,13 +1223,13 @@ int generate_netdev_config(NetDev *n) {
                         GList *iter;
 
                         if (n->wg->private_key) {
-                                r = key_file_set_string(key_file, "WireGuard", "PrivateKey", n->wg->private_key);
+                                r = key_file_set_str(key_file, "WireGuard", "PrivateKey", n->wg->private_key);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (n->wg->private_key_file) {
-                                r = key_file_set_string(key_file, "WireGuard", "PrivateKeyFile", n->wg->private_key_file);
+                                r = key_file_set_str(key_file, "WireGuard", "PrivateKeyFile", n->wg->private_key_file);
                                 if (r < 0)
                                         return r;
                         }
