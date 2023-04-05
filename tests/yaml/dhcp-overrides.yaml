@@ -5,6 +5,7 @@ network:
       dhcp4: yes
       dhcp4-overrides:
         route-metric: 100
+        send-release: no
     test99:
       dhcp4: yes
       dhcp4-overrides:
