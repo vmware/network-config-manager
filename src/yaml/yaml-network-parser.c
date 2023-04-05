@@ -182,10 +182,6 @@ static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc,
 
 static int parse_route(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Route *rt = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_item_t *i;
-        yaml_node_pair_t *p;
-        yaml_node_t *n;
         int r;
 
         assert(config);
@@ -193,13 +189,16 @@ static int parse_route(GHashTable *config, yaml_document_t *dp, yaml_node_t *nod
         assert(node);
         assert(network);
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
                 n = yaml_document_get_node(dp, *i);
                 if (n)
                         (void) parse_route(config, dp, n, network);
         }
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -239,10 +238,6 @@ static int parse_route(GHashTable *config, yaml_document_t *dp, yaml_node_t *nod
 
 static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network, IPAddress **addr) {
         _auto_cleanup_ IPAddress *a = NULL;
-        yaml_node_pair_t *p;
-        yaml_node_item_t *i;
-        yaml_node_t *k, *v;
-        yaml_node_t *n;
         int r;
 
         assert(m);
@@ -250,13 +245,17 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
         assert(node);
         assert(network);
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
                 n = yaml_document_get_node(dp, *i);
                 if (n)
                         (void) parse_address(m, dp, n, network, addr);
         }
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
+
                 k = yaml_document_get_node(dp, p->key);
                 v = yaml_document_get_node(dp, p->value);
 
@@ -319,10 +318,6 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
 
 static int parse_routing_policy_rule(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
        _cleanup_(routing_policy_rule_freep) RoutingPolicyRule *rule = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_item_t *i;
-        yaml_node_pair_t *p;
-        yaml_node_t *n;
         int r;
 
         assert(config);
@@ -330,13 +325,16 @@ static int parse_routing_policy_rule(GHashTable *config, yaml_document_t *dp, ya
         assert(node);
         assert(network);
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
                 n = yaml_document_get_node(dp, *i);
                 if (n)
                         (void) parse_routing_policy_rule(config, dp, n, network);
         }
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -374,14 +372,12 @@ static int parse_routing_policy_rule(GHashTable *config, yaml_document_t *dp, ya
 }
 
 static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
-        yaml_node_pair_t *p;
-        yaml_node_t *k, *v;
-
         assert(dp);
         assert(node);
         assert(network);
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for ( yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -403,8 +399,6 @@ static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *no
 }
 
 int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
-        yaml_node_pair_t *p;
-        yaml_node_t *k, *v;
         int r;
 
         assert(m);
@@ -412,7 +406,8 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
         assert(node);
         assert(network);
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -479,8 +474,6 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
 }
 
 int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *nets) {
-        yaml_node_pair_t *p;
-        yaml_node_t *n;
         int r;
 
         assert(m);
@@ -488,8 +481,10 @@ int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
         assert(node);
         assert(nets);
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                 _cleanup_(network_freep) Network *net = NULL;
+                yaml_node_t *n;
+
                 n = yaml_document_get_node(dp, p->key);
 
                 r = yaml_network_new(scalar(n), &net);
