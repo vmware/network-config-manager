@@ -17,9 +17,9 @@ typedef struct NetDevLink {
         ConfigManager *m;
 
         ParserType parser_type;
+        char **driver;
 
         char *ifname;
-
         char *alias;
         char *desc;
         char *macpolicy;

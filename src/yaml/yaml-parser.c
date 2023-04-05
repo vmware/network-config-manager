@@ -675,9 +675,11 @@ int parse_yaml_scalar_or_sequence(const char *key,
                         if (!*s)
                                 return log_oom();
                 } else {
-                        r = strv_add(s, c);
-                        if (r < 0)
-                                return r;
+                        if (!strv_contains((const char **)*s, c)) {
+                                r = strv_add(s, c);
+                                if (r < 0)
+                                        return r;
+                        }
                 }
        }
 
