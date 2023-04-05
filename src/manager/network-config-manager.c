@@ -2320,7 +2320,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
                         r = ip_to_string(d->address.family, &d->address, &pretty);
                         if (r >= 0)
-                                printf("%s ", string_strip(pretty));
+                                printf("%s ", str_strip(pretty));
                 }
                 printf("\n");
         }

@@ -49,7 +49,7 @@ int parse_key_file(const char *path, KeyFile **ret) {
                 if (!t)
                         return log_oom();
 
-                s = string_strip(t);
+                s = str_strip(t);
                 n = (int) strlen(s);
                 if (n <= 0)
                         continue;
@@ -221,7 +221,7 @@ int parse_line(const char *line, char **key, char **value) {
         if (!p)
                 return -ENOMEM;
 
-        s = string_strip(p);
+        s = str_strip(p);
         if (!s)
                 return -ENODATA;
 
@@ -279,7 +279,7 @@ int parse_state_file(const char *path, const char *key, char **value, GHashTable
                 if (!t)
                         return log_oom();
 
-                s = string_strip(t);
+                s = str_strip(t);
                 n = (int) strlen(s);
                 if (n <= 0)
                         continue;
@@ -342,7 +342,7 @@ int parse_resolv_conf(char ***dns, char ***domains) {
                 if (!t)
                         return log_oom();
 
-                t = string_strip(t);
+                t = str_strip(t);
                 n = (int) strlen(t);
                 if (n <= 0)
                         continue;

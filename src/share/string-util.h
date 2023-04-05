@@ -38,7 +38,7 @@ char *string_copy(char *dest, const char *src, size_t size);
 int split_pair(const char *s, const char *sep, char **l, char **r);
 
 char *truncate_newline(char *s);
-char *string_strip(char *s);
+char *str_strip(char *s);
 
 #define strv_foreach(s, l)                      \
         for ((s) = (l); (s) && *(s); (s)++)
