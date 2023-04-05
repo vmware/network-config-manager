@@ -410,7 +410,7 @@ int add_config_file_string(const char *path, const char *section, const char *k,
         return set_file_permisssion(path, "systemd-network");
 }
 
-int add_key_to_section_string(const char *path, const char *section, const char *k, const char *v) {
+int add_key_to_section_str(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         bool b = false;
         int r;

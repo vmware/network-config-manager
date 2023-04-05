@@ -1584,7 +1584,7 @@ int generate_master_device_network(Network *n) {
                         if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                 break;
 
-                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                        r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                         if (r < 0)
                                 return r;
                 }
@@ -1603,7 +1603,7 @@ int generate_master_device_network(Network *n) {
                         if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                 break;
 
-                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                        r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                         if (r < 0)
                                 return r;
                 }
@@ -1624,7 +1624,7 @@ int generate_master_device_network(Network *n) {
                                 if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                         break;
 
-                                r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                                r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                                 if (r < 0)
                                         return r;
                         }
@@ -1646,7 +1646,7 @@ int generate_master_device_network(Network *n) {
                                 if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                         break;
 
-                                r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                                r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                                 if (r < 0)
                                         return r;
                         }
@@ -1668,7 +1668,7 @@ int generate_master_device_network(Network *n) {
                                 if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                         break;
 
-                                r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                                r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                                 if (r < 0)
                                         return r;
                         }
@@ -1688,7 +1688,7 @@ int generate_master_device_network(Network *n) {
                         if (config_exists(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname))
                                 break;
 
-                        r = add_key_to_section_string(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
+                        r = add_key_to_section_str(network, "Network", ctl_to_config(m, netdev_kind_to_name(n->netdev->kind)), n->netdev->ifname);
                         if (r < 0)
                                 return r;
                 }

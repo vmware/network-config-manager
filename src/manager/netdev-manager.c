@@ -96,7 +96,7 @@ int manager_create_vlan(const IfNameIndex *ifidx, const char *ifname, VLan *v) {
         if (r < 0)
                 return r;
 
-        r = add_key_to_section_string(network, "Network", "VLAN", ifname);
+        r = add_key_to_section_str(network, "Network", "VLAN", ifname);
         if (r < 0)
                 return r;
 
@@ -156,7 +156,7 @@ int manager_create_bridge(const char *ifname, Bridge *b, char **interfaces) {
                 if (r < 0)
                         return r;
 
-                r = add_key_to_section_string(network, "Network", "Bridge", ifname);
+                r = add_key_to_section_str(network, "Network", "Bridge", ifname);
                 if (r < 0)
                         return r;
         }
@@ -212,7 +212,7 @@ int manager_create_bond(const char *ifname, Bond *b, char **interfaces) {
                 if (r < 0)
                         return r;
 
-                r = add_key_to_section_string(network, "Network", "Bond", ifname);
+                r = add_key_to_section_str(network, "Network", "Bond", ifname);
                 if (r < 0)
                         return r;
         }
@@ -271,7 +271,7 @@ int manager_create_vxlan(const char *ifname, const char *dev, VxLan *v) {
                 if (r < 0)
                         return r;
 
-                r = add_key_to_section_string(network, "Network", "VXLAN", ifname);
+                r = add_key_to_section_str(network, "Network", "VXLAN", ifname);
                 if (r < 0)
                         return r;
         }
@@ -330,9 +330,9 @@ int manager_create_macvlan(const char *ifname, const char *dev, MACVLan *m, bool
                 return r;
 
         if (kind)
-                r = add_key_to_section_string(network, "Network", "MACVLAN", ifname);
+                r = add_key_to_section_str(network, "Network", "MACVLAN", ifname);
         else
-                r = add_key_to_section_string(network, "Network", "MACVTAP", ifname);
+                r = add_key_to_section_str(network, "Network", "MACVTAP", ifname);
 
         if (r < 0)
                 return r;
@@ -391,9 +391,9 @@ int manager_create_ipvlan(const char *ifname, const char *dev, IPVLan *m, bool k
                 return r;
 
         if (kind)
-                r = add_key_to_section_string(network, "Network", "IPVLAN", ifname);
+                r = add_key_to_section_str(network, "Network", "IPVLAN", ifname);
         else
-                r = add_key_to_section_string(network, "Network", "IPVTAP", ifname);
+                r = add_key_to_section_str(network, "Network", "IPVTAP", ifname);
         if (r < 0)
                 return r;
 
@@ -491,7 +491,7 @@ int manager_create_tunnel(const char *ifname, NetDevKind kind, const char *dev, 
                 if (r < 0)
                         return r;
 
-                r = add_key_to_section_string(network, "Network", "Tunnel", ifname);
+                r = add_key_to_section_str(network, "Network", "Tunnel", ifname);
                 if (r < 0)
                         return r;
         }

@@ -302,7 +302,7 @@ int add_dns_server_and_domain_to_resolved_conf(DNSServers *dns, char **domains) 
                         steal_pointer(pretty);
                 }
 
-                g_key_file_set_str(key_file, "Resolve", "DNS", strv_join(" ", s));
+                g_key_file_set_string(key_file, "Resolve", "DNS", strv_join(" ", s));
         }
 
         if (domains) {
@@ -333,7 +333,7 @@ int add_dns_server_and_domain_to_resolved_conf(DNSServers *dns, char **domains) 
                                         return r;
                         }
                 }
-                g_key_file_set_str(key_file, "Resolve", "Domains", strv_join(" ", s));
+                g_key_file_set_string(key_file, "Resolve", "Domains", strv_join(" ", s));
         }
 
         if (!g_key_file_save_to_file (key_file, "/etc/systemd/resolved.conf", &e))
