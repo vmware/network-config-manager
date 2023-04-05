@@ -913,7 +913,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
                 if (r < 0)
                         return r;
 
-                r = key_file_set_string(key_file, "Address", "Address", address);
+                r = key_file_set_str(key_file, "Address", "Address", address);
                 if (r < 0)
                         return r;
         }

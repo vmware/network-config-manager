@@ -69,7 +69,7 @@ int set_config_file_integer(const char *path, const char *section, const char *k
 
 int add_config_file_string(const char *path, const char *section, const char *k, const char *v);
 
-int key_file_set_string(KeyFile *key_file, const char *section, const char *k, const char *v);
+int key_file_set_str(KeyFile *key_file, const char *section, const char *k, const char *v);
 int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, const uint v);
 int key_file_set_bool(KeyFile *key_file, const char *section, const char *k, const bool b);
 

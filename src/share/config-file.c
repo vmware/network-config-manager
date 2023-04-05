@@ -280,7 +280,7 @@ int set_config_uint(KeyFile *key_file, const char *section, const char *k, uint 
         if (!s)
                 return -ENOMEM;
 
-        r = key_file_set_string(key_file, section, k, s);
+        r = key_file_set_str(key_file, section, k, s);
         if (r < 0)
                 return r;
 
@@ -327,7 +327,7 @@ int set_config_file_integer(const char *path, const char *section, const char *k
         if (!s)
                 return -ENOMEM;
 
-        r = key_file_set_string(key_file, section, k, s);
+        r = key_file_set_str(key_file, section, k, s);
         if (r < 0)
                 return r;
 
@@ -346,7 +346,7 @@ int set_config_file_bool(const char *path, const char *section, const char *k, b
         return set_config_file_str(path, section, k, bool_to_string(b));
 }
 
-int key_file_set_string(KeyFile *key_file, const char *section, const char *k, const char *v) {
+int key_file_set_str(KeyFile *key_file, const char *section, const char *k, const char *v) {
         assert(key_file);
         assert(section);
         assert(k);
@@ -523,7 +523,7 @@ int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, uin
         if (!s)
                 return -ENOMEM;
 
-        r = key_file_set_string(key_file, section, k, s);
+        r = key_file_set_str(key_file, section, k, s);
         if (r < 0)
                 return r;
 
