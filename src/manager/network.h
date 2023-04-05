@@ -238,6 +238,7 @@ typedef struct Network {
         IPv6LinkLocalAddressGenMode ipv6_address_generation;
         IPv6PrivacyExtensions ipv6_privacy;
         KeepConfiguration keep_configuration;
+        IPoIBMode ipoib_mode;
 
         int unmanaged;
         int arp;
@@ -364,7 +365,7 @@ const char *keep_configuration_type_to_name(int id);
 int keep_configuration_type_to_mode(const char *name);
 
 const char *ipoib_mode_to_name(int id);
-int ipoib_mode_to_mode(const char *name);
+int ipoib_name_to_mode(const char *name);
 
 int generate_network_config(Network *n);
 int generate_master_device_network(Network *n);

@@ -447,7 +447,7 @@ const char *ipoib_mode_to_name(int id) {
         return ipoib_mode_table[id];
 }
 
-int ipoib_mode_to_mode(const char *name) {
+int ipoib_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IP_OIB_MODE_DATAGRAM; i < (size_t) ELEMENTSOF(ipoib_mode_table); i++)
@@ -782,6 +782,7 @@ int network_new(Network **ret) {
                 .ipv6_privacy = _IPV6_PRIVACY_EXTENSIONS_INVALID,
                 .parser_type = _PARSER_TYPE_INVALID,
                 .priority = BRIDGE_PRIORITY_MAX + 1,
+                .ipoib_mode = _IP_OIB_MODE_MODE_INVALID,
         };
 
         r = set_new(&n->addresses, g_str_hash, address_equal);
@@ -1468,6 +1469,12 @@ int generate_network_config(Network *n) {
 
         if (n->priority <= BRIDGE_PRIORITY_MAX) {
                 r = set_config_uint(key_file, "Bridge", "Priority", n->priority);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipoib_mode != _IP_OIB_MODE_MODE_INVALID) {
+                r = set_config(key_file, "IPoIB", "Mode", ipoib_mode_to_name(n->ipoib_mode));
                 if (r < 0)
                         return r;
         }
