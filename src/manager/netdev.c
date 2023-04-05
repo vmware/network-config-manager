@@ -932,21 +932,21 @@ int generate_netdev_config(NetDev *n) {
                                 return r;
 
                         if (!ip_is_null(&n->vxlan->local)) {
-                                (void) ip_to_string(n->vxlan->local.family, &n->vxlan->local, &local);
+                                (void) ip_to_str(n->vxlan->local.family, &n->vxlan->local, &local);
                                 r = key_file_set_string(key_file, "VXLAN", "Local", local);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (!ip_is_null(&n->vxlan->remote)) {
-                                (void) ip_to_string(n->vxlan->remote.family, &n->vxlan->remote, &remote);
+                                (void) ip_to_str(n->vxlan->remote.family, &n->vxlan->remote, &remote);
                                 r = key_file_set_string(key_file, "VXLAN", "Remote", remote);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (!ip_is_null(&n->vxlan->group)) {
-                                (void) ip_to_string(n->vxlan->group.family, &n->vxlan->group, &group);
+                                (void) ip_to_str(n->vxlan->group.family, &n->vxlan->group, &group);
                                 r = key_file_set_string(key_file, "VXLAN", "Group", group);
                                 if (r < 0)
                                         return r;
@@ -1180,14 +1180,14 @@ int generate_netdev_config(NetDev *n) {
                         }
 
                         if (!ip_is_null(&n->tunnel->local)) {
-                                (void) ip_to_string(n->tunnel->local.family, &n->tunnel->local, &local);
+                                (void) ip_to_str(n->tunnel->local.family, &n->tunnel->local, &local);
                                 r = key_file_set_string(key_file, "Tunnel", "Local", local);
                                 if (r < 0)
                                         return r;
                         }
 
                         if (!ip_is_null(&n->tunnel->remote)) {
-                                (void) ip_to_string(n->tunnel->remote.family, &n->tunnel->remote, &remote);
+                                (void) ip_to_str(n->tunnel->remote.family, &n->tunnel->remote, &remote);
                                 r = key_file_set_string(key_file, "Tunnel", "Remote", remote);
                                 if (r < 0)
                                         return r;

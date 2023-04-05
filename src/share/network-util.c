@@ -93,7 +93,7 @@ int ip_is_null(const IPAddress *a) {
         return -EAFNOSUPPORT;
 }
 
-int ip_to_string(int family, const struct IPAddress *u, char **ret) {
+int ip_to_str(int family, const struct IPAddress *u, char **ret) {
         _auto_cleanup_ char *x = NULL;
         const char *p = NULL;
         size_t l = 0;
@@ -129,7 +129,7 @@ int ip_to_string(int family, const struct IPAddress *u, char **ret) {
         return 0;
 }
 
-int ip_to_string_prefix(int family, const struct IPAddress *u, char **ret) {
+int ip_to_str_prefix(int family, const struct IPAddress *u, char **ret) {
         _auto_cleanup_ char *x = NULL, *y = NULL;
         char buf[1024] = {};
         int r;
@@ -137,7 +137,7 @@ int ip_to_string_prefix(int family, const struct IPAddress *u, char **ret) {
         assert(u);
         assert(ret);
 
-        r = ip_to_string(family, u, &x);
+        r = ip_to_str(family, u, &x);
         if (r < 0)
                 return r;
 

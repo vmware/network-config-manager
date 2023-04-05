@@ -44,7 +44,7 @@ static void json_list_link_addresses(gpointer key, gpointer value, gpointer user
 
         if_indextoname(a->ifindex, buf);
 
-        r = ip_to_string_prefix(a->family, &a->address, &c);
+        r = ip_to_str_prefix(a->family, &a->address, &c);
         if (r < 0)
                 return;
 
@@ -101,7 +101,7 @@ static void json_list_link_routes(gpointer key, gpointer value, gpointer userdat
         route = (Route *) g_bytes_get_data(key, &size);
         if_indextoname(route->ifindex, buf);
 
-        r = ip_to_string_prefix(route->gw.family, &route->gw, &c);
+        r = ip_to_str_prefix(route->gw.family, &route->gw, &c);
         if (r < 0)
                 return;
 
@@ -118,7 +118,7 @@ static void json_list_link_routes(gpointer key, gpointer value, gpointer userdat
         json_object_object_add(jrt, "gateway", jip);
         steal_pointer(jip);
 
-        r = ip_to_string_prefix(route->family, &route->dst, &c);
+        r = ip_to_str_prefix(route->family, &route->dst, &c);
         if (r < 0)
                 return;
 
@@ -411,7 +411,7 @@ static void json_list_one_link_addresses(gpointer key, gpointer value, gpointer 
 
         a = (Address *) g_bytes_get_data(key, &size);
 
-        r = ip_to_string_prefix(a->family, &a->address, &c);
+        r = ip_to_str_prefix(a->family, &a->address, &c);
         if (r < 0)
                 return;
 
@@ -435,7 +435,7 @@ static void json_list_one_link_routes(gpointer key, gpointer value, gpointer use
         if (ip_is_null(&rt->gw))
                 return;
 
-        r = ip_to_string(rt->family, &rt->gw, &c);
+        r = ip_to_str(rt->family, &rt->gw, &c);
         if (r < 0)
                 return;
 
@@ -1333,7 +1333,7 @@ int json_show_dns_server(void) {
                         if (!d->ifindex)
                                 continue;
 
-                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r >= 0) {
                                 json_object *s = json_object_new_string(pretty);
                                 if (!s)
@@ -1353,7 +1353,7 @@ int json_show_dns_server(void) {
 
                 i = g_sequence_get_begin_iter(current->dns_servers);
                 d = g_sequence_get(i);
-                r = ip_to_string(d->address.family, &d->address, &pretty);
+                r = ip_to_str(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
                         json_object *s = json_object_new_string(pretty);
                         if (!s)
@@ -1375,7 +1375,7 @@ int json_show_dns_server(void) {
 
                         d = g_sequence_get(i);
 
-                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r >= 0) {
                                 json_object *s = json_object_new_string(pretty);
                                 if (!s)
@@ -1405,7 +1405,7 @@ int json_show_dns_server(void) {
                                 continue;
 
                         if_indextoname(d->ifindex, buf);
-                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r >= 0) {
                                 json_object *a;
 

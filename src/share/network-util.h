@@ -60,8 +60,8 @@ typedef struct IfNameIndex {
         char ifname[IFNAMSIZ];
 } IfNameIndex;
 
-int ip_to_string(int family, const struct IPAddress *u, char **ret);
-int ip_to_string_prefix(int family, const struct IPAddress *u, char **ret);
+int ip_to_str(int family, const struct IPAddress *u, char **ret);
+int ip_to_str_prefix(int family, const struct IPAddress *u, char **ret);
 
 int parse_ipv4(const char *s, IPAddress **ret);
 int parse_ipv6(const char *s, IPAddress **ret);

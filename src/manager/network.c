@@ -1006,12 +1006,12 @@ static void append_routing_policy_rules(gpointer key, gpointer value, gpointer u
                 return;
 
         if (!ip_is_null(&rule->from)) {
-                (void) ip_to_string_prefix(rule->from.family, &rule->from, &from);
+                (void) ip_to_str_prefix(rule->from.family, &rule->from, &from);
                 (void ) add_key_to_section(section, "From", from);
         }
 
         if (!ip_is_null(&rule->to)) {
-                (void) ip_to_string_prefix(rule->to.family, &rule->to, &to);
+                (void) ip_to_str_prefix(rule->to.family, &rule->to, &to);
                 (void ) add_key_to_section(section, "To", to);
         }
 
@@ -1049,7 +1049,7 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
                 return;
 
         if (!ip_is_null(&route->dst)) {
-                (void) ip_to_string_prefix(route->dst.family, &route->dst, &destination);
+                (void) ip_to_str_prefix(route->dst.family, &route->dst, &destination);
                 (void ) add_key_to_section(section, "Destination", destination);
         } else if (route->to_default) {
                 switch(route->family) {
@@ -1063,12 +1063,12 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         }
 
         if (!ip_is_null(&route->gw)) {
-                (void) ip_to_string_prefix(route->gw.family, &route->gw, &gateway);
+                (void) ip_to_str_prefix(route->gw.family, &route->gw, &gateway);
                 (void) add_key_to_section(section, "Gateway", gateway);
         }
 
         if (!ip_is_null(&route->prefsrc)) {
-                (void) ip_to_string_prefix(route->prefsrc.family, &route->prefsrc, &prefsrc);
+                (void) ip_to_str_prefix(route->prefsrc.family, &route->prefsrc, &prefsrc);
                 (void) add_key_to_section(section, "PreferredSource", prefsrc);
         }
 
@@ -1109,7 +1109,7 @@ static void append_nameservers(gpointer key, gpointer value, gpointer userdata) 
         GString *config = userdata;
         int r;
 
-        r = ip_to_string(a->family,a, &pretty);
+        r = ip_to_str(a->family,a, &pretty);
         if (r < 0)
                 return;
 
@@ -1133,7 +1133,7 @@ static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
         if (r < 0)
                 return;
 
-        r = ip_to_string_prefix(a->family, a, &addr);
+        r = ip_to_str_prefix(a->family, a, &addr);
         if (r < 0)
                 return;
 

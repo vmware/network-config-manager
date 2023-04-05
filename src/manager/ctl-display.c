@@ -140,7 +140,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
         int r;
 
         a = (Address *) g_bytes_get_data(key, &size);
-        (void) ip_to_string_prefix(a->family, &a->address, &c);
+        (void) ip_to_str_prefix(a->family, &a->address, &c);
         if (first) {
                 printf("%s", c);
                 first = false;
@@ -216,7 +216,7 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
                 Address *a = (Address *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL;
 
-                r = ip_to_string_prefix(a->family, &a->address, &c);
+                r = ip_to_str_prefix(a->family, &a->address, &c);
                 if (r < 0)
                         return r;
 
@@ -502,7 +502,7 @@ static int list_one_link(char *argv[]) {
                         if (ip_is_null(&rt->gw))
                             continue;
 
-                        (void) ip_to_string(rt->family, &rt->gw, &c);
+                        (void) ip_to_str(rt->family, &rt->gw, &c);
                         printf("%s\n", c);
                         break;
                 }
@@ -624,7 +624,7 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
         a = (Address *) g_bytes_get_data(key, &size);
         if_indextoname(a->ifindex, buf);
 
-        (void) ip_to_string_prefix(a->family, &a->address, &c);
+        (void) ip_to_str_prefix(a->family, &a->address, &c);
         if (first) {
                 printf("%-30s on device ", c);
                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
@@ -750,7 +750,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                                 continue;
 
                         if_indextoname(rt->ifindex, buf);
-                        (void) ip_to_string(rt->family, &rt->gw, &c);
+                        (void) ip_to_str(rt->family, &rt->gw, &c);
                         if (first) {
                                 printf("%-30s on device ", c);
                                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);

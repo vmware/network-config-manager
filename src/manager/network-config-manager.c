@@ -1271,7 +1271,7 @@ _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
                 Address *a = (Address *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL;
 
-                r = ip_to_string_prefix(a->family, &a->address, &c);
+                r = ip_to_str_prefix(a->family, &a->address, &c);
                 if (r < 0)
                         return r;
 
@@ -1558,7 +1558,7 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
                 Route *a = (Route *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL;
 
-                ip_to_string(a->family, &a->gw, &c);
+                ip_to_str(a->family, &a->gw, &c);
                 if (r < 0)
                         return r;
 
@@ -2318,7 +2318,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                         if (!d->ifindex)
                                 continue;
 
-                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r >= 0)
                                 printf("%s ", str_strip(pretty));
                 }
@@ -2331,7 +2331,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
                 i = g_sequence_get_begin_iter(current->dns_servers);
                 d = g_sequence_get(i);
-                r = ip_to_string(d->address.family, &d->address, &pretty);
+                r = ip_to_str(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
                         display(beautify_enabled(), ansi_color_bold_cyan(), "CurrentDNSServer:");
                         printf(" %s\n", pretty);
@@ -2347,7 +2347,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
                         d = g_sequence_get(i);
 
-                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r >= 0)
                                 printf("%s ", pretty);
 
@@ -2368,7 +2368,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                                 continue;
 
                         if_indextoname(d->ifindex, buf);
-                        r = ip_to_string(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r >= 0)
                                 printf("%5d %-16s %s\n", d->ifindex, buf, pretty);
                 }
@@ -2396,7 +2396,7 @@ _public_ int ncm_get_dns_server(char ***ret) {
                 if (!d->ifindex)
                         continue;
 
-                r = ip_to_string(d->address.family, &d->address, &k);
+                r = ip_to_str(d->address.family, &d->address, &k);
                 if (r >= 0) {
                         if (!s) {
                                 s = strv_new(k);

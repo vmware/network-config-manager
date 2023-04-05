@@ -490,18 +490,18 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
 
         if (address) {
                 if (!address->prefix_len)
-                        r = ip_to_string(address->family, address, &a);
+                        r = ip_to_str(address->family, address, &a);
                 else
-                        r = ip_to_string_prefix(address->family, address, &a);
+                        r = ip_to_str_prefix(address->family, address, &a);
                 if (r < 0)
                         return r;
         }
 
         if (peer) {
                 if (!peer->prefix_len)
-                        r = ip_to_string(peer->family, peer, &p);
+                        r = ip_to_str(peer->family, peer, &p);
                 else
-                        r = ip_to_string_prefix(peer->family, peer, &p);
+                        r = ip_to_str_prefix(peer->family, peer, &p);
                 if (r < 0)
                         return r;
         }
@@ -591,7 +591,7 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
                 return r;
         }
 
-        r = ip_to_string(rt->gw.family, &rt->gw, &a);
+        r = ip_to_str(rt->gw.family, &rt->gw, &a);
         if (r < 0)
                 return r;
 
@@ -647,7 +647,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
                 return r;
 
         if (gateway) {
-                r = ip_to_string(gateway->family, gateway, &gw);
+                r = ip_to_str(gateway->family, gateway, &gw);
                 if (r < 0)
                         return r;
 
@@ -658,7 +658,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
                 add_key_to_section(section, "GatewayOnLink", bool_to_string(onlink));
 
         if (source) {
-                r = ip_to_string_prefix(gateway->family, source, &src);
+                r = ip_to_str_prefix(gateway->family, source, &src);
                 if (r < 0)
                         return r;
 
@@ -666,7 +666,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
         }
 
         if (pref_source) {
-                r = ip_to_string_prefix(pref_source->family, pref_source, &pref_src);
+                r = ip_to_str_prefix(pref_source->family, pref_source, &pref_src);
                 if (r < 0)
                         return r;
 
@@ -674,7 +674,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
         }
 
         if (destination) {
-                r = ip_to_string_prefix(destination->family, destination, &dest);
+                r = ip_to_str_prefix(destination->family, destination, &dest);
                 if (r < 0)
                         return r;
 
@@ -797,11 +797,11 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
         if (r < 0)
                 return r;
 
-        r = ip_to_string_prefix(rule->to.family, &rule->to, &to);
+        r = ip_to_str_prefix(rule->to.family, &rule->to, &to);
         if (r < 0)
                 return r;
 
-        r = ip_to_string_prefix(rule->from.family, &rule->from, &from);
+        r = ip_to_str_prefix(rule->from.family, &rule->from, &from);
         if (r < 0)
                 return r;
 
@@ -904,12 +904,12 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        r = ip_to_string(rt->gw.family, &rt->gw, &gw);
+        r = ip_to_str(rt->gw.family, &rt->gw, &gw);
         if (r < 0)
                 return r;
 
         if (a) {
-                r = ip_to_string_prefix(a->family, a, &address);
+                r = ip_to_str_prefix(a->family, a, &address);
                 if (r < 0)
                         return r;
 
@@ -923,7 +923,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
                 return log_oom();
 
         if (!ip_is_null(&rt->gw)) {
-                r = ip_to_string(rt->gw.family, &rt->gw, &gw);
+                r = ip_to_str(rt->gw.family, &rt->gw, &gw);
                 if (r < 0)
                         return r;
         }
@@ -941,7 +941,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
                 return r;
 
         if (!ip_is_null(&rt->dst)) {
-                r = ip_to_string(rt->dst.family, &rt->dst, &destination);
+                r = ip_to_str(rt->dst.family, &rt->dst, &destination);
                 if (r < 0)
                         return r;
         } else if (rt->to_default || ip_is_null(&rt->dst)) {
@@ -1067,13 +1067,13 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifidx,
                 return r;
 
         if (dns_address) {
-                r = ip_to_string(dns_address->family, dns_address, &dns);
+                r = ip_to_str(dns_address->family, dns_address, &dns);
                 if (r < 0)
                         return r;
         }
 
         if (ntp_address) {
-                r = ip_to_string(ntp_address->family, ntp_address, &ntp);
+                r = ip_to_str(ntp_address->family, ntp_address, &ntp);
                 if (r < 0)
                         return r;
         }
@@ -1189,19 +1189,19 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifidx,
                 return r;
 
         if (prefix) {
-                r = ip_to_string_prefix(dns->family, prefix, &p);
+                r = ip_to_str_prefix(dns->family, prefix, &p);
                 if (r < 0)
                         return r;
         }
 
         if (route_prefix) {
-                r = ip_to_string_prefix(dns->family, route_prefix, &rt);
+                r = ip_to_str_prefix(dns->family, route_prefix, &rt);
                 if (r < 0)
                         return r;
         }
 
         if (dns) {
-                r = ip_to_string(dns->family, dns, &d);
+                r = ip_to_str(dns->family, dns, &d);
                 if (r < 0)
                         return r;
         }
@@ -1346,7 +1346,7 @@ int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool syste
                 _auto_cleanup_ char *pretty = NULL;
                 DNSServer *d = g_sequence_get(i);
 
-                r = ip_to_string(d->address.family, &d->address, &pretty);
+                r = ip_to_str(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
                         a = strjoin(" ", pretty, a, NULL);
                         if (!a)
