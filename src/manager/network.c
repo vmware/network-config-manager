@@ -764,6 +764,7 @@ int network_new(Network **ret) {
                 .dhcp4_use_routes = -1,
                 .dhcp4_use_hostname = -1,
                 .dhcp4_send_hostname = -1,
+                .dhcp4_send_release = -1,
                 .dhcp4_use_ntp = -1,
                 .dhcp6_use_dns = -1,
                 .dhcp6_use_ntp = -1,
@@ -1350,7 +1351,7 @@ int generate_network_config(Network *n) {
 
         if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID || n->dhcp4_use_dns >= 0 || n->dhcp4_use_domains >= 0 ||
             n->dhcp4_use_ntp >= 0 || n->dhcp4_use_mtu >= 0 || n->dhcp4_route_metric > 0 || n->dhcp4_use_routes >= 0 || n->dhcp4_use_hostname >= 0 ||
-            n->dhcp4_send_hostname >= 0 || n->dhcp4_hostname ) {
+            n->dhcp4_send_hostname >= 0 || n->dhcp4_hostname || n->dhcp4_send_release >= 0) {
 
                 if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID) {
                         r = set_config(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
@@ -1396,6 +1397,12 @@ int generate_network_config(Network *n) {
 
                 if (n->dhcp4_send_hostname >= 0) {
                         r = set_config(key_file, "DHCPv4", "SendHostname", bool_to_string(n->dhcp4_send_hostname));
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->dhcp4_send_release >= 0) {
+                        r = set_config(key_file, "DHCPv4", "SendRelease", bool_to_string(n->dhcp4_send_release));
                         if (r < 0)
                                 return r;
                 }
