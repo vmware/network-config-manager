@@ -208,7 +208,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -399,7 +399,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -470,7 +470,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -532,7 +532,7 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -593,7 +593,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -644,7 +644,7 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -727,7 +727,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -862,7 +862,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -997,7 +997,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -1080,7 +1080,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -1165,7 +1165,7 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -1253,7 +1253,7 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;
@@ -1338,7 +1338,7 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
                 }
         }
 
-        r = netdev_link_configure(p, n);
+        r = netdev_link_configure(p->ifname, n);
         if (r < 0) {
                 log_warning("Failed to configure device: %s", strerror(-r));
                 return r;

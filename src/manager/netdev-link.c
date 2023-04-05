@@ -206,7 +206,7 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
 
         r = link_get_mac_address(ifname, &mac);
         if (r < 0)
-                return r;
+                log_debug("Failed to acquire MacAddress of '%s': %s", ifname, strerror(-r));
 
         r = create_conf_file("/etc/systemd/network", s, "link", &file);
         if (r < 0)
@@ -226,11 +226,11 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
         return 0;
 }
 
-int netdev_link_configure(const IfNameIndex *ifidx, NetDevLink *n) {
+int netdev_link_configure(const char *ifname, NetDevLink *n) {
         _auto_cleanup_ char *path = NULL;
          int r;
 
-        r = create_or_parse_netdev_link_conf_file(ifidx->ifname, &path);
+        r = create_or_parse_netdev_link_conf_file(ifname, &path);
         if (r < 0)
                 return r;
 
