@@ -457,6 +457,32 @@ int ipoib_name_to_mode(const char *name) {
         return _IP_OIB_MODE_MODE_INVALID;
 }
 
+static const char* const dhcp6_client_start_mode_table[_DHCP6_CLIENT_START_MODE_MAX] = {
+        [DHCP6_CLIENT_START_MODE_NO]                  = "no",
+        [DHCP6_CLIENT_START_MODE_INFORMATION_REQUEST] = "information-request",
+        [DHCP6_CLIENT_START_MODE_SOLICIT]             = "solicit",
+};
+
+const char *dhcp6_client_start_mode_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(dhcp6_client_start_mode_table))
+                return NULL;
+
+        return dhcp6_client_start_mode_table[id];
+}
+
+int dhcp6_client_start_name_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = DHCP6_CLIENT_START_MODE_NO; i < (size_t) ELEMENTSOF(dhcp6_client_start_mode_table); i++)
+                if (str_equal_fold(name, dhcp6_client_start_mode_table[i]))
+                        return i;
+
+        return _DHCP6_CLIENT_START_MODE_INVALID;
+}
+
 static const char *const auth_key_management_type[_AUTH_KEY_MANAGEMENT_MAX] =  {
         [AUTH_KEY_MANAGEMENT_NONE]    = "password",
         [AUTH_KEY_MANAGEMENT_WPA_PSK] = "psk",
@@ -772,6 +798,7 @@ int network_new(Network **ret) {
                 .dhcp6_use_address = -1,
                 .dhcp6_use_hostname = -1,
                 .dhcp6_send_release = -1,
+                .dhcp6_client_start_mode = _DHCP6_CLIENT_START_MODE_INVALID,
                 .gateway_onlink = -1,
                 .configure_without_carrier = -1,
                 .lldp = -1,
@@ -1422,7 +1449,7 @@ int generate_network_config(Network *n) {
         }
 
         if ( n->dhcp6_use_dns >= 0 || n->dhcp6_use_ntp >= 0 || n->dhcp6_use_address >= 0 || n->dhcp6_use_hostname >= 0 ||
-             n->dhcp6_use_domains || n->dhcp4_send_release >= 0) {
+             n->dhcp6_use_domains || n->dhcp4_send_release >= 0 || n->dhcp6_client_start_mode >= 0) {
                 if (n->dhcp6_use_dns >= 0) {
                         r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_string(n->dhcp4_use_dns));
                          if (r < 0)
@@ -1458,6 +1485,12 @@ int generate_network_config(Network *n) {
                         if (r < 0)
                                 return r;
                 }
+
+               if (n->dhcp6_client_start_mode >= 0) {
+                       r = set_config(key_file, "DHCPv6", "WithoutRA", dhcp6_client_start_mode_to_name(n->dhcp6_client_start_mode));
+                       if (r < 0)
+                               return r;
+               }
         }
 
         if (n->addresses && set_size(n->addresses) > 0)

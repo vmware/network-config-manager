@@ -80,6 +80,7 @@ int parse_yaml_sequence_wireguard_peer_shared_key_or_path(const char *key, const
 
 int parse_yaml_macvlan_mode(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_infiniband_mode(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_dhcp6_without_ra(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 
 int parse_yaml_bridge_path_cost(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_bridge_port_priority(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);

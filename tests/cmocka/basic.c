@@ -161,7 +161,7 @@ static void test_dhcp6_overrides(void **state) {
     assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
 
     assert_true(key_file_config_exists(key_file, "DHCPv6", "SendRelease", "no"));
-    assert_true(key_file_config_exists(key_file, "DHCPv6", "SendRelease", "no"));
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "WithoutRA", "solicit"));
 }
 
 static void test_source_routing(void **state) {

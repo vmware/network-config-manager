@@ -151,6 +151,14 @@ typedef enum IPoIBMode {
         _IP_OIB_MODE_MODE_INVALID = -EINVAL,
 } IPoIBMode;
 
+typedef enum DHCP6ClientStartMode {
+        DHCP6_CLIENT_START_MODE_NO,
+        DHCP6_CLIENT_START_MODE_INFORMATION_REQUEST,
+        DHCP6_CLIENT_START_MODE_SOLICIT,
+        _DHCP6_CLIENT_START_MODE_MAX,
+        _DHCP6_CLIENT_START_MODE_INVALID = -EINVAL,
+} DHCP6ClientStartMode;
+
 typedef enum AuthKeyManagement {
         AUTH_KEY_MANAGEMENT_NONE,
         AUTH_KEY_MANAGEMENT_WPA_PSK,
@@ -239,6 +247,7 @@ typedef struct Network {
         IPv6PrivacyExtensions ipv6_privacy;
         KeepConfiguration keep_configuration;
         IPoIBMode ipoib_mode;
+        DHCP6ClientStartMode dhcp6_client_start_mode;
 
         int unmanaged;
         int arp;
@@ -368,6 +377,9 @@ int keep_configuration_type_to_mode(const char *name);
 
 const char *ipoib_mode_to_name(int id);
 int ipoib_name_to_mode(const char *name);
+
+const char *dhcp6_client_start_mode_to_name(int id);
+int dhcp6_client_start_name_to_mode(const char *name);
 
 int generate_network_config(Network *n);
 int generate_master_device_network(Network *n);
