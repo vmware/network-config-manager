@@ -606,6 +606,23 @@ static void test_netdev_bond(void **state) {
     system("nmctl remove-netdev bond0 kind bond");
 }
 
+static void test_network_infiband(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("infiband.yaml");
+
+    r = parse_key_file("/etc/systemd/network/10-ib0.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "ib0"));
+    assert_true(key_file_config_exists(key_file, "Match", "MACAddress", "11:22:33:44:55:66:77:88:99:00:11:22:33:44:55:66:77:88:99:00"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+    assert_true(key_file_config_exists(key_file, "IPoIB", "Mode", "connected"));
+}
+
 static void test_netdev_bridges(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -712,7 +729,6 @@ static void test_netdev_bridge_cost_network_file(void **state) {
 
     system("nmctl remove-netdev br1 kind bridge");
 }
-
 
 static void test_netdev_vlan_bridge(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -998,6 +1014,7 @@ int main(void) {
         cmocka_unit_test (test_netdev_vlan_bridge),
         cmocka_unit_test (test_netdev_macvlans),
         cmocka_unit_test (test_netdev_bond_bridge),
+        cmocka_unit_test (test_network_infiband),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

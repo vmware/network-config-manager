@@ -144,6 +144,13 @@ typedef enum KeepConfiguration {
         _KEEP_CONFIGURATION_INVALID = -EINVAL,
 } KeepConfiguration;
 
+typedef enum IPoIBMode {
+        IP_OIB_MODE_DATAGRAM,
+        IP_OIB_MODE_MODE_CONNECTED,
+        _IP_OIB_MODE_MODE_MAX,
+        _IP_OIB_MODE_MODE_INVALID = -EINVAL,
+} IPoIBMode;
+
 typedef enum AuthKeyManagement {
         AUTH_KEY_MANAGEMENT_NONE,
         AUTH_KEY_MANAGEMENT_WPA_PSK,
@@ -231,6 +238,7 @@ typedef struct Network {
         IPv6LinkLocalAddressGenMode ipv6_address_generation;
         IPv6PrivacyExtensions ipv6_privacy;
         KeepConfiguration keep_configuration;
+        IPoIBMode ipoib_mode;
 
         int unmanaged;
         int arp;
@@ -355,6 +363,9 @@ int route_table_to_mode(const char *name);
 
 const char *keep_configuration_type_to_name(int id);
 int keep_configuration_type_to_mode(const char *name);
+
+const char *ipoib_mode_to_name(int id);
+int ipoib_name_to_mode(const char *name);
 
 int generate_network_config(Network *n);
 int generate_master_device_network(Network *n);

@@ -432,6 +432,31 @@ int route_table_to_mode(const char *name) {
         return _ROUTE_TABLE_INVALID;
 }
 
+static const char * const ipoib_mode_table[_IP_OIB_MODE_MODE_MAX] = {
+        [IP_OIB_MODE_DATAGRAM]       = "datagram",
+        [IP_OIB_MODE_MODE_CONNECTED] = "connected",
+};
+
+const char *ipoib_mode_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(ipoib_mode_table))
+                return NULL;
+
+        return ipoib_mode_table[id];
+}
+
+int ipoib_name_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = IP_OIB_MODE_DATAGRAM; i < (size_t) ELEMENTSOF(ipoib_mode_table); i++)
+                if (str_equal_fold(name, ipoib_mode_table[i]))
+                        return i;
+
+        return _IP_OIB_MODE_MODE_INVALID;
+}
+
 static const char *const auth_key_management_type[_AUTH_KEY_MANAGEMENT_MAX] =  {
         [AUTH_KEY_MANAGEMENT_NONE]    = "password",
         [AUTH_KEY_MANAGEMENT_WPA_PSK] = "psk",
@@ -757,6 +782,7 @@ int network_new(Network **ret) {
                 .ipv6_privacy = _IPV6_PRIVACY_EXTENSIONS_INVALID,
                 .parser_type = _PARSER_TYPE_INVALID,
                 .priority = BRIDGE_PRIORITY_MAX + 1,
+                .ipoib_mode = _IP_OIB_MODE_MODE_INVALID,
         };
 
         r = set_new(&n->addresses, g_str_hash, address_equal);
@@ -1443,6 +1469,12 @@ int generate_network_config(Network *n) {
 
         if (n->priority <= BRIDGE_PRIORITY_MAX) {
                 r = set_config_uint(key_file, "Bridge", "Priority", n->priority);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipoib_mode != _IP_OIB_MODE_MODE_INVALID) {
+                r = set_config(key_file, "IPoIB", "Mode", ipoib_mode_to_name(n->ipoib_mode));
                 if (r < 0)
                         return r;
         }

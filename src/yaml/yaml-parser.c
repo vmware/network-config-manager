@@ -415,12 +415,9 @@ int parse_yaml_keep_configuration(const char *key,
 
         n = data;
 
-        printf("%s %s\n", key, value);
-
         n->keep_configuration = keep_configuration_type_to_mode((const char *) value);
         return 0;
 }
-
 
 int parse_yaml_ipv6_address_generation_mode(const char *key,
                                             const char *value,
@@ -439,6 +436,26 @@ int parse_yaml_ipv6_address_generation_mode(const char *key,
         n = data;
 
         n->ipv6_address_generation = ipv6_link_local_address_gen_type_to_mode((const char *) value);
+        return 0;
+}
+
+int parse_yaml_infiniband_mode(const char *key,
+                              const char *value,
+                              void *data,
+                              void *userdata,
+                              yaml_document_t *doc,
+                              yaml_node_t *node) {
+        Network *n;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        n = data;
+
+        n->ipoib_mode = ipoib_name_to_mode((const char *) value);
         return 0;
 }
 

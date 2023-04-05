@@ -50,6 +50,7 @@ static ParserTable parser_network_vtable[] = {
         { "optional",                   CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, optional)},
         { "ignore-carrier",             CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, configure_without_carrier)},
         { "keep-configuration",         CONF_TYPE_NETWORK,     parse_yaml_keep_configuration,           offsetof(Network, keep_configuration)},
+        { "infiniband-mode",            CONF_TYPE_NETWORK,     parse_yaml_infiniband_mode,              offsetof(Network, ipoib_mode)},
         { "neigh-suppress",             CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, neighbor_suppression)},
         { "required-family-for-online", CONF_TYPE_NETWORK,     parse_yaml_rf_online,                    offsetof(Network, req_family_for_online)},
         { "activation-mode",            CONF_TYPE_NETWORK,     parse_yaml_activation_policy,            offsetof(Network, activation_policy)},
