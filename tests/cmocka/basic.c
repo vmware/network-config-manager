@@ -148,6 +148,22 @@ static void test_multiple_routes_address(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "RouteMetric", "300"));
 }
 
+static void test_dhcp6_overrides(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("dhcp6-overrides.yaml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "SendRelease", "no"));
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "SendRelease", "no"));
+}
+
 static void test_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1074,6 +1090,7 @@ int main(void) {
         cmocka_unit_test (test_link_driver),
         cmocka_unit_test (test_link_wakeonlan),
         cmocka_unit_test (test_link_mtu),
+        cmocka_unit_test (test_dhcp6_overrides),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

@@ -771,6 +771,7 @@ int network_new(Network **ret) {
                 .dhcp6_use_domains = -1,
                 .dhcp6_use_address = -1,
                 .dhcp6_use_hostname = -1,
+                .dhcp6_send_release = -1,
                 .gateway_onlink = -1,
                 .configure_without_carrier = -1,
                 .lldp = -1,
@@ -1420,7 +1421,8 @@ int generate_network_config(Network *n) {
                 }
         }
 
-        if ( n->dhcp6_use_dns >= 0 || n->dhcp6_use_ntp >= 0 || n->dhcp6_use_address >= 0 || n->dhcp6_use_hostname >= 0 || n->dhcp6_use_domains) {
+        if ( n->dhcp6_use_dns >= 0 || n->dhcp6_use_ntp >= 0 || n->dhcp6_use_address >= 0 || n->dhcp6_use_hostname >= 0 ||
+             n->dhcp6_use_domains || n->dhcp4_send_release >= 0) {
                 if (n->dhcp6_use_dns >= 0) {
                         r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_string(n->dhcp4_use_dns));
                          if (r < 0)
@@ -1447,6 +1449,12 @@ int generate_network_config(Network *n) {
 
                 if (n->dhcp6_use_domains >= 0) {
                         r = set_config(key_file, "DHCPv6", "UseDomains", bool_to_string(n->dhcp6_use_domains));
+                        if (r < 0)
+                                return r;
+                }
+
+               if (n->dhcp6_send_release >= 0) {
+                        r = set_config(key_file, "DHCPv6", "SendRelease", bool_to_string(n->dhcp6_send_release));
                         if (r < 0)
                                 return r;
                 }
