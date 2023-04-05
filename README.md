@@ -139,7 +139,7 @@ network:
           - to: default
             via: 10.100.1.1
  ```
-#### Using DHCP4 and dhcp6 overrides
+#### Using DHCP4 and DHCP6 overrides
 ```yml
 network:
   ethernets:
@@ -148,6 +148,7 @@ network:
       dhcp6: yes
       dhcp4-overrides:
         route-metric: 200
+        send-release: no
     eth1:
       dhcp4: yes
       dhcp4-overrides:
