@@ -575,7 +575,6 @@ int parse_yaml_addresses(const char *key,
                          yaml_document_t *doc,
                          yaml_node_t *node) {
 
-        yaml_node_item_t *i;
         Network *network;
         int r;
 
@@ -585,7 +584,7 @@ int parse_yaml_addresses(const char *key,
         assert(node);
 
         network = data;
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
                 if (str_equal("addresses", key)) {
@@ -604,7 +603,6 @@ int parse_yaml_nameserver_addresses(const char *key,
                                     void *userdata,
                                     yaml_document_t *doc,
                                     yaml_node_t *node) {
-        yaml_node_item_t *i;
         Network *network;
         int r;
 
@@ -614,7 +612,7 @@ int parse_yaml_nameserver_addresses(const char *key,
         assert(node);
 
         network = data;
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
                 r = parse_address_from_string_and_add(scalar(entry), network->nameservers);
@@ -668,7 +666,6 @@ int parse_yaml_scalar_or_sequence(const char *key,
                                   yaml_node_t *node) {
 
         char ***s = (char ***) userdata;
-        yaml_node_item_t *i;
         int r;
 
         assert(key);
@@ -682,7 +679,7 @@ int parse_yaml_scalar_or_sequence(const char *key,
                         return -ENOMEM;
         }
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
                 _auto_cleanup_ char *c = NULL;
 
@@ -714,7 +711,6 @@ int parse_yaml_sequence(const char *key,
                         yaml_node_t *node) {
 
         char ***s = (char ***) userdata;
-        yaml_node_item_t *i;
         int r;
 
         assert(key);
@@ -722,7 +718,7 @@ int parse_yaml_sequence(const char *key,
         assert(doc);
         assert(node);
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
                 _auto_cleanup_ char *c = NULL;
 
@@ -860,7 +856,6 @@ int parse_yaml_vxlan_notifications(const char *key,
                                    yaml_document_t *doc,
                                    yaml_node_t *node) {
 
-        yaml_node_item_t *i;
         VxLan *v;
 
         assert(key);
@@ -871,7 +866,7 @@ int parse_yaml_vxlan_notifications(const char *key,
 
         v = data;
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
                 if (str_equal(scalar(entry), "l2-miss"))
@@ -890,7 +885,6 @@ int parse_yaml_vxlan_csum(const char *key,
                           yaml_document_t *doc,
                           yaml_node_t *node) {
 
-        yaml_node_item_t *i;
         VxLan *v;
 
         assert(key);
@@ -901,7 +895,7 @@ int parse_yaml_vxlan_csum(const char *key,
 
         v = data;
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
                 if (str_equal(scalar(entry), "udp"))
@@ -929,7 +923,6 @@ int parse_yaml_vxlan_extensions(const char *key,
                                 yaml_document_t *doc,
                                 yaml_node_t *node) {
 
-        yaml_node_item_t *i;
         VxLan *v;
 
         assert(key);
@@ -940,7 +933,7 @@ int parse_yaml_vxlan_extensions(const char *key,
 
         v = data;
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
                 if (str_equal(scalar(entry), "group-policy"))
@@ -959,9 +952,7 @@ int parse_yaml_vxlan_port_range(const char *key,
                                 yaml_document_t *doc,
                                 yaml_node_t *node) {
 
-        yaml_node_item_t *i;
         bool b = false;
-        uint16_t k;
         VxLan *v;
         int r;
 
@@ -973,8 +964,9 @@ int parse_yaml_vxlan_port_range(const char *key,
 
         v = data;
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
+                uint16_t k;
 
                 r = parse_uint16(scalar(entry), &k);
                 if (r < 0) {
@@ -1199,8 +1191,6 @@ int parse_yaml_sequence_wireguard_peer_shared_key_or_path(const char *key,
                                                           yaml_node_t *node) {
 
         WireGuardPeer *w;
-        yaml_node_item_t *i;
-        yaml_node_t *k, *v;
 
         assert(key);
         assert(data);
@@ -1209,7 +1199,9 @@ int parse_yaml_sequence_wireguard_peer_shared_key_or_path(const char *key,
 
         w = (WireGuardPeer *) data;
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *k, *v;
+
                 k = yaml_document_get_node(doc, *i++);
                 v = yaml_document_get_node(doc, *i);
 
@@ -1240,9 +1232,7 @@ int parse_yaml_bridge_path_cost(const char *key,
                                 yaml_document_t *doc,
                                 yaml_node_t *node) {
 
-        yaml_node_item_t *i;
         Networks *p;
-        uint32_t t;
         int r;
 
         assert(key);
@@ -1253,10 +1243,11 @@ int parse_yaml_bridge_path_cost(const char *key,
 
         p = data;
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *k = yaml_document_get_node(doc, *i++);
                 yaml_node_t *v = yaml_document_get_node(doc, *i);
                 Network *n = g_hash_table_lookup(p->networks, scalar(k));
+                uint32_t t;
 
                 r = parse_uint32(scalar(v), &t);
                 if (r < 0)
@@ -1283,9 +1274,7 @@ int parse_yaml_bridge_port_priority(const char *key,
                                     yaml_document_t *doc,
                                     yaml_node_t *node) {
 
-        yaml_node_item_t *i;
         Networks *p;
-        uint16_t t;
         int r;
 
         assert(key);
@@ -1296,10 +1285,11 @@ int parse_yaml_bridge_port_priority(const char *key,
 
         p = data;
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *k = yaml_document_get_node(doc, *i++);
                 yaml_node_t *v = yaml_document_get_node(doc, *i);
                 Network *n = g_hash_table_lookup(p->networks, scalar(k));
+                uint16_t t;
 
                 r = parse_uint16(scalar(v), &t);
                 if (r < 0)
