@@ -119,6 +119,7 @@ static ParserTable parser_route_vtable[] = {
         { "on-link",                    CONF_TYPE_ROUTE,     parse_yaml_bool,        offsetof(Route, onlink)},
         { "congestion-window",          CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, initcwnd)},
         { "advertised-receive-window",  CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, initrwnd)},
+        { "quick-ack",                  CONF_TYPE_ROUTE,     parse_yaml_bool,        offsetof(Route, quick_ack)},
         { NULL,                         _CONF_TYPE_INVALID,  0,                      0}
 };
 
