@@ -13,6 +13,7 @@
 #include "yaml-manager.h"
 
 static ParserTable parser_link_vtable[] = {
+        { "driver",                                    CONF_TYPE_LINK,           parse_yaml_scalar_or_sequence,      offsetof(NetDevLink, driver)},
         { "ifname",                                    CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, ifname)},
         { "alias",                                     CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, alias)},
         { "description",                               CONF_TYPE_LINK,           parse_yaml_string,                  offsetof(NetDevLink, desc)},
@@ -109,6 +110,36 @@ int parse_link(YAMLManager *m, yaml_document_t *dp, yaml_node_t *k, yaml_node_t 
         t = (uint8_t *) network->link + link_table->offset;
         if (link_table->parser)
                 (void) link_table->parser(scalar(k), scalar(v), link, t, dp, v);
+
+        return 0;
+}
+
+int yaml_parse_link_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        yaml_node_t *k, *v;
+        yaml_node_pair_t *p;
+        yaml_node_item_t *i;
+        yaml_node_t *n;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                n = yaml_document_get_node(dp, *i);
+                if (n)
+                        (void) yaml_parse_link_parameters(m, dp, n, network);
+        }
+
+        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                parse_link(m, dp, k, v, network);
+        }
 
         return 0;
 }

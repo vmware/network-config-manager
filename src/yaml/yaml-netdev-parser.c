@@ -216,10 +216,10 @@ static ParserTable parser_bridge_vtable[] = {
         { "ageing-time",   CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, ageing_time)},
         { "aging-time",    CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, ageing_time)},
         { "stp",           CONF_TYPE_NETDEV_BRIDGE, parse_yaml_bool,     offsetof(Bridge, stp)},
-        { NULL,            _CONF_TYPE_INVALID,      0,                  0}
+        { NULL,            _CONF_TYPE_INVALID,      0,                   0}
 };
 
-static int yaml_yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Bridge *br, Networks *networks) {
+static int yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Bridge *br, Networks *networks) {
         yaml_node_t *k, *v;
         yaml_node_pair_t *p;
         yaml_node_item_t *i;
@@ -233,7 +233,7 @@ static int yaml_yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp
         for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 n = yaml_document_get_node(dp, *i);
                 if (n)
-                        (void) yaml_yaml_parse_bridge_parameters(m, dp, n, br, networks);
+                        (void) yaml_parse_bridge_parameters(m, dp, n, br, networks);
         }
 
         for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
@@ -302,7 +302,7 @@ static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
                 table = g_hash_table_lookup(m->bridge, scalar(k));
                 if (!table) {
                         if (str_equal(scalar(k), "parameters"))
-                                yaml_yaml_parse_bridge_parameters(m, dp, v, b, networks);
+                                yaml_parse_bridge_parameters(m, dp, v, b, networks);
                         else
                                 (void) parse_network(m, dp, node, network);
 

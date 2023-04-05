@@ -447,7 +447,7 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
                                 if (r < 0)
                                         return r;
                         } else if (str_equal(scalar(k), "links")) {
-                                r = parse_link(m, dp, k, v, network);
+                                r = yaml_parse_link_parameters(m, dp, v, network);
                                 if (r < 0)
                                         return r;
                         } else if (v) {
