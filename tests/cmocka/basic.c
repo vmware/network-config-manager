@@ -649,6 +649,21 @@ static void test_link_driver(void **state) {
     assert_true(key_file_config_exists(key_file, "Link", "LargeReceiveOffload", "yes"));
 }
 
+static void test_link_wakeonlan(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("wakeonlan.yaml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.link", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "OriginalName", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Link", "WakeOnLan", "off"));
+}
+
 static void test_netdev_bridges(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1042,6 +1057,7 @@ int main(void) {
         cmocka_unit_test (test_netdev_bond_bridge),
         cmocka_unit_test (test_network_infiband),
         cmocka_unit_test (test_link_driver),
+        cmocka_unit_test (test_link_wakeonlan),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

@@ -2027,9 +2027,9 @@ int manager_generate_network_config_from_yaml(const char *file) {
 
                         r = parse_ifname_or_index(net->ifname, &p);
                         if (r < 0)
-                                continue;
+                                log_debug("Failed to resolve link '%s': %s", net->ifname, strerror(-r));
 
-                        r = netdev_link_configure(p, l);
+                        r = netdev_link_configure(net->ifname, l);
                         if (r < 0)
                                 log_debug("Failed to generate .link file for link '%s': %s", net->ifname, strerror(-r));
                 }
