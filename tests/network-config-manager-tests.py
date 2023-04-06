@@ -414,6 +414,8 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('Route', 'InitialCongestionWindow') == '10')
         assert(parser.get('Route', 'InitialAdvertisedReceiveWindow') == '20')
         assert(parser.get('Route', 'QuickAck') == 'yes')
+        assert(parser.get('Route', 'FastOpenNoCookie') == 'yes')
+        assert(parser.get('Route', 'TTLPropagate') == 'yes')
 
     def test_network_routing_policy_rule(self):
         self.copy_yaml_file_to_netmanager_yaml_path('routing-policy-rule.yaml')
