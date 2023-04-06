@@ -170,6 +170,24 @@ static void test_dhcp6_overrides(void **state) {
     assert_true(key_file_config_exists(key_file, "DHCPv6", "UseAddress", "yes"));
 }
 
+static void test_ipv6_ra_overrides(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("ipv6-ra-overrides.yaml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "Token", "eui64"));
+    assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseDNS", "yes"));
+    assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseMTU", "yes"));
+    assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseDomains", "yes"));
+}
+
 static void test_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1097,6 +1115,7 @@ int main(void) {
         cmocka_unit_test (test_link_wakeonlan),
         cmocka_unit_test (test_link_mtu),
         cmocka_unit_test (test_dhcp6_overrides),
+        cmocka_unit_test (test_ipv6_ra_overrides),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
