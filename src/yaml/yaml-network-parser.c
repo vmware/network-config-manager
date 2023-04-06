@@ -82,7 +82,7 @@ static ParserTable parser_dhcp4_overrides_vtable[] = {
         { "send-release",   CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_send_release)},
         { "route-metric",   CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_route_metric)},
         { "hostname",       CONF_TYPE_DHCP4,     parse_yaml_string, offsetof(Network, dhcp4_hostname)},
-        { NULL,             _CONF_TYPE_INVALID,    0,                 0}
+        { NULL,             _CONF_TYPE_INVALID,  0,                 0}
 };
 
 static ParserTable parser_dhcp6_overrides_vtable[] = {
@@ -94,19 +94,19 @@ static ParserTable parser_dhcp6_overrides_vtable[] = {
         { "send-release",  CONF_TYPE_DHCP6,     parse_yaml_bool,             offsetof(Network, dhcp6_send_release)},
         { "without-ra",    CONF_TYPE_DHCP6,     parse_yaml_dhcp6_without_ra, offsetof(Network, dhcp6_client_start_mode)},
         { "rapid-commit",  CONF_TYPE_DHCP6,     parse_yaml_bool,             offsetof(Network, dhcp6_rapid_commit)},
-        { NULL,            _CONF_TYPE_INVALID,    0,                           0}
+        { NULL,            _CONF_TYPE_INVALID,  0,                           0}
 };
 
 static ParserTable router_advertisement_overrides_vtable[] = {
-        { "token",                 CONF_TYPE_RA,     parse_yaml_string,           offsetof(Network, ipv6_ra_token)},
-        { "use-dns",               CONF_TYPE_RA,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_dns)},
-        { "use-domain",            CONF_TYPE_RA,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_domains)},
-        { "use-mtu",               CONF_TYPE_RA,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_mtu)},
-        { "use-gateway",           CONF_TYPE_RA,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_gw)},
-        { "use-route-prefix",      CONF_TYPE_RA,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_route_prefix)},
-        { "use-autonomous-prefix", CONF_TYPE_RA,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_auto_prefix)},
-        { "use-on-link-prefix",    CONF_TYPE_RA,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_onlink_prefix)},
-        { NULL,                    _CONF_TYPE_INVALID,    0,                           0}
+        { "token",                 CONF_TYPE_RA,       parse_yaml_string,           offsetof(Network, ipv6_ra_token)},
+        { "use-dns",               CONF_TYPE_RA,       parse_yaml_bool,             offsetof(Network, ipv6_ra_use_dns)},
+        { "use-domain",            CONF_TYPE_RA,       parse_yaml_bool,             offsetof(Network, ipv6_ra_use_domains)},
+        { "use-mtu",               CONF_TYPE_RA,       parse_yaml_bool,             offsetof(Network, ipv6_ra_use_mtu)},
+        { "use-gateway",           CONF_TYPE_RA,       parse_yaml_bool,             offsetof(Network, ipv6_ra_use_gw)},
+        { "use-route-prefix",      CONF_TYPE_RA,       parse_yaml_bool,             offsetof(Network, ipv6_ra_use_route_prefix)},
+        { "use-autonomous-prefix", CONF_TYPE_RA,       parse_yaml_bool,             offsetof(Network, ipv6_ra_use_auto_prefix)},
+        { "use-on-link-prefix",    CONF_TYPE_RA,       parse_yaml_bool,             offsetof(Network, ipv6_ra_use_onlink_prefix)},
+        { NULL,                    _CONF_TYPE_INVALID, 0,                           0}
 };
 
 static ParserTable parser_address_vtable[] = {
@@ -116,9 +116,9 @@ static ParserTable parser_address_vtable[] = {
 };
 
 static ParserTable parser_nameservers_vtable[] = {
-        { "search",     CONF_TYPE_DNS,     parse_yaml_domains,              offsetof(Network, domains)},
-        { "addresses",  CONF_TYPE_DNS,     parse_yaml_nameserver_addresses, offsetof(Network, nameservers)},
-        { NULL,         _CONF_TYPE_INVALID,    0,                               0}
+        { "search",     CONF_TYPE_DNS,      parse_yaml_domains,              offsetof(Network, domains)},
+        { "addresses",  CONF_TYPE_DNS,      parse_yaml_nameserver_addresses, offsetof(Network, nameservers)},
+        { NULL,         _CONF_TYPE_INVALID, 0,                               0}
 };
 
 static ParserTable parser_route_vtable[] = {
