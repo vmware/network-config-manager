@@ -89,6 +89,25 @@ network:
         send-release: no
         without-ra: solicit
 ```
+
+#### Using IPv6 Router Advertisement (RA)
+```yml
+network:
+  ethernets:
+    eth0:
+      dhcp4: yes
+      dhcp6: yes
+      accept-ra: yes
+      ra-overrides:
+          token: eui64
+          use-dns: true
+          use-domain: true  
+          use-mtu: true                                                                                                                                             use-gateway: true  
+          use-route-prefix: true
+          use-autonomous-prefix: true
+          use-on-link-prefix: true       
+```
+
 #### Using match as MacAddress
 ```yml
 network:
