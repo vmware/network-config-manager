@@ -1103,6 +1103,12 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
        if (route->quick_ack >= 0)
                (void) add_key_to_section(section, "QuickAck", bool_to_str(route->quick_ack));
 
+       if (route->tfo >= 0)
+               (void) add_key_to_section(section, "FastOpenNoCookie", bool_to_str(route->tfo));
+
+       if (route->ttl_propogate >= 0)
+               (void) add_key_to_section(section, "TTLPropagate", bool_to_str(route->ttl_propogate));
+
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
                 return;
