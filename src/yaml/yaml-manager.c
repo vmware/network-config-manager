@@ -185,11 +185,12 @@ int yaml_manager_new(YAMLManager **ret) {
                  .routing_policy_rule = g_hash_table_new(g_str_hash, g_str_equal),
                  .dhcp4 = g_hash_table_new(g_str_hash, g_str_equal),
                  .dhcp6 = g_hash_table_new(g_str_hash, g_str_equal),
+                 .router_advertisement = g_hash_table_new(g_str_hash, g_str_equal),
                  .nameserver = g_hash_table_new(g_str_hash, g_str_equal),
         };
 
         if (!m->network || !m->address || !m->dhcp4 || !m->dhcp6 || !m->nameserver || !m->route || !m->routing_policy_rule ||
-            !m->nameserver)
+            !m->nameserver || !m->router_advertisement)
                 return log_oom();
 
         r = yaml_register_network(m);
