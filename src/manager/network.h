@@ -286,6 +286,10 @@ typedef struct Network {
         int ipv6_ra_use_dns;
         int ipv6_ra_use_domains;
         int ipv6_ra_use_mtu;
+        int ipv6_ra_use_gw;
+        int ipv6_ra_use_route_prefix;
+        int ipv6_ra_use_auto_prefix;
+        int ipv6_ra_use_onlink_prefix;
 
         /* Network section */
         int lldp;

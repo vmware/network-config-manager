@@ -803,6 +803,10 @@ int network_new(Network **ret) {
                 .ipv6_ra_use_dns = -1,
                 .ipv6_ra_use_domains = -1,
                 .ipv6_ra_use_mtu = -1,
+                .ipv6_ra_use_gw = -1,
+                .ipv6_ra_use_route_prefix = -1,
+                .ipv6_ra_use_auto_prefix = -1,
+                .ipv6_ra_use_onlink_prefix = -1,
                 .gateway_onlink = -1,
                 .configure_without_carrier = -1,
                 .lldp = -1,
@@ -1521,6 +1525,30 @@ int generate_network_config(Network *n) {
 
         if (n->ipv6_ra_use_mtu >= 0) {
                 r = set_config(key_file, "IPv6AcceptRA", "UseMTU", bool_to_str(n->ipv6_ra_use_mtu));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipv6_ra_use_gw >= 0) {
+                r = set_config(key_file, "IPv6AcceptRA", "UseGateway", bool_to_str(n->ipv6_ra_use_gw));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipv6_ra_use_route_prefix >= 0) {
+                r = set_config(key_file, "IPv6AcceptRA", "UseRoutePrefix", bool_to_str(n->ipv6_ra_use_route_prefix));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipv6_ra_use_auto_prefix >= 0) {
+                r = set_config(key_file, "IPv6AcceptRA", "UseAutonomousPrefix", bool_to_str(n->ipv6_ra_use_auto_prefix));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipv6_ra_use_onlink_prefix >= 0) {
+                r = set_config(key_file, "IPv6AcceptRA", "UseOnLinkPrefix", bool_to_str(n->ipv6_ra_use_onlink_prefix));
                 if (r < 0)
                         return r;
         }

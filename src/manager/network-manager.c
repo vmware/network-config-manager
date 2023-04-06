@@ -691,16 +691,16 @@ int manager_configure_route(const IfNameIndex *ifidx,
         }
 
         if (metric > 0)
-                add_key_to_section_integer(section, "Metric", metric);
+                add_key_to_section_int(section, "Metric", metric);
 
         if (mtu > 0)
-                add_key_to_section_integer(section, "MTUBytes", mtu);
+                add_key_to_section_int(section, "MTUBytes", mtu);
 
         if (protocol > 0) {
                 if (route_protocol_to_name(protocol))
                         add_key_to_section(section, "Protocol", route_protocol_to_name(protocol));
                 else
-                        add_key_to_section_integer(section, "Protocol", protocol);
+                        add_key_to_section_int(section, "Protocol", protocol);
         }
 
         if (rt_pref >= 0)
@@ -716,7 +716,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
                 if (route_table_to_name(table))
                         add_key_to_section(section, "Table", route_table_to_name(table));
                 else
-                        add_key_to_section_integer(section, "Table", table);
+                        add_key_to_section_int(section, "Table", table);
         }
 
         r = add_section_to_key_file(key_file, section);
@@ -812,10 +812,10 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
         if (rule->tos > 0)
                 add_key_to_section_uint(section, "TypeOfService", rule->tos);
 
-        add_key_to_section_integer(section, "Table", rule->table);
+        add_key_to_section_int(section, "Table", rule->table);
 
         if (rule->priority > 0)
-                add_key_to_section_integer(section, "Priority", rule->priority);
+                add_key_to_section_int(section, "Priority", rule->priority);
 
         if (from)
                 add_key_to_section(section, "From", from);
@@ -932,7 +932,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        r = add_key_to_section_integer(section, "Table", rt->table);
+        r = add_key_to_section_int(section, "Table", rt->table);
         if (r < 0)
                 return r;
 
@@ -973,7 +973,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        r = add_key_to_section_integer(section, "Table", rt->table);
+        r = add_key_to_section_int(section, "Table", rt->table);
         if (r < 0)
                 return r;
 
@@ -992,7 +992,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        r = add_key_to_section_integer(section, "Table", rt->table);
+        r = add_key_to_section_int(section, "Table", rt->table);
         if (r < 0)
                 return r;
 
@@ -1011,7 +1011,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        r = add_key_to_section_integer(section, "Table", rt->table);
+        r = add_key_to_section_int(section, "Table", rt->table);
         if (r < 0)
                 return r;
 
@@ -1087,16 +1087,16 @@ int manager_configure_dhcpv4_server(const IfNameIndex *ifidx,
                 return r;
 
         if (pool_offset > 0)
-                add_key_to_section_integer(section, "PoolOffset", pool_offset);
+                add_key_to_section_int(section, "PoolOffset", pool_offset);
 
         if (pool_size > 0)
-                add_key_to_section_integer(section, "PoolSize", pool_size);
+                add_key_to_section_int(section, "PoolSize", pool_size);
 
         if (default_lease_time > 0)
-                add_key_to_section_integer(section, "DefaultLeaseTimeSec", default_lease_time);
+                add_key_to_section_int(section, "DefaultLeaseTimeSec", default_lease_time);
 
         if (max_lease_time > 0)
-                add_key_to_section_integer(section, "MaxLeaseTimeSec", max_lease_time);
+                add_key_to_section_int(section, "MaxLeaseTimeSec", max_lease_time);
 
         if (dns)
                 add_key_to_section(section, "DNS", dns);
@@ -1220,10 +1220,10 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifidx,
                 add_key_to_section(ipv6_prefix_section, "Prefix", p);
 
         if (pref_lifetime > 0)
-                add_key_to_section_integer(ipv6_prefix_section, "PreferredLifetimeSec", pref_lifetime);
+                add_key_to_section_int(ipv6_prefix_section, "PreferredLifetimeSec", pref_lifetime);
 
         if (valid_lifetime > 0)
-                add_key_to_section_integer(ipv6_prefix_section, "ValidLifetimeSec", valid_lifetime);
+                add_key_to_section_int(ipv6_prefix_section, "ValidLifetimeSec", valid_lifetime);
 
 
         r = section_new("IPv6SendRA", &ipv6_sendra_section);
@@ -1241,7 +1241,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifidx,
                 add_key_to_section(ipv6_sendra_section, "EmitDNS", bool_to_str(emit_dns));
 
         if (dns_lifetime > 0)
-                add_key_to_section_integer(ipv6_sendra_section, "DNSLifetimeSec", dns_lifetime);
+                add_key_to_section_int(ipv6_sendra_section, "DNSLifetimeSec", dns_lifetime);
 
         if (domain)
                 add_key_to_section(ipv6_sendra_section, "Domains", domain);
@@ -1258,7 +1258,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *ifidx,
                 add_key_to_section(ipv6_route_prefix_section, "Route", rt);
 
         if (route_lifetime > 0)
-                add_key_to_section_integer(ipv6_route_prefix_section, "LifetimeSec", route_lifetime);
+                add_key_to_section_int(ipv6_route_prefix_section, "LifetimeSec", route_lifetime);
 
         r = add_section_to_key_file(key_file, ipv6_sendra_section);
         if (r < 0)

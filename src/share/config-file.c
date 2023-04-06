@@ -154,7 +154,7 @@ int add_section_to_key_file(KeyFile *k, Section *s) {
        return 0;
 }
 
-int add_key_to_section_integer(Section *s, const char *k, int v) {
+int add_key_to_section_int(Section *s, const char *k, int v) {
         _auto_cleanup_ gchar *c = NULL;
 
         assert(s);
