@@ -800,6 +800,9 @@ int network_new(Network **ret) {
                 .dhcp6_rapid_commit = -1,
                 .dhcp6_use_address = -1,
                 .dhcp6_client_start_mode = _DHCP6_CLIENT_START_MODE_INVALID,
+                .ipv6_ra_use_dns = -1,
+                .ipv6_ra_use_domains = -1,
+                .ipv6_ra_use_mtu = -1,
                 .gateway_onlink = -1,
                 .configure_without_carrier = -1,
                 .lldp = -1,
@@ -1381,128 +1384,145 @@ int generate_network_config(Network *n) {
                         return r;
         }
 
-        if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID || n->dhcp4_use_dns >= 0 || n->dhcp4_use_domains >= 0 ||
-            n->dhcp4_use_ntp >= 0 || n->dhcp4_use_mtu >= 0 || n->dhcp4_route_metric > 0 || n->dhcp4_use_routes >= 0 || n->dhcp4_use_hostname >= 0 ||
-            n->dhcp4_send_hostname >= 0 || n->dhcp4_hostname || n->dhcp4_send_release >= 0) {
-
-                if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID) {
-                        r = set_config(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_use_dns >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseDNS", bool_to_str(n->dhcp4_use_dns));
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_use_domains >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseDomains", bool_to_str(n->dhcp4_use_domains));
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_use_ntp >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseNTP", bool_to_str(n->dhcp4_use_ntp));
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_use_mtu >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseMTU", bool_to_str(n->dhcp4_use_mtu));
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_use_routes >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseRoutes", bool_to_str(n->dhcp4_use_routes));
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_use_hostname >= 0) {
-                        r = set_config(key_file, "DHCPv4", "UseHostname", bool_to_str(n->dhcp4_use_hostname));
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_send_hostname >= 0) {
-                        r = set_config(key_file, "DHCPv4", "SendHostname", bool_to_str(n->dhcp4_send_hostname));
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_send_release >= 0) {
-                        r = set_config(key_file, "DHCPv4", "SendRelease", bool_to_str(n->dhcp4_send_release));
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_hostname) {
-                        r = set_config(key_file, "DHCPv4", "Hostname", n->dhcp4_hostname);
-                        if (r < 0)
-                                return r;
-                }
-
-                if (n->dhcp4_route_metric > 0) {
-                        r = set_config_uint(key_file, "DHCPv4", "RouteMetric", n->dhcp4_route_metric);
-                        if (r < 0)
-                                return r;
-                }
+        /* [DHCPv4] */
+        if (n->dhcp_client_identifier_type != _DHCP_CLIENT_IDENTIFIER_INVALID) {
+                r = set_config(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(n->dhcp_client_identifier_type));
+                if (r < 0)
+                        return r;
         }
 
-        if ( n->dhcp6_use_dns >= 0 || n->dhcp6_use_ntp >= 0 || n->dhcp6_use_address >= 0 || n->dhcp6_use_hostname >= 0 ||
-             n->dhcp6_use_domains || n->dhcp4_send_release >= 0 || n->dhcp6_client_start_mode >= 0 || n->dhcp6_rapid_commit >= 0 ||
-             n->dhcp6_use_address >= 0) {
+        if (n->dhcp4_use_dns >= 0) {
+                r = set_config(key_file, "DHCPv4", "UseDNS", bool_to_str(n->dhcp4_use_dns));
+                if (r < 0)
+                        return r;
+        }
 
-                if (n->dhcp6_use_dns >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_str(n->dhcp6_use_dns));
-                         if (r < 0)
-                                return r;
-                }
+        if (n->dhcp4_use_domains >= 0) {
+                r = set_config(key_file, "DHCPv4", "UseDomains", bool_to_str(n->dhcp4_use_domains));
+                if (r < 0)
+                        return r;
+        }
 
-                if (n->dhcp6_use_ntp >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseNTP", bool_to_str(n->dhcp6_use_ntp));
-                        if (r < 0)
-                                return r;
-                }
+        if (n->dhcp4_use_ntp >= 0) {
+                r = set_config(key_file, "DHCPv4", "UseNTP", bool_to_str(n->dhcp4_use_ntp));
+                if (r < 0)
+                        return r;
+        }
 
-                if (n->dhcp6_use_hostname >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseHostname", bool_to_str(n->dhcp6_use_hostname));
-                        if (r < 0)
-                                return r;
-                }
+        if (n->dhcp4_use_mtu >= 0) {
+                r = set_config(key_file, "DHCPv4", "UseMTU", bool_to_str(n->dhcp4_use_mtu));
+                if (r < 0)
+                        return r;
+        }
 
-                if (n->dhcp6_use_domains >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseDomains", bool_to_str(n->dhcp6_use_domains));
-                        if (r < 0)
-                                return r;
-                }
+        if (n->dhcp4_use_routes >= 0) {
+                r = set_config(key_file, "DHCPv4", "UseRoutes", bool_to_str(n->dhcp4_use_routes));
+                if (r < 0)
+                        return r;
+        }
 
-                if (n->dhcp6_rapid_commit >= 0) {
-                        r = set_config(key_file, "DHCPv6", "RapidCommit", bool_to_str(n->dhcp6_rapid_commit));
-                         if (r < 0)
-                                return r;
-                }
+        if (n->dhcp4_use_hostname >= 0) {
+                r = set_config(key_file, "DHCPv4", "UseHostname", bool_to_str(n->dhcp4_use_hostname));
+                if (r < 0)
+                        return r;
+        }
 
-                if (n->dhcp6_use_address >= 0) {
-                        r = set_config(key_file, "DHCPv6", "UseAddress", bool_to_str(n->dhcp6_use_address));
-                         if (r < 0)
-                                return r;
-                }
+        if (n->dhcp4_send_hostname >= 0) {
+                r = set_config(key_file, "DHCPv4", "SendHostname", bool_to_str(n->dhcp4_send_hostname));
+                if (r < 0)
+                        return r;
+        }
 
-                if (n->dhcp6_send_release >= 0) {
-                        r = set_config(key_file, "DHCPv6", "SendRelease", bool_to_str(n->dhcp6_send_release));
-                        if (r < 0)
-                                return r;
-                }
+        if (n->dhcp4_send_release >= 0) {
+                r = set_config(key_file, "DHCPv4", "SendRelease", bool_to_str(n->dhcp4_send_release));
+                if (r < 0)
+                        return r;
+        }
 
-               if (n->dhcp6_client_start_mode >= 0) {
-                       r = set_config(key_file, "DHCPv6", "WithoutRA", dhcp6_client_start_mode_to_name(n->dhcp6_client_start_mode));
-                       if (r < 0)
-                               return r;
-               }
+        if (n->dhcp4_hostname) {
+                r = set_config(key_file, "DHCPv4", "Hostname", n->dhcp4_hostname);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp4_route_metric > 0) {
+                r = set_config_uint(key_file, "DHCPv4", "RouteMetric", n->dhcp4_route_metric);
+                if (r < 0)
+                        return r;
+        }
+
+        /* [DHCPv6] */
+        if (n->dhcp6_use_dns >= 0) {
+                r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_str(n->dhcp6_use_dns));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp6_use_domains >= 0) {
+                r = set_config(key_file, "DHCPv6", "UseDomains", bool_to_str(n->dhcp6_use_domains));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp6_use_ntp >= 0) {
+                r = set_config(key_file, "DHCPv6", "UseNTP", bool_to_str(n->dhcp6_use_ntp));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp6_use_hostname >= 0) {
+                r = set_config(key_file, "DHCPv6", "UseHostname", bool_to_str(n->dhcp6_use_hostname));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp6_rapid_commit >= 0) {
+                r = set_config(key_file, "DHCPv6", "RapidCommit", bool_to_str(n->dhcp6_rapid_commit));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp6_use_address >= 0) {
+                r = set_config(key_file, "DHCPv6", "UseAddress", bool_to_str(n->dhcp6_use_address));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp6_send_release >= 0) {
+                r = set_config(key_file, "DHCPv6", "SendRelease", bool_to_str(n->dhcp6_send_release));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp6_client_start_mode >= 0) {
+                r = set_config(key_file, "DHCPv6", "WithoutRA", dhcp6_client_start_mode_to_name(n->dhcp6_client_start_mode));
+                if (r < 0)
+                        return r;
+        }
+
+        /* [IPv6AcceptRA] */
+        if (n->ipv6_ra_token) {
+                r = set_config(key_file, "IPv6AcceptRA", "Token", n->ipv6_ra_token);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipv6_ra_use_dns >= 0) {
+                r = set_config(key_file, "IPv6AcceptRA", "UseDNS", bool_to_str(n->ipv6_ra_use_dns));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipv6_ra_use_domains >= 0) {
+                r = set_config(key_file, "IPv6AcceptRA", "UseDomains", bool_to_str(n->ipv6_ra_use_domains));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->ipv6_ra_use_mtu >= 0) {
+                r = set_config(key_file, "IPv6AcceptRA", "UseMTU", bool_to_str(n->ipv6_ra_use_mtu));
+                if (r < 0)
+                        return r;
         }
 
         if (n->addresses && set_size(n->addresses) > 0)

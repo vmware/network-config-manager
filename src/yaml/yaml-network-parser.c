@@ -96,6 +96,14 @@ static ParserTable parser_dhcp6_overrides_vtable[] = {
         { NULL,            _CONF_TYPE_INVALID,    0,                           0}
 };
 
+static ParserTable router_advertisement_overrides_vtable[] = {
+        { "token",         CONF_TYPE_NETWORK,     parse_yaml_string,           offsetof(Network, ipv6_ra_token)},
+        { "use-dns",       CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_dns)},
+        { "use-domain",    CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_domains)},
+        { "use-mtu",       CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_mtu)},
+        { NULL,            _CONF_TYPE_INVALID,    0,                           0}
+};
+
 static ParserTable parser_address_vtable[] = {
         { "label",     CONF_TYPE_NETWORK,     parse_yaml_addresses, offsetof(Network, addresses)},
         { "addresses", CONF_TYPE_NETWORK,     parse_yaml_addresses, offsetof(Network, addresses)},
@@ -428,6 +436,10 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
                                 r = parse_config(m->dhcp6, dp, v, network);
                                 if (r < 0)
                                         return r;
+                        } else if (str_equal(scalar(k), "ra-overrides")) {
+                                r = parse_config(m->router_advertisement, dp, v, network);
+                                if (r < 0)
+                                        return r;
                         } else if (str_equal(scalar(k), "addresses")) {
                                 IPAddress *a = NULL;
 
@@ -525,6 +537,7 @@ int yaml_register_network(YAMLManager *m) {
         assert(m->network);
         assert(m->dhcp4);
         assert(m->dhcp6);
+        assert(m->router_advertisement);
         assert(m->address);
         assert(m->routing_policy_rule);
         assert(m->route);
@@ -554,6 +567,13 @@ int yaml_register_network(YAMLManager *m) {
         for (size_t i = 0; parser_dhcp6_overrides_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->dhcp6, (void *) parser_dhcp6_overrides_vtable[i].key, &parser_dhcp6_overrides_vtable[i])) {
                         log_warning("Failed add key='%s' to dhcp6 table", parser_dhcp6_overrides_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        for (size_t i = 0; router_advertisement_overrides_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->router_advertisement, (void *) router_advertisement_overrides_vtable[i].key, &router_advertisement_overrides_vtable[i])) {
+                        log_warning("Failed add key='%s' to IPv6 RA table", router_advertisement_overrides_vtable[i].key);
                         return -EINVAL;
                 }
         }

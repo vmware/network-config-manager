@@ -281,6 +281,12 @@ typedef struct Network {
         int dhcp6_rapid_commit;
         int dhcp6_use_address;
 
+        /* RA section  */
+        char *ipv6_ra_token;
+        int ipv6_ra_use_dns;
+        int ipv6_ra_use_domains;
+        int ipv6_ra_use_mtu;
+
         /* Network section */
         int lldp;
         int emit_lldp;

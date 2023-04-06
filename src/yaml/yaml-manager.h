@@ -21,6 +21,7 @@ typedef struct YAMLManager {
         GHashTable *address;
         GHashTable *dhcp4;
         GHashTable *dhcp6;
+        GHashTable *router_advertisement;
         GHashTable *nameserver;
         GHashTable *route;
         GHashTable *routing_policy_rule;

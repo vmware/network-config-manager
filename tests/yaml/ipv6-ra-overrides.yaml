@@ -1,0 +1,10 @@
+network:
+  version: 2
+  ethernets:
+    test99:
+      dhcp4: yes
+      ra-overrides:
+        token: eui64
+        use-dns: true
+        use-domain: true
+        use-mtu: true
