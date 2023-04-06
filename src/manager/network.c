@@ -788,6 +788,7 @@ int network_new(Network **ret) {
                 .dhcp4_use_dns = -1,
                 .dhcp4_use_domains = -1,
                 .dhcp4_use_routes = -1,
+                .dhcp4_use_gw = -1,
                 .dhcp4_use_hostname = -1,
                 .dhcp4_send_hostname = -1,
                 .dhcp4_send_release = -1,
@@ -1427,6 +1428,12 @@ int generate_network_config(Network *n) {
 
         if (n->dhcp4_use_routes >= 0) {
                 r = set_config(key_file, "DHCPv4", "UseRoutes", bool_to_str(n->dhcp4_use_routes));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp4_use_gw >= 0) {
+                r = set_config(key_file, "DHCPv4", "UseGateway", bool_to_str(n->dhcp4_use_gw));
                 if (r < 0)
                         return r;
         }

@@ -267,6 +267,7 @@ typedef struct Network {
         int dhcp4_use_domains;
         int dhcp4_use_ntp;
         int dhcp4_use_routes;
+        int dhcp4_use_gw;
         int dhcp4_use_hostname;
         int dhcp4_send_hostname;
         int dhcp4_send_release;
