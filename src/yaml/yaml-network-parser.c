@@ -76,6 +76,7 @@ static ParserTable parser_dhcp4_overrides_vtable[] = {
         { "use-ntp",        CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_ntp)},
         { "use-mtu",        CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_mtu)},
         { "use-routes",     CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_routes)},
+        { "use-gateway",    CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_gw)},
         { "use-hostname",   CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_use_hostname)},
         { "send-hostname",  CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_send_hostname)},
         { "send-release",   CONF_TYPE_NETWORK,     parse_yaml_bool,   offsetof(Network, dhcp4_send_release)},
