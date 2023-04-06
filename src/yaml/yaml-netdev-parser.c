@@ -64,14 +64,14 @@ bool is_yaml_netdev_kind(const char *s) {
 }
 
 static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
         int r;
 
         assert(dp);
         assert(node);
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
+
                 k = yaml_document_get_node(dp, p->key);
                 v = yaml_document_get_node(dp, p->value);
 
@@ -116,23 +116,22 @@ static ParserTable parser_bond_vtable[] = {
 };
 
 static int yaml_yaml_parse_bond_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Bond *bond) {
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
-        yaml_node_item_t *i;
-        yaml_node_t *n;
 
         assert(m);
         assert(dp);
         assert(node);
         assert(bond);
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
                 n = yaml_document_get_node(dp, *i);
                 if (n)
                         (void) yaml_yaml_parse_bond_parameters(m, dp, n, bond);
         }
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -156,8 +155,6 @@ static int yaml_yaml_parse_bond_parameters(YAMLManager *m, yaml_document_t *dp, 
 
 static int yaml_parse_bond(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Bond *bond = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
         int r;
 
         assert(m);
@@ -177,7 +174,8 @@ static int yaml_parse_bond(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         if (!network->netdev->ifname)
                 return log_oom();
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -220,23 +218,22 @@ static ParserTable parser_bridge_vtable[] = {
 };
 
 static int yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Bridge *br, Networks *networks) {
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
-        yaml_node_item_t *i;
-        yaml_node_t *n;
 
         assert(m);
         assert(dp);
         assert(node);
         assert(br);
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
                 n = yaml_document_get_node(dp, *i);
                 if (n)
                         (void) yaml_parse_bridge_parameters(m, dp, n, br, networks);
         }
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -268,8 +265,6 @@ static int yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp, yam
 
 static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network, Networks *networks) {
         _auto_cleanup_ Bridge *b = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
         int r;
 
         assert(m);
@@ -289,7 +284,8 @@ static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
         if (!network->netdev->ifname)
                 return log_oom();
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -328,8 +324,6 @@ static ParserTable parser_vlan_vtable[] = {
 
 static int yaml_parse_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ VLan *vlan = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
         int r;
 
         assert(m);
@@ -349,7 +343,8 @@ static int yaml_parse_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         if (!network->netdev->ifname)
                 return log_oom();
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -388,23 +383,22 @@ static ParserTable parser_tunnel_vtable[] = {
 };
 
 static int yaml_parse_tunnel_keys(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Tunnel *tnl) {
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
-        yaml_node_item_t *i;
-        yaml_node_t *n;
 
         assert(m);
         assert(dp);
         assert(node);
         assert(tnl);
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
                 n = yaml_document_get_node(dp, *i);
                 if (n)
                         (void) yaml_parse_tunnel_keys(m, dp, n, tnl);
         }
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -428,8 +422,6 @@ static int yaml_parse_tunnel_keys(YAMLManager *m, yaml_document_t *dp, yaml_node
 
 static int yaml_parse_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Tunnel *tnl = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
         int r;
 
         assert(m);
@@ -452,7 +444,8 @@ static int yaml_parse_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
         if (!network->netdev->ifname)
                 return log_oom();
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -498,8 +491,6 @@ static ParserTable parser_vrf_vtable[] = {
 
 static int yaml_parse_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _cleanup_(vrf_freep) VRF *vrf = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
         int r;
 
         assert(m);
@@ -519,7 +510,8 @@ static int yaml_parse_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
         if (!network->netdev->ifname)
                 return log_oom();
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -570,8 +562,6 @@ static ParserTable parser_vxlan_vtable[] = {
 
 static int yaml_parse_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _cleanup_(vxlan_freep) VxLan *vx = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
         int r;
 
         assert(m);
@@ -591,7 +581,8 @@ static int yaml_parse_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *no
         if (!network->netdev->ifname)
                 return log_oom();
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -629,10 +620,6 @@ static ParserTable parser_wireguard_peer_vtable[] = {
 };
 
 static int yaml_parse_wireguard_peer(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, WireGuard *wg, WireGuardPeer **peer) {
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
-        yaml_node_item_t *i;
-        yaml_node_t *n;
         int r;
 
         assert(m);
@@ -640,13 +627,16 @@ static int yaml_parse_wireguard_peer(YAMLManager *m, yaml_document_t *dp, yaml_n
         assert(node);
         assert(peer);
 
-        for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
                 n = yaml_document_get_node(dp, *i);
                 if (n)
                         (void) yaml_parse_wireguard_peer(m, dp, n, wg, peer);
         }
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -685,8 +675,6 @@ static ParserTable parser_wireguard_vtable[] = {
 
 static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _cleanup_(wireguard_freep) WireGuard *wg = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
         int r;
 
         assert(m);
@@ -706,7 +694,8 @@ static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t
         if (!network->netdev->ifname)
                 return log_oom();
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -755,8 +744,6 @@ static ParserTable parser_macvlan_vtable[] = {
 
 static int yaml_parse_macvlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ MACVLan *macvlan = NULL;
-        yaml_node_t *k, *v;
-        yaml_node_pair_t *p;
         int r;
 
         assert(m);
@@ -776,7 +763,8 @@ static int yaml_parse_macvlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *
         if (!network->netdev->ifname)
                 return log_oom();
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
 
@@ -805,8 +793,6 @@ static int yaml_parse_macvlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *
 }
 
 int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_t *dp, yaml_node_t *node, Networks *networks) {
-        yaml_node_pair_t *p;
-        yaml_node_t *n;
         int r;
 
         assert(m);
@@ -814,8 +800,10 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
         assert(node);
         assert(networks);
 
-        for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                 _cleanup_(network_freep) Network *net = NULL;
+                yaml_node_t *n;
+
                 n = yaml_document_get_node(dp, p->key);
 
                 r = yaml_network_new(scalar(n), &net);
