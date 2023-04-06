@@ -14,6 +14,49 @@
 #include "yaml-network-parser.h"
 #include "yaml-parser.h"
 
+static const char * const conf_type_table[_CONF_TYPE_MAX] = {
+       [CONF_TYPE_MATCH]                = "match",
+       [CONF_TYPE_NETWORK]              = "ethernets",
+       [CONF_TYPE_DHCP4]                = "dhcp4-overrides",
+       [CONF_TYPE_DHCP6]                = "dhcp6-overrides",
+       [CONF_TYPE_RA]                   = "ra-overrides",
+       [CONF_TYPE_ADDRESS]              = "addresses",
+       [CONF_TYPE_DNS]                  = "nameservers",
+       [CONF_TYPE_ROUTE]                = "routes",
+       [CONF_TYPE_ROUTING_POLICY_RULE]  = "routing-policy",
+       [CONF_TYPE_LINK]                 = "links",
+       [CONF_TYPE_NETDEV]               = "netdev",
+       [CONF_TYPE_NETDEV_VLAN]          = "vlan",
+       [CONF_TYPE_NETDEV_MACVLAN]       = "macvlan",
+       [CONF_TYPE_NETDEV_BRIDGE]        = "bridge",
+       [CONF_TYPE_NETDEV_BOND]          = "bond",
+       [CONF_TYPE_NETDEV_TUNNEL]        = "tunnel",
+       [CONF_TYPE_NETDEV_VRF]           = "vrf",
+       [CONF_TYPE_NETDEV_VXLAN]         = "vxlan",
+       [CONF_TYPE_NETDEV_WIREGUARD]     = "wireguard",
+       [CONF_TYPE_WIFI]                 = "wifi",
+};
+
+const char *conf_type_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(conf_type_table))
+                return NULL;
+
+        return conf_type_table[id];
+}
+
+int conf_type_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = CONF_TYPE_MATCH; i < (size_t) ELEMENTSOF(conf_type_table); i++)
+                if (str_equal_fold(name, conf_type_table[i]))
+                        return i;
+
+        return _CONF_TYPE_INVALID;
+}
+
 int parse_yaml_bool(const char *key,
                     const char *value,
                     void *data,

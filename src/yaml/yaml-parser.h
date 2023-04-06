@@ -7,11 +7,16 @@
 #include <yaml.h>
 
 typedef enum ConfType {
+        CONF_TYPE_MATCH,
         CONF_TYPE_NETWORK,
-        CONF_TYPE_NETDEV,
-        CONF_TYPE_WIFI,
+        CONF_TYPE_DHCP4,
+        CONF_TYPE_DHCP6,
+        CONF_TYPE_RA,
+        CONF_TYPE_ADDRESS,
+        CONF_TYPE_DNS,
         CONF_TYPE_ROUTE,
         CONF_TYPE_ROUTING_POLICY_RULE,
+        CONF_TYPE_NETDEV,
         CONF_TYPE_LINK,
         CONF_TYPE_NETDEV_VLAN,
         CONF_TYPE_NETDEV_MACVLAN,
@@ -21,6 +26,7 @@ typedef enum ConfType {
         CONF_TYPE_NETDEV_VRF,
         CONF_TYPE_NETDEV_VXLAN,
         CONF_TYPE_NETDEV_WIREGUARD,
+        CONF_TYPE_WIFI,
         _CONF_TYPE_MAX,
         _CONF_TYPE_INVALID = -1,
 } ConfType;
@@ -31,6 +37,9 @@ typedef struct ParserTable {
         int (*parser) (const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
         const size_t offset;
 } ParserTable;
+
+const char *conf_type_to_name(int id);
+int conf_type_to_mode(const char *name);
 
 int parse_yaml_bool(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_uint64(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
