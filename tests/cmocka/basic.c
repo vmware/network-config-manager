@@ -186,6 +186,10 @@ static void test_ipv6_ra_overrides(void **state) {
     assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseDNS", "yes"));
     assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseMTU", "yes"));
     assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseDomains", "yes"));
+    assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseGateway", "yes"));
+    assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseRoutePrefix", "yes"));
+    assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseAutonomousPrefix", "yes"));
+    assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseOnLinkPrefix", "yes"));
 }
 
 static void test_source_routing(void **state) {
