@@ -75,6 +75,10 @@ network:
       dhcp4-overrides:
         route-metric: 200
         send-release: no
+        use-gateway: true
+        use-hostname: no
+        send-hostname: yes
+        use-mtu: yes
     eth1:
       dhcp4: yes
       dhcp4-overrides:
