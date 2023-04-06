@@ -24,6 +24,8 @@ int route_new(Route **ret) {
                 .table = RT_TABLE_MAIN,
                 .onlink = -1,
                 .quick_ack = -1,
+                .tfo = -1,
+                .ttl_propogate = -1,
         };
 
         *ret = route;
