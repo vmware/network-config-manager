@@ -97,11 +97,15 @@ static ParserTable parser_dhcp6_overrides_vtable[] = {
 };
 
 static ParserTable router_advertisement_overrides_vtable[] = {
-        { "token",         CONF_TYPE_NETWORK,     parse_yaml_string,           offsetof(Network, ipv6_ra_token)},
-        { "use-dns",       CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_dns)},
-        { "use-domain",    CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_domains)},
-        { "use-mtu",       CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_mtu)},
-        { NULL,            _CONF_TYPE_INVALID,    0,                           0}
+        { "token",                 CONF_TYPE_NETWORK,     parse_yaml_string,           offsetof(Network, ipv6_ra_token)},
+        { "use-dns",               CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_dns)},
+        { "use-domain",            CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_domains)},
+        { "use-mtu",               CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_mtu)},
+        { "use-gateway",           CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_gw)},
+        { "use-route-prefix",      CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_route_prefix)},
+        { "use-autonomous-prefix", CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_auto_prefix)},
+        { "use-on-link-prefix",    CONF_TYPE_NETWORK,     parse_yaml_bool,             offsetof(Network, ipv6_ra_use_onlink_prefix)},
+        { NULL,                    _CONF_TYPE_INVALID,    0,                           0}
 };
 
 static ParserTable parser_address_vtable[] = {
