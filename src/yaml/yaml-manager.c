@@ -11,9 +11,6 @@
 #include "log.h"
 
 static int yaml_parse_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networks *networks) {
-        yaml_node_item_t *i;
-        yaml_node_pair_t *p;
-        yaml_node_t *n;
         int r;
 
         assert(m);
@@ -26,16 +23,16 @@ static int yaml_parse_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         case YAML_SCALAR_NODE:
                 break;
         case YAML_SEQUENCE_NODE: {
-                for (i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
-                        n = yaml_document_get_node(dp, *i);
+                for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                        yaml_node_t *n = yaml_document_get_node(dp, *i);
                         if (n)
                                 (void) yaml_parse_node(m, dp, n, networks);
                 }
         }
                 break;
         case YAML_MAPPING_NODE:
-                for (p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
-                        n = yaml_document_get_node(dp, p->key);
+                for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                        yaml_node_t *n = yaml_document_get_node(dp, p->key);
 
                         if (str_equal(scalar(n), "ethernets")) {
                                 n = yaml_document_get_node(dp, p->value);
