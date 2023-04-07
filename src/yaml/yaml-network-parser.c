@@ -430,86 +430,86 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
                 v = yaml_document_get_node(dp, p->value);
 
                 table = g_hash_table_lookup(m->network, scalar(k));
-                if (!table) {
-                        switch (conf_type_to_mode(scalar(k))) {
-                                case CONF_TYPE_MATCH:
-                                        r = parse_config(m->match, dp, v, network);
-                                        if (r < 0)
-                                                return r;
-                                        break;
-
-                                case CONF_TYPE_DHCP4:
-                                        r = parse_config(m->dhcp4, dp, v, network);
-                                        if (r < 0)
-                                                return r;
-                                        break;
-
-                                case CONF_TYPE_DHCP6:
-                                        r = parse_config(m->dhcp6, dp, v, network);
-                                        if (r < 0)
-                                                return r;
-                                        break;
-
-                                case CONF_TYPE_RA:
-                                        r = parse_config(m->router_advertisement, dp, v, network);
-                                        if (r < 0)
-                                                return r;
-                                        break;
-
-                                case CONF_TYPE_ADDRESS: {
-                                        IPAddress *a = NULL;
-
-                                        r = parse_address(m, dp, v, network, &a);
-                                        if (r < 0)
-                                                return r;
-                                }
-                                        break;
-
-                                case CONF_TYPE_ROUTE:
-                                        r = parse_route(m->route, dp, v, network);
-                                        if (r < 0)
-                                                return r;
-                                        break;
-
-                                case CONF_TYPE_ROUTING_POLICY_RULE:
-                                        r = parse_routing_policy_rule(m->routing_policy_rule, dp, v, network);
-                                        if (r < 0)
-                                                return r;
-                                        break;
-
-                                case CONF_TYPE_DNS:
-                                        r = parse_config(m->nameserver, dp, v, network);
-                                        if (r < 0)
-                                                return r;
-                                        break;
-
-                                case CONF_TYPE_LINK:
-                                        r = yaml_parse_link_parameters(m, dp, v, network);
-                                        if (r < 0)
-                                                return r;
-                                        break;
-
-                                default:
-                                        if (v) {
-                                                r = parse_network(m, dp, v, network);
-                                                if (r < 0)
-                                                        return r;
-                                        }
+                if (table) {
+                        t = (uint8_t *) network + table->offset;
+                        if (table->parser) {
+                                (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
+                                network->modified = true;
                         }
-
-                        /* .link  */
-                        r = parse_link(m, dp, k, v, network);
-                        if (r <= 0)
-                                log_debug("Failed find key='%s' in link table", scalar(k));
 
                         continue;
                 }
 
-                t = (uint8_t *) network + table->offset;
-                if (table->parser) {
-                        (void) table->parser(scalar(k), scalar(v), network, t, dp, v);
-                        network->modified = true;
+                switch (conf_type_to_mode(scalar(k))) {
+                        case CONF_TYPE_MATCH:
+                                r = parse_config(m->match, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+
+                        case CONF_TYPE_DHCP4:
+                                r = parse_config(m->dhcp4, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+
+                        case CONF_TYPE_DHCP6:
+                                r = parse_config(m->dhcp6, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+
+                        case CONF_TYPE_RA:
+                                r = parse_config(m->router_advertisement, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+
+                        case CONF_TYPE_ADDRESS: {
+                                IPAddress *a = NULL;
+
+                                r = parse_address(m, dp, v, network, &a);
+                                if (r < 0)
+                                        return r;
+                        }
+                                break;
+
+                        case CONF_TYPE_ROUTE:
+                                r = parse_route(m->route, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+
+                        case CONF_TYPE_ROUTING_POLICY_RULE:
+                                r = parse_routing_policy_rule(m->routing_policy_rule, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+
+                        case CONF_TYPE_DNS:
+                                r = parse_config(m->nameserver, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+
+                        case CONF_TYPE_LINK:
+                                r = yaml_parse_link_parameters(m, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+
+                        default:
+                                if (v) {
+                                        r = parse_network(m, dp, v, network);
+                                        if (r < 0)
+                                                return r;
+                                }
                 }
+
+                /* .link  */
+                r = parse_link(m, dp, k, v, network);
+                if (r <= 0)
+                        log_debug("Failed find key='%s' in link table", scalar(k));
         }
 
         return 0;
