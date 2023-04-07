@@ -540,6 +540,10 @@ int parse_yaml_ipv6_privacy_extensions(const char *key,
         n = data;
 
         r = ipv6_privacy_extensions_to_type((const char *) value);
+         if (r < 0) {
+                log_warning("Failed to parse IPv6 Privacy extension='%s'\n", value);
+                return r;
+        }
         n->ipv6_privacy = r;
         return 0;
 }
