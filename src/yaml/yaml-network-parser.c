@@ -297,8 +297,10 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                         _auto_cleanup_ IPAddress *address = NULL;
 
                         r = parse_ip_from_str(scalar(k), &address);
-                        if (r < 0)
-                                return r;
+                        if (r < 0) {
+                                log_debug("Failed to parse address='%s': %s", scalar(k), strerror(-r));
+                                continue;
+                        }
 
                         if (*addr) {
                                 if ((*addr)->label)
@@ -318,7 +320,7 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                         if (v) {
                                 r = parse_address_from_str_and_add(scalar(v), network->addresses);
                                 if (r < 0)
-                                        continue;
+                                        log_debug("Failed to parse address='%s': %s", scalar(v), strerror(-r));
                         }
                 }
         }
