@@ -449,6 +449,7 @@ int parse_yaml_keep_configuration(const char *key,
                                   yaml_document_t *doc,
                                   yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -458,7 +459,12 @@ int parse_yaml_keep_configuration(const char *key,
 
         n = data;
 
-        n->keep_configuration = keep_configuration_type_to_mode((const char *) value);
+        r = keep_configuration_type_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to keep configuration mode='%s'\n", value);
+                return r;
+        }
+        n->keep_configuration = r;
         return 0;
 }
 
