@@ -528,14 +528,20 @@ int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
                 yaml_node_t *n;
 
                 n = yaml_document_get_node(dp, p->key);
+                if (!n)
+                        continue;
 
                 r = yaml_network_new(scalar(n), &net);
                 if (r < 0)
                         return r;
 
                 n = yaml_document_get_node(dp, p->value);
-                if (n)
-                        (void) parse_network(m, dp, n, net);
+                if (!n)
+                        continue;
+
+                r = parse_network(m, dp, n, net);
+                if (r < 0)
+                        return r;
 
                 if (g_hash_table_insert(nets->networks, (gpointer *) net->ifname, (gpointer *) net))
                         steal_pointer(net);
