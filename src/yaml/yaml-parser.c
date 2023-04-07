@@ -469,6 +469,7 @@ int parse_yaml_ipv6_address_generation_mode(const char *key,
                                             yaml_document_t *doc,
                                             yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -478,7 +479,12 @@ int parse_yaml_ipv6_address_generation_mode(const char *key,
 
         n = data;
 
-        n->ipv6_address_generation = ipv6_link_local_address_gen_type_to_mode((const char *) value);
+        r = ipv6_link_local_address_gen_type_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse IPv6 link local address generation mode='%s'\n", value);
+                return r;
+        }
+        n->ipv6_address_generation = r;
         return 0;
 }
 
@@ -489,6 +495,7 @@ int parse_yaml_infiniband_mode(const char *key,
                                yaml_document_t *doc,
                                yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -498,7 +505,12 @@ int parse_yaml_infiniband_mode(const char *key,
 
         n = data;
 
-        n->ipoib_mode = ipoib_name_to_mode((const char *) value);
+        r = ipoib_name_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to ipoib mode='%s'\n", value);
+                return r;
+        }
+        n->ipoib_mode = r;
         return 0;
 }
 
@@ -562,6 +574,7 @@ int parse_yaml_bond_mode(const char *key,
                          yaml_document_t *doc,
                          yaml_node_t *node) {
         Bond *b;
+        int r;
 
         assert(key);
         assert(value);
@@ -571,7 +584,7 @@ int parse_yaml_bond_mode(const char *key,
 
         b = data;
 
-        b->mode = bond_name_to_mode((const char *) value);
+        r = bond_name_to_mode((const char *) value);
         if (r < 0) {
                 log_warning("Failed to parse Bond mode='%s'\n", value);
                 return r;
