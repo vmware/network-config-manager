@@ -569,6 +569,7 @@ int parse_yaml_macvlan_mode(const char *key,
                             yaml_document_t *doc,
                             yaml_node_t *node) {
         MACVLan *m;
+        int r;
 
         assert(key);
         assert(value);
@@ -578,7 +579,13 @@ int parse_yaml_macvlan_mode(const char *key,
 
         m = data;
 
-        m->mode = macvlan_name_to_mode((const char *) value);
+        r = macvlan_name_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse Bond mode='%s'\n", value);
+                return r;
+
+        }
+        m->mode = r;
         return 0;
 }
 
