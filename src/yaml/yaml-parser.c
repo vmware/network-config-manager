@@ -1293,8 +1293,10 @@ int parse_yaml_bridge_path_cost(const char *key,
                 uint32_t t;
 
                 r = parse_uint32(scalar(v), &t);
-                if (r < 0)
+                if (r < 0) {
                         log_warning("Failed to parse bridge cost='%s'\n", scalar(v));
+                        return r;
+                }
 
                 if (!n) {
                         r = yaml_network_new(scalar(k), &n);
