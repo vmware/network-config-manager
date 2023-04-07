@@ -429,6 +429,7 @@ int parse_yaml_link_local_type(const char *key,
                                yaml_document_t *doc,
                                yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -438,7 +439,12 @@ int parse_yaml_link_local_type(const char *key,
 
         n = data;
 
-        n->link_local = link_local_address_type_to_mode((const char *) value);
+        r = link_local_address_type_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse link local address type='%s'\n", value);
+                return r;
+        }
+        n->link_local = r;
         return 0;
 }
 
@@ -461,7 +467,7 @@ int parse_yaml_keep_configuration(const char *key,
 
         r = keep_configuration_type_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to keep configuration mode='%s'\n", value);
+                log_warning("Failed to parse keep configuration mode='%s'\n", value);
                 return r;
         }
         n->keep_configuration = r;
@@ -513,7 +519,7 @@ int parse_yaml_infiniband_mode(const char *key,
 
         r = ipoib_name_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to ipoib mode='%s'\n", value);
+                log_warning("Failed to parse ipoib mode='%s'\n", value);
                 return r;
         }
         n->ipoib_mode = r;
