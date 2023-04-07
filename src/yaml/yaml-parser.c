@@ -429,6 +429,7 @@ int parse_yaml_link_local_type(const char *key,
                                yaml_document_t *doc,
                                yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -438,7 +439,12 @@ int parse_yaml_link_local_type(const char *key,
 
         n = data;
 
-        n->link_local = link_local_address_type_to_mode((const char *) value);
+        r = link_local_address_type_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse link local address type='%s'\n", value);
+                return r;
+        }
+        n->link_local = r;
         return 0;
 }
 
@@ -449,6 +455,7 @@ int parse_yaml_keep_configuration(const char *key,
                                   yaml_document_t *doc,
                                   yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -458,7 +465,12 @@ int parse_yaml_keep_configuration(const char *key,
 
         n = data;
 
-        n->keep_configuration = keep_configuration_type_to_mode((const char *) value);
+        r = keep_configuration_type_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse keep configuration mode='%s'\n", value);
+                return r;
+        }
+        n->keep_configuration = r;
         return 0;
 }
 
@@ -469,6 +481,7 @@ int parse_yaml_ipv6_address_generation_mode(const char *key,
                                             yaml_document_t *doc,
                                             yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -478,7 +491,12 @@ int parse_yaml_ipv6_address_generation_mode(const char *key,
 
         n = data;
 
-        n->ipv6_address_generation = ipv6_link_local_address_gen_type_to_mode((const char *) value);
+        r = ipv6_link_local_address_gen_type_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse IPv6 link local address generation mode='%s'\n", value);
+                return r;
+        }
+        n->ipv6_address_generation = r;
         return 0;
 }
 
@@ -489,6 +507,7 @@ int parse_yaml_infiniband_mode(const char *key,
                                yaml_document_t *doc,
                                yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -498,7 +517,12 @@ int parse_yaml_infiniband_mode(const char *key,
 
         n = data;
 
-        n->ipoib_mode = ipoib_name_to_mode((const char *) value);
+        r = ipoib_name_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse ipoib mode='%s'\n", value);
+                return r;
+        }
+        n->ipoib_mode = r;
         return 0;
 }
 
@@ -509,6 +533,7 @@ int parse_yaml_dhcp6_without_ra(const char *key,
                                 yaml_document_t *doc,
                                 yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -518,7 +543,13 @@ int parse_yaml_dhcp6_without_ra(const char *key,
 
         n = data;
 
-        n->dhcp6_client_start_mode = dhcp6_client_start_name_to_mode((const char *) value);
+        r = dhcp6_client_start_name_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse DHCP6 client start mode='%s'\n", value);
+                return r;
+        }
+        n->dhcp6_client_start_mode = r;
+
         return 0;
 }
 
@@ -529,6 +560,7 @@ int parse_yaml_ipv6_privacy_extensions(const char *key,
                                        yaml_document_t *doc,
                                        yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -538,7 +570,12 @@ int parse_yaml_ipv6_privacy_extensions(const char *key,
 
         n = data;
 
-        n->ipv6_privacy = ipv6_privacy_extensions_to_type((const char *) value);
+        r = ipv6_privacy_extensions_to_type((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse IPv6 Privacy extension='%s'\n", value);
+                return r;
+        }
+        n->ipv6_privacy = r;
         return 0;
 }
 
@@ -549,6 +586,7 @@ int parse_yaml_bond_mode(const char *key,
                          yaml_document_t *doc,
                          yaml_node_t *node) {
         Bond *b;
+        int r;
 
         assert(key);
         assert(value);
@@ -558,7 +596,12 @@ int parse_yaml_bond_mode(const char *key,
 
         b = data;
 
-        b->mode = bond_name_to_mode((const char *) value);
+        r = bond_name_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse Bond mode='%s'\n", value);
+                return r;
+        }
+        b->mode = r;
         return 0;
 }
 
@@ -569,6 +612,7 @@ int parse_yaml_macvlan_mode(const char *key,
                             yaml_document_t *doc,
                             yaml_node_t *node) {
         MACVLan *m;
+        int r;
 
         assert(key);
         assert(value);
@@ -578,7 +622,13 @@ int parse_yaml_macvlan_mode(const char *key,
 
         m = data;
 
-        m->mode = macvlan_name_to_mode((const char *) value);
+        r = macvlan_name_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse MACVLAN mode='%s'\n", value);
+                return r;
+
+        }
+        m->mode = r;
         return 0;
 }
 
@@ -1293,8 +1343,10 @@ int parse_yaml_bridge_path_cost(const char *key,
                 uint32_t t;
 
                 r = parse_uint32(scalar(v), &t);
-                if (r < 0)
+                if (r < 0) {
                         log_warning("Failed to parse bridge cost='%s'\n", scalar(v));
+                        return r;
+                }
 
                 if (!n) {
                         r = yaml_network_new(scalar(k), &n);
@@ -1335,8 +1387,10 @@ int parse_yaml_bridge_port_priority(const char *key,
                 uint16_t t;
 
                 r = parse_uint16(scalar(v), &t);
-                if (r < 0)
+                if (r < 0) {
                         log_warning("Failed to parse bridge cost='%s'\n", scalar(v));
+                        return r;
+                }
 
                 if (!n) {
                         r = yaml_network_new(scalar(k), &n);
