@@ -529,6 +529,7 @@ int parse_yaml_ipv6_privacy_extensions(const char *key,
                                        yaml_document_t *doc,
                                        yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -538,7 +539,8 @@ int parse_yaml_ipv6_privacy_extensions(const char *key,
 
         n = data;
 
-        n->ipv6_privacy = ipv6_privacy_extensions_to_type((const char *) value);
+        r = ipv6_privacy_extensions_to_type((const char *) value);
+        n->ipv6_privacy = r;
         return 0;
 }
 
@@ -559,6 +561,11 @@ int parse_yaml_bond_mode(const char *key,
         b = data;
 
         b->mode = bond_name_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse Bond mode='%s'\n", value);
+                return r;
+        }
+        b->mode = r;
         return 0;
 }
 
@@ -581,7 +588,7 @@ int parse_yaml_macvlan_mode(const char *key,
 
         r = macvlan_name_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to parse Bond mode='%s'\n", value);
+                log_warning("Failed to parse MACVLAN mode='%s'\n", value);
                 return r;
 
         }
