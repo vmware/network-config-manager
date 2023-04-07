@@ -509,6 +509,7 @@ int parse_yaml_dhcp6_without_ra(const char *key,
                                 yaml_document_t *doc,
                                 yaml_node_t *node) {
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -518,7 +519,13 @@ int parse_yaml_dhcp6_without_ra(const char *key,
 
         n = data;
 
-        n->dhcp6_client_start_mode = dhcp6_client_start_name_to_mode((const char *) value);
+        r = dhcp6_client_start_name_to_mode((const char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse DHCP6 client start mode='%s'\n", value);
+                return r;
+        }
+        n->dhcp6_client_start_mode = r;
+
         return 0;
 }
 
@@ -540,7 +547,7 @@ int parse_yaml_ipv6_privacy_extensions(const char *key,
         n = data;
 
         r = ipv6_privacy_extensions_to_type((const char *) value);
-         if (r < 0) {
+        if (r < 0) {
                 log_warning("Failed to parse IPv6 Privacy extension='%s'\n", value);
                 return r;
         }
