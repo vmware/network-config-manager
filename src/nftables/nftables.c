@@ -59,7 +59,7 @@ int nft_family_name_to_type(const char *name) {
         assert(name);
 
         for (size_t i = NF_PROTO_FAMILY_INET; i < (size_t) ELEMENTSOF(nft_family_table); i++)
-                if (nft_family_table[i] && str_equal_fold(name, nft_family_table[i]))
+                if (nft_family_table[i] && str_eq_fold(name, nft_family_table[i]))
                         return i;
 
         return _NF_PROTO_FAMILY_INVALID;
@@ -88,7 +88,7 @@ int nft_packet_action_name_to_type(char *name) {
         assert(name);
 
         for (size_t i = NF_PACKET_ACTION_DROP; i < (size_t) ELEMENTSOF(nft_packet_action_table); i++)
-                if (nft_packet_action_table[i] && str_equal_fold(name, nft_packet_action_table[i]))
+                if (nft_packet_action_table[i] && str_eq_fold(name, nft_packet_action_table[i]))
                         return i;
 
         return _NF_PACKET_ACTION_INVALID;
@@ -115,7 +115,7 @@ int ip_packet_port_name_to_type(char *name) {
         assert(name);
 
         for (i = IP_PACKET_PORT_SPORT; i < (int) ELEMENTSOF(ip_packet_port_table); i++)
-                if (ip_packet_port_table[i] && str_equal_fold(name, ip_packet_port_table[i]))
+                if (ip_packet_port_table[i] && str_eq_fold(name, ip_packet_port_table[i]))
                         return i;
 
         return _IP_PACKET_PORT_INVALID;
@@ -148,7 +148,7 @@ int ip_packet_protcol_name_to_type(char *name) {
         assert(name);
 
         for (size_t i = IP_PACKET_PROTOCOL_TCP; i < (size_t) ELEMENTSOF(ip_packet_protocol_table); i++)
-                if (ip_packet_protocol_table[i] && str_equal_fold(name, ip_packet_protocol_table[i]))
+                if (ip_packet_protocol_table[i] && str_eq_fold(name, ip_packet_protocol_table[i]))
                         return i;
 
         return _IP_PACKET_PROTOCOL_INVALID;

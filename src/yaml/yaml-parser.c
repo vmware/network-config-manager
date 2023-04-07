@@ -51,7 +51,7 @@ int conf_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = CONF_TYPE_MATCH; i < (size_t) ELEMENTSOF(conf_type_table); i++)
-                if (str_equal_fold(name, conf_type_table[i]))
+                if (str_eq_fold(name, conf_type_table[i]))
                         return i;
 
         return _CONF_TYPE_INVALID;
@@ -403,14 +403,14 @@ int parse_yaml_dhcp_type(const char *key,
 
         n = data;
 
-        if (str_equal("dhcp4", key)) {
+        if (str_eq("dhcp4", key)) {
                 r = parse_boolean(value);
                 if (r < 0)
                         return r;
 
                 n->dhcp4 = r;
 
-        } else if (str_equal("dhcp6", key)) {
+        } else if (str_eq("dhcp6", key)) {
                 r = parse_boolean(value);
                 if (r < 0)
                         return r;
@@ -680,7 +680,7 @@ int parse_yaml_addresses(const char *key,
         for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
-                if (str_equal("addresses", key)) {
+                if (str_eq("addresses", key)) {
                         r = parse_address_from_str_and_add(scalar(entry), network->addresses);
                         if (r < 0 && r != -EEXIST)
                                 return r;
@@ -852,13 +852,13 @@ int parse_yaml_route(const char *key,
 
         rt = data;
 
-        if (str_equal("to", key) || str_equal("via", key)) {
+        if (str_eq("to", key) || str_eq("via", key)) {
                 _auto_cleanup_ IPAddress *address = NULL;
                 bool b = false;
 
                 r = parse_ip_from_str(value, &address);
                 if (r < 0) {
-                        if (str_equal("default", value))
+                        if (str_eq("default", value))
                                 b = true;
                         else {
                                 log_warning("Failed to parse %s='%s'", key, value);
@@ -866,10 +866,10 @@ int parse_yaml_route(const char *key,
                         }
                 }
 
-                if (str_equal("0.0.0.0/0", value) || str_equal("::/0", value))
+                if (str_eq("0.0.0.0/0", value) || str_eq("::/0", value))
                         b = true;
 
-                if (str_equal("to", key)) {
+                if (str_eq("to", key)) {
                         if (address) {
                                 rt->dst = *address;
                                 rt->family = address->family;
@@ -962,9 +962,9 @@ int parse_yaml_vxlan_notifications(const char *key,
         for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
-                if (str_equal(scalar(entry), "l2-miss"))
+                if (str_eq(scalar(entry), "l2-miss"))
                         v->l2miss = true;
-                else if (str_equal(scalar(entry), "l3-miss"))
+                else if (str_eq(scalar(entry), "l3-miss"))
                         v->l3miss = true;
         }
 
@@ -991,18 +991,18 @@ int parse_yaml_vxlan_csum(const char *key,
         for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
-                if (str_equal(scalar(entry), "udp"))
+                if (str_eq(scalar(entry), "udp"))
                         v->udpcsum = true;
-                else if (str_equal(scalar(entry), "zero-udp6-tx"))
+                else if (str_eq(scalar(entry), "zero-udp6-tx"))
                         v->udp6zerocsumtx = true;
-                else if (str_equal(scalar(entry), "zero-udp6-rx"))
+                else if (str_eq(scalar(entry), "zero-udp6-rx"))
                         v->udp6zerocsumrx = true;
 
-                else if (str_equal(scalar(entry), "zero-udp6-tx"))
+                else if (str_eq(scalar(entry), "zero-udp6-tx"))
                         v->udp6zerocsumtx = true;
-                else if (str_equal(scalar(entry), "remote-tx"))
+                else if (str_eq(scalar(entry), "remote-tx"))
                         v->remote_csum_tx = true;
-                else if (str_equal(scalar(entry), "remote-rx"))
+                else if (str_eq(scalar(entry), "remote-rx"))
                         v->remote_csum_rx = true;
         }
 
@@ -1029,9 +1029,9 @@ int parse_yaml_vxlan_extensions(const char *key,
         for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *entry = yaml_document_get_node(doc, *i);
 
-                if (str_equal(scalar(entry), "group-policy"))
+                if (str_eq(scalar(entry), "group-policy"))
                         v->group_policy = true;
-                else if (str_equal(scalar(entry), "generic-protocol"))
+                else if (str_eq(scalar(entry), "generic-protocol"))
                         v->generic_protocol_extension = true;
         }
 
@@ -1261,7 +1261,7 @@ int parse_yaml_wireguard_key_or_path(const char *key,
 
         w = (WireGuard *) data;
 
-        if (str_equal(key, "key")) {
+        if (str_eq(key, "key")) {
                 if (string_has_prefix(value, "/")) {
                         w->private_key_file = strdup(value);
                         if (!w->private_key_file)
@@ -1298,7 +1298,7 @@ int parse_yaml_sequence_wireguard_peer_shared_key_or_path(const char *key,
                 k = yaml_document_get_node(doc, *i++);
                 v = yaml_document_get_node(doc, *i);
 
-                if (str_equal(scalar(k), "shared")) {
+                if (str_eq(scalar(k), "shared")) {
                         if (string_has_prefix(value, "/")) {
                                 w->preshared_key_file = strdup(scalar(v));
                                 if (!w->preshared_key_file)
@@ -1308,7 +1308,7 @@ int parse_yaml_sequence_wireguard_peer_shared_key_or_path(const char *key,
                                 if (!w->preshared_key)
                                         return log_oom();
                         }
-                } else if (str_equal(scalar(k), "public")) {
+                } else if (str_eq(scalar(k), "public")) {
                         w->public_key = strdup(scalar(v));
                         if (!w->public_key)
                                 return log_oom();

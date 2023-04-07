@@ -34,7 +34,7 @@ static int yaml_parse_node(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                 for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                         yaml_node_t *n = yaml_document_get_node(dp, p->key);
 
-                        if (str_equal(scalar(n), "ethernets")) {
+                        if (str_eq(scalar(n), "ethernets")) {
                                 n = yaml_document_get_node(dp, p->value);
                                 if (n)
                                         (void) parse_ethernet_config(m, dp, n, networks);

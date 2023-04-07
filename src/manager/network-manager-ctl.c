@@ -46,7 +46,7 @@ static int load_yaml_files(void) {
 static int generate_networkd_config_from_yaml(int argc, char *argv[]) {
         int r;
 
-        if (str_equal(argv[0], "apply")) {
+        if (str_eq(argv[0], "apply")) {
                 r = load_yaml_files();
                 if (r < 0) {
                         log_warning("Failed to process yaml directory '/etc/network-config-manager/yaml': %s", strerror(r));

@@ -26,7 +26,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "alias")) {
+                if (str_eq_fold(argv[i], "alias")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_alias(argv[i]);
@@ -40,7 +40,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "desc")) {
+                } else if (str_eq_fold(argv[i], "desc")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!argv[i]) {
@@ -53,7 +53,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "mtu")) {
+                } else if (str_eq_fold(argv[i], "mtu")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_link_bytes(argv[i])) {
@@ -66,7 +66,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "bps")) {
+                } else if (str_eq_fold(argv[i], "bps")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_link_bytes(argv[i])) {
@@ -79,7 +79,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "duplex")) {
+                } else if (str_eq_fold(argv[i], "duplex")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_duplex(argv[i]);
@@ -93,7 +93,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "wol")) {
+                } else if (str_eq_fold(argv[i], "wol")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -134,7 +134,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "wolp")) {
+                } else if (str_eq_fold(argv[i], "wolp")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_ether_address(argv[i])) {
@@ -147,7 +147,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "port")) {
+                } else if (str_eq_fold(argv[i], "port")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_port(argv[i]);
@@ -161,7 +161,7 @@ _public_ int ncm_configure_link(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "advertise")) {
+                } else if (str_eq_fold(argv[i], "advertise")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -233,7 +233,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "auton")) {
+                if (str_eq_fold(argv[i], "auton")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -243,7 +243,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->auto_nego = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "rxcsumo")) {
+                } else if (str_eq_fold(argv[i], "rxcsumo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -253,7 +253,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->rx_csum_off = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "txcsumo")) {
+                } else if (str_eq_fold(argv[i], "txcsumo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -263,7 +263,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tx_csum_off = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "tso")) {
+                } else if (str_eq_fold(argv[i], "tso")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -273,7 +273,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tcp_seg_off = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "tso6")) {
+                } else if (str_eq_fold(argv[i], "tso6")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -283,7 +283,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tcp6_seg_off = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "gso")) {
+                } else if (str_eq_fold(argv[i], "gso")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -293,7 +293,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->gen_seg_off = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "grxo")) {
+                } else if (str_eq_fold(argv[i], "grxo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -303,7 +303,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->gen_rx_off = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "grxoh")) {
+                } else if (str_eq_fold(argv[i], "grxoh")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -313,7 +313,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->gen_rx_off_hw = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "lrxo")) {
+                } else if (str_eq_fold(argv[i], "lrxo")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -323,7 +323,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->large_rx_off = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "rxvtha")) {
+                } else if (str_eq_fold(argv[i], "rxvtha")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -333,7 +333,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->rx_vlan_ctag_hw_acl = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "txvtha")) {
+                } else if (str_eq_fold(argv[i], "txvtha")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -343,7 +343,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tx_vlan_ctag_hw_acl = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "rxvtf")) {
+                } else if (str_eq_fold(argv[i], "rxvtf")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -353,7 +353,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->rx_vlan_ctag_fltr = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "txvstha")) {
+                } else if (str_eq_fold(argv[i], "txvstha")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -363,7 +363,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->tx_vlan_stag_hw_acl = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "ntf")) {
+                } else if (str_eq_fold(argv[i], "ntf")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -373,7 +373,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->n_tpl_fltr = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "uarxc")) {
+                } else if (str_eq_fold(argv[i], "uarxc")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -383,7 +383,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                         }
                         n->use_adpt_rx_coal = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "uatxc")) {
+                } else if (str_eq_fold(argv[i], "uatxc")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -424,7 +424,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "rxbuf")) {
+                if (str_eq_fold(argv[i], "rxbuf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -437,7 +437,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                                 return log_oom();
                         }
                         continue;
-                } else if (str_equal_fold(argv[i], "rxminbuf")) {
+                } else if (str_eq_fold(argv[i], "rxminbuf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -446,7 +446,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                         }
                         n->rx_mini_buf = strdup(argv[i]);
                         continue;
-                } else if (str_equal_fold(argv[i], "rxjumbobuf")) {
+                } else if (str_eq_fold(argv[i], "rxjumbobuf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -455,7 +455,7 @@ _public_ int ncm_configure_link_buf_size(int argc, char *argv[]) {
                         }
                         n->rx_jumbo_buf = strdup(argv[i]);
                         continue;
-                } else if (str_equal_fold(argv[i], "txbuf")) {
+                } else if (str_eq_fold(argv[i], "txbuf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -497,7 +497,7 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
         for (int i = 2; i < argc; i++) {
                 unsigned v;
 
-                if (str_equal_fold(argv[i], "txq")) {
+                if (str_eq_fold(argv[i], "txq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_link_queue(argv[i], &v)) {
@@ -507,7 +507,7 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
 
                         n->tx_queues = v;
                         continue;
-                } else if (str_equal_fold(argv[i], "rxq")) {
+                } else if (str_eq_fold(argv[i], "rxq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_link_queue(argv[i], &v)) {
@@ -516,7 +516,7 @@ _public_ int ncm_configure_link_queue_size(int argc, char *argv[]) {
                         }
                         n->rx_queues = v;
                         continue;
-                } else if (str_equal_fold(argv[i], "txqlen")) {
+                } else if (str_eq_fold(argv[i], "txqlen")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v);
@@ -557,7 +557,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "rxflowctrl")) {
+                if (str_eq_fold(argv[i], "rxflowctrl")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -567,7 +567,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                         }
                         n->rx_flow_ctrl = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "txflowctrl")) {
+                } else if (str_eq_fold(argv[i], "txflowctrl")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -577,7 +577,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                         }
                         n->tx_flow_ctrl = r;
                         continue;
-                } else if (str_equal_fold(argv[i], "autoflowctrl")) {
+                } else if (str_eq_fold(argv[i], "autoflowctrl")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_boolean(argv[i]);
@@ -618,7 +618,7 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "gsob")) {
+                if (str_eq_fold(argv[i], "gsob")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_gso(argv[i], &n->gen_seg_off_bytes);
@@ -628,7 +628,7 @@ _public_ int ncm_configure_link_gso(int argc, char *argv[]) {
                         }
 
                         continue;
-                } else if (str_equal_fold(argv[i], "gsos")) {
+                } else if (str_eq_fold(argv[i], "gsos")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_gso(argv[i], &n->gen_seg_off_seg);
@@ -669,7 +669,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "rxch")) {
+                if (str_eq_fold(argv[i], "rxch")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -682,7 +682,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "txch")) {
+                } else if (str_eq_fold(argv[i], "txch")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -695,7 +695,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "otrch")) {
+                } else if (str_eq_fold(argv[i], "otrch")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -708,7 +708,7 @@ _public_ int ncm_configure_link_channel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "combch")) {
+                } else if (str_eq_fold(argv[i], "combch")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -752,7 +752,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "rxcs")) {
+                if (str_eq_fold(argv[i], "rxcs")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -765,7 +765,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "rxcsirq")) {
+                } else if (str_eq_fold(argv[i], "rxcsirq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -778,7 +778,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "rxcslow")) {
+                } else if (str_eq_fold(argv[i], "rxcslow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -791,7 +791,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "rxcshigh")) {
+                } else if (str_eq_fold(argv[i], "rxcshigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -804,7 +804,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "txcs")) {
+                } else if (str_eq_fold(argv[i], "txcs")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -817,7 +817,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "txcsirq")) {
+                } else if (str_eq_fold(argv[i], "txcsirq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -830,7 +830,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "txcslow")) {
+                } else if (str_eq_fold(argv[i], "txcslow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -843,7 +843,7 @@ _public_ int ncm_configure_link_coalesce(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "txcshigh")) {
+                } else if (str_eq_fold(argv[i], "txcshigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -887,7 +887,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "rxmcf")) {
+                if (str_eq_fold(argv[i], "rxmcf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -900,7 +900,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "rxmcfirq")) {
+                } else if (str_eq_fold(argv[i], "rxmcfirq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -913,7 +913,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "rxmcflow")) {
+                } else if (str_eq_fold(argv[i], "rxmcflow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -926,7 +926,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "rxmcfhigh")) {
+                } else if (str_eq_fold(argv[i], "rxmcfhigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -939,7 +939,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "txmcf")) {
+                } else if (str_eq_fold(argv[i], "txmcf")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -952,7 +952,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "txmcfirq")) {
+                } else if (str_eq_fold(argv[i], "txmcfirq")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -965,7 +965,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "txmcflow")) {
+                } else if (str_eq_fold(argv[i], "txmcflow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -978,7 +978,7 @@ _public_ int ncm_configure_link_coald_frames(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "txmcfhigh")) {
+                } else if (str_eq_fold(argv[i], "txmcfhigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1022,7 +1022,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "cprlow")) {
+                if (str_eq_fold(argv[i], "cprlow")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1035,7 +1035,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "cprhigh")) {
+                } else if (str_eq_fold(argv[i], "cprhigh")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1048,7 +1048,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "cprsis")) {
+                } else if (str_eq_fold(argv[i], "cprsis")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1061,7 +1061,7 @@ _public_ int ncm_configure_link_coal_pkt(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "sbcs")) {
+                } else if (str_eq_fold(argv[i], "sbcs")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!is_uint32_or_max(argv[i])) {
@@ -1105,7 +1105,7 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "altnamepolicy")) {
+                if (str_eq_fold(argv[i], "altnamepolicy")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -1146,7 +1146,7 @@ _public_ int ncm_configure_link_altname(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "altname")) {
+                } else if (str_eq_fold(argv[i], "altname")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!argv[i]) {
@@ -1190,7 +1190,7 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
                 log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "namepolicy")) {
+                if (str_eq_fold(argv[i], "namepolicy")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -1233,7 +1233,7 @@ _public_ int ncm_configure_link_name(int argc, char *argv[]) {
                         continue;
                 }
 
-                if (str_equal_fold(argv[i], "name")) {
+                if (str_eq_fold(argv[i], "name")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_link_name(argv[i]);
@@ -1278,7 +1278,7 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_equal_fold(argv[i], "macpolicy")) {
+                if (str_eq_fold(argv[i], "macpolicy")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -1319,7 +1319,7 @@ _public_ int ncm_configure_link_mac(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_equal_fold(argv[i], "macaddr") || str_equal_fold(argv[i], "mac")) {
+                } else if (str_eq_fold(argv[i], "macaddr") || str_eq_fold(argv[i], "mac")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!parse_ether_address(argv[i])) {

@@ -162,7 +162,7 @@ static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc,
                 key = yaml_document_get_node(doc, entry->key);
                 value = yaml_document_get_node(doc, entry->value);
 
-                if (str_equal(scalar(key), "ssid-name")) {
+                if (str_eq(scalar(key), "ssid-name")) {
                         wifi_access_point = new0(WiFiAccessPoint, 1);
                         if (!wifi_access_point)
                                 return log_oom();
@@ -283,12 +283,12 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                                 return log_oom();
                 }
 
-                if (str_equal(scalar(k), "lifetime")) {
+                if (str_eq(scalar(k), "lifetime")) {
                         free(a->lifetime);
                         a->lifetime = strdup(scalar(v));
                         if (!a->lifetime)
                                 return log_oom();
-                } else if (str_equal(scalar(k), "label")) {
+                } else if (str_eq(scalar(k), "label")) {
                         free(a->label);
                         a->label = strdup(scalar(v));
                         if (!a->label)

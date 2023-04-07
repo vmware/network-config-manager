@@ -40,7 +40,7 @@ int dracut_dhcp_mode_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = DRACUT_DHCP_MODE_NONE; i < (int) ELEMENTSOF(dracut_dhcp_mode_table); i++)
-                if (str_equal_fold(name, dracut_dhcp_mode_table[i]))
+                if (str_eq_fold(name, dracut_dhcp_mode_table[i]))
                         return i;
 
         return _DRACUT_DHCP_MODE_INVALID;
@@ -69,7 +69,7 @@ int dracut_to_networkd_dhcp_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = DRACUT_DHCP_MODE_NONE; i < (int) ELEMENTSOF(dracut_to_networkd_dhcp_mode_table); i++)
-                if (str_equal_fold(name, dracut_to_networkd_dhcp_mode_table[i]))
+                if (str_eq_fold(name, dracut_to_networkd_dhcp_mode_table[i]))
                         return i;
 
         return _DRACUT_DHCP_MODE_INVALID;
@@ -382,7 +382,7 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
                 if (r < 0)
                         return r;
 
-                if (str_equal(k, "ip")) {
+                if (str_eq(k, "ip")) {
                         network = n;
 
                         r = parse_command_line_ip(v, n);
@@ -393,7 +393,7 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
                                 if (!g_hash_table_insert(networks_by_ifname, n->ifname, n))
                                         return log_oom();
                         }
-                } else if (str_equal(k, "rd.route")) {
+                } else if (str_eq(k, "rd.route")) {
                         r = parse_command_line_rd_route(v, n);
                         if (r < 0)
                                 return r;
@@ -401,7 +401,7 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
                         r = merge_network(networks_by_ifname, n);
                         if (r >= 0)
                                 continue;
-                } else if (str_equal(k, "nameserver")) {
+                } else if (str_eq(k, "nameserver")) {
                         if (network) {
                                 r = parse_command_line_nameserver(v, network);
                                 if (r < 0)
