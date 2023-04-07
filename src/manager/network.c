@@ -1633,10 +1633,8 @@ int generate_master_device_network(Network *n) {
                         MACVLan *macvlan = n->netdev->macvlan;
 
                         r = parse_ifname_or_index(macvlan->master, &p);
-                        if (r < 0) {
-                                log_warning("Failed to find device: %s", macvlan->master);
-                                return r;
-                        }
+                        if (r < 0)
+                                log_debug("Failed to find device: %s", macvlan->master);
 
                         r = parse_network_file(p ? p->ifindex : -1, macvlan->master, &network);
                         if (r < 0)
