@@ -164,7 +164,7 @@ static int dns_domain_compare_func(gconstpointer x, gconstpointer y, gpointer us
         if (a->ifindex != b->ifindex)
                 return a->ifindex - b->ifindex;
 
-        return g_str_equal(a->domain, b->domain);
+        return str_eq(a->domain, b->domain);
 }
 
 int dns_domain_add(DNSDomains **h, DNSDomain *a) {

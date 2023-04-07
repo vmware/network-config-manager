@@ -39,7 +39,7 @@ int dhcp_client_name_to_mode(char *name) {
         assert(name);
 
         for (size_t i = DHCP_CLIENT_NO; i < (size_t) ELEMENTSOF(dhcp_client_mode_table); i++)
-                if (str_equal_fold(name, dhcp_client_mode_table[i]))
+                if (str_eq_fold(name, dhcp_client_mode_table[i]))
                         return i;
 
         return _DHCP_CLIENT_INVALID;
@@ -64,12 +64,12 @@ int dhcp_name_to_client(char *name) {
         assert(name);
 
         for (size_t i = DHCP_CLIENT_IPV4; i < (size_t) ELEMENTSOF(dhcp_client_kind_table); i++)
-                if (str_equal_fold(name, dhcp_client_kind_table[i]))
+                if (str_eq_fold(name, dhcp_client_kind_table[i]))
                         return i;
 
-        if (str_equal(name, "4"))
+        if (str_eq(name, "4"))
                 return DHCP_CLIENT_IPV4;
-        else if (str_equal(name, "6"))
+        else if (str_eq(name, "6"))
                 return DHCP_CLIENT_IPV6;
 
         return _DHCP_CLIENT_INVALID;
@@ -95,7 +95,7 @@ int dhcp_client_identifier_to_mode(char *name) {
         assert(name);
 
         for (size_t i = DHCP_CLIENT_IDENTIFIER_MAC; i < (size_t) ELEMENTSOF(dhcp_client_identifier); i++)
-                if (str_equal_fold(name, dhcp_client_identifier[i]))
+                if (str_eq_fold(name, dhcp_client_identifier[i]))
                         return i;
 
         return _DHCP_CLIENT_IDENTIFIER_INVALID;
@@ -122,7 +122,7 @@ int dhcp_client_duid_name_to_type(char *name) {
         assert(name);
 
         for (size_t i = DHCP_CLIENT_DUID_TYPE_LINK_LAYER_TIME; i < (size_t) ELEMENTSOF(dhcp_client_duid_type); i++)
-                if (str_equal_fold(name, dhcp_client_duid_type[i]))
+                if (str_eq_fold(name, dhcp_client_duid_type[i]))
                         return i;
 
         return _DHCP_CLIENT_DUID_TYPE_INVALID;
@@ -151,7 +151,7 @@ int link_local_address_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = LINK_LOCAL_ADDRESS_YES; i < (size_t) ELEMENTSOF(link_local_address_type); i++)
-                if (str_equal_fold(name, link_local_address_type[i]))
+                if (str_eq_fold(name, link_local_address_type[i]))
                         return i;
 
         return _LINK_LOCAL_ADDRESS_INVALID;
@@ -178,7 +178,7 @@ int ipv6_link_local_address_gen_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IPV6_LINK_LOCAL_ADDRESSS_GEN_MODE_EUI64; i < (size_t) ELEMENTSOF(ipv6_link_local_address_gen_type); i++)
-                if (str_equal_fold(name, ipv6_link_local_address_gen_type[i]))
+                if (str_eq_fold(name, ipv6_link_local_address_gen_type[i]))
                         return i;
 
         return _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID;
@@ -204,7 +204,7 @@ int ipv6_privacy_extensions_to_type(const char *name) {
         assert(name);
 
         for (size_t i = IPV6_PRIVACY_EXTENSIONS_NO; i < (size_t) ELEMENTSOF(ipv6_link_local_address_gen_type); i++)
-                if (str_equal_fold(name, ipv6_privacy_extensions_type[i]))
+                if (str_eq_fold(name, ipv6_privacy_extensions_type[i]))
                         return i;
 
         return _IPV6_PRIVACY_EXTENSIONS_INVALID;
@@ -230,7 +230,7 @@ int ipv6_ra_preference_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IPV6_RA_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(ipv6_ra_preference_type); i++)
-                if (str_equal_fold(name, ipv6_ra_preference_type[i]))
+                if (str_eq_fold(name, ipv6_ra_preference_type[i]))
                         return i;
 
         return _IPV6_RA_PREFERENCE_INVALID;
@@ -257,7 +257,7 @@ int ip_duplicate_address_detection_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IP_DUPLICATE_ADDRESS_DETECTION_NONE; i < (size_t) ELEMENTSOF(ip_duplicate_address_detection_type); i++)
-                if (str_equal_fold(name, ip_duplicate_address_detection_type[i]))
+                if (str_eq_fold(name, ip_duplicate_address_detection_type[i]))
                         return i;
 
         return _IP_DUPLICATE_ADDRESS_DETECTION_INVALID;
@@ -285,7 +285,7 @@ int keep_configuration_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = KEEP_CONFIGURATION_NO; i < (size_t) ELEMENTSOF(keep_configuration_table); i++)
-                if (str_equal_fold(name, keep_configuration_table[i]))
+                if (str_eq_fold(name, keep_configuration_table[i]))
                         return i;
 
         return _KEEP_CONFIGURATION_INVALID;
@@ -313,7 +313,7 @@ int route_scope_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = ROUTE_SCOPE_UNIVERSE; i < (size_t) ELEMENTSOF(route_scope_type); i++)
-                if (str_equal_fold(name, route_scope_type[i]))
+                if (str_eq_fold(name, route_scope_type[i]))
                         return i;
 
         return _ROUTE_SCOPE_INVALID;
@@ -347,7 +347,7 @@ int route_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = ROUTE_TYPE_UNICAST; i < (size_t) ELEMENTSOF(route_type); i++)
-                if (str_equal_fold(name, route_type[i]))
+                if (str_eq_fold(name, route_type[i]))
                         return i;
 
         return _ROUTE_TYPE_INVALID;
@@ -373,7 +373,7 @@ int ipv6_route_preference_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IPV6_ROUTE_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(ipv6_route_preference_type); i++)
-                if (str_equal_fold(name, ipv6_route_preference_type[i]))
+                if (str_eq_fold(name, ipv6_route_preference_type[i]))
                         return i;
 
         return _IPV6_ROUTE_PREFERENCE_INVALID;
@@ -400,7 +400,7 @@ int route_protocol_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IPV6_ROUTE_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(route_protocol_type); i++)
-                if (str_equal_fold(name, route_protocol_type[i]))
+                if (str_eq_fold(name, route_protocol_type[i]))
                         return i;
 
         return _ROUTE_PROTOCOL_INVALID;
@@ -426,7 +426,7 @@ int route_table_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = ROUTE_TABLE_DEFAULT; i < (size_t) ELEMENTSOF(route_table_type); i++)
-                if (str_equal_fold(name, route_table_type[i]))
+                if (str_eq_fold(name, route_table_type[i]))
                         return i;
 
         return _ROUTE_TABLE_INVALID;
@@ -451,7 +451,7 @@ int ipoib_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IP_OIB_MODE_DATAGRAM; i < (size_t) ELEMENTSOF(ipoib_mode_table); i++)
-                if (str_equal_fold(name, ipoib_mode_table[i]))
+                if (str_eq_fold(name, ipoib_mode_table[i]))
                         return i;
 
         return _IP_OIB_MODE_MODE_INVALID;
@@ -477,7 +477,7 @@ int dhcp6_client_start_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = DHCP6_CLIENT_START_MODE_NO; i < (size_t) ELEMENTSOF(dhcp6_client_start_mode_table); i++)
-                if (str_equal_fold(name, dhcp6_client_start_mode_table[i]))
+                if (str_eq_fold(name, dhcp6_client_start_mode_table[i]))
                         return i;
 
         return _DHCP6_CLIENT_START_MODE_INVALID;
@@ -504,7 +504,7 @@ int auth_key_management_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = AUTH_KEY_MANAGEMENT_NONE; i < (size_t) ELEMENTSOF(auth_key_management_type); i++)
-                if (str_equal_fold(name, auth_key_management_type[i]))
+                if (str_eq_fold(name, auth_key_management_type[i]))
                         return i;
 
         return _AUTH_KEY_MANAGEMENT_INVALID;
@@ -531,7 +531,7 @@ int auth_eap_method_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = AUTH_EAP_METHOD_NONE; i < (size_t) ELEMENTSOF(auth_eap_method_type); i++)
-                if (str_equal_fold(name, auth_eap_method_type[i]))
+                if (str_eq_fold(name, auth_eap_method_type[i]))
                         return i;
 
         return _AUTH_EAP_METHOD_INVALID;

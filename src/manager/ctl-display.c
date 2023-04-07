@@ -51,27 +51,27 @@ bool beautify_enabled(void) {
 }
 
 static void system_online_state_to_color(const char *state, const char **on) {
-        if (str_equal(state, "online"))
+        if (str_eq(state, "online"))
                 *on = ansi_color_green();
-        else if (str_equal(state, "offline"))
+        else if (str_eq(state, "offline"))
                 *on = ansi_color_red();
-        else if (str_equal(state, "partial"))
+        else if (str_eq(state, "partial"))
                 *on = ansi_color_bold_yellow();
         else
                 *on = ansi_color_reset();
 }
 
 static void link_state_to_color(const char *state, const char **on) {
-        if (str_equal(state, "routable") || str_equal(state, "configured") || str_equal(state,"up"))
+        if (str_eq(state, "routable") || str_eq(state, "configured") || str_eq(state,"up"))
                 *on = ansi_color_green();
-        else if (str_equal(state, "failed") || str_equal(state,"down") || str_equal(state,"no-carrier") ||
-                 str_equal(state,"off")|| str_equal(state, "lower-layerdown"))
+        else if (str_eq(state, "failed") || str_eq(state,"down") || str_eq(state,"no-carrier") ||
+                 str_eq(state,"off")|| str_eq(state, "lower-layerdown"))
                 *on = ansi_color_red();
-        else if (str_equal(state, "configuring") || str_equal(state, "carrier"))
+        else if (str_eq(state, "configuring") || str_eq(state, "carrier"))
                 *on = ansi_color_yellow();
-        else if (str_equal(state, "degraded") || str_equal(state, "dormant"))
+        else if (str_eq(state, "degraded") || str_eq(state, "dormant"))
                 *on = ansi_color_bold_yellow();
-        else if (str_equal(state, "unmanaged"))
+        else if (str_eq(state, "unmanaged"))
                 *on = ansi_color_blue();
         else
                 *on = ansi_color_reset();
@@ -172,7 +172,7 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_equal_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -192,12 +192,12 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
 
         if (argc >= 2) {
                 for (int i = 2; i < argc; i++) {
-                        if (str_equal(argv[i], "family") || str_equal(argv[i], "f")) {
+                        if (str_eq(argv[i], "family") || str_eq(argv[i], "f")) {
                                 parse_next_arg(argv, argc, i);
 
-                                if (str_equal(argv[i], "ipv4") || str_equal(argv[i], "4"))
+                                if (str_eq(argv[i], "ipv4") || str_eq(argv[i], "4"))
                                         ipv4 = true;
-                                else if (str_equal(argv[i], "ipv6") || str_equal(argv[i], "6"))
+                                else if (str_eq(argv[i], "ipv6") || str_eq(argv[i], "6"))
                                         ipv6 = true;
                         }
                 }
@@ -586,7 +586,7 @@ static int list_one_link(char *argv[]) {
                 if (r >= 0) {
                         r = parse_config_file(network, "DHCPv4", "ClientIdentifier", &c);
                         if (r >= 0) {
-                                if (str_equal(c, "mac")) {
+                                if (str_eq(c, "mac")) {
                                          _auto_cleanup_ char *e = NULL;
 
                                          (void) link_read_sysfs_attribute(l->name, "address", &e);
