@@ -1335,8 +1335,10 @@ int parse_yaml_bridge_port_priority(const char *key,
                 uint16_t t;
 
                 r = parse_uint16(scalar(v), &t);
-                if (r < 0)
+                if (r < 0) {
                         log_warning("Failed to parse bridge cost='%s'\n", scalar(v));
+                        return r;
+                }
 
                 if (!n) {
                         r = yaml_network_new(scalar(k), &n);
