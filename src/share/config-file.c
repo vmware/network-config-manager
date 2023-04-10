@@ -310,7 +310,7 @@ int set_config_file_str(const char *path, const char *section, const char *k, co
         return set_file_permisssion(path, "systemd-network");
 }
 
-int set_config_file_integer(const char *path, const char *section, const char *k, int v) {
+int set_config_file_int(const char *path, const char *section, const char *k, int v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ gchar *s = NULL;
         int r;
@@ -387,7 +387,7 @@ static int add_config(KeyFile *key_file, const char *section, const char *k, con
         return 0;
 }
 
-int add_config_file_string(const char *path, const char *section, const char *k, const char *v) {
+int add_config_file_str(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
@@ -463,7 +463,7 @@ int add_key_to_section_str(const char *path, const char *section, const char *k,
         return set_file_permisssion(path, "systemd-network");
 }
 
-int key_file_add_string(KeyFile *key_file, const char *section, const char *k, const char *v) {
+int key_file_add_str(KeyFile *key_file, const char *section, const char *k, const char *v) {
         assert(key_file);
         assert(section);
         assert(k);
@@ -471,7 +471,7 @@ int key_file_add_string(KeyFile *key_file, const char *section, const char *k, c
         return add_config(key_file, section, k, v);
 }
 
-int key_file_parse_string(KeyFile *key_file, const char *section, const char *k, char **v) {
+int key_file_parse_str(KeyFile *key_file, const char *section, const char *k, char **v) {
         assert(key_file);
         assert(section);
         assert(k);
@@ -496,7 +496,7 @@ int key_file_parse_string(KeyFile *key_file, const char *section, const char *k,
         return -ENOENT;
 }
 
-int key_file_parse_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v) {
+int key_file_parse_int(KeyFile *key_file, const char *section, const char *k, unsigned *v) {
         _auto_cleanup_ char *value = NULL;
         int r;
 
@@ -504,7 +504,7 @@ int key_file_parse_integer(KeyFile *key_file, const char *section, const char *k
         assert(section);
         assert(k);
 
-        r = key_file_parse_string(key_file, section, k, &value);
+        r = key_file_parse_str(key_file, section, k, &value);
         if (r < 0)
                 return r;
 

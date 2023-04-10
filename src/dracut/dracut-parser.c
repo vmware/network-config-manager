@@ -160,7 +160,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
                  if (r >= 0)
                          route->gw.prefix_len = ipv4_netmask_to_prefixlen(prefix);
                  else
-                         r = parse_integer(s[3], &route->gw.prefix_len);
+                         r = parse_int(s[3], &route->gw.prefix_len);
         }
         steal_pointer(route);
 

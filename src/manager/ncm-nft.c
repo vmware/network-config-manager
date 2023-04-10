@@ -357,7 +357,7 @@ _public_ int ncm_nft_delete_rule(int argc, char *argv[]) {
 
         f = r;
         if (argc > 4) {
-                r = parse_integer(argv[4], &h);
+                r = parse_int(argv[4], &h);
                 if (r < 0) {
                         log_warning("Failed to parse handle %s : %s", argv[4], strerror(-r));
                         return r;

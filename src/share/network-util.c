@@ -289,7 +289,7 @@ int parse_ifname_or_index(const char *s, IfNameIndex **ret) {
         if (r <= 0) {
                 char *n;
 
-                r = parse_integer(s, &ifindex);
+                r = parse_int(s, &ifindex);
                 if (r < 0)
                         return -ENOENT;
 

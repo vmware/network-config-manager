@@ -238,7 +238,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient
         if (r < 0)
                 return r;
 
-        r = set_config_file_integer(network, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "IAID", iaid);
+        r = set_config_file_int(network, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "IAID", iaid);
         if (r < 0) {
                 log_warning("Failed to update DHCP IAID= to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -397,7 +397,7 @@ int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_integer(network, "Network", "IPv6MTUBytes", mtu);
+        r = set_config_file_int(network, "Network", "IPv6MTUBytes", mtu);
         if (r < 0) {
                 log_warning("Failed to update IPv6MTUBytes= to configuration file '%s' = %s", network, strerror(-r));
                 return r;

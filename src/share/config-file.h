@@ -65,18 +65,18 @@ const char *ctl_to_config(const ConfigManager *m, const char *name);
 
 int set_config_file_str(const char *path, const char *section, const char *k, const char *v);
 int set_config_file_bool(const char *path, const char *section, const char *k, bool b);
-int set_config_file_integer(const char *path, const char *section, const char *k, int v);
+int set_config_file_int(const char *path, const char *section, const char *k, int v);
 
-int add_config_file_string(const char *path, const char *section, const char *k, const char *v);
+int add_config_file_str(const char *path, const char *section, const char *k, const char *v);
 
 int key_file_set_str(KeyFile *key_file, const char *section, const char *k, const char *v);
 int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, const uint v);
 int key_file_set_bool(KeyFile *key_file, const char *section, const char *k, const bool b);
 
-int key_file_parse_string(KeyFile *key_file, const char *section, const char *k, char **v);
-int key_file_parse_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v);
+int key_file_parse_str(KeyFile *key_file, const char *section, const char *k, char **v);
+int key_file_parse_int(KeyFile *key_file, const char *section, const char *k, unsigned *v);
 
-int key_file_add_string(KeyFile *key_file, const char *section, const char *k, const char *v);
+int key_file_add_str(KeyFile *key_file, const char *section, const char *k, const char *v);
 int add_key_to_section_str(const char *path, const char *section, const char *k, const char *v);
 
 int remove_key_from_config_file(const char *path, const char *section, const char *k);
