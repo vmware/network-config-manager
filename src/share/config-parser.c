@@ -201,7 +201,7 @@ int parse_config_file(const char *path, const char *section, const char *k, char
         if (r < 0)
                 return r;
 
-        r = key_file_parse_string(key_file, section, k, &s);
+        r = key_file_parse_str(key_file, section, k, &s);
         if (r < 0)
                 return r;
 
