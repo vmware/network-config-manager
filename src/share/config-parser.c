@@ -243,7 +243,7 @@ int parse_config_file_integer(const char *path, const char *section, const char 
         if (r < 0)
                 return r;
 
-        return key_file_parse_integer(key_file, section, k, ret);
+        return key_file_parse_int(key_file, section, k, ret);
 }
 
 int parse_state_file(const char *path, const char *key, char **value, GHashTable **table) {

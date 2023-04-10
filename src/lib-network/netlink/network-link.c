@@ -589,7 +589,7 @@ int link_get_mtu(const char *ifname, uint32_t *mtu) {
 
         (void) link_read_sysfs_attribute(ifname, "mtu", &s);
 
-        r = parse_integer(s, &k);
+        r = parse_int(s, &k);
         if (r < 0)
                 return r;
 

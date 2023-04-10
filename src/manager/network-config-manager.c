@@ -1444,7 +1444,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
                         protocol = route_protocol_to_mode(argv[i]);
                         if (r < 0) {
-                                r = parse_integer(argv[i], &protocol);
+                                r = parse_int(argv[i], &protocol);
                                 if (r < 0) {
                                         log_warning("Failed to parse route protocol '%s': %s", argv[i], strerror(-r));
                                         return r;
@@ -1483,7 +1483,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
                         table = route_table_to_mode(argv[i]);
                         if (table < 0) {
-                                r = parse_integer(argv[i], &table);
+                                r = parse_int(argv[i], &table);
                                 if (r < 0) {
                                         log_warning("Failed to parse route table '%s': %s", argv[i], strerror(-r));
                                         return r;

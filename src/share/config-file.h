@@ -74,7 +74,7 @@ int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, con
 int key_file_set_bool(KeyFile *key_file, const char *section, const char *k, const bool b);
 
 int key_file_parse_string(KeyFile *key_file, const char *section, const char *k, char **v);
-int key_file_parse_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v);
+int key_file_parse_int(KeyFile *key_file, const char *section, const char *k, unsigned *v);
 
 int key_file_add_string(KeyFile *key_file, const char *section, const char *k, const char *v);
 int add_key_to_section_str(const char *path, const char *section, const char *k, const char *v);

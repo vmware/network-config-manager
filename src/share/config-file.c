@@ -496,7 +496,7 @@ int key_file_parse_string(KeyFile *key_file, const char *section, const char *k,
         return -ENOENT;
 }
 
-int key_file_parse_integer(KeyFile *key_file, const char *section, const char *k, unsigned *v) {
+int key_file_parse_int(KeyFile *key_file, const char *section, const char *k, unsigned *v) {
         _auto_cleanup_ char *value = NULL;
         int r;
 

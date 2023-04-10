@@ -14,7 +14,7 @@
 #include "parse-util.h"
 #include "string-util.h"
 
-int parse_integer(const char *c, int *val) {
+int parse_int(const char *c, int *val) {
         char *p;
         long r;
 
