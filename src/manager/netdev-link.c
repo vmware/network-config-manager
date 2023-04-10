@@ -504,30 +504,30 @@ int netdev_link_configure(const char *ifname, NetDevLink *n) {
         }
 
         if (n->tx_queues > 0) {
-                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "txq"), n->tx_queues);
+                r = set_config_file_int(path, "Link", ctl_to_config(n->m, "txq"), n->tx_queues);
                 if (r < 0)
                         return r;
         }
 
         if (n->rx_queues > 0) {
-                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "rxq"), n->rx_queues);
+                r = set_config_file_int(path, "Link", ctl_to_config(n->m, "rxq"), n->rx_queues);
                 if (r < 0)
                         return r;
         }
 
         if (n->tx_queue_len > 0) {
-                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "rxqlen"), n->tx_queue_len);
+                r = set_config_file_int(path, "Link", ctl_to_config(n->m, "rxqlen"), n->tx_queue_len);
                 if (r < 0)
                         return r;
         }
 
         if (n->gen_seg_off_bytes > 0) {
-                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "gsob"), n->gen_seg_off_bytes);
+                r = set_config_file_int(path, "Link", ctl_to_config(n->m, "gsob"), n->gen_seg_off_bytes);
                 if (r < 0)
                         return r;
         }
         if (n->gen_seg_off_seg > 0) {
-                r = set_config_file_integer(path, "Link", ctl_to_config(n->m, "gsos"), n->gen_seg_off_seg);
+                r = set_config_file_int(path, "Link", ctl_to_config(n->m, "gsos"), n->gen_seg_off_seg);
                 if (r < 0)
                         return r;
         }
