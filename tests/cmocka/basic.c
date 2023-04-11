@@ -593,6 +593,31 @@ static void test_remove_dhcp4_server_static_address(void **state) {
     unlink("/etc/systemd/network/10-test99.network");
 }
 
+static void test_yaml_add_dhcp4_server_static_address(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    apply_yaml_file("dhcp4-server.yaml");
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "DHCPServer", "PoolOffset", "0"));
+    assert_true(key_file_config_exists(key_file, "DHCPServer", "PoolSize", "200"));
+    assert_true(key_file_config_exists(key_file, "DHCPServer", "EmitDNS", "yes"));
+    assert_true(key_file_config_exists(key_file, "DHCPServer", "DNS", "8.8.8.8"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "DHCPServer", "yes"));
+    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "no"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "10.100.1.1/24"));
+
+    unlink("/etc/systemd/network/10-test99.network");
+}
+
 static void test_netdev_vlan(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *domains = NULL;
@@ -1199,6 +1224,7 @@ int main(void) {
         cmocka_unit_test (test_ipv6_ra_overrides),
         cmocka_unit_test (test_add_dhcp4_server_static_address),
         cmocka_unit_test (test_remove_dhcp4_server_static_address),
+        cmocka_unit_test (test_yaml_add_dhcp4_server_static_address),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

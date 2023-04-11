@@ -1,0 +1,15 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+      test99:
+          dhcp4: no
+          accept-ra: no
+          addresses:
+            - 10.100.1.1/24
+          dhcp-server: yes
+          dhcp4-server:
+              pool-offset: 0
+              pool-size: 200
+              emit-dns: yes
+              dns: 8.8.8.8
