@@ -373,6 +373,7 @@ int parse_yaml_dhcp_client_identifier(const char *key,
                                       yaml_node_t *node) {
 
         Network *n;
+        int r;
 
         assert(key);
         assert(value);
@@ -381,8 +382,14 @@ int parse_yaml_dhcp_client_identifier(const char *key,
         assert(node);
 
         n = data;
-        n->dhcp_client_identifier_type = dhcp_client_identifier_to_mode((char *) value);
 
+        r = dhcp_client_identifier_to_mode((char *) value);
+        if (r < 0) {
+                log_warning("Failed to parse dhcp client identifier='%s'\n", value);
+                return r;
+        }
+
+        n->dhcp_client_identifier_type = dhcp_client_identifier_to_mode((char *) value);
         return 0;
 }
 
