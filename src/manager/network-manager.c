@@ -1207,6 +1207,36 @@ int manager_add_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddre
         return dbus_network_reload();
 }
 
+int manager_remove_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddress *addr, const char *mac) {
+        _auto_cleanup_ char *network = NULL, *a = NULL;
+        int r;
+
+        assert(i);
+
+        r = create_or_parse_network_file(i, &network);
+        if (r < 0) {
+                log_warning("Failed to create network file '%s': %s\n", i->ifname, strerror(-r));
+                return r;
+        }
+
+        r = ip_to_str(addr->family, addr, &a);
+        if (r < 0)
+                return r;
+
+        r = remove_section_from_config_file_key(network, "DHCPServerStaticLease", "Address", a);
+        if (r < 0) {
+                r = remove_section_from_config_file_key(network, "DHCPServerStaticLease", "MACAddress", mac);
+                if (r < 0)
+                        return r;
+        }
+
+        r = set_file_permisssion(network, "systemd-network");
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
 int manager_configure_ipv6_router_advertisement(const IfNameIndex *i,
                                                 const IPAddress *prefix,
                                                 const IPAddress *route_prefix,

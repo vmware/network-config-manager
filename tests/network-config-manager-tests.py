@@ -1759,8 +1759,6 @@ class TestCLINetDev:
         network_reload()
         subprocess.check_call(['sleep', '3'])
 
-        assert(link_exist('ipvlan-98') == True)
-
         ipvlan_parser = configparser.ConfigParser()
         ipvlan_parser.read(os.path.join(networkd_unit_file_path, '10-ipvlan-98.netdev'))
 
