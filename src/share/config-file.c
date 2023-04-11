@@ -663,14 +663,12 @@ int remove_section_from_config_file_key(const char *path, const char *section, c
 
                                 if (str_eq(key->name, k) && str_eq(key->v, v)) {
                                         l = g_list_remove_link(key_file->sections, iter);
+                                        (void) l;
                                         break;
                                 }
                         }
                 }
         }
-
-        if (l)
-                sec = (Section *) l->data;
 
         r = key_file_save (key_file);
         if (r < 0)
