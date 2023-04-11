@@ -450,7 +450,6 @@ static int parse_dhcp4_server_static_lease(GHashTable *config, yaml_document_t *
                 steal_pointer(l);
         }
 
-
         return 0;
 }
 
@@ -503,8 +502,7 @@ static int parse_dhcp4_server(YAMLManager *m, yaml_document_t *dp, yaml_node_t *
                 t = (uint8_t *) s + table->offset;
                 if (table->parser)
                         (void) table->parser(scalar(k), scalar(v), s, t, dp, v);
-       }
-
+        }
 
         return 0;
 }

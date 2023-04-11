@@ -2280,7 +2280,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                                 log_oom();
 
                         continue;
-                } else if (str_eq_fold(argv[i], "pref-lifetime")) {
+                } else if (str_eq_fold(argv[i], "pref-lifetime") || str_eq_fold(argv[i], "plft")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &pref_lifetime);
@@ -2290,7 +2290,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                } else if (str_eq_fold(argv[i], "valid-lifetime")) {
+                } else if (str_eq_fold(argv[i], "valid-lifetime") || str_eq_fold(argv[i], "vlft")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &valid_lifetime);
@@ -2300,7 +2300,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                } else if (str_eq_fold(argv[i], "route-lifetime")) {
+                } else if (str_eq_fold(argv[i], "route-lifetime") || str_eq_fold(argv[i], "rlft")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &route_lifetime);
@@ -2310,7 +2310,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                         }
 
                         continue;
-                } else if (str_eq_fold(argv[i], "dns-lifetime")) {
+                } else if (str_eq_fold(argv[i], "dns-lifetime") || str_eq_fold(argv[i], "dlft")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &dns_lifetime);
