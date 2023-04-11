@@ -189,6 +189,7 @@ static int help(void) {
                                                       "\n\t\t\t\t      dns [DNS ADDRESS] emit-ntp [EmitNTP BOOLEAN] ntp [NTP ADDRESS]"
                                                       "\n\t\t\t\t      emit-router [EmitRouter BOOLEAN] Configures DHCPv4 server.\n"
                "  remove-dhcpv4-server         dev [DEVICE] Removes DHCPv4 server.\n"
+               "  add-dhcpv4-static-addr       dev [DEVICE] Removes mac [MACADDRESS] addr [ADDRESS].\n"
                "  add-ipv6ra                   dev [DEVICE] prefix [Prefix ADDRESS] pref-lifetime [PreferredLifetimeSec NUMBER] valid-lifetime [ValidLifetimeSec NUMBER]"
                                                       "\n\t\t\t\t      assign [Assign BOOLEAN] managed [Managed BOOLEAN]"
                                                       "\n\t\t\t\t      other [Other BOOLEAN] dns [DNS ADDRESS] emit-dns [EmitDNS BOOLEAN]"
@@ -389,8 +390,9 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-conf-wc",                   "cwc",              3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-dhcp4",                     "dhcp4",            4,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp6",                     "dhcp6",            4,        WORD_ANY, false, ncm_link_set_dhcp6_section },
-                { "add-dhcpv4-server",             "dhcpv4-srv" ,      2,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
-                { "remove-dhcpv4-server",          "rdhcpv4-srv",      2,        WORD_ANY, false, ncm_link_remove_dhcpv4_server },
+                { "add-dhcpv4-server",             "adhcp4-srv" ,      2,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
+                { "remove-dhcpv4-server",          "rdhcp4-srv",       2,        WORD_ANY, false, ncm_link_remove_dhcpv4_server },
+                { "add-dhcpv4-static-addr",        "adhcp4-srv-sa",    2,        WORD_ANY, false, ncm_link_add_dhcpv4_server_static_address },
                 { "add-ipv6ra",                    "ra6",              2,        WORD_ANY, false, ncm_link_add_ipv6_router_advertisement },
                 { "remove-ipv6ra",                 "rra6",             2,        WORD_ANY, false, ncm_link_remove_ipv6_router_advertisement },
                 { "add-ntp",                       "antp",             2,        WORD_ANY, false, ncm_link_add_ntp },
