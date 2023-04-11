@@ -111,6 +111,8 @@ int manager_configure_dhcpv4_server (const IfNameIndex *ifidx,
 
 int manager_remove_dhcpv4_server(const IfNameIndex *ifidx);
 
+int manager_add_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddress *addr, const char *mac);
+
 int manager_configure_ipv6_router_advertisement(const IfNameIndex *p,
                                                 const IPAddress *prefix,
                                                 const IPAddress *route_prefix,

@@ -516,6 +516,32 @@ static void test_additional_gw_source_routing(void **state) {
     assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "100"));
 }
 
+static void test_add_dhcp4_server_static_address(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.21 mac 00:0c:29:5f:d1:41") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.22 mac 00:0c:29:5f:d1:42") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.23 mac 00:0c:29:5f:d1:43") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.24 mac 00:0c:29:5f:d1:44") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:41"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:42"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:43"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:44"));
+
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.21"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.22"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.23"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.24"));
+}
+
 static void test_netdev_vlan(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     char *domains = NULL;
@@ -1120,6 +1146,7 @@ int main(void) {
         cmocka_unit_test (test_link_mtu),
         cmocka_unit_test (test_dhcp6_overrides),
         cmocka_unit_test (test_ipv6_ra_overrides),
+        cmocka_unit_test (test_add_dhcp4_server_static_address),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
