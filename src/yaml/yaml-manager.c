@@ -139,7 +139,7 @@ int networks_new(Networks **ret) {
 }
 
 void yaml_manager_free(YAMLManager *p) {
-        if (!p)
+       if (!p)
                 return;
 
         g_hash_table_destroy(p->match);
@@ -150,6 +150,7 @@ void yaml_manager_free(YAMLManager *p) {
         g_hash_table_destroy(p->dhcp4);
         g_hash_table_destroy(p->dhcp6);
         g_hash_table_destroy(p->nameserver);
+        g_hash_table_destroy(p->dhcp4_server);
 
         g_hash_table_destroy(p->link);
 
@@ -184,10 +185,11 @@ int yaml_manager_new(YAMLManager **ret) {
                  .dhcp6 = g_hash_table_new(g_str_hash, g_str_equal),
                  .router_advertisement = g_hash_table_new(g_str_hash, g_str_equal),
                  .nameserver = g_hash_table_new(g_str_hash, g_str_equal),
+                 .dhcp4_server = g_hash_table_new(g_str_hash, g_str_equal),
         };
 
         if (!m->network || !m->address || !m->dhcp4 || !m->dhcp6 || !m->nameserver || !m->route || !m->routing_policy_rule ||
-            !m->nameserver || !m->router_advertisement)
+            !m->nameserver || !m->router_advertisement || !m->dhcp4_server)
                 return log_oom();
 
         r = yaml_register_network(m);

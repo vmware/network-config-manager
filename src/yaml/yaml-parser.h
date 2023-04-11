@@ -16,6 +16,7 @@ typedef enum ConfType {
         CONF_TYPE_DNS,
         CONF_TYPE_ROUTE,
         CONF_TYPE_ROUTING_POLICY_RULE,
+        CONF_TYPE_DHCP4_SERVER,
         CONF_TYPE_NETDEV,
         CONF_TYPE_LINK,
         CONF_TYPE_NETDEV_VLAN,

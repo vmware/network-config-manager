@@ -62,6 +62,7 @@ static ParserTable parser_network_vtable[] = {
         { "lldp",                       CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, lldp)},
         { "emit-lldp",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, emit_lldp)},
         { "accept-ra",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, ipv6_accept_ra)},
+        { "dhcp-server",                CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, enable_dhcp4_server)},
         { "link-local",                 CONF_TYPE_NETWORK,     parse_yaml_link_local_type,              offsetof(Network, link_local)},
         { "ipv6-address-generation",    CONF_TYPE_NETWORK,     parse_yaml_ipv6_address_generation_mode, offsetof(Network, ipv6_address_generation)},
         { "ipv6-privacy",               CONF_TYPE_NETWORK,     parse_yaml_ipv6_privacy_extensions,      offsetof(Network, ipv6_privacy)},
@@ -122,30 +123,38 @@ static ParserTable parser_nameservers_vtable[] = {
 };
 
 static ParserTable parser_route_vtable[] = {
-        { "via",                        CONF_TYPE_ROUTE,     parse_yaml_route,       offsetof(Route, gw)},
-        { "to",                         CONF_TYPE_ROUTE,     parse_yaml_route,       offsetof(Route, dst)},
-        { "from",                       CONF_TYPE_ROUTE,     parse_yaml_address,     offsetof(Route, prefsrc)},
-        { "table",                      CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, table)},
-        { "type",                       CONF_TYPE_ROUTE,     parse_yaml_route_type,  offsetof(Route, type)},
-        { "scope",                      CONF_TYPE_ROUTE,     parse_yaml_route_scope, offsetof(Route, scope)},
-        { "metric",                     CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, metric)},
-        { "on-link",                    CONF_TYPE_ROUTE,     parse_yaml_bool,        offsetof(Route, onlink)},
-        { "congestion-window",          CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, initcwnd)},
-        { "advertised-receive-window",  CONF_TYPE_ROUTE,     parse_yaml_uint32,      offsetof(Route, initrwnd)},
-        { "quick-ack",                  CONF_TYPE_ROUTE,     parse_yaml_bool,        offsetof(Route, quick_ack)},
-        { "fast-open-no-cookie",        CONF_TYPE_ROUTE,     parse_yaml_bool,        offsetof(Route, tfo)},
-        { "ttl-propogate",              CONF_TYPE_ROUTE,     parse_yaml_bool,        offsetof(Route, ttl_propogate)},
-        { NULL,                         _CONF_TYPE_INVALID,  0,                      0}
+        { "via",                        CONF_TYPE_ROUTE,    parse_yaml_route,       offsetof(Route, gw)},
+        { "to",                         CONF_TYPE_ROUTE,    parse_yaml_route,       offsetof(Route, dst)},
+        { "from",                       CONF_TYPE_ROUTE,    parse_yaml_address,     offsetof(Route, prefsrc)},
+        { "table",                      CONF_TYPE_ROUTE,    parse_yaml_uint32,      offsetof(Route, table)},
+        { "type",                       CONF_TYPE_ROUTE,    parse_yaml_route_type,  offsetof(Route, type)},
+        { "scope",                      CONF_TYPE_ROUTE,    parse_yaml_route_scope, offsetof(Route, scope)},
+        { "metric",                     CONF_TYPE_ROUTE,    parse_yaml_uint32,      offsetof(Route, metric)},
+        { "on-link",                    CONF_TYPE_ROUTE,    parse_yaml_bool,        offsetof(Route, onlink)},
+        { "congestion-window",          CONF_TYPE_ROUTE,    parse_yaml_uint32,      offsetof(Route, initcwnd)},
+        { "advertised-receive-window",  CONF_TYPE_ROUTE,    parse_yaml_uint32,      offsetof(Route, initrwnd)},
+        { "quick-ack",                  CONF_TYPE_ROUTE,    parse_yaml_bool,        offsetof(Route, quick_ack)},
+        { "fast-open-no-cookie",        CONF_TYPE_ROUTE,    parse_yaml_bool,        offsetof(Route, tfo)},
+        { "ttl-propogate",              CONF_TYPE_ROUTE,    parse_yaml_bool,        offsetof(Route, ttl_propogate)},
+        { NULL,                         _CONF_TYPE_INVALID, 0,                      0}
 };
 
 static ParserTable parser_routing_policy_rule_vtable[] = {
-        { "from",            CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, from)},
-        { "to",              CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_address, offsetof(RoutingPolicyRule, to)},
-        { "table",           CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, table)},
-        { "priority",        CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, priority)},
-        { "type-of-service", CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, tos)},
-        { "mark",            CONF_TYPE_ROUTING_POLICY_RULE,     parse_yaml_uint32,  offsetof(RoutingPolicyRule, fwmark)},
-        { NULL,              _CONF_TYPE_INVALID,                0,                  0}
+        { "from",            CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_address, offsetof(RoutingPolicyRule, from)},
+        { "to",              CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_address, offsetof(RoutingPolicyRule, to)},
+        { "table",           CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_uint32,  offsetof(RoutingPolicyRule, table)},
+        { "priority",        CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_uint32,  offsetof(RoutingPolicyRule, priority)},
+        { "type-of-service", CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_uint32,  offsetof(RoutingPolicyRule, tos)},
+        { "mark",            CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_uint32,  offsetof(RoutingPolicyRule, fwmark)},
+        { NULL,              _CONF_TYPE_INVALID,            0,                  0}
+};
+
+static ParserTable parser_dhcp4_server_vtable[] = {
+        { "pool-offset", CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_offset)},
+        { "pool-size",   CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_size)},
+        { "emit-dns",    CONF_TYPE_DHCP4_SERVER, parse_yaml_bool,    offsetof(DHCP4Server, emit_dns)},
+        { "dns",         CONF_TYPE_DHCP4_SERVER, parse_yaml_address, offsetof(DHCP4Server, dns)},
+        { NULL,          _CONF_TYPE_INVALID,     0,                  0}
 };
 
 static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
@@ -388,6 +397,61 @@ static int parse_routing_policy_rule(GHashTable *config, yaml_document_t *dp, ya
         return 0;
 }
 
+static int parse_dhcp4_server(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        _auto_cleanup_ DHCP4Server *s = NULL;
+        int r;
+
+        assert(config);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
+                n = yaml_document_get_node(dp, *i);
+                if (n)
+                        (void) parse_dhcp4_server(config, dp, n, network);
+        }
+
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(config, scalar(k));
+                if (!table)
+                        continue;
+
+                if (!s) {
+                        r = dhcp4_server_new(&s);
+                        if (r < 0)
+                                return log_oom();
+                }
+
+                t = (uint8_t *) s + table->offset;
+                if (table->parser) {
+                        (void) table->parser(scalar(k), scalar(v), s, t, dp, v);
+                        network->modified = true;
+                }
+        }
+
+        if (s) {
+                network->dhcp4_server = s;
+                network->modified = true;
+                steal_pointer(s);
+        }
+
+
+        return 0;
+}
+
 static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         assert(dp);
         assert(node);
@@ -490,6 +554,11 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
 
                         case CONF_TYPE_DNS:
                                 r = parse_config(m->nameserver, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+                        case CONF_TYPE_DHCP4_SERVER:
+                                r = parse_dhcp4_server(m->dhcp4_server, dp, v, network);
                                 if (r < 0)
                                         return r;
                                 break;
@@ -643,6 +712,14 @@ int yaml_register_network(YAMLManager *m) {
                         return -EINVAL;
                 }
         }
+
+        for (size_t i = 0; parser_dhcp4_server_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->dhcp4_server, (void *) parser_dhcp4_server_vtable[i].key, &parser_dhcp4_server_vtable[i])) {
+                        log_warning("Failed add key='%s' to nameserver table", parser_dhcp4_server_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
 
         return 0;
 }

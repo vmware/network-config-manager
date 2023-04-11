@@ -207,6 +207,14 @@ typedef struct RoutingPolicyRule {
         struct fib_rule_uid_range uid_range;
 } RoutingPolicyRule;
 
+typedef struct DHCP4Server {
+    uint32_t pool_offset;
+    uint32_t pool_size;
+
+    int emit_dns;
+    IPAddress dns;
+} DHCP4Server;
+
 typedef struct WIFIAuthentication {
         AuthKeyManagement key_management;
         AuthEAPMethod eap_method;
@@ -296,6 +304,7 @@ typedef struct Network {
         int lldp;
         int emit_lldp;
         int ipv6_accept_ra;
+        int enable_dhcp4_server;
 
         IPAddress *gateway;
         int gateway_onlink;
@@ -313,6 +322,8 @@ typedef struct Network {
         void *link;
         NetDev *netdev;
 
+        DHCP4Server *dhcp4_server;
+
         bool modified;
 
         GHashTable *access_points;
@@ -328,6 +339,10 @@ void g_network_free(gpointer data);
 int routing_policy_rule_new(RoutingPolicyRule **ret);
 void routing_policy_rule_free(RoutingPolicyRule *rule);
 DEFINE_CLEANUP(RoutingPolicyRule*, routing_policy_rule_free);
+
+int dhcp4_server_new(DHCP4Server **ret);
+void dhcp4_server_free(DHCP4Server *s);
+DEFINE_CLEANUP(DHCP4Server*, dhcp4_server_free);
 
 int parse_address_from_str_and_add(const char *s, Set *a);
 

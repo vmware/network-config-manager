@@ -24,6 +24,7 @@ static const char * const conf_type_table[_CONF_TYPE_MAX] = {
        [CONF_TYPE_DNS]                  = "nameservers",
        [CONF_TYPE_ROUTE]                = "routes",
        [CONF_TYPE_ROUTING_POLICY_RULE]  = "routing-policy",
+       [CONF_TYPE_DHCP4_SERVER]         = "dhcp4-server",
        [CONF_TYPE_LINK]                 = "links",
        [CONF_TYPE_NETDEV]               = "netdev",
        [CONF_TYPE_NETDEV_VLAN]          = "vlan",

@@ -677,6 +677,28 @@ void routing_policy_rule_free(RoutingPolicyRule *rule) {
         free(rule);
 }
 
+int dhcp4_server_new(DHCP4Server **ret) {
+        DHCP4Server *s;
+
+        s = new(DHCP4Server, 1);
+        if (!s)
+                return -ENOMEM;
+
+        *s = (DHCP4Server) {
+               .emit_dns = -1,
+           };
+
+        *ret = s;
+        return 0;
+}
+
+void dhcp4_server_free(DHCP4Server *s) {
+        if (!s)
+                return;
+
+        free(s);
+}
+
 static gboolean routing_policy_rule_equal(gconstpointer v1, gconstpointer v2) {
         RoutingPolicyRule *a = (RoutingPolicyRule *) v1;
         RoutingPolicyRule *b = (RoutingPolicyRule *) v2;
@@ -813,6 +835,7 @@ int network_new(Network **ret) {
                 .lldp = -1,
                 .emit_lldp = -1,
                 .ipv6_accept_ra = -1,
+                .enable_dhcp4_server = -1,
                 .keep_configuration = _KEEP_CONFIGURATION_INVALID,
                 .dhcp_client_identifier_type = _DHCP_CLIENT_IDENTIFIER_INVALID,
                 .link_local = _LINK_LOCAL_ADDRESS_INVALID,
@@ -872,6 +895,7 @@ void network_free(Network *n) {
         free(n->req_family_for_online);
         free(n->activation_policy);
         free(n->link);
+        free(n->dhcp4_server);
 
         strv_free(n->ntps);
         strv_free(n->driver);
@@ -1340,6 +1364,12 @@ int generate_network_config(Network *n) {
                         return r;
         }
 
+        if (n->enable_dhcp4_server >= 0) {
+                r = set_config(key_file, "Network", "DHCPServer", bool_to_str(n->enable_dhcp4_server));
+                if (r < 0)
+                        return r;
+        }
+
         if (n->ipv6_mtu > 0) {
                 r = set_config_uint(key_file, "Network", "IPv6MTUBytes", n->ipv6_mtu);
                 if (r < 0)
@@ -1575,11 +1605,38 @@ int generate_network_config(Network *n) {
         if (n->routing_policy_rules && g_hash_table_size(n->routing_policy_rules) > 0)
                 g_hash_table_foreach(n->routing_policy_rules, append_routing_policy_rules, key_file);
 
-
         if (n->neighbor_suppression > 0) {
                 r = set_config(key_file, "Bridge", "NeighborSuppression", bool_to_str(n->neighbor_suppression));
                 if (r < 0)
                         return r;
+        }
+
+        if (n->dhcp4_server) {
+                r = set_config_uint(key_file, "DHCPServer", "PoolOffset", n->dhcp4_server->pool_offset);
+                if (r < 0)
+                        return r;
+
+                r = set_config_uint(key_file, "DHCPServer", "PoolSize", n->dhcp4_server->pool_size);
+                if (r < 0)
+                        return r;
+
+
+                if (n->dhcp4_server->emit_dns >= 0) {
+                        r = set_config(key_file, "DHCPServer", "EmitDNS", bool_to_str(n->dhcp4_server->emit_dns));
+                        if (r < 0)
+                                return r;
+                }
+
+                if (!ip_is_null(&n->dhcp4_server->dns)) {
+                        _auto_cleanup_ char *dns = NULL;
+
+                        r = ip_to_str(n->dhcp4_server->dns.family, &n->dhcp4_server->dns, &dns);
+                        if (r < 0)
+                                return r;
+                        r = set_config(key_file, "DHCPServer", "DNS", dns);
+                        if (r < 0)
+                                return r;
+                }
         }
 
         if (n->cost > 0) {
