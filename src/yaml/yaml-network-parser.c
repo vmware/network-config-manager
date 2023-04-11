@@ -62,6 +62,7 @@ static ParserTable parser_network_vtable[] = {
         { "lldp",                       CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, lldp)},
         { "emit-lldp",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, emit_lldp)},
         { "accept-ra",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, ipv6_accept_ra)},
+        { "dhcp-server",                CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, dhcp_server)},
         { "link-local",                 CONF_TYPE_NETWORK,     parse_yaml_link_local_type,              offsetof(Network, link_local)},
         { "ipv6-address-generation",    CONF_TYPE_NETWORK,     parse_yaml_ipv6_address_generation_mode, offsetof(Network, ipv6_address_generation)},
         { "ipv6-privacy",               CONF_TYPE_NETWORK,     parse_yaml_ipv6_privacy_extensions,      offsetof(Network, ipv6_privacy)},
