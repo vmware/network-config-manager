@@ -813,6 +813,7 @@ int network_new(Network **ret) {
                 .lldp = -1,
                 .emit_lldp = -1,
                 .ipv6_accept_ra = -1,
+                .dhcp_server = -1,
                 .keep_configuration = _KEEP_CONFIGURATION_INVALID,
                 .dhcp_client_identifier_type = _DHCP_CLIENT_IDENTIFIER_INVALID,
                 .link_local = _LINK_LOCAL_ADDRESS_INVALID,
@@ -1336,6 +1337,12 @@ int generate_network_config(Network *n) {
 
         if (n->ipv6_accept_ra >= 0) {
                 r = set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(n->ipv6_accept_ra));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp_server >= 0) {
+                r = set_config(key_file, "Network", "DHCPServer", bool_to_str(n->dhcp_server));
                 if (r < 0)
                         return r;
         }

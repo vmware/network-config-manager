@@ -296,6 +296,7 @@ typedef struct Network {
         int lldp;
         int emit_lldp;
         int ipv6_accept_ra;
+        int dhcp_server;
 
         IPAddress *gateway;
         int gateway_onlink;
