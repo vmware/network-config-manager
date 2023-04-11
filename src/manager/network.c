@@ -678,17 +678,21 @@ void routing_policy_rule_free(RoutingPolicyRule *rule) {
 }
 
 int dhcp4_server_new(DHCP4Server **ret) {
-        DHCP4Server *s;
+        _cleanup_(dhcp4_server_freep) DHCP4Server *s = NULL;
 
-        s = new(DHCP4Server, 1);
+        s = new0(DHCP4Server, 1);
         if (!s)
                 return -ENOMEM;
 
         *s = (DHCP4Server) {
                .emit_dns = -1,
+               .static_leases = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free),
            };
 
-        *ret = s;
+        if (!s->static_leases)
+                return -ENOMEM;
+
+        *ret = steal_pointer(s);
         return 0;
 }
 
@@ -895,6 +899,10 @@ void network_free(Network *n) {
         free(n->req_family_for_online);
         free(n->activation_policy);
         free(n->link);
+
+        if (n->dhcp4_server)
+                g_hash_table_destroy(n->dhcp4_server->static_leases);
+
         free(n->dhcp4_server);
 
         strv_free(n->ntps);
@@ -1021,6 +1029,31 @@ int generate_wifi_config(Network *n, GString **ret) {
 
         *ret = steal_pointer(config);
         return 0;
+}
+
+static void append_dhcp4_server_static_leases(gpointer key, gpointer value, gpointer userdata) {
+        _cleanup_(section_freep) Section *section = NULL;
+        _auto_cleanup_ char *address = NULL;
+        DHCP4ServerLease *l = value;
+        KeyFile *key_file = userdata;
+        int r;
+
+        r = section_new("DHCPServerStaticLease", &section);
+        if (r < 0)
+                return;
+
+        r = ip_to_str(l->addr.family, &l->addr, &address);
+        if (r < 0)
+                return;
+
+        (void ) add_key_to_section(section, "MACAddress", l->mac);
+        (void ) add_key_to_section(section, "Address", address);
+
+        r = add_section_to_key_file(key_file, section);
+        if (r < 0)
+                return;
+
+        steal_pointer(section);
 }
 
 static void append_routing_policy_rules(gpointer key, gpointer value, gpointer userdata) {
@@ -1620,7 +1653,6 @@ int generate_network_config(Network *n) {
                 if (r < 0)
                         return r;
 
-
                 if (n->dhcp4_server->emit_dns >= 0) {
                         r = set_config(key_file, "DHCPServer", "EmitDNS", bool_to_str(n->dhcp4_server->emit_dns));
                         if (r < 0)
@@ -1637,6 +1669,9 @@ int generate_network_config(Network *n) {
                         if (r < 0)
                                 return r;
                 }
+
+                if (g_hash_table_size(n->dhcp4_server->static_leases) > 0)
+                        g_hash_table_foreach(n->dhcp4_server->static_leases, append_dhcp4_server_static_leases, key_file);
         }
 
         if (n->cost > 0) {

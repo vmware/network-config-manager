@@ -615,6 +615,15 @@ static void test_yaml_add_dhcp4_server_static_address(void **state) {
 
     assert_true(key_file_config_exists(key_file, "Address", "Address", "10.100.1.1/24"));
 
+
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:41"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:42"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:43"));
+
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "10.100.1.2"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "10.100.1.3"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "10.100.1.4"));
+
     unlink("/etc/systemd/network/10-test99.network");
 }
 

@@ -207,12 +207,19 @@ typedef struct RoutingPolicyRule {
         struct fib_rule_uid_range uid_range;
 } RoutingPolicyRule;
 
+typedef struct DHCP4ServerLease {
+    char *mac;
+    IPAddress addr;
+} DHCP4ServerLease;
+
 typedef struct DHCP4Server {
     uint32_t pool_offset;
     uint32_t pool_size;
 
     int emit_dns;
     IPAddress dns;
+
+    GHashTable *static_leases;
 } DHCP4Server;
 
 typedef struct WIFIAuthentication {
