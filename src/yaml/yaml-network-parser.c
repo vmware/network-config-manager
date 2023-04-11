@@ -62,7 +62,7 @@ static ParserTable parser_network_vtable[] = {
         { "lldp",                       CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, lldp)},
         { "emit-lldp",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, emit_lldp)},
         { "accept-ra",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, ipv6_accept_ra)},
-        { "dhcp-server",                CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, enable_dhcp4_server)},
+        { "enable-dhcp4-server",        CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, enable_dhcp4_server)},
         { "link-local",                 CONF_TYPE_NETWORK,     parse_yaml_link_local_type,              offsetof(Network, link_local)},
         { "ipv6-address-generation",    CONF_TYPE_NETWORK,     parse_yaml_ipv6_address_generation_mode, offsetof(Network, ipv6_address_generation)},
         { "ipv6-privacy",               CONF_TYPE_NETWORK,     parse_yaml_ipv6_privacy_extensions,      offsetof(Network, ipv6_privacy)},
@@ -147,6 +147,12 @@ static ParserTable parser_routing_policy_rule_vtable[] = {
         { "type-of-service", CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_uint32,  offsetof(RoutingPolicyRule, tos)},
         { "mark",            CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_uint32,  offsetof(RoutingPolicyRule, fwmark)},
         { NULL,              _CONF_TYPE_INVALID,            0,                  0}
+};
+
+static ParserTable parser_dhcp4_server_static_lease_vtable[] = {
+        { "address",    CONF_TYPE_DHCP4_SERVER, parse_yaml_address,     offsetof(DHCP4ServerLease, addr)},
+        { "macaddress", CONF_TYPE_DHCP4_SERVER, parse_yaml_mac_address, offsetof(DHCP4ServerLease, mac)},
+        { NULL,          _CONF_TYPE_INVALID,    0,                      0}
 };
 
 static ParserTable parser_dhcp4_server_vtable[] = {
@@ -397,21 +403,20 @@ static int parse_routing_policy_rule(GHashTable *config, yaml_document_t *dp, ya
         return 0;
 }
 
-static int parse_dhcp4_server(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
-        _auto_cleanup_ DHCP4Server *s = NULL;
-        int r;
+static int parse_dhcp4_server_static_lease(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, DHCP4Server *s) {
+        _auto_cleanup_ DHCP4ServerLease *l = NULL;
 
         assert(config);
         assert(dp);
         assert(node);
-        assert(network);
+        assert(s);
 
         for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
                 yaml_node_t *n;
 
                 n = yaml_document_get_node(dp, *i);
                 if (n)
-                        (void) parse_dhcp4_server(config, dp, n, network);
+                        (void) parse_dhcp4_server_static_lease(config, dp, n, s);
         }
 
         for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
@@ -429,24 +434,76 @@ static int parse_dhcp4_server(GHashTable *config, yaml_document_t *dp, yaml_node
                 if (!table)
                         continue;
 
+                if (!l) {
+                        l = new0(DHCP4ServerLease, 1);
+                        if (!l)
+                                return log_oom();
+                }
+
+                t = (uint8_t *) l + table->offset;
+                if (table->parser)
+                        (void) table->parser(scalar(k), scalar(v), l, t, dp, v);
+        }
+
+        if (l) {
+                g_hash_table_insert(s->static_leases, GUINT_TO_POINTER(l), l);
+                steal_pointer(l);
+        }
+
+
+        return 0;
+}
+
+static int parse_dhcp4_server(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        DHCP4Server *s = NULL;
+        int r;
+
+        assert(m);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
+                n = yaml_document_get_node(dp, *i);
+                if (n)
+                        (void) parse_dhcp4_server(m, dp, n, network);
+        }
+
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
                 if (!s) {
                         r = dhcp4_server_new(&s);
                         if (r < 0)
                                 return log_oom();
-                }
 
-                t = (uint8_t *) s + table->offset;
-                if (table->parser) {
-                        (void) table->parser(scalar(k), scalar(v), s, t, dp, v);
+                        network->dhcp4_server = s;
                         network->modified = true;
                 }
-        }
 
-        if (s) {
-                network->dhcp4_server = s;
-                network->modified = true;
-                steal_pointer(s);
-        }
+                if (k && str_eq(scalar(k), "static-leases")) {
+                        parse_dhcp4_server_static_lease(m->dhcp4_server_static_lease, dp, v, s);
+                        continue;
+                }
+
+                table = g_hash_table_lookup(m->dhcp4_server, scalar(k));
+                if (!table)
+                        continue;
+
+                t = (uint8_t *) s + table->offset;
+                if (table->parser)
+                        (void) table->parser(scalar(k), scalar(v), s, t, dp, v);
+       }
 
 
         return 0;
@@ -558,7 +615,7 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
                                         return r;
                                 break;
                         case CONF_TYPE_DHCP4_SERVER:
-                                r = parse_dhcp4_server(m->dhcp4_server, dp, v, network);
+                                r = parse_dhcp4_server(m, dp, v, network);
                                 if (r < 0)
                                         return r;
                                 break;
@@ -715,11 +772,17 @@ int yaml_register_network(YAMLManager *m) {
 
         for (size_t i = 0; parser_dhcp4_server_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->dhcp4_server, (void *) parser_dhcp4_server_vtable[i].key, &parser_dhcp4_server_vtable[i])) {
-                        log_warning("Failed add key='%s' to nameserver table", parser_dhcp4_server_vtable[i].key);
+                        log_warning("Failed add key='%s' to dhcp4 server table", parser_dhcp4_server_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
+        for (size_t i = 0; parser_dhcp4_server_static_lease_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->dhcp4_server_static_lease, (void *) parser_dhcp4_server_static_lease_vtable[i].key, &parser_dhcp4_server_static_lease_vtable[i])) {
+                        log_warning("Failed add key='%s' dhcp4 server static lease table", parser_dhcp4_server_static_lease_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
 
         return 0;
 }
