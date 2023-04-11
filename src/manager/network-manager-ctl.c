@@ -189,7 +189,7 @@ static int help(void) {
                                                       "\n\t\t\t\t      dns [DNS ADDRESS] emit-ntp [EmitNTP BOOLEAN] ntp [NTP ADDRESS]"
                                                       "\n\t\t\t\t      emit-router [EmitRouter BOOLEAN] Configures DHCPv4 server.\n"
                "  remove-dhcpv4-server         dev [DEVICE] Removes DHCPv4 server.\n"
-               "  add-dhcpv4-static-addr       dev [DEVICE] Removes mac [MACADDRESS] addr [ADDRESS].\n"
+               "  add-dhcpv4-static-addr       dev [DEVICE] mac [MACADDRESS] addr [ADDRESS]. Adds a DHCPv4 server static address\n"
                "  add-ipv6ra                   dev [DEVICE] prefix [Prefix ADDRESS] pref-lifetime [PreferredLifetimeSec NUMBER] valid-lifetime [ValidLifetimeSec NUMBER]"
                                                       "\n\t\t\t\t      assign [Assign BOOLEAN] managed [Managed BOOLEAN]"
                                                       "\n\t\t\t\t      other [Other BOOLEAN] dns [DNS ADDRESS] emit-dns [EmitDNS BOOLEAN]"
