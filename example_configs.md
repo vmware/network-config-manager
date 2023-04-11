@@ -106,7 +106,8 @@ network:
           token: eui64
           use-dns: true
           use-domain: true
-          use-mtu: true                                                                                                                                             use-gateway: true
+          use-mtu: true
+          use-gateway: true
           use-route-prefix: true
           use-autonomous-prefix: true
           use-on-link-prefix: true
