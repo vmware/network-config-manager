@@ -156,12 +156,20 @@ network:
           accept-ra: no
           addresses:
             - 10.100.1.1/24
-          dhcp-server: yes
+          enable-dhcp4-server: yes
           dhcp4-server:
               pool-offset: 0
               pool-size: 200
               emit-dns: yes
               dns: 8.8.8.8
+              static-leases:
+                - address: 10.100.1.2/24
+                  macaddress: 00:0c:29:5f:d1:41
+                - address: 10.100.1.3/24
+                  macaddress: 00:0c:29:5f:d1:42
+                - address: 10.100.1.4/24
+                  macaddress: 00:0c:29:5f:d1:43
+
 ```
 
 #### Generate link config from yml file:
