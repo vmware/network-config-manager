@@ -18,6 +18,7 @@ Configure
   - Create netdevs, vlan, vxlan, bridge, bond, veth, macvlan/macvtap, ipvlap/ipvtap, veth, tunnels(ipip, sit, gre, sit, vti), wireguard.
   - Hostname.
   - DHCPv4 Server.
+  - DHCPv4 Server Static Lease.
   - IPv6 Router Advertisements.
   - Network and Link SRIOV
   - Add delete and view nftables table, chains and rules.
