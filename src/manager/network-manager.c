@@ -1182,8 +1182,12 @@ int manager_add_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddre
         if (r < 0)
                 return r;
 
-        add_key_to_section(section, "MACAddress", mac);
-        add_key_to_section(section, "Address", a);
+        r = add_key_to_section(section, "MACAddress", mac);
+        if (r < 0)
+                return r;
+        r = add_key_to_section(section, "Address", a);
+        if (r < 0)
+                return r;
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
@@ -1202,7 +1206,6 @@ int manager_add_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddre
 
         return dbus_network_reload();
 }
-
 
 int manager_configure_ipv6_router_advertisement(const IfNameIndex *i,
                                                 const IPAddress *prefix,
