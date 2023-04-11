@@ -28,7 +28,7 @@ typedef enum ConfType {
         CONF_TYPE_NETDEV_WIREGUARD,
         CONF_TYPE_WIFI,
         _CONF_TYPE_MAX,
-        _CONF_TYPE_INVALID = -1,
+        _CONF_TYPE_INVALID = -EINVAL,
 } ConfType;
 
 typedef struct ParserTable {
