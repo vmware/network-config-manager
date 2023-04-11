@@ -105,11 +105,11 @@ network:
       ra-overrides:
           token: eui64
           use-dns: true
-          use-domain: true  
-          use-mtu: true                                                                                                                                             use-gateway: true  
+          use-domain: true
+          use-mtu: true                                                                                                                                             use-gateway: true
           use-route-prefix: true
           use-autonomous-prefix: true
-          use-on-link-prefix: true       
+          use-on-link-prefix: true
 ```
 
 #### Using match as MacAddress
@@ -142,6 +142,25 @@ network:
             - from: 10.100.1.5/24
               to: 10.100.1.5/24
               table: 101
+```
+
+#### DHCP4 Server
+```yml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+      ens33:
+          dhcp4: no
+          accept-ra: no
+          addresses:
+            - 10.100.1.1/24
+          dhcp-server: yes
+          dhcp4-server:
+              pool-offset: 0
+              pool-size: 200
+              emit-dns: yes
+              dns: 8.8.8.8
 ```
 
 #### Generate link config from yml file:
