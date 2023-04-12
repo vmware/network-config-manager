@@ -13,6 +13,8 @@ network:
               pool-size: 200
               emit-dns: yes
               dns: 8.8.8.8
+              default-lease-time: 12h
+              max-lease-time: 24h
               static-leases:
                 - address: 10.100.1.2/24
                   macaddress: 00:0c:29:5f:d1:41

@@ -219,6 +219,9 @@ typedef struct DHCP4Server {
     int emit_dns;
     IPAddress dns;
 
+    char *default_lease_time;
+    char *max_lease_time;
+
     GHashTable *static_leases;
 } DHCP4Server;
 

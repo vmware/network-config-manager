@@ -841,3 +841,23 @@ int write_to_proxy_conf_file(GHashTable *table) {
         g_file_set_contents("/etc/sysconfig/proxy", p, len, NULL);
         return 0;
 }
+
+int determine_conf_file_name(const char *ifname, char **ret) {
+        _auto_cleanup_ char *n = NULL, *file = NULL;
+        assert(ifname);
+
+        if (strstr(ifname, "*"))
+                n = strdup("network-config-manager");
+        else
+                n = strdup(ifname);
+        if (!n)
+                return log_oom();
+
+        file = strjoin("-", "10", n, NULL);
+        if (!file)
+                return log_oom();
+
+        *ret = steal_pointer(file);
+        return 0;
+
+}

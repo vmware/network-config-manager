@@ -543,9 +543,9 @@ int create_network_conf_file(const char *ifname, char **ret) {
 
         assert(ifname);
 
-        file = strjoin("-", "10", ifname, NULL);
-        if (!file)
-                return log_oom();
+        r = determine_conf_file_name(ifname, &file);
+        if (r < 0)
+                return r;
 
         r = create_conf_file("/etc/systemd/network", file, "network", &network);
         if (r < 0)
@@ -570,11 +570,9 @@ int determine_network_conf_file(const char *ifname, char **ret) {
         _auto_cleanup_ char *file = NULL, *network = NULL;
         int r;
 
-        assert(ifname);
-
-        file = strjoin("-", "10", ifname, NULL);
-        if (!file)
-                return log_oom();
+        r = determine_conf_file_name(ifname, &file);
+        if (r < 0)
+                return r;
 
         r = determine_conf_file("/etc/systemd/network", file, "network", &network);
         if (r < 0)
@@ -700,6 +698,8 @@ void dhcp4_server_free(DHCP4Server *s) {
         if (!s)
                 return;
 
+        free(s->default_lease_time);
+        free(s->max_lease_time);
         free(s);
 }
 
@@ -1652,6 +1652,18 @@ int generate_network_config(Network *n) {
                 r = set_config_uint(key_file, "DHCPServer", "PoolSize", n->dhcp4_server->pool_size);
                 if (r < 0)
                         return r;
+
+                if (n->dhcp4_server->default_lease_time) {
+                        r = set_config(key_file, "DHCPServer", "DefaultLeaseTimeSec", n->dhcp4_server->default_lease_time);
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->dhcp4_server->max_lease_time) {
+                        r = set_config(key_file, "DHCPServer", "MaxLeaseTimeSec", n->dhcp4_server->max_lease_time);
+                        if (r < 0)
+                                return r;
+                }
 
                 if (n->dhcp4_server->emit_dns >= 0) {
                         r = set_config(key_file, "DHCPServer", "EmitDNS", bool_to_str(n->dhcp4_server->emit_dns));

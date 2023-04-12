@@ -1005,7 +1005,6 @@ int parse_yaml_vxlan_csum(const char *key,
                         v->udp6zerocsumtx = true;
                 else if (str_eq(scalar(entry), "zero-udp6-rx"))
                         v->udp6zerocsumrx = true;
-
                 else if (str_eq(scalar(entry), "zero-udp6-tx"))
                         v->udp6zerocsumtx = true;
                 else if (str_eq(scalar(entry), "remote-tx"))

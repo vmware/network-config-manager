@@ -97,3 +97,5 @@ int read_conf_file(const char *path, char **s);
 int write_to_resolv_conf_file(char **dns, char **domains);
 
 int key_file_save(KeyFile *k);
+
+int determine_conf_file_name(const char *ifname, char **ret);

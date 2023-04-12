@@ -187,9 +187,9 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
 
         assert(ifname);
 
-        s = strjoin("-", "10", ifname, NULL);
-        if (!s)
-                return -ENOMEM;
+        r = determine_conf_file_name(ifname, &s);
+        if (r < 0)
+                return r;
 
         file = strjoin(".", s, "link", NULL);
         if (!file)
@@ -197,11 +197,11 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
 
         path = g_build_path("/", "/etc/systemd/network", file, NULL);
         if (!path)
-                 return log_oom();
+                return log_oom();
 
         if (g_file_test(path, G_FILE_TEST_EXISTS)) {
-                  *ret = steal_pointer(path);
-                   return 0;
+                *ret = steal_pointer(path);
+                return 0;
         }
 
         r = link_get_mac_address(ifname, &mac);

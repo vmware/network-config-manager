@@ -156,11 +156,13 @@ static ParserTable parser_dhcp4_server_static_lease_vtable[] = {
 };
 
 static ParserTable parser_dhcp4_server_vtable[] = {
-        { "pool-offset", CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_offset)},
-        { "pool-size",   CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_size)},
-        { "emit-dns",    CONF_TYPE_DHCP4_SERVER, parse_yaml_bool,    offsetof(DHCP4Server, emit_dns)},
-        { "dns",         CONF_TYPE_DHCP4_SERVER, parse_yaml_address, offsetof(DHCP4Server, dns)},
-        { NULL,          _CONF_TYPE_INVALID,     0,                  0}
+        { "pool-offset",        CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_offset)},
+        { "pool-size",          CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_size)},
+        { "emit-dns",           CONF_TYPE_DHCP4_SERVER, parse_yaml_bool,    offsetof(DHCP4Server, emit_dns)},
+        { "dns",                CONF_TYPE_DHCP4_SERVER, parse_yaml_address, offsetof(DHCP4Server, dns)},
+        { "default-lease-time", CONF_TYPE_DHCP4_SERVER, parse_yaml_string,  offsetof(DHCP4Server, default_lease_time)},
+        { "max-lease-time",     CONF_TYPE_DHCP4_SERVER, parse_yaml_string,  offsetof(DHCP4Server, max_lease_time)},
+        { NULL,                 _CONF_TYPE_INVALID,     0,                  0}
 };
 
 static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
