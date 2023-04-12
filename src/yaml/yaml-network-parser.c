@@ -17,7 +17,7 @@
 
 static WiFiAccessPoint *wifi_access_point;
 
-static ParserTable parser_wifi_vtable[] = {
+static ParserTable wifi_vtable[] = {
         { "ssid-name",           CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WiFiAccessPoint,    ssid)},
         { "password",            CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WIFIAuthentication, password)},
         { "key-management",      CONF_TYPE_WIFI,     parse_yaml_auth_key_management_type, offsetof(WIFIAuthentication, key_management)},
@@ -32,14 +32,14 @@ static ParserTable parser_wifi_vtable[] = {
         { NULL,                  _CONF_TYPE_INVALID, 0,                                   0}
 };
 
-static ParserTable parser_match_vtable[] = {
+static ParserTable match_vtable[] = {
         { "name",                       CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, ifname)},
         { "driver",                     CONF_TYPE_NETWORK,     parse_yaml_scalar_or_sequence,     offsetof(Network, driver)},
         { "macaddress",                 CONF_TYPE_NETWORK,     parse_yaml_mac_address,            offsetof(Network, match_mac)},
         { NULL,                         _CONF_TYPE_INVALID,    0,                                 0}
 };
 
-static ParserTable parser_network_vtable[] = {
+static ParserTable network_vtable[] = {
         { "unmanaged",                  CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, unmanaged)},
         { "mtu",                        CONF_TYPE_NETWORK,     parse_yaml_uint32,                       offsetof(Network, mtu)},
         { "arp",                        CONF_TYPE_NETWORK,     parse_yaml_bool,                         offsetof(Network, arp)},
@@ -71,7 +71,7 @@ static ParserTable parser_network_vtable[] = {
         { NULL,                         _CONF_TYPE_INVALID,    0,                                       0}
 };
 
-static ParserTable parser_dhcp4_overrides_vtable[] = {
+static ParserTable dhcp4_overrides_vtable[] = {
         { "use-dns",        CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_dns)},
         { "use-domain",     CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_domains)},
         { "use-ntp",        CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_ntp)},
@@ -86,7 +86,7 @@ static ParserTable parser_dhcp4_overrides_vtable[] = {
         { NULL,             _CONF_TYPE_INVALID,  0,                 0}
 };
 
-static ParserTable parser_dhcp6_overrides_vtable[] = {
+static ParserTable dhcp6_overrides_vtable[] = {
         { "use-dns",       CONF_TYPE_DHCP6,     parse_yaml_bool,             offsetof(Network, dhcp6_use_dns)},
         { "use-domain",    CONF_TYPE_DHCP6,     parse_yaml_bool,             offsetof(Network, dhcp6_use_domains)},
         { "use-ntp",       CONF_TYPE_DHCP6,     parse_yaml_bool,             offsetof(Network, dhcp6_use_ntp)},
@@ -110,19 +110,19 @@ static ParserTable router_advertisement_overrides_vtable[] = {
         { NULL,                    _CONF_TYPE_INVALID, 0,                           0}
 };
 
-static ParserTable parser_address_vtable[] = {
+static ParserTable address_vtable[] = {
         { "label",     CONF_TYPE_ADDRESS,     parse_yaml_addresses, offsetof(Network, addresses)},
         { "addresses", CONF_TYPE_ADDRESS,     parse_yaml_addresses, offsetof(Network, addresses)},
         { NULL,        _CONF_TYPE_INVALID,    0,                    0}
 };
 
-static ParserTable parser_nameservers_vtable[] = {
+static ParserTable nameservers_vtable[] = {
         { "search",     CONF_TYPE_DNS,      parse_yaml_domains,              offsetof(Network, domains)},
         { "addresses",  CONF_TYPE_DNS,      parse_yaml_nameserver_addresses, offsetof(Network, nameservers)},
         { NULL,         _CONF_TYPE_INVALID, 0,                               0}
 };
 
-static ParserTable parser_route_vtable[] = {
+static ParserTable route_vtable[] = {
         { "via",                        CONF_TYPE_ROUTE,    parse_yaml_route,       offsetof(Route, gw)},
         { "to",                         CONF_TYPE_ROUTE,    parse_yaml_route,       offsetof(Route, dst)},
         { "from",                       CONF_TYPE_ROUTE,    parse_yaml_address,     offsetof(Route, prefsrc)},
@@ -139,7 +139,7 @@ static ParserTable parser_route_vtable[] = {
         { NULL,                         _CONF_TYPE_INVALID, 0,                      0}
 };
 
-static ParserTable parser_routing_policy_rule_vtable[] = {
+static ParserTable routing_policy_rule_vtable[] = {
         { "from",            CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_address, offsetof(RoutingPolicyRule, from)},
         { "to",              CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_address, offsetof(RoutingPolicyRule, to)},
         { "table",           CONF_TYPE_ROUTING_POLICY_RULE, parse_yaml_uint32,  offsetof(RoutingPolicyRule, table)},
@@ -149,13 +149,13 @@ static ParserTable parser_routing_policy_rule_vtable[] = {
         { NULL,              _CONF_TYPE_INVALID,            0,                  0}
 };
 
-static ParserTable parser_dhcp4_server_static_lease_vtable[] = {
+static ParserTable dhcp4_server_static_lease_vtable[] = {
         { "address",    CONF_TYPE_DHCP4_SERVER, parse_yaml_address,     offsetof(DHCP4ServerLease, addr)},
         { "macaddress", CONF_TYPE_DHCP4_SERVER, parse_yaml_mac_address, offsetof(DHCP4ServerLease, mac)},
         { NULL,          _CONF_TYPE_INVALID,    0,                      0}
 };
 
-static ParserTable parser_dhcp4_server_vtable[] = {
+static ParserTable dhcp4_server_vtable[] = {
         { "pool-offset",        CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_offset)},
         { "pool-size",          CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_size)},
         { "emit-dns",           CONF_TYPE_DHCP4_SERVER, parse_yaml_bool,    offsetof(DHCP4Server, emit_dns)},
@@ -164,6 +164,17 @@ static ParserTable parser_dhcp4_server_vtable[] = {
         { "max-lease-time",     CONF_TYPE_DHCP4_SERVER, parse_yaml_string,  offsetof(DHCP4Server, max_lease_time)},
         { NULL,                 _CONF_TYPE_INVALID,     0,                  0}
 };
+
+static ParserTable sriov_vtable[] = {
+        { "pool-offset",        CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_offset)},
+        { "pool-size",          CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_size)},
+        { "emit-dns",           CONF_TYPE_DHCP4_SERVER, parse_yaml_bool,    offsetof(DHCP4Server, emit_dns)},
+        { "dns",                CONF_TYPE_DHCP4_SERVER, parse_yaml_address, offsetof(DHCP4Server, dns)},
+        { "default-lease-time", CONF_TYPE_DHCP4_SERVER, parse_yaml_string,  offsetof(DHCP4Server, default_lease_time)},
+        { "max-lease-time",     CONF_TYPE_DHCP4_SERVER, parse_yaml_string,  offsetof(DHCP4Server, max_lease_time)},
+        { NULL,                 _CONF_TYPE_INVALID,     0,                  0}
+};
+
 
 static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
         yaml_node_pair_t *entry;
@@ -707,30 +718,30 @@ int yaml_register_network(YAMLManager *m) {
         assert(m->route);
         assert(m->nameserver);
 
-        for (size_t i = 0; parser_match_vtable[i].key; i++) {
-               if (!g_hash_table_insert(m->match, (void *) parser_match_vtable[i].key, &parser_match_vtable[i])) {
-                        log_warning("Failed add key='%s' to match table", parser_match_vtable[i].key);
+        for (size_t i = 0; match_vtable[i].key; i++) {
+               if (!g_hash_table_insert(m->match, (void *) match_vtable[i].key, &match_vtable[i])) {
+                        log_warning("Failed add key='%s' to match table", match_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        for (size_t i = 0; parser_network_vtable[i].key; i++) {
-               if (!g_hash_table_insert(m->network, (void *) parser_network_vtable[i].key, &parser_network_vtable[i])) {
-                        log_warning("Failed add key='%s' to network table", parser_network_vtable[i].key);
+        for (size_t i = 0; network_vtable[i].key; i++) {
+               if (!g_hash_table_insert(m->network, (void *) network_vtable[i].key, &network_vtable[i])) {
+                        log_warning("Failed add key='%s' to network table", network_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        for (size_t i = 0; parser_dhcp4_overrides_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->dhcp4, (void *) parser_dhcp4_overrides_vtable[i].key, &parser_dhcp4_overrides_vtable[i])) {
-                        log_warning("Failed add key='%s' to dhcp4 table", parser_dhcp4_overrides_vtable[i].key);
+        for (size_t i = 0; dhcp4_overrides_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->dhcp4, (void *) dhcp4_overrides_vtable[i].key, &dhcp4_overrides_vtable[i])) {
+                        log_warning("Failed add key='%s' to dhcp4 table", dhcp4_overrides_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        for (size_t i = 0; parser_dhcp6_overrides_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->dhcp6, (void *) parser_dhcp6_overrides_vtable[i].key, &parser_dhcp6_overrides_vtable[i])) {
-                        log_warning("Failed add key='%s' to dhcp6 table", parser_dhcp6_overrides_vtable[i].key);
+        for (size_t i = 0; dhcp6_overrides_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->dhcp6, (void *) dhcp6_overrides_vtable[i].key, &dhcp6_overrides_vtable[i])) {
+                        log_warning("Failed add key='%s' to dhcp6 table", dhcp6_overrides_vtable[i].key);
                         return -EINVAL;
                 }
         }
@@ -742,44 +753,44 @@ int yaml_register_network(YAMLManager *m) {
                 }
         }
 
-        for (size_t i = 0; parser_address_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->address, (void *) parser_address_vtable[i].key, &parser_address_vtable[i])) {
-                        log_warning("Failed add key='%s' to address table", parser_address_vtable[i].key);
+        for (size_t i = 0; address_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->address, (void *) address_vtable[i].key, &address_vtable[i])) {
+                        log_warning("Failed add key='%s' to address table", address_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        for (size_t i = 0; parser_routing_policy_rule_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->routing_policy_rule, (void *) parser_routing_policy_rule_vtable[i].key, &parser_routing_policy_rule_vtable[i])) {
-                        log_warning("Failed add key='%s' to routing policy rule table", parser_routing_policy_rule_vtable[i].key);
+        for (size_t i = 0; routing_policy_rule_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->routing_policy_rule, (void *) routing_policy_rule_vtable[i].key, &routing_policy_rule_vtable[i])) {
+                        log_warning("Failed add key='%s' to routing policy rule table", routing_policy_rule_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        for (size_t i = 0; parser_route_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->route, (void *) parser_route_vtable[i].key, &parser_route_vtable[i])) {
-                        log_warning("Failed add key='%s' to route table", parser_route_vtable[i].key);
+        for (size_t i = 0; route_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->route, (void *) route_vtable[i].key, &route_vtable[i])) {
+                        log_warning("Failed add key='%s' to route table", route_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        for (size_t i = 0; parser_nameservers_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->nameserver, (void *) parser_nameservers_vtable[i].key, &parser_nameservers_vtable[i])) {
-                        log_warning("Failed add key='%s' to nameserver table", parser_nameservers_vtable[i].key);
+        for (size_t i = 0; nameservers_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->nameserver, (void *) nameservers_vtable[i].key, &nameservers_vtable[i])) {
+                        log_warning("Failed add key='%s' to nameserver table", nameservers_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        for (size_t i = 0; parser_dhcp4_server_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->dhcp4_server, (void *) parser_dhcp4_server_vtable[i].key, &parser_dhcp4_server_vtable[i])) {
-                        log_warning("Failed add key='%s' to dhcp4 server table", parser_dhcp4_server_vtable[i].key);
+        for (size_t i = 0; dhcp4_server_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->dhcp4_server, (void *) dhcp4_server_vtable[i].key, &dhcp4_server_vtable[i])) {
+                        log_warning("Failed add key='%s' to dhcp4 server table", dhcp4_server_vtable[i].key);
                         return -EINVAL;
                 }
         }
 
-        for (size_t i = 0; parser_dhcp4_server_static_lease_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->dhcp4_server_static_lease, (void *) parser_dhcp4_server_static_lease_vtable[i].key, &parser_dhcp4_server_static_lease_vtable[i])) {
-                        log_warning("Failed add key='%s' dhcp4 server static lease table", parser_dhcp4_server_static_lease_vtable[i].key);
+        for (size_t i = 0; dhcp4_server_static_lease_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->dhcp4_server_static_lease, (void *) dhcp4_server_static_lease_vtable[i].key, &dhcp4_server_static_lease_vtable[i])) {
+                        log_warning("Failed add key='%s' dhcp4 server static lease table", dhcp4_server_static_lease_vtable[i].key);
                         return -EINVAL;
                 }
         }

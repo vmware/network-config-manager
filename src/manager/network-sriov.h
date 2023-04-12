@@ -29,4 +29,4 @@ int sriov_new(SRIOV **ret);
 void sriov_free(SRIOV *s);
 DEFINE_CLEANUP(SRIOV*, sriov_free);
 
-int sriov_configure(const IfNameIndex *ifidx, SRIOV *s, bool link);
+int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link);
