@@ -609,6 +609,8 @@ static void test_yaml_add_dhcp4_server_static_address(void **state) {
     assert_true(key_file_config_exists(key_file, "DHCPServer", "PoolSize", "200"));
     assert_true(key_file_config_exists(key_file, "DHCPServer", "EmitDNS", "yes"));
     assert_true(key_file_config_exists(key_file, "DHCPServer", "DNS", "8.8.8.8"));
+    assert_true(key_file_config_exists(key_file, "DHCPServer", "DefaultLeaseTimeSec", "12h"));
+    assert_true(key_file_config_exists(key_file, "DHCPServer", "MaxLeaseTimeSec", "16h"));
 
     assert_true(key_file_config_exists(key_file, "Network", "DHCPServer", "yes"));
     assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "no"));
