@@ -52,7 +52,7 @@ Introspect
  - DNS and Domains.
  - Hostname.
  - nftable
- - Supports JSON format.
+ - Allows to export in JSON format.
 
 ### Building from source.
 
