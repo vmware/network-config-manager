@@ -8,29 +8,13 @@
 #include "macros.h"
 #include "network-manager.h"
 #include "netdev-link.h"
+#include "network-sriov.h"
 #include "network.h"
 #include "networkd-api.h"
 #include "parse-util.h"
 #include "string-util.h"
 #include "yaml-network-parser.h"
 #include "yaml-parser.h"
-
-static WiFiAccessPoint *wifi_access_point;
-
-static ParserTable wifi_vtable[] = {
-        { "ssid-name",           CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WiFiAccessPoint,    ssid)},
-        { "password",            CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WIFIAuthentication, password)},
-        { "key-management",      CONF_TYPE_WIFI,     parse_yaml_auth_key_management_type, offsetof(WIFIAuthentication, key_management)},
-        { "psk",                 CONF_TYPE_WIFI,     parse_yaml_auth_key_management_type, offsetof(WIFIAuthentication, password)},
-        { "method",              CONF_TYPE_WIFI,     parse_yaml_auth_eap_method,          offsetof(WIFIAuthentication, eap_method)},
-        { "ca-certificate",      CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WIFIAuthentication, ca_certificate)},
-        { "client-certificate",  CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WIFIAuthentication, client_certificate)},
-        { "client-key",          CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WIFIAuthentication, client_key)},
-        { "client-key-password", CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WIFIAuthentication, client_key_password)},
-        { "identity",            CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WIFIAuthentication, identity)},
-        { "anonymous-identity",  CONF_TYPE_WIFI,     parse_yaml_string,                   offsetof(WIFIAuthentication, anonymous_identity)},
-        { NULL,                  _CONF_TYPE_INVALID, 0,                                   0}
-};
 
 static ParserTable match_vtable[] = {
         { "name",                       CONF_TYPE_NETWORK,     parse_yaml_string,                 offsetof(Network, ifname)},
@@ -166,62 +150,14 @@ static ParserTable dhcp4_server_vtable[] = {
 };
 
 static ParserTable sriov_vtable[] = {
-        { "pool-offset",        CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_offset)},
-        { "pool-size",          CONF_TYPE_DHCP4_SERVER, parse_yaml_uint32,  offsetof(DHCP4Server, pool_size)},
-        { "emit-dns",           CONF_TYPE_DHCP4_SERVER, parse_yaml_bool,    offsetof(DHCP4Server, emit_dns)},
-        { "dns",                CONF_TYPE_DHCP4_SERVER, parse_yaml_address, offsetof(DHCP4Server, dns)},
-        { "default-lease-time", CONF_TYPE_DHCP4_SERVER, parse_yaml_string,  offsetof(DHCP4Server, default_lease_time)},
-        { "max-lease-time",     CONF_TYPE_DHCP4_SERVER, parse_yaml_string,  offsetof(DHCP4Server, max_lease_time)},
-        { NULL,                 _CONF_TYPE_INVALID,     0,                  0}
+        { "virtual-function",    CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, vf)},
+        { "vlan-id",             CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, vlanid)},
+        { "quality-of-service",  CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, qos)},
+        { "vlan-protocol",       CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, vlanproto)},
+        { "link-state",          CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, linkstate)},
+        { "macaddress",          CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, macaddr)},
+        { NULL,                 _CONF_TYPE_INVALID,                 0, 0}
 };
-
-
-static int parse_wifi_access_points_config(YAMLManager *m, yaml_document_t *doc, yaml_node_t *node, Network *network) {
-        yaml_node_pair_t *entry;
-
-        assert(doc);
-        assert(node);
-
-        for (entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
-                yaml_node_t *key, *value;
-                ParserTable *p;
-                void *v;
-
-                key = yaml_document_get_node(doc, entry->key);
-                value = yaml_document_get_node(doc, entry->value);
-
-                if (str_eq(scalar(key), "ssid-name")) {
-                        wifi_access_point = new0(WiFiAccessPoint, 1);
-                        if (!wifi_access_point)
-                                return log_oom();
-
-                        wifi_access_point->auth = new0(WIFIAuthentication, 1);
-                        if (!wifi_access_point->auth)
-                                return log_oom();
-
-                        wifi_access_point->ssid = g_strdup(scalar(value));
-                        if (!network->access_points)
-                                network->access_points = g_hash_table_new(g_str_hash, g_str_equal);
-
-                        if (!g_hash_table_insert(network->access_points, wifi_access_point->ssid, wifi_access_point)) {
-                                log_warning("Failed to add WiFi access point: %s", scalar(value));
-                                return false;
-                        }
-
-                        continue;
-                }
-
-                p = g_hash_table_lookup(m->wifi_config, scalar(key));
-                if (!p)
-                        continue;
-
-                v = (uint8_t *)  wifi_access_point->auth + p->offset;
-                if (p->parser)
-                        (void) p->parser(scalar(key), scalar(value), wifi_access_point, v, doc, value);
-        }
-
-        return 0;
-}
 
 static int parse_route(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Route *rt = NULL;
