@@ -700,6 +700,8 @@ void dhcp4_server_free(DHCP4Server *s) {
         if (!s)
                 return;
 
+        free(s->default_lease_time);
+        free(s->max_lease_time);
         free(s);
 }
 
@@ -1652,6 +1654,18 @@ int generate_network_config(Network *n) {
                 r = set_config_uint(key_file, "DHCPServer", "PoolSize", n->dhcp4_server->pool_size);
                 if (r < 0)
                         return r;
+
+                if (n->dhcp4_server->default_lease_time) {
+                        r = set_config(key_file, "DHCPServer", "DefaultLeaseTimeSec", n->dhcp4_server->default_lease_time);
+                        if (r < 0)
+                                return r;
+                }
+
+                if (n->dhcp4_server->max_lease_time) {
+                        r = set_config(key_file, "DHCPServer", "MaxLeaseTimeSec", n->dhcp4_server->max_lease_time);
+                        if (r < 0)
+                                return r;
+                }
 
                 if (n->dhcp4_server->emit_dns >= 0) {
                         r = set_config(key_file, "DHCPServer", "EmitDNS", bool_to_str(n->dhcp4_server->emit_dns));

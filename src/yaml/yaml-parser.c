@@ -303,6 +303,7 @@ int parse_yaml_string(const char *key,
 
         p = (char **) userdata;
 
+        printf("%s\n", value);
         *p = g_strdup(value);
         if (!*p)
                 return log_oom();
