@@ -543,9 +543,9 @@ int create_network_conf_file(const char *ifname, char **ret) {
 
         assert(ifname);
 
-        file = strjoin("-", "10", ifname, NULL);
-        if (!file)
-                return log_oom();
+        r = determine_conf_file_name(ifname, &file);
+        if (r < 0)
+                return r;
 
         r = create_conf_file("/etc/systemd/network", file, "network", &network);
         if (r < 0)
@@ -570,11 +570,9 @@ int determine_network_conf_file(const char *ifname, char **ret) {
         _auto_cleanup_ char *file = NULL, *network = NULL;
         int r;
 
-        assert(ifname);
-
-        file = strjoin("-", "10", ifname, NULL);
-        if (!file)
-                return log_oom();
+        r = determine_conf_file_name(ifname, &file);
+        if (r < 0)
+                return r;
 
         r = determine_conf_file("/etc/systemd/network", file, "network", &network);
         if (r < 0)
