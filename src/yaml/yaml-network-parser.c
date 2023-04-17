@@ -150,11 +150,11 @@ static ParserTable dhcp4_server_vtable[] = {
 };
 
 static ParserTable sriov_vtable[] = {
-        { "virtual-function",    CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, vf)},
-        { "vlan-id",             CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, vlanid)},
+        { "virtual-function",    CONF_TYPE_SRIOV,   parse_yaml_uint32, offsetof(SRIOV, vf)},
+        { "vlan-id",             CONF_TYPE_SRIOV,   parse_yaml_uint32, offsetof(SRIOV, vlan)},
         { "quality-of-service",  CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, qos)},
-        { "vlan-protocol",       CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, vlanproto)},
-        { "link-state",          CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, linkstate)},
+        { "vlan-protocol",       CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, vlan_proto)},
+        { "link-state",          CONF_TYPE_SRIOV,   parse_yaml_uint32, offsetof(SRIOV, link_state)},
         { "macaddress",          CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, macaddr)},
         { NULL,                 _CONF_TYPE_INVALID,                 0, 0}
 };

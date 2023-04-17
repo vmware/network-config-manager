@@ -34,7 +34,7 @@ bool colors_supported(void) {
 
        e = getenv("NMCTL_BEAUTIFY");
        if (e)
-           return parse_boolean(e) ? true : false;
+           return parse_bool(e) ? true : false;
 
        return true;
 }

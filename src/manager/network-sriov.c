@@ -21,18 +21,51 @@
 #include "network.h"
 #include "parse-util.h"
 
+static const char *const sriov_link_state_table[_SR_IOV_LINK_STATE_MAX] = {
+       [SR_IOV_LINK_STATE_DISABLE] = "no",
+       [SR_IOV_LINK_STATE_ENABLE]  = "yes",
+       [SR_IOV_LINK_STATE_AUTO]    = "auto",
+};
+
+static const char *sriov_link_state_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(sriov_link_state_table))
+                return NULL;
+
+        return sriov_link_state_table[id];
+}
+
+int parse_sriov_link_state(const char *s) {
+        int r;
+
+        assert(s);
+
+        if (str_eq(s, "auto"))
+                return SR_IOV_LINK_STATE_AUTO;
+
+        r = parse_bool(s);
+        if (r < 0)
+                return -EINVAL;
+
+        return r;
+}
+
 int sriov_new(SRIOV **ret) {
         _cleanup_(sriov_freep) SRIOV *s = NULL;
 
-        s = new0(SRIOV, 1);
+        s = new(SRIOV, 1);
         if (!s)
                 return log_oom();
 
         *s = (SRIOV) {
+                .vf = UINT32_MAX,
                 .family = AF_UNSPEC,
-                .macspoofck = -1,
-                .qrss = -1,
+                .query_rss = -1,
+                .vf_spoof_check_setting = -1,
                 .trust = -1,
+                .link_state = -1,
         };
 
         *ret = steal_pointer(s);
@@ -43,13 +76,7 @@ void sriov_free(SRIOV *s) {
         if (!s)
                 return;
 
-        free(s->vf);
-        free(s->vlanid);
-        free(s->qos);
-        free(s->vlanproto);
         free(s->macaddr);
-        free(s->linkstate);
-
         free(s);
 }
 
@@ -80,29 +107,29 @@ int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link) {
         if (r < 0)
                 return r;
 
-        if (s->vf)
-                add_key_to_section(section, "VirtualFunction", s->vf);
+        if (s->vf != UINT32_MAX)
+                add_key_to_section_uint(section, "VirtualFunction", s->vf);
 
-        if (s->vlanid)
-                add_key_to_section(section, "VLANId", s->vlanid);
+        if (s->vlan > 0)
+                add_key_to_section_uint(section, "VLANId", s->vlan);
 
-        if (s->qos)
-                add_key_to_section(section, "QualityOfService", s->qos);
+        if (s->qos > 0)
+                add_key_to_section_uint(section, "QualityOfService", s->qos);
 
-        if (s->vlanproto)
-                add_key_to_section(section, "VLANProtocol", s->vlanproto);
+        if (s->vlan_proto)
+                add_key_to_section(section, "VLANProtocol", s->vlan_proto);
 
-        if (s->macspoofck >= 0)
-                add_key_to_section(section, "MACSpoofCheck", bool_to_str(s->macspoofck));
+        if (s->vf_spoof_check_setting >= 0)
+                add_key_to_section(section, "MACSpoofCheck", bool_to_str(s->vf_spoof_check_setting));
 
-        if (s->qrss >= 0)
-                add_key_to_section(section, "QueryReceiveSideScaling", bool_to_str(s->qrss));
+        if (s->query_rss >= 0)
+                add_key_to_section(section, "QueryReceiveSideScaling", bool_to_str(s->query_rss));
 
         if (s->trust >= 0)
                 add_key_to_section(section, "Trust", bool_to_str(s->trust));
 
-        if (s->linkstate)
-                add_key_to_section(section, "LinkState", s->linkstate);
+        if (s->link_state >= 0)
+                add_key_to_section(section, "LinkState", sriov_link_state_to_name(s->link_state));
 
         if (s->macaddr)
                 add_key_to_section(section, "MACAddress", s->macaddr);
@@ -140,8 +167,6 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 1; i < argc; i++) {
-                unsigned v;
-
                 if (str_eq_fold(argv[i], "dev")) {
                         parse_next_arg(argv, argc, i);
 
@@ -155,86 +180,74 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "vf")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint32(argv[i], &v);
+                        r = parse_uint32(argv[i], &s->vf);
                         if (r < 0) {
                                 log_warning("Failed to configure sriov vf ='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
-
-                        s->vf = strdup(argv[i]);
-                        if (!s->vf)
-                                return log_oom();
 
                         have_vf = true;
                         continue;
                 } else if (str_eq_fold(argv[i], "vlanid")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint32(argv[i], &v);
+                        r = parse_uint32(argv[i], &s->vlan);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vlanid ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov vlan ='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
-
-                        s->vlanid = strdup(argv[i]);
-                        if (!s->vlanid)
-                                return log_oom();
 
                         continue;
                 } else if (str_eq_fold(argv[i], "qos")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_uint32(argv[i], &v);
+                        r = parse_uint32(argv[i], &s->qos);
                         if (r < 0) {
                                 log_warning("Failed to configure sriov qos ='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
-                        s->qos = strdup(argv[i]);
-                        if (!s->qos)
-                                return log_oom();
-
                         continue;
                 } else if (str_eq_fold(argv[i], "vlanproto")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_sriov_vlanprotocol(argv[i]);
+                        r = parse_sriov_vlan_protocol(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vlanproto ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov vlan_proto ='%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
 
-                        s->vlanproto = strdup(argv[i]);
-                        if (!s->vlanproto)
+                        s->vlan_proto = strdup(argv[i]);
+                        if (!s->vlan_proto)
                                 return log_oom();
 
                         continue;
                 } else if (str_eq_fold(argv[i], "macspoofck")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse sriov macspoofck '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse sriov vf_spoof_check_setting '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
-                        s->macspoofck = r;
+                        s->vf_spoof_check_setting = r;
                         continue;
                 } else if (str_eq_fold(argv[i], "qrss")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse sriov qrss '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
-                        s->qrss = r;
+                        s->query_rss = r;
                         continue;
                 } else  if (str_eq_fold(argv[i], "trust")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse sriov trust '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -245,17 +258,13 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "linkstate")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (!str_eq_fold(argv[i], "auto")) {
-                                r = parse_boolean(argv[i]);
-                                if (r < 0) {
-                                        log_warning("Failed to parse sriov linkstate '%s': %s", argv[i], strerror(-r));
-                                        return r;
-                                }
+                        r = parse_sriov_link_state(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse sriov link_state '%s': %s", argv[i], strerror(-r));
+                                return r;
                         }
 
-                        s->linkstate = strdup(argv[i]);
-                        if (!s->linkstate)
-                                return log_oom();
+                        s->link_state = r;
 
                         continue;
                 } else if (str_eq_fold(argv[i], "macaddr")) {

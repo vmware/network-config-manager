@@ -236,7 +236,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 if (str_eq_fold(argv[i], "auton")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse auton='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -246,7 +246,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "rxcsumo")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse rxcsumo='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -256,7 +256,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "txcsumo")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse txcsumo='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -266,7 +266,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "tso")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse tso='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -276,7 +276,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "tso6")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse tso6='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -286,7 +286,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "gso")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse gso='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -296,7 +296,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "grxo")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse grxo='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -306,7 +306,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "grxoh")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse grxoh='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -316,7 +316,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "lrxo")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse lrxo='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -326,7 +326,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "rxvtha")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse rxvtha='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -336,7 +336,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "txvtha")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse txvtha='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -346,7 +346,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "rxvtf")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse rxvtf='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -356,7 +356,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "txvstha")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse txvstha='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -366,7 +366,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "ntf")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse ntf='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -376,7 +376,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "uarxc")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse uarxc='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -386,7 +386,7 @@ _public_ int ncm_configure_link_features(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "uatxc")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse uatxc='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -560,7 +560,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                 if (str_eq_fold(argv[i], "rxflowctrl")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse rxflowctrl='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -570,7 +570,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "txflowctrl")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse rxflowctrl='%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -580,7 +580,7 @@ _public_ int ncm_configure_link_flow_control(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "autoflowctrl")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse autoflowctrl='%s': %s", argv[i], strerror(-r));
                                 return r;

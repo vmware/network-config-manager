@@ -77,7 +77,7 @@ int parse_yaml_bool(const char *key,
 
         p = userdata;
 
-        r = parse_boolean(value);
+        r = parse_bool(value);
         if (r < 0)
                 return r;
 
@@ -413,14 +413,14 @@ int parse_yaml_dhcp_type(const char *key,
         n = data;
 
         if (str_eq("dhcp4", key)) {
-                r = parse_boolean(value);
+                r = parse_bool(value);
                 if (r < 0)
                         return r;
 
                 n->dhcp4 = r;
 
         } else if (str_eq("dhcp6", key)) {
-                r = parse_boolean(value);
+                r = parse_bool(value);
                 if (r < 0)
                         return r;
 

@@ -213,7 +213,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "manage")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse device 'manage' '%s' '%s': %s", p->ifname, argv[i], strerror(-r));
                                 return r;
@@ -221,7 +221,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
                         k = r;
                         break;
                 } else {
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse device 'manage' '%s' '%s': %s", p->ifname, argv[i], strerror(-r));
                                 return r;
@@ -281,7 +281,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                 if (str_eq_fold(argv[i], "arp")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse arp='%s' on device '%s': %s", argv[i], p->ifname, strerror(-r));
                                 return r;
@@ -298,7 +298,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "mc")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse device='%s' multicast='%s': %s", p->ifname, argv[i], strerror(-r));
                                 return r;
@@ -315,7 +315,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "amc")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse device='%s' allmulticast='%s': %s", p->ifname, argv[i], strerror(-r));
                                 return r;
@@ -332,7 +332,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "pcs")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse device='%s' promiscuous='%s': %s", p->ifname, argv[i], strerror(-r));
                                 return r;
@@ -868,7 +868,7 @@ _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        s = parse_boolean_or_ip_family(argv[3]);
+        s = parse_bool_or_ip_family(argv[3]);
         if (!s) {
                 log_warning("Failed to parse %s=%s for device '%s': %s", argv[0], argv[2], argv[1], strerror(-r));
                 return r;
@@ -910,7 +910,7 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
         if (r < 0)
                 return log_oom();
 
-        r = parse_boolean(argv[3]);
+        r = parse_bool(argv[3]);
         if (r < 0) {
                 if (str_eq(argv[0], "set-llmnr") || str_eq(argv[0], "llmnr") ||
                     str_eq(argv[0], "set-mcast-dns") || str_eq(argv[0], "mcast-dns")) {
@@ -956,7 +956,7 @@ _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
                 if (ctl_to_config(m, argv[i])) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse %s=%s for device '%s': %s", argv[i-1], argv[i], p->ifname, strerror(-r));
                                 return r;
@@ -1007,7 +1007,7 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
                 if (ctl_to_config(m, argv[i])) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse %s=%s for device '%s': %s", argv[i-1], argv[i], argv[1], strerror(-r));
                                 return r;
@@ -1165,7 +1165,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "prefix-route") || str_eq_fold(argv[i], "pr")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse prefix-route '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -1320,7 +1320,7 @@ _public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "onlink")) {
                         parse_next_arg(argv, argc, i);
 
-                        onlink = parse_boolean(argv[i]);
+                        onlink = parse_bool(argv[i]);
                         if (onlink < 0) {
                                 log_warning("Failed to parse onlink '%s': %s\n", argv[1], strerror(EINVAL));
                                 return -EINVAL;
@@ -1504,7 +1504,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "onlink")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse route onlink '%s': %s", argv[i], strerror(-r));
                                 return r;
@@ -1822,7 +1822,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "invert")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse invert '%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
@@ -1996,7 +1996,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "emit-dns")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse emit dns '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2007,7 +2007,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "emit-ntp")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse emit ntp '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2018,7 +2018,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "emit-router")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse emit router '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2323,7 +2323,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "assign")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse assign '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2334,7 +2334,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "managed")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse managed '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2345,7 +2345,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "other")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse other '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2356,7 +2356,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "emit-dns")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse emit-dns '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -2367,7 +2367,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "emit-domain")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse emit-domain '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -3035,7 +3035,7 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
                         continue;
                 }
 
-                b = parse_boolean(argv[i]);
+                b = parse_bool(argv[i]);
                 if (b < 0) {
                         log_warning("Failed to parse '%s': %s",  argv[i], strerror(EINVAL));
                         return -EINVAL;
