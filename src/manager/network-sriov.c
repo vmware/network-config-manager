@@ -53,21 +53,21 @@ void sriov_free(SRIOV *s) {
         free(s);
 }
 
-int sriov_configure(const IfNameIndex *ifidx, SRIOV *s, bool link) {
+int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         _auto_cleanup_ char *network = NULL;
          int r;
 
-        assert(ifidx);
+        assert(i);
         assert(s);
 
         if (!link) {
-                r = create_or_parse_network_file(ifidx, &network);
+                r = create_or_parse_network_file(i, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = create_or_parse_netdev_link_conf_file(ifidx->ifname, &network);
+                r = create_or_parse_netdev_link_conf_file(i->ifname, &network);
                 if (r < 0)
                         return r;
         }

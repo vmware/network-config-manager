@@ -150,6 +150,7 @@ void yaml_manager_free(YAMLManager *p) {
         g_hash_table_destroy(p->dhcp4);
         g_hash_table_destroy(p->dhcp6);
         g_hash_table_destroy(p->nameserver);
+        g_hash_table_destroy(p->router_advertisement);
         g_hash_table_destroy(p->dhcp4_server);
         g_hash_table_destroy(p->dhcp4_server_static_lease);
 

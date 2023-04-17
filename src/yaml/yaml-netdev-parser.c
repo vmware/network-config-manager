@@ -92,7 +92,7 @@ static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
         return -EINVAL;
 }
 
-static ParserTable parser_bond_vtable[] = {
+static ParserTable bond_vtable[] = {
         { "interfaces",              CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,              offsetof(Bond, interfaces)},
         { "arp-ip-targets",          CONF_TYPE_NETDEV_BOND, parse_yaml_sequence,              offsetof(Bond, arp_ip_targets)},
         { "transmit-hash-policy",    CONF_TYPE_NETDEV_BOND, parse_yaml_bond_xmit_hash_policy, offsetof(Bond, xmit_hash_policy)},
@@ -205,7 +205,7 @@ static int yaml_parse_bond(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         return 0;
 }
 
-static ParserTable parser_bridge_vtable[] = {
+static ParserTable bridge_vtable[] = {
         { "interfaces",    CONF_TYPE_NETDEV_BRIDGE, parse_yaml_sequence, offsetof(Bridge, interfaces)},
         { "priority",      CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, priority)},
         { "forward-delay", CONF_TYPE_NETDEV_BRIDGE, parse_yaml_uint32,   offsetof(Bridge, forward_delay)},
@@ -316,7 +316,7 @@ static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
         return 0;
 }
 
-static ParserTable parser_vlan_vtable[] = {
+static ParserTable vlan_vtable[] = {
         { "id",   CONF_TYPE_NETDEV_VLAN, parse_yaml_uint32,  offsetof(VLan, id)},
         { "link", CONF_TYPE_NETDEV_VLAN, parse_yaml_string,  offsetof(VLan, master)},
         { NULL,   _CONF_TYPE_INVALID,    0,                  0}
@@ -372,7 +372,7 @@ static int yaml_parse_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
         return 0;
 }
 
-static ParserTable parser_tunnel_vtable[] = {
+static ParserTable tunnel_vtable[] = {
         { "local",  CONF_TYPE_NETDEV_TUNNEL, parse_yaml_address, offsetof(Tunnel, local)},
         { "remote", CONF_TYPE_NETDEV_TUNNEL, parse_yaml_address, offsetof(Tunnel, remote)},
         { "key",    CONF_TYPE_NETDEV_TUNNEL, parse_yaml_uint32,  offsetof(Tunnel, key)},
@@ -483,7 +483,7 @@ static int yaml_parse_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
         return 0;
 }
 
-static ParserTable parser_vrf_vtable[] = {
+static ParserTable vrf_vtable[] = {
         { "interfaces", CONF_TYPE_NETDEV_VRF, parse_yaml_sequence, offsetof(VRF, interfaces)},
         { "table",      CONF_TYPE_NETDEV_VRF, parse_yaml_uint32,   offsetof(VRF, table)},
         { NULL,         _CONF_TYPE_INVALID,    0,                  0}
@@ -539,7 +539,7 @@ static int yaml_parse_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
         return 0;
 }
 
-static ParserTable parser_vxlan_vtable[] = {
+static ParserTable vxlan_vtable[] = {
         { "id",               CONF_TYPE_NETDEV_VXLAN, parse_yaml_uint32,              offsetof(VxLan, vni)},
         { "local",            CONF_TYPE_NETDEV_VXLAN, parse_yaml_address,             offsetof(VxLan, local)},
         { "remote",           CONF_TYPE_NETDEV_VXLAN, parse_yaml_address,             offsetof(VxLan, remote)},
@@ -610,7 +610,7 @@ static int yaml_parse_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *no
         return 0;
 }
 
-static ParserTable parser_wireguard_peer_vtable[] = {
+static ParserTable wireguard_peer_vtable[] = {
         { "public",      CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence_wireguard_peer_shared_key_or_path, offsetof(WireGuardPeer, public_key)},
         { "keys",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence_wireguard_peer_shared_key_or_path, offsetof(WireGuardPeer, preshared_key_file)},
         { "allowed-ips", CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_sequence,                                   offsetof(WireGuardPeer, allowed_ips)},
@@ -666,7 +666,7 @@ static int yaml_parse_wireguard_peer(YAMLManager *m, yaml_document_t *dp, yaml_n
         return 0;
 }
 
-static ParserTable parser_wireguard_vtable[] = {
+static ParserTable wireguard_vtable[] = {
         { "key",         CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_wireguard_key_or_path, offsetof(WireGuard, private_key_file)},
         { "mark",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint32,                offsetof(WireGuard, fwmark)},
         { "port",        CONF_TYPE_NETDEV_WIREGUARD, parse_yaml_uint16,                offsetof(WireGuard, listen_port)},
@@ -736,7 +736,7 @@ static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t
         return 0;
 }
 
-static ParserTable parser_macvlan_vtable[] = {
+static ParserTable macvlan_vtable[] = {
         { "mode",                  CONF_TYPE_NETDEV_MACVLAN, parse_yaml_macvlan_mode,  offsetof(MACVLan, mode)},
         { "link",                  CONF_TYPE_NETDEV_MACVLAN, parse_yaml_string,        offsetof(MACVLan, master)},
         { NULL,                    _CONF_TYPE_INVALID,       0,                        0}
@@ -870,9 +870,9 @@ int yaml_register_netdev(YAMLManager *m) {
         if (!m->macvlan)
                 return log_oom();
 
-        for (size_t i = 0; parser_macvlan_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->macvlan, (void *) parser_macvlan_vtable[i].key, &parser_macvlan_vtable[i])) {
-                        log_warning("Failed add key='%s' to MACVLan table", parser_macvlan_vtable[i].key);
+        for (size_t i = 0; macvlan_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->macvlan, (void *) macvlan_vtable[i].key, &macvlan_vtable[i])) {
+                        log_warning("Failed add key='%s' to MACVLan table", macvlan_vtable[i].key);
                         return -EINVAL;
                 }
         }
@@ -881,9 +881,9 @@ int yaml_register_netdev(YAMLManager *m) {
         if (!m->vlan)
                 return log_oom();
 
-        for (size_t i = 0; parser_vlan_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->vlan, (void *) parser_vlan_vtable[i].key, &parser_vlan_vtable[i])) {
-                        log_warning("Failed add key='%s' to VLan table", parser_vlan_vtable[i].key);
+        for (size_t i = 0; vlan_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->vlan, (void *) vlan_vtable[i].key, &vlan_vtable[i])) {
+                        log_warning("Failed add key='%s' to VLan table", vlan_vtable[i].key);
                         return -EINVAL;
                 }
         }
@@ -892,9 +892,9 @@ int yaml_register_netdev(YAMLManager *m) {
         if (!m->bond)
                 return log_oom();
 
-        for (size_t i = 0; parser_bond_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->bond, (void *) parser_bond_vtable[i].key, &parser_bond_vtable[i])) {
-                        log_warning("Failed add key='%s' to Bond table", parser_bond_vtable[i].key);
+        for (size_t i = 0; bond_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->bond, (void *) bond_vtable[i].key, &bond_vtable[i])) {
+                        log_warning("Failed add key='%s' to Bond table", bond_vtable[i].key);
                         return -EINVAL;
                 }
         }
@@ -903,9 +903,9 @@ int yaml_register_netdev(YAMLManager *m) {
         if (!m->bridge)
                 return log_oom();
 
-        for (size_t i = 0; parser_bridge_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->bridge, (void *) parser_bridge_vtable[i].key, &parser_bridge_vtable[i])) {
-                        log_warning("Failed add key='%s' to Bridge table", parser_bridge_vtable[i].key);
+        for (size_t i = 0; bridge_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->bridge, (void *) bridge_vtable[i].key, &bridge_vtable[i])) {
+                        log_warning("Failed add key='%s' to Bridge table", bridge_vtable[i].key);
                         return -EINVAL;
                 }
         }
@@ -914,9 +914,9 @@ int yaml_register_netdev(YAMLManager *m) {
         if (!m->tunnel)
                 return log_oom();
 
-        for (size_t i = 0; parser_tunnel_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->tunnel, (void *) parser_tunnel_vtable[i].key, &parser_tunnel_vtable[i])) {
-                        log_warning("Failed add key='%s' to Tunnel table", parser_tunnel_vtable[i].key);
+        for (size_t i = 0; tunnel_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->tunnel, (void *) tunnel_vtable[i].key, &tunnel_vtable[i])) {
+                        log_warning("Failed add key='%s' to Tunnel table", tunnel_vtable[i].key);
                         return -EINVAL;
                 }
         }
@@ -925,9 +925,9 @@ int yaml_register_netdev(YAMLManager *m) {
         if (!m->vrf)
                 return log_oom();
 
-        for (size_t i = 0; parser_vrf_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->vrf, (void *) parser_vrf_vtable[i].key, &parser_vrf_vtable[i])) {
-                        log_warning("Failed add key='%s' to VRF table", parser_vrf_vtable[i].key);
+        for (size_t i = 0; vrf_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->vrf, (void *) vrf_vtable[i].key, &vrf_vtable[i])) {
+                        log_warning("Failed add key='%s' to VRF table", vrf_vtable[i].key);
                         return -EINVAL;
                 }
         }
@@ -936,9 +936,9 @@ int yaml_register_netdev(YAMLManager *m) {
         if (!m->vxlan)
                 return log_oom();
 
-        for (size_t i = 0; parser_vxlan_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->vxlan, (void *) parser_vxlan_vtable[i].key, &parser_vxlan_vtable[i])) {
-                        log_warning("Failed add key='%s' to VRF table", parser_vxlan_vtable[i].key);
+        for (size_t i = 0; vxlan_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->vxlan, (void *) vxlan_vtable[i].key, &vxlan_vtable[i])) {
+                        log_warning("Failed add key='%s' to VRF table", vxlan_vtable[i].key);
                         return -EINVAL;
                 }
         }
@@ -947,9 +947,9 @@ int yaml_register_netdev(YAMLManager *m) {
         if (!m->wireguard)
                 return log_oom();
 
-        for (size_t i = 0; parser_wireguard_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->wireguard, (void *) parser_wireguard_vtable[i].key, &parser_wireguard_vtable[i])) {
-                        log_warning("Failed add key='%s' to VRF table", parser_wireguard_vtable[i].key);
+        for (size_t i = 0; wireguard_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->wireguard, (void *) wireguard_vtable[i].key, &wireguard_vtable[i])) {
+                        log_warning("Failed add key='%s' to VRF table", wireguard_vtable[i].key);
                         return -EINVAL;
                 }
         }
@@ -958,9 +958,9 @@ int yaml_register_netdev(YAMLManager *m) {
         if (!m->wireguard_peer)
                 return log_oom();
 
-        for (size_t i = 0; parser_wireguard_peer_vtable[i].key; i++) {
-                if (!g_hash_table_insert(m->wireguard_peer, (void *) parser_wireguard_peer_vtable[i].key, &parser_wireguard_peer_vtable[i])) {
-                        log_warning("Failed add key='%s' to VRF table", parser_wireguard_peer_vtable[i].key);
+        for (size_t i = 0; wireguard_peer_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->wireguard_peer, (void *) wireguard_peer_vtable[i].key, &wireguard_peer_vtable[i])) {
+                        log_warning("Failed add key='%s' to VRF table", wireguard_peer_vtable[i].key);
                         return -EINVAL;
                 }
         }
