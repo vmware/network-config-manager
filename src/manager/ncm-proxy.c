@@ -25,7 +25,7 @@ _public_ int ncm_configure_proxy(int argc, char *argv[]) {
                 if (str_eq(argv[i], "enable")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse enable '%s': %s", argv[i], strerror(-r));
                                 return r;

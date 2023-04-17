@@ -36,7 +36,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "stp")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse stp %s : %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -46,7 +46,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "vlan-protocol")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse vlan-protocol %s : %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -56,7 +56,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "vlan-filtering")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse vlan-filtering %s : %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -66,7 +66,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "mcast-snooping")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse mcast-snooping %s : %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -76,7 +76,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "mcast-querier")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse mcast-querier %s : %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -386,7 +386,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "independent")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse independent %s : %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -479,7 +479,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "gvrp")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse gvrp '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -490,7 +490,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "mvrp")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse mvrp '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -501,7 +501,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "loose-binding")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse loose-binding '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -512,7 +512,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "reorder-hdr")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse reorder_hdr '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -686,7 +686,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "independent")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse independent %s : %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -900,7 +900,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "mq")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse multi queue %s: %s", argv[i], strerror(-r));
                                 return r;
@@ -911,7 +911,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "pkt-info")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse packet info %s: %s", argv[i], strerror(-r));
                                 return r;
@@ -922,7 +922,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "kc")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse keep carrier %s: %s", argv[i], strerror(-r));
                                 return r;
@@ -933,7 +933,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
               } else if (str_eq_fold(argv[i], "vnet-hdr")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_boolean(argv[i]);
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
                                 log_warning("Failed to parse vnet header %s: %s", argv[i], strerror(-r));
                                 return r;

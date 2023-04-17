@@ -161,7 +161,7 @@ int parse_link_gso(const char *c, int *ret) {
         return 0;
 }
 
-int parse_boolean(const char *v) {
+int parse_bool(const char *v) {
         if (!v)
                 return -EINVAL;
 
@@ -177,7 +177,7 @@ int parse_boolean(const char *v) {
         return -EINVAL;
 }
 
-const char *parse_boolean_or_ip_family(const char *v) {
+const char *parse_bool_or_ip_family(const char *v) {
         if (!v)
                 return NULL;
 
@@ -314,7 +314,7 @@ int parse_link_advertise(const char *c) {
         return 0;
 }
 
-int parse_sriov_vlanprotocol(const char *c) {
+int parse_sriov_vlan_protocol(const char *c) {
         assert(c);
 
         if((!str_eq(c, "802.1Q")) && (!str_eq(c, "802.1ad")))

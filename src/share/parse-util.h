@@ -23,13 +23,13 @@ int parse_link_port(const char *c);
 int parse_link_advertise(const char *c);
 int parse_link_alias(const char *c);
 
-int parse_boolean(const char *v);
-const char *parse_boolean_or_ip_family(const char *v);
+int parse_bool(const char *v);
+const char *parse_bool_or_ip_family(const char *v);
 
 bool is_port_or_range(const char *c);
 bool is_uint32_or_max(const char *c);
 
-int parse_sriov_vlanprotocol(const char *c);
+int parse_sriov_vlan_protocol(const char *c);
 
 
 bool valid_address_label(char *c);
