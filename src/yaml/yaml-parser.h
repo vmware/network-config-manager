@@ -59,7 +59,6 @@ int parse_yaml_route_type(const char *key, const char *value, void *data, void *
 int parse_yaml_route_scope(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 
 int parse_yaml_auth_key_management_type(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
-int parse_yaml_auth_eap_method(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 
 int parse_yaml_dhcp_client_identifier(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_dhcp_type(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
@@ -95,3 +94,5 @@ int parse_yaml_dhcp6_without_ra(const char *key, const char *value, void *data, 
 
 int parse_yaml_bridge_path_cost(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 int parse_yaml_bridge_port_priority(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+
+int parse_yaml_sriov_vlan_protocol(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);

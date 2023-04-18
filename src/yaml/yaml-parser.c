@@ -12,6 +12,7 @@
 #include "parse-util.h"
 #include "string-util.h"
 #include "yaml-network-parser.h"
+#include "network-sriov.h"
 #include "yaml-parser.h"
 
 static const char * const conf_type_table[_CONF_TYPE_MAX] = {
@@ -327,42 +328,6 @@ int parse_yaml_auth_key_management_type(const char *key,
 
         p = data;
         p->auth->eap_method = auth_key_management_type_to_mode(value);
-
-        return 0;
-}
-
-int parse_yaml_auth_eap_method(const char *key,
-                               const char *value,
-                               void *data,
-                               void *userdata,
-                               yaml_document_t *doc,
-                               yaml_node_t *node) {
-
-        WiFiAccessPoint *p;
-
-        assert(key);
-        assert(value);
-        assert(data);
-        assert(doc);
-        assert(node);
-
-        p = data;
-
-        p->auth->key_management = auth_key_management_type_to_mode(key);
-        switch (p->auth->key_management) {
-                case AUTH_KEY_MANAGEMENT_NONE:
-                        p->auth->password = g_strdup(value);
-                        if (!p->auth->password)
-                                return log_oom();
-                        break;
-                case AUTH_KEY_MANAGEMENT_WPA_PSK:
-                        p->auth->password = g_strdup(value);
-                        if (!p->auth->password)
-                                return log_oom();
-                        break;
-                default:
-                        break;
-        }
 
         return 0;
 }
@@ -1410,6 +1375,37 @@ int parse_yaml_bridge_port_priority(const char *key,
                 }
                 n->priority = t;
         }
+
+        return 0;
+}
+
+int parse_yaml_sriov_vlan_protocol(const char *key,
+                                   const char *value,
+                                   void *data,
+                                   void *userdata,
+                                   yaml_document_t *doc,
+                                   yaml_node_t *node) {
+
+        SRIOV *v;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        v = data;
+
+        r = parse_sriov_vlan_protocol(value);
+        if (r < 0) {
+                log_warning("Failed to configure sriov vlan proto ='%s': %s", value, strerror(EINVAL));
+                return r;
+        }
+
+        v->vlan_proto = strdup(value);
+        if (!v->vlan_proto)
+                return log_oom();
 
         return 0;
 }
