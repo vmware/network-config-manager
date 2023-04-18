@@ -1409,3 +1409,31 @@ int parse_yaml_sriov_vlan_protocol(const char *key,
 
         return 0;
 }
+
+int parse_yaml_sriov_link_state(const char *key,
+                                const char *value,
+                                void *data,
+                                void *userdata,
+                                yaml_document_t *doc,
+                                yaml_node_t *node) {
+
+        SRIOV *v;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(data);
+        assert(doc);
+        assert(node);
+
+        v = data;
+
+        r = parse_sriov_link_state(value);
+        if (r < 0) {
+                log_warning("Failed to configure sriov link state ='%s': %s", value, strerror(EINVAL));
+                return r;
+        }
+
+        v->link_state = r;
+        return 0;
+}

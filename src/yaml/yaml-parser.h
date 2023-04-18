@@ -96,3 +96,4 @@ int parse_yaml_bridge_path_cost(const char *key, const char *value, void *data, 
 int parse_yaml_bridge_port_priority(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
 
 int parse_yaml_sriov_vlan_protocol(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
+int parse_yaml_sriov_link_state(const char *key, const char *value, void *data, void *userdata, yaml_document_t *doc, yaml_node_t *node);
