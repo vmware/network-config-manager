@@ -182,7 +182,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &s->vf);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vf ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov vf='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
@@ -193,7 +193,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &s->vlan);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vlan ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov vlan='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
@@ -203,7 +203,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &s->qos);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov qos ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov qos='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
@@ -213,7 +213,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_sriov_vlan_protocol(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vlan_proto ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov vlan proto ='%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
 
@@ -227,7 +227,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_bool(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse sriov vf_spoof_check_setting '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse sriov macspoofck '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -292,7 +292,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
         }
 
         if (!have_vf) {
-                log_warning("Failed to configure sriov missing VirtualFunction : %s", strerror(EINVAL));
+                log_warning("Failed to configure sriov. Missing VirtualFunction: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
