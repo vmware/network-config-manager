@@ -143,15 +143,15 @@ int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link) {
         if (r < 0)
                 return r;
 
+        r = sriov_add_new_section(key_file, s);
+        if (r < 0)
+                return r;
+
         r = key_file_save (key_file);
         if (r < 0) {
                 log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
-
-        r = sriov_add_new_section(key_file, s);
-        if (r < 0)
-                return r;
 
         r = set_file_permisssion(network, "systemd-network");
         if (r < 0)
