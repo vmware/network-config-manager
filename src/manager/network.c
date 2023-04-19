@@ -14,6 +14,7 @@
 #include "network.h"
 #include "networkd-api.h"
 #include "parse-util.h"
+#include "network-sriov.h"
 #include "string-util.h"
 
 #define BRIDGE_PRIORITY_MAX 63
@@ -862,6 +863,10 @@ int network_new(Network **ret) {
         if (!n->routing_policy_rules)
                 return log_oom();
 
+        n->sriovs = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+        if (!n->sriovs)
+                return log_oom();
+
         r = set_new(&n->nameservers, g_str_hash, g_str_equal);
         if (r < 0)
                 return r;
@@ -884,6 +889,7 @@ void network_free(Network *n) {
 
         g_hash_table_destroy(n->routes);
         g_hash_table_destroy(n->routing_policy_rules);
+        g_hash_table_destroy(n->sriovs);
 
         if (n->access_points) {
                 g_hash_table_foreach_steal(n->access_points, wifi_access_point_free, NULL);
@@ -1029,6 +1035,15 @@ int generate_wifi_config(Network *n, GString **ret) {
 
         *ret = steal_pointer(config);
         return 0;
+}
+
+static void append_sriovs(gpointer key, gpointer value, gpointer userdata) {
+        _auto_cleanup_ char *gateway = NULL, *destination = NULL, *prefsrc = NULL;
+        _cleanup_(section_freep) Section *section = NULL;
+        KeyFile *key_file = userdata;
+        SRIOV *s = value;
+
+        (void )sriov_add_new_section(key_file, s);
 }
 
 static void append_dhcp4_server_static_leases(gpointer key, gpointer value, gpointer userdata) {
@@ -1637,6 +1652,9 @@ int generate_network_config(Network *n) {
 
         if (n->routing_policy_rules && g_hash_table_size(n->routing_policy_rules) > 0)
                 g_hash_table_foreach(n->routing_policy_rules, append_routing_policy_rules, key_file);
+
+        if (n->sriovs && g_hash_table_size(n->sriovs) > 0)
+                g_hash_table_foreach(n->sriovs, append_sriovs, key_file);
 
         if (n->neighbor_suppression > 0) {
                 r = set_config(key_file, "Bridge", "NeighborSuppression", bool_to_str(n->neighbor_suppression));

@@ -40,3 +40,4 @@ DEFINE_CLEANUP(SRIOV*, sriov_free);
 
 int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link);
 int parse_sriov_link_state(const char *s);
+int sriov_add_new_section(KeyFile *key_file, SRIOV *s);

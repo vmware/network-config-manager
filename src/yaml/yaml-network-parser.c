@@ -150,14 +150,71 @@ static ParserTable dhcp4_server_vtable[] = {
 };
 
 static ParserTable sriov_vtable[] = {
-        { "virtual-function",    CONF_TYPE_SRIOV,   parse_yaml_uint32, offsetof(SRIOV, vf)},
-        { "vlan-id",             CONF_TYPE_SRIOV,   parse_yaml_uint32, offsetof(SRIOV, vlan)},
-        { "quality-of-service",  CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, qos)},
-        { "vlan-protocol",       CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, vlan_proto)},
-        { "link-state",          CONF_TYPE_SRIOV,   parse_yaml_uint32, offsetof(SRIOV, link_state)},
-        { "macaddress",          CONF_TYPE_SRIOV,   parse_yaml_string, offsetof(SRIOV, macaddr)},
-        { NULL,                 _CONF_TYPE_INVALID,                 0, 0}
+        { "virtual-function",    CONF_TYPE_SRIOV,   parse_yaml_uint32,              offsetof(SRIOV, vf)},
+        { "vlan-id",             CONF_TYPE_SRIOV,   parse_yaml_uint32,              offsetof(SRIOV, vlan)},
+        { "quality-of-service",  CONF_TYPE_SRIOV,   parse_yaml_uint32,              offsetof(SRIOV, qos)},
+        { "vlan-protocol",       CONF_TYPE_SRIOV,   parse_yaml_sriov_vlan_protocol, offsetof(SRIOV, vlan_proto)},
+        { "link-state",          CONF_TYPE_SRIOV,   parse_yaml_sriov_link_state,    offsetof(SRIOV, link_state)},
+        { "macaddress",          CONF_TYPE_SRIOV,   parse_yaml_mac_address,         offsetof(SRIOV, macaddr)},
+        { NULL,                 _CONF_TYPE_INVALID, 0,                              0}
 };
+
+static int parse_sriov(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
+        _auto_cleanup_ SRIOV *s = NULL;
+        int r;
+
+        assert(config);
+        assert(dp);
+        assert(node);
+        assert(network);
+
+        for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
+                yaml_node_t *n;
+
+                n = yaml_document_get_node(dp, *i);
+                if (n)
+                        (void) parse_sriov(config, dp, n, network);
+        }
+
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+                yaml_node_t *k, *v;
+                ParserTable *table;
+                void *t;
+
+                k = yaml_document_get_node(dp, p->key);
+                v = yaml_document_get_node(dp, p->value);
+
+                if (!k && !v)
+                        continue;
+
+                table = g_hash_table_lookup(config, scalar(k));
+                if (!table)
+                        continue;
+
+                if (!s) {
+                        r = sriov_new(&s);
+                        if (r < 0)
+                                return log_oom();
+                }
+
+                t = (uint8_t *) s + table->offset;
+                if (table->parser) {
+                        (void) table->parser(scalar(k), scalar(v), s, t, dp, v);
+                        network->modified = true;
+                }
+        }
+
+        if (s) {
+                g_hash_table_insert(network->sriovs, s, s);
+
+                network->modified = true;
+                steal_pointer(s);
+        }
+
+
+        return 0;
+}
+
 
 static int parse_route(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Route *rt = NULL;
@@ -461,7 +518,7 @@ static int parse_config(GHashTable *config, yaml_document_t *dp, yaml_node_t *no
         assert(node);
         assert(network);
 
-        for ( yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
+        for (yaml_node_pair_t *p = node->data.mapping.pairs.start; p < node->data.mapping.pairs.top; p++) {
                 yaml_node_t *k, *v;
                 ParserTable *table;
                 void *t;
@@ -552,6 +609,12 @@ int parse_network(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node, Networ
 
                         case CONF_TYPE_ROUTING_POLICY_RULE:
                                 r = parse_routing_policy_rule(m->routing_policy_rule, dp, v, network);
+                                if (r < 0)
+                                        return r;
+                                break;
+
+                        case CONF_TYPE_SRIOV:
+                                r = parse_sriov(m->sriovs, dp, v, network);
                                 if (r < 0)
                                         return r;
                                 break;
@@ -727,6 +790,13 @@ int yaml_register_network(YAMLManager *m) {
         for (size_t i = 0; dhcp4_server_static_lease_vtable[i].key; i++) {
                 if (!g_hash_table_insert(m->dhcp4_server_static_lease, (void *) dhcp4_server_static_lease_vtable[i].key, &dhcp4_server_static_lease_vtable[i])) {
                         log_warning("Failed add key='%s' dhcp4 server static lease table", dhcp4_server_static_lease_vtable[i].key);
+                        return -EINVAL;
+                }
+        }
+
+        for (size_t i = 0; sriov_vtable[i].key; i++) {
+                if (!g_hash_table_insert(m->sriovs, (void *) sriov_vtable[i].key, &sriov_vtable[i])) {
+                        log_warning("Failed add key='%s' dhcp4 server static lease table", sriov_vtable[i].key);
                         return -EINVAL;
                 }
         }

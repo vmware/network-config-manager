@@ -28,6 +28,7 @@ typedef struct YAMLManager {
         GHashTable *link;
         GHashTable *dhcp4_server;
         GHashTable *dhcp4_server_static_lease;
+        GHashTable *sriovs;
 
         GHashTable *vlan;
         GHashTable *macvlan;
