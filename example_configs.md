@@ -15,7 +15,7 @@ To set the device named `eth1` get an address via DHCP4 create a YAML file with 
       dhcp4: true
  ```
 
-#### Static configuration
+#### Configuring static address and routes
 To set a static IP address, use the addresses key, which takes a list of (IPv4 or IPv6), addresses along with the subnet prefix length (e.g. /24). Gateway and DNS information can be provided as well:
 
 ```yml
@@ -129,7 +129,7 @@ network:
                 via: 10.3.0.1
 ```
 
-#### Routing Policy Rule
+#### Configuring Routing Policy Rule
 ```yml
 network:
   ethernets:
@@ -144,6 +144,32 @@ network:
               to: 10.100.1.5/24
               table: 101
 ```
+
+#### Configuring SR-IOV Virtual Functions
+```yml
+network:
+  ethernets:
+    eni99np1:
+      addresses:
+          - 10.100.1.5/24
+      routes:
+          - to: default
+            via: 10.100.1.1
+      sriovs:
+            - virtual-function: 0
+              vlan-id: 1
+              quality-of-service: 101
+              vlan-protocol: 802.1Q
+              link-state: yes
+              macaddress: 00:11:22:33:44:55
+            - virtual-function: 1
+              vlan-id: 2
+              quality-of-service: 102
+              vlan-protocol: 802.1Q
+              link-state: yes
+              macaddress: 00:11:22:33:44:56
+```
+
 
 #### DHCP4 Server
 ```yml
