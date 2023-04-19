@@ -74,7 +74,8 @@ Or by simply doing
 ➜  ~ nmctl --help
 ```
 
-For a comprehensive list of YAML examples, heads to [example configs](https://github.com/vmware/network-config-manager/blob/main/example_configs.md)
+For a comprehensive list of YAML examples, heads to [YAML example configurations](https://github.com/vmware/network-config-manager/blob/main/example-yaml-configurations.md)
+
 
 ### Contributing
 
