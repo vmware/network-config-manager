@@ -80,28 +80,9 @@ void sriov_free(SRIOV *s) {
         free(s);
 }
 
-int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link) {
-        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+int sriov_add_new_section(KeyFile *key_file, SRIOV *s) {
         _cleanup_(section_freep) Section *section = NULL;
-        _auto_cleanup_ char *network = NULL;
-         int r;
-
-        assert(i);
-        assert(s);
-
-        if (!link) {
-                r = create_or_parse_network_file(i, &network);
-                if (r < 0)
-                        return r;
-        } else {
-                r = create_or_parse_netdev_link_conf_file(i->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
-
-        r = parse_key_file(network, &key_file);
-        if (r < 0)
-                return r;
+        int r;
 
         r = section_new("SR-IOV", &section);
         if (r < 0)
@@ -139,6 +120,32 @@ int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link) {
                 return r;
 
         steal_pointer(section);
+
+        return 0;
+}
+
+int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ char *network = NULL;
+         int r;
+
+        assert(i);
+        assert(s);
+
+        if (!link)
+                r = create_or_parse_network_file(i, &network);
+        else
+                r = create_or_parse_netdev_link_conf_file(i->ifname, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = sriov_add_new_section(key_file, s);
+        if (r < 0)
+                return r;
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -182,7 +189,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &s->vf);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vf ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov vf='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
@@ -193,7 +200,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &s->vlan);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vlan ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov vlan='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
@@ -203,7 +210,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &s->qos);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov qos ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov qos='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
 
@@ -213,7 +220,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_sriov_vlan_protocol(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to configure sriov vlan_proto ='%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to configure sriov vlan proto ='%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
 
@@ -227,7 +234,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
 
                         r = parse_bool(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse sriov vf_spoof_check_setting '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse sriov macspoofck '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -292,7 +299,7 @@ _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {
         }
 
         if (!have_vf) {
-                log_warning("Failed to configure sriov missing VirtualFunction : %s", strerror(EINVAL));
+                log_warning("Failed to configure sriov. Missing VirtualFunction: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
