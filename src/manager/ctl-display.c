@@ -573,8 +573,8 @@ static int list_one_link(char *argv[]) {
 
         r = network_parse_link_dhcp4_client_id(p->ifindex, &dhcp4_identifier);
         if (r >= 0) {
-                _auto_cleanup_ char *c = NULL;
                 _auto_cleanup_ IfNameIndex *ifn = NULL;
+                _auto_cleanup_ char *c = NULL;
 
                 r = parse_ifname_or_index(l->name, &ifn);
                 if (r < 0) {
@@ -582,7 +582,7 @@ static int list_one_link(char *argv[]) {
                         return r;
                 }
 
-                r = create_or_parse_network_file(ifn, &network);
+                r = parse_network_file(ifn->ifindex, ifn->ifname, &network);
                 if (r >= 0) {
                         r = parse_config_file(network, "DHCPv4", "ClientIdentifier", &c);
                         if (r >= 0) {
