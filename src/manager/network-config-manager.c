@@ -2438,6 +2438,45 @@ _public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_get_dns_mode(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        DHCPClient mode = _DHCP_CLIENT_INVALID;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_get_link_dhcp_client(p, &mode);
+        if (r < 0)
+                return r;
+
+        if (mode == _DHCP_CLIENT_INVALID || mode == DHCP_CLIENT_NO) {
+                printf("static\n");
+        } else {
+                printf("dhcp\n");
+        }
+
+        return 0;
+}
+
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
         char buf[IF_NAMESIZE + 1] = {};
