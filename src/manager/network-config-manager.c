@@ -2440,7 +2440,7 @@ _public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
 
 _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        DHCPClient mode = _DHCP_CLIENT_INVALID;
+        DHCPClient mode;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -2465,16 +2465,14 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
         }
 
         r = manager_get_link_dhcp_client(p, &mode);
-        if (r < 0)
-                return r;
-
-        if (mode == _DHCP_CLIENT_INVALID || mode == DHCP_CLIENT_NO) {
-                printf("static\n");
-        } else {
+        if (r >= 0)
                 printf("dhcp\n");
+        else {
+                if (manager_is_link_static_address(p))
+                        printf("static\n");
         }
 
-        return 0;
+        return -ENOENT;
 }
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
