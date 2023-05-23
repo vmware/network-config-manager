@@ -191,6 +191,27 @@ int manager_get_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient *mode) {
         return 0;
 }
 
+bool manager_is_link_static_address(const IfNameIndex *ifidx) {
+        _auto_cleanup_ char *network = NULL, *addr = NULL;
+        int r;
+
+        assert(ifidx);
+
+        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_config_file(network, "Network", "Address", &addr);
+        if (r >= 0)
+                return true;
+
+        r = parse_config_file(network, "Address", "Address", &addr);
+        if (r >= 0)
+                return true;
+
+        return false;
+}
+
 int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHCPClientIdentifier identifier) {
         _auto_cleanup_ char *network = NULL;
         int r;
