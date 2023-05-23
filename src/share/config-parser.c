@@ -88,7 +88,7 @@ int parse_key_file(const char *path, KeyFile **ret) {
                         if (r < 0)
                                 continue;
 
-                        r = add_key_to_section(section, k, v);
+                        r = add_key_to_section(section, str_strip(k), str_strip(v));
                         if (r < 0)
                                 return r;
                 }
