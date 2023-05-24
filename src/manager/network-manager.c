@@ -199,7 +199,7 @@ bool manager_is_link_static_address(const IfNameIndex *ifidx) {
 
         r = network_parse_link_network_file(ifidx->ifindex, &network);
         if (r < 0)
-                return r;
+                return false;
 
         r = parse_config_file(network, "Network", "Address", &addr);
         if (r >= 0)
