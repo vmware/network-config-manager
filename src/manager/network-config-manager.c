@@ -2555,6 +2555,86 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
+        _cleanup_(dns_servers_freep) DNSServers *dns = NULL, *current = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *dns_config = NULL;
+        GSequenceIter *itr;
+        DNSServer *d;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_get_link_dns(p, &dns_config);
+        if (r < 0)
+                dns_config = NULL;
+
+        r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
+        if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
+
+                for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
+                        _auto_cleanup_ char *pretty = NULL;
+                        d = g_sequence_get(itr);
+                        if (!d->ifindex)
+                                continue;
+
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
+                        if (r >= 0) {
+                                static bool first = true;
+                                if(first) {
+                                        display(beautify_enabled() ? true : false, ansi_color_bold_cyan(), "      DNSServers: ");
+                                        first = false;
+                                }
+                                printf("%s ", str_strip(pretty));
+                                if (dns_config && g_strrstr(dns_config, pretty))
+                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(static) ");
+                                else
+                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(dhcp) ");
+                        }
+                }
+                printf("\n");
+        }
+
+        r = dbus_get_current_dns_servers_from_resolved(&current);
+        if (r >= 0 && current && !g_sequence_is_empty(current->dns_servers)) {
+                _auto_cleanup_ char *pretty = NULL;
+
+                itr = g_sequence_get_begin_iter(current->dns_servers);
+                d = g_sequence_get(itr);
+                r = ip_to_str(d->address.family, &d->address, &pretty);
+                if (r >= 0) {
+                        display(beautify_enabled(), ansi_color_bold_cyan(), "CurrentDNSServer: ");
+                        printf("%s ", pretty);
+                        if (dns_config && g_strrstr(dns_config, pretty))
+                                display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(static) ");
+                        else
+                                display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(dhcp) ");
+                }
+                printf("\n");
+        }
+
+        return 0;
+}
+
 _public_ int ncm_get_dns_server(char ***ret) {
         _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_strv_ char **s = NULL;
