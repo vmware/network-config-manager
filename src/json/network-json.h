@@ -9,5 +9,5 @@
 int json_system_status(char **ret);
 int json_list_one_link(IfNameIndex *p, char **ret);
 
-int json_show_dns_server(void);
+int json_show_dns_server(const IfNameIndex *p, char *dns_config);
 int json_show_dns_server_domains(void);

@@ -2477,22 +2477,47 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
+        _auto_cleanup_ char *dns_config = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         char buf[IF_NAMESIZE + 1] = {};
-        GSequenceIter *i;
+        GSequenceIter *itr;
         DNSServer *d;
         int r;
 
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (p) {
+                r = manager_get_link_dns(p, &dns_config);
+                if (r < 0)
+                       dns_config = NULL;
+        }
+
         if (json_enabled())
-                return json_show_dns_server();
+                return json_show_dns_server(p, dns_config);
+
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
                 display(beautify_enabled() ? true : false, ansi_color_bold_cyan(), "             DNS: ");
 
-                for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
 
-                        d = g_sequence_get(i);
+                        d = g_sequence_get(itr);
                         if (!d->ifindex)
                                 continue;
 
@@ -2507,8 +2532,8 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         if (r >= 0 && current && !g_sequence_is_empty(current->dns_servers)) {
                 _auto_cleanup_ char *pretty = NULL;
 
-                i = g_sequence_get_begin_iter(current->dns_servers);
-                d = g_sequence_get(i);
+                itr = g_sequence_get_begin_iter(current->dns_servers);
+                d = g_sequence_get(itr);
                 r = ip_to_str(d->address.family, &d->address, &pretty);
                 if (r >= 0) {
                         display(beautify_enabled(), ansi_color_bold_cyan(), "CurrentDNSServer:");
@@ -2520,10 +2545,10 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
 
                 display(beautify_enabled(), ansi_color_bold_cyan(), "     FallbackDNS: ");
-                for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                for (itr = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
 
-                        d = g_sequence_get(i);
+                        d = g_sequence_get(itr);
 
                         r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r >= 0)
@@ -2537,10 +2562,10 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 if (beautify_enabled())
                         printf("%5s %-20s %-14s\n", "INDEX", "LINK", "DNS");
 
-                for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
 
-                        d = g_sequence_get(i);
+                        d = g_sequence_get(itr);
 
                         if (!d->ifindex)
                                 continue;
