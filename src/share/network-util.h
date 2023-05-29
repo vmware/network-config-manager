@@ -49,6 +49,8 @@ typedef struct IPAddress {
 
         int family;
         int prefix_len;
+        unsigned char scope;
+        unsigned char flags;
 
         char *label;
         char *lifetime;
