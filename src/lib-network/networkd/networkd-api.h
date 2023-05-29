@@ -34,6 +34,7 @@ int network_parse_link_dhcp6_client_iaid(int ifindex, char **ret);
 
 int network_parse_link_dhcp4_address(int ifindex, char **ret);
 int network_parse_link_dhcp4_server_address(int ifindex, char **ret);
+int network_parse_link_dhcp4_router(int ifindex, char **ret);
 int network_parse_link_dhcp4_client_id(int ifindex, char **ret);
 int network_parse_link_dhcp4_address_lifetime(int ifindex, char **ret);
 int network_parse_link_dhcp4_address_lifetime_t1(int ifindex, char **ret);

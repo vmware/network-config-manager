@@ -454,16 +454,16 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
                         json_object_object_add(jobj, "ConfigSource", js);
                         steal_pointer(js);
 
-                         r = network_parse_link_dhcp4_server_address(a->ifindex, &provider);
-                         if (r >= 0) {
-                                 js = json_object_new_string(provider);
-                                 if (!js)
-                                         return log_oom();
+                        r = network_parse_link_dhcp4_server_address(a->ifindex, &provider);
+                        if (r >= 0) {
+                                js = json_object_new_string(provider);
+                                if (!js)
+                                        return log_oom();
 
-                                 json_object_object_add(jobj, "ConfigProvider", js);
-                                 steal_pointer(js);
+                                json_object_object_add(jobj, "ConfigProvider", js);
+                                steal_pointer(js);
 
-                         }
+                        }
                 } else {
                         _auto_cleanup_ char *network = NULL;
 
@@ -491,28 +491,84 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
         return 0;
 }
 
-static void json_list_one_link_routes(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_(json_object_putp) json_object *js = NULL;
-        json_object *ja = (json_object *) userdata;
-        _auto_cleanup_ char *c = NULL;
+static int json_list_one_link_routes(Link *l, Routes *rts, json_object *ret) {
+        _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
+        GHashTableIter iter;
+        gpointer key, value;
         unsigned long size;
-        Route *rt = NULL;
         int r;
 
-        rt = (Route *) g_bytes_get_data(key, &size);
-        if (ip_is_null(&rt->gw))
-                return;
+        g_hash_table_iter_init(&iter, rts->routes->hash);
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+                _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL;
+                Route *rt = (Route *) g_bytes_get_data(key, &size);
+                _auto_cleanup_ char *c = NULL, *dhcp = NULL;
 
-        r = ip_to_str(rt->family, &rt->gw, &c);
-        if (r < 0)
-                return;
+                jobj = json_object_new_object();
+                if (!jobj)
+                        return log_oom();
 
-        js = json_object_new_string(c);
-        if (!js)
-                return;
+                rt = (Route *) g_bytes_get_data(key, &size);
+                if (ip_is_null(&rt->gw))
+                        continue;
 
-        json_object_object_add(ja, "Gateway", js);
-        steal_pointer(js);
+                r = ip_to_str(rt->family, &rt->gw, &c);
+                if (r < 0)
+                        return r;
+
+                js = json_object_new_string(c);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Gateway", js);
+                steal_pointer(js);
+
+                r = network_parse_link_dhcp4_router(rt->ifindex, &dhcp);
+                if (r >= 0 && string_has_prefix(c, dhcp)) {
+                        _auto_cleanup_ char *provider = NULL;
+
+                        js = json_object_new_string("dhcp");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_object_add(jobj, "ConfigSource", js);
+                        steal_pointer(js);
+
+                        r = network_parse_link_dhcp4_server_address(rt->ifindex, &provider);
+                        if (r >= 0) {
+                                js = json_object_new_string(provider);
+                                if (!js)
+                                        return log_oom();
+
+                                json_object_object_add(jobj, "ConfigProvider", js);
+                                steal_pointer(js);
+
+                        }
+                } else {
+                        _auto_cleanup_ char *network = NULL;
+
+                        r = parse_network_file(l->ifindex, NULL, &network);
+                        if (r >= 0) {
+                                if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c)) {
+                                        js = json_object_new_string("static");
+                                        if (!js)
+                                                return log_oom();
+                                } else {
+                                        js = json_object_new_string("foreign");
+                                        if (!js)
+                                        return log_oom();
+                                }
+                        }
+
+                        json_object_object_add(jobj, "ConfigSource", js);
+                        steal_pointer(js);
+                }
+
+                json_object_array_add(ret, jobj);
+                steal_pointer(jobj);
+        }
+
+        return 0;
 }
 
 static int json_one_link_udev(json_object *j, Link *l, char **link_file) {
@@ -1279,11 +1335,11 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         if (r >= 0 && route && set_size(route->routes) > 0) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
 
-                ja = json_object_new_object();
+                ja = json_object_new_array();
                 if (!ja)
                         return log_oom();
 
-                set_foreach(route->routes, json_list_one_link_routes, ja);
+                json_list_one_link_routes(l, route, ja);
 
                 json_object_object_add(jobj, "Routes", ja);
                 steal_pointer(ja);
