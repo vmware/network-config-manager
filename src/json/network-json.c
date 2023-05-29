@@ -9,6 +9,7 @@
 #include "ansi-color.h"
 #include "arphrd-to-name.h"
 #include "ctl.h"
+#include "config-parser.h"
 #include "dbus.h"
 #include "device.h"
 #include "dns.h"
@@ -401,26 +402,79 @@ int json_system_status(char **ret) {
         return r;
 }
 
-static void json_list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_(json_object_putp) json_object *js = NULL;
-        json_object *ja = (json_object *) userdata;
-        _auto_cleanup_ char *c = NULL;
+static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *ret) {
+        _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
+        GHashTableIter iter;
+        gpointer key, value;
         unsigned long size;
-        Address *a = NULL;
         int r;
 
-        a = (Address *) g_bytes_get_data(key, &size);
+        g_hash_table_iter_init(&iter, addr->addresses->hash);
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+                Address *a = (Address *) g_bytes_get_data(key, &size);
+                _auto_cleanup_ char *c = NULL, *dhcp = NULL;
 
-        r = ip_to_str_prefix(a->family, &a->address, &c);
-        if (r < 0)
-                return;
+                r = ip_to_str_prefix(a->family, &a->address, &c);
+                if (r < 0)
+                        return r;
 
-        js = json_object_new_string(c);
-        if (!js)
-                return;
+                jobj = json_object_new_object();
+                if (!jobj)
+                        return log_oom();
 
-        json_object_array_add(ja, js);
-        steal_pointer(js);
+                js = json_object_new_string(c);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Address", js);
+                steal_pointer(js);
+
+                r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
+                if (r >= 0 && string_has_prefix(c, dhcp)) {
+                        _auto_cleanup_ char *provider = NULL;
+
+                        js = json_object_new_string("dhcp");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_object_add(jobj, "ConfigSource", js);
+                        steal_pointer(js);
+
+                         r = network_parse_link_dhcp4_server_address(a->ifindex, &provider);
+                         if (r >= 0) {
+                                 js = json_object_new_string(provider);
+                                 if (!js)
+                                         return log_oom();
+
+                                 json_object_object_add(jobj, "ConfigProvider", js);
+                                 steal_pointer(js);
+
+                         }
+                } else {
+                        _auto_cleanup_ char *network = NULL;
+
+                        r = parse_network_file(l->ifindex, NULL, &network);
+                        if (r >= 0) {
+                                if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c)) {
+                                        js = json_object_new_string("static");
+                                        if (!js)
+                                                return log_oom();
+                                } else {
+                                        js = json_object_new_string("foreign");
+                                        if (!js)
+                                        return log_oom();
+                                }
+                        }
+
+                        json_object_object_add(jobj, "ConfigSource", js);
+                        steal_pointer(js);
+                }
+
+                json_object_array_add(ret, jobj);
+                steal_pointer(jobj);
+        }
+
+        return 0;
 }
 
 static void json_list_one_link_routes(gpointer key, gpointer value, gpointer userdata) {
@@ -820,7 +874,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                         return log_oom();
 
                 if (l->flags & IFF_UP) {
-                        js = json_object_new_string("UP");
+                        js = json_object_new_string("up");
                         if (!js)
                                 return log_oom();
 
@@ -829,7 +883,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_BROADCAST) {
-                        js = json_object_new_string("BROADCAST");
+                        js = json_object_new_string("broadcast");
                         if (!js)
                                 return log_oom();
 
@@ -838,7 +892,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_RUNNING) {
-                        js = json_object_new_string("RUNNING");
+                        js = json_object_new_string("running");
                         if (!js)
                                 return log_oom();
 
@@ -847,7 +901,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_NOARP) {
-                        js = json_object_new_string("NOARP");
+                        js = json_object_new_string("noarp");
                         if (!js)
                                 return log_oom();
 
@@ -856,7 +910,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_MASTER) {
-                        js = json_object_new_string("MASTER");
+                        js = json_object_new_string("master");
                         if (!js)
                                 return log_oom();
 
@@ -865,7 +919,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_SLAVE) {
-                        js = json_object_new_string("SLAVE");
+                        js = json_object_new_string("slave");
                         if (!js)
                                 return log_oom();
 
@@ -874,7 +928,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_MULTICAST) {
-                        js = json_object_new_string("MULTICAST");
+                        js = json_object_new_string("multicast");
                         if (!js)
                                 return log_oom();
 
@@ -883,7 +937,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_LOWER_UP) {
-                        js = json_object_new_string("LOWERUP");
+                        js = json_object_new_string("lowerup");
                         if (!js)
                                 return log_oom();
 
@@ -892,7 +946,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_DORMANT) {
-                        js = json_object_new_string("DORMANT");
+                        js = json_object_new_string("dormant");
                         if (!js)
                                 return log_oom();
 
@@ -1201,7 +1255,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 if (!ja)
                         return log_oom();
 
-                set_foreach(addr->addresses, json_list_one_link_addresses, ja);
+                json_list_one_link_addresses(l, addr, ja);
 
                 json_object_object_add(jobj, "Addresses", ja);
                 steal_pointer(ja);
