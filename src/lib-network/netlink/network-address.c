@@ -128,6 +128,7 @@ static int fill_link_address(const struct nlmsghdr *nlh, void *data) {
 
         *a = (Address) {
            .family = ifa->ifa_family,
+           .flags = ifa->ifa_flags,
            .ifindex = ifa->ifa_index,
            .scope = ifa->ifa_scope,
            .address.prefix_len = ifa->ifa_prefixlen,
@@ -229,6 +230,8 @@ static int link_add_address(int s, int ifindex, IPAddress *address, IPAddress *p
                 return r;
 
         m->ifm.ifa_prefixlen = address->prefix_len;
+        m->ifm.ifa_flags = address->flags;
+        m->ifm.ifa_scope = address->scope;
 
         if (address->family == AF_INET)
                 r = rtnl_message_add_attribute(&m->hdr, IFA_LOCAL, &address->in, sizeof(struct in_addr));

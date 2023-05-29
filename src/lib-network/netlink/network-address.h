@@ -23,8 +23,8 @@ typedef struct Address {
         int ifindex;
 
         unsigned char scope;
-
-        uint32_t metric;
+        unsigned char flags;
+        unsigned char prefix_len;
 
         IPAddress address;
         IPAddress peer;
