@@ -174,15 +174,16 @@ static void list_one_link_address_with_address_mode(gpointer key, gpointer value
         if (a->family == AF_INET) {
                 if (first) {
                         display(arg_beautify, ansi_color_bold_cyan(), "IPv4 Address: ");
+                        printf("%s ", c);
                         first = false;
-                }
-                printf("%s ", c);
+                } else
+                        printf("              %s ", c);
 
                 r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
                 if (r >= 0 && string_has_prefix(c, dhcp))
-                        display(arg_beautify, ansi_color_bold_blue(), "(dhcp) ");
+                        display(arg_beautify, ansi_color_bold_blue(), "(dhcp) \n");
                 else
-                        display(arg_beautify, ansi_color_bold_blue(), "(static) ");
+                        display(arg_beautify, ansi_color_bold_blue(), "(static) \n");
         }
 }
 
@@ -887,11 +888,10 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
                         (void) ip_to_str(rt->family, &rt->gw, &c);
                         if (first) {
                                 display(arg_beautify, ansi_color_bold_cyan(), "IPv4 Gateway: ");
-                                printf("%s ", c);
+                                printf("%s \n", c);
                                 first = false;
-                        } else {
-                                printf("%s ", c);
-                         }
+                        } else
+                                printf("              %s \n", c);
                 }
         }
         printf("\n");
