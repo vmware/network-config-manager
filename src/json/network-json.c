@@ -820,7 +820,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                         return log_oom();
 
                 if (l->flags & IFF_UP) {
-                        js = json_object_new_string("UP");
+                        js = json_object_new_string("up");
                         if (!js)
                                 return log_oom();
 
@@ -829,7 +829,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_BROADCAST) {
-                        js = json_object_new_string("BROADCAST");
+                        js = json_object_new_string("broadcast");
                         if (!js)
                                 return log_oom();
 
@@ -838,7 +838,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_RUNNING) {
-                        js = json_object_new_string("RUNNING");
+                        js = json_object_new_string("running");
                         if (!js)
                                 return log_oom();
 
@@ -847,7 +847,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_NOARP) {
-                        js = json_object_new_string("NOARP");
+                        js = json_object_new_string("noarp");
                         if (!js)
                                 return log_oom();
 
@@ -856,7 +856,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_MASTER) {
-                        js = json_object_new_string("MASTER");
+                        js = json_object_new_string("master");
                         if (!js)
                                 return log_oom();
 
@@ -865,7 +865,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_SLAVE) {
-                        js = json_object_new_string("SLAVE");
+                        js = json_object_new_string("slave");
                         if (!js)
                                 return log_oom();
 
@@ -874,7 +874,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_MULTICAST) {
-                        js = json_object_new_string("MULTICAST");
+                        js = json_object_new_string("multicast");
                         if (!js)
                                 return log_oom();
 
@@ -883,7 +883,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_LOWER_UP) {
-                        js = json_object_new_string("LOWERUP");
+                        js = json_object_new_string("lowerup");
                         if (!js)
                                 return log_oom();
 
@@ -892,7 +892,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 }
 
                 if (l->flags & IFF_DORMANT) {
-                        js = json_object_new_string("DORMANT");
+                        js = json_object_new_string("dormant");
                         if (!js)
                                 return log_oom();
 
