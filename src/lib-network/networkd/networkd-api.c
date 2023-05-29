@@ -214,6 +214,10 @@ int network_parse_link_dhcp4_server_address(int ifindex, char **ret) {
         return network_parse_link_lease_string(ifindex, "SERVER_ADDRESS", ret);
 }
 
+int network_parse_link_dhcp4_router(int ifindex, char **ret) {
+        return network_parse_link_lease_string(ifindex, "ROUTER", ret);
+}
+
 int network_parse_link_dhcp4_client_id(int ifindex, char **ret) {
         return network_parse_link_lease_string(ifindex, "CLIENTID", ret);
 }
