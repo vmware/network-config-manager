@@ -231,6 +231,24 @@ int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHC
         return dbus_network_reload();
 }
 
+int manager_get_link_dns(const IfNameIndex *ifidx, char **ret) {
+        _auto_cleanup_ char *network = NULL, *config = NULL;
+        int r;
+
+        assert(ifidx);
+
+        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_config_file(network, "Network", "DNS", &config);
+        if (r < 0)
+                return r;
+
+        *ret = steal_pointer(config);
+        return 0;
+}
+
 int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;

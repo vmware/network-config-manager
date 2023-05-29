@@ -11,6 +11,7 @@
 int ncm_add_dns_server(int argc, char *argv[]);
 int ncm_get_dns_server(char ***ret);
 int ncm_show_dns_server(int argc, char *argv[]);
+int ncm_show_dns_servers_and_mode(int argc, char *argv[]);
 int ncm_get_dns_mode(int argc, char *argv[]);
 
 int ncm_add_dns_domains(int argc, char *argv[]);
@@ -129,6 +130,7 @@ int ncm_configure_proxy(int argc, char *argv[]);
 int ncm_show_proxy(int argc, char *argv[]);
 int ncm_get_proxy(char ***proxy);
 
+int ncm_system_ipv4_status(int argc, char *argv[]);
 int ncm_system_status(int argc, char *argv[]);
 bool ncm_is_netword_running(void);
 

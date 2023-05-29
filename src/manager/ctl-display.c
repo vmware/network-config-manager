@@ -162,6 +162,30 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 printf("\n");
 }
 
+static void list_one_link_address_with_address_mode(gpointer key, gpointer value, gpointer userdata) {
+        _auto_cleanup_ char *c = NULL, *dhcp = NULL;
+        static bool first = true;
+        unsigned long size;
+        Address *a = NULL;
+        int r;
+
+        a = (Address *) g_bytes_get_data(key, &size);
+        (void) ip_to_str_prefix(a->family, &a->address, &c);
+        if (a->family == AF_INET) {
+                if (first) {
+                        display(arg_beautify, ansi_color_bold_cyan(), "IPv4 Address: ");
+                        first = false;
+                }
+                printf("%s ", c);
+
+                r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
+                if (r >= 0 && string_has_prefix(c, dhcp))
+                        display(arg_beautify, ansi_color_bold_blue(), "(dhcp) ");
+                else
+                        display(arg_beautify, ansi_color_bold_blue(), "(static) ");
+        }
+}
+
 _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -800,6 +824,79 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         }
 
         return r;
+}
+
+_public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
+        _cleanup_(routes_freep) Routes *routes = NULL;
+        _cleanup_(addresses_freep) Addresses *addr = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        GHashTableIter iter;
+        gpointer key, value;
+        unsigned long size;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        break;
+                } else  {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[1]);
+                                return r;
+                        }
+                }
+        }
+
+        r = manager_get_one_link_address(p->ifindex, &addr);
+        if (r >= 0 && addr && set_size(addr->addresses) > 0) {
+                set_foreach(addr->addresses, list_one_link_address_with_address_mode, NULL);
+                printf("\n");
+        }
+
+        r = manager_link_get_routes(&routes);
+        if (r >= 0 && set_size(routes->routes) > 0) {
+                _cleanup_(set_freep) Set *devs = NULL;
+                bool first = true;
+
+                r = set_new(&devs, g_int64_hash, g_int64_equal);
+                if (r < 0)
+                        return r;
+
+
+                g_hash_table_iter_init(&iter, routes->routes->hash);
+                while (g_hash_table_iter_next (&iter, &key, &value)) {
+                        _auto_cleanup_ char *c = NULL;
+                        Route *rt;
+
+                        rt = (Route *) g_bytes_get_data(key, &size);
+                        if (ip_is_null(&rt->gw))
+                                continue;
+
+                        if (!set_contains(devs, &rt->ifindex))
+                                set_add(devs, &rt->ifindex);
+                        else
+                                continue;
+
+                        (void) ip_to_str(rt->family, &rt->gw, &c);
+                        if (first) {
+                                display(arg_beautify, ansi_color_bold_cyan(), "IPv4 Gateway: ");
+                                printf("%s ", c);
+                                first = false;
+                        } else {
+                                printf("%s ", c);
+                         }
+                }
+        }
+        printf("\n");
+
+        return 0;
 }
 
 _public_ int ncm_link_status(int argc, char *argv[]) {

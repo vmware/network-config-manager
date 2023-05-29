@@ -125,6 +125,7 @@ static int help(void) {
                "\nCommands:\n"
                "  status                       [DEVICE] Show system or device status\n"
                "  status-devs                  List all devices.\n"
+               "  show-ipv4-status             dev [DEVICE] Show device ipv4 address, address mode and gateway\n"
                "  set-mtu                      dev [DEVICE] mtu [MTU NUMBER] Configures device MTU.\n"
                "  set-mac                      dev [DEVICE] mac [MAC] Configures device MAC address.\n"
                "  set-manage                   dev [DEVICE] manage [MANAGE BOOLEAN] Configures whether device managed by networkd.\n"
@@ -158,7 +159,8 @@ static int help(void) {
                                                 "\n\t\t\t\t [invert BOOLEAN] [sport NUMBER] [dport NUMBER] [proto tcp|udp|sctp] Configures Routing Policy Rule.\n"
                "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
                "  set-hostname                 [HOSTNAME] Configures hostname.\n"
-               "  show-dns                            Show DNS servers.\n"
+               "  show-dns                     Show DNS servers.\n"
+               "  show-dns-servers             Show DNS servers and DNS mode.\n"
                "  add-dns                      dev|global|system [DEVICE] dns [ADDRESS] Configures Link or global DNS servers.\n"
                "  add-domain                   dev|global|system [DEVICE] domains [DOMAIN] Configures Link or global Domain.\n"
                "  show-domains                        Show DNS server Domains.\n"
@@ -349,6 +351,7 @@ static int cli_run(int argc, char *argv[]) {
         static const Ctl commands[] = {
                 { "status",                        "s",                WORD_ANY, WORD_ANY, true,  ncm_system_status },
                 { "status-devs",                   "sd",               WORD_ANY, WORD_ANY, false, ncm_link_status },
+                { "show-ipv4-status",              "s4s",              1,        WORD_ANY, false, ncm_system_ipv4_status },
                 { "set-mtu",                       "mtu",              3,        WORD_ANY, false, ncm_link_set_mtu },
                 { "set-mac",                       "mac",              3,        WORD_ANY, false, ncm_link_set_mac },
                 { "set-manage",                    "manage" ,          3,        WORD_ANY, false, ncm_link_set_mode },
@@ -373,6 +376,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "remove-rule",                   "rrule",            1,        WORD_ANY, false, ncm_link_remove_routing_policy_rules },
                 { "set-hostname",                  "hostname",         1,        WORD_ANY, false, ncm_set_system_hostname },
                 { "show-dns",                      "dns",              WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
+                { "show-dns-servers",              "dnsm",             WORD_ANY, WORD_ANY, false, ncm_show_dns_servers_and_mode },
                 { "add-dns",                       "adns",             2,        WORD_ANY, false, ncm_add_dns_server },
                 { "add-domain",                    "adomain",          1,        WORD_ANY, false, ncm_add_dns_domains },
                 { "show-domains",                  "domain",           WORD_ANY, WORD_ANY, false, ncm_show_dns_server_domains },
