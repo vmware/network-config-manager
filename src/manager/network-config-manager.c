@@ -2602,13 +2602,15 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
                                 static bool first = true;
                                 if(first) {
                                         display(beautify_enabled() ? true : false, ansi_color_bold_cyan(), "      DNSServers: ");
+                                        printf("%s ", str_strip(pretty));
                                         first = false;
-                                }
-                                printf("%s ", str_strip(pretty));
+                                } else
+                                        printf("                  %s ", str_strip(pretty));
+
                                 if (dns_config && g_strrstr(dns_config, pretty))
-                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(static) ");
+                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(static) \n");
                                 else
-                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(dhcp) ");
+                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(dhcp) \n");
                         }
                 }
                 printf("\n");
