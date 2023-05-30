@@ -1031,6 +1031,17 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 steal_pointer(ja);
         }
 
+        if (p->ifindex > 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                ja = json_object_new_string(p->ifname);
+                if (!ja)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Name", ja);
+                steal_pointer(ja);
+        }
+
         if (l->alt_names) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
 
