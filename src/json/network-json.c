@@ -1746,7 +1746,7 @@ int json_show_dns_server_domains(void) {
                         json_object_array_add(ja, a);
                 }
 
-                json_object_object_add(jobj, "DNSDomain", ja);
+                json_object_object_add(jobj, "SearchDomains", ja);
                 steal_pointer(ja);
 
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
