@@ -109,6 +109,7 @@ typedef enum RouteProtcol {
 } RouteProtocol;
 
 typedef enum RouteType {
+       ROUTE_TYPE_UNSPEC,
        ROUTE_TYPE_UNICAST,
        ROUTE_TYPE_LOCAL,
        ROUTE_TYPE_BROADCAST,
