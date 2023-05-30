@@ -364,7 +364,7 @@ int json_system_status(char **ret) {
                         json_object_array_add(ja, jdomains);
                 }
 
-                json_object_object_add(jobj, "Domains", ja);
+                json_object_object_add(jobj, "SearchDomains", ja);
                 steal_pointer(ja);
         }
 
@@ -861,7 +861,14 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "OperState", js);
+                json_object_object_add(jobj, "KernelOperStateString", js);
+                steal_pointer(js);
+
+                js = json_object_new_int(l->operstate);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "KernelOperState", js);
                 steal_pointer(js);
         }
 
@@ -1437,7 +1444,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                         json_object_object_add(j, "Domain", jdns);
                         steal_pointer(jdns);
 
-                        if (dns_servers && strv_length(dns_domains) && strv_contains((const char **) dns_domains, *d)) {
+                        if (dns_domains && strv_length(dns_domains) && strv_contains((const char **) dns_domains, *d)) {
                                 _cleanup_(json_object_putp) json_object *js = NULL;
                                 _auto_cleanup_ char *provider = NULL;
 
