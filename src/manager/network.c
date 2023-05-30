@@ -348,7 +348,7 @@ int route_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = ROUTE_TYPE_UNICAST; i < (size_t) ELEMENTSOF(route_type); i++)
-                if (str_eq_fold(name, route_type[i]))
+                if (route_type[i] && str_eq_fold(name, route_type[i]))
                         return i;
 
         return _ROUTE_TYPE_INVALID;
