@@ -196,6 +196,10 @@ static int fill_link_route_message(Route *rt, int ifindex , struct nlattr *tb[])
         if (ifindex > 0 && ifindex != (int) rt->ifindex)
                 return -EINVAL;
 
+        if (tb[RTA_PREF])
+                rt->pref = mnl_attr_get_u8(tb[RTA_PREF]);
+
+
         if (tb[RTA_FLOW])
                 rt->flow = mnl_attr_get_u32(tb[RTA_FLOW]);
 
