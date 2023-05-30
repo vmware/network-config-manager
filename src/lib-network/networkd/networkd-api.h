@@ -39,3 +39,4 @@ int network_parse_link_dhcp4_client_id(int ifindex, char **ret);
 int network_parse_link_dhcp4_address_lifetime(int ifindex, char **ret);
 int network_parse_link_dhcp4_address_lifetime_t1(int ifindex, char **ret);
 int network_parse_link_dhcp4_address_lifetime_t2(int ifindex, char **ret);
+int network_parse_link_dhcp4_dns(int ifindex, char ***ret);
