@@ -1020,6 +1020,17 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         if (r < 0)
                 return r;
 
+        if (l->ifindex > 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                ja = json_object_new_int(l->ifindex);
+                if (!ja)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Index", ja);
+                steal_pointer(ja);
+        }
+
         if (l->alt_names) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
 
