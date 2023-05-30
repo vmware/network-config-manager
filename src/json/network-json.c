@@ -1437,7 +1437,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                         json_object_object_add(j, "Domain", jdns);
                         steal_pointer(jdns);
 
-                        if (dns_servers && strv_length(dns_domains) && strv_contains((const char **) dns_domains, *d)) {
+                        if (dns_domains && strv_length(dns_domains) && strv_contains((const char **) dns_domains, *d)) {
                                 _cleanup_(json_object_putp) json_object *js = NULL;
                                 _auto_cleanup_ char *provider = NULL;
 
