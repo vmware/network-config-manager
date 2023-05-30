@@ -481,6 +481,14 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
 
                         json_object_array_add(ja, js);
                         steal_pointer(js);
+                } else {
+                        js = json_object_new_string("dynamic");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+
                 }
                 if (flags & IFA_F_MANAGETEMPADDR) {
                         js = json_object_new_string(table[IFA_F_MANAGETEMPADDR]);
