@@ -1572,9 +1572,9 @@ int json_show_dns_server(const IfNameIndex *p, char *dns_config) {
                                 json_object_object_add(jaddr, "Address", s);
                                 steal_pointer(s);
 
-                                if (dns_config && g_strrstr(dns_config, pretty)){
+                                if (dns_config && g_strrstr(dns_config, pretty))
                                         s = json_object_new_string("static");
-                                } else {
+                                else {
                                         s = json_object_new_string("dhcp");
 
                                         if(provider) {
