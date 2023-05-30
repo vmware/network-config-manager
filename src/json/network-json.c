@@ -402,6 +402,127 @@ int json_system_status(char **ret) {
         return r;
 }
 
+static int address_flags_to_string(json_object *jobj, uint32_t flags) {
+        _auto_cleanup_ char *s = NULL;
+        static const char* map[] = {
+                [IFA_F_NODAD]          = "nodad",
+                [IFA_F_OPTIMISTIC]     = "optimistic",
+                [IFA_F_DADFAILED]      = "dadfailed",
+                [IFA_F_HOMEADDRESS]    = "home-address",
+                [IFA_F_DEPRECATED]     = "deprecated",
+                [IFA_F_TENTATIVE]      = "tentative",
+                [IFA_F_PERMANENT]      = "permanent",
+                [IFA_F_MANAGETEMPADDR] = "manage-temporary-address",
+                [IFA_F_NOPREFIXROUTE]  = "no-prefixroute",
+                [IFA_F_MCAUTOJOIN]     = "auto-join",
+                [IFA_F_STABLE_PRIVACY] = "stable-privacy",
+        };
+
+        assert(jobj);
+
+        if (flags > 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL, *js = NULL;
+
+                ja = json_object_new_array();
+                if (!ja)
+                        return log_oom();
+
+                if (flags & IFA_F_NODAD) {
+                        js = json_object_new_string(map[IFA_F_NODAD]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_OPTIMISTIC) {
+                        js = json_object_new_string(map[IFA_F_OPTIMISTIC]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_DADFAILED) {
+                        js = json_object_new_string(map[IFA_F_DADFAILED]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_HOMEADDRESS) {
+                        js = json_object_new_string(map[IFA_F_HOMEADDRESS]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_DEPRECATED) {
+                        js = json_object_new_string(map[IFA_F_DEPRECATED]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_TENTATIVE) {
+                        js = json_object_new_string(map[IFA_F_TENTATIVE]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_PERMANENT) {
+                        js = json_object_new_string(map[IFA_F_PERMANENT]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_MANAGETEMPADDR) {
+                        js = json_object_new_string(map[IFA_F_MANAGETEMPADDR]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_NOPREFIXROUTE) {
+                        js = json_object_new_string(map[IFA_F_NOPREFIXROUTE]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_MCAUTOJOIN) {
+                        js = json_object_new_string(map[IFA_F_MCAUTOJOIN]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+                if (flags & IFA_F_STABLE_PRIVACY) {
+                        js = json_object_new_string(map[IFA_F_STABLE_PRIVACY]);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
+
+                json_object_object_add(jobj, "FlagsString", ja);
+                steal_pointer(ja);
+        }
+
+        return 0;
+}
+
 static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
@@ -434,7 +555,12 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
                 if (!jscope)
                         return log_oom();
                 json_object_object_add(jobj, "Scope", jscope);
+                steal_pointer(jscope);
 
+                jscope = json_object_new_string(route_scope_type_to_name(a->scope));
+                if (!jscope)
+                        return log_oom();
+                json_object_object_add(jobj, "ScopeString", jscope);
                 steal_pointer(jscope);
 
                 jflags= json_object_new_int(a->flags);
@@ -442,6 +568,8 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
                         return log_oom();
                 json_object_object_add(jobj, "Flags", jflags);
                 steal_pointer(jflags);
+
+                address_flags_to_string(jobj, a->flags);
 
                 r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
                 if (r >= 0 && string_has_prefix(c, dhcp)) {
@@ -511,6 +639,18 @@ static int json_list_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                 rt = (Route *) g_bytes_get_data(key, &size);
                 if (ip_is_null(&rt->gw))
                         continue;
+
+                jscope = json_object_new_int(rt->scope);
+                if (!jscope)
+                        return log_oom();
+                json_object_object_add(jobj, "Scope", jscope);
+                steal_pointer(jscope);
+
+                jscope = json_object_new_string(route_scope_type_to_name(rt->scope));
+                if (!jscope)
+                        return log_oom();
+                json_object_object_add(jobj, "ScopeString", jscope);
+                steal_pointer(jscope);
 
                 r = ip_to_str(rt->family, &rt->gw, &c);
                 if (r < 0)
@@ -1746,7 +1886,7 @@ int json_show_dns_server_domains(void) {
                         json_object_array_add(ja, a);
                 }
 
-                json_object_object_add(jobj, "DNSDomain", ja);
+                json_object_object_add(jobj, "SearchDomains", ja);
                 steal_pointer(ja);
 
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
