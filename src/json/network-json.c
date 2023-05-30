@@ -629,7 +629,7 @@ static int json_list_one_link_routes(Link *l, Routes *rts, json_object *ret) {
         g_hash_table_iter_init(&iter, rts->routes->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
                 _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jtype = NULL, *jtable = NULL,
-                        *jprotocol = NULL, *jpref = NULL;
+                        *jprotocol = NULL, *jpref = NULL, *jprio = NULL;
                 Route *rt = (Route *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL, *dhcp = NULL;
 
@@ -686,6 +686,13 @@ static int json_list_one_link_routes(Link *l, Routes *rts, json_object *ret) {
 
                 json_object_object_add(jobj, "Preference", jpref);
                 steal_pointer(jpref);
+
+                jprio = json_object_new_int(rt->priority);
+                if (!jprio)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Priority", jprio);
+                steal_pointer(jprio);
 
                 r = ip_to_str(rt->family, &rt->gw, &c);
                 if (r < 0)
