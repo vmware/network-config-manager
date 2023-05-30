@@ -415,34 +415,34 @@ static int list_one_link(char *argv[]) {
         if (l->flags > 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                       Flags: ");
                 if (l->flags & IFF_UP)
-                        printf("UP ");
+                        printf("up");
 
                 if (l->flags & IFF_BROADCAST)
-                        printf("BROADCAST ");
+                        printf("broadcast");
 
                 if (l->flags & IFF_RUNNING)
-                        printf("RUNNING ");
+                        printf("running ");
 
                 if (l->flags & IFF_NOARP)
-                        printf("NOARP ");
+                        printf("noarp ");
 
                 if (l->flags & IFF_MASTER)
-                        printf("MASTER ");
+                        printf("master ");
 
                 if (l->flags & IFF_SLAVE)
-                        printf("SLAVE ");
+                        printf("slave ");
 
                 if (l->flags & IFF_MULTICAST)
-                        printf("MULTICAST ");
+                        printf("multicast ");
 
                 if (l->flags & IFF_LOWER_UP)
-                        printf("LOWERUP ");
+                        printf("lowerup ");
 
                 if (l->flags & IFF_DORMANT)
-                        printf("DORMANT");
+                        printf("dormant");
 
                 if (l->flags & IFF_DEBUG)
-                        printf("DEBUG");
+                        printf("debug");
 
                 printf("\n");
         }
