@@ -255,6 +255,11 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                 n->contains_mac_address = true;
         }
 
+        if (rta_tb[IFLA_PERM_ADDRESS]) {
+                rtnl_message_read_attribute_ether_address(rta_tb[IFLA_PERM_ADDRESS], &n->perm_address);
+                n->contains_perm_address = true;
+        }
+
         if (rta_tb[IFLA_STATS64]) {
                 rtnl_message_read_attribute(rta_tb[IFLA_STATS64], &n->stats64, sizeof(struct rtnl_link_stats64));
                 n->contains_stats64 = true;
