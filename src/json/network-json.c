@@ -562,7 +562,7 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
                 if (!jobj)
                         return log_oom();
 
-                r = ip_to_str_prefix(a->family, &a->address, &c);
+                r = ip_to_str(a->family, &a->address, &c);
                 if (r < 0)
                         return r;
 
@@ -571,6 +571,13 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
                         return log_oom();
 
                 json_object_object_add(jobj, "Address", js);
+                steal_pointer(js);
+
+                js = json_object_new_int(a->address.prefix_len);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "PrefixLength", js);
                 steal_pointer(js);
 
                 r = ip_to_str_prefix(a->family, &a->broadcast, &b);
