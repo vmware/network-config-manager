@@ -434,7 +434,12 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
                 if (!jscope)
                         return log_oom();
                 json_object_object_add(jobj, "Scope", jscope);
+                steal_pointer(jscope);
 
+                jscope = json_object_new_string(route_scope_type_to_name(a->scope));
+                if (!jscope)
+                        return log_oom();
+                json_object_object_add(jobj, "ScopeString", jscope);
                 steal_pointer(jscope);
 
                 jflags= json_object_new_int(a->flags);
