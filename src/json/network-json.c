@@ -364,7 +364,7 @@ int json_system_status(char **ret) {
                         json_object_array_add(ja, jdomains);
                 }
 
-                json_object_object_add(jobj, "Domains", ja);
+                json_object_object_add(jobj, "SearchDomains", ja);
                 steal_pointer(ja);
         }
 
