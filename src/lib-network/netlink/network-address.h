@@ -27,6 +27,7 @@ typedef struct Address {
 
         uint32_t flags;
         IPAddress address;
+        IPAddress broadcast;
         IPAddress peer;
 } Address;
 
