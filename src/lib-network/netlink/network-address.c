@@ -152,6 +152,9 @@ static int fill_link_address(const struct nlmsghdr *nlh, void *data) {
                         memcpy(&a->address.in6, mnl_attr_get_payload(tb[IFA_ADDRESS]), sizeof(struct in6_addr));
         }
 
+        if (tb[IFA_FLAGS])
+                a->flags = mnl_attr_get_u32(tb[IFA_FLAGS]);
+
         r = address_add(&addrs, a);
         if (r < 0)
                 return r;

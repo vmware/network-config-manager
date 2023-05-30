@@ -25,6 +25,7 @@ typedef enum IPv6AddressGenMode {
 
 typedef struct Link {
         struct ether_addr mac_address;
+        struct ether_addr perm_address;
 
         unsigned short iftype;
 
@@ -58,6 +59,7 @@ typedef struct Link {
         GPtrArray *alt_names;
 
         bool contains_mac_address:1;
+        bool contains_perm_address:1;
         bool contains_mtu:1;
         bool contains_stats:1;
         bool contains_stats64:1;

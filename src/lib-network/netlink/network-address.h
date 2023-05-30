@@ -23,9 +23,9 @@ typedef struct Address {
         int ifindex;
 
         unsigned char scope;
-        unsigned char flags;
         unsigned char prefix_len;
 
+        uint32_t flags;
         IPAddress address;
         IPAddress peer;
 } Address;
