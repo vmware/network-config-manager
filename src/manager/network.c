@@ -314,7 +314,7 @@ int route_scope_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = ROUTE_SCOPE_UNIVERSE; i < (size_t) ELEMENTSOF(route_scope_type); i++)
-                if (str_eq_fold(name, route_scope_type[i]))
+                if (route_scope_type[i] && str_eq_fold(name, route_scope_type[i]))
                         return i;
 
         return _ROUTE_SCOPE_INVALID;
