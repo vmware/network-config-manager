@@ -402,7 +402,7 @@ int json_system_status(char **ret) {
         return r;
 }
 
-static int address_flags_to_string(json_object *jobj, uint32_t flags) {
+static int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags) {
         static const char* table[] = {
                 [IFA_F_NODAD]          = "nodad",
                 [IFA_F_OPTIMISTIC]     = "optimistic",
@@ -522,6 +522,21 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         json_object_array_add(ja, js);
                         steal_pointer(js);
                 }
+                if (flags & IFA_F_SECONDARY && a->family == AF_INET6) {
+                        js = json_object_new_string("temporary");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                } else if (flags & IFA_F_SECONDARY) {
+                        js = json_object_new_string("secondary");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
 
                 json_object_object_add(jobj, "FlagsString", ja);
                 steal_pointer(ja);
@@ -587,7 +602,7 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
                 json_object_object_add(jobj, "Flags", jflags);
                 steal_pointer(jflags);
 
-                address_flags_to_string(jobj, a->flags);
+                address_flags_to_string(a, jobj, a->flags);
 
                 r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
                 if (r >= 0 && string_has_prefix(c, dhcp)) {
