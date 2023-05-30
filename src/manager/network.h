@@ -83,10 +83,10 @@ typedef enum IPv6RAPreference {
 
 typedef enum RouteScope {
         ROUTE_SCOPE_UNIVERSE,
-        ROUTE_SCOPE_SITE,
-        ROUTE_SCOPE_LINK,
-        ROUTE_SCOPE_HOST,
-        ROUTE_SCOPE_NOWHERE,
+        ROUTE_SCOPE_SITE = RT_SCOPE_SITE,
+        ROUTE_SCOPE_LINK = RT_SCOPE_LINK,
+        ROUTE_SCOPE_HOST = RT_SCOPE_HOST,
+        ROUTE_SCOPE_NOWHERE = RT_SCOPE_NOWHERE,
        _ROUTE_SCOPE_MAX,
        _ROUTE_SCOPE_INVALID = -EINVAL,
 } RouteScope;
