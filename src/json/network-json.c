@@ -402,7 +402,7 @@ int json_system_status(char **ret) {
         return r;
 }
 
-static int address_flags_to_string(json_object *jobj, uint32_t flags) {
+static int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags) {
         static const char* table[] = {
                 [IFA_F_NODAD]          = "nodad",
                 [IFA_F_OPTIMISTIC]     = "optimistic",
@@ -481,6 +481,14 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
 
                         json_object_array_add(ja, js);
                         steal_pointer(js);
+                } else {
+                        js = json_object_new_string("dynamic");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+
                 }
                 if (flags & IFA_F_MANAGETEMPADDR) {
                         js = json_object_new_string(table[IFA_F_MANAGETEMPADDR]);
@@ -514,6 +522,21 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         json_object_array_add(ja, js);
                         steal_pointer(js);
                 }
+                if (flags & IFA_F_SECONDARY && a->family == AF_INET6) {
+                        js = json_object_new_string("temporary");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                } else if (flags & IFA_F_SECONDARY) {
+                        js = json_object_new_string("secondary");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_array_add(ja, js);
+                        steal_pointer(js);
+                }
 
                 json_object_object_add(jobj, "FlagsString", ja);
                 steal_pointer(ja);
@@ -533,21 +556,39 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
         while (g_hash_table_iter_next (&iter, &key, &value)) {
                 _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL;
                 Address *a = (Address *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *dhcp = NULL;
-
-                r = ip_to_str_prefix(a->family, &a->address, &c);
-                if (r < 0)
-                        return r;
+                _auto_cleanup_ char *c = NULL, *b = NULL, *dhcp = NULL;
 
                 jobj = json_object_new_object();
                 if (!jobj)
                         return log_oom();
+
+                r = ip_to_str(a->family, &a->address, &c);
+                if (r < 0)
+                        return r;
 
                 js = json_object_new_string(c);
                 if (!js)
                         return log_oom();
 
                 json_object_object_add(jobj, "Address", js);
+                steal_pointer(js);
+
+                js = json_object_new_int(a->address.prefix_len);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "PrefixLength", js);
+                steal_pointer(js);
+
+                r = ip_to_str_prefix(a->family, &a->broadcast, &b);
+                if (r < 0)
+                        return r;
+
+                js = json_object_new_string(b);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Broadcast", js);
                 steal_pointer(js);
 
                 jscope = json_object_new_int(a->scope);
@@ -568,7 +609,7 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
                 json_object_object_add(jobj, "Flags", jflags);
                 steal_pointer(jflags);
 
-                address_flags_to_string(jobj, a->flags);
+                address_flags_to_string(a, jobj, a->flags);
 
                 r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
                 if (r >= 0 && string_has_prefix(c, dhcp)) {
@@ -985,6 +1026,28 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         r = link_get_one_link(p->ifname, &l);
         if (r < 0)
                 return r;
+
+        if (l->ifindex > 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                ja = json_object_new_int(l->ifindex);
+                if (!ja)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Index", ja);
+                steal_pointer(ja);
+        }
+
+        if (p->ifindex > 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                ja = json_object_new_string(p->ifname);
+                if (!ja)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Name", ja);
+                steal_pointer(ja);
+        }
 
         if (l->alt_names) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
