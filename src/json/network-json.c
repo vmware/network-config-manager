@@ -774,7 +774,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL, *link = NULL, *online_state = NULL,
                 *address_state = NULL, *ipv4_state = NULL, *ipv6_state = NULL, *required_for_online = NULL,
-                *device_activation_policy = NULL;
+                *device_activation_policy = NULL, *mdns = NULL, *llmnr = NULL;
         _auto_cleanup_strv_ char **dns_servers = NULL, **dns_domains = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
@@ -1482,6 +1482,33 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 steal_pointer(ja);
         }
 
+        (void) network_parse_link_mdns(l->ifindex, &mdns);
+        (void) network_parse_link_llmnr(l->ifindex, &llmnr);
+        if (mdns || llmnr) {
+                _cleanup_(json_object_putp) json_object *j = NULL, *jmdns = NULL, *jllmnr = NULL;
+
+                j = json_object_new_object();
+                if (!j)
+                        return log_oom();
+
+                jmdns = json_object_new_string(mdns);
+                if (!jmdns)
+                        return log_oom();
+
+                json_object_object_add(j, "MDNS", jmdns);
+                steal_pointer(jmdns);
+
+                jllmnr = json_object_new_string(llmnr);
+                if (!jllmnr)
+                        return log_oom();
+
+                json_object_object_add(j, "LLMNR", jllmnr);
+                steal_pointer(jllmnr);
+
+                json_object_object_add(jobj, "DNSSettings", j);
+                steal_pointer(j);
+        }
+
         if (ntp) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
                 char **d;
@@ -1572,9 +1599,9 @@ int json_show_dns_server(const IfNameIndex *p, char *dns_config) {
                                 json_object_object_add(jaddr, "Address", s);
                                 steal_pointer(s);
 
-                                if (dns_config && g_strrstr(dns_config, pretty)){
+                                if (dns_config && g_strrstr(dns_config, pretty))
                                         s = json_object_new_string("static");
-                                } else {
+                                else {
                                         s = json_object_new_string("dhcp");
 
                                         if(provider) {
