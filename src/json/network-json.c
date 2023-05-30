@@ -909,6 +909,19 @@ static int json_list_link_attributes(json_object *jobj, Link *l) {
                 steal_pointer(js);
         }
 
+        if (l->contains_perm_address) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+                char s[ETHER_ADDR_LEN * 6] = {};
+
+                ether_addr_to_string(&l->perm_address, s);
+                js = json_object_new_string(s);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "PermAddress", js);
+                steal_pointer(js);
+        }
+
         r = link_read_sysfs_attribute(l->name, "mtu", &mtu);
         if (r >= 0) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
