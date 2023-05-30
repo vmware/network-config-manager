@@ -403,8 +403,7 @@ int json_system_status(char **ret) {
 }
 
 static int address_flags_to_string(json_object *jobj, uint32_t flags) {
-        _auto_cleanup_ char *s = NULL;
-        static const char* map[] = {
+        static const char* table[] = {
                 [IFA_F_NODAD]          = "nodad",
                 [IFA_F_OPTIMISTIC]     = "optimistic",
                 [IFA_F_DADFAILED]      = "dadfailed",
@@ -428,7 +427,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         return log_oom();
 
                 if (flags & IFA_F_NODAD) {
-                        js = json_object_new_string(map[IFA_F_NODAD]);
+                        js = json_object_new_string(table[IFA_F_NODAD]);
                         if (!js)
                                 return log_oom();
 
@@ -436,7 +435,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_OPTIMISTIC) {
-                        js = json_object_new_string(map[IFA_F_OPTIMISTIC]);
+                        js = json_object_new_string(table[IFA_F_OPTIMISTIC]);
                         if (!js)
                                 return log_oom();
 
@@ -444,7 +443,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_DADFAILED) {
-                        js = json_object_new_string(map[IFA_F_DADFAILED]);
+                        js = json_object_new_string(table[IFA_F_DADFAILED]);
                         if (!js)
                                 return log_oom();
 
@@ -452,7 +451,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_HOMEADDRESS) {
-                        js = json_object_new_string(map[IFA_F_HOMEADDRESS]);
+                        js = json_object_new_string(table[IFA_F_HOMEADDRESS]);
                         if (!js)
                                 return log_oom();
 
@@ -460,7 +459,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_DEPRECATED) {
-                        js = json_object_new_string(map[IFA_F_DEPRECATED]);
+                        js = json_object_new_string(table[IFA_F_DEPRECATED]);
                         if (!js)
                                 return log_oom();
 
@@ -468,7 +467,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_TENTATIVE) {
-                        js = json_object_new_string(map[IFA_F_TENTATIVE]);
+                        js = json_object_new_string(table[IFA_F_TENTATIVE]);
                         if (!js)
                                 return log_oom();
 
@@ -476,7 +475,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_PERMANENT) {
-                        js = json_object_new_string(map[IFA_F_PERMANENT]);
+                        js = json_object_new_string(table[IFA_F_PERMANENT]);
                         if (!js)
                                 return log_oom();
 
@@ -484,7 +483,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_MANAGETEMPADDR) {
-                        js = json_object_new_string(map[IFA_F_MANAGETEMPADDR]);
+                        js = json_object_new_string(table[IFA_F_MANAGETEMPADDR]);
                         if (!js)
                                 return log_oom();
 
@@ -492,7 +491,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_NOPREFIXROUTE) {
-                        js = json_object_new_string(map[IFA_F_NOPREFIXROUTE]);
+                        js = json_object_new_string(table[IFA_F_NOPREFIXROUTE]);
                         if (!js)
                                 return log_oom();
 
@@ -500,7 +499,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_MCAUTOJOIN) {
-                        js = json_object_new_string(map[IFA_F_MCAUTOJOIN]);
+                        js = json_object_new_string(table[IFA_F_MCAUTOJOIN]);
                         if (!js)
                                 return log_oom();
 
@@ -508,7 +507,7 @@ static int address_flags_to_string(json_object *jobj, uint32_t flags) {
                         steal_pointer(js);
                 }
                 if (flags & IFA_F_STABLE_PRIVACY) {
-                        js = json_object_new_string(map[IFA_F_STABLE_PRIVACY]);
+                        js = json_object_new_string(table[IFA_F_STABLE_PRIVACY]);
                         if (!js)
                                 return log_oom();
 
