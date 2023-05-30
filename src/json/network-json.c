@@ -861,7 +861,14 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "OperState", js);
+                json_object_object_add(jobj, "KernelOperStateString", js);
+                steal_pointer(js);
+
+                js = json_object_new_int(l->operstate);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "KernelOperState", js);
                 steal_pointer(js);
         }
 
