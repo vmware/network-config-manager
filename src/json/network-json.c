@@ -1389,6 +1389,20 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                                         steal_pointer(js);
                                         steal_pointer(provider);
                                 }
+                        } else  {
+                                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                                if (config_contains(network, "Network", "DNS", *d)) {
+                                        js = json_object_new_string("static");
+                                        if (!js)
+                                                return log_oom();
+                                } else {
+                                        js = json_object_new_string("foreign");
+                                        if (!js)
+                                                return log_oom();
+                                }
+                                json_object_object_add(j, "ConfigProvider", js);
+                                steal_pointer(js);
                         }
 
                         json_object_array_add(ja, j);
