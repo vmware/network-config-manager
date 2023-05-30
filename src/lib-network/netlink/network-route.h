@@ -16,6 +16,7 @@ typedef struct Route {
         unsigned char src_prefixlen;
         unsigned char protocol;
         unsigned char tos;
+        unsigned char pref;
 
         uint32_t priority;
         uint32_t table;
