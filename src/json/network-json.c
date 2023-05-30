@@ -533,21 +533,32 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
         while (g_hash_table_iter_next (&iter, &key, &value)) {
                 _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL;
                 Address *a = (Address *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *dhcp = NULL;
-
-                r = ip_to_str_prefix(a->family, &a->address, &c);
-                if (r < 0)
-                        return r;
+                _auto_cleanup_ char *c = NULL, *b = NULL, *dhcp = NULL;
 
                 jobj = json_object_new_object();
                 if (!jobj)
                         return log_oom();
+
+                r = ip_to_str_prefix(a->family, &a->address, &c);
+                if (r < 0)
+                        return r;
 
                 js = json_object_new_string(c);
                 if (!js)
                         return log_oom();
 
                 json_object_object_add(jobj, "Address", js);
+                steal_pointer(js);
+
+                r = ip_to_str_prefix(a->family, &a->broadcast, &b);
+                if (r < 0)
+                        return r;
+
+                js = json_object_new_string(b);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Broadcast", js);
                 steal_pointer(js);
 
                 jscope = json_object_new_int(a->scope);
