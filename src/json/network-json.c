@@ -517,6 +517,18 @@ static int json_list_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                 if (ip_is_null(&rt->gw))
                         continue;
 
+                jscope = json_object_new_int(rt->scope);
+                if (!jscope)
+                        return log_oom();
+                json_object_object_add(jobj, "Scope", jscope);
+                steal_pointer(jscope);
+
+                jscope = json_object_new_string(route_scope_type_to_name(rt->scope));
+                if (!jscope)
+                        return log_oom();
+                json_object_object_add(jobj, "ScopeString", jscope);
+                steal_pointer(jscope);
+
                 r = ip_to_str(rt->family, &rt->gw, &c);
                 if (r < 0)
                         return r;
@@ -527,6 +539,7 @@ static int json_list_one_link_routes(Link *l, Routes *rts, json_object *ret) {
 
                 json_object_object_add(jobj, "Gateway", js);
                 steal_pointer(js);
+
 
                 r = network_parse_link_dhcp4_router(rt->ifindex, &dhcp);
                 if (r >= 0 && string_has_prefix(c, dhcp)) {
