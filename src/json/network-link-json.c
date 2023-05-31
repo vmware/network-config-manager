@@ -177,7 +177,7 @@ static int json_fill_one_link_addresses(Link *l, Addresses *addr, json_object *r
 
         g_hash_table_iter_init(&iter, addr->addresses->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
-                _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jlft = NULL;
+                _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jlft = NULL, *jlabel = NULL;
                 Address *a = (Address *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL, *b = NULL, *dhcp = NULL;
 
@@ -255,6 +255,12 @@ static int json_fill_one_link_addresses(Link *l, Addresses *addr, json_object *r
 
                 json_object_object_add(jobj, "ValidLft", jlft);
                 steal_pointer(jlft);
+
+                jlabel = json_object_new_string(a->label ? a->label : "");
+                if (!jlabel)
+                        return log_oom();
+                json_object_object_add(jobj, "Label", jlabel);
+                steal_pointer(jlabel);
 
                 r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
                 if (r >= 0 && string_has_prefix(c, dhcp)) {

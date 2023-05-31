@@ -162,6 +162,12 @@ static int fill_link_address(const struct nlmsghdr *nlh, void *data) {
         if (tb[IFA_FLAGS])
                 a->flags = mnl_attr_get_u32(tb[IFA_FLAGS]);
 
+        if (tb[IFA_LABEL]) {
+                a->label = strdup(mnl_attr_get_str(tb[IFA_LABEL]));
+                if (!a->label)
+                        return -ENOMEM;
+        }
+
         if (tb[IFA_CACHEINFO])
                 memcpy(&a->ci, mnl_attr_get_payload(tb[IFA_CACHEINFO]), sizeof(struct ifa_cacheinfo));
 
