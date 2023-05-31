@@ -18,6 +18,10 @@
 #include "network-util.h"
 #include "set.h"
 
+#ifndef IFA_PROTO
+#define IFA_PROTO 11
+#endif
+
 typedef struct Address {
         int family;
         int ifindex;
