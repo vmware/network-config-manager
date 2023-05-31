@@ -25,6 +25,7 @@ typedef struct Address {
         unsigned char scope;
         unsigned char prefix_len;
 
+        uint8_t proto;
         uint32_t flags;
         char *label;
 
