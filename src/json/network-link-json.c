@@ -329,7 +329,8 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
         g_hash_table_iter_init(&iter, rts->routes->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
                 _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jtype = NULL, *jtable = NULL,
-                        *jprotocol = NULL, *jpref = NULL, *jprio = NULL, *jdestination = NULL, *jdest_prefix_len = NULL;
+                        *jprotocol = NULL, *jpref = NULL, *jprio = NULL, *jdestination = NULL, *jdest_prefix_len = NULL,
+                        *j = NULL;
                 Route *rt = (Route *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL, *dhcp = NULL, *prefsrc = NULL, *destination = NULL;
 
@@ -419,7 +420,7 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                                 }
                         }
 
-                        json_object_object_add(jobj, "ConfigSource", js);
+                        json_object_object_add(jobj, "ConfigSourceDestination", js);
                         steal_pointer(js);
                 }
 
@@ -429,6 +430,27 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
 
                 json_object_object_add(jobj, "Priority", jprio);
                 steal_pointer(jprio);
+
+                j = json_object_new_int(rt->ifindex);
+                if (!j)
+                        return log_oom();
+
+                json_object_object_add(jobj, "OIF", j);
+                steal_pointer(j);
+
+                j = json_object_new_int(rt->iif);
+                if (!j)
+                        return log_oom();
+
+                json_object_object_add(jobj, "IIF", j);
+                steal_pointer(j);
+
+                j = json_object_new_int(rt->ttl_propogate);
+                if (!j)
+                        return log_oom();
+
+                json_object_object_add(jobj, "TTLPropogate", j);
+                steal_pointer(j);
 
                 if (!ip_is_null(&rt->prefsrc)) {
                         r = ip_to_str(rt->family, &rt->prefsrc, &prefsrc);
