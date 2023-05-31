@@ -329,9 +329,9 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
         g_hash_table_iter_init(&iter, rts->routes->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
                 _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jtype = NULL, *jtable = NULL,
-                        *jprotocol = NULL, *jpref = NULL, *jprio = NULL;
+                        *jprotocol = NULL, *jpref = NULL, *jprio = NULL, *jdestination = NULL, *jdest_prefix_len = NULL;
                 Route *rt = (Route *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *dhcp = NULL, *prefsrc = NULL;
+                _auto_cleanup_ char *c = NULL, *dhcp = NULL, *prefsrc = NULL, *destination = NULL;
 
                 jobj = json_object_new_object();
                 if (!jobj)
@@ -381,9 +381,47 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                 jpref = json_object_new_int(rt->pref);
                 if (!jpref)
                         return log_oom();
-
                 json_object_object_add(jobj, "Preference", jpref);
                 steal_pointer(jpref);
+
+                if (!ip_is_null(&rt->dst)) {
+                        r = ip_to_str(rt->family, &rt->dst, &destination);
+                        if (r < 0)
+                                return r;
+                }
+
+                js = json_object_new_string(destination ? destination : "");
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Destination", js);
+                steal_pointer(js);
+
+                jdest_prefix_len = json_object_new_int(rt->dst_prefixlen);
+                if (!jdest_prefix_len)
+                        return log_oom();
+                json_object_object_add(jobj, "DestinationPrefixLength", jdest_prefix_len);
+                steal_pointer(jdest_prefix_len);
+
+                if (destination) {
+                        _auto_cleanup_ char *network = NULL;
+
+                        r = parse_network_file(l->ifindex, NULL, &network);
+                        if (r >= 0) {
+                                if (config_contains(network, "Route", "Destination", destination)) {
+                                        js = json_object_new_string("static");
+                                        if (!js)
+                                                return log_oom();
+                                } else {
+                                        js = json_object_new_string("foreign");
+                                        if (!js)
+                                                return log_oom();
+                                }
+                        }
+
+                        json_object_object_add(jobj, "ConfigSource", js);
+                        steal_pointer(js);
+                }
 
                 jprio = json_object_new_int(rt->priority);
                 if (!jprio)
