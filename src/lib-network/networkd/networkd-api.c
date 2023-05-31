@@ -263,3 +263,7 @@ int network_parse_link_dhcp4_dns(int ifindex, char ***ret) {
 int network_parse_link_dhcp4_search_domains(int ifindex, char ***ret) {
         return network_parse_link_lease_strv(ifindex, "DOMAINS", ret);
 }
+
+int network_parse_link_dhcp4_ntp(int ifindex, char ***ret) {
+        return network_parse_link_lease_strv(ifindex, "NTP", ret);
+}
