@@ -26,6 +26,9 @@ typedef struct Address {
         unsigned char prefix_len;
 
         uint32_t flags;
+
+        struct ifa_cacheinfo ci;
+
         IPAddress address;
         IPAddress broadcast;
         IPAddress peer;
