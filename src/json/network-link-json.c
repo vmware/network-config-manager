@@ -403,6 +403,26 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                 json_object_object_add(jobj, "DestinationPrefixLength", jdest_prefix_len);
                 steal_pointer(jdest_prefix_len);
 
+                if (destination) {
+                        _auto_cleanup_ char *network = NULL;
+
+                        r = parse_network_file(l->ifindex, NULL, &network);
+                        if (r >= 0) {
+                                if (config_contains(network, "Route", "Destination", destination)) {
+                                        js = json_object_new_string("static");
+                                        if (!js)
+                                                return log_oom();
+                                } else {
+                                        js = json_object_new_string("foreign");
+                                        if (!js)
+                                                return log_oom();
+                                }
+                        }
+
+                        json_object_object_add(jobj, "ConfigSource", js);
+                        steal_pointer(js);
+                }
+
                 jprio = json_object_new_int(rt->priority);
                 if (!jprio)
                         return log_oom();
