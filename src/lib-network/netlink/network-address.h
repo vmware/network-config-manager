@@ -26,6 +26,7 @@ typedef struct Address {
         unsigned char prefix_len;
 
         uint32_t flags;
+        char *label;
 
         struct ifa_cacheinfo ci;
 
