@@ -445,6 +445,13 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                 json_object_object_add(jobj, "IIF", j);
                 steal_pointer(j);
 
+                j = json_object_new_int(rt->ttl_propogate);
+                if (!j)
+                        return log_oom();
+
+                json_object_object_add(jobj, "TTLPropogate", j);
+                steal_pointer(j);
+
                 if (!ip_is_null(&rt->prefsrc)) {
                         r = ip_to_str(rt->family, &rt->prefsrc, &prefsrc);
                         if (r < 0)
