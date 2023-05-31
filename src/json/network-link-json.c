@@ -168,7 +168,7 @@ static int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags
         return 0;
 }
 
-static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *ret) {
+static int json_fill_one_link_addresses(Link *l, Addresses *addr, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
         gpointer key, value;
@@ -282,7 +282,7 @@ static int json_list_one_link_addresses(Link *l, Addresses *addr, json_object *r
         return 0;
 }
 
-static int json_list_one_link_routes(Link *l, Routes *rts, json_object *ret) {
+static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
         gpointer key, value;
@@ -1314,9 +1314,88 @@ static int fill_link_dns_message(json_object *jobj, Link *l, char *network) {
         return 0;
 }
 
-int json_list_one_link(IfNameIndex *p, char **ret) {
-        _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
-        _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL, *mdns = NULL, *llmnr = NULL;
+static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
+        _auto_cleanup_strv_ char **ntp = NULL, **config_ntp = NULL;
+        _cleanup_(json_object_putp) json_object *ja = NULL;
+        char **d;
+        int r;
+
+        assert(jobj);
+        assert(l);
+
+        (void) network_parse_link_dhcp4_ntp(l->ifindex, &ntp);
+        r = network_parse_link_ntp(l->ifindex, &config_ntp);
+        if (r < 0)
+                return r;
+
+       ja = json_object_new_array();
+       if (!ja)
+               return log_oom();
+
+       strv_foreach(d, config_ntp) {
+               _cleanup_(json_object_putp) json_object *j = NULL, *jntp = NULL;
+
+                jntp = json_object_new_string(*d);
+                if (!jntp)
+                        return log_oom();
+
+                j = json_object_new_object();
+                if (!j)
+                        return log_oom();
+
+                json_object_object_add(j, "Address", jntp);
+                steal_pointer(jntp);
+
+                if (ntp && strv_length(ntp) && strv_contains((const char **) ntp, *d)) {
+                        _cleanup_(json_object_putp) json_object *js = NULL;
+                        _auto_cleanup_ char *provider = NULL;
+
+                        js = json_object_new_string("dhcp");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_object_add(j, "ConfigSource", js);
+                        steal_pointer(js);
+
+                        r = network_parse_link_dhcp4_server_address(l->ifindex, &provider);
+                        if (r >= 0) {
+                                js = json_object_new_string(provider);
+                                if (!js)
+                                        return log_oom();
+
+                                json_object_object_add(j, "ConfigProvider", js);
+                                steal_pointer(js);
+                                steal_pointer(provider);
+                        }
+                } else  {
+                        _cleanup_(json_object_putp) json_object *js = NULL;
+
+                        if (config_contains(network, "Network", "NTP", *d)) {
+                                js = json_object_new_string("static");
+                                if (!js)
+                                        return log_oom();
+                        } else {
+                                js = json_object_new_string("foreign");
+                                if (!js)
+                                        return log_oom();
+                        }
+                        json_object_object_add(j, "ConfigProvider", js);
+                        steal_pointer(js);
+                }
+
+                json_object_array_add(ja, j);
+                steal_pointer(j);
+        }
+
+        json_object_object_add(jobj, "NTP", ja);
+        steal_pointer(ja);
+
+        return 0;
+}
+
+int json_fill_one_link(IfNameIndex *p, char **ret) {
+        _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL;
+        _auto_cleanup_strv_ char **route_domains = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _cleanup_(routes_freep) Routes *route = NULL;
@@ -1408,7 +1487,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 if (!ja)
                         return log_oom();
 
-                json_list_one_link_addresses(l, addr, ja);
+                json_fill_one_link_addresses(l, addr, ja);
 
                 json_object_object_add(jobj, "Addresses", ja);
                 steal_pointer(ja);
@@ -1422,7 +1501,7 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
                 if (!ja)
                         return log_oom();
 
-                json_list_one_link_routes(l, route, ja);
+                json_fill_one_link_routes(l, route, ja);
 
                 json_object_object_add(jobj, "Routes", ja);
                 steal_pointer(ja);
@@ -1432,27 +1511,9 @@ int json_list_one_link(IfNameIndex *p, char **ret) {
         if (r < 0)
                 return r;
 
-        (void) network_parse_link_route_domains(l->ifindex, &route_domains);
-        (void) network_parse_link_ntp(l->ifindex, &ntp);
-        if (ntp) {
-                _cleanup_(json_object_putp) json_object *ja = NULL;
-                char **d;
-
-                ja = json_object_new_array();
-                if (!ja)
-                        return log_oom();
-
-                strv_foreach(d, ntp) {
-                        json_object *jntp = json_object_new_string(*d);
-                        if (!jntp)
-                                return log_oom();
-
-                        json_object_array_add(ja, jntp);
-                }
-
-                json_object_object_add(jobj, "NTP", ja);
-                steal_pointer(ja);
-        }
+        r = fill_link_ntp_message(jobj, l, network);
+        if (r < 0)
+                return r;
 
         (void) network_parse_link_timezone(l->ifindex, &tz);
         if (tz) {

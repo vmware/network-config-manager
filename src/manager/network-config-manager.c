@@ -2507,7 +2507,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         }
 
         if (json_enabled())
-                return json_show_dns_server(p, dns_config);
+                return json_fill_dns_server(p, dns_config);
 
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
@@ -2836,7 +2836,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
         int r;
 
         if (json_enabled())
-                return json_show_dns_server_domains();
+                return json_fill_dns_server_domains();
 
         if (argc > 1 && str_eq_fold(argv[1], "system")) {
                 r = parse_ifname_or_index(argv[1], &p);
