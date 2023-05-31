@@ -331,15 +331,13 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                 _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jtype = NULL, *jtable = NULL,
                         *jprotocol = NULL, *jpref = NULL, *jprio = NULL;
                 Route *rt = (Route *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *dhcp = NULL;
+                _auto_cleanup_ char *c = NULL, *dhcp = NULL, *prefsrc = NULL;
 
                 jobj = json_object_new_object();
                 if (!jobj)
                         return log_oom();
 
                 rt = (Route *) g_bytes_get_data(key, &size);
-                if (ip_is_null(&rt->gw))
-                        continue;
 
                 jtype = json_object_new_int(rt->type);
                 if (!jtype)
@@ -394,60 +392,76 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                 json_object_object_add(jobj, "Priority", jprio);
                 steal_pointer(jprio);
 
-                r = ip_to_str(rt->family, &rt->gw, &c);
-                if (r < 0)
-                        return r;
+                if (!ip_is_null(&rt->prefsrc)) {
+                        r = ip_to_str(rt->family, &rt->prefsrc, &prefsrc);
+                        if (r < 0)
+                                return r;
+                }
 
-                js = json_object_new_string(c);
+                js = json_object_new_string(prefsrc ? prefsrc : "");
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "PreferredSource", js);
+                steal_pointer(js);
+
+                if (!ip_is_null(&rt->gw)) {
+                        r = ip_to_str(rt->family, &rt->gw, &c);
+                        if (r < 0)
+                                return r;
+                }
+
+                js = json_object_new_string(c ? c : "");
                 if (!js)
                         return log_oom();
 
                 json_object_object_add(jobj, "Gateway", js);
                 steal_pointer(js);
 
-                r = network_parse_link_dhcp4_router(rt->ifindex, &dhcp);
-                if (r >= 0 && string_has_prefix(c, dhcp)) {
-                        _auto_cleanup_ char *provider = NULL;
+                if (c) {
+                        r = network_parse_link_dhcp4_router(rt->ifindex, &dhcp);
+                        if (r >= 0 && string_has_prefix(c, dhcp)) {
+                                _auto_cleanup_ char *provider = NULL;
 
-                        js = json_object_new_string("dhcp");
-                        if (!js)
-                                return log_oom();
-
-                        json_object_object_add(jobj, "ConfigSource", js);
-                        steal_pointer(js);
-
-                        r = network_parse_link_dhcp4_server_address(rt->ifindex, &provider);
-                        if (r >= 0) {
-                                js = json_object_new_string(provider);
+                                js = json_object_new_string("dhcp");
                                 if (!js)
                                         return log_oom();
 
-                                json_object_object_add(jobj, "ConfigProvider", js);
+                                json_object_object_add(jobj, "ConfigSource", js);
                                 steal_pointer(js);
 
-                        }
-                } else {
-                        _auto_cleanup_ char *network = NULL;
-
-                        r = parse_network_file(l->ifindex, NULL, &network);
-                        if (r >= 0) {
-                                if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c)) {
-                                        js = json_object_new_string("static");
+                                r = network_parse_link_dhcp4_server_address(rt->ifindex, &provider);
+                                if (r >= 0) {
+                                        js = json_object_new_string(provider);
                                         if (!js)
                                                 return log_oom();
-                                } else {
-                                        js = json_object_new_string("foreign");
-                                        if (!js)
-                                        return log_oom();
+
+                                        json_object_object_add(jobj, "ConfigProvider", js);
+                                        steal_pointer(js);
                                 }
+                        } else {
+                                _auto_cleanup_ char *network = NULL;
+
+                                r = parse_network_file(l->ifindex, NULL, &network);
+                                if (r >= 0) {
+                                        if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c)) {
+                                                js = json_object_new_string("static");
+                                                if (!js)
+                                                        return log_oom();
+                                } else {
+                                                js = json_object_new_string("foreign");
+                                                if (!js)
+                                                        return log_oom();
+                                }
+                                }
+
+                                json_object_object_add(jobj, "ConfigSource", js);
+                                steal_pointer(js);
                         }
 
-                        json_object_object_add(jobj, "ConfigSource", js);
-                        steal_pointer(js);
+                        json_object_array_add(ret, jobj);
+                        steal_pointer(jobj);
                 }
-
-                json_object_array_add(ret, jobj);
-                steal_pointer(jobj);
         }
 
         return 0;
