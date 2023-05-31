@@ -225,6 +225,9 @@ static int fill_link_route_message(Route *rt, int ifindex , struct nlattr *tb[])
         if (tb[RTA_PRIORITY])
                 rt->priority = mnl_attr_get_u32(tb[RTA_PRIORITY]);
 
+        if (tb[RTA_PRIORITY])
+                rt->ttl_propogate = mnl_attr_get_u8(tb[RTA_PRIORITY]);
+
         if (tb[RTA_METRICS]) {
                 struct nlattr *tbx[RTAX_MAX+1] = {};
                 int i;
