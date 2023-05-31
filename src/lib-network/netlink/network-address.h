@@ -18,6 +18,10 @@
 #include "network-util.h"
 #include "set.h"
 
+#ifndef IFA_PROTO
+#define IFA_PROTO 11
+#endif
+
 typedef struct Address {
         int family;
         int ifindex;
@@ -25,6 +29,7 @@ typedef struct Address {
         unsigned char scope;
         unsigned char prefix_len;
 
+        uint8_t proto;
         uint32_t flags;
         char *label;
 

@@ -171,7 +171,6 @@ static int fill_link_route_message(Route *rt, int ifindex , struct nlattr *tb[])
         if (tb[RTA_TABLE])
                 rt->table = mnl_attr_get_u32(tb[RTA_TABLE]);
 
-
         if (tb[RTA_DST]) {
                 if (rt->family == AF_INET)
                         memcpy(&rt->dst.in, mnl_attr_get_payload(tb[RTA_DST]), sizeof(struct in_addr));
@@ -198,7 +197,6 @@ static int fill_link_route_message(Route *rt, int ifindex , struct nlattr *tb[])
 
         if (tb[RTA_PREF])
                 rt->pref = mnl_attr_get_u8(tb[RTA_PREF]);
-
 
         if (tb[RTA_FLOW])
                 rt->flow = mnl_attr_get_u32(tb[RTA_FLOW]);

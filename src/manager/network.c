@@ -185,6 +185,33 @@ int ipv6_link_local_address_gen_type_to_mode(const char *name) {
         return _IPV6_LINK_LOCAL_ADDRESS_GEN_MODE_INVALID;
 }
 
+static const char* const address_protocol_table[_ADDRESS_PROTOCOL_MAX] = {
+        [ADDRESS_PROTOCOL_UNSPEC] = "unspec",
+        [ADDRESS_PROTOCOL_LO]     = "kernel-loopback",
+        [ADDRESS_PROTOCOL_RA]     = "kernel-router-announcement",
+        [ADDRESS_PROTOCOL_LL]     = "kernel-link-local",
+};
+
+const char *address_protocol_type_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(address_protocol_table))
+                return NULL;
+
+        return address_protocol_table[id];
+}
+
+int address_protocol_type_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = ADDRESS_PROTOCOL_UNSPEC; i < (size_t) ELEMENTSOF(address_protocol_table); i++)
+                if (str_eq_fold(name, address_protocol_table[i]))
+                        return i;
+
+        return _ADDRESS_PROTOCOL_INVALID;
+}
+
 static const char* const ipv6_privacy_extensions_type[_IPV6_PRIVACY_EXTENSIONS_MAX] = {
         [IPV6_PRIVACY_EXTENSIONS_NO] = "no",
         [IPV6_PRIVACY_EXTENSIONS_PREFER_PUBLIC] = "prefer-public",
