@@ -192,6 +192,9 @@ static int fill_link_route_message(Route *rt, int ifindex , struct nlattr *tb[])
         if (tb[RTA_OIF])
                 rt->ifindex = mnl_attr_get_u32(tb[RTA_OIF]);
 
+        if (tb[RTA_IIF])
+                rt->iif = mnl_attr_get_u32(tb[RTA_IIF]);
+
         if (ifindex > 0 && ifindex != (int) rt->ifindex)
                 return -EINVAL;
 

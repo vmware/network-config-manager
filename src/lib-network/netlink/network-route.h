@@ -29,6 +29,7 @@ typedef struct Route {
 
         int family;
         int ifindex;
+        int iif;
         int type;
         int scope;
 
