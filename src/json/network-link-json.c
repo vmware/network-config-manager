@@ -177,7 +177,7 @@ static int json_fill_one_link_addresses(Link *l, Addresses *addr, json_object *r
 
         g_hash_table_iter_init(&iter, addr->addresses->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
-                _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL;
+                _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jlft = NULL;
                 Address *a = (Address *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL, *b = NULL, *dhcp = NULL;
 
@@ -233,6 +233,28 @@ static int json_fill_one_link_addresses(Link *l, Addresses *addr, json_object *r
                 steal_pointer(jflags);
 
                 address_flags_to_string(a, jobj, a->flags);
+
+                if (a->ci.ifa_prefered != UINT32_MAX)
+                        jlft = json_object_new_int(a->ci.ifa_prefered);
+                else
+                        jlft = json_object_new_string("forever");
+
+                if (!jlft)
+                        return log_oom();
+
+                json_object_object_add(jobj, "PreferedLft", jlft);
+                steal_pointer(jlft);
+
+                if (a->ci.ifa_valid != UINT32_MAX)
+                        jlft = json_object_new_int(a->ci.ifa_valid);
+                else
+                         jlft = json_object_new_string("forever");
+
+                if (!jlft)
+                        return log_oom();
+
+                json_object_object_add(jobj, "ValidLft", jlft);
+                steal_pointer(jlft);
 
                 r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
                 if (r >= 0 && string_has_prefix(c, dhcp)) {
@@ -1227,18 +1249,18 @@ static int fill_link_dns_message(json_object *jobj, Link *l, char *network) {
                 return log_oom();
 
         strv_foreach(d, search_domains) {
-                _cleanup_(json_object_putp) json_object *j = NULL, *jdns = NULL;
+                _cleanup_(json_object_putp) json_object *j = NULL, *jdomain = NULL;
 
-                jdns = json_object_new_string(*d);
-                if (!jdns)
+                jdomain = json_object_new_string(*d);
+                if (!jdomain)
                         return log_oom();
 
                 j = json_object_new_object();
                 if (!j)
                         return log_oom();
 
-                json_object_object_add(j, "Domain", jdns);
-                steal_pointer(jdns);
+                json_object_object_add(j, "Domain", jdomain);
+                steal_pointer(jdomain);
 
                 if (dns_domains && strv_length(dns_domains) && strv_contains((const char **) dns_domains, *d)) {
                         _cleanup_(json_object_putp) json_object *js = NULL;
