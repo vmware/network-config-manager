@@ -25,7 +25,7 @@
 #include "parse-util.h"
 #include "udev-hwdb.h"
 
-static void json_list_link_addresses(gpointer key, gpointer value, gpointer userdata) {
+static void json_fill_link_addresses(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *jip = NULL, *jname = NULL, *jfamily = NULL,
                 *jidx = NULL, *jaddr = NULL;
         json_object *jobj = (json_object *) userdata;
@@ -83,7 +83,7 @@ static void json_list_link_addresses(gpointer key, gpointer value, gpointer user
         steal_pointer(jidx);
 }
 
-static void json_list_link_routes(gpointer key, gpointer value, gpointer userdata) {
+static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *jip = NULL, *jname = NULL, *jfamily = NULL,
                 *jidx = NULL, *jrt = NULL;
         json_object *jobj = (json_object *) userdata;
@@ -150,7 +150,7 @@ static void json_list_link_routes(gpointer key, gpointer value, gpointer userdat
         steal_pointer(jidx);
 }
 
-int json_system_status(char **ret) {
+int json_fill_system_status(char **ret) {
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jaddress = NULL, *jroutes = NULL;
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
@@ -307,7 +307,7 @@ int json_system_status(char **ret) {
                         return log_oom();
 
 
-                set_foreach(h->addresses, json_list_link_addresses, jaddress);
+                set_foreach(h->addresses, json_fill_link_addresses, jaddress);
         }
 
         json_object_object_add(jobj, "Addresses", jaddress);
@@ -319,7 +319,7 @@ int json_system_status(char **ret) {
                 if (!jroutes)
                         return log_oom();
 
-                set_foreach(routes->routes, json_list_link_routes, jroutes);
+                set_foreach(routes->routes, json_fill_link_routes, jroutes);
         }
 
         json_object_object_add(jobj, "Routes", jroutes);
@@ -400,7 +400,7 @@ int json_system_status(char **ret) {
         return r;
 }
 
-int json_show_dns_server(const IfNameIndex *p, char *dns_config) {
+int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ char *provider = NULL;
@@ -520,7 +520,7 @@ int json_show_dns_server(const IfNameIndex *p, char *dns_config) {
         return 0;
 }
 
-int json_show_dns_server_domains(void) {
+int json_fill_dns_server_domains(void) {
         _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;

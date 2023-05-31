@@ -391,7 +391,7 @@ static int list_one_link(char *argv[]) {
         }
 
         if (arg_json)
-                return json_list_one_link(p, NULL);
+                return json_fill_one_link(p, NULL);
 
         r = link_get_one_link(p->ifname, &l);
         if (r < 0)
@@ -673,7 +673,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 return list_one_link(argv + 1);
 
         if (arg_json)
-                return json_system_status(NULL);
+                return json_fill_system_status(NULL);
 
         (void) dbus_get_property_from_hostnamed("StaticHostname", &hostname);
         if (hostname) {
@@ -913,7 +913,7 @@ _public_ int ncm_link_status(int argc, char *argv[]) {
 _public_ int ncm_get_system_status(char **ret) {
         assert(ret);
 
-        return json_system_status(ret);
+        return json_fill_system_status(ret);
 }
 
 _public_ int ncm_get_link_status(const char *ifname, char **ret) {
@@ -927,5 +927,5 @@ _public_ int ncm_get_link_status(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        return json_list_one_link(p, ret);
+        return json_fill_one_link(p, ret);
 }
