@@ -420,7 +420,7 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                                 }
                         }
 
-                        json_object_object_add(jobj, "ConfigSource", js);
+                        json_object_object_add(jobj, "ConfigSourceDestination", js);
                         steal_pointer(js);
                 }
 
