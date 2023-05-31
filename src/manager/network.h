@@ -81,6 +81,15 @@ typedef enum IPv6RAPreference {
        _IPV6_RA_PREFERENCE_INVALID = -EINVAL,
 } IPv6RAPreference;
 
+typedef enum AddressProtocol {
+       ADDRESS_PROTOCOL_UNSPEC,
+       ADDRESS_PROTOCOL_LO,
+       ADDRESS_PROTOCOL_RA,
+       ADDRESS_PROTOCOL_LL,
+       _ADDRESS_PROTOCOL_MAX,
+       _ADDRESS_PROTOCOL_INVALID = -EINVAL,
+} AddressProtocol;
+
 typedef enum RouteScope {
         ROUTE_SCOPE_UNIVERSE,
         ROUTE_SCOPE_SITE = RT_SCOPE_SITE,
@@ -419,6 +428,10 @@ int ipoib_name_to_mode(const char *name);
 
 const char *dhcp6_client_start_mode_to_name(int id);
 int dhcp6_client_start_name_to_mode(const char *name);
+
+const char *address_protocol_type_to_name(int id);
+int address_protocol_type_to_mode(const char *name);
+
 
 int generate_network_config(Network *n);
 int generate_master_device_network(Network *n);
