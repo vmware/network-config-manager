@@ -879,6 +879,17 @@ static int fill_link_message(json_object *jobj, Link *l) {
                 }
         }
 
+        if (l->group > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_int(l->group);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Group", js);
+                steal_ptr(js);
+        }
+
         if (l->min_mtu > 0) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
