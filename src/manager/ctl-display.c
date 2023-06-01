@@ -859,10 +859,8 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
                 return json_fill_one_link(p, true, NULL);
 
         r = manager_get_one_link_address(p->ifindex, &addr);
-        if (r >= 0 && addr && set_size(addr->addresses) > 0) {
+        if (r >= 0 && addr && set_size(addr->addresses) > 0)
                 set_foreach(addr->addresses, list_one_link_address_with_address_mode, NULL);
-                printf("\n");
-        }
 
         r = manager_link_get_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
@@ -872,7 +870,6 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
                 r = set_new(&devs, g_int64_hash, g_int64_equal);
                 if (r < 0)
                         return r;
-
 
                 g_hash_table_iter_init(&iter, routes->routes->hash);
                 while (g_hash_table_iter_next (&iter, &key, &value)) {
