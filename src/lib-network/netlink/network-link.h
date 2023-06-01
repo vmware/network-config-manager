@@ -51,6 +51,7 @@ typedef struct Link {
         uint32_t gso_max_segments;
         uint32_t tso_max_size;
         uint32_t tso_max_segments;
+        uint32_t gro_max_size;
         uint32_t flags;
 
         union {
