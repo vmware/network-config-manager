@@ -391,7 +391,7 @@ static int list_one_link(char *argv[]) {
         }
 
         if (arg_json)
-                return json_fill_one_link(p, NULL);
+                return json_fill_one_link(p, false, NULL);
 
         r = link_get_one_link(p->ifname, &l);
         if (r < 0)
@@ -855,6 +855,9 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
                 }
         }
 
+        if (arg_json)
+                return json_fill_one_link(p, true, NULL);
+
         r = manager_get_one_link_address(p->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0) {
                 set_foreach(addr->addresses, list_one_link_address_with_address_mode, NULL);
@@ -927,5 +930,5 @@ _public_ int ncm_get_link_status(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        return json_fill_one_link(p, ret);
+        return json_fill_one_link(p, false, ret);
 }

@@ -168,7 +168,7 @@ static int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags
         return 0;
 }
 
-static int json_fill_one_link_addresses(Link *l, Addresses *addr, json_object *ret) {
+static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
         gpointer key, value;
@@ -180,6 +180,9 @@ static int json_fill_one_link_addresses(Link *l, Addresses *addr, json_object *r
                 _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jlft = NULL, *jlabel = NULL, *jproto = NULL;
                 Address *a = (Address *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL, *b = NULL, *dhcp = NULL;
+
+                if (ipv4 && a->family != AF_INET)
+                        continue;
 
                 jobj = json_object_new_object();
                 if (!jobj)
@@ -319,7 +322,7 @@ static int json_fill_one_link_addresses(Link *l, Addresses *addr, json_object *r
         return 0;
 }
 
-static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
+static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
         gpointer key, value;
@@ -333,6 +336,9 @@ static int json_fill_one_link_routes(Link *l, Routes *rts, json_object *ret) {
                         *j = NULL;
                 Route *rt = (Route *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL, *dhcp = NULL, *prefsrc = NULL, *destination = NULL;
+
+                if (ipv4 && rt->family != AF_INET)
+                        continue;
 
                 jobj = json_object_new_object();
                 if (!jobj)
@@ -1504,7 +1510,7 @@ static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
         return 0;
 }
 
-int json_fill_one_link(IfNameIndex *p, char **ret) {
+int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL;
         _auto_cleanup_strv_ char **route_domains = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
@@ -1598,7 +1604,7 @@ int json_fill_one_link(IfNameIndex *p, char **ret) {
                 if (!ja)
                         return log_oom();
 
-                json_fill_one_link_addresses(l, addr, ja);
+                json_fill_one_link_addresses(ipv4, l, addr, ja);
 
                 json_object_object_add(jobj, "Addresses", ja);
                 steal_ptr(ja);
@@ -1612,7 +1618,7 @@ int json_fill_one_link(IfNameIndex *p, char **ret) {
                 if (!ja)
                         return log_oom();
 
-                json_fill_one_link_routes(l, route, ja);
+                json_fill_one_link_routes(ipv4, l, route, ja);
 
                 json_object_object_add(jobj, "Routes", ja);
                 steal_ptr(ja);
