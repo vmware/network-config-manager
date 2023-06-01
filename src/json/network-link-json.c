@@ -945,6 +945,28 @@ static int fill_link_message(json_object *jobj, Link *l) {
                 steal_ptr(js);
         }
 
+        if (l->tso_max_size > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_int(l->tso_max_size);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "TSOMaxSize", js);
+                steal_ptr(js);
+        }
+
+        if (l->tso_max_segments > 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_int(l->tso_max_segments);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "TSOMaxSegments", js);
+                steal_ptr(js);
+        }
+
         if (l->contains_stats || l->contains_stats64) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
