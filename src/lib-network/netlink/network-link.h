@@ -54,6 +54,7 @@ typedef struct Link {
         uint8_t ipv6_addr_gen_mode;
 
         uint32_t mtu;
+        uint32_t group;
         uint32_t master;
         uint32_t min_mtu;
         uint32_t max_mtu;

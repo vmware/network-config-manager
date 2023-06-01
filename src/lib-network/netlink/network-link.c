@@ -212,6 +212,9 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                         return log_oom();
         }
 
+        if (rta_tb[IFLA_GROUP])
+                n->group = rtnl_message_read_attribute_u32(rta_tb[IFLA_GROUP]);
+
         if (rta_tb[IFLA_MASTER])
                 n->master = rtnl_message_read_attribute_u32(rta_tb[IFLA_MASTER]);
 
