@@ -7,6 +7,19 @@
 #include "alloc-util.h"
 #include "network-util.h"
 
+#ifndef IFLA_PARENT_DEV_NAME
+#define IFLA_PARENT_DEV_NAME 56
+#define IFLA_PARENT_DEV_BUS_NAME 57
+#define IFLA_GRO_MAX_SIZE 58
+#define IFLA_TSO_MAX_SIZE 59
+#define IFLA_TSO_MAX_SEGS 60
+#define IFLA_ALLMULTI     61
+#define IFLA_DEVLINK_PORT 62
+#define IFLA_GSO_IPV4_MAX_SIZE 63
+#define IFLA_GRO_IPV4_MAX_SIZE 64
+#endif
+
+
 typedef enum LinkState {
         LINK_STATE_DOWN,
         LINK_STATE_UP,
