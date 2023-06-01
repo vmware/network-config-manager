@@ -90,6 +90,18 @@ typedef enum AddressProtocol {
        _ADDRESS_PROTOCOL_INVALID = -EINVAL,
 } AddressProtocol;
 
+typedef enum LinkEvent {
+        LINK_EVENT_NONE = IFLA_EVENT_NONE,
+        LINK_EVENT_REBOOT = IFLA_EVENT_REBOOT,
+        LINK_EVENT_FEATURES = IFLA_EVENT_FEATURES,
+        LINK_EVENT_BONDING_FAILOVER = IFLA_EVENT_BONDING_FAILOVER,
+        LINK_EVENT_NOTIFY_PEERS = IFLA_EVENT_NOTIFY_PEERS,
+        LINK_EVENT_IGMP_RESEND = IFLA_EVENT_IGMP_RESEND,
+        LINK_EVENT_BONDING_OPTIONS = IFLA_EVENT_BONDING_OPTIONS,
+        _LINK_EVENT_MAX,
+        _LINK_EVENT_INVALID = -EINVAL,
+} LinkEvent;
+
 typedef enum RouteScope {
         ROUTE_SCOPE_UNIVERSE,
         ROUTE_SCOPE_SITE = RT_SCOPE_SITE,
@@ -432,6 +444,8 @@ int dhcp6_client_start_name_to_mode(const char *name);
 const char *address_protocol_type_to_name(int id);
 int address_protocol_type_to_mode(const char *name);
 
+const char *link_event_type_to_name(int id);
+int link_event_type_to_mode(const char *name);
 
 int generate_network_config(Network *n);
 int generate_master_device_network(Network *n);
