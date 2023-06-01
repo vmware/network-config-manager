@@ -244,6 +244,12 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
         if (rta_tb[IFLA_GSO_MAX_SEGS])
                 n->gso_max_segments = rtnl_message_read_attribute_u32(rta_tb[IFLA_GSO_MAX_SEGS]);
 
+        if (rta_tb[IFLA_TSO_MAX_SIZE])
+                n->tso_max_size = rtnl_message_read_attribute_u32(rta_tb[IFLA_TSO_MAX_SIZE]);
+
+        if (rta_tb[IFLA_TSO_MAX_SEGS])
+                n->tso_max_segments = rtnl_message_read_attribute_u32(rta_tb[IFLA_TSO_MAX_SEGS]);
+
         if (rta_tb[IFLA_OPERSTATE])
                 n->operstate = rtnl_message_read_attribute_u8(rta_tb[IFLA_OPERSTATE]);
 
