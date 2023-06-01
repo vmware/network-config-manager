@@ -887,11 +887,25 @@ static int fill_link_message(json_object *jobj, Link *l) {
                 }
         }
 
-        js = json_object_new_int(l->group);
+        js = json_object_new_int(l->netnsid);
         if (!js)
                 return log_oom();
 
-        json_object_object_add(jobj, "Group", js);
+        json_object_object_add(jobj, "NetNSId", js);
+        steal_ptr(js);
+
+        js = json_object_new_int(l->new_netnsid);
+        if (!js)
+                return log_oom();
+
+        json_object_object_add(jobj, "NewNetNSId", js);
+        steal_ptr(js);
+
+        js = json_object_new_int(l->new_ifindex);
+        if (!js)
+                return log_oom();
+
+        json_object_object_add(jobj, "NewIfIndex", js);
         steal_ptr(js);
 
         js = json_object_new_int(l->min_mtu);
