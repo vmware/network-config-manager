@@ -53,6 +53,9 @@ typedef struct Link {
         uint8_t operstate;
         uint8_t ipv6_addr_gen_mode;
 
+        uint32_t netnsid;
+        uint32_t new_netnsid;
+        uint32_t new_ifindex;
         uint32_t mtu;
         uint32_t event;
         uint32_t group;
