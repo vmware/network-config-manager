@@ -187,7 +187,7 @@ int nft_table_new(int family, const char *name, NFTNLTable **ret) {
                         return -ENOMEM;
         }
 
-        *ret = steal_pointer(t);
+        *ret = steal_ptr(t);
         return 0;
 }
 
@@ -231,7 +231,7 @@ int nft_chain_new(int family, const char *name, const char *table, NFTNLChain **
                         return -ENOMEM;
         }
 
-        *ret = steal_pointer(c);
+        *ret = steal_ptr(c);
         return 0;
 }
 
@@ -276,7 +276,7 @@ int nft_rule_new(int family, const char *table, const char *chain, NFTNLRule **r
 
         nftnl_rule_set_u32(nf_rule->rule, NFTNL_RULE_FAMILY, family);
 
-        *ret = steal_pointer(nf_rule);
+        *ret = steal_ptr(nf_rule);
         return 0;
 }
 
@@ -383,7 +383,7 @@ static int get_table_cb(const struct nlmsghdr *nlh, void *data) {
                 return r;
 
         g_ptr_array_add(s, t);
-        steal_pointer(t);
+        steal_ptr(t);
 
         return MNL_CB_OK;
 }
@@ -423,7 +423,7 @@ int nft_get_tables(int family, const char *table, GPtrArray **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }
 
@@ -488,7 +488,7 @@ static int get_chain_cb(const struct nlmsghdr *nlh, void *data) {
                 return r;
 
         g_ptr_array_add(s, c);
-        steal_pointer(c);
+        steal_ptr(c);
 
         return MNL_CB_OK;
 }
@@ -528,7 +528,7 @@ int nft_get_chains(int family, const char *table, const char *chain, GPtrArray *
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }
 
@@ -673,7 +673,7 @@ int nft_run_command(char **command, GString **ret) {
         if (!o)
                 return -ENOMEM;
 
-        *ret = steal_pointer(o);
+        *ret = steal_ptr(o);
         return 0;
 }
 
@@ -705,7 +705,7 @@ int nft_get_rules(const char *table, GString **ret) {
         if (!o)
                 return -ENOMEM;
 
-        *ret = steal_pointer(o);
+        *ret = steal_ptr(o);
         return 0;
 }
 

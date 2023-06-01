@@ -66,7 +66,7 @@ DEFINE_CLEANUP(GError*, g_error_free);
 #define _auto_cleanup_strv_ _cleanup_(strv_freep)
 #define _auto_cleanup_gstring_ _cleanup_(strv_freep)
 
-#define steal_pointer(ptr)                      \
+#define steal_ptr(ptr)                      \
         ({                                      \
                 typeof(ptr) _ptr_ = (ptr);      \
                 (ptr) = NULL;                   \

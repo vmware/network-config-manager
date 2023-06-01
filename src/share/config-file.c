@@ -30,7 +30,7 @@ int key_new(const char *key, const char *value, Key **ret) {
                         return -ENOMEM;
         }
 
-        *ret = steal_pointer(k);
+        *ret = steal_ptr(k);
         return 0;
 }
 
@@ -58,7 +58,7 @@ int section_new(const char *name, Section **ret) {
         if (!s->name)
                 return -ENOMEM;
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }
 
@@ -86,7 +86,7 @@ int key_file_new(const char *file_name, KeyFile **ret) {
         if (!k->name)
                 return -ENOMEM;
 
-        *ret = steal_pointer(k);
+        *ret = steal_ptr(k);
         return 0;
 }
 
@@ -141,7 +141,7 @@ int add_key_to_section(Section *s, const char *k, const char *v) {
                 return r;
 
         s->keys = g_list_append(s->keys, key);
-        steal_pointer(key);
+        steal_ptr(key);
         return 0;
 }
 
@@ -200,7 +200,7 @@ int config_manager_new(const Config *configs, ConfigManager **ret) {
         for (size_t i = 0; configs[i].ctl_name; i++)
                 g_hash_table_insert(m->ctl_to_config_table, (gpointer *) configs[i].ctl_name, (gpointer *) configs[i].config);
 
-        *ret = steal_pointer(m);
+        *ret = steal_ptr(m);
         return 0;
 }
 
@@ -268,7 +268,7 @@ int set_config(KeyFile *key_file, const char *section, const char *k, const char
         if (r < 0)
                 return r;
 
-        steal_pointer(sec);
+        steal_ptr(sec);
         return 0;
 }
 
@@ -383,7 +383,7 @@ static int add_config(KeyFile *key_file, const char *section, const char *k, con
         if (r < 0)
                 return r;
 
-        steal_pointer(sec);
+        steal_ptr(sec);
         return 0;
 }
 
@@ -453,7 +453,7 @@ int add_key_to_section_str(const char *path, const char *section, const char *k,
                 if (r < 0)
                         return r;
 
-                steal_pointer(sec);
+                steal_ptr(sec);
         }
 
         r = key_file_save (key_file);
@@ -686,7 +686,7 @@ int write_to_conf_file(const char *path, const GString *s) {
         if (!g_file_set_contents(path, s->str, s->len, &e))
                 return -e->code;
 
-        steal_pointer(e);
+        steal_ptr(e);
         return set_file_permisssion(path, "systemd-network");
 }
 
@@ -728,7 +728,7 @@ int read_conf_file(const char *path, char **s) {
         if (!g_file_get_contents(path, &c, &sz, &e))
                 return -e->code;
 
-        *s = steal_pointer(c);
+        *s = steal_ptr(c);
         return 0;
 }
 
@@ -857,7 +857,7 @@ int determine_conf_file_name(const char *ifname, char **ret) {
         if (!file)
                 return log_oom();
 
-        *ret = steal_pointer(file);
+        *ret = steal_ptr(file);
         return 0;
 
 }

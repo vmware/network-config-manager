@@ -20,7 +20,7 @@ int dns_server_new(DNSServer **ret) {
         if (!a)
                 return -ENOMEM;
 
-        *ret = steal_pointer(a);
+        *ret = steal_ptr(a);
         return 0;
 }
 
@@ -49,7 +49,7 @@ int dns_servers_new(DNSServers **ret) {
         if (!h->dns_servers)
                 return -ENOMEM;
 
-        *ret = steal_pointer(h);
+        *ret = steal_ptr(h);
 
         return 0;
 }
@@ -113,7 +113,7 @@ int dns_domain_new(DNSDomain **ret) {
         if (!a)
                 return -ENOMEM;
 
-        *ret = steal_pointer(a);
+        *ret = steal_ptr(a);
         return 0;
 }
 
@@ -138,7 +138,7 @@ int dns_domains_new(DNSDomains **ret) {
         if (!h->dns_domains)
                 return -ENOMEM;
 
-        *ret = steal_pointer(h);
+        *ret = steal_ptr(h);
         return 0;
 }
 
@@ -218,7 +218,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
                                         return r;
                         }
 
-                        steal_pointer(pretty);
+                        steal_ptr(pretty);
                 }
         }
 
@@ -236,7 +236,7 @@ int add_dns_server_and_domain_to_resolv_conf(DNSServers *dns, char **domains) {
                                 if (r < 0)
                                         return r;
 
-                                steal_pointer(s);
+                                steal_ptr(s);
                         }
                 }
         }
@@ -299,7 +299,7 @@ int add_dns_server_and_domain_to_resolved_conf(DNSServers *dns, char **domains) 
                                         return r;
                         }
 
-                        steal_pointer(pretty);
+                        steal_ptr(pretty);
                 }
 
                 g_key_file_set_string(key_file, "Resolve", "DNS", strv_join(" ", s));

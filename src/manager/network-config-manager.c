@@ -1285,10 +1285,10 @@ _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
                                 return log_oom();
                 }
 
-                steal_pointer(c);
+                steal_ptr(c);
         }
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }
 
@@ -1572,10 +1572,10 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
                                 return log_oom();
                 }
 
-                steal_pointer(c);
+                steal_ptr(c);
         }
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }
 
@@ -2694,10 +2694,10 @@ _public_ int ncm_get_dns_server(char ***ret) {
                         }
                 }
 
-                steal_pointer(k);
+                steal_ptr(k);
         }
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }
 
@@ -2766,7 +2766,7 @@ _public_ int ncm_add_dns_server(int argc, char *argv[]) {
                         return r;
                 }
 
-                steal_pointer(t);
+                steal_ptr(t);
         }
 
         r = manager_add_dns_server(p, dns, system, global);
@@ -2989,10 +2989,10 @@ _public_ int ncm_get_dns_domains(char ***ret) {
                                         return r;
                         }
 
-                        steal_pointer(k);
+                        steal_ptr(k);
                 }
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }
 

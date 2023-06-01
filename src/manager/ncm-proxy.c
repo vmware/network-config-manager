@@ -204,9 +204,9 @@ _public_ int ncm_get_proxy(char ***proxy) {
                                 return r;
                 }
 
-                steal_pointer(p);
+                steal_ptr(p);
         }
 
-        *proxy = steal_pointer(s);
+        *proxy = steal_ptr(s);
         return 0;
 }

@@ -327,7 +327,7 @@ int netdev_ctl_name_to_configs_new(ConfigManager **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(m);
+        *ret = steal_ptr(m);
         return 0;
 }
 
@@ -350,7 +350,7 @@ static int create_or_parse_netdev_conf_file(const char *ifname, KeyFile **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(key_file);
+        *ret = steal_ptr(key_file);
         return 0;
 }
 
@@ -365,7 +365,7 @@ int netdev_new(NetDev **ret) {
                 .kind = _NETDEV_KIND_INVALID,
         };
 
-        *ret = steal_pointer(n);
+        *ret = steal_ptr(n);
         return 0;
 }
 
@@ -394,7 +394,7 @@ int vlan_new(VLan **ret) {
             .reorder_header = -1,
         };
 
-        *ret = steal_pointer(v);
+        *ret = steal_ptr(v);
         return 0;
 
 }
@@ -430,7 +430,7 @@ int vxlan_new(VxLan **ret) {
                 .flow_label = G_MAXUINT,
              };
 
-        *ret = steal_pointer(v);
+        *ret = steal_ptr(v);
         return 0;
 }
 
@@ -463,7 +463,7 @@ int bond_new(Bond **ret) {
                 .all_slaves_active = -1,
           };
 
-        *ret = steal_pointer(b);
+        *ret = steal_ptr(b);
         return 0;
 }
 
@@ -483,7 +483,7 @@ int wireguard_peer_new(WireGuardPeer **ret) {
         if (!wg)
                 return log_oom();
 
-        *ret = steal_pointer(wg);
+        *ret = steal_ptr(wg);
         return 0;
 }
 
@@ -512,7 +512,7 @@ int wireguard_new(WireGuard **ret) {
         if (!wg)
                 return log_oom();
 
-        *ret = steal_pointer(wg);
+        *ret = steal_ptr(wg);
         return 0;
 }
 
@@ -534,7 +534,7 @@ int tunnel_new(Tunnel **ret) {
         if (!t)
                 return log_oom();
 
-        *ret = steal_pointer(t);
+        *ret = steal_ptr(t);
         return 0;
 }
 
@@ -565,7 +565,7 @@ int bridge_new(Bridge **ret) {
               .priority = UINT16_MAX,
           };
 
-        *ret = steal_pointer(t);
+        *ret = steal_ptr(t);
         return 0;
 }
 
@@ -591,7 +591,7 @@ int tuntap_new(TunTap **ret) {
             .multi_queue = -1,
         };
 
-        *ret = steal_pointer(t);
+        *ret = steal_ptr(t);
         return 0;
 }
 
@@ -1306,7 +1306,7 @@ int generate_netdev_config(NetDev *n) {
                                 if (r < 0)
                                         return r;
 
-                                steal_pointer(section);
+                                steal_ptr(section);
                         }
                 }
 

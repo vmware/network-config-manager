@@ -74,7 +74,7 @@ int parse_key_file(const char *path, KeyFile **ret) {
                                         if (r < 0)
                                                 return r;
 
-                                        steal_pointer(section);
+                                        steal_ptr(section);
                                 }
 
                                 r = section_new(section_name, &section);
@@ -98,10 +98,10 @@ int parse_key_file(const char *path, KeyFile **ret) {
                 r = add_section_to_key_file(key_file, section);
                 if (r < 0)
                         return r;
-                steal_pointer(section);
+                steal_ptr(section);
         }
 
-        *ret = steal_pointer(key_file);
+        *ret = steal_ptr(key_file);
         return 0;
 }
 
@@ -329,8 +329,8 @@ int parse_state_file(const char *path, const char *key, char **value, GHashTable
                                 continue;
                 }
 
-                steal_pointer(k);
-                steal_pointer(v);
+                steal_ptr(k);
+                steal_ptr(v);
         }
 
         if (key && value) {
@@ -344,7 +344,7 @@ int parse_state_file(const char *path, const char *key, char **value, GHashTable
         }
 
         if (table)
-                *table = steal_pointer(hash);
+                *table = steal_ptr(hash);
 
         return 0;
 }
@@ -402,7 +402,7 @@ int parse_resolv_conf(char ***dns, char ***domains) {
                 }
         }
 
-        *dns = steal_pointer(a);
-        *domains = steal_pointer(b);
+        *dns = steal_ptr(a);
+        *domains = steal_ptr(b);
         return 0;
 }

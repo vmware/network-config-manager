@@ -34,7 +34,7 @@ int ctl_manager_new(const Ctl *ctl_commands, CtlManager **ret) {
         for (size_t i = 0; ctl_commands[i].alias; i++)
                 g_hash_table_insert(m->table_alias, (gpointer *) ctl_commands[i].alias, (gpointer *) &ctl_commands[i]);
 
-        *ret = steal_pointer(m);
+        *ret = steal_ptr(m);
         return 0;
 }
 

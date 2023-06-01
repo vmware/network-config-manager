@@ -200,7 +200,7 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
                 return log_oom();
 
         if (g_file_test(path, G_FILE_TEST_EXISTS)) {
-                *ret = steal_pointer(path);
+                *ret = steal_ptr(path);
                 return 0;
         }
 
@@ -222,7 +222,7 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(path);
+        *ret = steal_ptr(path);
         return 0;
 }
 

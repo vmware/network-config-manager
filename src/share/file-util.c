@@ -57,7 +57,7 @@ int determine_conf_file(const char *path, const char *ifname, const char *extens
                 return -ENOMEM;
 
 
-        *ret = steal_pointer(p);
+        *ret = steal_ptr(p);
         return 0;
 }
 
@@ -86,7 +86,7 @@ int create_conf_file(const char *path, const char *ifname, const char *extension
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(p);
+        *ret = steal_ptr(p);
         return 0;
 }
 
@@ -111,7 +111,7 @@ int read_one_line(const char *path, char **v) {
         if (l < 0)
                 return -errno;
 
-        *v = steal_pointer(line);
+        *v = steal_ptr(line);
         return 0;
 }
 

@@ -32,7 +32,7 @@ static int addresses_new(Addresses **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(h);
+        *ret = steal_ptr(h);
         return 0;
 }
 
@@ -178,7 +178,7 @@ static int fill_link_address(const struct nlmsghdr *nlh, void *data) {
         if (r < 0)
                 return r;
 
-        steal_pointer(a);
+        steal_ptr(a);
         return MNL_CB_OK;
 }
 

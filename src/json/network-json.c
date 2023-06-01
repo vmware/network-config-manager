@@ -76,11 +76,11 @@ static void json_fill_link_addresses(gpointer key, gpointer value, gpointer user
         json_object_object_add(jaddr, "ifindex", jidx);
         json_object_array_add(jobj, jaddr);
 
-        steal_pointer(jaddr);
-        steal_pointer(jip);
-        steal_pointer(jname);
-        steal_pointer(jfamily);
-        steal_pointer(jidx);
+        steal_ptr(jaddr);
+        steal_ptr(jip);
+        steal_ptr(jname);
+        steal_ptr(jfamily);
+        steal_ptr(jidx);
 }
 
 static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdata) {
@@ -115,7 +115,7 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
                 return;
 
         json_object_object_add(jrt, "gateway", jip);
-        steal_pointer(jip);
+        steal_ptr(jip);
 
         r = ip_to_str_prefix(route->family, &route->dst, &c);
         if (r < 0)
@@ -126,7 +126,7 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
                 return;
 
         json_object_object_add(jrt, "destination", jip);
-        steal_pointer(jip);
+        steal_ptr(jip);
 
         if (route->family == AF_INET)
                 jfamily = json_object_new_string("ipv4");
@@ -144,10 +144,10 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
         json_object_object_add(jrt, "ifindex", jidx);
         json_object_array_add(jobj, jrt);
 
-        steal_pointer(jrt);
-        steal_pointer(jname);
-        steal_pointer(jfamily);
-        steal_pointer(jidx);
+        steal_ptr(jrt);
+        steal_ptr(jname);
+        steal_ptr(jfamily);
+        steal_ptr(jidx);
 }
 
 int json_fill_system_status(char **ret) {
@@ -174,7 +174,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "System Name", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         (void) dbus_get_property_from_hostnamed("KernelName", &kernel);
@@ -186,7 +186,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj,"KernelName", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         (void) dbus_get_property_from_hostnamed("KernelRelease", &kernel_release);
@@ -198,7 +198,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj,"KernelRelease", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         (void) dbus_get_string_systemd_manager("Version", &systemd);
@@ -210,7 +210,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "SystemdVersion", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         (void) dbus_get_string_systemd_manager("Architecture", &arch);
@@ -222,7 +222,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "Architecture", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         (void) dbus_get_string_systemd_manager("Virtualization", &virt);
@@ -234,7 +234,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "Virtualization", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         (void) dbus_get_property_from_hostnamed("OperatingSystemPrettyName", &os);
@@ -246,7 +246,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "OperatingSystem", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         r = sd_id128_get_machine(&machine_id);
@@ -261,7 +261,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "MachineID", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         r = dbus_get_system_property_from_networkd("OperationalState", &state);
@@ -273,7 +273,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "OperationalState", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         r = dbus_get_system_property_from_networkd("CarrierState", &carrier_state);
@@ -285,7 +285,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "CarrierState", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         r = dbus_get_system_property_from_networkd("OnlineState", &online_state);
@@ -297,7 +297,7 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "OnlineState", js);
-                steal_pointer(js);
+                steal_ptr(js);
         }
 
         r = manager_link_get_address(&h);
@@ -311,7 +311,7 @@ int json_fill_system_status(char **ret) {
         }
 
         json_object_object_add(jobj, "Addresses", jaddress);
-        steal_pointer(jaddress);
+        steal_ptr(jaddress);
 
         r = manager_link_get_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
@@ -323,7 +323,7 @@ int json_fill_system_status(char **ret) {
         }
 
         json_object_object_add(jobj, "Routes", jroutes);
-        steal_pointer(jroutes);
+        steal_ptr(jroutes);
 
         (void) network_parse_dns(&dns);
         if (dns) {
@@ -343,7 +343,7 @@ int json_fill_system_status(char **ret) {
                 }
 
                 json_object_object_add(jobj, "DNS", ja);
-                steal_pointer(ja);
+                steal_ptr(ja);
         }
 
         (void) network_parse_search_domains(&domains);
@@ -363,7 +363,7 @@ int json_fill_system_status(char **ret) {
                 }
 
                 json_object_object_add(jobj, "SearchDomains", ja);
-                steal_pointer(ja);
+                steal_ptr(ja);
         }
 
         (void) network_parse_ntp(&ntp);
@@ -383,7 +383,7 @@ int json_fill_system_status(char **ret) {
                 }
 
                 json_object_object_add(jobj, "NTP", ja);
-                steal_pointer(ja);
+                steal_ptr(ja);
         }
 
         if (ret) {
@@ -393,7 +393,7 @@ int json_fill_system_status(char **ret) {
                 if (!s)
                         return log_oom();
 
-                *ret = steal_pointer(s);
+                *ret = steal_ptr(s);
         } else
                 printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
 
@@ -442,7 +442,7 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
                                         return log_oom();
 
                                 json_object_object_add(jaddr, "Address", s);
-                                steal_pointer(s);
+                                steal_ptr(s);
 
                                 if (dns_config && g_strrstr(dns_config, pretty))
                                         s = json_object_new_string("static");
@@ -455,7 +455,7 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
                                                         return log_oom();
 
                                                 json_object_object_add(jaddr, "ConfigProvider", js);
-                                                steal_pointer(js);
+                                                steal_ptr(js);
                                         }
                                 }
 
@@ -463,16 +463,16 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
                                         return log_oom();
 
                                 json_object_object_add(jaddr, "ConfigSource", s);
-                                steal_pointer(s);
+                                steal_ptr(s);
 
                                 json_object_array_add(jdns, jaddr);
-                                steal_pointer(jaddr);
+                                steal_ptr(jaddr);
                         }
 
                 }
 
                 json_object_object_add(jobj, "DNS", jdns);
-                steal_pointer(jdns);
+                steal_ptr(jdns);
         }
 
         r = dbus_get_current_dns_servers_from_resolved(&current);
@@ -488,7 +488,7 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
                                 return log_oom();
 
                         json_object_object_add(jobj, "CurrentDNSServer", s);
-                        steal_pointer(s);
+                        steal_ptr(s);
                 }
         }
 
@@ -513,7 +513,7 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
                         }
                 }
                 json_object_object_add(jobj, "FallbackDNS", ja);
-                steal_pointer(ja);
+                steal_ptr(ja);
         }
 
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
@@ -585,7 +585,7 @@ int json_fill_dns_server_domains(void) {
                 }
 
                 json_object_object_add(jobj, "SearchDomains", ja);
-                steal_pointer(ja);
+                steal_ptr(ja);
 
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         _cleanup_(json_object_putp) json_object *j = NULL;
@@ -608,11 +608,11 @@ int json_fill_dns_server_domains(void) {
                                          return log_oom();
 
                                  json_object_array_add(j, a);
-                                 steal_pointer(a);
+                                 steal_ptr(a);
 
                         }
                         json_object_object_add(jobj, p->ifname, j);
-                        steal_pointer(j);
+                        steal_ptr(j);
                 }
         }
 

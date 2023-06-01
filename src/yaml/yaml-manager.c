@@ -110,7 +110,7 @@ int yaml_parse_file(const char *file, Networks **n) {
 
         yaml_parser_delete(&parser);
         if (r >= 0)
-                *n = steal_pointer(networks);
+                *n = steal_ptr(networks);
 
         return r;
 }
@@ -134,7 +134,7 @@ int networks_new(Networks **ret) {
         if (!n->networks)
              return log_oom();
 
-        *ret = steal_pointer(n);
+        *ret = steal_ptr(n);
         return 0;
 }
 
@@ -209,6 +209,6 @@ int yaml_manager_new(YAMLManager **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(m);
+        *ret = steal_ptr(m);
         return 0;
 }

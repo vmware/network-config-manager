@@ -201,7 +201,7 @@ static int yaml_parse_bond(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                 }
         }
 
-        steal_pointer(bond);
+        steal_ptr(bond);
         return 0;
 }
 
@@ -312,7 +312,7 @@ static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
                 }
         }
 
-        steal_pointer(b);
+        steal_ptr(b);
         return 0;
 }
 
@@ -368,7 +368,7 @@ static int yaml_parse_vlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
                 }
         }
 
-        steal_pointer(vlan);
+        steal_ptr(vlan);
         return 0;
 }
 
@@ -479,7 +479,7 @@ static int yaml_parse_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
                 }
         }
 
-        steal_pointer(tnl);
+        steal_ptr(tnl);
         return 0;
 }
 
@@ -535,7 +535,7 @@ static int yaml_parse_vrf(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
                 }
         }
 
-        steal_pointer(vrf);
+        steal_ptr(vrf);
         return 0;
 }
 
@@ -606,7 +606,7 @@ static int yaml_parse_vxlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *no
                 }
         }
 
-        steal_pointer(vx);
+        steal_ptr(vx);
         return 0;
 }
 
@@ -732,7 +732,7 @@ static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t
                 }
         }
 
-        steal_pointer(wg);
+        steal_ptr(wg);
         return 0;
 }
 
@@ -788,7 +788,7 @@ static int yaml_parse_macvlan(YAMLManager *m, yaml_document_t *dp, yaml_node_t *
                 }
         }
 
-        steal_pointer(macvlan);
+        steal_ptr(macvlan);
         return 0;
 }
 
@@ -857,7 +857,7 @@ int yaml_parse_netdev_config(YAMLManager *m, YAMLNetDevKind kind, yaml_document_
                 if (!g_hash_table_insert(networks->networks, (gpointer *) net->ifname, (gpointer *) net))
                         return log_oom();
 
-                steal_pointer(net);
+                steal_ptr(net);
         }
 
         return 0;

@@ -68,7 +68,7 @@ int sriov_new(SRIOV **ret) {
                 .link_state = -1,
         };
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }
 
@@ -119,7 +119,7 @@ int sriov_add_new_section(KeyFile *key_file, SRIOV *s) {
         if (r < 0)
                 return r;
 
-        steal_pointer(section);
+        steal_ptr(section);
 
         return 0;
 }

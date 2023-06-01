@@ -286,7 +286,7 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                         g_ptr_array_add(s, a);
                 }
 
-                n->alt_names = steal_pointer(s);
+                n->alt_names = steal_ptr(s);
         }
 
         if (rta_tb[IFLA_LINKINFO]) {
@@ -295,7 +295,7 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                         return r;
         }
 
-        *ret = steal_pointer(n);
+        *ret = steal_ptr(n);
         return 0;
 }
 
@@ -402,7 +402,7 @@ static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
                 if (r < 0)
                         return r;
 
-                steal_pointer(n);
+                steal_ptr(n);
         }
 
         return 0;
@@ -444,7 +444,7 @@ static int acquire_link_info(int s, Links **ret) {
                          break;
          }
 
-        *ret = steal_pointer(links);
+        *ret = steal_ptr(links);
         return 0;
 }
 
@@ -584,7 +584,7 @@ int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **
 
         truncate_newline(line);
 
-        *ret = steal_pointer(line);
+        *ret = steal_ptr(line);
         return 0;
 }
 
