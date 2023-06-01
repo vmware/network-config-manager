@@ -212,6 +212,36 @@ int address_protocol_type_to_mode(const char *name) {
         return _ADDRESS_PROTOCOL_INVALID;
 }
 
+static const char* const link_event_table[_LINK_EVENT_MAX] = {
+        [LINK_EVENT_NONE]             = "none",
+        [LINK_EVENT_REBOOT]           = "reboot",
+        [LINK_EVENT_FEATURES]         = "feature-change",
+        [LINK_EVENT_BONDING_FAILOVER] = "bonding-failover",
+        [LINK_EVENT_NOTIFY_PEERS]     = "notify-peers",
+        [LINK_EVENT_IGMP_RESEND]      = "resend-igmp",
+        [LINK_EVENT_BONDING_OPTIONS]  = "bonding-option",
+};
+
+const char *link_event_type_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(link_event_table))
+                return NULL;
+
+        return link_event_table[id];
+}
+
+int link_event_type_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = LINK_EVENT_NONE; i < (size_t) ELEMENTSOF(link_event_table); i++)
+                if (str_eq_fold(name, link_event_table[i]))
+                        return i;
+
+        return _LINK_EVENT_INVALID;
+}
+
 static const char* const ipv6_privacy_extensions_type[_IPV6_PRIVACY_EXTENSIONS_MAX] = {
         [IPV6_PRIVACY_EXTENSIONS_NO] = "no",
         [IPV6_PRIVACY_EXTENSIONS_PREFER_PUBLIC] = "prefer-public",
