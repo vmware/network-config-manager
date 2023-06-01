@@ -182,8 +182,17 @@ static void list_one_link_address_with_address_mode(gpointer key, gpointer value
                 r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
                 if (r >= 0 && string_has_prefix(c, dhcp))
                         display(arg_beautify, ansi_color_bold_blue(), "(dhcp) \n");
-                else
-                        display(arg_beautify, ansi_color_bold_blue(), "(static) \n");
+                else {
+                        _auto_cleanup_ char *network = NULL;
+
+                        r = parse_network_file(a->ifindex, NULL, &network);
+                        if (r >= 0) {
+                                if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c))
+                                        display(arg_beautify, ansi_color_bold_blue(), "(static) \n");
+                                else
+                                        display(arg_beautify, ansi_color_bold_blue(), "(foreign) \n");
+                        }
+                }
         }
 }
 
