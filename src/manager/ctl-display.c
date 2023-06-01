@@ -874,7 +874,10 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
         r = manager_link_get_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
                 _cleanup_(set_freep) Set *devs = NULL;
+                 _auto_cleanup_ char *network = NULL;
                 bool first = true;
+
+                (void) parse_network_file(p->ifindex, NULL, &network);
 
                 r = set_new(&devs, g_int64_hash, g_int64_equal);
                 if (r < 0)
@@ -882,25 +885,40 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
 
                 g_hash_table_iter_init(&iter, routes->routes->hash);
                 while (g_hash_table_iter_next (&iter, &key, &value)) {
-                        _auto_cleanup_ char *c = NULL;
+                        _auto_cleanup_ char *c = NULL, *provider = NULL, *dhcp4_router = NULL;
                         Route *rt;
 
                         rt = (Route *) g_bytes_get_data(key, &size);
-                        if (ip_is_null(&rt->gw))
+                        if (ip_is_null(&rt->gw) || rt->family != AF_INET)
                                 continue;
+
+                        (void) network_parse_link_dhcp4_router(p->ifindex, &dhcp4_router);
 
                         if (!set_contains(devs, &rt->ifindex))
                                 set_add(devs, &rt->ifindex);
                         else
                                 continue;
 
-                        (void) ip_to_str(rt->family, &rt->gw, &c);
+                        r = ip_to_str(rt->family, &rt->gw, &c);
+                        if (r < 0)
+                                continue;
+
+                        if (network && (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c)))
+                                provider = strdup("static");
+                        else if (dhcp4_router && str_eq(c, dhcp4_router))
+                                provider = strdup("dhcp");
+                        else
+                                provider = strdup("foreign");
+
                         if (first) {
                                 display(arg_beautify, ansi_color_bold_cyan(), "IPv4 Gateway: ");
-                                printf("%s \n", c);
+                                printf("%s ", c);
+                                display(arg_beautify, ansi_color_bold_blue(), "(%s)\n", provider);
                                 first = false;
-                        } else
-                                printf("              %s \n", c);
+                        } else {
+                                printf("              %s ", c);
+                                display(arg_beautify, ansi_color_bold_blue(), "(%s)\n", provider);
+                        }
                 }
         }
         printf("\n");
