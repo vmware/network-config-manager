@@ -322,6 +322,120 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
         return 0;
 }
 
+static int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags) {
+        _cleanup_(json_object_putp) json_object *ja = NULL, *js = NULL;
+
+        assert(jobj);
+
+        ja = json_object_new_array();
+        if (!ja)
+                return log_oom();
+
+        if (flags & RTNH_F_DEAD) {
+                js = json_object_new_string("dead");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTNH_F_ONLINK) {
+                js = json_object_new_string("onlink");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTNH_F_PERVASIVE) {
+                js = json_object_new_string("pervasive");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTNH_F_OFFLOAD) {
+                js = json_object_new_string("offload");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTNH_F_TRAP) {
+                js = json_object_new_string("trap");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTM_F_NOTIFY) {
+                js = json_object_new_string("notify");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTNH_F_LINKDOWN) {
+                js = json_object_new_string("linkdown");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTNH_F_UNRESOLVED) {
+                js = json_object_new_string("unresolved");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTM_F_TRAP) {
+                js = json_object_new_string("rt-trap");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTM_F_OFFLOAD) {
+                js = json_object_new_string("rt-offload");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        if (flags & RTM_F_OFFLOAD_FAILED) {
+                js = json_object_new_string("rt-offload-failed");
+                if (!js)
+                        return log_oom();
+
+                json_object_array_add(ja, js);
+                steal_ptr(js);
+        }
+
+        json_object_object_add(jobj, "FlagsString", ja);
+        steal_ptr(ja);
+
+        return 0;
+}
+
 static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
@@ -483,6 +597,8 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
 
                 json_object_object_add(jobj, "Gateway", js);
                 steal_ptr(js);
+
+                routes_flags_to_string(rt, jobj, rt->flags);
 
                 if (c) {
                         r = network_parse_link_dhcp4_router(rt->ifindex, &dhcp);
