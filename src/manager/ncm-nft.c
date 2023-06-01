@@ -119,10 +119,10 @@ _public_ int ncm_nft_get_tables(const char *family, const char *table, char ***r
                                 return r;
                 }
 
-                steal_pointer(a);
+                steal_ptr(a);
         }
 
-        *ret = steal_pointer(p);
+        *ret = steal_ptr(p);
         return 0;
 }
 
@@ -255,10 +255,10 @@ _public_ int ncm_nft_get_chains(char *family, const char *table, const char *cha
                                 return r;
                 }
 
-                steal_pointer(a);
+                steal_ptr(a);
         }
 
-        *ret = steal_pointer(p);
+        *ret = steal_ptr(p);
         return 0;
 }
 

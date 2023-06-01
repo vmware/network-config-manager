@@ -792,7 +792,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                         }
                                 }
                                 peer->allowed_ips = s;
-                                steal_pointer(s);
+                                steal_ptr(s);
                         } else {
                                 _auto_cleanup_ IPAddress *address = NULL;
 
@@ -847,7 +847,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
         }
 
         wg->peers = g_list_append(wg->peers, peer);
-        steal_pointer(peer);
+        steal_ptr(peer);
 
         r = manager_create_wireguard(argv[1], wg);
         if (r < 0) {

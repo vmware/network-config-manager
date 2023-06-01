@@ -136,7 +136,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
                 a->peer = *peer;
         }
 
-        steal_pointer(a);
+        steal_ptr(a);
 
         if (strv_length(s) >= 2 && !isempty_str(s[2])) {
                 _auto_cleanup_ IPAddress *ip = NULL;
@@ -162,7 +162,7 @@ static int dracut_parse_mac(char *mac, Network *n) {
                  else
                          r = parse_int(s[3], &route->gw.prefix_len);
         }
-        steal_pointer(route);
+        steal_ptr(route);
 
         if (strv_length(s) >= 4 && !isempty_str(s[4])) {
                 n->hostname = g_strdup(s[4]);
@@ -307,7 +307,7 @@ static int parse_command_line_rd_route(const char *line, Network *n) {
                 if (!g_hash_table_insert(n->routes, route, route))
                         return -EINVAL;
 
-                steal_pointer(route);
+                steal_ptr(route);
        }
 
         if (!isempty_str(s[2])) {
@@ -414,9 +414,9 @@ int parse_proc_command_line(const char *cmd_line, GHashTable **ret) {
                 if (!g_hash_table_insert(networks, n, n))
                         return -EINVAL;
 
-                steal_pointer(n);
+                steal_ptr(n);
         }
 
-        *ret = steal_pointer(networks);
+        *ret = steal_ptr(networks);
         return 0;
 }

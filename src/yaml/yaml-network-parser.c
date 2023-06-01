@@ -208,7 +208,7 @@ static int parse_sriov(GHashTable *config, yaml_document_t *dp, yaml_node_t *nod
                 g_hash_table_insert(network->sriovs, s, s);
 
                 network->modified = true;
-                steal_pointer(s);
+                steal_ptr(s);
         }
 
 
@@ -265,7 +265,7 @@ static int parse_route(GHashTable *config, yaml_document_t *dp, yaml_node_t *nod
                 g_hash_table_insert(network->routes, rt, rt);
 
                 network->modified = true;
-                steal_pointer(rt);
+                steal_ptr(rt);
         }
 
 
@@ -330,11 +330,11 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                                         address->lifetime = (*addr)->lifetime;
 
                                 free(*addr);
-                                steal_pointer(*addr);
+                                steal_ptr(*addr);
                         }
 
                         set_add(network->addresses, address);
-                        steal_pointer(address);
+                        steal_ptr(address);
 
                         network->modified = true;
 
@@ -348,7 +348,7 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
 
         if (a) {
                 *addr = a;
-                steal_pointer(a);
+                steal_ptr(a);
         }
 
         return 0;
@@ -403,7 +403,7 @@ static int parse_routing_policy_rule(GHashTable *config, yaml_document_t *dp, ya
                 g_hash_table_insert(network->routing_policy_rules, rule, rule);
 
                 network->modified = true;
-                steal_pointer(rule);
+                steal_ptr(rule);
         }
 
         return 0;
@@ -453,7 +453,7 @@ static int parse_dhcp4_server_static_lease(GHashTable *config, yaml_document_t *
 
         if (l) {
                 g_hash_table_insert(s->static_leases, GUINT_TO_POINTER(l), l);
-                steal_pointer(l);
+                steal_ptr(l);
         }
 
         return 0;
@@ -682,7 +682,7 @@ int parse_ethernet_config(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node
                         return r;
 
                 if (g_hash_table_insert(nets->networks, (gpointer *) net->ifname, (gpointer *) net))
-                        steal_pointer(net);
+                        steal_ptr(net);
         }
 
         return 0;
@@ -701,7 +701,7 @@ int yaml_network_new(const char *ifname, Network **ret) {
         if (!n->ifname)
                 return log_oom();
 
-        *ret = steal_pointer(n);
+        *ret = steal_ptr(n);
         return 0;
 }
 

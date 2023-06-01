@@ -44,7 +44,7 @@ static int routes_new(Routes **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(rt);
+        *ret = steal_ptr(rt);
         return 0;
 }
 
@@ -287,7 +287,7 @@ static int fill_link_route(const struct nlmsghdr *nlh, void *data) {
         if (r < 0)
                 return r;
 
-        steal_pointer(rt);
+        steal_ptr(rt);
 
         return MNL_CB_OK;
 }

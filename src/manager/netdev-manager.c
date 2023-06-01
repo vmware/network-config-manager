@@ -100,7 +100,7 @@ int manager_create_vlan(const IfNameIndex *ifidx, const char *ifname, VLan *v) {
         if (r < 0)
                 return r;
 
-        steal_pointer(netdev->vlan);
+        steal_ptr(netdev->vlan);
         return 0;
 }
 
@@ -276,7 +276,7 @@ int manager_create_vxlan(const char *ifname, const char *dev, VxLan *v) {
                         return r;
         }
 
-        steal_pointer(netdev->vxlan);
+        steal_ptr(netdev->vxlan);
         return 0;
 }
 

@@ -33,7 +33,7 @@ int mnl_new(Mnl **ret) {
 
         m->seq = time(NULL);
 
-        *ret = steal_pointer(m);
+        *ret = steal_ptr(m);
         return 0;
 }
 

@@ -22,7 +22,7 @@ int ip_link_message_new(int type, int family, int ifindex, IPlinkMessage **ret) 
                 .ifi.ifi_index   = ifindex,
         };
 
-        *ret = steal_pointer(m);
+        *ret = steal_ptr(m);
         return 0;
 }
 
@@ -43,7 +43,7 @@ int ip_address_message_new(int type, int family, int ifindex, IPAddressMessage *
                  .ifm.ifa_index   = ifindex,
         };
 
-        *ret = steal_pointer(m);
+        *ret = steal_ptr(m);
         return 0;
 }
 
@@ -70,6 +70,6 @@ int ip_route_message_new(int type, int family, char rtm_protocol, IPRouteMessage
         if (type == RTM_NEWROUTE)
                 m->hdr.nlmsg_flags |= NLM_F_CREATE | NLM_F_APPEND;
 
-        *ret = steal_pointer(m);
+        *ret = steal_ptr(m);
         return 0;
 }

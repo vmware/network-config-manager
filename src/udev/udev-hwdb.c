@@ -31,6 +31,6 @@ int hwdb_get_description(const uint8_t *ether_address, char **ret) {
          if (!s)
                 return -ENOMEM;
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }

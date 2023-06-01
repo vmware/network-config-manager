@@ -20,7 +20,7 @@ int network_parse_operational_state(char **state) {
         if (isempty_str(s))
                 return -ENODATA;
 
-        *state = steal_pointer(s);
+        *state = steal_ptr(s);
         return 0;
 }
 
@@ -97,7 +97,7 @@ static int network_parse_link_string(int ifindex, const char *key, char **ret) {
                 return 0;
         }
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return r;
 }
 
@@ -140,7 +140,7 @@ static int network_parse_link_lease_string(int ifindex, const char *key, char **
                 return 0;
         }
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return r;
 }
 

@@ -588,7 +588,7 @@ int create_network_conf_file(const char *ifname, char **ret) {
                  return r;
 
         if (ret)
-                *ret = steal_pointer(network);
+                *ret = steal_ptr(network);
 
 
         return dbus_network_reload();
@@ -606,7 +606,7 @@ int determine_network_conf_file(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(network);
+        *ret = steal_ptr(network);
         return 0;
 }
 
@@ -638,7 +638,7 @@ int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
                         return r;
         }
 
-        *ret = steal_pointer(network);
+        *ret = steal_ptr(network);
         return 0;
 }
 
@@ -672,7 +672,7 @@ int parse_network_file(const int ifindex, const char *ifname, char **ret) {
 
         }
 
-        *ret = steal_pointer(network);
+        *ret = steal_ptr(network);
         return 0;
 }
 
@@ -718,7 +718,7 @@ int dhcp4_server_new(DHCP4Server **ret) {
         if (!s->static_leases)
                 return -ENOMEM;
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }
 
@@ -902,7 +902,7 @@ int network_new(Network **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(n);
+        *ret = steal_ptr(n);
         return 0;
 }
 
@@ -963,7 +963,7 @@ int parse_address_from_str_and_add(const char *s, Set *a) {
 
 
         set_add(a, address);
-        steal_pointer(address);
+        steal_ptr(address);
 
         return 0;
 }
@@ -1060,7 +1060,7 @@ int generate_wifi_config(Network *n, GString **ret) {
 
         g_hash_table_foreach(n->access_points, append_access_points, config);
 
-        *ret = steal_pointer(config);
+        *ret = steal_ptr(config);
         return 0;
 }
 
@@ -1095,7 +1095,7 @@ static void append_dhcp4_server_static_leases(gpointer key, gpointer value, gpoi
         if (r < 0)
                 return;
 
-        steal_pointer(section);
+        steal_ptr(section);
 }
 
 static void append_routing_policy_rules(gpointer key, gpointer value, gpointer userdata) {
@@ -1138,7 +1138,7 @@ static void append_routing_policy_rules(gpointer key, gpointer value, gpointer u
         if (r < 0)
                 return;
 
-        steal_pointer(section);
+        steal_ptr(section);
 }
 
 static void append_routes(gpointer key, gpointer value, gpointer userdata) {
@@ -1213,7 +1213,7 @@ static void append_routes(gpointer key, gpointer value, gpointer userdata) {
         if (r < 0)
                 return;
 
-        steal_pointer(section);
+        steal_ptr(section);
 }
 
 static void append_nameservers(gpointer key, gpointer value, gpointer userdata) {
@@ -1262,8 +1262,8 @@ static void append_addresses(gpointer key, gpointer value, gpointer userdata) {
         if (r < 0)
                 return;
 
-        steal_pointer(addr);
-        steal_pointer(section);
+        steal_ptr(addr);
+        steal_ptr(section);
 }
 
 int generate_network_config(Network *n) {

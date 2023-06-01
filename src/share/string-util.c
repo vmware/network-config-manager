@@ -93,8 +93,8 @@ int split_pair(const char *s, const char *sep, char **l, char **r) {
                         return -ENOMEM;;
         }
 
-        *l = steal_pointer(a);
-        *r = steal_pointer(b);
+        *l = steal_ptr(a);
+        *r = steal_ptr(b);
         return 0;
 }
 
@@ -145,7 +145,7 @@ int skip_first_word_and_split(char *line, const char *first_word, const char *se
                         return -ENOMEM;
         }
 
-        *ret = steal_pointer(a);
+        *ret = steal_ptr(a);
         return 0;
 }
 
@@ -162,7 +162,7 @@ char **strv_new(const char *x) {
          if (!a[0])
                  return NULL;
 
-         return steal_pointer(a);
+         return steal_ptr(a);
 }
 
 int strv_add(char ***l, const char *value) {
@@ -211,6 +211,6 @@ int argv_to_strv(int argc, char *argv[], char ***ret) {
                         return r;
         }
 
-        *ret = steal_pointer(s);
+        *ret = steal_ptr(s);
         return 0;
 }

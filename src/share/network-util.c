@@ -125,7 +125,7 @@ int ip_to_str(int family, const struct IPAddress *u, char **ret) {
                         return -EINVAL;
         }
 
-        *ret = steal_pointer(x);
+        *ret = steal_ptr(x);
         return 0;
 }
 
@@ -151,7 +151,7 @@ int ip_to_str_prefix(int family, const struct IPAddress *u, char **ret) {
                 x = NULL;
         }
 
-        *ret = steal_pointer(y);
+        *ret = steal_ptr(y);
         return 0;
 }
 
@@ -172,7 +172,7 @@ int parse_ipv4(const char *s, IPAddress **ret) {
         memcpy(&b->in, &buffer, sizeof(struct in_addr));
         b->family = AF_INET;
 
-        *ret = steal_pointer(b);
+        *ret = steal_ptr(b);
         return 0;
 }
 
@@ -193,7 +193,7 @@ int parse_ipv6(const char *s, IPAddress **ret) {
         memcpy(&b->in6, &buffer, sizeof(struct in6_addr));
         b->family = AF_INET6;
 
-        *ret = steal_pointer(b);
+        *ret = steal_ptr(b);
         return 0;
 }
 
@@ -302,7 +302,7 @@ int parse_ifname_or_index(const char *s, IfNameIndex **ret) {
                 memcpy(p->ifname, s, IFNAMSIZ);
         }
 
-        *ret = steal_pointer(p);
+        *ret = steal_ptr(p);
         return 0;
 }
 

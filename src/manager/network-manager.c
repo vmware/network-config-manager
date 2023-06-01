@@ -245,7 +245,7 @@ int manager_get_link_dns(const IfNameIndex *ifidx, char **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(config);
+        *ret = steal_ptr(config);
         return 0;
 }
 
@@ -570,7 +570,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
         if (r < 0)
                 return r;
 
-        steal_pointer(section);
+        steal_ptr(section);
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -762,7 +762,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
         if (r < 0)
                 return r;
 
-        steal_pointer(section);
+        steal_ptr(section);
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -884,7 +884,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
         if (r < 0)
                 return r;
 
-        steal_pointer(section);
+        steal_ptr(section);
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -1006,7 +1006,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        steal_pointer(section);
+        steal_ptr(section);
 
         r = section_new("Route", &section);
         if (r < 0)
@@ -1024,7 +1024,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        steal_pointer(section);
+        steal_ptr(section);
 
         /* To= */
         r = section_new("RoutingPolicyRule", &section);
@@ -1043,7 +1043,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        steal_pointer(section);
+        steal_ptr(section);
 
         /* From= */
         r = section_new("RoutingPolicyRule", &section);
@@ -1062,7 +1062,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        steal_pointer(section);
+        steal_ptr(section);
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -1156,7 +1156,7 @@ int manager_configure_dhcpv4_server(const IfNameIndex *i,
         if (r < 0)
                 return r;
 
-        steal_pointer(section);
+        steal_ptr(section);
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -1231,7 +1231,7 @@ int manager_add_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddre
         r = add_section_to_key_file(key_file, section);
         if (r < 0)
                 return r;
-        steal_pointer(section);
+        steal_ptr(section);
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -1393,9 +1393,9 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *i,
         if (r < 0)
                 return r;
 
-        steal_pointer(ipv6_sendra_section);
-        steal_pointer(ipv6_prefix_section);
-        steal_pointer(ipv6_route_prefix_section);
+        steal_ptr(ipv6_sendra_section);
+        steal_ptr(ipv6_prefix_section);
+        steal_ptr(ipv6_route_prefix_section);
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -1544,7 +1544,7 @@ int manager_read_domains_from_system_config(char **domains) {
         if (r < 0)
                 return r;
 
-        *domains = steal_pointer(config_domains);
+        *domains = steal_ptr(config_domains);
         return 0;
 }
 
@@ -1824,7 +1824,7 @@ int manager_show_link_network_config(const IfNameIndex *i, char **ret) {
         if (!c)
                 return log_oom();
 
-        *ret = steal_pointer(c);
+        *ret = steal_ptr(c);
         return 0;
 }
 
@@ -1962,8 +1962,8 @@ int manager_configure_proxy(int enable,
 
                 g_hash_table_replace(table, k, s);
 
-                steal_pointer(s);
-                steal_pointer(k);
+                steal_ptr(s);
+                steal_ptr(k);
         }
 
         if (https)  {
@@ -1979,8 +1979,8 @@ int manager_configure_proxy(int enable,
 
                 g_hash_table_replace(table, k, s);
 
-                steal_pointer(s);
-                steal_pointer(k);
+                steal_ptr(s);
+                steal_ptr(k);
         }
 
         if (ftp) {
@@ -1996,8 +1996,8 @@ int manager_configure_proxy(int enable,
 
                 g_hash_table_replace(table, k, s);
 
-                steal_pointer(s);
-                steal_pointer(k);
+                steal_ptr(s);
+                steal_ptr(k);
         }
 
         if (gopher) {
@@ -2013,8 +2013,8 @@ int manager_configure_proxy(int enable,
 
                 g_hash_table_replace(table, k, s);
 
-                steal_pointer(s);
-                steal_pointer(k);
+                steal_ptr(s);
+                steal_ptr(k);
         }
 
         if (socks) {
@@ -2030,8 +2030,8 @@ int manager_configure_proxy(int enable,
 
                 g_hash_table_replace(table, k, s);
 
-                steal_pointer(s);
-                steal_pointer(k);
+                steal_ptr(s);
+                steal_ptr(k);
         }
 
         if (socks5) {
@@ -2047,8 +2047,8 @@ int manager_configure_proxy(int enable,
 
                 g_hash_table_replace(table, k, s);
 
-                steal_pointer(s);
-                steal_pointer(k);
+                steal_ptr(s);
+                steal_ptr(k);
         }
 
         if (no_proxy) {
@@ -2064,8 +2064,8 @@ int manager_configure_proxy(int enable,
 
                 g_hash_table_replace(table, k, s);
 
-                steal_pointer(s);
-                steal_pointer(k);
+                steal_ptr(s);
+                steal_ptr(k);
         }
 
         if (enable >= 0) {
@@ -2081,8 +2081,8 @@ int manager_configure_proxy(int enable,
 
                 g_hash_table_replace(table, p, t);
 
-                steal_pointer(t);
-                steal_pointer(p);
+                steal_ptr(t);
+                steal_ptr(p);
         }
 
         return write_to_proxy_conf_file(table);
@@ -2098,7 +2098,7 @@ int manager_parse_proxy_config(GHashTable **c) {
         if (r < 0)
                 return r;
 
-        *c = steal_pointer(table);
+        *c = steal_ptr(table);
         return 0;
 }
 

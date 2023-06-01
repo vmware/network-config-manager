@@ -115,7 +115,7 @@ int dbus_get_property_from_hostnamed(const char *p, char **ret) {
         if (!t)
                 return log_oom();
         else
-                *ret = steal_pointer(t);
+                *ret = steal_ptr(t);
 
         return 0;
 }
@@ -259,9 +259,9 @@ int dbus_get_current_dns_servers_from_resolved(DNSServers **ret) {
         if (r < 0)
                 return r;
 
-        steal_pointer(i);
+        steal_ptr(i);
 
-        *ret = steal_pointer(serv);
+        *ret = steal_ptr(serv);
         return 0;
 }
 
@@ -366,10 +366,10 @@ int dbus_acquire_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
                 if (r < 0)
                         return r;
 
-                steal_pointer(i);
+                steal_ptr(i);
         }
 
-        *ret = steal_pointer(serv);
+        *ret = steal_ptr(serv);
         return 0;
 }
 
@@ -601,7 +601,7 @@ int dbus_acquire_dns_domains_from_resolved(DNSDomains **domains) {
         if (r < 0)
                 return r;
 
-        *domains = steal_pointer(serv);
+        *domains = steal_ptr(serv);
         return 0;
 }
 

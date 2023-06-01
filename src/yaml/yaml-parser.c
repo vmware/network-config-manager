@@ -718,7 +718,7 @@ int parse_yaml_domains(const char *key,
 
                 if (!set_contains(network->domains, p)) {
                         set_add(network->domains, p);
-                        steal_pointer(p);
+                        steal_ptr(p);
                 }
         }
 

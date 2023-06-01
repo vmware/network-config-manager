@@ -12,6 +12,6 @@ int device_new_from_ifname(sd_device **ret, const char *ifname) {
         if (r < 0)
                 return r;
 
-        *ret = steal_pointer(dev);
+        *ret = steal_ptr(dev);
         return 0;
 }
