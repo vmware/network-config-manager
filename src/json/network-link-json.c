@@ -862,11 +862,19 @@ static void fill_alterative_names(gpointer data, gpointer user_data) {
 }
 
 static int fill_link_message(json_object *jobj, Link *l) {
+        _cleanup_(json_object_putp) json_object *js = NULL;
+
         assert(jobj);
         assert(l);
 
+        js = json_object_new_string(link_event_type_to_name(l->event));
+        if (!js)
+                return log_oom();
+
+        json_object_object_add(jobj, "LinkEvent", js);
+        steal_ptr(js);
+
         if (l->master > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
                 char ifname[IFNAMSIZ] = {};
 
                 if (if_indextoname(l->master, ifname)) {
@@ -879,363 +887,303 @@ static int fill_link_message(json_object *jobj, Link *l) {
                 }
         }
 
-        if (l->group > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        js = json_object_new_int(l->group);
+        if (!js)
+                return log_oom();
 
-                js = json_object_new_int(l->group);
-                if (!js)
-                        return log_oom();
+        json_object_object_add(jobj, "Group", js);
+        steal_ptr(js);
 
-                json_object_object_add(jobj, "Group", js);
-                steal_ptr(js);
-        }
+        js = json_object_new_int(l->min_mtu);
+        if (!js)
+                return log_oom();
 
-        if (l->min_mtu > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object_object_add(jobj, "MinMTU", js);
+        steal_ptr(js);
 
-                js = json_object_new_int(l->min_mtu);
-                if (!js)
-                        return log_oom();
+        js = json_object_new_int(l->max_mtu);
+        if (!js)
+                return log_oom();
 
-                json_object_object_add(jobj, "MinMTU", js);
-                steal_ptr(js);
-        }
+        json_object_object_add(jobj, "MaxMTU", js);
+        steal_ptr(js);
 
-        if (l->max_mtu > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        js = json_object_new_int(l->n_tx_queues);
+        if (!js)
+                return log_oom();
 
-                js = json_object_new_int(l->max_mtu);
-                if (!js)
-                        return log_oom();
+        json_object_object_add(jobj, "NTXQueues", js);
+        steal_ptr(js);
 
-                json_object_object_add(jobj, "MaxMTU", js);
-                steal_ptr(js);
-        }
+        js = json_object_new_int(l->n_rx_queues);
+        if (!js)
+                return log_oom();
 
-        if (l->n_tx_queues > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object_object_add(jobj, "NRXQueues", js);
+        steal_ptr(js);
 
-                js = json_object_new_int(l->n_tx_queues);
-                if (!js)
-                        return log_oom();
+        js = json_object_new_int(l->gso_max_size);
+        if (!js)
+                return log_oom();
 
-                json_object_object_add(jobj, "NTXQueues", js);
-                steal_ptr(js);
-        }
+        json_object_object_add(jobj, "GSOMaxSize", js);
+        steal_ptr(js);
 
-        if (l->n_rx_queues > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        js = json_object_new_int(l->gso_max_segments);
+        if (!js)
+                return log_oom();
 
-                js = json_object_new_int(l->n_rx_queues);
-                if (!js)
-                        return log_oom();
+        json_object_object_add(jobj, "GSOMaxSegments", js);
+        steal_ptr(js);
 
-                json_object_object_add(jobj, "NRXQueues", js);
-                steal_ptr(js);
-        }
+        js = json_object_new_int(l->tso_max_size);
+        if (!js)
+                return log_oom();
 
-        if (l->gso_max_size > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object_object_add(jobj, "TSOMaxSize", js);
+        steal_ptr(js);
 
-                js = json_object_new_int(l->gso_max_size);
-                if (!js)
-                        return log_oom();
+        js = json_object_new_int(l->tso_max_segments);
+        if (!js)
+                return log_oom();
 
-                json_object_object_add(jobj, "GSOMaxSize", js);
-                steal_ptr(js);
-        }
+        json_object_object_add(jobj, "TSOMaxSegments", js);
+        steal_ptr(js);
 
-        if (l->gso_max_segments > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        js = json_object_new_int(l->gro_max_size);
+        if (!js)
+                return log_oom();
 
-                js = json_object_new_int(l->gso_max_segments);
-                if (!js)
-                        return log_oom();
+        json_object_object_add(jobj, "GROMaxSize", js);
+        steal_ptr(js);
 
-                json_object_object_add(jobj, "GSOMaxSegments", js);
-                steal_ptr(js);
-        }
+        js = json_object_new_int(l->gro_ipv4_max_size);
+        if (!js)
+                return log_oom();
 
-        if (l->tso_max_size > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object_object_add(jobj, "GROIPv4MaxSize", js);
+        steal_ptr(js);
 
-                js = json_object_new_int(l->tso_max_size);
-                if (!js)
-                        return log_oom();
+        js = json_object_new_string(l->parent_dev);
+        if (!js)
+                return log_oom();
 
-                json_object_object_add(jobj, "TSOMaxSize", js);
-                steal_ptr(js);
-        }
+        json_object_object_add(jobj, "ParentDev", js);
+        steal_ptr(js);
 
-        if (l->tso_max_segments > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        js = json_object_new_string(l->parent_bus);
+        if (!js)
+                return log_oom();
 
-                js = json_object_new_int(l->tso_max_segments);
-                if (!js)
-                        return log_oom();
+        json_object_object_add(jobj, "ParentBus", js);
+        steal_ptr(js);
 
-                json_object_object_add(jobj, "TSOMaxSegments", js);
-                steal_ptr(js);
-        }
+        js = json_object_new_int(l->gso_ipv4_max_size);
+        if (!js)
+                return log_oom();
 
-        if (l->gro_max_size > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object_object_add(jobj, "GSOIPv4MaxSize", js);
+        steal_ptr(js);
 
-                js = json_object_new_int(l->gro_max_size);
-                if (!js)
-                        return log_oom();
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_bytes);
+        else
+                js = json_object_new_double(l->stats64.rx_bytes);
 
-                json_object_object_add(jobj, "GROMaxSize", js);
-                steal_ptr(js);
-        }
+        json_object_object_add(jobj, "RXBytes", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_bytes);
+        else
+                js = json_object_new_double(l->stats64.tx_bytes);
 
-        if (l->gro_ipv4_max_size > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object_object_add(jobj, "TXBytes", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_packets);
+        else
+                js = json_object_new_double(l->stats64.rx_packets);
 
-                js = json_object_new_int(l->gro_ipv4_max_size);
-                if (!js)
-                        return log_oom();
+        json_object_object_add(jobj, "RXPackets", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_packets);
+        else
+                js = json_object_new_double(l->stats64.tx_packets);
 
-                json_object_object_add(jobj, "GROIPv4MaxSize", js);
-                steal_ptr(js);
-        }
+        json_object_object_add(jobj, "TXPackets", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_errors);
+        else
+                js = json_object_new_double(l->stats64.tx_errors);
 
-        if (l->parent_dev) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object_object_add(jobj, "TXErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_errors);
+        else
+                js = json_object_new_double(l->stats64.rx_errors);
 
-                js = json_object_new_string(l->parent_dev);
-                if (!js)
-                        return log_oom();
+        json_object_object_add(jobj, "RXErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_dropped);
+        else
+                js = json_object_new_double(l->stats64.rx_dropped);
 
-                json_object_object_add(jobj, "ParentDev", js);
-                steal_ptr(js);
-        }
+        json_object_object_add(jobj, "TXDropped", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_dropped);
+        else
+                js = json_object_new_double(l->stats64.tx_dropped);
 
-        if (l->parent_bus) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object_object_add(jobj, "RXDropped", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_over_errors);
+        else
+                js = json_object_new_double(l->stats64.rx_over_errors);
 
-                js = json_object_new_string(l->parent_bus);
-                if (!js)
-                        return log_oom();
+        json_object_object_add(jobj, "RXOverErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.multicast);
+        else
+                js = json_object_new_double(l->stats64.multicast);
 
-                json_object_object_add(jobj, "ParentBus", js);
-                steal_ptr(js);
-        }
+        json_object_object_add(jobj, "MulticastPackets", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.collisions);
+        else
+                js = json_object_new_double(l->stats64.collisions);
 
-        if (l->gso_ipv4_max_size > 0) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
+        json_object_object_add(jobj, "Collisions", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_length_errors);
+        else
+                js = json_object_new_double(l->stats64.rx_length_errors);
 
-                js = json_object_new_int(l->gso_ipv4_max_size);
-                if (!js)
-                        return log_oom();
-
-                json_object_object_add(jobj, "GSOIPv4MaxSize", js);
-                steal_ptr(js);
-        }
-
-        if (l->contains_stats || l->contains_stats64) {
-                _cleanup_(json_object_putp) json_object *js = NULL;
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_bytes);
-                else
-                        js = json_object_new_double(l->stats64.rx_bytes);
-
-                json_object_object_add(jobj, "RXBytes", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_bytes);
-                else
-                        js = json_object_new_double(l->stats64.tx_bytes);
-
-                json_object_object_add(jobj, "TXBytes", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_packets);
-                else
-                        js = json_object_new_double(l->stats64.rx_packets);
-
-                json_object_object_add(jobj, "RXPackets", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_packets);
-                else
-                        js = json_object_new_double(l->stats64.tx_packets);
-
-                json_object_object_add(jobj, "TXPackets", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_errors);
-                else
-                        js = json_object_new_double(l->stats64.tx_errors);
-
-                json_object_object_add(jobj, "TXErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_errors);
-                else
-                        js = json_object_new_double(l->stats64.rx_errors);
-
-                json_object_object_add(jobj, "RXErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_dropped);
-                else
-                        js = json_object_new_double(l->stats64.rx_dropped);
-
-                json_object_object_add(jobj, "TXDropped", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_dropped);
-                else
-                        js = json_object_new_double(l->stats64.tx_dropped);
-
-                json_object_object_add(jobj, "RXDropped", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_over_errors);
-                else
-                        js = json_object_new_double(l->stats64.rx_over_errors);
-
-                json_object_object_add(jobj, "RXOverErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.multicast);
-                else
-                        js = json_object_new_double(l->stats64.multicast);
-
-                json_object_object_add(jobj, "MulticastPackets", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.collisions);
-                else
-                        js = json_object_new_double(l->stats64.collisions);
-
-                json_object_object_add(jobj, "Collisions", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_length_errors);
-                else
-                        js = json_object_new_double(l->stats64.rx_length_errors);
-
-                json_object_object_add(jobj, "RXLengthErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_over_errors);
-                else
-                        js = json_object_new_double(l->stats64.rx_over_errors);
-
-                json_object_object_add(jobj, "RXOverErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_crc_errors);
-                else
-                        js = json_object_new_double(l->stats64.rx_crc_errors);
-
-                json_object_object_add(jobj, "RXCRCErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_frame_errors);
-                else
-                        js = json_object_new_double(l->stats64.rx_frame_errors);
-
-                json_object_object_add(jobj, "RXFrameErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_fifo_errors);
-                else
-                        js = json_object_new_double(l->stats64.rx_fifo_errors);
-
-                json_object_object_add(jobj, "RXFIFOErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_missed_errors);
-                else
-                        js = json_object_new_double(l->stats64.rx_missed_errors);
-
-                json_object_object_add(jobj, "RXMissedErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_aborted_errors);
-                else
-                        js = json_object_new_double(l->stats64.tx_aborted_errors);
-
-                json_object_object_add(jobj, "TXAbortedErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_carrier_errors);
-                else
-                        js = json_object_new_double(l->stats64.tx_carrier_errors);
-
-                json_object_object_add(jobj, "TXCarrierErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_fifo_errors);
-                else
-                        js = json_object_new_double(l->stats64.tx_fifo_errors);
-
-                json_object_object_add(jobj, "TXFIFOErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_heartbeat_errors);
-                else
-                        js = json_object_new_double(l->stats64.tx_heartbeat_errors);
-
-                json_object_object_add(jobj, "TXHeartBeatErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_window_errors);
-                else
-                        js = json_object_new_double(l->stats64.tx_window_errors);
-
-                json_object_object_add(jobj, "TXWindowErrors", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_compressed);
-                else
-                        js = json_object_new_double(l->stats64.rx_compressed);
-
-                json_object_object_add(jobj, "RXCompressed", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.tx_compressed);
-                else
-                        js = json_object_new_double(l->stats64.tx_compressed);
-
-                json_object_object_add(jobj, "TXCompressed", js);
-                steal_ptr(js);
-
-                if (l->contains_stats)
-                        js = json_object_new_int(l->stats.rx_nohandler);
-                else
-                        js = json_object_new_double(l->stats64.rx_nohandler);
-
-                json_object_object_add(jobj, "RXNoHandler", js);
-                steal_ptr(js);
-        }
+        json_object_object_add(jobj, "RXLengthErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_over_errors);
+        else
+                js = json_object_new_double(l->stats64.rx_over_errors);
+
+        json_object_object_add(jobj, "RXOverErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_crc_errors);
+        else
+                js = json_object_new_double(l->stats64.rx_crc_errors);
+
+        json_object_object_add(jobj, "RXCRCErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_frame_errors);
+        else
+                js = json_object_new_double(l->stats64.rx_frame_errors);
+
+        json_object_object_add(jobj, "RXFrameErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_fifo_errors);
+        else
+                js = json_object_new_double(l->stats64.rx_fifo_errors);
+
+        json_object_object_add(jobj, "RXFIFOErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_missed_errors);
+        else
+                js = json_object_new_double(l->stats64.rx_missed_errors);
+
+        json_object_object_add(jobj, "RXMissedErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_aborted_errors);
+        else
+                js = json_object_new_double(l->stats64.tx_aborted_errors);
+
+        json_object_object_add(jobj, "TXAbortedErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_carrier_errors);
+        else
+                js = json_object_new_double(l->stats64.tx_carrier_errors);
+
+        json_object_object_add(jobj, "TXCarrierErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_fifo_errors);
+        else
+                js = json_object_new_double(l->stats64.tx_fifo_errors);
+
+        json_object_object_add(jobj, "TXFIFOErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_heartbeat_errors);
+        else
+                js = json_object_new_double(l->stats64.tx_heartbeat_errors);
+
+        json_object_object_add(jobj, "TXHeartBeatErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_window_errors);
+        else
+                js = json_object_new_double(l->stats64.tx_window_errors);
+
+        json_object_object_add(jobj, "TXWindowErrors", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_compressed);
+        else
+                js = json_object_new_double(l->stats64.rx_compressed);
+
+        json_object_object_add(jobj, "RXCompressed", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.tx_compressed);
+        else
+                js = json_object_new_double(l->stats64.tx_compressed);
+
+        json_object_object_add(jobj, "TXCompressed", js);
+        steal_ptr(js);
+
+        if (l->contains_stats)
+                js = json_object_new_int(l->stats.rx_nohandler);
+        else
+                js = json_object_new_double(l->stats64.rx_nohandler);
+
+        json_object_object_add(jobj, "RXNoHandler", js);
+        steal_ptr(js);
 
         return 0;
 }
