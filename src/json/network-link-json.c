@@ -989,6 +989,28 @@ static int fill_link_message(json_object *jobj, Link *l) {
                 steal_ptr(js);
         }
 
+        if (l->parent_dev) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(l->parent_dev);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "ParentDev", js);
+                steal_ptr(js);
+        }
+
+        if (l->parent_bus) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(l->parent_bus);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "ParentBus", js);
+                steal_ptr(js);
+        }
+
         if (l->gso_ipv4_max_size > 0) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
@@ -999,7 +1021,6 @@ static int fill_link_message(json_object *jobj, Link *l) {
                 json_object_object_add(jobj, "GSOIPv4MaxSize", js);
                 steal_ptr(js);
         }
-
 
         if (l->contains_stats || l->contains_stats64) {
                 _cleanup_(json_object_putp) json_object *js = NULL;

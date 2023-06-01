@@ -200,25 +200,17 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                         return log_oom();
         }
 
-#ifdef IFLA_PARENT_DEV_NAME
-
         if (rta_tb[IFLA_PARENT_DEV_NAME]) {
                 n->parent_dev = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_PARENT_DEV_NAME]));
                 if (!n->parent_dev)
                         return log_oom();
         }
 
-#endif
-
-#ifdef IFLA_PARENT_DEV_BUS_NAME
-
         if (rta_tb[IFLA_PARENT_DEV_BUS_NAME]) {
                 n->parent_bus = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_PARENT_DEV_BUS_NAME]));
                 if (!n->parent_bus)
                         return log_oom();
         }
-
-#endif
 
         if (rta_tb[IFLA_MASTER])
                 n->master = rtnl_message_read_attribute_u32(rta_tb[IFLA_MASTER]);
