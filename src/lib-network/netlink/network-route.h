@@ -11,6 +11,18 @@
 #include "network-util.h"
 #include "set.h"
 
+#ifndef RTNH_F_TRAP
+#define RTNH_F_TRAP             64      /* Nexthop is trapping packets */
+#endif
+
+#ifndef RTM_F_OFFLOAD_FAILED
+#define RTM_F_OFFLOAD_FAILED    0x20000000 /* route offload failed, this value
+                                            * is chosen to avoid conflicts with
+                                            * other flags defined in
+                                            * include/uapi/linux/ipv6_route.h
+                                            */
+#endif
+
 typedef struct Route {
         unsigned char dst_prefixlen;
         unsigned char src_prefixlen;
