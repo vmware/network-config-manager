@@ -2103,7 +2103,6 @@ int manager_parse_proxy_config(GHashTable **c) {
 }
 
 int manager_generate_network_config_from_yaml(const char *file) {
-        _cleanup_(g_string_unrefp) GString *wifi_config = NULL;
         _cleanup_(networks_freep) Networks *n = NULL;
         GHashTableIter iter;
         gpointer k, v;

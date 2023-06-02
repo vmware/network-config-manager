@@ -643,7 +643,6 @@ int remove_section_from_config_file(const char *path, const char *section) {
 
 int remove_section_from_config_file_key(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        _cleanup_ (section_freep) Section *sec = NULL;
         GList *l = NULL;
         int r;
 

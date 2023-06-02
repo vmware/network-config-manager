@@ -1095,8 +1095,6 @@ int generate_wifi_config(Network *n, GString **ret) {
 }
 
 static void append_sriovs(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_ char *gateway = NULL, *destination = NULL, *prefsrc = NULL;
-        _cleanup_(section_freep) Section *section = NULL;
         KeyFile *key_file = userdata;
         SRIOV *s = value;
 
