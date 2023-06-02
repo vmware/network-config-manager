@@ -211,6 +211,14 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                 if (!n->parent_bus)
                         return log_oom();
         }
+        if (rta_tb[IFLA_LINK_NETNSID])
+                n->netnsid = rtnl_message_read_attribute_u32(rta_tb[IFLA_LINK_NETNSID]);
+
+        if (rta_tb[IFLA_NEW_NETNSID])
+                n->new_netnsid = rtnl_message_read_attribute_u32(rta_tb[IFLA_NEW_NETNSID]);
+
+        if (rta_tb[IFLA_NEW_IFINDEX])
+                n->new_ifindex = rtnl_message_read_attribute_u32(rta_tb[IFLA_NEW_IFINDEX]);
 
         if (rta_tb[IFLA_GROUP])
                 n->group = rtnl_message_read_attribute_u32(rta_tb[IFLA_GROUP]);
