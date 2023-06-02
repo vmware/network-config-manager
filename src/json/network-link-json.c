@@ -984,14 +984,14 @@ static int fill_link_message(json_object *jobj, Link *l) {
         json_object_object_add(jobj, "GROIPv4MaxSize", js);
         steal_ptr(js);
 
-        js = json_object_new_string(l->parent_dev);
+        js = json_object_new_string(l->parent_dev ? l->parent_dev : "");
         if (!js)
                 return log_oom();
 
         json_object_object_add(jobj, "ParentDev", js);
         steal_ptr(js);
 
-        js = json_object_new_string(l->parent_bus);
+        js = json_object_new_string(l->parent_bus ? l->parent_bus : "");
         if (!js)
                 return log_oom();
 
