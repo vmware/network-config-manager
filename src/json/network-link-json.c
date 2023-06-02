@@ -167,7 +167,7 @@ static int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags
 }
 
 static int json_fill_ipv6_link_local_addresses(Link *l, Addresses *addr, json_object *ret) {
-        _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
+        _cleanup_(json_object_putp) json_object *js = NULL;
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
@@ -176,7 +176,7 @@ static int json_fill_ipv6_link_local_addresses(Link *l, Addresses *addr, json_ob
         g_hash_table_iter_init(&iter, addr->addresses->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
                 Address *a = (Address *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *b = NULL, *dhcp = NULL;
+                _auto_cleanup_ char *c = NULL;
 
                 if (a->family != AF_INET6)
                         continue;
@@ -497,8 +497,8 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
 
         g_hash_table_iter_init(&iter, rts->routes->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
-                _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jtype = NULL, *jtable = NULL,
-                        *jprotocol = NULL, *jpref = NULL, *jprio = NULL, *jdestination = NULL, *jdest_prefix_len = NULL,
+                _cleanup_(json_object_putp) json_object *jscope = NULL, *jtype = NULL, *jtable = NULL,
+                        *jprotocol = NULL, *jpref = NULL, *jprio = NULL, *jdest_prefix_len = NULL,
                         *j = NULL;
                 Route *rt = (Route *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL, *dhcp = NULL, *prefsrc = NULL, *destination = NULL, *table = NULL;
@@ -1753,7 +1753,6 @@ static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
 
 int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL;
-        _auto_cleanup_strv_ char **route_domains = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _cleanup_(routes_freep) Routes *route = NULL;
