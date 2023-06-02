@@ -434,6 +434,23 @@ static int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags) 
         return 0;
 }
 
+static int route_table_to_string(uint32_t table, char **ret) {
+        _auto_cleanup_ char *str = NULL;
+        const char *s;
+        int r;
+
+        s = route_table_to_name(table);
+        if (!s)
+                r = asprintf(&str, "%" PRIu32, table);
+        else
+                r = asprintf(&str, "%s(%" PRIu32 ")", s, table);
+        if (r < 0)
+                return -ENOMEM;
+
+        *ret = steal_ptr(str);
+        return 0;
+}
+
 static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
@@ -447,7 +464,7 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
                         *jprotocol = NULL, *jpref = NULL, *jprio = NULL, *jdestination = NULL, *jdest_prefix_len = NULL,
                         *j = NULL;
                 Route *rt = (Route *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *dhcp = NULL, *prefsrc = NULL, *destination = NULL;
+                _auto_cleanup_ char *c = NULL, *dhcp = NULL, *prefsrc = NULL, *destination = NULL, *table = NULL;
 
                 if (ipv4 && rt->family != AF_INET)
                         continue;
@@ -489,6 +506,16 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
 
                 json_object_object_add(jobj, "Table", jtable);
                 steal_ptr(jtable);
+
+                r = route_table_to_string(rt->table, &table);
+                if (r >= 0) {
+                        jtable = json_object_new_string(table);
+                        if (!jtable)
+                                return log_oom();
+
+                        json_object_object_add(jobj, "TableString", jtable);
+                        steal_ptr(jtable);
+                }
 
                 jprotocol = json_object_new_int(rt->protocol);
                 if (!jprotocol)
