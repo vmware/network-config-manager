@@ -464,7 +464,7 @@ int route_protocol_to_mode(const char *name) {
         return _ROUTE_PROTOCOL_INVALID;
 }
 
-static const char * const route_table_type[_ROUTE_TABLE_MAX] = {
+static const char * const route_table[_ROUTE_TABLE_MAX] = {
        [ROUTE_TABLE_LOCAL]    = "local",
        [ROUTE_TABLE_MAIN]     = "main",
        [ROUTE_TABLE_DEFAULT]  = "default",
@@ -474,17 +474,17 @@ const char *route_table_to_name(int id) {
         if (id < 0)
                 return NULL;
 
-        if ((size_t) id >= ELEMENTSOF(route_table_type))
+        if ((size_t) id >= ELEMENTSOF(route_table))
                 return NULL;
 
-        return route_table_type[id];
+        return route_table[id];
 }
 
 int route_table_to_mode(const char *name) {
         assert(name);
 
-        for (size_t i = ROUTE_TABLE_DEFAULT; i < (size_t) ELEMENTSOF(route_table_type); i++)
-                if (str_eq_fold(name, route_table_type[i]))
+        for (size_t i = ROUTE_TABLE_DEFAULT; i < (size_t) ELEMENTSOF(route_table); i++)
+                if (str_eq_fold(name, route_table[i]))
                         return i;
 
         return _ROUTE_TABLE_INVALID;
