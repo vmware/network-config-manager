@@ -372,6 +372,10 @@ static void list_link_attributes(Link *l) {
         printf("%d ", l->gso_max_size);
         display(arg_beautify, ansi_color_bold_cyan(), "GSO Max Segments: ");
         printf("%d \n", l->gso_max_segments);
+        display(arg_beautify, ansi_color_bold_cyan(), "                TSO Max Size: ");
+        printf("%d ", l->tso_max_size);
+        display(arg_beautify, ansi_color_bold_cyan(), "TSO Max Segments: ");
+        printf("%d \n", l->tso_max_segments);
 }
 
 static void display_alterative_names(gpointer data, gpointer user_data) {
