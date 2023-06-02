@@ -406,6 +406,8 @@ static int list_one_link(char *argv[]) {
         if (r < 0)
                 return r;
 
+        display(arg_beautify, ansi_color_bold_cyan(), "                        Name: ");
+        printf("%s\n", p->ifname);
         if (l->alt_names) {
                 display(arg_beautify, ansi_color_bold_cyan(), "           Alternative names: ");
                 g_ptr_array_foreach(l->alt_names, display_alterative_names, NULL);
