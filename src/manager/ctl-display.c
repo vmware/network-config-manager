@@ -428,10 +428,10 @@ static int list_one_link(char *argv[]) {
         if (l->flags > 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                       Flags: ");
                 if (l->flags & IFF_UP)
-                        printf("up");
+                        printf("up ");
 
                 if (l->flags & IFF_BROADCAST)
-                        printf("broadcast");
+                        printf("broadcast ");
 
                 if (l->flags & IFF_RUNNING)
                         printf("running ");
@@ -452,7 +452,7 @@ static int list_one_link(char *argv[]) {
                         printf("lowerup ");
 
                 if (l->flags & IFF_DORMANT)
-                        printf("dormant");
+                        printf("dormant ");
 
                 if (l->flags & IFF_DEBUG)
                         printf("debug");
