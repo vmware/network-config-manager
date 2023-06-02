@@ -817,7 +817,7 @@ static int json_fill_one_link_udev(json_object *j, Link *l, char **link_file) {
                         if (!js)
                                 return log_oom();
 
-                        json_object_object_add(j, "HWDescription", js);
+                        json_object_object_add(j, "HardwareDescription", js);
                         steal_ptr(js);
                 }
         }
