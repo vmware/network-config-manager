@@ -9,13 +9,37 @@
 
 #ifndef IFLA_PARENT_DEV_NAME
 #define IFLA_PARENT_DEV_NAME 56
+#endif
+
+#ifndef IFLA_PARENT_DEV_BUS_NAME
 #define IFLA_PARENT_DEV_BUS_NAME 57
+#endif
+
+#ifndef IFLA_GRO_MAX_SIZE
 #define IFLA_GRO_MAX_SIZE 58
+#endif
+
+#ifndef IFLA_TSO_MAX_SIZE
 #define IFLA_TSO_MAX_SIZE 59
+#endif
+
+#ifndef IFLA_TSO_MAX_SEGS
 #define IFLA_TSO_MAX_SEGS 60
+#endif
+
+#ifndef IFLA_ALLMULTI
 #define IFLA_ALLMULTI     61
+#endif
+
+#ifndef IFLA_DEVLINK_PORT
 #define IFLA_DEVLINK_PORT 62
+#endif
+
+#ifndef IFLA_GSO_IPV4_MAX_SIZE
 #define IFLA_GSO_IPV4_MAX_SIZE 63
+#endif
+
+#ifndef IFLA_GRO_IPV4_MAX_SIZE
 #define IFLA_GRO_IPV4_MAX_SIZE 64
 #endif
 
@@ -49,6 +73,7 @@ typedef struct Link {
         char *parent_bus;
 
         int ifindex;
+        int family;
 
         uint8_t operstate;
         uint8_t ipv6_addr_gen_mode;
@@ -89,6 +114,7 @@ typedef struct Link {
 } Link;
 
 typedef struct Links {
+         int ifindex;
          GList *links;
 } Links;
 
