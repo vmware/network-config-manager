@@ -166,12 +166,49 @@ static int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags
         return 0;
 }
 
+static int json_fill_ipv6_link_local_addresses(Link *l, Addresses *addr, json_object *ret) {
+        _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
+        GHashTableIter iter;
+        gpointer key, value;
+        unsigned long size;
+        int r;
+
+        g_hash_table_iter_init(&iter, addr->addresses->hash);
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+                Address *a = (Address *) g_bytes_get_data(key, &size);
+                _auto_cleanup_ char *c = NULL, *b = NULL, *dhcp = NULL;
+
+                if (a->family != AF_INET6)
+                        continue;
+
+                if (IN6_IS_ADDR_LINKLOCAL(&a->address.in6)) {
+                        r = ip_to_str(a->family, &a->address, &c);
+                        if (r < 0)
+                                return r;
+
+                        js = json_object_new_string(c);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_object_add(ret, "IPv6LinkLocalAddress", js);
+                        steal_ptr(js);
+                }
+        }
+
+        return 0;
+}
+
+
 static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
         int r;
+
+        assert(l);
+        assert(addr);
+        assert(l);
 
         g_hash_table_iter_init(&iter, addr->addresses->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
@@ -212,7 +249,7 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                 if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "Broadcast", js);
+                json_object_object_add(jobj, "BroadcastAddress", js);
                 steal_ptr(js);
 
                 jscope = json_object_new_int(a->scope);
@@ -827,7 +864,7 @@ static int json_fill_link_attributes(json_object *jobj, Link *l) {
                 if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "HWAddress", js);
+                json_object_object_add(jobj, "HardwareAddress", js);
                 steal_ptr(js);
         }
 
@@ -840,7 +877,7 @@ static int json_fill_link_attributes(json_object *jobj, Link *l) {
                 if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "PermAddress", js);
+                json_object_object_add(jobj, "PermanentHardwareAddress", js);
                 steal_ptr(js);
         }
 
@@ -1803,6 +1840,8 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
         r = manager_get_one_link_address(l->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                json_fill_ipv6_link_local_addresses(l, addr, jobj);
 
                 ja = json_object_new_array();
                 if (!ja)
