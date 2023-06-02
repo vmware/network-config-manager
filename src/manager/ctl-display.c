@@ -372,6 +372,10 @@ static void list_link_attributes(Link *l) {
         printf("%d ", l->gso_max_size);
         display(arg_beautify, ansi_color_bold_cyan(), "GSO Max Segments: ");
         printf("%d \n", l->gso_max_segments);
+        display(arg_beautify, ansi_color_bold_cyan(), "                TSO Max Size: ");
+        printf("%d ", l->tso_max_size);
+        display(arg_beautify, ansi_color_bold_cyan(), "TSO Max Segments: ");
+        printf("%d \n", l->tso_max_segments);
 }
 
 static void display_alterative_names(gpointer data, gpointer user_data) {
@@ -416,6 +420,8 @@ static int list_one_link(char *argv[]) {
                 printf("\n");
         }
 
+        display(arg_beautify, ansi_color_bold_cyan(), "                       Group: ");
+        printf("%d\n", l->group);
         (void) network_parse_link_operational_state(l->ifindex, &operational_state);
 
         r = network_parse_link_setup_state(l->ifindex, &setup_state);
