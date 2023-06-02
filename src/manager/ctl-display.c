@@ -406,6 +406,10 @@ static int list_one_link(char *argv[]) {
         if (r < 0)
                 return r;
 
+        display(arg_beautify, ansi_color_bold_cyan(), "                        Name: ");
+        printf("%s\n", p->ifname);
+        display(arg_beautify, ansi_color_bold_cyan(), "                       Index: ");
+        printf("%d\n", p->ifindex);
         if (l->alt_names) {
                 display(arg_beautify, ansi_color_bold_cyan(), "           Alternative names: ");
                 g_ptr_array_foreach(l->alt_names, display_alterative_names, NULL);
@@ -424,10 +428,10 @@ static int list_one_link(char *argv[]) {
         if (l->flags > 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                       Flags: ");
                 if (l->flags & IFF_UP)
-                        printf("up");
+                        printf("up ");
 
                 if (l->flags & IFF_BROADCAST)
-                        printf("broadcast");
+                        printf("broadcast ");
 
                 if (l->flags & IFF_RUNNING)
                         printf("running ");
@@ -448,7 +452,7 @@ static int list_one_link(char *argv[]) {
                         printf("lowerup ");
 
                 if (l->flags & IFF_DORMANT)
-                        printf("dormant");
+                        printf("dormant ");
 
                 if (l->flags & IFF_DEBUG)
                         printf("debug");

@@ -243,7 +243,7 @@ static int fill_link_route_message(Route *rt, int ifindex , struct nlattr *tb[])
 }
 
 static int fill_link_route(const struct nlmsghdr *nlh, void *data) {
-        struct nlattr *tb[RTA_MAX+1] = {};
+        struct nlattr *tb[RTA_MAX * 2] = {};
         _auto_cleanup_ Route *rt = NULL;
         Routes *rts = (Routes *) data;
         struct rtmsg *rm;

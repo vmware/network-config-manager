@@ -114,7 +114,7 @@ static int validate_address_attributes(const struct nlattr *attr, void *data) {
 
 static int fill_link_address(const struct nlmsghdr *nlh, void *data) {
         struct ifaddrmsg *ifa = mnl_nlmsg_get_payload(nlh);
-        struct nlattr *tb[IFA_MAX + 1] = {};
+        struct nlattr *tb[IFA_MAX + 2] = {};
         _auto_cleanup_ Address *a = NULL;
         Addresses *addrs = data;
         int r;
