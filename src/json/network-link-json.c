@@ -280,7 +280,7 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                 if (!jlft)
                         return log_oom();
 
-                json_object_object_add(jobj, "PreferedLft", jlft);
+                json_object_object_add(jobj, "PreferedLifetime", jlft);
                 steal_ptr(jlft);
 
                 if (a->ci.ifa_valid != UINT32_MAX)
@@ -291,7 +291,7 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                 if (!jlft)
                         return log_oom();
 
-                json_object_object_add(jobj, "ValidLft", jlft);
+                json_object_object_add(jobj, "ValidLifetime", jlft);
                 steal_ptr(jlft);
 
                 jlabel = json_object_new_string(a->label ? a->label : "");
