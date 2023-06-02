@@ -195,7 +195,7 @@ bool key_file_config_contains(const KeyFile *key_file, const char *section, cons
                         for (GList *j = s->keys; j; j = g_list_next (j)) {
                                 Key *key = (Key *) j->data;
 
-                                if (strstr(key->name, k) && strstr(key->v, v))
+                                if (str_eq(key->name, k) && strstr(key->v, v))
                                         return true;
                         }
                 }
