@@ -867,6 +867,13 @@ static int fill_link_message(json_object *jobj, Link *l) {
         assert(jobj);
         assert(l);
 
+        js = json_object_new_string(l->alias);
+        if (!js)
+                return log_oom();
+
+        json_object_object_add(jobj, "Alias", js);
+        steal_ptr(js);
+
         js = json_object_new_string(link_event_type_to_name(l->event));
         if (!js)
                 return log_oom();

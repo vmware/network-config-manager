@@ -219,6 +219,9 @@ static int fill_one_link_info(const struct nlmsghdr *nlh, void *data) {
         if (tb[IFLA_IFNAME])
                 memcpy(l->name, mnl_attr_get_str(tb[IFLA_IFNAME]), IFNAMSIZ);
 
+        if (tb[IFLA_IFALIAS])
+                memcpy(l->alias, mnl_attr_get_str(tb[IFLA_IFALIAS]), IFNAMSIZ);
+
         if (tb[IFLA_MTU]) {
                 l->mtu = mnl_attr_get_u32(tb[IFLA_MTU]);
                 l->contains_mtu = true;

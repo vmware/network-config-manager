@@ -67,6 +67,7 @@ typedef struct Link {
         unsigned short iftype;
 
         char name[IFNAMSIZ+1];
+        char alias[IFNAMSIZ+1];
         char *qdisc;
         char *kind;
         char *parent_dev;
