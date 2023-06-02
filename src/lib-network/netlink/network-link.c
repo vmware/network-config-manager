@@ -149,7 +149,6 @@ static int parse_link_info_cb(const struct nlattr *attr, void *data) {
 static int parse_link_info(struct nlattr *nest, Link *l) {
         struct nlattr *tb[IFLA_INFO_MAX+1] = {};
 
-        assert(tb);
         assert(l);
 
         mnl_attr_parse_nested(nest, parse_link_info_cb, tb);

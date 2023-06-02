@@ -266,7 +266,7 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                 json_object_object_add(jobj, "Label", jlabel);
                 steal_ptr(jlabel);
 
-                if (a->proto > 0)
+                if (a->proto > 0 && address_protocol_type_to_name(a->proto))
                         jproto = json_object_new_string(address_protocol_type_to_name(a->proto));
                 else
                         jproto = json_object_new_string("");
