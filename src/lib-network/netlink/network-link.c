@@ -191,7 +191,7 @@ static int data_attr_cb(const struct nlattr *attr, void *data) {
 
 static int fill_one_link_info(const struct nlmsghdr *nlh, void *data) {
         struct ifinfomsg *ifm = mnl_nlmsg_get_payload(nlh);
-        struct nlattr *tb[IFLA_MAX + 1] = {};
+        struct nlattr *tb[2 * IFLA_MAX] = {};
         _auto_cleanup_ Link *l = NULL;
         Links *links = data;
         int r;
@@ -242,6 +242,7 @@ static int fill_one_link_info(const struct nlmsghdr *nlh, void *data) {
                 if (!l->parent_bus)
                         return log_oom();
         }
+
         if (tb[IFLA_LINK_NETNSID])
                 l->netnsid = mnl_attr_get_u32(tb[IFLA_LINK_NETNSID]);
 
