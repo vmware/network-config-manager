@@ -416,6 +416,8 @@ static int list_one_link(char *argv[]) {
                 printf("\n");
         }
 
+        display(arg_beautify, ansi_color_bold_cyan(), "                       Group: ");
+        printf("%d\n", l->group);
         (void) network_parse_link_operational_state(l->ifindex, &operational_state);
 
         r = network_parse_link_setup_state(l->ifindex, &setup_state);
