@@ -9,9 +9,9 @@
 #include "netlink-message.h"
 #include "netlink.h"
 #include "network-link.h"
-#include "network-util.h"
 #include "parse-util.h"
 #include "string-util.h"
+#include "mnl_util.h"
 
 static const char* const link_operstates_table[] = {
         [IF_OPER_UNKNOWN]        = "unknown",
@@ -135,23 +135,27 @@ static int link_add(Links **h, Link *link) {
         return 0;
 }
 
-static int parse_link_info(struct rtattr *tb, Link *l) {
-        _auto_cleanup_ struct rtattr **rta_tb = NULL;
-       int r;
+static int parse_link_info_cb(const struct nlattr *attr, void *data) {
+        const struct nlattr **tb = data;
+        int type = mnl_attr_get_type(attr);
 
-       assert(tb);
-       assert(l);
+        if (mnl_attr_type_valid(attr, IFLA_INFO_SLAVE_DATA) < 0)
+                return MNL_CB_OK;
 
-       rta_tb = new0(struct rtattr *, IFLA_INFO_MAX + 1);
-       if (!rta_tb)
-               return log_oom();
+        tb[type] = attr;
+        return MNL_CB_OK;
+}
 
-        r = rtnl_message_parse_rtattr(rta_tb, IFLA_INFO_MAX, RTA_DATA(tb), RTA_PAYLOAD(tb));
-        if (r < 0)
-                return r;
+static int parse_link_info(struct nlattr *nest, Link *l) {
+        struct nlattr *tb[IFLA_INFO_MAX+1] = {};
 
-        if (rta_tb[IFLA_INFO_KIND]) {
-                l->kind = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_INFO_KIND]));
+        assert(tb);
+        assert(l);
+
+        mnl_attr_parse_nested(nest, parse_link_info_cb, tb);
+
+        if (tb[IFLA_INFO_KIND]) {
+                l->kind = strdup(mnl_attr_get_str(tb[IFLA_INFO_KIND]));
                 if (!l->kind)
                         return -ENOMEM;
         }
@@ -159,139 +163,167 @@ static int parse_link_info(struct rtattr *tb, Link *l) {
         return 0;
 }
 
-static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
-        _auto_cleanup_ struct rtattr **rta_tb = NULL;
-        _auto_cleanup_ Link *n = NULL;
-        struct ifinfomsg *iface;
-        struct nlmsghdr *p;
-        int r, l;
+static int data_attr_cb(const struct nlattr *attr, void *data) {
+        int type = mnl_attr_get_type(attr);
+        const struct nlattr **tb = data;
 
-        r = link_new(&n);
+        if (mnl_attr_type_valid(attr, IFLA_MAX) < 0)
+                return MNL_CB_OK;
+
+        switch(type) {
+        case IFLA_ADDRESS:
+                if (mnl_attr_validate(attr, MNL_TYPE_BINARY) < 0)
+                        return MNL_CB_ERROR;
+                break;
+        case IFLA_MTU:
+                if (mnl_attr_validate(attr, MNL_TYPE_U32) < 0)
+                        return MNL_CB_ERROR;
+                break;
+        case IFLA_IFNAME:
+                if (mnl_attr_validate(attr, MNL_TYPE_STRING) < 0)
+                        return MNL_CB_ERROR;
+                break;
+        }
+
+        tb[type] = attr;
+        return MNL_CB_OK;
+}
+
+static int fill_one_link_info(const struct nlmsghdr *nlh, void *data) {
+        struct ifinfomsg *ifm = mnl_nlmsg_get_payload(nlh);
+        struct nlattr *tb[IFLA_MAX + 1] = {};
+        _auto_cleanup_ Link *l = NULL;
+        Links *links = data;
+        int r;
+
+        assert(nlh);
+        assert(data);
+
+        r = link_new(&l);
         if (r < 0)
                 return r;
-        p = h;
 
-        iface = NLMSG_DATA(p);
-        l = p->nlmsg_len - NLMSG_LENGTH(sizeof(*iface));
+        *l = (Link) {
+              .ifindex = ifm->ifi_index,
+              .iftype = ifm->ifi_type,
+              .flags = ifm->ifi_flags,
+              .family = ifm->ifi_family,
+        };
 
-        rta_tb = new0(struct rtattr *, IFLA_MAX + 1);
-        if (!rta_tb)
-                return log_oom();
+        if (links->ifindex != 0 && links->ifindex != l->ifindex)
+                return MNL_CB_OK;
 
-        r = rtnl_message_parse_rtattr(rta_tb, IFLA_MAX, IFLA_RTA(iface), l);
-        if (r < 0)
-                return r;
+        log_debug("index=%d type=%d flags=%d family=%d", ifm->ifi_index, ifm->ifi_type, ifm->ifi_flags, ifm->ifi_family);
 
-        n->ifindex = iface->ifi_index;
-        n->iftype = iface->ifi_type;
-        n->flags = iface->ifi_flags;
+        mnl_attr_parse(nlh, sizeof(*ifm), data_attr_cb, tb);
 
-        if (rta_tb[IFLA_IFNAME])
-                memcpy(n->name, rtnl_message_read_attribute_string(rta_tb[IFLA_IFNAME]), IFNAMSIZ);
+        if (tb[IFLA_IFNAME])
+                memcpy(l->name, mnl_attr_get_str(tb[IFLA_IFNAME]), IFNAMSIZ);
 
-        if (rta_tb[IFLA_MTU]) {
-                n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MTU]);
-                n->contains_mtu = true;
+        if (tb[IFLA_MTU]) {
+                l->mtu = mnl_attr_get_u32(tb[IFLA_MTU]);
+                l->contains_mtu = true;
         }
 
-        if (rta_tb[IFLA_QDISC]) {
-                n->qdisc = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_QDISC]));
-                if (!n->qdisc)
+        if (tb[IFLA_QDISC]) {
+                l->qdisc = strdup(mnl_attr_get_str(tb[IFLA_QDISC]));
+                if (!l->qdisc)
                         return log_oom();
         }
 
-        if (rta_tb[IFLA_PARENT_DEV_NAME]) {
-                n->parent_dev = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_PARENT_DEV_NAME]));
-                if (!n->parent_dev)
+        if (tb[IFLA_PARENT_DEV_NAME]) {
+                l->parent_dev = strdup(mnl_attr_get_str(tb[IFLA_PARENT_DEV_NAME]));
+                if (!l->parent_dev)
                         return log_oom();
         }
 
-        if (rta_tb[IFLA_PARENT_DEV_BUS_NAME]) {
-                n->parent_bus = strdup(rtnl_message_read_attribute_string(rta_tb[IFLA_PARENT_DEV_BUS_NAME]));
-                if (!n->parent_bus)
+        if (tb[IFLA_PARENT_DEV_BUS_NAME]) {
+                l->parent_bus = strdup(mnl_attr_get_str(tb[IFLA_PARENT_DEV_BUS_NAME]));
+                if (!l->parent_bus)
                         return log_oom();
         }
-        if (rta_tb[IFLA_LINK_NETNSID])
-                n->netnsid = rtnl_message_read_attribute_u32(rta_tb[IFLA_LINK_NETNSID]);
+        if (tb[IFLA_LINK_NETNSID])
+                l->netnsid = mnl_attr_get_u32(tb[IFLA_LINK_NETNSID]);
 
-        if (rta_tb[IFLA_NEW_NETNSID])
-                n->new_netnsid = rtnl_message_read_attribute_u32(rta_tb[IFLA_NEW_NETNSID]);
+        if (tb[IFLA_NEW_NETNSID])
+                l->new_netnsid = mnl_attr_get_u32(tb[IFLA_NEW_NETNSID]);
 
-        if (rta_tb[IFLA_NEW_IFINDEX])
-                n->new_ifindex = rtnl_message_read_attribute_u32(rta_tb[IFLA_NEW_IFINDEX]);
+        if (tb[IFLA_NEW_IFINDEX])
+                l->new_ifindex = mnl_attr_get_u32(tb[IFLA_NEW_IFINDEX]);
 
-        if (rta_tb[IFLA_GROUP])
-                n->group = rtnl_message_read_attribute_u32(rta_tb[IFLA_GROUP]);
+        if (tb[IFLA_GROUP])
+                l->group = mnl_attr_get_u32(tb[IFLA_GROUP]);
 
-        if (rta_tb[IFLA_EVENT])
-                n->event = rtnl_message_read_attribute_u32(rta_tb[IFLA_EVENT]);
+        if (tb[IFLA_EVENT])
+                l->event = mnl_attr_get_u32(tb[IFLA_EVENT]);
 
-        if (rta_tb[IFLA_MASTER])
-                n->master = rtnl_message_read_attribute_u32(rta_tb[IFLA_MASTER]);
+        if (tb[IFLA_MASTER])
+                l->master = mnl_attr_get_u32(tb[IFLA_MASTER]);
 
-        if (rta_tb[IFLA_MIN_MTU])
-                n->min_mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MIN_MTU]);
+        if (tb[IFLA_MIN_MTU])
+                l->min_mtu = mnl_attr_get_u32(tb[IFLA_MIN_MTU]);
 
-        if (rta_tb[IFLA_MAX_MTU])
-                n->max_mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MAX_MTU]);
+        if (tb[IFLA_MAX_MTU])
+                l->max_mtu = mnl_attr_get_u32(tb[IFLA_MAX_MTU]);
 
-        if (rta_tb[IFLA_TXQLEN])
-                n->tx_queue_len = rtnl_message_read_attribute_u32(rta_tb[IFLA_TXQLEN]);
+        if (tb[IFLA_TXQLEN])
+                l->tx_queue_len = mnl_attr_get_u32(tb[IFLA_TXQLEN]);
 
-        if (rta_tb[IFLA_NUM_TX_QUEUES])
-                n->n_tx_queues = rtnl_message_read_attribute_u32(rta_tb[IFLA_NUM_TX_QUEUES]);
+        if (tb[IFLA_NUM_TX_QUEUES])
+                l->n_tx_queues = mnl_attr_get_u32(tb[IFLA_NUM_TX_QUEUES]);
 
-        if (rta_tb[IFLA_NUM_RX_QUEUES])
-                n->n_rx_queues = rtnl_message_read_attribute_u32(rta_tb[IFLA_NUM_RX_QUEUES]);
+        if (tb[IFLA_NUM_RX_QUEUES])
+                l->n_rx_queues = mnl_attr_get_u32(tb[IFLA_NUM_RX_QUEUES]);
 
-        if (rta_tb[IFLA_GSO_MAX_SIZE])
-                n->gso_max_size = rtnl_message_read_attribute_u32(rta_tb[IFLA_GSO_MAX_SIZE]);
+        if (tb[IFLA_GSO_MAX_SIZE])
+                l->gso_max_size = mnl_attr_get_u32(tb[IFLA_GSO_MAX_SIZE]);
 
-        if (rta_tb[IFLA_GSO_MAX_SEGS])
-                n->gso_max_segments = rtnl_message_read_attribute_u32(rta_tb[IFLA_GSO_MAX_SEGS]);
+        if (tb[IFLA_GSO_MAX_SEGS])
+                l->gso_max_segments = mnl_attr_get_u32(tb[IFLA_GSO_MAX_SEGS]);
 
-        if (rta_tb[IFLA_TSO_MAX_SIZE])
-                n->tso_max_size = rtnl_message_read_attribute_u32(rta_tb[IFLA_TSO_MAX_SIZE]);
+        if (tb[IFLA_TSO_MAX_SIZE])
+                l->tso_max_size = mnl_attr_get_u32(tb[IFLA_TSO_MAX_SIZE]);
 
-        if (rta_tb[IFLA_TSO_MAX_SEGS])
-                n->tso_max_segments = rtnl_message_read_attribute_u32(rta_tb[IFLA_TSO_MAX_SEGS]);
+        if (tb[IFLA_TSO_MAX_SEGS])
+                l->tso_max_segments = mnl_attr_get_u32(tb[IFLA_TSO_MAX_SEGS]);
 
-        if (rta_tb[IFLA_GRO_MAX_SIZE])
-                n->gro_max_size = rtnl_message_read_attribute_u32(rta_tb[IFLA_GRO_MAX_SIZE]);
-#if 0
-        if (rta_tb[IFLA_GSO_IPV4_MAX_SIZE])
-                n->gso_ipv4_max_size = rtnl_message_read_attribute_u32(rta_tb[IFLA_GSO_IPV4_MAX_SIZE]);
+        if (tb[IFLA_GRO_MAX_SIZE])
+                l->gro_max_size = mnl_attr_get_u32(tb[IFLA_GRO_MAX_SIZE]);
 
-        if (rta_tb[IFLA_GRO_IPV4_MAX_SIZE])
-                n->gro_ipv4_max_size = rtnl_message_read_attribute_u32(rta_tb[IFLA_GRO_IPV4_MAX_SIZE]);
-#endif
-        if (rta_tb[IFLA_OPERSTATE])
-                n->operstate = rtnl_message_read_attribute_u8(rta_tb[IFLA_OPERSTATE]);
+        if (tb[IFLA_GSO_IPV4_MAX_SIZE])
+                l->gso_ipv4_max_size = mnl_attr_get_u32(tb[IFLA_GSO_IPV4_MAX_SIZE]);
 
-        if (rta_tb[IFLA_INET6_ADDR_GEN_MODE])
-                n->ipv6_addr_gen_mode = rtnl_message_read_attribute_u8(rta_tb[IFLA_INET6_ADDR_GEN_MODE]);
+        if (tb[IFLA_GRO_IPV4_MAX_SIZE])
+                l->gro_ipv4_max_size = mnl_attr_get_u32(tb[IFLA_GRO_IPV4_MAX_SIZE]);
 
-        if (rta_tb[IFLA_ADDRESS]) {
-                rtnl_message_read_attribute_ether_address(rta_tb[IFLA_ADDRESS], &n->mac_address);
-                n->contains_mac_address = true;
+        if (tb[IFLA_OPERSTATE])
+                l->operstate = mnl_attr_get_u8(tb[IFLA_OPERSTATE]);
+
+        if (tb[IFLA_INET6_ADDR_GEN_MODE])
+                l->ipv6_addr_gen_mode = mnl_attr_get_u8(tb[IFLA_INET6_ADDR_GEN_MODE]);
+
+        if (tb[IFLA_ADDRESS]) {
+                memcpy(&l->mac_address, mnl_attr_get_payload(tb[IFLA_ADDRESS]), sizeof(struct ether_addr));
+                l->contains_mac_address = true;
         }
 
-        if (rta_tb[IFLA_PERM_ADDRESS]) {
-                rtnl_message_read_attribute_ether_address(rta_tb[IFLA_PERM_ADDRESS], &n->perm_address);
-                n->contains_perm_address = true;
+        if (tb[IFLA_PERM_ADDRESS]) {
+                memcpy(&l->perm_address, mnl_attr_get_payload(tb[IFLA_PERM_ADDRESS]), sizeof(struct ether_addr));
+                l->contains_perm_address = true;
         }
 
-        if (rta_tb[IFLA_STATS64]) {
-                rtnl_message_read_attribute(rta_tb[IFLA_STATS64], &n->stats64, sizeof(struct rtnl_link_stats64));
-                n->contains_stats64 = true;
-        }
-        if (rta_tb[IFLA_STATS]) {
-                rtnl_message_read_attribute(rta_tb[IFLA_STATS], &n->stats, sizeof(struct rtnl_link_stats));
-                n->contains_stats = true;
+        if (tb[IFLA_STATS64]) {
+                memcpy(&l->stats64, mnl_attr_get_payload(tb[IFLA_STATS64]), sizeof(struct rtnl_link_stats64));
+                l->contains_stats64 = true;
         }
 
-        if (rta_tb[IFLA_PROP_LIST]) {
-                struct rtattr *i, *j = rta_tb[IFLA_PROP_LIST];
+        if (tb[IFLA_STATS]) {
+                memcpy(&l->stats, mnl_attr_get_payload(tb[IFLA_STATS]), sizeof(struct rtnl_link_stats));
+                l->contains_stats = true;
+        }
+
+        if (tb[IFLA_PROP_LIST]) {
+                struct rtattr *i, *j = (struct rtattr *) tb[IFLA_PROP_LIST];
                 int k = RTA_PAYLOAD(j);
                 GPtrArray *s;
                 char *a;
@@ -307,264 +339,110 @@ static int fill_one_link_info(struct nlmsghdr *h, size_t len, Link **ret) {
                         g_ptr_array_add(s, a);
                 }
 
-                n->alt_names = steal_ptr(s);
+                l->alt_names = steal_ptr(s);
         }
 
-        if (rta_tb[IFLA_LINKINFO]) {
-                r = parse_link_info(rta_tb[IFLA_LINKINFO], n);
+        if (tb[IFLA_LINKINFO]) {
+                r = parse_link_info(tb[IFLA_LINKINFO], l);
                 if (r < 0)
                         return r;
         }
 
-        *ret = steal_ptr(n);
-        return 0;
+        r = link_add(&links, l);
+        if (r < 0)
+                return r;
+
+        steal_ptr(l);
+        return MNL_CB_OK;
 }
 
-static int acquire_one_link_info(int s, int ifindex, Link **ret) {
-        _auto_cleanup_ IPlinkMessage *m = NULL;
-        struct nlmsghdr *reply = NULL;
+
+static int acquire_one_link_info(int ifindex, Links **ret) {
+        _cleanup_(mnl_freep) Mnl *m = NULL;
+        struct nlmsghdr *nlh;
+        Links *links = NULL;
         int r;
 
-        assert(s);
-        assert(ifindex > 0);
         assert(ret);
 
-        r = ip_link_message_new(RTM_GETLINK, AF_UNSPEC, ifindex, &m);
+        r = mnl_new(&m);
         if (r < 0)
                 return r;
 
-        r = rtnl_send_message(s, &m->hdr);
+        nlh = mnl_nlmsg_put_header(m->buf);
+        nlh->nlmsg_type = RTM_GETLINK;
+        nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
+        mnl_nlmsg_put_extra_header(nlh, sizeof(struct rtgenmsg));
+        m->nlh = nlh;
+
+        r = links_new(&links);
         if (r < 0)
                 return r;
 
-        r = rtnl_receive_message(s, m->buf, sizeof(m->buf), 0);
+        links->ifindex = ifindex;
+        r = mnl_send(m, fill_one_link_info, links, NETLINK_ROUTE);
         if (r < 0)
                 return r;
-
-        reply = (struct nlmsghdr *) m->buf;
-
-        return fill_one_link_info(reply, r, ret);
-}
-
-int link_get_one_link(const char *ifname, Link **ret) {
-        _auto_cleanup_close_ int s = -1;
-        int r;
-
-        assert(ifname);
-        assert(ret);
-
-        r = rtnl_socket_open(0, &s);
-        if (r < 0)
-                return r;
-
-        r = (int) if_nametoindex(ifname);
-        if (r <= 0)
-                return -errno;
-
-        return acquire_one_link_info(s, r, ret);
-}
-
-static int fill_link_info(Links **links, struct nlmsghdr *h, size_t len) {
-        _auto_cleanup_ Link *n = NULL;
-        struct ifinfomsg *iface;
-        struct nlmsghdr *p;
-        int r, l;
-
-        for (p = h; NLMSG_OK(p, len); p = NLMSG_NEXT(p, len)) {
-                _auto_cleanup_ struct rtattr **rta_tb = NULL;
-
-                iface = NLMSG_DATA(p);
-                l = p->nlmsg_len - NLMSG_LENGTH(sizeof(*iface));
-
-                rta_tb = new0(struct rtattr *, IFLA_MAX + 1);
-                if (!rta_tb)
-                        return log_oom();
-
-                r = rtnl_message_parse_rtattr(rta_tb, IFLA_MAX, IFLA_RTA(iface), l);
-                if (r < 0)
-                        return r;
-
-                r = link_new(&n);
-                if (r < 0)
-                        return r;
-
-                n->ifindex = iface->ifi_index;
-                n->iftype = iface->ifi_type;
-
-                if (rta_tb[IFLA_IFNAME])
-                        memcpy(n->name, rtnl_message_read_attribute_string(rta_tb[IFLA_IFNAME]), IFNAMSIZ);
-
-                if (rta_tb[IFLA_MTU]) {
-                        n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MTU]);
-                        n->contains_mtu = true;
-                }
-
-                if (rta_tb[IFLA_MIN_MTU])
-                        n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MIN_MTU]);
-
-                if (rta_tb[IFLA_MAX_MTU])
-                        n->mtu = rtnl_message_read_attribute_u32(rta_tb[IFLA_MAX_MTU]);
-
-                if (rta_tb[IFLA_OPERSTATE])
-                        n->operstate = rtnl_message_read_attribute_u8(rta_tb[IFLA_OPERSTATE]);
-
-                if (rta_tb[IFLA_ADDRESS]) {
-                        rtnl_message_read_attribute_ether_address(rta_tb[IFLA_ADDRESS], &n->mac_address);
-                        n->contains_mac_address = true;
-                }
-
-                if (rta_tb[IFLA_LINKINFO]) {
-                        r = parse_link_info(rta_tb[IFLA_LINKINFO], n);
-                        if (r < 0)
-                                return r;
-                }
-
-                r = link_add(links, n);
-                if (r < 0)
-                        return r;
-
-                steal_ptr(n);
-        }
-
-        return 0;
-}
-
-static int acquire_link_info(int s, Links **ret) {
-        _auto_cleanup_ IPlinkMessage *m = NULL;
-        _auto_cleanup_ Links *links = NULL;
-        struct nlmsghdr *reply = NULL;
-        int r;
-
-        assert(s);
-        assert(ret);
-
-        r = ip_link_message_new(RTM_GETLINK, AF_UNSPEC, 0, &m);
-        if (r < 0)
-                return r;
-
-        r = rtnl_message_request_dump(&m->hdr, true);
-        if (r < 0)
-                return r;
-
-        r = rtnl_send_message(s, &m->hdr);
-        if (r < 0)
-                return r;
-
-        r = rtnl_receive_message(s, m->buf, sizeof(m->buf), 0);
-        if (r < 0)
-                 return r;
-
-        reply = (struct nlmsghdr *) m->buf;
-        for(; r > 0;) {
-                fill_link_info(&links, reply, r);
-
-                r = rtnl_receive_message(s, m->buf, sizeof(m->buf), 0);
-                if (r < 0)
-                        return -errno;
-                if (r == 0)
-                         break;
-         }
 
         *ret = steal_ptr(links);
         return 0;
 }
 
+int link_get_one_link(const char *ifname, Link **ret) {
+        Links *links = NULL;
+        int r, ifindex;
+
+        assert(ifname);
+        assert(ret);
+
+        ifindex = (int) if_nametoindex(ifname);
+        if (ifindex <= 0)
+                return -errno;
+
+        r = links_new(&links);
+        if (r < 0)
+                return r;
+
+        r = acquire_one_link_info(ifindex, &links);
+        if (r < 0)
+                return r;
+
+        *ret = g_list_first(links->links)->data;
+        return 0;
+}
+
+static int acquire_link_info(Links **ret) {
+        _cleanup_(mnl_freep) Mnl *m = NULL;
+        struct nlmsghdr *nlh;
+        Links *links = NULL;
+        int r;
+
+        assert(ret);
+
+        r = mnl_new(&m);
+        if (r < 0)
+                return r;
+
+        nlh = mnl_nlmsg_put_header(m->buf);
+        nlh->nlmsg_type = RTM_GETLINK;
+        nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
+        mnl_nlmsg_put_extra_header(nlh, sizeof(struct rtgenmsg));
+        m->nlh = nlh;
+
+        r = links_new(&links);
+        if (r < 0)
+                return r;
+
+        r = mnl_send(m, fill_one_link_info, links, NETLINK_ROUTE);
+        if (r < 0)
+                return r;
+
+        *ret = links;
+        return 0;
+}
+
 int link_get_links(Links **ret) {
-       _auto_cleanup_close_ int s = -1;
-        int r;
-
-        r = rtnl_socket_open(0, &s);
-        if (r < 0)
-                return r;
-
-        return acquire_link_info(s, ret);
-}
-
-int link_update_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
-      _auto_cleanup_ IPlinkMessage *m = NULL;
-      _auto_cleanup_close_ int s = -1;
-      int r;
-
-      assert(mtu > 0);
-      assert(ifidx);
-
-      r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifidx->ifindex, &m);
-      if (r < 0)
-                return r;
-
-      r = rtnl_message_add_attribute_uint32(&m->hdr, IFLA_MTU, mtu);
-      if (r < 0)
-                return r;
-
-      r = rtnl_socket_open(0, &s);
-      if (r < 0)
-              return r;
-
-      return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
-}
-
-int link_set_mac_address(const IfNameIndex *ifidx, const char *mac_address) {
-        _auto_cleanup_ IPlinkMessage *m = NULL;
-        _auto_cleanup_close_ int s = -1;
-        int r;
-
-        assert(mac_address);
-        assert(ifidx);
-
-        r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifidx->ifindex, &m);
-        if (r < 0)
-                return r;
-
-        r = rtnl_message_add_attribute(&m->hdr, IFLA_ADDRESS, ether_aton(mac_address), ETH_ALEN);
-        if (r < 0)
-                return r;
-
-        r = rtnl_socket_open(0, &s);
-        if (r < 0)
-                return r;
-
-        return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
-}
-
-int link_set_state(const IfNameIndex *ifidx, LinkState state) {
-        _auto_cleanup_ IPlinkMessage *m = NULL;
-        _auto_cleanup_ char *operstate = NULL;
-        _auto_cleanup_close_ int s = -1;
-        int r;
-
-        assert(ifidx);
-
-        r = link_get_operstate(ifidx->ifname, &operstate);
-        if (r < 0) {
-                log_warning("Failed to get link operstate: %s\n", ifidx->ifname);
-                return r;
-        }
-
-        if ((int) state == link_name_to_state(operstate))
-                return 0;
-
-        r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifidx->ifindex, &m);
-        if (r < 0)
-                return r;
-
-        switch (state) {
-        case LINK_STATE_UP:
-                SET_FLAG(m->ifi.ifi_change, IFF_UP, state);
-                SET_FLAG(m->ifi.ifi_flags, IFF_UP, state);
-                break;
-        case LINK_STATE_DOWN:
-                SET_FLAG(m->ifi.ifi_change, IFF_UP, IFF_UP);
-                SET_FLAG(m->ifi.ifi_flags, ~IFF_UP, ~IFF_UP);
-                break;
-        default:
-                assert(0);
-        }
-
-        r = rtnl_socket_open(0, &s);
-        if (r < 0)
-                return r;
-
-        return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
+        return acquire_link_info(ret);
 }
 
 int link_remove(const IfNameIndex *ifidx) {
@@ -607,6 +485,47 @@ int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **
 
         *ret = steal_ptr(line);
         return 0;
+}
+
+int link_set_state(const IfNameIndex *ifidx, LinkState state) {
+        _auto_cleanup_ IPlinkMessage *m = NULL;
+        _auto_cleanup_ char *operstate = NULL;
+        _auto_cleanup_close_ int s = -1;
+        int r;
+
+        assert(ifidx);
+
+        r = link_get_operstate(ifidx->ifname, &operstate);
+        if (r < 0) {
+                log_warning("Failed to get link operstate: %s\n", ifidx->ifname);
+                return r;
+        }
+
+        if ((int) state == link_name_to_state(operstate))
+                return 0;
+
+        r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifidx->ifindex, &m);
+        if (r < 0)
+                return r;
+
+        switch (state) {
+        case LINK_STATE_UP:
+                SET_FLAG(m->ifi.ifi_change, IFF_UP, state);
+                SET_FLAG(m->ifi.ifi_flags, IFF_UP, state);
+                break;
+        case LINK_STATE_DOWN:
+                SET_FLAG(m->ifi.ifi_change, IFF_UP, IFF_UP);
+                SET_FLAG(m->ifi.ifi_flags, ~IFF_UP, ~IFF_UP);
+                break;
+        default:
+                assert(0);
+        }
+
+        r = rtnl_socket_open(0, &s);
+        if (r < 0)
+                return r;
+
+        return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
 }
 
 int link_get_mtu(const char *ifname, uint32_t *mtu) {
