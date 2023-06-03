@@ -889,7 +889,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         (void) network_parse_search_domains(&search_domains);
 
         if (dns) {
-                _auto_cleanup_ char *s = NULL, *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
+                _auto_cleanup_ char *s = NULL, *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL, *dns_sec = NULL;
                 _cleanup_(dns_servers_freep) DNSServers *c = NULL;
                 GSequenceIter *itr;
                 DNSServer *d;
@@ -918,10 +918,11 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 (void) dbus_acqure_dns_setting_from_resolved("LLMNR", &llmnr);
                 (void) dbus_acqure_dns_setting_from_resolved("DNSOverTLS", &dns_over_tls);
                 (void) dbus_acqure_dns_setting_from_resolved("ResolvConfMode", &conf_mode);
+                (void) dbus_acqure_dns_setting_from_resolved("DNSSEC", &dns_sec);
 
                 display(arg_beautify, ansi_color_bold_cyan(), "        DNS Settings: ");
-                printf("MulticastDNS (%s) LLMNR (%s) DNSOverTLS (%s) ResolvConfMode (%s)\n",
-                       str_na(mdns), str_na(llmnr), str_na(dns_over_tls), str_na(conf_mode));
+                printf("MulticastDNS (%s) LLMNR (%s) DNSOverTLS (%s) ResolvConfMode (%s) DNSSEC (%s)\n",
+                       str_na(mdns), str_na(llmnr), str_na(dns_over_tls), str_na(conf_mode), str_na(dns_sec));
         }
 
         if (search_domains) {
