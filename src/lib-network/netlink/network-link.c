@@ -493,7 +493,7 @@ int link_set_state(const IfNameIndex *ifidx, LinkState state) {
 
         assert(ifidx);
 
-        r = link_get_operstate(ifidx->ifname, &operstate);
+        r = link_acquire_operstate(ifidx->ifname, &operstate);
         if (r < 0) {
                 log_warning("Failed to get link operstate: %s\n", ifidx->ifname);
                 return r;
@@ -526,7 +526,7 @@ int link_set_state(const IfNameIndex *ifidx, LinkState state) {
         return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
 }
 
-int link_get_mtu(const char *ifname, uint32_t *mtu) {
+int link_acquire_mtu(const char *ifname, uint32_t *mtu) {
         _auto_cleanup_ Link *l = NULL;
         int r;
 
@@ -538,7 +538,7 @@ int link_get_mtu(const char *ifname, uint32_t *mtu) {
         return 0;
 }
 
-int link_get_mac_address(const char *ifname, char **mac) {
+int link_acquire_mac_address(const char *ifname, char **mac) {
         _auto_cleanup_ Link *l = NULL;
         _auto_cleanup_ char *s = NULL;
         int r;
@@ -557,7 +557,7 @@ int link_get_mac_address(const char *ifname, char **mac) {
         return 0;
 }
 
-int link_get_operstate(const char *ifname, char **operstate) {
+int link_acquire_operstate(const char *ifname, char **operstate) {
         _auto_cleanup_ Link *l = NULL;
         int r;
 
