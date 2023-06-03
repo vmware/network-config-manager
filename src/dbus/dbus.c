@@ -633,6 +633,41 @@ int dbus_revert_resolve_link(int ifindex) {
         return 0;
 }
 
+int dbus_acqure_dns_setting_from_resolved(const char *setting, char **ret) {
+        _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+        _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
+        _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
+        const void *a;
+        int r;
+        size_t sz;
+
+        r = sd_bus_open_system(&bus);
+        if (r < 0)
+                return r;
+
+        r = sd_bus_get_property(bus,
+                                "org.freedesktop.resolve1",
+                                "/org/freedesktop/resolve1",
+                                "org.freedesktop.resolve1.Manager",
+                                setting,
+                                &bus_error,
+                                &reply,
+                                "s");
+        if (r < 0) {
+                log_warning("Failed to get D-Bus property 'CurrentDNSServer': %s", bus_error.message);
+                return r;
+        }
+
+        r = sd_bus_message_read(reply, "s", &a);
+        if (r < 0) {
+                log_warning("Failed to read %s: %s", setting, strerror(-r));
+                return r;
+        }
+
+        *ret = strdup(a);
+        return 0;
+}
+
 int dbus_network_reload(void) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
         _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
