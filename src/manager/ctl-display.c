@@ -142,10 +142,10 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
         a = (Address *) g_bytes_get_data(key, &size);
         (void) ip_to_str_prefix(a->family, &a->address, &c);
         if (first) {
-                printf("%s", c);
+                printf("%s ", c);
                 first = false;
         } else
-                printf("                              %s", c);
+                printf("                              %s ", c);
 
         r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
         if (r >= 0 && string_has_prefix(c, dhcp)) {
@@ -156,10 +156,25 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 (void) network_parse_link_dhcp4_address_lifetime_t1(a->ifindex, &t1);
                 (void) network_parse_link_dhcp4_address_lifetime_t2(a->ifindex, &t2);
 
-                printf(" (DHCPv4 via %s) lease time: %s seconds T1: %s seconds T2: %s seconds\n", string_na(server), string_na(life_time),
+                printf("(DHCPv4 via %s) lease time: %s seconds T1: %s seconds T2: %s seconds", string_na(server), string_na(life_time),
                        string_na(t1), string_na(t2));
-        } else
-                printf("\n");
+        } else {
+                _auto_cleanup_ char *network = NULL;
+
+                r = parse_network_file(a->ifindex, NULL, &network);
+                if (r >= 0) {
+                        if (a->family == AF_INET6 && IN6_IS_ADDR_LINKLOCAL(&a->address.in6))
+                                printf("(IPv6 Link Local) ");
+
+                        if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c))
+                                printf("(static)");
+                        else
+                                printf("(foreign)");
+
+                }
+        }
+
+        printf("\n");
 }
 
 static void list_one_link_address_with_address_mode(gpointer key, gpointer value, gpointer userdata) {
