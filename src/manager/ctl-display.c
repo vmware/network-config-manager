@@ -946,7 +946,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 printf("%s\n", s);
         }
 
-        return r;
+        return 0;
 }
 
 _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
