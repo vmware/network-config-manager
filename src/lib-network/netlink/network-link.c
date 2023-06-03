@@ -359,7 +359,6 @@ static int fill_one_link_info(const struct nlmsghdr *nlh, void *data) {
         return MNL_CB_OK;
 }
 
-
 static int acquire_one_link_info(int ifindex, Links **ret) {
         _cleanup_(mnl_freep) Mnl *m = NULL;
         struct nlmsghdr *nlh;
@@ -391,7 +390,7 @@ static int acquire_one_link_info(int ifindex, Links **ret) {
         return 0;
 }
 
-int link_get_one_link(const char *ifname, Link **ret) {
+int link_acqure_one(const char *ifname, Link **ret) {
         Links *links = NULL;
         int r, ifindex;
 
@@ -414,7 +413,7 @@ int link_get_one_link(const char *ifname, Link **ret) {
         return 0;
 }
 
-static int acquire_link_info(Links **ret) {
+int link_acquire_all(Links **ret) {
         _cleanup_(mnl_freep) Mnl *m = NULL;
         struct nlmsghdr *nlh;
         Links *links = NULL;
@@ -442,10 +441,6 @@ static int acquire_link_info(Links **ret) {
 
         *ret = links;
         return 0;
-}
-
-int link_get_links(Links **ret) {
-        return acquire_link_info(ret);
 }
 
 int link_remove(const IfNameIndex *ifidx) {
@@ -532,16 +527,14 @@ int link_set_state(const IfNameIndex *ifidx, LinkState state) {
 }
 
 int link_get_mtu(const char *ifname, uint32_t *mtu) {
-        _auto_cleanup_ char *s = NULL;
-        int r, k;
+        _auto_cleanup_ Link *l = NULL;
+        int r;
 
-        (void) link_read_sysfs_attribute(ifname, "mtu", &s);
-
-        r = parse_int(s, &k);
+        r = link_acqure_one(ifname, &l);
         if (r < 0)
                 return r;
 
-        *mtu = k;
+        *mtu = l->mtu;
         return 0;
 }
 

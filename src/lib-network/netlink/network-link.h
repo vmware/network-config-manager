@@ -125,8 +125,8 @@ void links_free(Links *l);
 DEFINE_CLEANUP(Link*, link_free);
 DEFINE_CLEANUP(Links*, links_free);
 
-int link_get_links(Links **ret);
-int link_get_one_link(const char *ifname, Link **ret);
+int link_acquire_all(Links **ret);
+int link_acqure_one(const char *ifname, Link **ret);
 
 int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **ret);
 int link_set_mac_address(const IfNameIndex *ifidx, const char *mac_address);

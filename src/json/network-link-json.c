@@ -1745,7 +1745,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
         if (!jobj)
                 return log_oom();
 
-        r = link_get_one_link(p->ifname, &l);
+        r = link_acqure_one(p->ifname, &l);
         if (r < 0)
                 return r;
 

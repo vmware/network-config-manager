@@ -82,7 +82,7 @@ static int list_links(int argc, char *argv[]) {
         _cleanup_(links_freep) Links *h = NULL;
         int r;
 
-        r = link_get_links(&h);
+        r = link_acquire_all(&h);
         if (r < 0)
                return r;
 
@@ -449,7 +449,7 @@ static int list_one_link(char *argv[]) {
         if (arg_json)
                 return json_fill_one_link(p, false, NULL);
 
-        r = link_get_one_link(p->ifname, &l);
+        r = link_acqure_one(p->ifname, &l);
         if (r < 0)
                 return r;
 
