@@ -496,7 +496,7 @@ int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac) {
 int manager_set_link_state(const IfNameIndex *ifidx, LinkState state) {
         assert(ifidx);
 
-        return link_set_state(ifidx, state);
+        return netlink_set_link_state(ifidx, state);
 }
 
 int manager_configure_link_address(const IfNameIndex *ifidx,
@@ -624,7 +624,7 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
         if (r < 0)
                 return r;
 
-        r = manager_link_add_default_gateway(rt);
+        r = netlink_add_link_default_gateway(rt);
         if (r < 0 && r != -EEXIST) {
                 log_warning("Failed to add Gateway to kernel : %s\n", strerror(-r));
                 return r;

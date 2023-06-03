@@ -67,8 +67,8 @@ void routes_free(Routes *rt);
 
 DEFINE_CLEANUP(Routes *, routes_free);
 
-int manager_link_get_routes(Routes **ret);
-int manager_get_one_link_route(int ifindex, Routes **ret);
+int netlink_acquire_all_link_routes(Routes **ret);
+int netlink_get_one_link_route(int ifindex, Routes **ret);
 
-int manager_link_add_default_gateway(Route *route);
-int manager_link_add_route(Route *route);
+int netlink_add_link_default_gateway(Route *route);
+int netlink_add_link_route(Route *route);

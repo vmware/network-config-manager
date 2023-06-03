@@ -359,7 +359,6 @@ static int fill_one_link_info(const struct nlmsghdr *nlh, void *data) {
         return MNL_CB_OK;
 }
 
-
 static int acquire_one_link_info(int ifindex, Links **ret) {
         _cleanup_(mnl_freep) Mnl *m = NULL;
         struct nlmsghdr *nlh;
@@ -391,7 +390,7 @@ static int acquire_one_link_info(int ifindex, Links **ret) {
         return 0;
 }
 
-int link_get_one_link(const char *ifname, Link **ret) {
+int netlink_acqure_one_link(const char *ifname, Link **ret) {
         Links *links = NULL;
         int r, ifindex;
 
@@ -414,7 +413,7 @@ int link_get_one_link(const char *ifname, Link **ret) {
         return 0;
 }
 
-static int acquire_link_info(Links **ret) {
+int netlink_acquire_all_links(Links **ret) {
         _cleanup_(mnl_freep) Mnl *m = NULL;
         struct nlmsghdr *nlh;
         Links *links = NULL;
@@ -444,11 +443,7 @@ static int acquire_link_info(Links **ret) {
         return 0;
 }
 
-int link_get_links(Links **ret) {
-        return acquire_link_info(ret);
-}
-
-int link_remove(const IfNameIndex *ifidx) {
+int netlink_remove_link(const IfNameIndex *ifidx) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
         _auto_cleanup_close_ int s = -1;
         int r;
@@ -490,7 +485,7 @@ int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **
         return 0;
 }
 
-int link_set_state(const IfNameIndex *ifidx, LinkState state) {
+int netlink_set_link_state(const IfNameIndex *ifidx, LinkState state) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
         _auto_cleanup_ char *operstate = NULL;
         _auto_cleanup_close_ int s = -1;
@@ -498,7 +493,7 @@ int link_set_state(const IfNameIndex *ifidx, LinkState state) {
 
         assert(ifidx);
 
-        r = link_get_operstate(ifidx->ifname, &operstate);
+        r = netlink_acquire_link_operstate(ifidx->ifname, &operstate);
         if (r < 0) {
                 log_warning("Failed to get link operstate: %s\n", ifidx->ifname);
                 return r;
@@ -531,24 +526,45 @@ int link_set_state(const IfNameIndex *ifidx, LinkState state) {
         return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
 }
 
-int link_get_mtu(const char *ifname, uint32_t *mtu) {
-        _auto_cleanup_ char *s = NULL;
-        int r, k;
+int netlink_acquire_link_mtu(const char *ifname, uint32_t *mtu) {
+        _auto_cleanup_ Link *l = NULL;
+        int r;
 
-        (void) link_read_sysfs_attribute(ifname, "mtu", &s);
-
-        r = parse_int(s, &k);
+        r = netlink_acqure_one_link(ifname, &l);
         if (r < 0)
                 return r;
 
-        *mtu = k;
+        *mtu = l->mtu;
         return 0;
 }
 
-int link_get_mac_address(const char *ifname, char **mac) {
-        return link_read_sysfs_attribute(ifname, "address", mac);
+int netlink_acquire_link_mac_address(const char *ifname, char **mac) {
+        _auto_cleanup_ Link *l = NULL;
+        _auto_cleanup_ char *s = NULL;
+        int r;
+
+        r = netlink_acqure_one_link(ifname, &l);
+        if (r < 0)
+                return r;
+
+        s = new0(char, ETHER_ADDR_TO_STRING_MAX);
+        if (!s)
+                return -ENOMEM;
+
+        sprintf(s, ETHER_ADDR_FORMAT_STR, ETHER_ADDR_FORMAT_VAL(l->mac_address));
+        *mac = steal_ptr(s);
+
+        return 0;
 }
 
-int link_get_operstate(const char *ifname, char **operstate) {
-        return link_read_sysfs_attribute(ifname, "operstate", operstate);
+int netlink_acquire_link_operstate(const char *ifname, char **operstate) {
+        _auto_cleanup_ Link *l = NULL;
+        int r;
+
+        r = netlink_acqure_one_link(ifname, &l);
+        if (r < 0)
+                return r;
+
+        *operstate = strdup(link_operstates_to_name(l->operstate));
+        return 0;
 }

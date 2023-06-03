@@ -323,11 +323,11 @@ static int acquire_link_route(int ifindex, Routes **ret) {
         return 0;
 }
 
-int manager_link_get_routes(Routes **rt) {
+int netlink_acquire_all_link_routes(Routes **rt) {
         return acquire_link_route(0, rt);
 }
 
-int manager_get_one_link_route(int ifindex, Routes **ret) {
+int netlink_get_one_link_route(int ifindex, Routes **ret) {
         return acquire_link_route(ifindex, ret);
 }
 
@@ -390,7 +390,7 @@ static int link_add_route(int s, Route *route) {
         return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
 }
 
-int manager_link_add_default_gateway(Route *route) {
+int netlink_add_link_default_gateway(Route *route) {
        _auto_cleanup_close_ int s = -1;
        int r;
 
@@ -403,7 +403,7 @@ int manager_link_add_default_gateway(Route *route) {
         return link_add_route(s, route);
 }
 
-int manager_link_add_route(Route *route) {
+int netlink_add_link_route(Route *route) {
        _auto_cleanup_close_ int s = -1;
        int r;
 

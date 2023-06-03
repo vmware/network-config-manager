@@ -125,19 +125,19 @@ void links_free(Links *l);
 DEFINE_CLEANUP(Link*, link_free);
 DEFINE_CLEANUP(Links*, links_free);
 
-int link_get_links(Links **ret);
-int link_get_one_link(const char *ifname, Link **ret);
+int netlink_acquire_all_links(Links **ret);
+int netlink_acqure_one_link(const char *ifname, Link **ret);
 
 int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **ret);
 int link_set_mac_address(const IfNameIndex *ifidx, const char *mac_address);
 int manager_link_get_link_mac_addr(const char *ifname, char **pmac);
-int link_get_mtu(const char *ifname, uint32_t *mtu);
+int netlink_acquire_link_mtu(const char *ifname, uint32_t *mtu);
 int link_update_mtu(const IfNameIndex *ifidx, uint32_t mtu);
-int link_get_mac_address(const char *ifname, char **mac);
-int link_set_state(const IfNameIndex *ifidx, LinkState state);
-int link_get_operstate(const char *ifname, char **operstate);
+int netlink_acquire_link_mac_address(const char *ifname, char **mac);
+int netlink_set_link_state(const IfNameIndex *ifidx, LinkState state);
+int netlink_acquire_link_operstate(const char *ifname, char **operstate);
 
-int link_remove(const IfNameIndex *ifidx);
+int netlink_remove_link(const IfNameIndex *ifidx);
 
 const char *link_operstates_to_name(int id);
 

@@ -45,7 +45,7 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
                 return r;
 
         /* Finally remove the link */
-        r = link_remove(p);
+        r = netlink_remove_link(p);
         if (r < 0)
                 return r;
 

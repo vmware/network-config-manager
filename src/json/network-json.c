@@ -301,7 +301,7 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        r = manager_link_get_address(&h);
+        r = netlink_acquire_all_link_addresses(&h);
         if (r >= 0 && set_size(h->addresses) > 0) {
                 jaddress = json_object_new_array();
                 if (!jaddress)
@@ -314,7 +314,7 @@ int json_fill_system_status(char **ret) {
         json_object_object_add(jobj, "Addresses", jaddress);
         steal_ptr(jaddress);
 
-        r = manager_link_get_routes(&routes);
+        r = netlink_acquire_all_link_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
                 jroutes = json_object_new_array();
                 if (!jroutes)
