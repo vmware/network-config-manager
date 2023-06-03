@@ -573,9 +573,13 @@ static int list_one_link(char *argv[]) {
 
         r = manager_get_one_link_route(l->ifindex, &route);
         if (r >= 0 && route && set_size(route->routes) > 0) {
+                _auto_cleanup_strv_ char **gws = NULL;
+                _auto_cleanup_ char *router = NULL;
                 gpointer key, value;
                 GHashTableIter iter;
+                bool first = true;
 
+                r = network_parse_link_dhcp4_router(p->ifindex, &router);
                 display(arg_beautify, ansi_color_bold_cyan(), "                     Gateway: ");
 
                 g_hash_table_iter_init(&iter, route->routes->hash);
@@ -587,11 +591,42 @@ static int list_one_link(char *argv[]) {
                         rt = (Route *) g_bytes_get_data(key, &size);
 
                         if (ip_is_null(&rt->gw))
-                            continue;
+                                continue;
 
-                        (void) ip_to_str(rt->family, &rt->gw, &c);
-                        printf("%s\n", c);
-                        break;
+                        r = ip_to_str(rt->family, &rt->gw, &c);
+                        if (r < 0)
+                                continue;
+
+                        if (!gws || strv_length(gws) == 0) {
+                                gws = strv_new(c);
+                                if (!gws)
+                                        return -ENOMEM;
+
+                        } else if (!strv_contains((const char **) gws, c)) {
+                                r = strv_add(&gws, c);
+                                if (r < 0)
+                                        return r;
+                        } else
+                                continue;
+
+                        if (first) {
+                                printf("%s ", c);
+                                first = false;
+                        } else
+                                printf("                              %s ", c);
+
+                        if (router && c && string_has_prefix(c, router))
+                                printf("(dhcp) \n");
+                        else {
+                                r = parse_network_file(p->ifindex, NULL, &network);
+                                if (r >= 0) {
+                                        if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c))
+                                                printf("(static) \n");
+                                        else
+                                                printf("(foreign) \n");
+                                }
+                        }
+                        steal_ptr(c);
                 }
         }
 
