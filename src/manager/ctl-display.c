@@ -890,6 +890,9 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
         if (dns) {
                 _auto_cleanup_ char *s = NULL, *multicast = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
+                _cleanup_(dns_servers_freep) DNSServers *c = NULL;
+                GSequenceIter *itr;
+                DNSServer *d;
 
                 s = strv_join(" ", dns);
                 if (!s)
@@ -897,6 +900,19 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
                 display(arg_beautify, ansi_color_bold_cyan(), "                 DNS: ");
                 printf("%s \n", s);
+
+                r = dbus_get_current_dns_servers_from_resolved(&c);
+                if (r >= 0 && c && !g_sequence_is_empty(c->dns_servers)) {
+                        _auto_cleanup_ char *pretty = NULL;
+
+                        itr = g_sequence_get_begin_iter(c->dns_servers);
+                        d = g_sequence_get(itr);
+                        r = ip_to_str(d->address.family, &d->address, &pretty);
+                        if (r >= 0) {
+                                display(beautify_enabled(), ansi_color_bold_cyan(), "  Current DNS Server:");
+                                printf(" %s\n", pretty);
+                        }
+                }
 
                 (void) dbus_acqure_dns_setting_from_resolved("MulticastDNS", &multicast);
                 (void) dbus_acqure_dns_setting_from_resolved("LLMNR", &llmnr);
