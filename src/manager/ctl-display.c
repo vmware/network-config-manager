@@ -889,14 +889,23 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         (void) network_parse_search_domains(&search_domains);
 
         if (dns) {
-                _auto_cleanup_ char *s = NULL;
+                _auto_cleanup_ char *s = NULL, *multicast = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
 
                 s = strv_join(" ", dns);
                 if (!s)
                         return log_oom();
 
                 display(arg_beautify, ansi_color_bold_cyan(), "                 DNS: ");
-                printf("%s\n", s);
+                printf("%s \n", s);
+
+                (void) dbus_acqure_dns_setting_from_resolved("MulticastDNS", &multicast);
+                (void) dbus_acqure_dns_setting_from_resolved("LLMNR", &llmnr);
+                (void) dbus_acqure_dns_setting_from_resolved("DNSOverTLS", &dns_over_tls);
+                (void) dbus_acqure_dns_setting_from_resolved("ResolvConfMode", &conf_mode);
+
+                display(arg_beautify, ansi_color_bold_cyan(), "        DNS Settings: ");
+                printf("MulticastDNS (%s) LLMNR (%s) DNSOverTLS (%s) ResolvConfMode (%s)\n",
+                       string_na(multicast), string_na(llmnr), string_na(dns_over_tls), string_na(conf_mode));
         }
 
         if (search_domains) {
