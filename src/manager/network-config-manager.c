@@ -85,7 +85,7 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_acquire_link_mtu(const char *ifname, uint32_t *ret) {
+_public_ int ncm_link_acquire_mtu(const char *ifname, uint32_t *ret) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t mtu;
         int r;
