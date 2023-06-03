@@ -539,9 +539,32 @@ int link_get_mtu(const char *ifname, uint32_t *mtu) {
 }
 
 int link_get_mac_address(const char *ifname, char **mac) {
-        return link_read_sysfs_attribute(ifname, "address", mac);
+        _auto_cleanup_ Link *l = NULL;
+        _auto_cleanup_ char *s = NULL;
+        int r;
+
+        r = link_acqure_one(ifname, &l);
+        if (r < 0)
+                return r;
+
+        s = new0(char, ETHER_ADDR_TO_STRING_MAX);
+        if (!s)
+                return -ENOMEM;
+
+        sprintf(s, ETHER_ADDR_FORMAT_STR, ETHER_ADDR_FORMAT_VAL(l->mac_address));
+        *mac = steal_ptr(s);
+
+        return 0;
 }
 
 int link_get_operstate(const char *ifname, char **operstate) {
-        return link_read_sysfs_attribute(ifname, "operstate", operstate);
+        _auto_cleanup_ Link *l = NULL;
+        int r;
+
+        r = link_acqure_one(ifname, &l);
+        if (r < 0)
+                return r;
+
+        *operstate = strdup(link_operstates_to_name(l->operstate));
+        return 0;
 }
