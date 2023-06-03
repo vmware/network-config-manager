@@ -82,7 +82,7 @@ static int list_links(int argc, char *argv[]) {
         _cleanup_(links_freep) Links *h = NULL;
         int r;
 
-        r = link_acquire_all(&h);
+        r = netlink_acquire_all_links(&h);
         if (r < 0)
                return r;
 
@@ -254,7 +254,7 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
                 }
         }
 
-        r = manager_get_one_link_address(p->ifindex, &addr);
+        r = netlink_get_one_link_address(p->ifindex, &addr);
         if (r < 0)
                 return r;
 
@@ -449,7 +449,7 @@ static int list_one_link(char *argv[]) {
         if (arg_json)
                 return json_fill_one_link(p, false, NULL);
 
-        r = link_acqure_one(p->ifname, &l);
+        r = netlink_acqure_one_link(p->ifname, &l);
         if (r < 0)
                 return r;
 
@@ -565,13 +565,13 @@ static int list_one_link(char *argv[]) {
 
         list_link_attributes(l);
 
-        r = manager_get_one_link_address(l->ifindex, &addr);
+        r = netlink_get_one_link_address(l->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                     Address: ");
                 set_foreach(addr->addresses, list_one_link_addresses, NULL);
         }
 
-        r = manager_get_one_link_route(l->ifindex, &route);
+        r = netlink_get_one_link_route(l->ifindex, &route);
         if (r >= 0 && route && set_size(route->routes) > 0) {
                 _auto_cleanup_strv_ char **gws = NULL;
                 _auto_cleanup_ char *router = NULL;
@@ -836,13 +836,13 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 display(arg_beautify, state_color, "%s\n", state);
         }
 
-        r = manager_link_get_address(&h);
+        r = netlink_acquire_all_link_addresses(&h);
         if (r >= 0 && set_size(h->addresses) > 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "           Addresses: ");
                 set_foreach(h->addresses, list_link_addresses, NULL);
         }
 
-        r = manager_link_get_routes(&routes);
+        r = netlink_acquire_all_link_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
                 _cleanup_(set_freep) Set *devs = NULL;
                 gpointer key, value;
@@ -981,11 +981,11 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
         if (arg_json)
                 return json_fill_one_link(p, true, NULL);
 
-        r = manager_get_one_link_address(p->ifindex, &addr);
+        r = netlink_get_one_link_address(p->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0)
                 set_foreach(addr->addresses, list_one_link_address_with_address_mode, NULL);
 
-        r = manager_link_get_routes(&routes);
+        r = netlink_acquire_all_link_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
                 _cleanup_(set_freep) Set *devs = NULL;
                  _auto_cleanup_ char *network = NULL;

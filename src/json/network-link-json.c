@@ -1745,7 +1745,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
         if (!jobj)
                 return log_oom();
 
-        r = link_acqure_one(p->ifname, &l);
+        r = netlink_acqure_one_link(p->ifname, &l);
         if (r < 0)
                 return r;
 
@@ -1816,7 +1816,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
         if (r < 0)
                 return r;
 
-        r = manager_get_one_link_address(l->ifindex, &addr);
+        r = netlink_get_one_link_address(l->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
 
@@ -1832,7 +1832,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
                 steal_ptr(ja);
         }
 
-        r = manager_get_one_link_route(l->ifindex, &route);
+        r = netlink_get_one_link_route(l->ifindex, &route);
         if (r >= 0 && route && set_size(route->routes) > 0) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
 

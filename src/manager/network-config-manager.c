@@ -85,7 +85,7 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_link_acquire_mtu(const char *ifname, uint32_t *ret) {
+_public_ int ncm_acquire_link_mtu(const char *ifname, uint32_t *ret) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         uint32_t mtu;
         int r;
@@ -96,7 +96,7 @@ _public_ int ncm_link_acquire_mtu(const char *ifname, uint32_t *ret) {
         if (r < 0)
                 return r;
 
-        r = link_acquire_mtu(p->ifname, &mtu);
+        r = netlink_acquire_link_mtu(p->ifname, &mtu);
         if (r < 0)
                 return r;
 
@@ -1259,7 +1259,7 @@ _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
         if (r < 0)
                 return r;
 
-        r = manager_get_one_link_address(p->ifindex, &addr);
+        r = netlink_get_one_link_address(p->ifindex, &addr);
         if (r < 0)
                 return r;
 
@@ -1547,7 +1547,7 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
         if (r < 0)
                 return r;
 
-        r = manager_get_one_link_route(p->ifindex, &route);
+        r = netlink_get_one_link_route(p->ifindex, &route);
         if (r < 0)
                 return r;
 

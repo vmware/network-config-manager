@@ -204,7 +204,7 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
                 return 0;
         }
 
-        r = link_acquire_mac_address(ifname, &mac);
+        r = netlink_acquire_link_mac_address(ifname, &mac);
         if (r < 0)
                 log_debug("Failed to acquire MacAddress of '%s': %s", ifname, strerror(-r));
 

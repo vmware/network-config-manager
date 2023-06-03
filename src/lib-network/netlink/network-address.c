@@ -212,7 +212,7 @@ static int acquire_link_address(int s, int ifindex, Addresses **ret) {
         return 0;
 }
 
-int manager_link_get_address(Addresses **ret) {
+int netlink_acquire_all_link_addresses(Addresses **ret) {
        _auto_cleanup_close_ int s = -1;
         int r;
 
@@ -225,7 +225,7 @@ int manager_link_get_address(Addresses **ret) {
         return acquire_link_address(s, 0, ret);
 }
 
-int manager_get_one_link_address(int ifindex, Addresses **ret) {
+int netlink_get_one_link_address(int ifindex, Addresses **ret) {
         _auto_cleanup_close_ int s = -1;
         int r;
 
@@ -274,7 +274,7 @@ static int link_add_address(int s, int ifindex, IPAddress *address, IPAddress *p
         return netlink_call(s, &m->hdr, m->buf, sizeof(m->buf));
 }
 
-int manager_link_add_address(int ifindex, IPAddress *address, IPAddress *peer) {
+int netlink_add_link_address(int ifindex, IPAddress *address, IPAddress *peer) {
        _auto_cleanup_close_ int s = -1;
        int r;
 
