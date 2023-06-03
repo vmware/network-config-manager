@@ -125,8 +125,8 @@ static int list_links(int argc, char *argv[]) {
                         display(arg_beautify, ansi_color_blue_magenta(), "%-12s ", arphrd_to_name(link->iftype));
 
                 display(arg_beautify, operstates_color, "%-9s ", operstates);
-                display(arg_beautify, operational_color, "%-16s ", string_na(operational));
-                display(arg_beautify, setup_color, "%-10s\n", string_na(setup));
+                display(arg_beautify, operational_color, "%-16s ", str_na(operational));
+                display(arg_beautify, setup_color, "%-10s\n", str_na(setup));
         }
 
         return 0;
@@ -156,8 +156,8 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 (void) network_parse_link_dhcp4_address_lifetime_t1(a->ifindex, &t1);
                 (void) network_parse_link_dhcp4_address_lifetime_t2(a->ifindex, &t2);
 
-                printf("(DHCPv4 via %s) lease time: %s seconds T1: %s seconds T2: %s seconds", string_na(server), string_na(life_time),
-                       string_na(t1), string_na(t2));
+                printf("(DHCPv4 via %s) lease time: %s seconds T1: %s seconds T2: %s seconds", str_na(server), str_na(life_time),
+                       str_na(t1), str_na(t2));
         } else {
                 _auto_cleanup_ char *network = NULL;
 
@@ -337,7 +337,7 @@ static int display_one_link_device(Link *l, bool show, char **link_file) {
         if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_str(t))
                 printf("%s\n", t);
         else
-                printf("%s\n", string_na(arphrd_to_name(l->iftype)));
+                printf("%s\n", str_na(arphrd_to_name(l->iftype)));
 
         if (link && link_file) {
                 *link_file = g_strdup(link);
@@ -521,15 +521,15 @@ static int list_one_link(char *argv[]) {
 
         (void)  display_one_link_device(l, true, &link);
         display(arg_beautify, ansi_color_bold_cyan(), "                   Link File: ");
-        printf("%s\n", string_na(link));
+        printf("%s\n", str_na(link));
 
         display(arg_beautify, ansi_color_bold_cyan(), "                Network File: ");
-        printf("%s\n", string_na(network));
+        printf("%s\n", str_na(network));
 
         display(arg_beautify, ansi_color_bold_cyan(), "                       State: ");
-        display(arg_beautify, operational_state_color, "%s", string_na(operational_state));
+        display(arg_beautify, operational_state_color, "%s", str_na(operational_state));
         printf(" (");
-        display(arg_beautify, setup_set_color, "%s", string_na(setup_state));
+        display(arg_beautify, setup_set_color, "%s", str_na(setup_state));
         printf(") \n");
 
         r = network_parse_link_address_state(l->ifindex, &address_state);
@@ -782,7 +782,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         (void) dbus_get_property_from_hostnamed("KernelName", &kernel);
         if (kernel) {
                 display(arg_beautify, ansi_color_bold_cyan(), "              Kernel: ");
-                printf("%s (%s)\n", kernel, string_na(kernel_release));
+                printf("%s (%s)\n", kernel, str_na(kernel_release));
         }
 
         (void) dbus_get_string_systemd_manager("Version", &systemd);
@@ -905,7 +905,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
                 display(arg_beautify, ansi_color_bold_cyan(), "        DNS Settings: ");
                 printf("MulticastDNS (%s) LLMNR (%s) DNSOverTLS (%s) ResolvConfMode (%s)\n",
-                       string_na(multicast), string_na(llmnr), string_na(dns_over_tls), string_na(conf_mode));
+                       str_na(multicast), str_na(llmnr), str_na(dns_over_tls), str_na(conf_mode));
         }
 
         if (search_domains) {

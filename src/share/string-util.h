@@ -22,7 +22,7 @@
 
 char *free_and_strdup(char *s, char *t);
 
-static inline const char *string_na(const char *s) {
+static inline const char *str_na(const char *s) {
         return s ?: "n/a";
 }
 

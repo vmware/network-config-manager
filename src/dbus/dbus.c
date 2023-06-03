@@ -639,7 +639,6 @@ int dbus_acqure_dns_setting_from_resolved(const char *setting, char **ret) {
         _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
         const void *a;
         int r;
-        size_t sz;
 
         r = sd_bus_open_system(&bus);
         if (r < 0)

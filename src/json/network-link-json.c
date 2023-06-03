@@ -729,7 +729,7 @@ static int json_fill_one_link_udev(json_object *j, Link *l, char **link_file) {
                if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_str(t))
                         js = json_object_new_string(t);
                else
-                       js = json_object_new_string(string_na(arphrd_to_name(l->iftype)));
+                       js = json_object_new_string(str_na(arphrd_to_name(l->iftype)));
                if (!js)
                        return log_oom();
 
@@ -1366,10 +1366,10 @@ static int fill_link_networkd_message(json_object *jobj, Link *l, char *network)
         if (r < 0)
                 return r;
 
-        if (string_na(link)) {
+        if (str_na(link)) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                js = json_object_new_string(string_na(link));
+                js = json_object_new_string(str_na(link));
                 if (!js)
                         return log_oom();
 
@@ -1380,7 +1380,7 @@ static int fill_link_networkd_message(json_object *jobj, Link *l, char *network)
         if (network) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                js = json_object_new_string(string_na(network));
+                js = json_object_new_string(str_na(network));
                 if (!js)
                         return log_oom();
 
@@ -1388,10 +1388,10 @@ static int fill_link_networkd_message(json_object *jobj, Link *l, char *network)
                 steal_ptr(js);
         }
 
-        if (string_na(link_operstates_to_name(l->operstate))) {
+        if (str_na(link_operstates_to_name(l->operstate))) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                js = json_object_new_string(string_na(link_operstates_to_name(l->operstate)));
+                js = json_object_new_string(str_na(link_operstates_to_name(l->operstate)));
                 if (!js)
                         return log_oom();
 
@@ -1858,7 +1858,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
         if (tz) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                js = json_object_new_string(string_na(tz));
+                js = json_object_new_string(str_na(tz));
                 if (!js)
                         return log_oom();
 
