@@ -758,7 +758,7 @@ class TestCLINetwork:
     def test_cli_link_status(self):
         subprocess.check_call("nmctl status 2", text=True, shell = True)
 
-    def test_cli_link_status(self):
+    def test_cli_system_status(self):
         subprocess.check_call("nmctl", text=True, shell = True)
 
     def test_cli_show_dns(self):
