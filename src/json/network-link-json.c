@@ -1631,14 +1631,14 @@ static int fill_link_dns_message(json_object *jobj, Link *l, char *network) {
                 if (!j)
                         return log_oom();
 
-                jmdns = json_object_new_string(mdns);
+                jmdns = json_object_new_string(str_na(mdns));
                 if (!jmdns)
                         return log_oom();
 
                 json_object_object_add(j, "MDNS", jmdns);
                 steal_ptr(jmdns);
 
-                jllmnr = json_object_new_string(llmnr);
+                jllmnr = json_object_new_string(str_na(llmnr));
                 if (!jllmnr)
                         return log_oom();
 

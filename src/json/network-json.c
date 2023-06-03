@@ -155,6 +155,7 @@ int json_fill_system_status(char **ret) {
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
                 *online_state;
+        _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **domains = NULL, **ntp = NULL;
         _cleanup_(routes_freep) Routes *routes = NULL;
         _cleanup_(addresses_freep) Addresses *h = NULL;
@@ -366,6 +367,51 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(ja);
         }
 
+        (void) dbus_acqure_dns_setting_from_resolved("MulticastDNS", &mdns);
+        (void) dbus_acqure_dns_setting_from_resolved("LLMNR", &llmnr);
+        (void) dbus_acqure_dns_setting_from_resolved("DNSOverTLS", &dns_over_tls);
+        (void) dbus_acqure_dns_setting_from_resolved("ResolvConfMode", &conf_mode);
+
+        if (mdns || llmnr || conf_mode || dns_over_tls) {
+                _cleanup_(json_object_putp) json_object *j = NULL, *js = NULL;
+
+
+                j = json_object_new_object();
+                if (!j)
+                        return log_oom();
+
+                js = json_object_new_string(str_na(mdns));
+                if (!js)
+                                return log_oom();
+
+                json_object_object_add(j, "MDNS", js);
+                steal_ptr(js);
+
+                js = json_object_new_string(str_na(llmnr));
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(j, "LLMNR", js);
+                steal_ptr(js);
+
+                js = json_object_new_string(str_na(dns_over_tls));
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(j, "DNSOverTLS", js);
+                steal_ptr(js);
+
+                js = json_object_new_string(str_na(conf_mode));
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(j, "ResolvConfMode", js);
+                steal_ptr(js);
+
+                json_object_object_add(jobj, "DNSSettings", j);
+                steal_ptr(j);
+        }
+
         (void) network_parse_ntp(&ntp);
         if (ntp) {
                 _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
@@ -473,6 +519,7 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
 
                 json_object_object_add(jobj, "DNS", jdns);
                 steal_ptr(jdns);
+
         }
 
         r = dbus_get_current_dns_servers_from_resolved(&current);
