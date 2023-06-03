@@ -215,9 +215,11 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool ipv4 = false, ipv6 = false;
+        _auto_cleanup_ char *dhcp = NULL;
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
+        bool first = true;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -259,21 +261,47 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         if (!set_size(addr->addresses))
                 return -ENODATA;
 
+        (void) network_parse_link_dhcp4_address(p->ifindex, &dhcp);
         printf("Addresses: ");
+
         g_hash_table_iter_init(&iter, addr->addresses->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
                 Address *a = (Address *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL;
+                _auto_cleanup_ char *c = NULL, *source = NULL;
 
                 r = ip_to_str_prefix(a->family, &a->address, &c);
                 if (r < 0)
                         return r;
 
-                if ((a->family == AF_INET && ipv4 ) || (a->family == AF_INET6 && ipv6))
-                        printf("%s ", c);
+                if (dhcp && string_has_prefix(c, dhcp))
+                        source = strdup("dhcp");
+                else {
+                        _auto_cleanup_ char *network = NULL;
 
-                if (!ipv4 && !ipv6)
-                        printf("%s ", c);
+                        r = parse_network_file(a->ifindex, NULL, &network);
+                        if (r >= 0) {
+                                if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c))
+                                        source = strdup("static");
+                                else
+                                        source = strdup("foreign");
+                        }
+                }
+
+                if ((a->family == AF_INET && ipv4) || (a->family == AF_INET6 && ipv6)) {
+                        if (first) {
+                                printf("%s (%s) \n", c, source);
+                                first = false;
+                        } else
+                                printf("           %s (%s)\n", c, source);
+                }
+
+                if (!ipv4 && !ipv6){
+                        if (first) {
+                                printf("%s (%s) \n", c, source);
+                                first = false;
+                        } else
+                                printf("           %s (%s)\n", c, source);
+                }
         }
 
         printf("\n");
