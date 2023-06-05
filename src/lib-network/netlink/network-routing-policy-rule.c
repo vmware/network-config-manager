@@ -124,6 +124,12 @@ static int fill_link_routing_policy_rule_message(RoutingPolicyRule *rule, struct
         if (tb[FRA_TABLE])
                 rule->table = mnl_attr_get_u32(tb[FRA_TABLE]);
 
+        if (tb[FRA_SUPPRESS_PREFIXLEN])
+                rule->suppress_prefixlen = mnl_attr_get_u32(tb[FRA_SUPPRESS_PREFIXLEN]);
+
+        if (tb[FRA_SUPPRESS_IFGROUP])
+                rule->suppress_ifgroup = mnl_attr_get_u32(tb[FRA_SUPPRESS_IFGROUP]);
+
         if (tb[FRA_SRC]) {
                 if (rule->family == AF_INET)
                         memcpy(&rule->from.in, mnl_attr_get_payload(tb[FRA_SRC]), sizeof(struct in_addr));
@@ -144,6 +150,9 @@ static int fill_link_routing_policy_rule_message(RoutingPolicyRule *rule, struct
 
         if (tb[FRA_PROTOCOL])
                 rule->protocol = mnl_attr_get_u8(tb[FRA_PROTOCOL]);
+
+        if (tb[FRA_L3MDEV])
+                rule->l3mdev = mnl_attr_get_u8(tb[FRA_L3MDEV]);
 
         if (tb[FRA_IP_PROTO]) {
                 rule->ipproto = mnl_attr_get_u8(tb[FRA_IP_PROTO]);
