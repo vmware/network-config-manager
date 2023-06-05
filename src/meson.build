@@ -66,6 +66,8 @@ network_config_manager_sources = files('''
         lib-network/netlink/network-address.c
         lib-network/netlink/network-route.h
         lib-network/netlink/network-route.c
+        lib-network/netlink/network-routing-policy-rule.h
+        lib-network/netlink/network-routing-policy-rule.c
         lib-network/networkd/networkd-api.h
         lib-network/networkd/networkd-api.c
         yaml/yaml-manager.c
