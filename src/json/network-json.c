@@ -335,6 +335,31 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         json_object_object_add(jrule, "OutgoingInterface", jd);
         steal_ptr(jd);
 
+        jd = json_object_new_int(rule->l3mdev);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "L3MDev", jd);
+        steal_ptr(jd);
+
+        if (rule->suppress_prefixlen >= 0) {
+                jd = json_object_new_int(rule->suppress_prefixlen);
+                if (!jd)
+                        return;
+
+                json_object_object_add(jrule, "SuppressPrefixLength", jd);
+                steal_ptr(jd);
+        }
+
+        if (rule->suppress_ifgroup >= 0) {
+                jd = json_object_new_int(rule->suppress_ifgroup);
+                if (!jd)
+                        return;
+
+                json_object_object_add(jrule, "SuppressInterfaceGroup", jd);
+                steal_ptr(jd);
+        }
+
         if (rule->sport.start != 0 || rule->sport.end != 0) {
                 _cleanup_(json_object_putp) json_object *ja = NULL;
 
