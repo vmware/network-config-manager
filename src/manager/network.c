@@ -465,32 +465,6 @@ int route_protocol_to_mode(const char *name) {
         return _ROUTE_PROTOCOL_INVALID;
 }
 
-static const char * const route_table[_ROUTE_TABLE_MAX] = {
-       [ROUTE_TABLE_LOCAL]    = "local",
-       [ROUTE_TABLE_MAIN]     = "main",
-       [ROUTE_TABLE_DEFAULT]  = "default",
-};
-
-const char *route_table_to_name(int id) {
-        if (id < 0)
-                return NULL;
-
-        if ((size_t) id >= ELEMENTSOF(route_table))
-                return NULL;
-
-        return route_table[id];
-}
-
-int route_table_to_mode(const char *name) {
-        assert(name);
-
-        for (size_t i = ROUTE_TABLE_DEFAULT; i < (size_t) ELEMENTSOF(route_table); i++)
-                if (str_eq_fold(name, route_table[i]))
-                        return i;
-
-        return _ROUTE_TABLE_INVALID;
-}
-
 static const char * const ipoib_mode_table[_IP_OIB_MODE_MODE_MAX] = {
         [IP_OIB_MODE_DATAGRAM]       = "datagram",
         [IP_OIB_MODE_MODE_CONNECTED] = "connected",

@@ -18,6 +18,7 @@ typedef struct RoutingPolicyRule {
 
         bool invert_rule;
         bool priority_set;
+        bool ipproto_set;
 
         uint8_t tos;
         uint8_t action;

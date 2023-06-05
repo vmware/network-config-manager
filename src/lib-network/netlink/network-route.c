@@ -7,6 +7,7 @@
 #include "network-route.h"
 #include "mnl_util.h"
 #include "network-util.h"
+#include "string-util.h"
 
 int route_new(Route **ret) {
         Route *route;
@@ -92,6 +93,49 @@ static int route_add(Routes **rts, Route *rt) {
                 return set_add((*rts)->routes, b);
 
         return -EEXIST;
+}
+
+int route_table_to_string(uint32_t table, char **ret) {
+        _auto_cleanup_ char *str = NULL;
+        const char *s;
+        int r;
+
+        s = route_table_to_name(table);
+        if (!s)
+                r = asprintf(&str, "%" PRIu32, table);
+        else
+                r = asprintf(&str, "%s(%" PRIu32 ")", s, table);
+        if (r < 0)
+                return -ENOMEM;
+
+        *ret = steal_ptr(str);
+        return 0;
+}
+
+static const char * const route_table[_ROUTE_TABLE_MAX] = {
+       [ROUTE_TABLE_LOCAL]    = "local",
+       [ROUTE_TABLE_MAIN]     = "main",
+       [ROUTE_TABLE_DEFAULT]  = "default",
+};
+
+const char *route_table_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(route_table))
+                return NULL;
+
+        return route_table[id];
+}
+
+int route_table_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = ROUTE_TABLE_DEFAULT; i < (size_t) ELEMENTSOF(route_table); i++)
+                if (str_eq_fold(name, route_table[i]))
+                        return i;
+
+        return _ROUTE_TABLE_INVALID;
 }
 
 static int validata_attr_mettrics(const struct nlattr *attr, void *data) {

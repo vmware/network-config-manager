@@ -146,16 +146,6 @@ typedef enum RouteType {
        _ROUTE_TYPE_INVALID = -EINVAL
 } RouteType;
 
-/* iproute */
-typedef enum RouteTable {
-       ROUTE_TABLE_UNSPEC,
-       ROUTE_TABLE_DEFAULT  = 253,
-       ROUTE_TABLE_MAIN     = 254,
-       ROUTE_TABLE_LOCAL    = 255,
-       _ROUTE_TABLE_MAX,
-       _ROUTE_TABLE_INVALID = -EINVAL
-} RouteTable;
-
 typedef enum KeepConfiguration {
         KEEP_CONFIGURATION_NO,
         KEEP_CONFIGURATION_DHCP_ON_STOP,
@@ -401,9 +391,6 @@ int ipv6_route_preference_type_to_mode(const char *name);
 
 const char *route_protocol_to_name(int id);
 int route_protocol_to_mode(const char *name);
-
-const char *route_table_to_name(int id);
-int route_table_to_mode(const char *name);
 
 const char *keep_configuration_type_to_name(int id);
 int keep_configuration_type_to_mode(const char *name);
