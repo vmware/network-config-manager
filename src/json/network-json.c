@@ -273,6 +273,13 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         json_object_object_add(jrule, "Protocol", jd);
         steal_ptr(jd);
 
+        jd = json_object_new_boolean(rule->invert_rule);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "Invert", jd);
+        steal_ptr(jd);
+
         if (rule->ipproto_set) {
                 _auto_cleanup_ struct protoent *pe = NULL;
 
