@@ -148,6 +148,18 @@ static int fill_link_routing_policy_rule_message(RoutingPolicyRule *rule, struct
         if (tb[FRA_PRIORITY])
                 rule->priority = mnl_attr_get_u32(tb[FRA_PRIORITY]);
 
+        if (tb[FRA_IFNAME]) {
+                rule->iif = strdup(mnl_attr_get_str(tb[FRA_IFNAME]));
+                if (!rule->iif)
+                        return -ENOMEM;
+        }
+
+        if (tb[FRA_OIFNAME]) {
+                rule->oif = strdup(mnl_attr_get_str(tb[FRA_OIFNAME]));
+                if (!rule->iif)
+                        return -ENOMEM;
+        }
+
         return 0;
 }
 
