@@ -259,6 +259,13 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         json_object_object_add(jrule, "Type", jd);
         steal_ptr(jd);
 
+        jd = json_object_new_int(rule->priority);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "Priority", jd);
+        steal_ptr(jd);
+
         jd = json_object_new_int(rule->protocol);
         if (!jd)
                 return;
