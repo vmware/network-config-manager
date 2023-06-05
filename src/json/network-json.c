@@ -272,18 +272,32 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         json_object_object_add(jrule, "Priority", jd);
         steal_ptr(jd);
 
+        jd = json_object_new_int(rule->fwmark);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "FirewallMark", jd);
+        steal_ptr(jd);
+
+        jd = json_object_new_int(rule->fwmask);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "FirewallMask", jd);
+        steal_ptr(jd);
+
         jd = json_object_new_string(str_na_json(rule->iif));
         if (!jd)
                 return;
 
-        json_object_object_add(jrule, "IIF", jd);
+        json_object_object_add(jrule, "IncomingInterface", jd);
         steal_ptr(jd);
 
         jd = json_object_new_string(str_na_json(rule->oif));
         if (!jd)
                 return;
 
-        json_object_object_add(jrule, "OIF", jd);
+        json_object_object_add(jrule, "OutgoingInterface", jd);
         steal_ptr(jd);
 
         if (rule->sport.start != 0 || rule->sport.end != 0) {
