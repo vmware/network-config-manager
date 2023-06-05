@@ -165,6 +165,13 @@ static int fill_link_routing_policy_rule_message(RoutingPolicyRule *rule, struct
                         return -ENOMEM;
         }
 
+        if (tb[FRA_SPORT_RANGE])
+                memcpy(&rule->sport, mnl_attr_get_payload(tb[FRA_SPORT_RANGE]), sizeof(struct fib_rule_port_range));
+
+
+        if (tb[FRA_DPORT_RANGE])
+                memcpy(&rule->dport, mnl_attr_get_payload(tb[FRA_DPORT_RANGE]), sizeof(struct fib_rule_port_range));
+
         return 0;
 }
 
