@@ -234,6 +234,20 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         json_object_object_add(jrule, "Priority", jd);
         steal_ptr(jd);
 
+        jd = json_object_new_string(str_na_json(rule->iif));
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "IIF", jd);
+        steal_ptr(jd);
+
+        jd = json_object_new_string(str_na_json(rule->oif));
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "OIF", jd);
+        steal_ptr(jd);
+
         json_object_array_add(jobj, jrule);
         steal_ptr(jrule);
 }
