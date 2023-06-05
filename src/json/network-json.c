@@ -4,6 +4,7 @@
 #include <json-c/json.h>
 
 #include <systemd/sd-device.h>
+#include <netdb.h>
 
 #include "alloc-util.h"
 #include "ansi-color.h"
@@ -158,7 +159,7 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
 static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *jd = NULL, *jrule = NULL;
         json_object *jobj = (json_object *) userdata;
-        _auto_cleanup_ char *c = NULL;
+        _auto_cleanup_ char *c = NULL, *table = NULL;
         RoutingPolicyRule *rule;
         size_t size;
         int r;
@@ -220,12 +221,47 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         json_object_object_add(jrule, "Table", jd);
         steal_ptr(jd);
 
+        r = route_table_to_string(rule->table, &table);
+        if (r >= 0) {
+                jd = json_object_new_string(str_na_json(table));
+                if (!jd)
+                        return;
+
+                json_object_object_add(jrule, "TableString", jd);
+                steal_ptr(jd);
+        }
+
         jd = json_object_new_int(rule->protocol);
         if (!jd)
                 return;
 
         json_object_object_add(jrule, "Protocol", jd);
         steal_ptr(jd);
+
+        if (rule->ipproto_set) {
+                _auto_cleanup_ struct protoent *pe = NULL;
+
+                jd = json_object_new_int(rule->ipproto);
+                if (!jd)
+                        return;
+
+                json_object_object_add(jrule, "IPProtocol", jd);
+                steal_ptr(jd);
+
+                pe = new(struct protoent, 1);
+                if (!pe)
+                        return;
+
+                pe = getprotobynumber(rule->ipproto);
+                if (pe) {
+                        jd = json_object_new_string(pe->p_name);
+                        if (!jd)
+                                return;
+
+                        json_object_object_add(jrule, "IPProtocolString", jd);
+                        steal_ptr(jd);
+                }
+        }
 
         jd = json_object_new_int(rule->priority);
         if (!jd)

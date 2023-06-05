@@ -23,6 +23,17 @@
                                             */
 #endif
 
+
+/* iproute */
+typedef enum RouteTable {
+       ROUTE_TABLE_UNSPEC,
+       ROUTE_TABLE_DEFAULT  = 253,
+       ROUTE_TABLE_MAIN     = 254,
+       ROUTE_TABLE_LOCAL    = 255,
+       _ROUTE_TABLE_MAX,
+       _ROUTE_TABLE_INVALID = -EINVAL
+} RouteTable;
+
 typedef struct Route {
         unsigned char dst_prefixlen;
         unsigned char src_prefixlen;
@@ -72,3 +83,8 @@ int netlink_get_one_link_route(int ifindex, Routes **ret);
 
 int netlink_add_link_default_gateway(Route *route);
 int netlink_add_link_route(Route *route);
+
+int route_table_to_string(uint32_t table, char **ret);
+
+const char *route_table_to_name(int id);
+int route_table_to_mode(const char *name);

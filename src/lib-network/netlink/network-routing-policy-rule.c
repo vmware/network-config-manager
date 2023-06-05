@@ -145,6 +145,11 @@ static int fill_link_routing_policy_rule_message(RoutingPolicyRule *rule, struct
         if (tb[FRA_PROTOCOL])
                 rule->protocol = mnl_attr_get_u8(tb[FRA_PROTOCOL]);
 
+        if (tb[FRA_IP_PROTO]) {
+                rule->ipproto = mnl_attr_get_u8(tb[FRA_IP_PROTO]);
+                rule->ipproto_set = true;
+        }
+
         if (tb[FRA_PRIORITY])
                 rule->priority = mnl_attr_get_u32(tb[FRA_PRIORITY]);
 

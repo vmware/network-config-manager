@@ -471,23 +471,6 @@ static int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags) 
         return 0;
 }
 
-static int route_table_to_string(uint32_t table, char **ret) {
-        _auto_cleanup_ char *str = NULL;
-        const char *s;
-        int r;
-
-        s = route_table_to_name(table);
-        if (!s)
-                r = asprintf(&str, "%" PRIu32, table);
-        else
-                r = asprintf(&str, "%s(%" PRIu32 ")", s, table);
-        if (r < 0)
-                return -ENOMEM;
-
-        *ret = steal_ptr(str);
-        return 0;
-}
-
 static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
