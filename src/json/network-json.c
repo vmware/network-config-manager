@@ -173,7 +173,6 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
                 return;
 
         rule = (RoutingPolicyRule *) g_bytes_get_data(key, &size);
-
         if (rule->from_prefixlen > 0) {
                 r = ip_to_str(rule->from.family, &rule->from, &c);
                 if (r < 0)

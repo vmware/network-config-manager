@@ -138,6 +138,146 @@ int route_table_to_mode(const char *name) {
         return _ROUTE_TABLE_INVALID;
 }
 
+static const char *const route_scope_type[_ROUTE_SCOPE_MAX] =  {
+        [ROUTE_SCOPE_UNIVERSE] = "global",
+        [ROUTE_SCOPE_SITE]     = "site",
+        [ROUTE_SCOPE_LINK]     = "link",
+        [ROUTE_SCOPE_HOST]     = "host",
+        [ROUTE_SCOPE_NOWHERE]  = "nowhere",
+};
+
+const char *route_scope_type_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(route_scope_type))
+                return NULL;
+
+        return route_scope_type[id];
+}
+
+int route_scope_type_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = ROUTE_SCOPE_UNIVERSE; i < (size_t) ELEMENTSOF(route_scope_type); i++)
+                if (route_scope_type[i] && str_eq_fold(name, route_scope_type[i]))
+                        return i;
+
+        return _ROUTE_SCOPE_INVALID;
+}
+
+static const char * const route_type[_ROUTE_TYPE_MAX] = {
+        [ROUTE_TYPE_UNICAST]     = "unicast",
+        [ROUTE_TYPE_LOCAL]       = "local",
+        [ROUTE_TYPE_BROADCAST]   = "broadcast",
+        [ROUTE_TYPE_ANYCAST]     = "anycast",
+        [ROUTE_TYPE_MULTICAST]   = "multicast",
+        [ROUTE_TYPE_BLACKHOLE]   = "blackhole",
+        [ROUTE_TYPE_UNREACHABLE] = "unreachable",
+        [ROUTE_TYPE_PROHIBIT]    = "prohibit",
+        [ROUTE_TYPE_THROW]       = "throw",
+        [ROUTE_TYPE_NAT]         = "nat",
+        [ROUTE_TYPE_XRESOLVE]    = "xresolve",
+};
+
+const char *route_type_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(route_type))
+                return NULL;
+
+        return route_type[id];
+}
+
+int route_type_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = ROUTE_TYPE_UNICAST; i < (size_t) ELEMENTSOF(route_type); i++)
+                if (route_type[i] && str_eq_fold(name, route_type[i]))
+                        return i;
+
+        return _ROUTE_TYPE_INVALID;
+}
+
+static const char * const ipv6_route_preference_type[_IPV6_ROUTE_PREFERENCE_MAX] = {
+        [IPV6_ROUTE_PREFERENCE_LOW]     = "low",
+        [IPV6_ROUTE_PREFERENCE_MEDIUM]  = "medium",
+        [IPV6_ROUTE_PREFERENCE_HIGH]    = "high",
+};
+
+const char *ipv6_route_preference_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(ipv6_route_preference_type))
+                return NULL;
+
+        return ipv6_route_preference_type[id];
+}
+
+int ipv6_route_preference_type_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = IPV6_ROUTE_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(ipv6_route_preference_type); i++)
+                if (str_eq_fold(name, ipv6_route_preference_type[i]))
+                        return i;
+
+        return _IPV6_ROUTE_PREFERENCE_INVALID;
+}
+
+static const char * const route_protocol_type[_ROUTE_PROTOCOL_MAX] = {
+       [ROUTE_PROTOCOL_KERNEL]  = "kernel",
+       [ROUTE_PROTOCOL_BOOT]    = "boot",
+       [ROUTE_PROTOCOL_STATIC]  = "static",
+       [ROUTE_PRTOCOL_DHCP]     = "dhcp",
+};
+
+const char *route_protocol_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(route_protocol_type))
+                return NULL;
+
+        return route_protocol_type[id];
+}
+
+int route_protocol_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = IPV6_ROUTE_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(route_protocol_type); i++)
+                if (str_eq_fold(name, route_protocol_type[i]))
+                        return i;
+
+        return _ROUTE_PROTOCOL_INVALID;
+}
+
+static const char * const ipoib_mode_table[_IP_OIB_MODE_MODE_MAX] = {
+        [IP_OIB_MODE_DATAGRAM]       = "datagram",
+        [IP_OIB_MODE_MODE_CONNECTED] = "connected",
+};
+
+const char *ipoib_mode_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(ipoib_mode_table))
+                return NULL;
+
+        return ipoib_mode_table[id];
+}
+
+int ipoib_name_to_mode(const char *name) {
+        assert(name);
+
+        for (size_t i = IP_OIB_MODE_DATAGRAM; i < (size_t) ELEMENTSOF(ipoib_mode_table); i++)
+                if (str_eq_fold(name, ipoib_mode_table[i]))
+                        return i;
+
+        return _IP_OIB_MODE_MODE_INVALID;
+}
+
 static int validata_attr_mettrics(const struct nlattr *attr, void *data) {
         const struct nlattr **tb = data;
 
