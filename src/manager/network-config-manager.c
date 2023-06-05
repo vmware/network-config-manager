@@ -1741,7 +1741,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 return r;
                         }
 
-                        rule->iif = *idx;
+                        rule->iif = strdup(idx->ifname);
 
                         continue;
                 } else if (str_eq_fold(argv[i], "oif")) {
@@ -1754,7 +1754,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 log_warning("Failed to find device '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
-                        rule->oif = *idx;
+                        rule->oif = strdup(idx->ifname);
                         continue;
                 } if (str_eq_fold(argv[i], "from")) {
                          _auto_cleanup_ IPAddress *a = NULL;
@@ -1828,7 +1828,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        rule->invert = r;
+                        rule->invert_rule = r;
 
                         continue;
                 } else if (str_eq_fold(argv[i], "sport")) {
@@ -1839,8 +1839,8 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        rule->sport = strdup(argv[i]);
-                        if (!rule->sport)
+                        rule->sport_str = strdup(argv[i]);
+                        if (!rule->sport_str)
                                 return log_oom();
 
                         continue;
@@ -1852,16 +1852,16 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
 
-                        rule->dport = strdup(argv[i]);
-                        if (!rule->dport)
+                        rule->dport_str = strdup(argv[i]);
+                        if (!rule->dport_str)
                                 return log_oom();
 
                         continue;
                 } else if (str_eq_fold(argv[i], "proto")) {
                         parse_next_arg(argv, argc, i);
 
-                        rule->ipproto = strdup(argv[i]);
-                        if (!rule->ipproto)
+                        rule->ipproto_str = strdup(argv[i]);
+                        if (!rule->ipproto_str)
                                 return log_oom();
 
                         continue;

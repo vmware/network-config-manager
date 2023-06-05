@@ -206,29 +206,6 @@ typedef enum ParserType {
         _PARSER_TYPE_INVALID = -EINVAL,
 } ParserType;
 
-typedef struct RoutingPolicyRule {
-        IPAddress to;
-        IPAddress from;
-
-        IfNameIndex oif;
-        IfNameIndex iif;
-
-        bool invert;
-
-        char *ipproto;
-        char *sport;
-        char *dport;
-
-        uint32_t tos;
-        uint32_t type;
-        uint32_t fwmark;
-
-        uint32_t table;
-        uint32_t priority;
-
-        struct fib_rule_uid_range uid_range;
-} RoutingPolicyRule;
-
 typedef struct DHCP4ServerLease {
     char *mac;
     IPAddress addr;
@@ -368,10 +345,6 @@ int network_new(Network **ret);
 void network_free(Network *n);
 DEFINE_CLEANUP(Network*, network_free);
 void g_network_free(gpointer data);
-
-int routing_policy_rule_new(RoutingPolicyRule **ret);
-void routing_policy_rule_free(RoutingPolicyRule *rule);
-DEFINE_CLEANUP(RoutingPolicyRule*, routing_policy_rule_free);
 
 int dhcp4_server_new(DHCP4Server **ret);
 void dhcp4_server_free(DHCP4Server *s);

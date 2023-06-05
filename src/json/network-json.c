@@ -19,6 +19,7 @@
 #include "network-link.h"
 #include "network-manager.h"
 #include "network-route.h"
+#include "network-routing-policy-rule.h"
 #include "network-util.h"
 #include "networkd-api.h"
 #include "network-json.h"
@@ -93,6 +94,10 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
         size_t size;
         int r;
 
+        assert(key);
+        assert(value);
+        assert(userdata);
+
         jrt = json_object_new_object();
         if (!jrt)
                 return;
@@ -150,12 +155,81 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
         steal_ptr(jidx);
 }
 
+static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointer userdata) {
+        _cleanup_(json_object_putp) json_object *jd = NULL, *jrl = NULL;
+        json_object *jobj = (json_object *) userdata;
+        _auto_cleanup_ char *c = NULL;
+        RoutingPolicyRule *rule;
+        size_t size;
+        int r;
+
+        assert(key);
+        assert(value);
+        assert(userdata);
+
+        jrl = json_object_new_object();
+        if (!jrl)
+                return;
+
+        rule = (RoutingPolicyRule *) g_bytes_get_data(key, &size);
+
+        if (rule->from_prefixlen > 0) {
+                r = ip_to_str(rule->from.family, &rule->from, &c);
+                if (r < 0)
+                        return;
+
+                jd = json_object_new_string(c);
+        } else
+                jd = json_object_new_string("");
+
+        if (!jd)
+                return;
+
+        json_object_object_add(jrl, "From", jd);
+        steal_ptr(jd);
+
+        if (rule->to_prefixlen > 0) {
+                r = ip_to_str(rule->to.family, &rule->from, &c);
+                if (r < 0)
+                        return;
+
+                jd = json_object_new_string(c);
+        } else
+                jd = json_object_new_string("");
+
+        if (!jd)
+                return;
+
+        json_object_object_add(jrl, "To", jd);
+        steal_ptr(jd);
+
+        if (rule->family == AF_INET)
+                jd = json_object_new_string("ipv4");
+        else
+                jd = json_object_new_string("ipv6");
+        if (!jd)
+                return;
+
+        json_object_object_add(jrl, "family", jd);
+        steal_ptr(jd);
+
+        jd = json_object_new_int(rule->table);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrl, "Table", jd);
+        json_object_array_add(jobj, jrl);
+        steal_ptr(jd);
+        steal_ptr(jrl);
+}
+
 int json_fill_system_status(char **ret) {
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jaddress = NULL, *jroutes = NULL;
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
                 *online_state;
         _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
+        _cleanup_(routing_policy_rules_freep) RoutingPolicyRules *rules = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **domains = NULL, **ntp = NULL;
         _cleanup_(routes_freep) Routes *routes = NULL;
         _cleanup_(addresses_freep) Addresses *h = NULL;
@@ -309,10 +383,9 @@ int json_fill_system_status(char **ret) {
 
 
                 set_foreach(h->addresses, json_fill_link_addresses, jaddress);
+                json_object_object_add(jobj, "Addresses", jaddress);
+                steal_ptr(jaddress);
         }
-
-        json_object_object_add(jobj, "Addresses", jaddress);
-        steal_ptr(jaddress);
 
         r = netlink_acquire_all_link_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
@@ -321,10 +394,9 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 set_foreach(routes->routes, json_fill_link_routes, jroutes);
+                json_object_object_add(jobj, "Routes", jroutes);
+                steal_ptr(jroutes);
         }
-
-        json_object_object_add(jobj, "Routes", jroutes);
-        steal_ptr(jroutes);
 
         (void) network_parse_dns(&dns);
         if (dns) {
@@ -430,6 +502,19 @@ int json_fill_system_status(char **ret) {
 
                 json_object_object_add(jobj, "NTP", ja);
                 steal_ptr(ja);
+        }
+
+        r = acquire_routing_policy_rules(&rules);
+        if (r >= 0 && set_size(rules->routing_policy_rules) > 0) {
+                _cleanup_(json_object_putp) json_object *jrules = NULL;
+
+                jrules = json_object_new_array();
+                if (!jrules)
+                        return log_oom();
+
+                set_foreach(rules->routing_policy_rules, json_fill_routing_policy_rules, jrules);
+                json_object_object_add(jobj, "RoutingPolicyRules", jrules);
+                steal_ptr(jrules);
         }
 
         if (ret) {
