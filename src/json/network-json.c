@@ -245,6 +245,13 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
                 steal_ptr(table);
         }
 
+        jd = json_object_new_int(rule->tos);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "TOS", jd);
+        steal_ptr(jd);
+
         jd = json_object_new_int(rule->protocol);
         if (!jd)
                 return;
