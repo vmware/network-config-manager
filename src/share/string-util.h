@@ -26,6 +26,10 @@ static inline const char *str_na(const char *s) {
         return s ?: "n/a";
 }
 
+static inline const char *str_na_json(const char *s) {
+        return s ?: "";
+}
+
 static inline bool isempty_str(const char *p) {
         return !p || !p[0];
 }

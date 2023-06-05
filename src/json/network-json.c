@@ -156,7 +156,7 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
 }
 
 static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_(json_object_putp) json_object *jd = NULL, *jrl = NULL;
+        _cleanup_(json_object_putp) json_object *jd = NULL, *jrule = NULL;
         json_object *jobj = (json_object *) userdata;
         _auto_cleanup_ char *c = NULL;
         RoutingPolicyRule *rule;
@@ -167,8 +167,8 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         assert(value);
         assert(userdata);
 
-        jrl = json_object_new_object();
-        if (!jrl)
+        jrule = json_object_new_object();
+        if (!jrule)
                 return;
 
         rule = (RoutingPolicyRule *) g_bytes_get_data(key, &size);
@@ -185,7 +185,7 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         if (!jd)
                 return;
 
-        json_object_object_add(jrl, "From", jd);
+        json_object_object_add(jrule, "From", jd);
         steal_ptr(jd);
 
         if (rule->to_prefixlen > 0) {
@@ -200,7 +200,7 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         if (!jd)
                 return;
 
-        json_object_object_add(jrl, "To", jd);
+        json_object_object_add(jrule, "To", jd);
         steal_ptr(jd);
 
         if (rule->family == AF_INET)
@@ -210,17 +210,46 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         if (!jd)
                 return;
 
-        json_object_object_add(jrl, "family", jd);
+        json_object_object_add(jrule, "family", jd);
         steal_ptr(jd);
 
         jd = json_object_new_int(rule->table);
         if (!jd)
                 return;
 
-        json_object_object_add(jrl, "Table", jd);
-        json_object_array_add(jobj, jrl);
+        json_object_object_add(jrule, "Table", jd);
         steal_ptr(jd);
-        steal_ptr(jrl);
+
+        jd = json_object_new_int(rule->protocol);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "Protocol", jd);
+        steal_ptr(jd);
+
+        jd = json_object_new_int(rule->priority);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "Priority", jd);
+        steal_ptr(jd);
+
+        jd = json_object_new_string(str_na_json(rule->iif));
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "IIF", jd);
+        steal_ptr(jd);
+
+        jd = json_object_new_string(str_na_json(rule->oif));
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "OIF", jd);
+        steal_ptr(jd);
+
+        json_object_array_add(jobj, jrule);
+        steal_ptr(jrule);
 }
 
 int json_fill_system_status(char **ret) {
