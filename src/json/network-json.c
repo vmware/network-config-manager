@@ -173,6 +173,16 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
                 return;
 
         rule = (RoutingPolicyRule *) g_bytes_get_data(key, &size);
+        if (rule->family == AF_INET)
+                jd = json_object_new_string("ipv4");
+        else
+                jd = json_object_new_string("ipv6");
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "Family", jd);
+        steal_ptr(jd);
+
         if (rule->from_prefixlen > 0) {
                 r = ip_to_str(rule->from.family, &rule->from, &c);
                 if (r < 0)
@@ -188,8 +198,15 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         json_object_object_add(jrule, "From", jd);
         steal_ptr(jd);
 
+        jd = json_object_new_int(rule->from_prefixlen);
+        if (!jd)
+                return;
+
+        json_object_object_add(jrule, "FromPrefixLength", jd);
+        steal_ptr(jd);
+
         if (rule->to_prefixlen > 0) {
-                r = ip_to_str(rule->to.family, &rule->from, &c);
+                r = ip_to_str(rule->to.family, &rule->to, &c);
                 if (r < 0)
                         return;
 
@@ -203,14 +220,11 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         json_object_object_add(jrule, "To", jd);
         steal_ptr(jd);
 
-        if (rule->family == AF_INET)
-                jd = json_object_new_string("ipv4");
-        else
-                jd = json_object_new_string("ipv6");
+        jd = json_object_new_int(rule->to_prefixlen);
         if (!jd)
                 return;
 
-        json_object_object_add(jrule, "family", jd);
+        json_object_object_add(jrule, "ToPrefixLength", jd);
         steal_ptr(jd);
 
         jd = json_object_new_int(rule->table);
@@ -219,7 +233,6 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
 
         json_object_object_add(jrule, "Table", jd);
         steal_ptr(jd);
-        steal_ptr(table);
 
         r = route_table_to_string(rule->table, &table);
         if (r >= 0) {
@@ -229,6 +242,7 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
 
                 json_object_object_add(jrule, "TableString", jd);
                 steal_ptr(jd);
+                steal_ptr(table);
         }
 
         jd = json_object_new_int(rule->protocol);
@@ -264,13 +278,6 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
 
                 steal_ptr(pe);
         }
-
-        jd = json_object_new_int(rule->priority);
-        if (!jd)
-                return;
-
-        json_object_object_add(jrule, "Priority", jd);
-        steal_ptr(jd);
 
         jd = json_object_new_int(rule->fwmark);
         if (!jd)
