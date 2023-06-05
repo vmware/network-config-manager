@@ -204,6 +204,7 @@ static int fill_routing_policy_rule(const struct nlmsghdr *nlh, void *data) {
                 .from_prefixlen= rtm->src_len,
                 .tos = rtm->tos,
                 .action = rtm->action,
+                .invert_rule = rtm->flags & FIB_RULE_INVERT,
              };
 
         mnl_attr_parse(nlh, sizeof(*rtm), routing_policy_rule_data_attr_cb, tb);
