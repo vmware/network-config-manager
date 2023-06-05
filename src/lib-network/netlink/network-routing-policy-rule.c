@@ -150,6 +150,12 @@ static int fill_link_routing_policy_rule_message(RoutingPolicyRule *rule, struct
                 rule->ipproto_set = true;
         }
 
+        if (tb[FRA_FWMARK])
+                rule->fwmark = mnl_attr_get_u32(tb[FRA_FWMARK]);
+
+        if (tb[FRA_FWMASK])
+                rule->fwmask = mnl_attr_get_u32(tb[FRA_FWMASK]);
+
         if (tb[FRA_PRIORITY])
                 rule->priority = mnl_attr_get_u32(tb[FRA_PRIORITY]);
 
