@@ -101,51 +101,6 @@ typedef enum LinkEvent {
         _LINK_EVENT_MAX,
         _LINK_EVENT_INVALID = -EINVAL,
 } LinkEvent;
-
-typedef enum RouteScope {
-        ROUTE_SCOPE_UNIVERSE,
-        ROUTE_SCOPE_SITE = RT_SCOPE_SITE,
-        ROUTE_SCOPE_LINK = RT_SCOPE_LINK,
-        ROUTE_SCOPE_HOST = RT_SCOPE_HOST,
-        ROUTE_SCOPE_NOWHERE = RT_SCOPE_NOWHERE,
-       _ROUTE_SCOPE_MAX,
-       _ROUTE_SCOPE_INVALID = -EINVAL,
-} RouteScope;
-
-typedef enum IPv6RoutePreference {
-        IPV6_ROUTE_PREFERENCE_LOW,
-        IPV6_ROUTE_PREFERENCE_MEDIUM,
-        IPV6_ROUTE_PREFERENCE_HIGH,
-        _IPV6_ROUTE_PREFERENCE_MAX,
-        _IPV6_ROUTE_PREFERENCE_INVALID = -EINVAL,
-} IPv6RoutePreference;
-
-typedef enum RouteProtcol {
-       ROUTE_PROTOCOL_KERNEL,
-       ROUTE_PROTOCOL_BOOT,
-       ROUTE_PROTOCOL_STATIC,
-       ROUTE_PRTOCOL_DHCP,
-       _ROUTE_PROTOCOL_MAX,
-       _ROUTE_PROTOCOL_INVALID = -EINVAL,
-} RouteProtocol;
-
-typedef enum RouteType {
-       ROUTE_TYPE_UNSPEC,
-       ROUTE_TYPE_UNICAST,
-       ROUTE_TYPE_LOCAL,
-       ROUTE_TYPE_BROADCAST,
-       ROUTE_TYPE_ANYCAST,
-       ROUTE_TYPE_MULTICAST,
-       ROUTE_TYPE_BLACKHOLE,
-       ROUTE_TYPE_UNREACHABLE,
-       ROUTE_TYPE_PROHIBIT,
-       ROUTE_TYPE_THROW,
-       ROUTE_TYPE_NAT,
-       ROUTE_TYPE_XRESOLVE,
-       _ROUTE_TYPE_MAX,
-       _ROUTE_TYPE_INVALID = -EINVAL
-} RouteType;
-
 typedef enum KeepConfiguration {
         KEEP_CONFIGURATION_NO,
         KEEP_CONFIGURATION_DHCP_ON_STOP,
@@ -155,13 +110,6 @@ typedef enum KeepConfiguration {
         _KEEP_CONFIGURATION_MAX,
         _KEEP_CONFIGURATION_INVALID = -EINVAL,
 } KeepConfiguration;
-
-typedef enum IPoIBMode {
-        IP_OIB_MODE_DATAGRAM,
-        IP_OIB_MODE_MODE_CONNECTED,
-        _IP_OIB_MODE_MODE_MAX,
-        _IP_OIB_MODE_MODE_INVALID = -EINVAL,
-} IPoIBMode;
 
 typedef enum DHCP6ClientStartMode {
         DHCP6_CLIENT_START_MODE_NO,
@@ -380,23 +328,8 @@ int ipv6_link_local_address_gen_type_to_mode(const char *name);
 const char *ipv6_privacy_extensions_type_to_name(int id);
 int ipv6_privacy_extensions_to_type(const char *name);
 
-const char *route_scope_type_to_name(int id);
-int route_scope_type_to_mode(const char *name);
-
-const char *route_type_to_name(int id);
-int route_type_to_mode(const char *name);
-
-const char *ipv6_route_preference_to_name(int id);
-int ipv6_route_preference_type_to_mode(const char *name);
-
-const char *route_protocol_to_name(int id);
-int route_protocol_to_mode(const char *name);
-
 const char *keep_configuration_type_to_name(int id);
 int keep_configuration_type_to_mode(const char *name);
-
-const char *ipoib_mode_to_name(int id);
-int ipoib_name_to_mode(const char *name);
 
 const char *dhcp6_client_start_mode_to_name(int id);
 int dhcp6_client_start_name_to_mode(const char *name);

@@ -173,7 +173,6 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
                 return;
 
         rule = (RoutingPolicyRule *) g_bytes_get_data(key, &size);
-
         if (rule->from_prefixlen > 0) {
                 r = ip_to_str(rule->from.family, &rule->from, &c);
                 if (r < 0)
@@ -220,6 +219,7 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
 
         json_object_object_add(jrule, "Table", jd);
         steal_ptr(jd);
+        steal_ptr(table);
 
         r = route_table_to_string(rule->table, &table);
         if (r >= 0) {
@@ -261,6 +261,8 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
                         json_object_object_add(jrule, "IPProtocolString", jd);
                         steal_ptr(jd);
                 }
+
+                steal_ptr(pe);
         }
 
         jd = json_object_new_int(rule->priority);
@@ -283,6 +285,56 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
 
         json_object_object_add(jrule, "OIF", jd);
         steal_ptr(jd);
+
+        if (rule->sport.start != 0 || rule->sport.end != 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                ja = json_object_new_array();
+                if (!ja)
+                        return;
+
+                jd = json_object_new_int(rule->sport.start);
+                if (!jd)
+                        return;
+
+                json_object_array_add(ja,  jd);
+                steal_ptr(jd);
+
+                jd = json_object_new_int(rule->sport.end);
+                if (!jd)
+                        return;
+
+                json_object_array_add(ja,  jd);
+                steal_ptr(jd);
+
+                json_object_object_add(jrule, "SourcePort", ja);
+                steal_ptr(ja);
+        }
+
+        if (rule->dport.start != 0 || rule->dport.end != 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                ja = json_object_new_array();
+                if (!ja)
+                        return;
+
+                jd = json_object_new_int(rule->dport.start);
+                if (!jd)
+                        return;
+
+                json_object_array_add(ja,  jd);
+                steal_ptr(jd);
+
+                jd = json_object_new_int(rule->dport.end);
+                if (!jd)
+                        return;
+
+                json_object_array_add(ja,  jd);
+                steal_ptr(jd);
+
+                json_object_object_add(jrule, "DestinationPort", ja);
+                steal_ptr(ja);
+        }
 
         json_object_array_add(jobj, jrule);
         steal_ptr(jrule);
