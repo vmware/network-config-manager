@@ -862,23 +862,23 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
         if (to)
                 add_key_to_section(section, "To", to);
 
-        if (rule->iif.ifindex > 0)
-                add_key_to_section(section, "IncomingInterface", rule->iif.ifname);
+        if (rule->iif)
+                add_key_to_section(section, "IncomingInterface", rule->iif);
 
-        if (rule->oif.ifindex > 0)
-                add_key_to_section(section, "OutgoingInterface", rule->oif.ifname);
+        if (rule->oif)
+                add_key_to_section(section, "OutgoingInterface", rule->oif);
 
-        if (rule->invert)
-                add_key_to_section(section, "Invert", bool_to_str(rule->invert));
+        if (rule->invert_rule)
+                add_key_to_section(section, "Invert", bool_to_str(rule->invert_rule));
 
-        if (rule->sport)
-                add_key_to_section(section, "SourcePort", rule->sport);
+        if (rule->sport_str)
+                add_key_to_section(section, "SourcePort", rule->sport_str);
 
-        if (rule->dport)
-                add_key_to_section(section, "DestinationPort", rule->dport);
+        if (rule->dport_str)
+                add_key_to_section(section, "DestinationPort", rule->dport_str);
 
-        if (rule->ipproto)
-                add_key_to_section(section, "IPProtocol", rule->ipproto);
+        if (rule->ipproto_str)
+                add_key_to_section(section, "IPProtocol", rule->ipproto_str);
 
         r = add_section_to_key_file(key_file, section);
         if (r < 0)

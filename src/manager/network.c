@@ -16,6 +16,7 @@
 #include "parse-util.h"
 #include "network-sriov.h"
 #include "string-util.h"
+#include "network-routing-policy-rule.h"
 
 #define BRIDGE_PRIORITY_MAX 63
 
@@ -706,33 +707,6 @@ int parse_network_file(const int ifindex, const char *ifname, char **ret) {
         return 0;
 }
 
-int routing_policy_rule_new(RoutingPolicyRule **ret) {
-        RoutingPolicyRule *rule;
-
-        rule = new(RoutingPolicyRule, 1);
-        if (!rule)
-                return -ENOMEM;
-
-        *rule = (RoutingPolicyRule) {
-                 .priority = G_MAXUINT,
-                 .tos = G_MAXUINT,
-                 .fwmark = G_MAXUINT,
-                };
-
-        *ret = rule;
-        return 0;
-}
-
-void routing_policy_rule_free(RoutingPolicyRule *rule) {
-        if (!rule)
-                return;
-
-        free(rule->ipproto);
-        free(rule->sport);
-        free(rule->dport);
-        free(rule);
-}
-
 int dhcp4_server_new(DHCP4Server **ret) {
         _cleanup_(dhcp4_server_freep) DHCP4Server *s = NULL;
 
@@ -775,7 +749,7 @@ static gboolean routing_policy_rule_equal(gconstpointer v1, gconstpointer v2) {
             a->fwmark == b->fwmark &&
             a->type == b->type &&
             a->tos == b->tos &&
-            a->invert == b->invert )
+            a->invert_rule == b->invert_rule )
                 return true;
 
         return false;
@@ -1156,7 +1130,7 @@ static void append_routing_policy_rules(gpointer key, gpointer value, gpointer u
         if (rule->table > 0 && rule->table != RT_TABLE_MAIN)
                 (void) add_key_to_section_uint(section, "Table", rule->table);
 
-        if (rule->tos != G_MAXUINT)
+        if (rule->tos != G_MAXUINT8)
                 (void) add_key_to_section_uint(section, "TypeOfService", rule->tos);
 
         if (rule->fwmark != G_MAXUINT)
