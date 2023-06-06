@@ -157,9 +157,9 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
 }
 
 static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_(json_object_putp) json_object *jd = NULL, *jrule = NULL;
+        _cleanup_(json_object_putp) json_object *jd = NULL, *jrule = NULL, *config_source = NULL;
+        _auto_cleanup_ char *from = NULL, *to = NULL, *table = NULL;
         json_object *jobj = (json_object *) userdata;
-        _auto_cleanup_ char *c = NULL, *table = NULL;
         RoutingPolicyRule *rule;
         size_t size;
         int r;
@@ -184,11 +184,10 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         steal_ptr(jd);
 
         if (rule->from_prefixlen > 0) {
-                r = ip_to_str(rule->from.family, &rule->from, &c);
+                r = ip_to_str(rule->from.family, &rule->from, &from);
                 if (r < 0)
                         return;
-
-                jd = json_object_new_string(c);
+                jd = json_object_new_string(from);
         } else
                 jd = json_object_new_string("");
 
@@ -206,11 +205,11 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
         steal_ptr(jd);
 
         if (rule->to_prefixlen > 0) {
-                r = ip_to_str(rule->to.family, &rule->to, &c);
+                r = ip_to_str(rule->to.family, &rule->to, &to);
                 if (r < 0)
                         return;
 
-                jd = json_object_new_string(c);
+                jd = json_object_new_string(to);
         } else
                 jd = json_object_new_string("");
 
@@ -409,6 +408,14 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
                 json_object_object_add(jrule, "DestinationPort", ja);
                 steal_ptr(ja);
         }
+
+        if ((from && manager_config_exists("RoutingPolicyRule", "From", from)) || (to && manager_config_exists("RoutingPolicyRule", "To", to)))
+                config_source = json_object_new_string("static");
+        else
+                config_source = json_object_new_string("foreign");
+
+        json_object_object_add(jrule, "ConfigSource", config_source);
+        steal_ptr(config_source);
 
         json_object_array_add(jobj, jrule);
         steal_ptr(jrule);
