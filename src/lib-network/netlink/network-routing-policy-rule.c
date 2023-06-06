@@ -177,7 +177,7 @@ static int fill_link_routing_policy_rule_message(RoutingPolicyRule *rule, struct
 
         if (tb[FRA_OIFNAME]) {
                 rule->oif = strdup(mnl_attr_get_str(tb[FRA_OIFNAME]));
-                if (!rule->iif)
+                if (!rule->oif)
                         return -ENOMEM;
         }
 
