@@ -787,7 +787,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
         r = dbus_get_string_systemd_manager("Version", &systemd);
         if (r >= 0 && systemd) {
-                display(arg_beautify, ansi_color_bold_cyan(), "     systemd version: ");
+                display(arg_beautify, ansi_color_bold_cyan(), "     Systemd Version: ");
                 printf("%s\n", systemd);
         }
 
