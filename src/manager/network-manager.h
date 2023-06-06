@@ -155,4 +155,4 @@ int manager_parse_proxy_config(GHashTable **c);
 
 int manager_write_network_config(const Network *n, const GString *config);
 
-int manager_config_exists(const char *section, const char *k, const char *v);
+bool manager_config_exists(const char *section, const char *k, const char *v);

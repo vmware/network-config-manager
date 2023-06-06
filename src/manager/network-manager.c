@@ -2240,7 +2240,7 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
         return dbus_network_reload();
 }
 
-int manager_config_exists(const char *section, const char *k, const char *v) {
+bool manager_config_exists(const char *section, const char *k, const char *v) {
          _cleanup_(globfree) glob_t g = {};
         int r;
 
@@ -2250,7 +2250,7 @@ int manager_config_exists(const char *section, const char *k, const char *v) {
 
         r = glob_files("/run/systemd/netif/links/*", 0, &g);
         if (r != -ENOENT)
-                return r;
+                return false;
 
         for (size_t i = 0; i < g.gl_pathc; i++) {
                 _auto_cleanup_ char *network = NULL;
