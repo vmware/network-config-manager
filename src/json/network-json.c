@@ -53,13 +53,13 @@ static void json_fill_link_addresses(gpointer key, gpointer value, gpointer user
         if (!jname)
                 return;
 
-        json_object_object_add(jaddr, "ifname", jname);
+        json_object_object_add(jaddr, "Name", jname);
 
         jip = json_object_new_string(c);
         if (!jip)
                 return;
 
-        json_object_object_add(jaddr, "ip", jip);
+        json_object_object_add(jaddr, "Address", jip);
 
         if (a->family == AF_INET)
                 jfamily = json_object_new_string("ipv4");
@@ -69,13 +69,13 @@ static void json_fill_link_addresses(gpointer key, gpointer value, gpointer user
         if (!jfamily)
                 return;
 
-        json_object_object_add(jaddr, "family", jfamily);
+        json_object_object_add(jaddr, "Family", jfamily);
 
         jidx = json_object_new_int(a->ifindex);
         if (!jidx)
                 return;
 
-        json_object_object_add(jaddr, "ifindex", jidx);
+        json_object_object_add(jaddr, "Index", jidx);
         json_object_array_add(jobj, jaddr);
 
         steal_ptr(jaddr);
@@ -104,24 +104,43 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
                 return;
 
         route = (Route *) g_bytes_get_data(key, &size);
+
+        if (route->family == AF_INET)
+                jfamily = json_object_new_string("ipv4");
+        else
+                jfamily = json_object_new_string("ipv6");
+        if (!jfamily)
+                return;
+
+        json_object_object_add(jrt, "Family", jfamily);
+        steal_ptr(jfamily);
+
+        jidx = json_object_new_int(route->ifindex);
+        if (!jidx)
+                return;
+
+        json_object_object_add(jrt, "Index", jidx);
+        steal_ptr(jidx);
+
         if_indextoname(route->ifindex, buf);
+        jname = json_object_new_string(buf);
+        if (!jname)
+                return;
+
+        json_object_object_add(jrt, "Name", jname);
+        steal_ptr(jname);
 
         r = ip_to_str_prefix(route->gw.family, &route->gw, &c);
         if (r < 0)
                 return;
 
-        jname = json_object_new_string(buf);
-        if (!jname)
-                return;
-
-        json_object_object_add(jrt, "ifname", jname);
-
         jip = json_object_new_string(c);
         if (!jip)
                 return;
 
-        json_object_object_add(jrt, "gateway", jip);
+        json_object_object_add(jrt, "Gateway", jip);
         steal_ptr(jip);
+        steal_ptr(c);
 
         r = ip_to_str_prefix(route->family, &route->dst, &c);
         if (r < 0)
@@ -131,29 +150,12 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
         if (!jip)
                 return;
 
-        json_object_object_add(jrt, "destination", jip);
+        json_object_object_add(jrt, "Destination", jip);
         steal_ptr(jip);
+        steal_ptr(c);
 
-        if (route->family == AF_INET)
-                jfamily = json_object_new_string("ipv4");
-        else
-                jfamily = json_object_new_string("ipv6");
-        if (!jfamily)
-                return;
-
-        json_object_object_add(jrt, "family", jfamily);
-
-        jidx = json_object_new_int(route->ifindex);
-        if (!jidx)
-                return;
-
-        json_object_object_add(jrt, "ifindex", jidx);
         json_object_array_add(jobj, jrt);
-
         steal_ptr(jrt);
-        steal_ptr(jname);
-        steal_ptr(jfamily);
-        steal_ptr(jidx);
 }
 
 static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointer userdata) {
