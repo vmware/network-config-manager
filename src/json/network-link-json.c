@@ -581,14 +581,14 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
                 if (!j)
                         return log_oom();
 
-                json_object_object_add(jobj, "OIF", j);
+                json_object_object_add(jobj, "OutgoingInterface", j);
                 steal_ptr(j);
 
                 j = json_object_new_int(rt->iif);
                 if (!j)
                         return log_oom();
 
-                json_object_object_add(jobj, "IIF", j);
+                json_object_object_add(jobj, "IncomingInterface", j);
                 steal_ptr(j);
 
                 j = json_object_new_int(rt->ttl_propogate);
