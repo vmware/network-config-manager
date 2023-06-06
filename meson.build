@@ -1,5 +1,5 @@
 project('network-config-manager', 'c',
-        version : '0.6.0',
+        version : '0.6.2',
         license : 'Apache-2.0',
         default_options: [
                 'c_std=gnu99',

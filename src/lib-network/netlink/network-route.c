@@ -7,6 +7,7 @@
 #include "network-route.h"
 #include "mnl_util.h"
 #include "network-util.h"
+#include "network-netlink.h"
 #include "string-util.h"
 
 int route_new(Route **ret) {
