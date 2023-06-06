@@ -2239,3 +2239,36 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
 
         return dbus_network_reload();
 }
+
+int manager_config_exists(const char *section, const char *k, const char *v) {
+         _cleanup_(globfree) glob_t g = {};
+        int r;
+
+        assert(section);
+        assert(k);
+        assert(v);
+
+        r = glob_files("/run/systemd/netif", 0, &g);
+        if (r != -ENOENT)
+                return r;
+
+        for (size_t i = 0; i < g.gl_pathc; i++) {
+                _auto_cleanup_ char *network = NULL;
+                int index;
+
+                r = parse_int(g.gl_pathv[i], &index);
+                if (r < 0)
+                        continue;
+
+                r = network_parse_link_network_file(index, &network);
+                if (r < 0)
+                        continue;
+
+                printf("%s\n", network);
+
+                if (config_contains(network, section, k, v))
+                        return true;
+        }
+
+        return false;
+}
