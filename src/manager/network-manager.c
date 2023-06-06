@@ -2248,7 +2248,7 @@ int manager_config_exists(const char *section, const char *k, const char *v) {
         assert(k);
         assert(v);
 
-        r = glob_files("/run/systemd/netif", 0, &g);
+        r = glob_files("/run/systemd/netif/links/*", 0, &g);
         if (r != -ENOENT)
                 return r;
 
@@ -2256,15 +2256,12 @@ int manager_config_exists(const char *section, const char *k, const char *v) {
                 _auto_cleanup_ char *network = NULL;
                 int index;
 
-                r = parse_int(g.gl_pathv[i], &index);
+                r = parse_int(g_path_get_basename(g.gl_pathv[i]), &index);
                 if (r < 0)
                         continue;
-
                 r = network_parse_link_network_file(index, &network);
                 if (r < 0)
                         continue;
-
-                printf("%s\n", network);
 
                 if (config_contains(network, section, k, v))
                         return true;
