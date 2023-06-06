@@ -11,51 +11,6 @@
 #include "network-util.h"
 #include "set.h"
 
-#ifndef RTNH_F_TRAP
-#define RTNH_F_TRAP             64      /* Nexthop is trapping packets */
-#endif
-
-/* rtm_flags */
-#ifndef RTM_F_NOTIFY
-#define RTM_F_NOTIFY            0x100   /* Notify user of route change  */
-#endif
-
-#ifndef RTM_F_CLONED
-#define RTM_F_CLONED            0x200   /* This route is cloned         */
-#endif
-
-#ifndef RTM_F_EQUALIZE
-#define RTM_F_EQUALIZE          0x400   /* Multipath equalizer: NI      */
-#endif
-
-#ifndef RTM_F_PREFIX
-#define RTM_F_PREFIX            0x800   /* Prefix addresses             */
-#endif
-
-#ifndef RTM_F_LOOKUP_TABLE
-#define RTM_F_LOOKUP_TABLE      0x1000  /* set rtm_table to FIB lookup result */
-#endif
-
-#ifndef RTM_F_FIB_MATCH
-#define RTM_F_FIB_MATCH         0x2000  /* return full fib lookup match */
-#endif
-
-#ifndef RTM_F_OFFLOAD
-#define RTM_F_OFFLOAD           0x4000  /* route is offloaded */
-#endif
-
-#ifndef RTM_F_TRAP
-#define RTM_F_TRAP              0x8000  /* route is trapping packets */
-#endif
-
-#ifndef RTM_F_OFFLOAD_FAILED
-#define RTM_F_OFFLOAD_FAILED    0x20000000 /* route offload failed, this value
-                                            * is chosen to avoid conflicts with
-                                            * other flags defined in
-                                            * include/uapi/linux/ipv6_route.h
-                                            */
-#endif
-
 /* iproute */
 typedef enum RouteTable {
        ROUTE_TABLE_UNSPEC,

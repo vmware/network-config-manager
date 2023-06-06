@@ -5,6 +5,7 @@
 #include "alloc-util.h"
 #include "log.h"
 #include "network-routing-policy-rule.h"
+#include "network-netlink.h"
 #include "mnl_util.h"
 #include "network-util.h"
 
