@@ -512,11 +512,6 @@ static int list_one_link(char *argv[]) {
         link_state_to_color(operational_state, &operational_state_color);
         link_state_to_color(setup_state, &setup_set_color);
 
-        (void) network_parse_link_dns(l->ifindex, &dns);
-        (void) network_parse_link_search_domains(l->ifindex, &search_domains);
-        (void) network_parse_link_route_domains(l->ifindex, &route_domains);
-        (void) network_parse_link_ntp(l->ifindex, &ntp);
-
         (void) network_parse_link_network_file(l->ifindex, &network);
 
         (void)  display_one_link_device(l, true, &link);
@@ -630,7 +625,8 @@ static int list_one_link(char *argv[]) {
                 }
         }
 
-        if (dns) {
+        r = network_parse_link_dns(l->ifindex, &dns);
+        if (r >= 0 && dns) {
                 _auto_cleanup_ char *s = NULL;
 
                 s = strv_join(" ", dns);
@@ -641,7 +637,8 @@ static int list_one_link(char *argv[]) {
                 printf("%s\n", s);
         }
 
-        if (search_domains) {
+        r = network_parse_link_search_domains(l->ifindex, &search_domains);
+        if (r >= 0 && search_domains) {
                 _auto_cleanup_ char *s = NULL;
 
                 s = strv_join(" ", search_domains);
@@ -652,7 +649,8 @@ static int list_one_link(char *argv[]) {
                 printf("%s\n", s);
         }
 
-        if (route_domains) {
+        r = network_parse_link_route_domains(l->ifindex, &route_domains);
+        if (r >= 0 && route_domains) {
                 _auto_cleanup_ char *s = NULL;
 
                 s = strv_join(" ", route_domains);
@@ -663,7 +661,9 @@ static int list_one_link(char *argv[]) {
                 printf("%s\n", s);
         }
 
-        if (ntp) {
+
+        r = network_parse_link_ntp(l->ifindex, &ntp);
+        if (r >= 0 && ntp) {
                 _auto_cleanup_ char *s = NULL;
 
                 s = strv_join(" ", ntp);
@@ -674,8 +674,8 @@ static int list_one_link(char *argv[]) {
                 printf("%s\n", s);
         }
 
-        (void) network_parse_link_timezone(l->ifindex, &tz);
-        if (tz) {
+        r = network_parse_link_timezone(l->ifindex, &tz);
+        if (r >= 0 && tz) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                   Time Zone: ");
                 printf("%s\n", tz);
         }
@@ -772,8 +772,8 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         if (arg_json)
                 return json_fill_system_status(NULL);
 
-        (void) dbus_get_property_from_hostnamed("StaticHostname", &hostname);
-        if (hostname) {
+        r =  dbus_get_property_from_hostnamed("StaticHostname", &hostname);
+        if (r >=0 && hostname) {
                 display(arg_beautify, ansi_color_bold_cyan(), "         System Name: ");
                 printf("%s\n",hostname);
         }
@@ -785,26 +785,26 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 printf("%s (%s)\n", kernel, str_na(kernel_release));
         }
 
-        (void) dbus_get_string_systemd_manager("Version", &systemd);
-        if (systemd) {
+        r = dbus_get_string_systemd_manager("Version", &systemd);
+        if (r >= 0 && systemd) {
                 display(arg_beautify, ansi_color_bold_cyan(), "     systemd version: ");
                 printf("%s\n", systemd);
         }
 
-        (void) dbus_get_string_systemd_manager("Architecture", &arch);
-        if (arch) {
+        r = dbus_get_string_systemd_manager("Architecture", &arch);
+        if (r >= 0 && arch) {
                 display(arg_beautify, ansi_color_bold_cyan(), "        Architecture: ");
                 printf("%s\n", arch);
         }
 
-        (void) dbus_get_string_systemd_manager("Virtualization", &virt);
-        if (virt) {
+        r = dbus_get_string_systemd_manager("Virtualization", &virt);
+        if (r >= 0 && virt) {
                 display(arg_beautify, ansi_color_bold_cyan(), "      Virtualization: ");
                 printf("%s\n", virt);
         }
 
-        (void) dbus_get_property_from_hostnamed("OperatingSystemPrettyName", &os);
-        if (os) {
+        r = dbus_get_property_from_hostnamed("OperatingSystemPrettyName", &os);
+        if (r >= 0 && os) {
                 display(arg_beautify, ansi_color_bold_cyan(), "    Operating System: ");
                 printf("%s\n", os);
         }
@@ -884,11 +884,8 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 }
         }
 
-        (void) network_parse_dns(&dns);
-        (void) network_parse_ntp(&ntp);
-        (void) network_parse_search_domains(&search_domains);
-
-        if (dns) {
+        r = network_parse_dns(&dns);
+        if (r >= 0 && dns) {
                 _auto_cleanup_ char *s = NULL, *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL, *dns_sec = NULL;
                 _cleanup_(dns_servers_freep) DNSServers *c = NULL;
                 GSequenceIter *itr;
@@ -925,7 +922,8 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                        str_na(mdns), str_na(llmnr), str_na(dns_over_tls), str_na(conf_mode), str_na(dns_sec));
         }
 
-        if (search_domains) {
+        r = network_parse_search_domains(&search_domains);
+        if (r >= 0 && search_domains) {
                 _auto_cleanup_ char *s = NULL;
 
                 s = strv_join(" ", search_domains);
@@ -936,7 +934,8 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 printf("%s\n", s);
         }
 
-        if (ntp) {
+        r = network_parse_ntp(&ntp);
+        if (r >= 0 && ntp) {
                 _auto_cleanup_ char *s = NULL;
 
                 s = strv_join(" ", ntp);
