@@ -15,7 +15,7 @@
 #include "netlink-message.h"
 #include "netlink.h"
 #include "network-address.h"
-#include "network-netlink.h"
+#include "netlink-missing.h"
 #include "network-util.h"
 #include "set.h"
 

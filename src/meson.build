@@ -56,7 +56,7 @@ network_config_manager_sources = files('''
         share/string-util.c
         lib-network/mnl/mnl_util.h
         lib-network/mnl/mnl_util.c
-        lib-network/netlink/network-netlink.h
+        lib-network/netlink/netlink-missing.h
         lib-network/netlink/netlink.h
         lib-network/netlink/netlink.c
         lib-network/netlink/netlink-message.h
