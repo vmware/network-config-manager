@@ -446,7 +446,7 @@ int json_fill_system_status(char **ret) {
                 if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "System Name", js);
+                json_object_object_add(jobj, "SystemName", js);
                 steal_ptr(js);
         }
 
