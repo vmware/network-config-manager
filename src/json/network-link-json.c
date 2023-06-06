@@ -19,6 +19,7 @@
 #include "network-link.h"
 #include "network-manager.h"
 #include "network-route.h"
+#include "netlink-missing.h"
 #include "network-util.h"
 #include "networkd-api.h"
 #include "network-json.h"
