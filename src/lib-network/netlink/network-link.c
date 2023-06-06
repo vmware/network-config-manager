@@ -9,7 +9,7 @@
 #include "netlink-message.h"
 #include "netlink.h"
 #include "network-link.h"
-#include "network-netlink.h"
+#include "netlink-missing.h"
 #include "parse-util.h"
 #include "string-util.h"
 #include "mnl_util.h"
