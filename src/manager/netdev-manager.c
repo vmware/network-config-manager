@@ -29,15 +29,18 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
         /* remove .netdev file  */
         (void) remove_config_files_glob("/etc/systemd/network/*.netdev", "NetDev", "Name", ifname);
         (void) remove_config_files_glob("/lib/systemd/network/*.netdev", "NetDev", "Name", ifname);
+        (void) remove_config_files_glob("/run/systemd/network/*.netdev", "NetDev", "Name", ifname);
 
         /* remove .network */
         (void) remove_config_files_glob("/etc/systemd/network/*.network", "Match", "Name", ifname);
         (void) remove_config_files_glob("/lib/systemd/network/*.network", "Match", "Name", ifname);
+        (void) remove_config_files_glob("/run/systemd/network/*.network", "Match", "Name", ifname);
 
         /* Remove [Network] section */
         if (kind) {
                 (void) remove_config_files_section_glob("/etc/systemd/network/*.network", "Network", kind, ifname);
                 (void) remove_config_files_section_glob("/lib/systemd/network/*.network", "Network", kind, ifname);
+                (void) remove_config_files_section_glob("/run/systemd/network/*.network", "Network", kind, ifname);
         }
 
         r = parse_ifname_or_index(ifname, &p);
