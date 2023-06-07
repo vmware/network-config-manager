@@ -31,7 +31,7 @@ static void json_fill_link_addresses(gpointer key, gpointer value, gpointer user
         _cleanup_(json_object_putp) json_object *js = NULL, *jname = NULL, *jfamily = NULL,
                 *jidx = NULL, *jaddr = NULL;
         json_object *jobj = (json_object *) userdata;
-        _auto_cleanup_ char *c = NULL;
+        _auto_cleanup_ char *c = NULL, *dhcp = NULL;
         char buf[IF_NAMESIZE + 1] = {};
         size_t size;
         Address *a;
@@ -91,6 +91,33 @@ static void json_fill_link_addresses(gpointer key, gpointer value, gpointer user
 
         address_flags_to_string(a, jaddr, a->flags);
 
+        if (a->ci.ifa_prefered != UINT32_MAX)
+                js = json_object_new_int(a->ci.ifa_prefered);
+        else
+                js = json_object_new_string("forever");
+        if (!js)
+                return;
+
+        json_object_object_add(jaddr, "PreferedLifetime", js);
+        steal_ptr(js);
+
+        if (a->ci.ifa_valid != UINT32_MAX)
+                js = json_object_new_int(a->ci.ifa_valid);
+                else
+                        js = json_object_new_string("forever");
+        if (!js)
+                return;
+
+        json_object_object_add(jaddr, "ValidLifetime", js);
+        steal_ptr(js);
+
+        js = json_object_new_string(a->label ? a->label : "");
+        if (!js)
+                return;
+
+        json_object_object_add(jaddr, "Label", js);
+        steal_ptr(js);
+
         if_indextoname(a->ifindex, buf);
         js = json_object_new_string(buf);
         if (!js)
@@ -105,6 +132,47 @@ static void json_fill_link_addresses(gpointer key, gpointer value, gpointer user
 
         json_object_object_add(jaddr, "Index", js);
         steal_ptr(js);
+
+        r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
+        if (r >= 0 && string_has_prefix(c, dhcp)) {
+                _auto_cleanup_ char *provider = NULL;
+
+                js = json_object_new_string("dhcp");
+                if (!js)
+                        return;
+
+                json_object_object_add(jaddr, "ConfigSource", js);
+                steal_ptr(js);
+
+                r = network_parse_link_dhcp4_server_address(a->ifindex, &provider);
+                if (r >= 0) {
+                        js = json_object_new_string(provider);
+                        if (!js)
+                                return;
+
+                        json_object_object_add(jaddr, "ConfigProvider", js);
+                        steal_ptr(js);
+                }
+        } else {
+                _auto_cleanup_ char *network = NULL;
+
+                        r = parse_network_file(a->ifindex, NULL, &network);
+                        if (r >= 0) {
+                                if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c)) {
+                                        js = json_object_new_string("static");
+                                        if (!js)
+                                                return;
+                                } else {
+                                        js = json_object_new_string("foreign");
+                                        if (!js)
+                                                return;
+                                }
+                        }
+
+                        json_object_object_add(jaddr, "ConfigSource", js);
+                        steal_ptr(js);
+        }
+
         json_object_array_add(jobj, jaddr);
         steal_ptr(jaddr);
 }
