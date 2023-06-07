@@ -917,9 +917,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         r = network_parse_dns(&dns);
         if (r >= 0 && dns) {
                 _auto_cleanup_ char *s = NULL, *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL, *dns_sec = NULL;
-                _cleanup_(dns_servers_freep) DNSServers *c = NULL;
-                GSequenceIter *itr;
-                DNSServer *d;
+                _auto_cleanup_ DNSServer *c = NULL;
 
                 s = strv_join(" ", dns);
                 if (!s)
@@ -928,13 +926,11 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                 DNS: ");
                 printf("%s \n", s);
 
-                r = dbus_get_current_dns_servers_from_resolved(&c);
-                if (r >= 0 && c && !g_sequence_is_empty(c->dns_servers)) {
+                r = dbus_get_current_dns_server_from_resolved(&c);
+                if (r >= 0 && c) {
                         _auto_cleanup_ char *pretty = NULL;
 
-                        itr = g_sequence_get_begin_iter(c->dns_servers);
-                        d = g_sequence_get(itr);
-                        r = ip_to_str(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(c->address.family, &c->address, &pretty);
                         if (r >= 0) {
                                 display(beautify_enabled(), ansi_color_bold_cyan(), "  Current DNS Server:");
                                 printf(" %s\n", pretty);

@@ -21,7 +21,7 @@ int dbus_stop_unit(const char *unit);
 int dbus_restart_unit(const char *unit);
 
 int dbus_acquire_dns_servers_from_resolved(const char *dns, DNSServers **ret);
-int dbus_get_current_dns_servers_from_resolved(DNSServers **ret);
+int dbus_get_current_dns_server_from_resolved(DNSServer **ret);
 
 int dbus_add_dns_server(int ifindex, DNSServers *serv);
 int dbus_add_dns_domains(int ifindex, char **domains);

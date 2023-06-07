@@ -2476,7 +2476,8 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
 }
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
-        _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
+        _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
+        _auto_cleanup_ DNSServer *current = NULL;
         _auto_cleanup_ char *dns_config = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buf[IF_NAMESIZE + 1] = {};
@@ -2528,13 +2529,11 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 printf("\n");
         }
 
-        r = dbus_get_current_dns_servers_from_resolved(&current);
-        if (r >= 0 && current && !g_sequence_is_empty(current->dns_servers)) {
+        r = dbus_get_current_dns_server_from_resolved(&current);
+        if (r >= 0 && current) {
                 _auto_cleanup_ char *pretty = NULL;
 
-                itr = g_sequence_get_begin_iter(current->dns_servers);
-                d = g_sequence_get(itr);
-                r = ip_to_str(d->address.family, &d->address, &pretty);
+                r = ip_to_str(current->address.family, &current->address, &pretty);
                 if (r >= 0) {
                         display(beautify_enabled(), ansi_color_bold_cyan(), "CurrentDNSServer:");
                         printf(" %s\n", pretty);
@@ -2581,7 +2580,8 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 }
 
 _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
-        _cleanup_(dns_servers_freep) DNSServers *dns = NULL, *current = NULL;
+        _auto_cleanup_ DNSServer *current = NULL;
+        _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *dns_config = NULL;
         GSequenceIter *itr;
@@ -2641,13 +2641,11 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
                 printf("\n");
         }
 
-        r = dbus_get_current_dns_servers_from_resolved(&current);
-        if (r >= 0 && current && !g_sequence_is_empty(current->dns_servers)) {
+        r = dbus_get_current_dns_server_from_resolved(&current);
+        if (r >= 0 && current) {
                 _auto_cleanup_ char *pretty = NULL;
 
-                itr = g_sequence_get_begin_iter(current->dns_servers);
-                d = g_sequence_get(itr);
-                r = ip_to_str(d->address.family, &d->address, &pretty);
+                r = ip_to_str(current->address.family, &current->address, &pretty);
                 if (r >= 0) {
                         display(beautify_enabled(), ansi_color_bold_cyan(), "CurrentDNSServer: ");
                         printf("%s ", pretty);

@@ -299,9 +299,9 @@ int json_fill_system_status(char **ret) {
                 *online_state = NULL, *address_state = NULL, *ipv4_address_state = NULL, *ipv6_address_state = NULL;
         _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
         _cleanup_(routing_policy_rules_freep) RoutingPolicyRules *rules = NULL;
-        _cleanup_(dns_servers_freep) DNSServers *c = NULL;
         _cleanup_(links_freep) Links *links = NULL;
         _auto_cleanup_strv_ char **ntp = NULL;
+        _auto_cleanup_ DNSServer *c = NULL;
         sd_id128_t machine_id = {};
         int r;
 
@@ -507,15 +507,11 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(ja);
         }
 
-        r = dbus_get_current_dns_servers_from_resolved(&c);
-        if (r >= 0 && c && !g_sequence_is_empty(c->dns_servers)) {
+        r = dbus_get_current_dns_server_from_resolved(&c);
+        if (r >= 0 && c) {
                 _auto_cleanup_ char *pretty = NULL;
-                GSequenceIter *itr;
-                DNSServer *d;
 
-                itr = g_sequence_get_begin_iter(c->dns_servers);
-                d = g_sequence_get(itr);
-                r =ip_to_str(d->address.family, &d->address, &pretty);
+                r =ip_to_str(c->address.family, &c->address, &pretty);
                 if (r >= 0) {
                         _cleanup_(json_object_putp) json_object *jd = NULL;
 
@@ -523,7 +519,7 @@ int json_fill_system_status(char **ret) {
                         if (!jd)
                                 return log_oom();
 
-                        json_object_object_add(jobj, "CurrentDNSServer",jd);
+                        json_object_object_add(jobj, "CurrentDNSServer", jd);
                         steal_ptr(jd);
                         steal_ptr(pretty);
                 }
@@ -622,8 +618,9 @@ int json_fill_system_status(char **ret) {
 }
 
 int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
-        _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL, *current = NULL;
+        _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _auto_cleanup_ DNSServer *current = NULL;
         _auto_cleanup_ char *provider = NULL;
         GSequenceIter *i;
         DNSServer *d;
@@ -697,13 +694,11 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
 
         }
 
-        r = dbus_get_current_dns_servers_from_resolved(&current);
-        if (r >= 0 && current && !g_sequence_is_empty(current->dns_servers)) {
+        r = dbus_get_current_dns_server_from_resolved(&current);
+        if (r >= 0 && current) {
                 _auto_cleanup_ char *pretty = NULL;
 
-                i = g_sequence_get_begin_iter(current->dns_servers);
-                d = g_sequence_get(i);
-                r = ip_to_str(d->address.family, &d->address, &pretty);
+                r = ip_to_str(current->address.family, &current->address, &pretty);
                 if (r >= 0) {
                         json_object *s = json_object_new_string(pretty);
                         if (!s)
