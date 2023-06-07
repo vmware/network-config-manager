@@ -179,7 +179,7 @@ static void json_fill_link_addresses(gpointer key, gpointer value, gpointer user
 
 static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jrt = NULL;
-        _auto_cleanup_ char *c = NULL, *table = NULL, *destination = NULL;
+        _auto_cleanup_ char *gw = NULL, *table = NULL, *destination = NULL;
         json_object *jobj = (json_object *) userdata;
         char buf[IF_NAMESIZE + 1] = {};
         Route *rt;
@@ -221,29 +221,28 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
         json_object_object_add(jrt, "Name", js);
         steal_ptr(js);
 
-        r = ip_to_str_prefix(rt->gw.family, &rt->gw, &c);
+        r = ip_to_str_prefix(rt->gw.family, &rt->gw, &gw);
         if (r < 0)
                 return;
 
-        js = json_object_new_string(c);
+        js = json_object_new_string(gw);
         if (!js)
                 return;
 
         json_object_object_add(jrt, "Gateway", js);
         steal_ptr(js);
-        steal_ptr(c);
 
-        r = ip_to_str_prefix(rt->family, &rt->dst, &c);
+        r = ip_to_str_prefix(rt->family, &rt->dst, &destination);
         if (r < 0)
                 return;
 
-        js = json_object_new_string(c);
+        js = json_object_new_string(destination);
         if (!js)
                 return;
 
         json_object_object_add(jrt, "Destination", js);
         steal_ptr(js);
-        steal_ptr(c);
+        steal_ptr(destination);
 
         js = json_object_new_int(rt->type);
         if (!js)
@@ -309,6 +308,51 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
                 if (r < 0)
                         return;
         }
+
+        if (gw) {
+                _auto_cleanup_ char *dhcp = NULL;
+
+                r = network_parse_link_dhcp4_router(rt->ifindex, &dhcp);
+                if (r >= 0 && string_has_prefix(gw, dhcp)) {
+                        _auto_cleanup_ char *provider = NULL;
+
+                        js = json_object_new_string("dhcp");
+                        if (!js)
+                                return;
+
+                        json_object_object_add(jrt, "ConfigSource", js);
+                        steal_ptr(js);
+
+                        r = network_parse_link_dhcp4_server_address(rt->ifindex, &provider);
+                        if (r >= 0) {
+                                js = json_object_new_string(provider);
+                                if (!js)
+                                        return;
+
+                                json_object_object_add(jrt, "ConfigProvider", js);
+                                steal_ptr(js);
+                        }
+                } else {
+                        _auto_cleanup_ char *network = NULL;
+
+                        r = parse_network_file(rt->ifindex, NULL, &network);
+                        if (r >= 0) {
+                                if (config_exists(network, "Network", "Gateway", gw) || config_exists(network, "Route", "Gateway", gw)) {
+                                        js = json_object_new_string("static");
+                                        if (!js)
+                                                return;
+                                } else {
+                                        js = json_object_new_string("foreign");
+                                        if (!js)
+                                                return;
+                                }
+                        }
+
+                        json_object_object_add(jrt, "ConfigSource", js);
+                        steal_ptr(js);
+                }
+        }
+        steal_ptr(gw);
 
         json_object_array_add(jobj, jrt);
         steal_ptr(jrt);
