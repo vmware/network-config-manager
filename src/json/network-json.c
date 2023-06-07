@@ -575,11 +575,11 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        r = dbus_get_system_property_from_networkd("AddressState", &online_state);
+        r = dbus_get_system_property_from_networkd("AddressState", &address_state);
         if (r >= 0) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                js = json_object_new_string(online_state);
+                js = json_object_new_string(address_state);
                 if (!js)
                         return log_oom();
 
@@ -587,15 +587,27 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        r = dbus_get_system_property_from_networkd("IPv4AddressState", &online_state);
+        r = dbus_get_system_property_from_networkd("IPv4AddressState", &ipv4_address_state);
         if (r >= 0) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                js = json_object_new_string(online_state);
+                js = json_object_new_string(ipv4_address_state);
                 if (!js)
                         return log_oom();
 
                 json_object_object_add(jobj, "IPv4AddressState", js);
+                steal_ptr(js);
+        }
+
+        r = dbus_get_system_property_from_networkd("IPv6AddressState", &ipv6_address_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(ipv6_address_state);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "IPv6AddressState", js);
                 steal_ptr(js);
         }
 
