@@ -587,6 +587,18 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
+        r = dbus_get_system_property_from_networkd("IPv4AddressState", &online_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(online_state);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "IPv4AddressState", js);
+                steal_ptr(js);
+        }
+
         r = netlink_acquire_all_link_addresses(&h);
         if (r >= 0 && set_size(h->addresses) > 0) {
                 jaddress = json_object_new_array();
