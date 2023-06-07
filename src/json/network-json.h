@@ -7,6 +7,7 @@
 #include <json-c/json.h>
 
 #include "network-util.h"
+#include "network-address.h"
 
 DEFINE_CLEANUP(json_object*, json_object_put);
 
@@ -15,3 +16,5 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret);
 
 int json_fill_dns_server(const IfNameIndex *p, char *dns_config);
 int json_fill_dns_server_domains(void);
+
+int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags);
