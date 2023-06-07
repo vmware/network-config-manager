@@ -7,13 +7,13 @@
 #include "networkd-api.h"
 #include "string-util.h"
 
-int network_parse_operational_state(char **state) {
+int network_parse_string(const char *key, char **state) {
         _auto_cleanup_ char *s = NULL;
         int r;
 
         assert(state);
 
-        r = parse_state_file("/run/systemd/netif/state", "OPER_STATE", &s, NULL);
+        r = parse_state_file("/run/systemd/netif/state", key, &s, NULL);
         if (r < 0)
                 return r;
 
@@ -22,6 +22,26 @@ int network_parse_operational_state(char **state) {
 
         *state = steal_ptr(s);
         return 0;
+}
+
+int network_parse_operational_state(char **ret) {
+        return network_parse_string("OPER_STATE", ret);
+}
+
+int network_parse_carrier_state(char **ret) {
+        return network_parse_string("CARRIER_STATE", ret);
+}
+
+int network_parse_address_state(char **ret) {
+        return network_parse_string("ADDRESS_STATE", ret);
+}
+
+int network_parse_ipv4_address_state(char **ret) {
+        return network_parse_string("IPV4_ADDRESS_STATE", ret);
+}
+
+int network_parse_ipv6_address_state(char **ret) {
+        return network_parse_string("IPV6_ADDRESS_STATE", ret);
 }
 
 static int network_parse_strv(const char *key, char ***ret) {

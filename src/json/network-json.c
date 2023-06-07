@@ -427,7 +427,7 @@ int json_fill_system_status(char **ret) {
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jaddress = NULL, *jroutes = NULL;
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
-                *online_state = NULL;
+                *online_state = NULL, *address_state = NULL, *ipv4_address_state = NULL, *ipv6_address_state = NULL;
         _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
         _cleanup_(routing_policy_rules_freep) RoutingPolicyRules *rules = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **domains = NULL, **ntp = NULL;
@@ -572,6 +572,42 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "OnlineState", js);
+                steal_ptr(js);
+        }
+
+        r = dbus_get_system_property_from_networkd("AddressState", &address_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(address_state);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "AddressState", js);
+                steal_ptr(js);
+        }
+
+        r = dbus_get_system_property_from_networkd("IPv4AddressState", &ipv4_address_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(ipv4_address_state);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "IPv4AddressState", js);
+                steal_ptr(js);
+        }
+
+        r = dbus_get_system_property_from_networkd("IPv6AddressState", &ipv6_address_state);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(ipv6_address_state);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "IPv6AddressState", js);
                 steal_ptr(js);
         }
 
