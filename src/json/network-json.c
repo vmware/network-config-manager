@@ -296,7 +296,9 @@ int json_fill_system_status(char **ret) {
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
-                *online_state = NULL, *address_state = NULL, *ipv4_address_state = NULL, *ipv6_address_state = NULL;
+                *online_state = NULL, *address_state = NULL, *ipv4_address_state = NULL,
+                *ipv6_address_state = NULL, *hwvendor = NULL, *hwmodel = NULL, *firmware = NULL,
+                *firmware_vendor = NULL, *firmware_date = NULL;
         _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
         _cleanup_(routing_policy_rules_freep) RoutingPolicyRules *rules = NULL;
         _cleanup_(links_freep) Links *links = NULL;
@@ -309,8 +311,8 @@ int json_fill_system_status(char **ret) {
         if (!jobj)
                 return log_oom();
 
-        (void) dbus_get_property_from_hostnamed("StaticHostname", &hostname);
-        if (hostname) {
+        r = dbus_get_property_from_hostnamed("StaticHostname", &hostname);
+        if (r >=0 && hostname) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
                 js = json_object_new_string(hostname);
@@ -321,8 +323,8 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        (void) dbus_get_property_from_hostnamed("KernelName", &kernel);
-        if (kernel) {
+        r = dbus_get_property_from_hostnamed("KernelName", &kernel);
+        if (r >=0 && kernel) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
                 js = json_object_new_string(kernel);
@@ -333,8 +335,8 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        (void) dbus_get_property_from_hostnamed("KernelRelease", &kernel_release);
-        if (kernel_release) {
+        r = dbus_get_property_from_hostnamed("KernelRelease", &kernel_release);
+        if (r >=0 && kernel_release) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
                 js = json_object_new_string(kernel_release);
@@ -345,8 +347,8 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        (void) dbus_get_string_systemd_manager("Version", &systemd);
-        if (systemd) {
+        r = dbus_get_string_systemd_manager("Version", &systemd);
+        if (r >=0 && systemd) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
                 js = json_object_new_string(systemd);
@@ -357,8 +359,8 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        (void) dbus_get_string_systemd_manager("Architecture", &arch);
-        if (arch) {
+        r = dbus_get_string_systemd_manager("Architecture", &arch);
+        if (r >=0 && arch) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
                 js = json_object_new_string(arch);
@@ -369,8 +371,8 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        (void) dbus_get_string_systemd_manager("Virtualization", &virt);
-        if (virt) {
+        r = dbus_get_string_systemd_manager("Virtualization", &virt);
+        if (r >=0 && virt) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
                 js = json_object_new_string(virt);
@@ -381,15 +383,75 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        (void) dbus_get_property_from_hostnamed("OperatingSystemPrettyName", &os);
-        if (os) {
+        r = dbus_get_property_from_hostnamed("OperatingSystemPrettyName", &os);
+        if (r >=0 && os) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
                 js = json_object_new_string(os);
                 if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "OperatingSystem", js);
+                json_object_object_add(jobj, "OperatingSystemPrettyName", js);
+                steal_ptr(js);
+        }
+
+        r = dbus_get_property_from_hostnamed("HardwareVendor", &hwvendor);
+        if (r >= 0 && hwvendor) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(hwvendor);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "HardwareVendor", js);
+                steal_ptr(js);
+        }
+
+        r = dbus_get_property_from_hostnamed("HardwareModel", &hwmodel);
+        if (r >= 0 && hwmodel) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(hwmodel);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "HardwareModel", js);
+                steal_ptr(js);
+        }
+
+        r = dbus_get_property_from_hostnamed("FirmwareVersion", &firmware);
+        if (r >= 0 && firmware) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(firmware);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "FirmwareVersion", js);
+                steal_ptr(js);
+        }
+
+        r = dbus_get_property_from_hostnamed("FirmwareVendor", &firmware_vendor);
+        if (r >= 0 && firmware_vendor) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(firmware_vendor);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "FirmwareVendor", js);
+                steal_ptr(js);
+        }
+
+        r = dbus_get_property_from_hostnamed("FirmwareDate", &firmware_date);
+        if (r >= 0 && firmware_date) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+
+                js = json_object_new_string(firmware_date);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "FirmwareDate", js);
                 steal_ptr(js);
         }
 
