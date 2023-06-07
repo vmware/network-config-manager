@@ -26,7 +26,7 @@
 #include "parse-util.h"
 #include "udev-hwdb.h"
 
-static int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags) {
+int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags) {
         static const char* table[] = {
                            [IFA_F_NODAD]          = "nodad",
                            [IFA_F_OPTIMISTIC]     = "optimistic",

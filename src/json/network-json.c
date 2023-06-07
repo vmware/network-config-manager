@@ -28,7 +28,7 @@
 #include "udev-hwdb.h"
 
 static void json_fill_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_(json_object_putp) json_object *jip = NULL, *jname = NULL, *jfamily = NULL,
+        _cleanup_(json_object_putp) json_object *js = NULL, *jname = NULL, *jfamily = NULL,
                 *jidx = NULL, *jaddr = NULL;
         json_object *jobj = (json_object *) userdata;
         _auto_cleanup_ char *c = NULL;
@@ -43,46 +43,70 @@ static void json_fill_link_addresses(gpointer key, gpointer value, gpointer user
 
         a = (Address *) g_bytes_get_data(key, &size);
 
-        if_indextoname(a->ifindex, buf);
-
-        r = ip_to_str_prefix(a->family, &a->address, &c);
+        r = ip_to_str(a->family, &a->address, &c);
         if (r < 0)
                 return;
 
-        jname = json_object_new_string(buf);
-        if (!jname)
+        js = json_object_new_string(c);
+        if (!js)
                 return;
 
-        json_object_object_add(jaddr, "Name", jname);
+        json_object_object_add(jaddr, "Address", js);
+        steal_ptr(js);
 
-        jip = json_object_new_string(c);
-        if (!jip)
+        js = json_object_new_int(a->address.prefix_len);
+        if (!js)
                 return;
 
-        json_object_object_add(jaddr, "Address", jip);
+        json_object_object_add(jaddr, "PrefixLength", js);
+        steal_ptr(js);
 
         if (a->family == AF_INET)
-                jfamily = json_object_new_string("ipv4");
+                js = json_object_new_string("ipv4");
         else
-                jfamily = json_object_new_string("ipv6");
+                js = json_object_new_string("ipv6");
 
-        if (!jfamily)
+        if (!js)
+                return;
+        json_object_object_add(jaddr, "Family", js);
+        steal_ptr(js);
+
+        js = json_object_new_int(a->scope);
+        if (!js)
+                return;
+        json_object_object_add(jaddr, "Scope", js);
+        steal_ptr(js);
+
+        js = json_object_new_string(route_scope_type_to_name(a->scope));
+        if (!js)
+                return;
+        json_object_object_add(jaddr, "ScopeString", js);
+        steal_ptr(js);
+
+        js= json_object_new_int(a->flags);
+        if (!js)
+                return;
+        json_object_object_add(jaddr, "Flags", js);
+        steal_ptr(js);
+
+        address_flags_to_string(a, jaddr, a->flags);
+
+        if_indextoname(a->ifindex, buf);
+        js = json_object_new_string(buf);
+        if (!js)
                 return;
 
-        json_object_object_add(jaddr, "Family", jfamily);
+        json_object_object_add(jaddr, "Name", js);
+        steal_ptr(js);
 
-        jidx = json_object_new_int(a->ifindex);
-        if (!jidx)
+        js = json_object_new_int(a->ifindex);
+        if (!js)
                 return;
 
-        json_object_object_add(jaddr, "Index", jidx);
+        json_object_object_add(jaddr, "Index", js);
+        steal_ptr(js);
         json_object_array_add(jobj, jaddr);
-
         steal_ptr(jaddr);
-        steal_ptr(jip);
-        steal_ptr(jname);
-        steal_ptr(jfamily);
-        steal_ptr(jidx);
 }
 
 static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdata) {
