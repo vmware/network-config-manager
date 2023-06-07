@@ -178,12 +178,11 @@ static void json_fill_link_addresses(gpointer key, gpointer value, gpointer user
 }
 
 static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_(json_object_putp) json_object *jip = NULL, *jname = NULL, *jfamily = NULL,
-                *jidx = NULL, *jrt = NULL;
+        _cleanup_(json_object_putp) json_object *js = NULL, *jrt = NULL;
+        _auto_cleanup_ char *c = NULL, *table = NULL, *destination = NULL;
         json_object *jobj = (json_object *) userdata;
-        _auto_cleanup_ char *c = NULL;
         char buf[IF_NAMESIZE + 1] = {};
-        Route *route;
+        Route *rt;
         size_t size;
         int r;
 
@@ -195,56 +194,121 @@ static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdat
         if (!jrt)
                 return;
 
-        route = (Route *) g_bytes_get_data(key, &size);
+        rt = (Route *) g_bytes_get_data(key, &size);
 
-        if (route->family == AF_INET)
-                jfamily = json_object_new_string("ipv4");
+        if (rt->family == AF_INET)
+                js = json_object_new_string("ipv4");
         else
-                jfamily = json_object_new_string("ipv6");
-        if (!jfamily)
+                js = json_object_new_string("ipv6");
+        if (!js)
                 return;
 
-        json_object_object_add(jrt, "Family", jfamily);
-        steal_ptr(jfamily);
+        json_object_object_add(jrt, "Family", js);
+        steal_ptr(js);
 
-        jidx = json_object_new_int(route->ifindex);
-        if (!jidx)
+        js = json_object_new_int(rt->ifindex);
+        if (!js)
                 return;
 
-        json_object_object_add(jrt, "Index", jidx);
-        steal_ptr(jidx);
+        json_object_object_add(jrt, "Index", js);
+        steal_ptr(js);
 
-        if_indextoname(route->ifindex, buf);
-        jname = json_object_new_string(buf);
-        if (!jname)
+        if_indextoname(rt->ifindex, buf);
+        js = json_object_new_string(buf);
+        if (!js)
                 return;
 
-        json_object_object_add(jrt, "Name", jname);
-        steal_ptr(jname);
+        json_object_object_add(jrt, "Name", js);
+        steal_ptr(js);
 
-        r = ip_to_str_prefix(route->gw.family, &route->gw, &c);
+        r = ip_to_str_prefix(rt->gw.family, &rt->gw, &c);
         if (r < 0)
                 return;
 
-        jip = json_object_new_string(c);
-        if (!jip)
+        js = json_object_new_string(c);
+        if (!js)
                 return;
 
-        json_object_object_add(jrt, "Gateway", jip);
-        steal_ptr(jip);
+        json_object_object_add(jrt, "Gateway", js);
+        steal_ptr(js);
         steal_ptr(c);
 
-        r = ip_to_str_prefix(route->family, &route->dst, &c);
+        r = ip_to_str_prefix(rt->family, &rt->dst, &c);
         if (r < 0)
                 return;
 
-        jip = json_object_new_string(c);
-        if (!jip)
+        js = json_object_new_string(c);
+        if (!js)
                 return;
 
-        json_object_object_add(jrt, "Destination", jip);
-        steal_ptr(jip);
+        json_object_object_add(jrt, "Destination", js);
+        steal_ptr(js);
         steal_ptr(c);
+
+        js = json_object_new_int(rt->type);
+        if (!js)
+                return;
+
+        json_object_object_add(jrt, "Type", js);
+        steal_ptr(js);
+
+        js = json_object_new_string(route_type_to_name(rt->type));
+        if (!js)
+                return;
+
+        json_object_object_add(jrt, "TypeString", js);
+        steal_ptr(js);
+
+        js = json_object_new_int(rt->scope);
+        if (!js)
+                return;
+
+        json_object_object_add(jrt, "Scope", js);
+        steal_ptr(js);
+
+        js = json_object_new_string(route_scope_type_to_name(rt->scope));
+        if (!js)
+                return;
+
+        json_object_object_add(jrt, "ScopeString", js);
+        steal_ptr(js);
+
+        js = json_object_new_int(rt->table);
+        if (!js)
+                return;
+
+        json_object_object_add(jrt, "Table", js);
+        steal_ptr(js);
+
+        r = route_table_to_string(rt->table, &table);
+        if (r >= 0) {
+                js = json_object_new_string(table);
+                if (!js)
+                        return;
+
+                json_object_object_add(jrt, "TableString", js);
+                steal_ptr(js);
+        }
+
+        js = json_object_new_int(rt->protocol);
+        if (!js)
+                return;
+
+        json_object_object_add(jrt, "Protocol", js);
+        steal_ptr(js);
+
+        js = json_object_new_int(rt->pref);
+        if (!js)
+                return;
+
+        json_object_object_add(jrt, "Preference", js);
+        steal_ptr(js);
+
+        if (!ip_is_null(&rt->dst)) {
+                r = ip_to_str(rt->family, &rt->dst, &destination);
+                if (r < 0)
+                        return;
+        }
 
         json_object_array_add(jobj, jrt);
         steal_ptr(jrt);
