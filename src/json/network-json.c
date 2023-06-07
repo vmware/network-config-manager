@@ -431,6 +431,7 @@ int json_fill_system_status(char **ret) {
         _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
         _cleanup_(routing_policy_rules_freep) RoutingPolicyRules *rules = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **domains = NULL, **ntp = NULL;
+        _cleanup_(dns_servers_freep) DNSServers *c = NULL;
         _cleanup_(routes_freep) Routes *routes = NULL;
         _cleanup_(addresses_freep) Addresses *h = NULL;
         sd_id128_t machine_id = {};
@@ -653,6 +654,28 @@ int json_fill_system_status(char **ret) {
 
                 json_object_object_add(jobj, "DNS", ja);
                 steal_ptr(ja);
+        }
+
+        r = dbus_get_current_dns_servers_from_resolved(&c);
+        if (r >= 0 && c && !g_sequence_is_empty(c->dns_servers)) {
+                _auto_cleanup_ char *pretty = NULL;
+                GSequenceIter *itr;
+                DNSServer *d;
+
+                itr = g_sequence_get_begin_iter(c->dns_servers);
+                d = g_sequence_get(itr);
+                r =ip_to_str(d->address.family, &d->address, &pretty);
+                if (r >= 0) {
+                        _cleanup_(json_object_putp) json_object *jd = NULL;
+
+                        jd = json_object_new_string(pretty);
+                        if (!jd)
+                                return log_oom();
+
+                        json_object_object_add(jobj, "CurrentDNSServer",jd);
+                        steal_ptr(jd);
+                        steal_ptr(pretty);
+                }
         }
 
         (void) network_parse_search_domains(&domains);
