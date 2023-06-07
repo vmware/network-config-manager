@@ -574,8 +574,8 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(j);
         }
 
-        (void) network_parse_ntp(&ntp);
-        if (ntp) {
+        r = network_parse_ntp(&ntp);
+        if (r >= 0 && ntp) {
                 _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
                 char **d;
 

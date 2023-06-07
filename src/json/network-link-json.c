@@ -199,7 +199,6 @@ static int json_fill_ipv6_link_local_addresses(Link *l, Addresses *addr, json_ob
         return 0;
 }
 
-
 static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
@@ -334,7 +333,7 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                 } else {
                         _auto_cleanup_ char *network = NULL;
 
-                        r = parse_network_file(l->ifindex, NULL, &network);
+                        r = parse_network_file(l->ifindex, l->name, &network);
                         if (r >= 0) {
                                 if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c)) {
                                         js = json_object_new_string("static");
@@ -648,7 +647,7 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
                         } else {
                                 _auto_cleanup_ char *network = NULL;
 
-                                r = parse_network_file(l->ifindex, NULL, &network);
+                                r = parse_network_file(l->ifindex, l->name, &network);
                                 if (r >= 0) {
                                         if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c)) {
                                                 js = json_object_new_string("static");

@@ -613,7 +613,7 @@ static int list_one_link(char *argv[]) {
                         if (router && c && string_has_prefix(c, router))
                                 printf("(dhcp) \n");
                         else {
-                                r = parse_network_file(p->ifindex, NULL, &network);
+                                r = parse_network_file(p->ifindex, p->ifname, &network);
                                 if (r >= 0) {
                                         if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c))
                                                 printf("(static) \n");
@@ -1020,7 +1020,7 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
                  _auto_cleanup_ char *network = NULL;
                 bool first = true;
 
-                (void) parse_network_file(p->ifindex, NULL, &network);
+                (void) parse_network_file(p->ifindex, p->ifname, &network);
 
                 r = set_new(&devs, g_int64_hash, g_int64_equal);
                 if (r < 0)
