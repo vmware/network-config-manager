@@ -846,6 +846,16 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 display(arg_beautify, state_color, "%s\n", state);
         }
 
+        r = dbus_get_system_property_from_networkd("IPv4AddressState", &state);
+        if (r >= 0) {
+                const char *state_color;
+
+                system_online_state_to_color(state, &state_color);
+
+                display(arg_beautify, ansi_color_bold_cyan(), "  IPv4 Address State: ");
+                display(arg_beautify, state_color, "%s\n", state);
+        }
+
         r = netlink_acquire_all_link_addresses(&h);
         if (r >= 0 && set_size(h->addresses) > 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "           Addresses: ");
