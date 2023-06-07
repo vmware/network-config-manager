@@ -759,7 +759,9 @@ static void list_link_addresses(gpointer key, gpointer value, gpointer userdata)
 
 _public_ int ncm_system_status(int argc, char *argv[]) {
         _auto_cleanup_ char *state = NULL, *hostname = NULL, *kernel = NULL,
-                *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL;
+                *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL,
+                *systemd = NULL, *hwvendor = NULL, *hwmodel = NULL, *firmware = NULL,
+                *firmware_vendor = NULL, *firmware_date = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **search_domains = NULL, **ntp = NULL;
         _cleanup_(routes_freep) Routes *routes = NULL;
         _cleanup_(addresses_freep) Addresses *h = NULL;
@@ -807,6 +809,36 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         if (r >= 0 && os) {
                 display(arg_beautify, ansi_color_bold_cyan(), "    Operating System: ");
                 printf("%s\n", os);
+        }
+
+        r = dbus_get_property_from_hostnamed("HardwareVendor", &hwvendor);
+        if (r >= 0 && hwvendor) {
+                display(arg_beautify, ansi_color_bold_cyan(), "     Hardware Vendor: ");
+                printf("%s\n", hwvendor);
+        }
+
+        r = dbus_get_property_from_hostnamed("HardwareModel", &hwmodel);
+        if (r >= 0 && hwmodel) {
+                display(arg_beautify, ansi_color_bold_cyan(), "      Hardware Model: ");
+                printf("%s\n", hwmodel);
+        }
+
+        r = dbus_get_property_from_hostnamed("FirmwareVersion", &firmware);
+        if (r >= 0 && firmware) {
+                display(arg_beautify, ansi_color_bold_cyan(), "    Firmware Version: ");
+                printf("%s\n", firmware);
+        }
+
+        r = dbus_get_property_from_hostnamed("FirmwareVendor", &firmware_vendor);
+        if (r >= 0 && firmware_vendor) {
+                display(arg_beautify, ansi_color_bold_cyan(), "     Firmware Vendor: ");
+                printf("%s\n", firmware_vendor);
+        }
+
+        r = dbus_get_property_from_hostnamed("FirmwareDate", &firmware_date);
+        if (r >= 0 && firmware_date) {
+                display(arg_beautify, ansi_color_bold_cyan(), "      Firmware Date: ");
+                printf("%s\n", firmware_date);
         }
 
         r = sd_id128_get_machine(&machine_id);
