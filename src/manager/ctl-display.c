@@ -1087,7 +1087,9 @@ _public_ int ncm_get_system_status(char **ret) {
 }
 
 _public_ int ncm_get_link_status(const char *ifname, char **ret) {
+        _cleanup_(json_object_putp) json_object *j = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *s = NULL;
         int r;
 
         assert(ifname);
@@ -1097,5 +1099,16 @@ _public_ int ncm_get_link_status(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        return json_fill_one_link(p, false, ret);
+        r = json_fill_one_link(p, false, &j);
+        if (r < 0)
+                return r;
+
+        s = strdup(json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+        if (!s)
+                return log_oom();
+
+        if (ret && *ret)
+                *ret = steal_ptr(s);
+
+        return 0;
 }

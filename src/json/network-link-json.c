@@ -358,7 +358,7 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
         return 0;
 }
 
-static int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags) {
+int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags) {
         _cleanup_(json_object_putp) json_object *ja = NULL, *js = NULL;
 
         assert(jobj);
@@ -1713,7 +1713,7 @@ static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
         return 0;
 }
 
-int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
+int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object **ret) {
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
@@ -1848,15 +1848,9 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, char **ret) {
                 steal_ptr(js);
         }
 
-        if (ret) {
-                char *s;
-
-                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
-                if (!s)
-                        return log_oom();
-
-                *ret = steal_ptr(s);
-        } else
+        if (ret)
+                *ret = steal_ptr(jobj);
+        else
                 printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
 
         return 0;
