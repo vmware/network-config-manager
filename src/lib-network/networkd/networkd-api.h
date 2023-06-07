@@ -8,6 +8,7 @@ int network_parse_string(const char *key, char **state);
 int network_parse_operational_state(char **state);
 int network_parse_carrier_state(char **ret);
 int network_parse_address_state(char **ret);
+int network_parse_ipv4_address_state(char **ret);
 
 int network_parse_dns(char ***ret);
 int network_parse_ntp(char ***ret);
