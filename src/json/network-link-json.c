@@ -473,7 +473,6 @@ static int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags) 
 }
 
 static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_object *ret) {
-        _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
@@ -481,11 +480,9 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
 
         g_hash_table_iter_init(&iter, rts->routes->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
-                _cleanup_(json_object_putp) json_object *jscope = NULL, *jtype = NULL, *jtable = NULL,
-                        *jprotocol = NULL, *jpref = NULL, *jprio = NULL, *jdest_prefix_len = NULL,
-                        *j = NULL;
-                Route *rt = (Route *) g_bytes_get_data(key, &size);
                 _auto_cleanup_ char *c = NULL, *dhcp = NULL, *prefsrc = NULL, *destination = NULL, *table = NULL;
+                _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
+                Route *rt = (Route *) g_bytes_get_data(key, &size);
 
                 if (ipv4 && rt->family != AF_INET)
                         continue;
@@ -496,60 +493,60 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
 
                 rt = (Route *) g_bytes_get_data(key, &size);
 
-                jtype = json_object_new_int(rt->type);
-                if (!jtype)
+                js = json_object_new_int(rt->type);
+                if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "Type", jtype);
-                steal_ptr(jtype);
+                json_object_object_add(jobj, "Type", js);
+                steal_ptr(js);
 
-                jtype = json_object_new_string(route_type_to_name(rt->type));
-                if (!jtype)
+                js = json_object_new_string(route_type_to_name(rt->type));
+                if (!js)
                         return log_oom();
-                json_object_object_add(jobj, "TypeString", jtype);
-                steal_ptr(jtype);
+                json_object_object_add(jobj, "TypeString", js);
+                steal_ptr(js);
 
-                jscope = json_object_new_int(rt->scope);
-                if (!jscope)
+                js = json_object_new_int(rt->scope);
+                if (!js)
                         return log_oom();
-                json_object_object_add(jobj, "Scope", jscope);
-                steal_ptr(jscope);
+                json_object_object_add(jobj, "Scope", js);
+                steal_ptr(js);
 
-                jscope = json_object_new_string(route_scope_type_to_name(rt->scope));
-                if (!jscope)
+                js = json_object_new_string(route_scope_type_to_name(rt->scope));
+                if (!js)
                         return log_oom();
-                json_object_object_add(jobj, "ScopeString", jscope);
-                steal_ptr(jscope);
+                json_object_object_add(jobj, "ScopeString", js);
+                steal_ptr(js);
 
-                jtable = json_object_new_int(rt->table);
-                if (!jtable)
+                js = json_object_new_int(rt->table);
+                if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "Table", jtable);
-                steal_ptr(jtable);
+                json_object_object_add(jobj, "Table", js);
+                steal_ptr(js);
 
                 r = route_table_to_string(rt->table, &table);
                 if (r >= 0) {
-                        jtable = json_object_new_string(table);
-                        if (!jtable)
+                        js = json_object_new_string(table);
+                        if (!js)
                                 return log_oom();
 
-                        json_object_object_add(jobj, "TableString", jtable);
-                        steal_ptr(jtable);
+                        json_object_object_add(jobj, "TableString", js);
+                        steal_ptr(js);
                 }
 
-                jprotocol = json_object_new_int(rt->protocol);
-                if (!jprotocol)
+                js = json_object_new_int(rt->protocol);
+                if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "Protocol", jprotocol);
-                steal_ptr(jprotocol);
+                json_object_object_add(jobj, "Protocol", js);
+                steal_ptr(js);
 
-                jpref = json_object_new_int(rt->pref);
-                if (!jpref)
+                js = json_object_new_int(rt->pref);
+                if (!js)
                         return log_oom();
-                json_object_object_add(jobj, "Preference", jpref);
-                steal_ptr(jpref);
+                json_object_object_add(jobj, "Preference", js);
+                steal_ptr(js);
 
                 if (!ip_is_null(&rt->dst)) {
                         r = ip_to_str(rt->family, &rt->dst, &destination);
@@ -564,39 +561,40 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
                 json_object_object_add(jobj, "Destination", js);
                 steal_ptr(js);
 
-                jdest_prefix_len = json_object_new_int(rt->dst_prefixlen);
-                if (!jdest_prefix_len)
-                        return log_oom();
-                json_object_object_add(jobj, "DestinationPrefixLength", jdest_prefix_len);
-                steal_ptr(jdest_prefix_len);
-
-                jprio = json_object_new_int(rt->priority);
-                if (!jprio)
+                js = json_object_new_int(rt->dst_prefixlen);
+                if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "Priority", jprio);
-                steal_ptr(jprio);
+                json_object_object_add(jobj, "DestinationPrefixLength", js);
+                steal_ptr(js);
 
-                j = json_object_new_int(rt->ifindex);
-                if (!j)
+                js = json_object_new_int(rt->priority);
+                if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "OutgoingInterface", j);
-                steal_ptr(j);
+                json_object_object_add(jobj, "Priority", js);
+                steal_ptr(js);
 
-                j = json_object_new_int(rt->iif);
-                if (!j)
+                js = json_object_new_int(rt->ifindex);
+                if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "IncomingInterface", j);
-                steal_ptr(j);
+                json_object_object_add(jobj, "OutgoingInterface", js);
+                steal_ptr(js);
 
-                j = json_object_new_int(rt->ttl_propogate);
-                if (!j)
+                js = json_object_new_int(rt->iif);
+                if (!js)
                         return log_oom();
 
-                json_object_object_add(jobj, "TTLPropogate", j);
-                steal_ptr(j);
+                json_object_object_add(jobj, "IncomingInterface", js);
+                steal_ptr(js);
+
+                js = json_object_new_int(rt->ttl_propogate);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "TTLPropogate", js);
+                steal_ptr(js);
 
                 if (!ip_is_null(&rt->prefsrc)) {
                         r = ip_to_str(rt->family, &rt->prefsrc, &prefsrc);
@@ -656,11 +654,11 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
                                                 js = json_object_new_string("static");
                                                 if (!js)
                                                         return log_oom();
-                                } else {
+                                        } else {
                                                 js = json_object_new_string("foreign");
                                                 if (!js)
                                                         return log_oom();
-                                }
+                                        }
                                 }
 
                                 json_object_object_add(jobj, "ConfigSource", js);

@@ -28,8 +28,7 @@
 #include "udev-hwdb.h"
 
 static void json_fill_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_(json_object_putp) json_object *js = NULL, *jname = NULL, *jfamily = NULL,
-                *jidx = NULL, *jaddr = NULL;
+        _cleanup_(json_object_putp) json_object *js = NULL, *jaddr = NULL;
         json_object *jobj = (json_object *) userdata;
         _auto_cleanup_ char *c = NULL, *dhcp = NULL;
         char buf[IF_NAMESIZE + 1] = {};
