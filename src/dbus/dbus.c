@@ -102,10 +102,8 @@ int dbus_get_property_from_hostnamed(const char *p, char **ret) {
                                 &bus_error,
                                 &reply,
                                 "s");
-        if (r < 0) {
-                log_warning("Failed to issue method call: %s\n", bus_error.message);
+        if (r < 0)
                 return r;
-        }
 
         r = sd_bus_message_read(reply, "s", &s);
         if (r < 0)
