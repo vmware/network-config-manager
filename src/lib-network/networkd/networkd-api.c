@@ -32,6 +32,10 @@ int network_parse_carrier_state(char **ret) {
         return network_parse_string("CARRIER_STATE", ret);
 }
 
+int network_parse_address_state(char **ret) {
+        return network_parse_string("ADDRESS_STATE", ret);
+}
+
 static int network_parse_strv(const char *key, char ***ret) {
         _auto_cleanup_ char *s = NULL;
         int r;
