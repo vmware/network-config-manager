@@ -176,13 +176,12 @@ int dbus_restart_unit(const char *unit) {
         return 0;
 }
 
-int dbus_get_current_dns_servers_from_resolved(DNSServers **ret) {
+int dbus_get_current_dns_server_from_resolved(DNSServer **ret) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
         _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
         _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
-        _auto_cleanup_ DNSServer *i = NULL;
+        _auto_cleanup_ DNSServer *dns = NULL;
         int r, ifindex = 0, family = 0;
-        DNSServers *serv = NULL;
         const void *a;
         size_t sz;
 
@@ -202,10 +201,6 @@ int dbus_get_current_dns_servers_from_resolved(DNSServers **ret) {
                 log_warning("Failed to get D-Bus property 'CurrentDNSServer': %s", bus_error.message);
                 return r;
         }
-
-        r = dns_servers_new(&serv);
-        if (r < 0)
-                return r;
 
         r = sd_bus_message_enter_container(reply, 'r', "iiay");
         if (r < 0) {
@@ -237,31 +232,25 @@ int dbus_get_current_dns_servers_from_resolved(DNSServers **ret) {
                 return r;
         }
 
-        r = dns_server_new(&i);
+        r = dns_server_new(&dns);
         if (r < 0)
                 return r;
 
-        i->address.family = family;
-        i->ifindex = ifindex;
+        dns->address.family = family;
+        dns->ifindex = ifindex;
 
-        switch (i->address.family) {
+        switch (dns->address.family) {
                 case AF_INET:
-                        memcpy(&i->address.in, a, sz);
+                        memcpy(&dns->address.in, a, sz);
                         break;
                 case AF_INET6:
-                        memcpy(&i->address.in6, a, sz);
+                        memcpy(&dns->address.in6, a, sz);
                         break;
                 default:
                       return -ENODATA;
         }
 
-        r = dns_server_add(&serv, i);
-        if (r < 0)
-                return r;
-
-        steal_ptr(i);
-
-        *ret = steal_ptr(serv);
+        *ret = steal_ptr(dns);
         return 0;
 }
 
