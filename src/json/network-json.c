@@ -27,336 +27,6 @@
 #include "parse-util.h"
 #include "udev-hwdb.h"
 
-static void json_fill_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_(json_object_putp) json_object *js = NULL, *jaddr = NULL;
-        json_object *jobj = (json_object *) userdata;
-        _auto_cleanup_ char *c = NULL, *dhcp = NULL;
-        char buf[IF_NAMESIZE + 1] = {};
-        size_t size;
-        Address *a;
-        int r;
-
-        jaddr = json_object_new_object();
-        if (!jaddr)
-                return;
-
-        a = (Address *) g_bytes_get_data(key, &size);
-
-        r = ip_to_str(a->family, &a->address, &c);
-        if (r < 0)
-                return;
-
-        js = json_object_new_string(c);
-        if (!js)
-                return;
-
-        json_object_object_add(jaddr, "Address", js);
-        steal_ptr(js);
-
-        js = json_object_new_int(a->address.prefix_len);
-        if (!js)
-                return;
-
-        json_object_object_add(jaddr, "PrefixLength", js);
-        steal_ptr(js);
-
-        if (a->family == AF_INET)
-                js = json_object_new_string("ipv4");
-        else
-                js = json_object_new_string("ipv6");
-
-        if (!js)
-                return;
-        json_object_object_add(jaddr, "Family", js);
-        steal_ptr(js);
-
-        js = json_object_new_int(a->scope);
-        if (!js)
-                return;
-        json_object_object_add(jaddr, "Scope", js);
-        steal_ptr(js);
-
-        js = json_object_new_string(route_scope_type_to_name(a->scope));
-        if (!js)
-                return;
-        json_object_object_add(jaddr, "ScopeString", js);
-        steal_ptr(js);
-
-        js= json_object_new_int(a->flags);
-        if (!js)
-                return;
-        json_object_object_add(jaddr, "Flags", js);
-        steal_ptr(js);
-
-        address_flags_to_string(a, jaddr, a->flags);
-
-        if (a->ci.ifa_prefered != UINT32_MAX)
-                js = json_object_new_int(a->ci.ifa_prefered);
-        else
-                js = json_object_new_string("forever");
-        if (!js)
-                return;
-
-        json_object_object_add(jaddr, "PreferedLifetime", js);
-        steal_ptr(js);
-
-        if (a->ci.ifa_valid != UINT32_MAX)
-                js = json_object_new_int(a->ci.ifa_valid);
-                else
-                        js = json_object_new_string("forever");
-        if (!js)
-                return;
-
-        json_object_object_add(jaddr, "ValidLifetime", js);
-        steal_ptr(js);
-
-        js = json_object_new_string(a->label ? a->label : "");
-        if (!js)
-                return;
-
-        json_object_object_add(jaddr, "Label", js);
-        steal_ptr(js);
-
-        if_indextoname(a->ifindex, buf);
-        js = json_object_new_string(buf);
-        if (!js)
-                return;
-
-        json_object_object_add(jaddr, "Name", js);
-        steal_ptr(js);
-
-        js = json_object_new_int(a->ifindex);
-        if (!js)
-                return;
-
-        json_object_object_add(jaddr, "Index", js);
-        steal_ptr(js);
-
-        r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
-        if (r >= 0 && string_has_prefix(c, dhcp)) {
-                _auto_cleanup_ char *provider = NULL;
-
-                js = json_object_new_string("dhcp");
-                if (!js)
-                        return;
-
-                json_object_object_add(jaddr, "ConfigSource", js);
-                steal_ptr(js);
-
-                r = network_parse_link_dhcp4_server_address(a->ifindex, &provider);
-                if (r >= 0) {
-                        js = json_object_new_string(provider);
-                        if (!js)
-                                return;
-
-                        json_object_object_add(jaddr, "ConfigProvider", js);
-                        steal_ptr(js);
-                }
-        } else {
-                _auto_cleanup_ char *network = NULL;
-
-                        r = parse_network_file(a->ifindex, NULL, &network);
-                        if (r >= 0) {
-                                if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c)) {
-                                        js = json_object_new_string("static");
-                                        if (!js)
-                                                return;
-                                } else {
-                                        js = json_object_new_string("foreign");
-                                        if (!js)
-                                                return;
-                                }
-                        }
-
-                        json_object_object_add(jaddr, "ConfigSource", js);
-                        steal_ptr(js);
-        }
-
-        json_object_array_add(jobj, jaddr);
-        steal_ptr(jaddr);
-}
-
-static void json_fill_link_routes(gpointer key, gpointer value, gpointer userdata) {
-        _cleanup_(json_object_putp) json_object *js = NULL, *jrt = NULL;
-        _auto_cleanup_ char *gw = NULL, *table = NULL, *destination = NULL;
-        json_object *jobj = (json_object *) userdata;
-        char buf[IF_NAMESIZE + 1] = {};
-        Route *rt;
-        size_t size;
-        int r;
-
-        assert(key);
-        assert(value);
-        assert(userdata);
-
-        jrt = json_object_new_object();
-        if (!jrt)
-                return;
-
-        rt = (Route *) g_bytes_get_data(key, &size);
-
-        if (rt->family == AF_INET)
-                js = json_object_new_string("ipv4");
-        else
-                js = json_object_new_string("ipv6");
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Family", js);
-        steal_ptr(js);
-
-        js = json_object_new_int(rt->ifindex);
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Index", js);
-        steal_ptr(js);
-
-        if_indextoname(rt->ifindex, buf);
-        js = json_object_new_string(buf);
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Name", js);
-        steal_ptr(js);
-
-        r = ip_to_str_prefix(rt->gw.family, &rt->gw, &gw);
-        if (r < 0)
-                return;
-
-        js = json_object_new_string(gw);
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Gateway", js);
-        steal_ptr(js);
-
-        r = ip_to_str_prefix(rt->family, &rt->dst, &destination);
-        if (r < 0)
-                return;
-
-        js = json_object_new_string(destination);
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Destination", js);
-        steal_ptr(js);
-        steal_ptr(destination);
-
-        js = json_object_new_int(rt->type);
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Type", js);
-        steal_ptr(js);
-
-        js = json_object_new_string(route_type_to_name(rt->type));
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "TypeString", js);
-        steal_ptr(js);
-
-        js = json_object_new_int(rt->scope);
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Scope", js);
-        steal_ptr(js);
-
-        js = json_object_new_string(route_scope_type_to_name(rt->scope));
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "ScopeString", js);
-        steal_ptr(js);
-
-        js = json_object_new_int(rt->table);
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Table", js);
-        steal_ptr(js);
-
-        r = route_table_to_string(rt->table, &table);
-        if (r >= 0) {
-                js = json_object_new_string(table);
-                if (!js)
-                        return;
-
-                json_object_object_add(jrt, "TableString", js);
-                steal_ptr(js);
-        }
-
-        js = json_object_new_int(rt->protocol);
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Protocol", js);
-        steal_ptr(js);
-
-        js = json_object_new_int(rt->pref);
-        if (!js)
-                return;
-
-        json_object_object_add(jrt, "Preference", js);
-        steal_ptr(js);
-
-        if (!ip_is_null(&rt->dst)) {
-                r = ip_to_str(rt->family, &rt->dst, &destination);
-                if (r < 0)
-                        return;
-        }
-
-        if (gw) {
-                _auto_cleanup_ char *dhcp = NULL;
-
-                r = network_parse_link_dhcp4_router(rt->ifindex, &dhcp);
-                if (r >= 0 && string_has_prefix(gw, dhcp)) {
-                        _auto_cleanup_ char *provider = NULL;
-
-                        js = json_object_new_string("dhcp");
-                        if (!js)
-                                return;
-
-                        json_object_object_add(jrt, "ConfigSource", js);
-                        steal_ptr(js);
-
-                        r = network_parse_link_dhcp4_server_address(rt->ifindex, &provider);
-                        if (r >= 0) {
-                                js = json_object_new_string(provider);
-                                if (!js)
-                                        return;
-
-                                json_object_object_add(jrt, "ConfigProvider", js);
-                                steal_ptr(js);
-                        }
-                } else {
-                        _auto_cleanup_ char *network = NULL;
-
-                        r = parse_network_file(rt->ifindex, NULL, &network);
-                        if (r >= 0) {
-                                if (config_exists(network, "Network", "Gateway", gw) || config_exists(network, "Route", "Gateway", gw)) {
-                                        js = json_object_new_string("static");
-                                        if (!js)
-                                                return;
-                                } else {
-                                        js = json_object_new_string("foreign");
-                                        if (!js)
-                                                return;
-                                }
-                        }
-
-                        json_object_object_add(jrt, "ConfigSource", js);
-                        steal_ptr(js);
-                }
-        }
-        steal_ptr(gw);
-
-        json_object_array_add(jobj, jrt);
-        steal_ptr(jrt);
-}
-
 static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointer userdata) {
         _cleanup_(json_object_putp) json_object *jd = NULL, *jrule = NULL, *config_source = NULL;
         _auto_cleanup_ char *from = NULL, *to = NULL, *table = NULL;
@@ -623,16 +293,15 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
 }
 
 int json_fill_system_status(char **ret) {
-        _cleanup_(json_object_putp) json_object *jobj = NULL, *jaddress = NULL, *jroutes = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
                 *online_state = NULL, *address_state = NULL, *ipv4_address_state = NULL, *ipv6_address_state = NULL;
         _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
         _cleanup_(routing_policy_rules_freep) RoutingPolicyRules *rules = NULL;
-        _auto_cleanup_strv_ char **dns = NULL, **domains = NULL, **ntp = NULL;
         _cleanup_(dns_servers_freep) DNSServers *c = NULL;
-        _cleanup_(routes_freep) Routes *routes = NULL;
-        _cleanup_(addresses_freep) Addresses *h = NULL;
+        _cleanup_(links_freep) Links *links = NULL;
+        _auto_cleanup_strv_ char **ntp = NULL;
         sd_id128_t machine_id = {};
         int r;
 
@@ -811,47 +480,30 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        r = netlink_acquire_all_link_addresses(&h);
-        if (r >= 0 && set_size(h->addresses) > 0) {
-                jaddress = json_object_new_array();
-                if (!jaddress)
-                        return log_oom();
+        r = netlink_acquire_all_links(&links);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL;
 
-
-                set_foreach(h->addresses, json_fill_link_addresses, jaddress);
-                json_object_object_add(jobj, "Addresses", jaddress);
-                steal_ptr(jaddress);
-        }
-
-        r = netlink_acquire_all_link_routes(&routes);
-        if (r >= 0 && set_size(routes->routes) > 0) {
-                jroutes = json_object_new_array();
-                if (!jroutes)
-                        return log_oom();
-
-                set_foreach(routes->routes, json_fill_link_routes, jroutes);
-                json_object_object_add(jobj, "Routes", jroutes);
-                steal_ptr(jroutes);
-        }
-
-        (void) network_parse_dns(&dns);
-        if (dns) {
-                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
-                char **d;
-
+                ja = json_object_new_array();
                 if (!ja)
                         return log_oom();
 
-                strv_foreach(d, dns) {
-                        json_object *jdns = json_object_new_string(*d);
+                for (GList *i = links->links; i; i = g_list_next (i)) {
+                        _cleanup_(json_object_putp) json_object *js = NULL;
+                        _auto_cleanup_ IfNameIndex *p = NULL;
+                        Link *link = (Link *) i->data;
 
-                        if (!jdns)
-                                return log_oom();
-
-                        json_object_array_add(ja, jdns);
+                        r = parse_ifname_or_index(link->name, &p);
+                        if (r >= 0) {
+                                r = json_fill_one_link(p, false, &js);
+                                if (r >= 0) {
+                                       json_object_array_add(ja, js);
+                                       steal_ptr(js);
+                                }
+                        }
                 }
 
-                json_object_object_add(jobj, "DNS", ja);
+                json_object_object_add(jobj, "Interfaces", ja);
                 steal_ptr(ja);
         }
 
@@ -875,26 +527,6 @@ int json_fill_system_status(char **ret) {
                         steal_ptr(jd);
                         steal_ptr(pretty);
                 }
-        }
-
-        (void) network_parse_search_domains(&domains);
-        if (domains) {
-                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
-                char **d;
-
-                if (!ja)
-                        return log_oom();
-
-                strv_foreach(d, domains) {
-                        json_object *jdomains = json_object_new_string(*d);
-                        if (!jdomains)
-                                return log_oom();
-
-                        json_object_array_add(ja, jdomains);
-                }
-
-                json_object_object_add(jobj, "SearchDomains", ja);
-                steal_ptr(ja);
         }
 
         (void) dbus_acqure_dns_setting_from_resolved("MulticastDNS", &mdns);
