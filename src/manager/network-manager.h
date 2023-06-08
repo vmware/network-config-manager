@@ -26,6 +26,8 @@ int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy)
 int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHCPClientIdentifier identifier);
 int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret);
 
+int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad);
+
 int manager_get_link_dns(const IfNameIndex *ifidx, char **ret);
 bool manager_is_link_static_address(const IfNameIndex *ifidx);
 

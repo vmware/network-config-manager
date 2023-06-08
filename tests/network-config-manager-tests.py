@@ -969,6 +969,18 @@ class TestCLINetwork:
     def test_cli_set_dhcp_client_type(self):
         assert(link_exist('test99') == True)
 
+        subprocess.check_call("nmctl set-ipv6dad dev test99 no", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'IPv6DuplicateAddressDetection') == '0')
+
+    def test_cli_set_dhcp_client_type(self):
+        assert(link_exist('test99') == True)
+
         subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
