@@ -966,7 +966,7 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Link', 'ActivationPolicy') == 'always-up')
 
-    def test_cli_set_dhcp_client_type(self):
+    def test_cli_set_ipv6_dad_type(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call("nmctl set-ipv6dad dev test99 no", shell = True)
@@ -977,6 +977,18 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'IPv6DuplicateAddressDetection') == '0')
+
+    def test_cli_set_ipv6_ll_address_generation_mode(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-ipv6-ll-addr-gen-mode dev test99 stable-privacy", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'IPv6LinkLocalAddressGenerationMode') == 'stable-privacy')
 
     def test_cli_set_dhcp_client_type(self):
         assert(link_exist('test99') == True)
