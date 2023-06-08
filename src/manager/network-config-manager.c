@@ -961,6 +961,37 @@ _public_ int ncm_link_set_network_ipv6_dad(int argc, char *argv[]) {
         return manager_set_link_ipv6_dad(p, r);
 }
 
+_public_ int ncm_link_set_network_ipv6_link_local_address_generation_mode(int argc, char *argv[]) {
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = ipv6_link_local_address_gen_type_to_mode(argv[3]);
+        if (r < 0) {
+                log_warning("Failed to parse '%s': %s", argv[3], strerror(-r));
+                return r;
+        }
+
+        return manager_set_link_ipv6_link_local_address_generation_mode(p, r);
+}
+
 _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
         _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;

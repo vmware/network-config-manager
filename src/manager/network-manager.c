@@ -250,6 +250,26 @@ int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad) {
         return dbus_network_reload();
 }
 
+int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *ifidx, int mode) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifidx);
+
+        r = create_or_parse_network_file(ifidx, &network);
+        if (r < 0)
+                return r;
+
+        r = set_config_file_str(network, "Network", "IPv6LinkLocalAddressGenerationMode", ipv6_link_local_address_gen_type_to_name(mode));
+        if (r < 0) {
+                log_warning("Failed to update IPv6LinkLocalAddressGenerationMode= to configuration file '%s': %s", network, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
+
 int manager_get_link_dns(const IfNameIndex *ifidx, char **ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;

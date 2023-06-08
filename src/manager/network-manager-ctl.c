@@ -179,6 +179,9 @@ static int help(void) {
                "  set-ipv4proxyarp             dev [DEVICE] [IPv4ProxyARP BOOLEAN] Configures Link proxy ARP for IPv4.\n"
                "  set-ipv6proxyndp             dev [DEVICE] [IPv6ProxyNDP BOOLEAN] Configures Link proxy NDP for IPv6.\n"
                "  set-conf-wc                  dev [DEVICE] [ConfigureWithoutCarrier BOOLEAN] Allows networkd to configure link even if it has no carrier.\n"
+               "  set-ipv6dad                  dev [DEVICE] [IPv6DuplicateAddressDetection BOOLEAN] Allows Configures the amount of IPv6 Duplicate Address Detection (DAD) probes to send.\n"
+               "  set-ipv6-ll-addr-gen-mode    dev [DEVICE] [IPv6LinkLocalAddressGenerationMode eui64|stable-privacy|none|random] Specifies how IPv6 link-local address is generated.\n"
+               "  set-conf-wc                  dev [DEVICE] [ConfigureWithoutCarrier BOOLEAN] Allows networkd to configure link even if it has no carrier.\n"
                "  set-dhcp4                    dev [DEVICE] [use-dns BOOLEAN] [use-domains BOOLEAN] [use-mtu BOOLEAN] [use-ntp BOOLEAN] [send-release BOOLEAN]."
                                                      "\n\t\t\t\t     [use-hostname BOOLEAN] [use-routes BOOLEAN] [use-gw BOOLEAN] [use-tz BOOLEAN] Configures Link DHCPv4\n"
                "  set-dhcp6                    dev [DEVICE] [use-dns BOOLEAN] [use-domains BOOLEAN] [rapid-commit BOOLEAN] [use-addr BOOLEAN] [use-delegataed-prefix BOOLEAN]"
@@ -395,6 +398,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-ipv6proxyndp",              "pxyndp6",          3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-conf-wc",                   "cwc",              3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-ipv6dad",                   "ipv6dad",          3,        WORD_ANY, false, ncm_link_set_network_ipv6_dad },
+                { "set-ipv6-ll-addr-gen-mode",     "ipv6llagm",        3,        WORD_ANY, false, ncm_link_set_network_ipv6_link_local_address_generation_mode},
                 { "set-dhcp4",                     "dhcp4",            4,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp6",                     "dhcp6",            4,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "add-dhcpv4-server",             "adhcp4-srv" ,      2,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
