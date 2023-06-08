@@ -68,6 +68,7 @@ int ncm_link_acquire_mtu(const char *ifname, uint32_t *ret);
 
 int ncm_link_set_network_ipv6_dad(int argc, char *argv[]);
 int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]);
+int ncm_link_set_network_ipv6_link_local_address_generation_mode(int argc, char *argv[]);
 
 int ncm_link_set_network_section(int argc, char *argv[]);
 int ncm_link_status(int argc, char *argv[]);
