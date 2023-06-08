@@ -104,6 +104,10 @@ _public_ int ncm_link_acquire_mtu(const char *ifname, uint32_t *ret) {
         return 0;
 }
 
+_public_ int ncm_link_get_mtu(const char *ifname, uint32_t *ret) {
+         return ncm_link_acquire_mtu(ifname, ret);
+}
+
 _public_ int ncm_link_set_mac(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *mac = NULL;
