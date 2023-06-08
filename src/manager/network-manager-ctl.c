@@ -394,6 +394,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-ipv4proxyarp",              "pxyarp4",          3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-ipv6proxyndp",              "pxyndp6",          3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-conf-wc",                   "cwc",              3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-ipv6dad",                   "ipv6dad",          3,        WORD_ANY, false, ncm_link_set_network_ipv6_dad },
                 { "set-dhcp4",                     "dhcp4",            4,        WORD_ANY, false, ncm_link_set_dhcp4_section },
                 { "set-dhcp6",                     "dhcp6",            4,        WORD_ANY, false, ncm_link_set_dhcp6_section },
                 { "add-dhcpv4-server",             "adhcp4-srv" ,      2,        WORD_ANY, false, ncm_link_add_dhcpv4_server },
