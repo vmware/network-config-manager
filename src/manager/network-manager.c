@@ -13,6 +13,7 @@
 #include "dbus.h"
 #include "device.h"
 #include "dracut-parser.h"
+#include "edit.h"
 #include "file-util.h"
 #include "log.h"
 #include "macros.h"
@@ -1869,7 +1870,6 @@ int manager_show_link_network_config(const IfNameIndex *i, char **ret) {
 
 int manager_edit_link_network_config(const IfNameIndex *i) {
         _auto_cleanup_ char *network = NULL;
-        pid_t pid;
         int r;
 
         assert(i);
@@ -1878,46 +1878,12 @@ int manager_edit_link_network_config(const IfNameIndex *i) {
         if (r < 0)
                 return r;
 
-        pid = fork();
-        if (pid < 0)
-                return -errno;
-
-        if (pid == 0) {
-                _auto_cleanup_strv_ char **editors = NULL;
-                char **d;
-
-                editors = strv_new("vim");
-                if (!editors)
-                        return log_oom();
-
-                r = strv_add(&editors, "vi");
-                if (r < 0)
-                        return r;
-
-                strv_foreach(d, editors) {
-                        const char *args[] = {*d, network, NULL};
-
-                        execvp(*d, (char* const*) args);
-                        if (errno != ENOENT) {
-                                log_warning("Failed to edit %s via editor %s: %s",  network, *d, strerror(-errno));
-                                _exit(EXIT_FAILURE);
-                        }
-                }
-
-                _exit(EXIT_SUCCESS);
-        } else {
-                int status;
-
-                waitpid(pid, &status, 0);
-        }
-
-        return 0;
+        return edit_file(network);
 }
 
 int manager_edit_link_config(const IfNameIndex *i) {
         _cleanup_(sd_device_unrefp) sd_device *sd_device = NULL;
         const char *link = NULL;
-        pid_t pid;
         int r;
 
         assert(i);
@@ -1930,40 +1896,7 @@ int manager_edit_link_config(const IfNameIndex *i) {
         if (r < 0)
               return r;
 
-        pid = fork();
-        if (pid < 0)
-                return -errno;
-
-        if (pid == 0) {
-                _auto_cleanup_strv_ char **editors = NULL;
-                char **d;
-
-                editors = strv_new("vim");
-                if (!editors)
-                        return log_oom();
-
-                r = strv_add(&editors, "vi");
-                if (r < 0)
-                        return r;
-
-                strv_foreach(d, editors) {
-                        const char *args[] = {*d, link, NULL};
-
-                        execvp(*d, (char* const*) args);
-                        if (errno != ENOENT) {
-                                log_warning("Failed to edit %s via editor %s: %s",  link, *d, strerror(-errno));
-                                _exit(EXIT_FAILURE);
-                        }
-                }
-
-                _exit(EXIT_SUCCESS);
-        } else {
-                int status;
-
-                waitpid(pid, &status, 0);
-        }
-
-        return 0;
+        return edit_file(link);
 }
 
 int manager_configure_proxy(int enable,

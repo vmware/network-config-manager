@@ -42,6 +42,8 @@ network_config_manager_sources = files('''
         share/config-file.c
         share/config-parser.h
         share/config-parser.c
+        share/edit.h
+        share/edit.c
         share/file-util.h
         share/file-util.c
         share/log.h
