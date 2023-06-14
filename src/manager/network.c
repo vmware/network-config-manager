@@ -529,12 +529,11 @@ int parse_network_file(const int ifindex, const char *ifname, char **ret) {
                 if (r < 0)
                         return r;
 
-                if (!g_file_test(network, G_FILE_TEST_EXISTS)) {
-                                r = create_network_conf_file(ifname, &network);
-                                if (r < 0)
-                                        return r;
+                if (!network || !g_file_test(network, G_FILE_TEST_EXISTS)) {
+                        r = create_network_conf_file(ifname, &network);
+                        if (r < 0)
+                                return r;
                 }
-
         }
 
         *ret = steal_ptr(network);

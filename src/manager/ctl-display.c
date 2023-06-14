@@ -84,7 +84,7 @@ static int list_links(int argc, char *argv[]) {
 
         r = netlink_acquire_all_links(&h);
         if (r < 0)
-               return r;
+                return r;
 
 
         if (arg_beautify)
@@ -134,6 +134,8 @@ static int list_links(int argc, char *argv[]) {
 
 static void list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
         _auto_cleanup_ char *c = NULL, *dhcp = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        char buf[IF_NAMESIZE + 1] = {};
         static bool first = true;
         unsigned long size;
         Address *a = NULL;
@@ -146,6 +148,11 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 first = false;
         } else
                 printf("                              %s ", c);
+
+        if (!if_indextoname(a->ifindex, buf)) {
+                log_warning("Failed to find device ifindex='%d'", a->ifindex);
+                return;
+        }
 
         r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
         if (r >= 0 && string_has_prefix(c, dhcp)) {
@@ -161,7 +168,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
         } else {
                 _auto_cleanup_ char *network = NULL;
 
-                r = parse_network_file(a->ifindex, NULL, &network);
+                r = parse_network_file(a->ifindex, buf, &network);
                 if (r >= 0) {
                         if (a->family == AF_INET6 && IN6_IS_ADDR_LINKLOCAL(&a->address.in6))
                                 printf("(IPv6 Link Local) ");
@@ -199,8 +206,14 @@ static void list_one_link_address_with_address_mode(gpointer key, gpointer value
                         display(arg_beautify, ansi_color_bold_blue(), "(dhcp) \n");
                 else {
                         _auto_cleanup_ char *network = NULL;
+                        char buf[IF_NAMESIZE + 1] = {};
 
-                        r = parse_network_file(a->ifindex, NULL, &network);
+                        if (!if_indextoname(a->ifindex, buf)) {
+                                log_warning("Failed to find device ifindex='%d'", a->ifindex);
+                                return;
+                        }
+
+                        r = parse_network_file(a->ifindex, buf, &network);
                         if (r >= 0) {
                                 if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c))
                                         display(arg_beautify, ansi_color_bold_blue(), "(static) \n");
@@ -278,7 +291,14 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
                 else {
                         _auto_cleanup_ char *network = NULL;
 
-                        r = parse_network_file(a->ifindex, NULL, &network);
+                        char buf[IF_NAMESIZE + 1] = {};
+
+                        if (!if_indextoname(a->ifindex, buf)) {
+                                log_warning("Failed to find device ifindex='%d'", a->ifindex);
+                                return -ENOENT;
+                        }
+
+                        r = parse_network_file(a->ifindex, buf, &network);
                         if (r >= 0) {
                                 if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c))
                                         source = strdup("static");
@@ -382,7 +402,7 @@ static void list_link_attributes(Link *l) {
 
         if (!isempty_str(ether)) {
                 _auto_cleanup_ char *desc = NULL;
-                 hwdb_get_description((uint8_t *) &l->mac_address.ether_addr_octet, &desc);
+                hwdb_get_description((uint8_t *) &l->mac_address.ether_addr_octet, &desc);
 
                 display(arg_beautify, ansi_color_bold_cyan(), "                  HW Address: ");
                 printf("%s (%s)\n", ether, desc);
@@ -709,11 +729,11 @@ static int list_one_link(char *argv[]) {
                         r = parse_config_file(network, "DHCPv4", "ClientIdentifier", &c);
                         if (r >= 0) {
                                 if (str_eq(c, "mac")) {
-                                         _auto_cleanup_ char *e = NULL;
+                                        _auto_cleanup_ char *e = NULL;
 
-                                         (void) link_read_sysfs_attribute(l->name, "address", &e);
-                                         display(arg_beautify, ansi_color_bold_cyan(), "             DHCP4 Client ID: ");
-                                         printf("%s (mac)\n", e);
+                                        (void) link_read_sysfs_attribute(l->name, "address", &e);
+                                        display(arg_beautify, ansi_color_bold_cyan(), "             DHCP4 Client ID: ");
+                                        printf("%s (mac)\n", e);
                                 }
                         }
                 }
@@ -942,7 +962,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                         } else {
                                 printf("                      %-30s on device ", c);
                                 display(arg_beautify, ansi_color_bold_blue(), "%s\n", buf);
-                         }
+                        }
                 }
         }
 
@@ -1045,7 +1065,7 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
         r = netlink_acquire_all_link_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
                 _cleanup_(set_freep) Set *devs = NULL;
-                 _auto_cleanup_ char *network = NULL;
+                _auto_cleanup_ char *network = NULL;
                 bool first = true;
 
                 (void) parse_network_file(p->ifindex, p->ifname, &network);
