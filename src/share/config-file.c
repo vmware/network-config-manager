@@ -843,6 +843,7 @@ int write_to_proxy_conf_file(GHashTable *table) {
 
 int determine_conf_file_name(const char *ifname, char **ret) {
         _auto_cleanup_ char *n = NULL, *file = NULL;
+
         assert(ifname);
 
         if (strstr(ifname, "*"))
