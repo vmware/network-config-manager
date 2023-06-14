@@ -46,7 +46,10 @@ network_config_manager_sources = files('''
         share/edit.c
         share/file-util.h
         share/file-util.c
+        share/journal.h
+        share/journal.c
         share/log.h
+        share/log.c
         share/macros.h
         share/network-util.h
         share/network-util.c

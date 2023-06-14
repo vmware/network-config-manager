@@ -12,6 +12,9 @@
 #include "log.h"
 #include "macros.h"
 #include "network-manager.h"
+#include "parse-util.h"
+
+#define DEFAULT_LOG_LINE_SIZE 64
 
 static bool alias = false;
 
@@ -302,7 +305,7 @@ static int help(void) {
 static int parse_argv(int argc, char *argv[]) {
 
         enum {
-                ARG_VERSION = 0x100,
+                ARG_VERSION = 0x604,
         };
 
         static const struct option options[] = {
@@ -311,20 +314,18 @@ static int parse_argv(int argc, char *argv[]) {
                 { "json",        no_argument,       NULL, 'j'   },
                 { "no-beautify", no_argument,       NULL, 'b'   },
                 { "alias",       no_argument,       NULL, 'a'   },
+                { "log",         optional_argument, NULL, 'l'   },
                 {}
         };
-        int c;
+        int r, c, l = 0;
 
         assert(argc >= 0);
         assert(argv);
 
-        while ((c = getopt_long(argc, argv, "ahvjb", options, NULL)) >= 0) {
-
+        while ((c = getopt_long(argc, argv, "ahvjbl", options, 0)) >= 0) {
                 switch (c) {
-
                 case 'h':
                         return help();
-
                 case 'v':
                         return ncm_show_version();
                 case 'j':
@@ -336,9 +337,21 @@ static int parse_argv(int argc, char *argv[]) {
                 case 'a':
                         alias = true;
                         break;
+                case 'l':
+                        for (int i = optind; i < argc; ++i) {
+                                r = parse_int(argv[i], &l);
+                                if (r < 0) {
+                                        printf("Failed to parse log line: %s\n", argv[i]);
+                                        return -EINVAL;
+                                }
+                        }
+
+                        if (l == 0)
+                                l = DEFAULT_LOG_LINE_SIZE;
+                        set_log(true, l);
+                        break;
                 case '?':
                         return -EINVAL;
-
                 default:
                         assert(0);
                 }
