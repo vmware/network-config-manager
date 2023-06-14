@@ -646,18 +646,8 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
                                 }
                         } else {
                                 _auto_cleanup_ char *network = NULL;
-                                char buf[IF_NAMESIZE + 1] = {};
 
-<<<<<<< HEAD
                                 r = parse_network_file(l->ifindex, l->name, &network);
-=======
-                                if (!if_indextoname(l->ifindex, buf)) {
-                                        log_warning("Failed to find device ifindex='%d'", l->ifindex);
-                                        return -ENOENT;
-                                }
-
-                                r = parse_network_file(l->ifindex, buf, &network);
->>>>>>> cbdaee4 (Also pass ifname)
                                 if (r >= 0) {
                                         if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c)) {
                                                 js = json_object_new_string("static");
