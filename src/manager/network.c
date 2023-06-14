@@ -525,16 +525,19 @@ int parse_network_file(const int ifindex, const char *ifname, char **ret) {
                         }
                 }
         } else {
-                r = determine_network_conf_file(ifname, &network);
-                if (r < 0)
-                        return r;
-
-                if (!g_file_test(network, G_FILE_TEST_EXISTS)) {
+                if (ifname) {
+                        r = determine_network_conf_file(ifname, &network);
+                        if (r < 0)
+                                return r;
+                        if (!g_file_test(network, G_FILE_TEST_EXISTS)) {
                                 r = create_network_conf_file(ifname, &network);
                                 if (r < 0)
                                         return r;
+                        }
+
                 }
 
+                return -EINVAL;
         }
 
         *ret = steal_ptr(network);
