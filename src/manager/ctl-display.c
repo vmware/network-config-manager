@@ -134,6 +134,8 @@ static int list_links(int argc, char *argv[]) {
 
 static void list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
         _auto_cleanup_ char *c = NULL, *dhcp = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        char buf[IF_NAMESIZE + 1] = {};
         static bool first = true;
         unsigned long size;
         Address *a = NULL;
@@ -146,6 +148,11 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 first = false;
         } else
                 printf("                              %s ", c);
+
+        if (!if_indextoname(a->ifindex, buf)) {
+                log_warning("Failed to find device ifindex='%d'", a->ifindex);
+                return;
+        }
 
         r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
         if (r >= 0 && string_has_prefix(c, dhcp)) {
@@ -161,7 +168,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
         } else {
                 _auto_cleanup_ char *network = NULL;
 
-                r = parse_network_file(a->ifindex, NULL, &network);
+                r = parse_network_file(a->ifindex, buf, &network);
                 if (r >= 0) {
                         if (a->family == AF_INET6 && IN6_IS_ADDR_LINKLOCAL(&a->address.in6))
                                 printf("(IPv6 Link Local) ");
