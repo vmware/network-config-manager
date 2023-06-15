@@ -12,27 +12,27 @@
 #include "journal.h"
 
 int add_matches_for_unit(sd_journal *j, const char *unit) {
-        const char *m1, *m2, *m3, *m4;
+        const char *match_systemd_unit, *match_coredump_unit, *match_unit, *match_object_systemd_unit;
         int r;
 
         assert(j);
         assert(unit);
 
-        m1 = strjoin("_SYSTEMD_UNIT=", unit, NULL);
-        m2 = strjoin("COREDUMP_UNIT", unit, NULL);
-        m3 = strjoin("UNIT=", unit, NULL);
-        m4 = strjoin("OBJECT_SYSTEMD_UNIT=", unit, NULL);
+        match_systemd_unit = strjoin("_SYSTEMD_UNIT=", unit, NULL);
+        match_coredump_unit = strjoin("COREDUMP_UNIT", unit, NULL);
+        match_unit = strjoin("UNIT=", unit, NULL);
+        match_object_systemd_unit = strjoin("OBJECT_SYSTEMD_UNIT=", unit, NULL);
 
-        r = sd_journal_add_match(j, m1, 0);
-        r = sd_journal_add_match(j, m2, 0);
+        r = sd_journal_add_match(j, match_systemd_unit, 0);
+        r = sd_journal_add_match(j, match_coredump_unit, 0);
         r = sd_journal_add_disjunction(j);
         r = sd_journal_add_match(j, "_PID=1", 0);
-        r = sd_journal_add_match(j, m3, 0);
+        r = sd_journal_add_match(j, match_unit, 0);
 
         /* Look for messages from authorized daemons about this service */
         r = sd_journal_add_disjunction(j);
         r = sd_journal_add_match(j, "_UID=0", 0);
-        r = sd_journal_add_match(j, m4, 0);
+        r = sd_journal_add_match(j, match_object_systemd_unit, 0);
 
         return r;
 }
@@ -120,9 +120,12 @@ int display_network_logs(int ifindex, char *ifname) {
 
         printf("\n");
         SD_JOURNAL_FOREACH (j)  {
-                _auto_cleanup_ char *p = NULL, *s = NULL;
-                const void *d;
-                size_t l;
+                _auto_cleanup_ char *p = NULL, *s = NULL, *a = NULL, *b = NULL, *c = NULL, *e = NULL, *f = NULL, *g = NULL;
+                size_t l, pid_len, syslog_indentifier_len, host_name_len;
+                const void *d, *pid, *syslog_indentifier, *host_name;
+                char buf[128] = {};
+                uint64_t x;
+                time_t t;
 
                 r = sd_journal_next(j);
                 if (r < 0) {
@@ -138,14 +141,36 @@ int display_network_logs(int ifindex, char *ifname) {
                         continue;
                 }
 
+                r = sd_journal_get_realtime_usec(j, &x);
+                if (r < 0)
+                        continue;
+
+                t = x / 1000000;
+                strftime(buf, 16, "%b %d %H:%M:%S", localtime(&t));
+
                 r = sd_journal_get_data(j, "MESSAGE", &d, &l);
                 if (r < 0) {
                         log_warning("Failed to read message field: %s", strerror(-r));
                         continue;
                 }
 
+                r = sd_journal_get_data(j, "_PID", (const void **) &pid, &pid_len);
+                if (r < 0)
+                        continue;
+
+                r = sd_journal_get_data(j, "SYSLOG_IDENTIFIER", (const void **) &syslog_indentifier, &syslog_indentifier_len);
+                if (r < 0)
+                        continue;
+
+                r = sd_journal_get_data(j, "_HOSTNAME", (const void **) &host_name, &host_name_len);
+                if (r < 0)
+                        continue;
+
                 split_pair((char *) d, "=", &p, &s);
-                printf("                       %.*s\n", (int) l,s);
+                split_pair((char *) pid, "=", &a, &b);
+                split_pair((char *) syslog_indentifier, "=", &c, &e);
+                split_pair((char *) host_name, "=", &f, &g);
+                printf("%s %s %s [%.*s] %.*s\n", buf, g, e, (int) (strlen(a) + 1), b, (int) l, s);
         }
 
         sd_journal_close(j);
