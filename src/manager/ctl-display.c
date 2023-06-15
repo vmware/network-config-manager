@@ -649,17 +649,18 @@ static int list_one_link(char *argv[]) {
                                 printf("                              %s ", c);
 
                         if (router && c && string_has_prefix(c, router))
-                                printf("(dhcp) \n");
+                                printf("(dhcp)");
                         else {
                                 r = parse_network_file(p->ifindex, p->ifname, &network);
                                 if (r >= 0) {
                                         if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c))
-                                                printf("(static) \n");
+                                                printf("(static)");
                                         else
-                                                printf("(foreign) \n");
+                                                printf("(foreign)");
                                 }
                         }
                         steal_ptr(c);
+                        printf("\n");
                 }
         }
 
