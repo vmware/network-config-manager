@@ -767,6 +767,9 @@ class TestCLINetwork:
     def test_cli_link_status(self):
         subprocess.check_call("nmctl status -j", text=True, shell = True)
 
+    def test_cli_link_status_with_logs(self):
+        subprocess.check_call("nmctl status 2 -l", text=True, shell = True)
+
     def test_cli_system_status(self):
         subprocess.check_call("nmctl", text=True, shell = True)
 

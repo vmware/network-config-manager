@@ -6,6 +6,7 @@
 
 #include <systemd/sd-hwdb.h>
 #include <systemd/sd-device.h>
+#include <systemd/sd-journal.h>
 
 #include "alloc-util.h"
 #include "ansi-color.h"
@@ -16,6 +17,7 @@
 #include "dbus.h"
 #include "device.h"
 #include "dns.h"
+#include "journal.h"
 #include "log.h"
 #include "macros.h"
 #include "netdev-link.h"
@@ -32,7 +34,10 @@
 #include "udev-hwdb.h"
 
 static bool arg_json = false;
+static bool arg_log = false;
 static bool arg_beautify = true;
+
+static int arg_log_line;
 
 void set_json(bool k) {
         arg_json = k;
@@ -48,6 +53,19 @@ void set_beautify(bool k) {
 
 bool beautify_enabled(void) {
         return arg_beautify;
+}
+
+void set_log(bool k, int size) {
+        arg_log = k;
+        arg_log_line = size;
+}
+
+bool log_enabled(void) {
+        return arg_log;
+}
+
+int get_log_line(void) {
+        return arg_log_line;
 }
 
 static void system_online_state_to_color(const char *state, const char **on) {
@@ -752,6 +770,9 @@ static int list_one_link(char *argv[]) {
                 display(arg_beautify, ansi_color_bold_cyan(), "           DHCP6 Client DUID: ");
                 printf("%s\n", dhcp6_duid);
         }
+
+        if (log_enabled())
+                display_network_logs(l->ifindex, l->name);
 
         return 0;
 }
