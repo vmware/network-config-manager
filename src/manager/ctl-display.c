@@ -649,7 +649,7 @@ static int list_one_link(char *argv[]) {
                                 printf("                              %s ", c);
 
                         if (router && c && string_has_prefix(c, router))
-                                printf("(dhcp)");
+                                printf("(DHCPv4)");
                         else {
                                 r = parse_network_file(p->ifindex, p->ifname, &network);
                                 if (r >= 0) {
