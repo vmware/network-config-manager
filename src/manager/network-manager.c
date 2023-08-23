@@ -131,7 +131,6 @@ int manager_network_link_section_configs_new(ConfigManager **ret) {
         return 0;
 }
 
-
 int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v) {
         _auto_cleanup_ char *network = NULL;
         int r;
@@ -269,7 +268,6 @@ int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *
 
         return dbus_network_reload();
 }
-
 
 int manager_get_link_dns(const IfNameIndex *ifidx, char **ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
