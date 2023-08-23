@@ -2574,8 +2574,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         }
 
         if (json_enabled())
-                return json_fill_dns_server(p, dns_config);
-
+                return json_fill_dns_server(p, dns_config, 0);
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
@@ -2679,6 +2678,9 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
         if (r < 0)
                 dns_config = NULL;
 
+        if (json_enabled())
+                return json_fill_dns_server(p, dns_config, p->ifindex);
+
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
 
@@ -2703,22 +2705,6 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
                                 else
                                         display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(dhcp) \n");
                         }
-                }
-                printf("\n");
-        }
-
-        r = dbus_get_current_dns_server_from_resolved(&current);
-        if (r >= 0 && current) {
-                _auto_cleanup_ char *pretty = NULL;
-
-                r = ip_to_str(current->address.family, &current->address, &pretty);
-                if (r >= 0) {
-                        display(beautify_enabled(), ansi_color_bold_cyan(), "CurrentDNSServer: ");
-                        printf("%s ", pretty);
-                        if (dns_config && g_strrstr(dns_config, pretty))
-                                display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(static) ");
-                        else
-                                display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(dhcp) ");
                 }
                 printf("\n");
         }

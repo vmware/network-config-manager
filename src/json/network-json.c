@@ -679,7 +679,7 @@ int json_fill_system_status(char **ret) {
         return r;
 }
 
-int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
+int json_fill_dns_server(const IfNameIndex *p, char *dns_config, int ifindex) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ DNSServer *current = NULL;
@@ -712,7 +712,7 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
                                 return log_oom();
 
                         d = g_sequence_get(i);
-                        if (!d->ifindex)
+                        if (!d->ifindex && d->ifindex != ifindex)
                                 continue;
 
                         r = ip_to_str(d->address.family, &d->address, &pretty);
@@ -748,51 +748,51 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config) {
                                 json_object_array_add(jdns, jaddr);
                                 steal_ptr(jaddr);
                         }
-
                 }
 
                 json_object_object_add(jobj, "DNS", jdns);
                 steal_ptr(jdns);
-
         }
 
-        r = dbus_get_current_dns_server_from_resolved(&current);
-        if (r >= 0 && current) {
-                _auto_cleanup_ char *pretty = NULL;
-
-                r = ip_to_str(current->address.family, &current->address, &pretty);
-                if (r >= 0) {
-                        json_object *s = json_object_new_string(pretty);
-                        if (!s)
-                                return log_oom();
-
-                        json_object_object_add(jobj, "CurrentDNSServer", s);
-                        steal_ptr(s);
-                }
-        }
-
-        r = dbus_acquire_dns_servers_from_resolved("FallbackDNS", &fallback);
-        if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
-                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
-                if (!ja)
-                        return log_oom();
-
-                for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+        if (ifindex == 0) {
+                r = dbus_get_current_dns_server_from_resolved(&current);
+                if (r >= 0 && current) {
                         _auto_cleanup_ char *pretty = NULL;
 
-                        d = g_sequence_get(i);
-
-                        r = ip_to_str(d->address.family, &d->address, &pretty);
+                        r = ip_to_str(current->address.family, &current->address, &pretty);
                         if (r >= 0) {
                                 json_object *s = json_object_new_string(pretty);
                                 if (!s)
                                         return log_oom();
 
-                                json_object_array_add(ja, s);
+                                json_object_object_add(jobj, "CurrentDNSServer", s);
+                                steal_ptr(s);
                         }
                 }
-                json_object_object_add(jobj, "FallbackDNS", ja);
-                steal_ptr(ja);
+
+                r = dbus_acquire_dns_servers_from_resolved("FallbackDNS", &fallback);
+                if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
+                        _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
+                        if (!ja)
+                                return log_oom();
+
+                        for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                                _auto_cleanup_ char *pretty = NULL;
+
+                                d = g_sequence_get(i);
+
+                                r = ip_to_str(d->address.family, &d->address, &pretty);
+                                if (r >= 0) {
+                                        json_object *s = json_object_new_string(pretty);
+                                        if (!s)
+                                                return log_oom();
+
+                                        json_object_array_add(ja, s);
+                                }
+                        }
+                        json_object_object_add(jobj, "FallbackDNS", ja);
+                        steal_ptr(ja);
+                }
         }
 
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
