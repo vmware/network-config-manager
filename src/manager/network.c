@@ -456,7 +456,7 @@ int create_network_conf_file(const char *ifname, char **ret) {
                 *ret = steal_ptr(network);
 
 
-        return dbus_network_reload();
+        return dbus_restart_unit("systemd-networkd.service");
 }
 
 int determine_network_conf_file(const char *ifname, char **ret) {
@@ -481,7 +481,7 @@ int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
 
         assert(ifidx);
 
-        (void) dbus_network_reload();
+        (void) dbus_restart_unit("systemd-networkd.service");
 
         r = network_parse_link_setup_state(ifidx->ifindex, &setup);
         if (r < 0) {
@@ -1594,7 +1594,7 @@ int generate_network_config(Network *n) {
         if (r < 0)
                 return r;
 
-        (void) dbus_network_reload();
+        (void) dbus_restart_unit("systemd-networkd.service");
         return 0;
 }
 

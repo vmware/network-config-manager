@@ -52,7 +52,7 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
         if (r < 0)
                 return r;
 
-        return dbus_network_reload();
+        return dbus_restart_unit("systemd-networkd.service");
 }
 
 int manager_create_vlan(const IfNameIndex *ifidx, const char *ifname, VLan *v) {
@@ -340,7 +340,7 @@ int manager_create_macvlan(const char *ifname, const char *dev, MACVLan *m, bool
         if (r < 0)
                 return r;
 
-        return dbus_network_reload();
+        return dbus_restart_unit("systemd-networkd.service");
 }
 
 int manager_create_ipvlan(const char *ifname, const char *dev, IPVLan *m, bool kind) {
@@ -400,7 +400,7 @@ int manager_create_ipvlan(const char *ifname, const char *dev, IPVLan *m, bool k
         if (r < 0)
                 return r;
 
-        return dbus_network_reload();
+        return dbus_restart_unit("systemd-networkd.service");
 }
 
 int manager_create_veth(const char *ifname, Veth *v) {

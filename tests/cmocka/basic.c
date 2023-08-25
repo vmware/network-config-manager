@@ -43,7 +43,8 @@ static int link_remove (const char *s) {
 static int reload_networkd (const char *s) {
     _auto_cleanup_ char *c = NULL;
 
-    system("networkctl reload");
+    system("systemctl restart systemd-networkd");
+    system("sleep 15");
 
     c = strjoin(" ", "/lib/systemd/systemd-networkd-wait-online", "-i", s, NULL);
     if (!c)
