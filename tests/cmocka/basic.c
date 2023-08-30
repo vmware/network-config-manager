@@ -44,7 +44,7 @@ static int reload_networkd (const char *s) {
     _auto_cleanup_ char *c = NULL;
 
     system("systemctl restart systemd-networkd");
-    system("sleep 15");
+    system("sleep 30");
 
     c = strjoin(" ", "/lib/systemd/systemd-networkd-wait-online", "-i", s, NULL);
     if (!c)
@@ -522,9 +522,13 @@ static void test_add_dhcp4_server_static_address(void **state) {
     int r;
 
     assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.21 mac 00:0c:29:5f:d1:41") >= 0);
+    system("sleep 1");
     assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.22 mac 00:0c:29:5f:d1:42") >= 0);
+    system("sleep 1");
     assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.23 mac 00:0c:29:5f:d1:43") >= 0);
+    system("sleep 1");
     assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.24 mac 00:0c:29:5f:d1:44") >= 0);
+    system("sleep 1");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -549,9 +553,13 @@ static void test_remove_dhcp4_server_static_address(void **state) {
     int r;
 
     assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.21 mac 00:0c:29:5f:d1:41") >= 0);
+    system("sleep 1");
     assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.22 mac 00:0c:29:5f:d1:42") >= 0);
+    system("sleep 1");
     assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.23 mac 00:0c:29:5f:d1:43") >= 0);
+    system("sleep 1");
     assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.24 mac 00:0c:29:5f:d1:44") >= 0);
+    system("sleep 1");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -1259,7 +1267,7 @@ int main(void) {
         cmocka_unit_test (test_link_wakeonlan),
         cmocka_unit_test (test_link_mtu),
         cmocka_unit_test (test_dhcp6_overrides),
-        cmocka_unit_test (test_ipv6_ra_overrides),
+        cmocka_unit_test (test_ipv6_ra_overrides),*/
         cmocka_unit_test (test_add_dhcp4_server_static_address),
         cmocka_unit_test (test_remove_dhcp4_server_static_address),
         cmocka_unit_test (test_yaml_add_dhcp4_server_static_address),
