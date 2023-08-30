@@ -481,7 +481,7 @@ int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
 
         assert(ifidx);
 
-        (void) dbus_restart_unit("systemd-networkd.service");
+        (void) dbus_network_reload();
 
         r = network_parse_link_setup_state(ifidx->ifindex, &setup);
         if (r < 0) {
