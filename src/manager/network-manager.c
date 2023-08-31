@@ -1513,12 +1513,6 @@ int manager_add_dns_server(const IfNameIndex *i, DNSServers *dns, bool system, b
                 }
         }
 
-        r = parse_config_file(network, "Network", "DNS", &config_dns);
-        if (r >= 0) {
-                if (str_eq(a, config_dns))
-                        return 0;
-        }
-
         r = set_config_file_str(network, "Network", "DNS", a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
@@ -1557,12 +1551,6 @@ int manager_add_dns_server_domain(const IfNameIndex *i, char **domains, bool sys
                 a = strjoin(" ", *d, a, NULL);
                 if (!a)
                         return log_oom();
-        }
-
-        r = parse_config_file(network, "Network", "Domains", &config_domain);
-        if (r >= 0) {
-                if (str_eq(a, config_domain))
-                        return 0;
         }
 
         r = set_config_file_str(network, "Network", "Domains", a);

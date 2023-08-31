@@ -392,7 +392,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "remove-rule",                   "rrule",            1,        WORD_ANY, false, ncm_link_remove_routing_policy_rules },
                 { "set-hostname",                  "hostname",         1,        WORD_ANY, false, ncm_set_system_hostname },
                 { "show-dns",                      "dns",              WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
-                { "show-dns-servers",              "dnsm",             2,         WORD_ANY, false, ncm_show_dns_servers_and_mode },
+                { "show-dns-servers",              "dnsm",             2,        WORD_ANY, false, ncm_show_dns_servers_and_mode },
                 { "add-dns",                       "adns",             2,        WORD_ANY, false, ncm_add_dns_server },
                 { "add-domain",                    "adomain",          1,        WORD_ANY, false, ncm_add_dns_domains },
                 { "show-domains",                  "domain",           WORD_ANY, WORD_ANY, false, ncm_show_dns_server_domains },
