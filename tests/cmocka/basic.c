@@ -1267,7 +1267,7 @@ int main(void) {
         cmocka_unit_test (test_link_wakeonlan),
         cmocka_unit_test (test_link_mtu),
         cmocka_unit_test (test_dhcp6_overrides),
-        cmocka_unit_test (test_ipv6_ra_overrides),*/
+        cmocka_unit_test (test_ipv6_ra_overrides),
         cmocka_unit_test (test_add_dhcp4_server_static_address),
         cmocka_unit_test (test_remove_dhcp4_server_static_address),
         cmocka_unit_test (test_yaml_add_dhcp4_server_static_address),
