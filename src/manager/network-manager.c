@@ -269,7 +269,7 @@ int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *
         return dbus_restart_unit("systemd-networkd.service");
 }
 
-int manager_get_link_dns(const IfNameIndex *ifidx, char **ret) {
+int manager_get_link_dns(const IfNameIndex *ifidx, char ***ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
@@ -283,11 +283,11 @@ int manager_get_link_dns(const IfNameIndex *ifidx, char **ret) {
         if (r < 0)
                 return r;
 
-        *ret = steal_ptr(config);
+        *ret = strsplit(config, " ", 0);
         return 0;
 }
 
-int manager_get_all_link_dns(char **ret) {
+int manager_get_all_link_dns(char ***ret) {
         _cleanup_(links_freep) Links *links = NULL;
         _auto_cleanup_ char *dns = NULL;
         int r;
@@ -318,7 +318,39 @@ int manager_get_all_link_dns(char **ret) {
                         return log_oom();
         }
 
-        *ret = steal_ptr(dns);
+        *ret = strsplit(dns, " ", 0);
+        return 0;
+}
+
+int manager_get_all_link_dhcp_lease_dns(char ***ret) {
+        _cleanup_(links_freep) Links *links = NULL;
+        _auto_cleanup_ char *dns = NULL;
+        int r;
+
+        r = netlink_acquire_all_links(&links);
+        if (r < 0)
+                return r;
+
+        for (GList *i = links->links; i; i = g_list_next (i)) {
+                _auto_cleanup_strv_ char **c = NULL;
+                _auto_cleanup_ IfNameIndex *p = NULL;
+                _auto_cleanup_ char *s = NULL;
+                Link *link = (Link *) i->data;
+
+                r = parse_ifname_or_index(link->name, &p);
+                if (r < 0)
+                        continue;
+
+                r = network_parse_link_dhcp4_dns(link->ifindex, &c);
+                if (r < 0)
+                        continue;
+
+                dns = strjoin(" ", strv_join(" ", c), dns, NULL);
+                if (!dns)
+                        return log_oom();
+        }
+
+        *ret = strsplit(dns, " ", 0);
         return 0;
 }
 

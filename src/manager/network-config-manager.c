@@ -2543,8 +2543,8 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
+        _auto_cleanup_strv_ char **dns_config = NULL;
         _auto_cleanup_ DNSServer *current = NULL;
-        _auto_cleanup_ char *dns_config = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buf[IF_NAMESIZE + 1] = {};
         GSequenceIter *itr;
@@ -2647,10 +2647,10 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 }
 
 _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
-        _auto_cleanup_ DNSServer *current = NULL;
         _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
+        _auto_cleanup_strv_ char **dns_config = NULL;
+        _auto_cleanup_ DNSServer *current = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_ char *dns_config = NULL;
         GSequenceIter *itr;
         DNSServer *d;
         int r;
@@ -2705,10 +2705,10 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
                                 } else
                                         printf("                  %s ", str_strip(pretty));
 
-                                if (dns_config && g_strrstr(dns_config, pretty))
+                                if (dns_config && strv_contains((const char **) dns_config, pretty))
                                         display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(static) \n");
                                 else
-                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(dhcp) \n");
+                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(DHCPv4) \n");
                         }
                 }
                 printf("\n");
