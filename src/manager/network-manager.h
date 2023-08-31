@@ -30,6 +30,7 @@ int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad);
 int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *ifidx, int mode);
 
 int manager_get_link_dns(const IfNameIndex *ifidx, char **ret);
+int manager_get_all_link_dns(char **ret);
 bool manager_is_link_static_address(const IfNameIndex *ifidx);
 
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, uint32_t v);

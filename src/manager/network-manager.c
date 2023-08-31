@@ -147,7 +147,7 @@ int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode) {
@@ -284,6 +284,41 @@ int manager_get_link_dns(const IfNameIndex *ifidx, char **ret) {
                 return r;
 
         *ret = steal_ptr(config);
+        return 0;
+}
+
+int manager_get_all_link_dns(char **ret) {
+        _cleanup_(links_freep) Links *links = NULL;
+        _auto_cleanup_ char *dns = NULL;
+        int r;
+
+        r = netlink_acquire_all_links(&links);
+        if (r < 0)
+                return r;
+
+        for (GList *i = links->links; i; i = g_list_next (i)) {
+                _auto_cleanup_ char *c = NULL, *network = NULL;
+                _auto_cleanup_ IfNameIndex *p = NULL;
+                Link *link = (Link *) i->data;
+
+                r = parse_ifname_or_index(link->name, &p);
+                if (r < 0)
+                        continue;
+
+                r = network_parse_link_network_file(link->ifindex, &network);
+                if (r < 0)
+                        continue;
+
+                r = parse_config_file(network, "Network", "DNS", &c);
+                if (r < 0)
+                        continue;
+
+                dns = strjoin(" ", c, dns, NULL);
+                if (!dns)
+                        return log_oom();
+        }
+
+        *ret = steal_ptr(dns);
         return 0;
 }
 

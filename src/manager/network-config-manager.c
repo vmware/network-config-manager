@@ -2571,7 +2571,9 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 r = manager_get_link_dns(p, &dns_config);
                 if (r < 0)
                        dns_config = NULL;
-        }
+        } else
+                /* Read all links managed by networkd and parse DNS= */
+                manager_get_all_link_dns(&dns_config);
 
         if (json_enabled())
                 return json_fill_dns_server(p, dns_config, 0);
@@ -2677,7 +2679,10 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
         r = manager_get_link_dns(p, &dns_config);
         if (r < 0)
                 dns_config = NULL;
-
+        else 
+                /* Read all links managed by networkd and parse DNS= */
+                manager_get_all_link_dns(&dns_config);
+        
         if (json_enabled())
                 return json_fill_dns_server(p, dns_config, p->ifindex);
 
