@@ -727,7 +727,7 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config, int ifindex) {
                                 if (dns_config && g_strrstr(dns_config, pretty))
                                         s = json_object_new_string("static");
                                 else {
-                                        s = json_object_new_string("dhcp");
+                                        s = json_object_new_string("DHCPv4");
 
                                         if(provider) {
                                                 json_object *js = json_object_new_string(provider);

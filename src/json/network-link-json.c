@@ -313,7 +313,7 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                 if (r >= 0 && string_has_prefix(c, dhcp)) {
                         _auto_cleanup_ char *provider = NULL;
 
-                        js = json_object_new_string("dhcp");
+                        js = json_object_new_string("DHCPv4");
                         if (!js)
                                 return log_oom();
 
@@ -628,7 +628,7 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
                         if (r >= 0 && string_has_prefix(c, dhcp)) {
                                 _auto_cleanup_ char *provider = NULL;
 
-                                js = json_object_new_string("dhcp");
+                                js = json_object_new_string("DHCPv4");
                                 if (!js)
                                         return log_oom();
 
@@ -1496,7 +1496,7 @@ static int fill_link_dns_message(json_object *jobj, Link *l, char *network) {
                         _cleanup_(json_object_putp) json_object *js = NULL;
                         _auto_cleanup_ char *provider = NULL;
 
-                        js = json_object_new_string("dhcp");
+                        js = json_object_new_string("DHCPv4");
                         if (!js)
                                 return log_oom();
 
@@ -1563,7 +1563,7 @@ static int fill_link_dns_message(json_object *jobj, Link *l, char *network) {
                         _cleanup_(json_object_putp) json_object *js = NULL;
                         _auto_cleanup_ char *provider = NULL;
 
-                        js = json_object_new_string("dhcp");
+                        js = json_object_new_string("DHCPv4");
                         if (!js)
                                 return log_oom();
 
@@ -1669,7 +1669,7 @@ static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
                         _cleanup_(json_object_putp) json_object *js = NULL;
                         _auto_cleanup_ char *provider = NULL;
 
-                        js = json_object_new_string("dhcp");
+                        js = json_object_new_string("DHCPv4");
                         if (!js)
                                 return log_oom();
 
