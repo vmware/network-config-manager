@@ -679,9 +679,10 @@ int json_fill_system_status(char **ret) {
         return r;
 }
 
-int json_fill_dns_server(const IfNameIndex *p, char *dns_config, int ifindex) {
+int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _auto_cleanup_strv_ char **dhcp_dns = NULL;
         _auto_cleanup_ DNSServer *current = NULL;
         _auto_cleanup_ char *provider = NULL;
         GSequenceIter *i;
@@ -697,6 +698,8 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config, int ifindex) {
                 if(r < 0)
                         return r;
         }
+
+        (void) manager_get_all_link_dhcp_lease_dns(&dhcp_dns);
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
@@ -724,9 +727,9 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config, int ifindex) {
                                 json_object_object_add(jaddr, "Address", s);
                                 steal_ptr(s);
 
-                                if (dns_config && g_strrstr(dns_config, pretty))
+                                if (dns_config && strv_contains((const char **) dns_config, pretty))
                                         s = json_object_new_string("static");
-                                else {
+                                else if (dhcp_dns && strv_contains((const char **) dhcp_dns, pretty)){
                                         s = json_object_new_string("DHCPv4");
 
                                         if(provider) {
@@ -737,7 +740,8 @@ int json_fill_dns_server(const IfNameIndex *p, char *dns_config, int ifindex) {
                                                 json_object_object_add(jaddr, "ConfigProvider", js);
                                                 steal_ptr(js);
                                         }
-                                }
+                                } else
+                                        s = json_object_new_string("foreign");
 
                                 if (!s)
                                         return log_oom();
