@@ -166,7 +166,7 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode) {
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_get_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient *mode) {
@@ -228,7 +228,7 @@ int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHC
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad) {
@@ -247,7 +247,7 @@ int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad) {
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *ifidx, int mode) {
@@ -266,7 +266,7 @@ int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_get_link_dns(const IfNameIndex *ifidx, char ***ret) {
@@ -463,7 +463,7 @@ int manager_set_link_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_link_group(const IfNameIndex *ifidx, uint32_t group) {
@@ -485,7 +485,7 @@ int manager_set_link_group(const IfNameIndex *ifidx, uint32_t group) {
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_link_rf_online(const IfNameIndex *ifidx, const char *addrfamily) {
@@ -506,7 +506,7 @@ int manager_set_link_rf_online(const IfNameIndex *ifidx, const char *addrfamily)
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy) {
@@ -527,7 +527,7 @@ int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy)
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
@@ -547,7 +547,7 @@ int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_link_local_address(const IfNameIndex *ifidx, const char *k, const char *v) {
@@ -568,7 +568,7 @@ int manager_set_link_local_address(const IfNameIndex *ifidx, const char *k, cons
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac) {
@@ -595,7 +595,7 @@ int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac) {
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_link_state(const IfNameIndex *ifidx, LinkState state) {
@@ -687,7 +687,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_delete_link_address(const IfNameIndex *ifidx, const char *a) {
@@ -715,7 +715,7 @@ int manager_delete_link_address(const IfNameIndex *ifidx, const char *a) {
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
@@ -753,7 +753,7 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
                 }
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_configure_route(const IfNameIndex *ifidx,
@@ -879,7 +879,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway) {
@@ -920,7 +920,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway) {
                         (void) remove_key_from_config_file(network, "Route", "Metric");
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPolicyRule *rule) {
@@ -1001,7 +1001,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_remove_routing_policy_rules(const IfNameIndex *ifidx) {
@@ -1020,7 +1020,7 @@ int manager_remove_routing_policy_rules(const IfNameIndex *ifidx) {
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a, const Route *rt) {
@@ -1031,12 +1031,6 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
 
         assert(ifidx);
         assert(rt);
-
-        r = create_network_conf_file(ifidx->ifname, &network);
-        if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s", ifidx->ifname, strerror(-r));
-                return r;
-        }
 
         r = create_or_parse_network_file(ifidx, &network);
         if (r < 0) {
@@ -1179,7 +1173,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_configure_dhcpv4_server(const IfNameIndex *i,
@@ -1273,7 +1267,7 @@ int manager_configure_dhcpv4_server(const IfNameIndex *i,
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_remove_dhcpv4_server(const IfNameIndex *i) {
@@ -1296,7 +1290,7 @@ int manager_remove_dhcpv4_server(const IfNameIndex *i) {
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_add_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddress *addr, const char *mac) {
@@ -1348,7 +1342,7 @@ int manager_add_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddre
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_remove_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddress *addr, const char *mac) {
@@ -1378,7 +1372,7 @@ int manager_remove_dhcpv4_server_static_address(const IfNameIndex *i, const IPAd
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_configure_ipv6_router_advertisement(const IfNameIndex *i,
@@ -1512,7 +1506,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *i,
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_remove_ipv6_router_advertisement(const IfNameIndex *i) {
@@ -1543,7 +1537,7 @@ int manager_remove_ipv6_router_advertisement(const IfNameIndex *i) {
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_add_dns_server(const IfNameIndex *i, DNSServers *dns, bool system, bool global) {
@@ -1586,7 +1580,7 @@ int manager_add_dns_server(const IfNameIndex *i, DNSServers *dns, bool system, b
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_add_dns_server_domain(const IfNameIndex *i, char **domains, bool system, bool global) {
@@ -1626,7 +1620,7 @@ int manager_add_dns_server_domain(const IfNameIndex *i, char **domains, bool sys
                 return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_read_domains_from_system_config(char **domains) {
@@ -1671,7 +1665,7 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *i) {
                         return r;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_network_section_bool(const IfNameIndex *i, const char *k, bool v) {
@@ -1689,7 +1683,7 @@ int manager_set_network_section_bool(const IfNameIndex *i, const char *k, bool v
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_network_section(const IfNameIndex *i, const char *k, const char *v) {
@@ -1707,7 +1701,7 @@ int manager_set_network_section(const IfNameIndex *i, const char *k, const char 
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *i, const char *k, bool v) {
@@ -1731,7 +1725,7 @@ int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *i, const char *
                         return -EINVAL;
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_add_ntp_addresses(const IfNameIndex *i, char **ntps, bool add) {
@@ -1770,7 +1764,7 @@ int manager_add_ntp_addresses(const IfNameIndex *i, char **ntps, bool add) {
                 return r;
         }
 
-        (void) dbus_restart_unit("systemd-networkd.service");
+        (void) dbus_network_reload();
         (void) dbus_restart_unit("systemd-timesyncd.service");
 
         return 0;
@@ -1792,7 +1786,7 @@ int manager_remove_ntp_addresses(const IfNameIndex *i) {
                 return r;
         }
 
-        (void) dbus_restart_unit("systemd-networkd.service");
+        (void) dbus_network_reload();
         (void) dbus_restart_unit("systemd-timesyncd.service");
 
         return 0;
@@ -1828,11 +1822,11 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_reload_network(void) {
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 int manager_reconfigure_link(const IfNameIndex *i) {
@@ -2195,7 +2189,7 @@ int manager_generate_network_config_from_yaml(const char *file) {
                 }
         }
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 static void manager_command_line_config_generator(void *key, void *value, void *user_data) {
@@ -2262,7 +2256,7 @@ int manager_generate_networkd_config_from_command_line(const char *file, const c
         } else
                 g_hash_table_foreach(networks, manager_command_line_config_generator, NULL);
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 bool manager_config_exists(const char *section, const char *k, const char *v) {

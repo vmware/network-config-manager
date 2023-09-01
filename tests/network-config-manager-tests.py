@@ -789,7 +789,8 @@ class TestCLINetwork:
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
         subprocess.check_call("nmctl add-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
@@ -806,7 +807,8 @@ class TestCLINetwork:
     def test_cli_add_domain(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
         subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
 
         assert(unit_exist('10-test99.network') == True)

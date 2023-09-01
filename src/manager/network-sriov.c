@@ -157,7 +157,7 @@ int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link) {
         if (r < 0)
                 return r;
 
-        return dbus_restart_unit("systemd-networkd.service");
+        return dbus_network_reload();
 }
 
 _public_ int ncm_configure_sr_iov(int argc, char *argv[]) {

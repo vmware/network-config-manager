@@ -1322,7 +1322,7 @@ int generate_netdev_config(NetDev *n) {
         }
 
         (void) set_file_permisssion(key_file->name, "systemd-network");
-        (void) dbus_restart_unit("systemd-networkd.service");
+        (void) dbus_network_reload();
 
         return 0;
 }
