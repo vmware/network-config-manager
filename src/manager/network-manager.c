@@ -318,7 +318,9 @@ int manager_get_all_link_dns(char ***ret) {
                         return log_oom();
         }
 
-        *ret = strsplit(dns, " ", 0);
+        if (dns)
+                *ret = strsplit(dns, " ", 0);
+
         return 0;
 }
 
