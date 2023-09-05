@@ -761,16 +761,16 @@ class TestCLINetwork:
         remove_units_from_netword_unit_path()
         link_remove('test99')
 
-    def test_cli_link_status(self):
+    def test_cli_link_index_status(self):
         subprocess.check_call("nmctl status 2", text=True, shell = True)
 
-    def test_cli_link_status(self):
+    def test_cli_link_index_status_json(self):
         subprocess.check_call("nmctl status 2 -j ", text=True, shell = True)
 
     def test_cli_link_status(self):
         subprocess.check_call("nmctl status", text=True, shell = True)
 
-    def test_cli_link_status(self):
+    def test_cli_link_status_json(self):
         subprocess.check_call("nmctl status -j", text=True, shell = True)
 
     def test_cli_link_status_with_logs(self):
@@ -781,6 +781,9 @@ class TestCLINetwork:
 
     def test_cli_show_dns(self):
         subprocess.check_call("nmctl dns", text=True, shell = True)
+
+    def test_cli_show_dns_json(self):
+        subprocess.check_call("nmctl dns -j", text=True, shell = True)
 
     def test_cli_show_domains(self):
         subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
