@@ -221,7 +221,7 @@ static void list_one_link_address_with_address_mode(gpointer key, gpointer value
 
                 r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
                 if (r >= 0 && string_has_prefix(c, dhcp))
-                        display(arg_beautify, ansi_color_bold_blue(), "(dhcp) \n");
+                        display(arg_beautify, ansi_color_bold_blue(), "(DHCPv4) \n");
                 else {
                         _auto_cleanup_ char *network = NULL;
                         char buf[IF_NAMESIZE + 1] = {};
@@ -1119,7 +1119,7 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
                         if (network && (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c)))
                                 provider = strdup("static");
                         else if (dhcp4_router && str_eq(c, dhcp4_router))
-                                provider = strdup("dhcp");
+                                provider = strdup("DHCPv4");
                         else
                                 provider = strdup("foreign");
 
