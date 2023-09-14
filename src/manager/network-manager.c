@@ -283,7 +283,8 @@ int manager_get_link_dns(const IfNameIndex *ifidx, char ***ret) {
         if (r < 0)
                 return r;
 
-        *ret = strsplit(config, " ", 0);
+        if (config)
+                *ret = strsplit(config, " ", 0);
         return 0;
 }
 
@@ -320,7 +321,6 @@ int manager_get_all_link_dns(char ***ret) {
 
         if (dns)
                 *ret = strsplit(dns, " ", 0);
-
         return 0;
 }
 
@@ -352,7 +352,8 @@ int manager_get_all_link_dhcp_lease_dns(char ***ret) {
                         return log_oom();
         }
 
-        *ret = strsplit(dns, " ", 0);
+        if (dns)
+                *ret = strsplit(dns, " ", 0);
         return 0;
 }
 
