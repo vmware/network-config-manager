@@ -255,8 +255,8 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
 _public_ int ncm_link_set_option(int argc, char *argv[]) {
         _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        int r = 0;
         bool k;
-        int r;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev")) {
@@ -777,10 +777,10 @@ _public_ int ncm_link_get_dhcp_client_iaid(char *ifname, uint32_t *ret) {
 }
 
 _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
+        DHCPClientDUIDType d = _DHCP_CLIENT_DUID_TYPE_INVALID;
         DHCPClient kind = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *raw_data = NULL;
-        DHCPClientDUIDType d;
         bool system = false;
         int r;
 
@@ -837,6 +837,11 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
 
         if (!p && !system) {
                 log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (d == _DHCP_CLIENT_DUID_TYPE_INVALID) {
+                log_warning("Failed to parse 'duid' type: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
 
