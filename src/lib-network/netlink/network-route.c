@@ -28,6 +28,7 @@ int route_new(Route **ret) {
                 .quick_ack = -1,
                 .tfo = -1,
                 .ttl_propogate = -1,
+                .type = _ROUTE_TYPE_INVALID,
         };
 
         *ret = route;
