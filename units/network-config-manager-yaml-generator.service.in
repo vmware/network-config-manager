@@ -4,6 +4,7 @@
 [Unit]
 Description=network-config-manager generate network units from yaml file
 DefaultDependencies=no
+After=dbus.service
 Before=network.target
 
 [Service]
