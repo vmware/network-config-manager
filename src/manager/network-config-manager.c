@@ -2538,12 +2538,12 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
         r = manager_get_link_dhcp_client(p, &mode);
         if (r >= 0)
                 printf("dhcp\n");
-        else {
-                if (manager_is_link_static_address(p))
-                        printf("static\n");
-        }
+        else if (manager_is_link_static_address(p))
+                printf("static\n");
+        else
+                return -ENOENT;
 
-        return -ENOENT;
+        return 0;
 }
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
