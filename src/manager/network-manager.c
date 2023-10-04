@@ -1545,7 +1545,6 @@ int manager_remove_ipv6_router_advertisement(const IfNameIndex *i) {
 
 int manager_add_dns_server(const IfNameIndex *i, DNSServers *dns, bool system, bool global) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config_dns = NULL, *a = NULL;
-        GSequenceIter *itr;
         int r;
 
         assert(dns);
@@ -1565,7 +1564,7 @@ int manager_add_dns_server(const IfNameIndex *i, DNSServers *dns, bool system, b
         if (r < 0)
                 return r;
 
-        for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
+        for (GSequenceIter *itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                 _auto_cleanup_ char *pretty = NULL;
                 DNSServer *d = g_sequence_get(itr);
 
