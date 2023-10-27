@@ -2514,8 +2514,12 @@ _public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
 }
 
 _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
+        _auto_cleanup_ char *network = NULL, *c4 = NULL, *c6 = NULL, *c = NULL;
+        _auto_cleanup_strv_ char **dns_config = NULL, **dns_lease = NULL;
+        bool dhcpv4 = true, dhcpv6 = true, static_dns = false;
+        _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        DHCPClient mode;
+        DHCPClient mode = DHCP_CLIENT_NO;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -2539,13 +2543,51 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        r = network_parse_link_network_file(p->ifindex, &network);
+        if (r < 0)
+                return r;
+
         r = manager_get_link_dhcp_client(p, &mode);
-        if (r >= 0)
-                printf("dhcp\n");
-        else if (manager_is_link_static_address(p))
-                printf("static\n");
-        else
-                return -ENOENT;
+        if (r < 0 && r != -ENOENT) {
+                log_warning("Failed to parse 'DHCP=' : %s",  strerror(-r));
+                return r;
+        }
+
+        r = parse_config_file(network, "Network", "DNS", &c);
+        if (r < 0 && r != -ENOENT) {
+                log_warning("Failed to parse 'DNS=' :%s",  strerror(-r));
+                return r;
+        }
+
+        if (!isempty_str(c))
+                static_dns = true;
+
+        r = parse_config_file(network, "DHCPv4", "UseDNS", &c4);
+        if (r >= 0) {
+                r = parse_bool(c4);
+                if (r >= 0)
+                        dhcpv4 = r;
+        }
+
+        r = parse_config_file(network, "DHCPv6", "UseDNS", &c6);
+        if (r >= 0) {
+                r = parse_bool(c6);
+                if (r >= 0)
+                        dhcpv6 = r;
+        }
+
+        display(beautify_enabled() ? true : false, ansi_color_bold_blue(),"DNS Mode: ");
+
+        if ((dhcpv4 || dhcpv6) && static_dns)
+                printf("(merged) \n");
+        else {
+                if (static_dns)
+                        printf("(static)\n");
+                else if ((dhcpv4 || dhcpv6) && (mode == DHCP_CLIENT_YES || mode == DHCP_CLIENT_IPV4 || mode == DHCP_CLIENT_IPV6))
+                        printf("(DHCP)\n");
+                else
+                        printf("(foreign)\n");
+        }
 
         return 0;
 }
