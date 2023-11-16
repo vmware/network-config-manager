@@ -26,7 +26,7 @@ int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy)
 int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHCPClientIdentifier identifier);
 int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret);
 
-int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad);
+int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, bool dad);
 int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *ifidx, int mode);
 
 int manager_get_link_dns(const IfNameIndex *ifidx, char ***ret);

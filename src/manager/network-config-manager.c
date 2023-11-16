@@ -938,6 +938,7 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
 _public_ int ncm_link_set_network_ipv6_dad(int argc, char *argv[]) {
         _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        bool v;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -963,7 +964,8 @@ _public_ int ncm_link_set_network_ipv6_dad(int argc, char *argv[]) {
                 return r;
         }
 
-        return manager_set_link_ipv6_dad(p, r);
+        v = r;
+        return manager_set_link_ipv6_dad(p, v);
 }
 
 _public_ int ncm_link_set_network_ipv6_link_local_address_generation_mode(int argc, char *argv[]) {

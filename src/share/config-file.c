@@ -310,7 +310,7 @@ int set_config_file_str(const char *path, const char *section, const char *k, co
         return set_file_permisssion(path, "systemd-network");
 }
 
-int set_config_file_int(const char *path, const char *section, const char *k, int v) {
+int set_config_file_int(const char *path, const char *section, const char *k, unsigned v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ gchar *s = NULL;
         int r;
@@ -323,7 +323,7 @@ int set_config_file_int(const char *path, const char *section, const char *k, in
         if (r < 0)
                 return r;
 
-        s = g_strdup_printf("%i", v);
+        s = g_strdup_printf("%u", v);
         if (!s)
                 return -ENOMEM;
 

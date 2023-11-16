@@ -91,11 +91,10 @@ typedef struct NetDevLink {
         int rx_flow_ctrl;
         int auto_flow_ctrl;
 
-        int tx_queues;
-        int rx_queues;
-        int gen_seg_off_bytes;
-        int gen_seg_off_seg;
-
+        unsigned tx_queues;
+        unsigned rx_queues;
+        unsigned gen_seg_off_bytes;
+        unsigned gen_seg_off_seg;
         unsigned tx_queue_len;
 } NetDevLink;
 

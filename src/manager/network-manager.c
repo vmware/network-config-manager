@@ -231,7 +231,7 @@ int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHC
         return dbus_network_reload();
 }
 
-int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad) {
+int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, bool dad) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -241,7 +241,7 @@ int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_int(network, "Network", "IPv6DuplicateAddressDetection", dad);
+        r = set_config_file_bool(network, "Network", "IPv6DuplicateAddressDetection", dad);
         if (r < 0) {
                 log_warning("Failed to update IPv6DuplicateAddressDetection= to configuration file '%s': %s", network, strerror(-r));
                 return r;

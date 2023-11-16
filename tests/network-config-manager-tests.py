@@ -999,7 +999,7 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'IPv6DuplicateAddressDetection') == '0')
+        assert(parser.get('Network', 'IPv6DuplicateAddressDetection') == 'no')
 
     def test_cli_set_ipv6_ll_address_generation_mode(self):
         assert(link_exist('test99') == True)
@@ -1041,7 +1041,7 @@ class TestCLINetwork:
     def test_cli_set_dhcp6_iaid(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv4", shell = True)
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv6", shell = True)
         subprocess.check_call("nmctl set-dhcp-iaid dev test99 f 6 iaid 5555", shell = True)
 
         assert(unit_exist('10-test99.network') == True)

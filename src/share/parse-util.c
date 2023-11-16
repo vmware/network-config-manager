@@ -51,20 +51,17 @@ int parse_uint64(const char *c, uint64_t *val) {
         return 0;
 }
 
-int parse_uint32(const char *c, unsigned *val) {
+int parse_uint32(const char *c, uint32_t *val) {
         char *p;
-        long r;
+        unsigned long r;
 
         assert(c);
 
-        r = strtol(c, &p, 0);
-        if (!p || p == c || *p)
+        r = strtoul(c, &p, 0);
+        if (errno != 0 || !p || p == c || *p)
                 return -1;
 
-        if ((r == LONG_MAX || r == LONG_MIN) && errno == ERANGE)
-                return -ERANGE;
-
-        if (r < INT_MIN || r > INT_MAX)
+        if (r > UINT32_MAX)
                 return -ERANGE;
 
         *val = r;
@@ -147,7 +144,7 @@ int parse_link_queue(const char *c, unsigned *ret) {
         return true;
 }
 
-int parse_link_gso(const char *c, int *ret) {
+int parse_link_gso(const char *c, unsigned *ret) {
         unsigned v;
         int r;
 

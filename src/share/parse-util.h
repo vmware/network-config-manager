@@ -8,10 +8,10 @@
 
 int parse_int(const char *c, int *val);
 int parse_uint64(const char *c, uint64_t *val);
-int parse_uint32(const char *c, unsigned *val);
+int parse_uint32(const char *c, uint32_t *val);
 int parse_uint16(const char *c, uint16_t *val);
 int parse_link_queue(const char *c, unsigned *ret);
-int parse_link_gso(const char *c, int *ret);
+int parse_link_gso(const char *c, unsigned *ret);
 int parse_link_macpolicy(const char *c);
 int parse_link_namepolicy(const char *c);
 int parse_link_name(const char *c);
