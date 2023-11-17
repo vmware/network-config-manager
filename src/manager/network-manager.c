@@ -375,7 +375,7 @@ int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClien
         return 0;
 }
 
-int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient kind, const uint32_t iaid) {
+int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient kind, const char *iaid) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -385,7 +385,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient
         if (r < 0)
                 return r;
 
-        r = set_config_file_int(network, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "IAID", iaid);
+        r = set_config_file_str(network, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "IAID", iaid);
         if (r < 0) {
                 log_warning("Failed to update DHCP IAID= to configuration file '%s': %s", network, strerror(-r));
                 return r;

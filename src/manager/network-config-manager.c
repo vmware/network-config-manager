@@ -699,7 +699,7 @@ _public_ int ncm_link_get_dhcp4_client_identifier(const char *ifname, char **ret
 _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
         DHCPClient kind = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        uint32_t v;
+        _auto_cleanup_ char *iaid = NULL;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -725,6 +725,8 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
 
                         continue;
                 } else if (str_eq_fold(argv[i], "iaid")) {
+                        uint32_t v;
+
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v);
@@ -732,6 +734,10 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
                                 log_warning("Failed to parse IAID '%s' for device '%s': %s", argv[i], p->ifname, strerror(-r));
                                 return r;
                         }
+
+                        iaid = strdup(argv[i]);
+                        if (!iaid)
+                                return log_oom();
 
                         continue;
                 }
@@ -750,7 +756,7 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_link_dhcp_client_iaid(p, kind, v);
+        r = manager_set_link_dhcp_client_iaid(p, kind, iaid);
         if (r < 0) {
                 log_warning("Failed to set device DHCP client IAID for '%s': %s", p->ifname, strerror(r));
                 return r;
@@ -2684,10 +2690,10 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
         r = manager_get_link_dns(p, &dns_config);
         if (r < 0)
                 dns_config = NULL;
-        else 
+        else
                 /* Read all links managed by networkd and parse DNS= */
                 manager_get_all_link_dns(&dns_config);
-        
+
         if (json_enabled())
                 return json_fill_dns_server(p, dns_config, p->ifindex);
 
