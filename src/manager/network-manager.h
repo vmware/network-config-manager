@@ -36,7 +36,7 @@ int manager_get_all_link_dhcp_lease_dns(char ***ret);
 bool manager_is_link_static_address(const IfNameIndex *ifidx);
 
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, const char *iaid);
-int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, uint32_t *iaid);
+int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, char **iaid);
 
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                                       const DHCPClientDUIDType duid,

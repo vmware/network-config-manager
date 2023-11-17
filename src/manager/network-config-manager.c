@@ -765,20 +765,18 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_link_get_dhcp_client_iaid(char *ifname, uint32_t *ret) {
+_public_ int ncm_link_get_dhcp_client_iaid(char *ifname, char **ret) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        uint32_t v;
         int r;
 
         r = parse_ifname_or_index(ifname, &p);
         if (r < 0)
                 return r;
 
-        r = manager_get_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV4, &v);
+        r = manager_get_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV4, ret);
         if (r < 0)
                 return r;
 
-        *ret = v;
         return 0;
 }
 

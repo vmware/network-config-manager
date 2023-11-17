@@ -468,14 +468,13 @@ static void display_alterative_names(gpointer data, gpointer user_data) {
 static int list_one_link(char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *address_state = NULL, *ipv4_state = NULL,
                 *ipv6_state = NULL, *required_for_online = NULL, *device_activation_policy = NULL, *tz = NULL, *network = NULL,
-                *online_state = NULL, *link = NULL, *dhcp4_identifier = NULL, *dhcp6_duid = NULL, *dhcp6_iaid = NULL;
+                *online_state = NULL, *link = NULL, *dhcp4_identifier = NULL, *dhcp6_duid = NULL, *dhcp6_iaid = NULL, *iaid = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _cleanup_(routes_freep) Routes *route = NULL;
         _cleanup_(link_freep) Link *l = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        uint32_t iaid;
         int r;
 
         r = parse_ifname_or_index(*argv, &p);
@@ -660,8 +659,8 @@ static int list_one_link(char *argv[]) {
                                 }
                         }
                         steal_ptr(c);
-                        printf("\n");
                 }
+                printf("\n");
         }
 
         r = network_parse_link_dns(l->ifindex, &dns);
@@ -722,14 +721,13 @@ static int list_one_link(char *argv[]) {
         r = manager_get_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV4, &iaid);
         if (r >= 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                 DHCPv4 IAID: ");
-                printf("%d\n", iaid);
+                printf("%s\n", iaid);
         }
 
-        iaid = 0;
         r = manager_get_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV6, &iaid);
         if (r >= 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                 DHCPv6 IAID: ");
-                printf("%d\n", iaid);
+                printf("%s\n", iaid);
         }
 
         r = network_parse_link_dhcp4_client_id(p->ifindex, &dhcp4_identifier);
