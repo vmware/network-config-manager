@@ -56,7 +56,7 @@ static const Config link_ctl_to_config_table[] = {
                 { "txbuf",           "TxBufferSize" },
                 { "txq",             "TransmitQueues" },
                 { "rxq",             "ReceiveQueues" },
-                { "rxqlen",          "TransmitQueueLength" },
+                { "txqlen",          "TransmitQueueLength" },
                 { "rxflowctrl",      "RxFlowControl" },
                 { "txflowctrl",      "TxFlowControl" },
                 { "autoflowctrl",    "AutoNegotiationFlowControl" },
@@ -516,7 +516,7 @@ int netdev_link_configure(const char *ifname, NetDevLink *n) {
         }
 
         if (n->tx_queue_len > 0) {
-                r = set_config_file_int(path, "Link", ctl_to_config(n->m, "rxqlen"), n->tx_queue_len);
+                r = set_config_file_int(path, "Link", ctl_to_config(n->m, "txqlen"), n->tx_queue_len);
                 if (r < 0)
                         return r;
         }
