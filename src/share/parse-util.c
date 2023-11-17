@@ -64,9 +64,6 @@ int parse_uint32(const char *c, unsigned *val) {
         if ((r == LONG_MAX || r == LONG_MIN) && errno == ERANGE)
                 return -ERANGE;
 
-        if (r < INT_MIN || r > INT_MAX)
-                return -ERANGE;
-
         *val = r;
         return 0;
 }
