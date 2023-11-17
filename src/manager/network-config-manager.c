@@ -729,7 +729,7 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
 
                         r = parse_uint32(argv[i], &v);
                         if (r < 0) {
-                                log_warning("Failed to parse IAID '%s' for device '%s': %s", argv[2], argv[1], strerror(-r));
+                                log_warning("Failed to parse IAID '%s' for device '%s': %s", argv[i], p->ifname, strerror(-r));
                                 return r;
                         }
 
@@ -752,7 +752,7 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
 
         r = manager_set_link_dhcp_client_iaid(p, kind, v);
         if (r < 0) {
-                log_warning("Failed to set device DHCP4 client IAID for '%s': %s", p->ifname, strerror(r));
+                log_warning("Failed to set device DHCP client IAID for '%s': %s", p->ifname, strerror(r));
                 return r;
         }
 
