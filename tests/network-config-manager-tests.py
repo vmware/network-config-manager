@@ -1029,27 +1029,27 @@ class TestCLINetwork:
         assert(link_exist('test99') == True)
 
         subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv4", shell = True)
-        subprocess.check_call("nmctl set-dhcp-iaid dev test99 f 4 iaid 5555", shell = True)
+        subprocess.check_call("nmctl set-dhcp-iaid dev test99 f 4 iaid 0xb6220feb", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv4', 'IAID') == '5555')
+        assert(parser.get('DHCPv4', 'IAID') == '0xb6220feb')
 
     def test_cli_set_dhcp6_iaid(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv4", shell = True)
-        subprocess.check_call("nmctl set-dhcp-iaid dev test99 f 6 iaid 5555", shell = True)
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp ipv6", shell = True)
+        subprocess.check_call("nmctl set-dhcp-iaid dev test99 f 6 iaid 0xb6220feb", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('DHCPv6', 'IAID') == '5555')
+        assert(parser.get('DHCPv6', 'IAID') == '0xb6220feb')
 
     def test_cli_set_dhcp4_duid(self):
         assert(link_exist('test99') == True)
