@@ -2553,6 +2553,11 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
                 return r;
         }
 
+        if (mode == DHCP_CLIENT_NO) {
+                dhcpv6 = false;
+                dhcpv4 = false;
+        }
+
         r = parse_config_file(network, "Network", "DNS", &c);
         if (r < 0 && r != -ENOENT) {
                 log_warning("Failed to parse 'DNS=' :%s",  strerror(-r));
@@ -2576,17 +2581,20 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
                         dhcpv6 = r;
         }
 
+        if (json_enabled())
+                return json_get_dns_mode(mode, dhcpv4, dhcpv6, static_dns);
+
         display(beautify_enabled() ? true : false, ansi_color_bold_blue(),"DNS Mode: ");
 
         if ((dhcpv4 || dhcpv6) && static_dns)
-                printf("(merged) \n");
+                printf("merged\n");
         else {
                 if (static_dns)
-                        printf("(static)\n");
+                        printf("static\n");
                 else if ((dhcpv4 || dhcpv6) && (mode == DHCP_CLIENT_YES || mode == DHCP_CLIENT_IPV4 || mode == DHCP_CLIENT_IPV6))
-                        printf("(DHCP)\n");
+                        printf("DHCP\n");
                 else
-                        printf("(foreign)\n");
+                        printf("foreign\n");
         }
 
         return 0;

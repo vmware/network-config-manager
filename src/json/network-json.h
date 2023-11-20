@@ -6,6 +6,7 @@
 
 #include <json-c/json.h>
 
+#include "network.h"
 #include "network-util.h"
 #include "network-address.h"
 #include "network-route.h"
@@ -20,3 +21,5 @@ int json_fill_dns_server_domains(void);
 
 int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags);
 int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags);
+
+int json_get_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static_dns);
