@@ -842,6 +842,35 @@ class TestCLINetwork:
 
         assert(json_object["DNSMode"] == "merged")
 
+    def test_cli_dns_mode_dhcp(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
+        subprocess.check_call("nmctl sdm dev test99 -j", shell = True)
+
+        out = subprocess.check_output(['/usr/bin/nmctl', 'sdm', 'dev', 'test99', '-j'], text=True)
+        print(out)
+        json_object = json.loads(out)
+        print(json_object["DNSMode"])
+
+        assert(json_object["DNSMode"] == "DHCP")
+
+    def test_cli_dns_mode_static(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp no", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
+        subprocess.check_call("nmctl add-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
+        subprocess.check_call("nmctl sdm dev test99 -j", shell = True)
+
+        out = subprocess.check_output(['/usr/bin/nmctl', 'sdm', 'dev', 'test99', '-j'], text=True)
+        print(out)
+        json_object = json.loads(out)
+        print(json_object["DNSMode"])
+
+        assert(json_object["DNSMode"] == "static")
+
     def test_cli_enable_ipv6(self):
         assert(link_exist('test99') == True)
 
