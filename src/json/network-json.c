@@ -902,3 +902,29 @@ int json_fill_dns_server_domains(void) {
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
         return 0;
 }
+
+int json_get_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static_dns) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _cleanup_(json_object_putp) json_object *s = NULL;
+
+        jobj = json_object_new_object();
+        if (!jobj)
+                return log_oom();
+
+        if ((dhcpv4 || dhcpv6) && static_dns)
+                s = json_object_new_string("merged");
+        else {
+                if (static_dns)
+                        s = json_object_new_string("static");
+                else if ((dhcpv4 || dhcpv6) && (mode == DHCP_CLIENT_YES || mode == DHCP_CLIENT_IPV4 || mode == DHCP_CLIENT_IPV6))
+                        s = json_object_new_string("DHCP");
+                else
+                        s = json_object_new_string("foreign");
+        }
+
+        json_object_object_add(jobj, "DNSMode", s);
+        steal_ptr(s);
+
+        printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+        return 0;
+}
