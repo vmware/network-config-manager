@@ -227,6 +227,7 @@ typedef struct Network {
         int dhcp4_send_hostname;
         int dhcp4_send_release;
         char *dhcp4_hostname;
+        char *dhcp4_iaid;
 
         /* dhcp6 section  */
         int dhcp6_use_dns;
@@ -236,6 +237,7 @@ typedef struct Network {
         int dhcp6_send_release;
         int dhcp6_rapid_commit;
         int dhcp6_use_address;
+        char *dhcp6_iaid;
 
         /* RA section  */
         char *ipv6_ra_token;

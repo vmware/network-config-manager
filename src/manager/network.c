@@ -762,6 +762,8 @@ void network_free(Network *n) {
         free(n->mac);
         free(n->match_mac);
         free(n->hostname);
+        free(n->dhcp4_iaid);
+        free(n->dhcp6_iaid);
         free(n->gateway);
         free(n->dhcp4_hostname);
         free(n->req_family_for_online);
@@ -1406,6 +1408,12 @@ int generate_network_config(Network *n) {
                         return r;
         }
 
+        if (n->dhcp4_iaid) {
+                r = set_config(key_file, "DHCPv4", "IAID", n->dhcp4_iaid);
+                if (r < 0)
+                        return r;
+        }
+
         /* [DHCPv6] */
         if (n->dhcp6_use_dns >= 0) {
                 r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_str(n->dhcp6_use_dns));
@@ -1451,6 +1459,12 @@ int generate_network_config(Network *n) {
 
         if (n->dhcp6_client_start_mode >= 0) {
                 r = set_config(key_file, "DHCPv6", "WithoutRA", dhcp6_client_start_mode_to_name(n->dhcp6_client_start_mode));
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp6_iaid) {
+                r = set_config(key_file, "DHCPv6", "IAID", n->dhcp6_iaid);
                 if (r < 0)
                         return r;
         }
