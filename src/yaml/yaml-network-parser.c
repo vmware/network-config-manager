@@ -67,6 +67,7 @@ static ParserTable dhcp4_overrides_vtable[] = {
         { "send-release",   CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_send_release)},
         { "route-metric",   CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_route_metric)},
         { "hostname",       CONF_TYPE_DHCP4,     parse_yaml_string, offsetof(Network, dhcp4_hostname)},
+        { "iaid",           CONF_TYPE_DHCP4,     parse_yaml_string, offsetof(Network, dhcp4_iaid)},
         { NULL,             _CONF_TYPE_INVALID,  0,                 0}
 };
 
@@ -79,6 +80,7 @@ static ParserTable dhcp6_overrides_vtable[] = {
         { "send-release",  CONF_TYPE_DHCP6,     parse_yaml_bool,             offsetof(Network, dhcp6_send_release)},
         { "without-ra",    CONF_TYPE_DHCP6,     parse_yaml_dhcp6_without_ra, offsetof(Network, dhcp6_client_start_mode)},
         { "rapid-commit",  CONF_TYPE_DHCP6,     parse_yaml_bool,             offsetof(Network, dhcp6_rapid_commit)},
+        { "iaid",          CONF_TYPE_DHCP6,     parse_yaml_string,           offsetof(Network, dhcp6_iaid)},
         { NULL,            _CONF_TYPE_INVALID,  0,                           0}
 };
 
