@@ -7,9 +7,12 @@ network:
         route-metric: 100
         send-release: no
         use-gateway: yes
+        iaid: 0xb6220feb
     test99:
       dhcp4: yes
       dhcp4-overrides:
         route-metric: 200
+        iaid: 0xb6220feb
       dhcp6-overrides:
         use-dns: true
+        iaid: 0xb6220feb

@@ -358,6 +358,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('DHCPv4', 'RouteMetric') == '200')
 
         assert(parser.get('DHCPv6', 'UseDNS') == 'yes')
+        assert(parser.get('DHCPv6', 'IAID') == '0xb6220feb')
 
         parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
 
@@ -368,6 +369,7 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('DHCPv4', 'RouteMetric') == '100')
         assert(parser.get('DHCPv4', 'SendRelease') == 'no')
         assert(parser.get('DHCPv4', 'UseGateway') == 'yes')
+        assert(parser.get('DHCPv4', 'IAID') == '0xb6220feb')
 
     def test_network_static_address_label_configuration(self):
         self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yaml')
