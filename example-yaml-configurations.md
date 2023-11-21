@@ -1,5 +1,6 @@
 ### Generate network config from YAML file:
 
+
 `nmctl` can generate configurations for required network links from YAML description. Configuration written to disk under `/etc/systemd/network` will persist between reboots. When `network-config-manager-yaml-generator.service` is enabled it reads yaml files from `/etc/network-config-manager/yaml` and generates systemd-networkd configuration files. `nmctl apply` and `nmctl apply-file` can be used to generate configuration from yml file.
 
 `nmctl` uses similar format as defined by [different YAML format](https://curtin.readthedocs.io/en/latest/topics/networking.html).
@@ -79,10 +80,12 @@ network:
         use-hostname: no
         send-hostname: yes
         use-mtu: yes
+        iaid: 0xb6220feb
     eth1:
       dhcp4: yes
       dhcp4-overrides:
         route-metric: 300
+        iaid: 0xb6220feb
       dhcp6-overrides:
         use-dns: true
         use-domain: true
@@ -91,6 +94,7 @@ network:
         use-ntp: true
         rapid-commit: false
         send-release: no
+        iaid: 0xb6220feb
         without-ra: solicit
 ```
 
