@@ -81,11 +81,15 @@ network:
         send-hostname: yes
         use-mtu: yes
         iaid: 0xb6220feb
+        initial-congestion-window: 20
+        initial-advertised-receive-window: 20
     eth1:
       dhcp4: yes
       dhcp4-overrides:
         route-metric: 300
         iaid: 0xb6220feb
+        initial-congestion-window: 20
+        initial-advertised-receive-window: 20
       dhcp6-overrides:
         use-dns: true
         use-domain: true
