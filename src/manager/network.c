@@ -682,6 +682,7 @@ int network_new(Network **ret) {
                 .dhcp4_send_hostname = -1,
                 .dhcp4_send_release = -1,
                 .dhcp4_use_ntp = -1,
+                .dhcp4_rapid_commit = -1,
                 .dhcp6_use_dns = -1,
                 .dhcp6_use_ntp = -1,
                 .dhcp6_use_domains = -1,
@@ -1422,6 +1423,12 @@ int generate_network_config(Network *n) {
 
         if (n->dhcp4_iaid) {
                 r = set_config(key_file, "DHCPv4", "IAID", n->dhcp4_iaid);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp4_rapid_commit >= 0) {
+                r = set_config(key_file, "DHCPv4", "RapidCommit", bool_to_str(n->dhcp4_rapid_commit));
                 if (r < 0)
                         return r;
         }

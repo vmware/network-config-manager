@@ -228,6 +228,7 @@ typedef struct Network {
         int dhcp4_use_hostname;
         int dhcp4_send_hostname;
         int dhcp4_send_release;
+        int dhcp4_rapid_commit;
         char *dhcp4_hostname;
         char *dhcp4_iaid;
 
