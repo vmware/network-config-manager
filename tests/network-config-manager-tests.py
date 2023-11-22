@@ -389,6 +389,26 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('DHCPv4', 'IAID') == '0xb6220feb')
         assert(parser.get('DHCPv4', 'SendRelease') == 'no')
 
+    def test_dhcp4_dhcp6_static_dns(self):
+        self.copy_yaml_file_to_netmanager_yaml_path('static-dns-dhcp4-dhcp6.yaml')
+
+        subprocess.check_call("nmctl apply", shell = True)
+        assert(unit_exist('10-test98.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test98.network'))
+
+        assert(parser.get('Match', 'Name') == 'test98')
+
+        assert(parser.get('Network', 'DHCP') == 'ipv4')
+        assert(parser.get('Network', 'DNS') == '1.2.3.5 1.2.2.2')
+
+        assert(parser.get('DHCPv4', 'UseDNS') == 'no')
+        assert(parser.get('DHCPv4', 'SendRelease') == 'no')
+
+        assert(parser.get('DHCPv6', 'UseDNS') == 'no')
+        assert(parser.get('DHCPv6', 'SendRelease') == 'no')
+
     def test_network_static_address_label_configuration(self):
         self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yaml')
 
