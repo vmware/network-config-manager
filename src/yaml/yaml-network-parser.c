@@ -68,6 +68,7 @@ static ParserTable dhcp4_overrides_vtable[] = {
         { "route-metric",                      CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_route_metric)},
         { "hostname",                          CONF_TYPE_DHCP4,     parse_yaml_string, offsetof(Network, dhcp4_hostname)},
         { "iaid",                              CONF_TYPE_DHCP4,     parse_yaml_string, offsetof(Network, dhcp4_iaid)},
+        { "rapid-commit",                      CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_rapid_commit)},
         { "initial-congestion-window",         CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_initial_congestion_window)},
         { "initial-advertised-receive-window", CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_advertised_receive_window)},
         { NULL,                                _CONF_TYPE_INVALID,  0,                 0}
