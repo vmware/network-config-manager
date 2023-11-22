@@ -407,9 +407,11 @@ class TestNetworkConfigManagerYAML:
         assert(parser.get('DHCPv4', 'SendRelease') == 'no')
         assert(parser.get('DHCPv4', 'InitialCongestionWindow') == '40')
         assert(parser.get('DHCPv4', 'InitialAdvertisedReceiveWindow') == '50')
+        assert(parser.get('DHCPv4', 'RapidCommit') == 'yes')
 
         assert(parser.get('DHCPv6', 'UseDNS') == 'no')
         assert(parser.get('DHCPv6', 'SendRelease') == 'no')
+        assert(parser.get('DHCPv6', 'RapidCommit') == 'yes')
 
     def test_network_static_address_label_configuration(self):
         self.copy_yaml_file_to_netmanager_yaml_path('static-address-label.yaml')
