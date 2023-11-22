@@ -56,21 +56,21 @@ static ParserTable network_vtable[] = {
 };
 
 static ParserTable dhcp4_overrides_vtable[] = {
-        { "use-dns",                          CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_dns)},
-        { "use-domain",                       CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_domains)},
-        { "use-ntp",                          CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_ntp)},
-        { "use-mtu",                          CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_mtu)},
-        { "use-routes",                       CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_routes)},
-        { "use-gateway",                      CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_gw)},
-        { "use-hostname",                     CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_hostname)},
-        { "send-hostname",                    CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_send_hostname)},
-        { "send-release",                     CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_send_release)},
-        { "route-metric",                     CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_route_metric)},
-        { "hostname",                         CONF_TYPE_DHCP4,     parse_yaml_string, offsetof(Network, dhcp4_hostname)},
-        { "iaid",                             CONF_TYPE_DHCP4,     parse_yaml_string, offsetof(Network, dhcp4_iaid)},
-        { "initial-congestion-window",        CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_initial_congestion_window)},
-        { "initial-advertisedReceive-window", CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_advertised_receive_window)},
-        { NULL,                               _CONF_TYPE_INVALID,  0,                 0}
+        { "use-dns",                           CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_dns)},
+        { "use-domain",                        CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_domains)},
+        { "use-ntp",                           CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_ntp)},
+        { "use-mtu",                           CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_mtu)},
+        { "use-routes",                        CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_routes)},
+        { "use-gateway",                       CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_gw)},
+        { "use-hostname",                      CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_use_hostname)},
+        { "send-hostname",                     CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_send_hostname)},
+        { "send-release",                      CONF_TYPE_DHCP4,     parse_yaml_bool,   offsetof(Network, dhcp4_send_release)},
+        { "route-metric",                      CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_route_metric)},
+        { "hostname",                          CONF_TYPE_DHCP4,     parse_yaml_string, offsetof(Network, dhcp4_hostname)},
+        { "iaid",                              CONF_TYPE_DHCP4,     parse_yaml_string, offsetof(Network, dhcp4_iaid)},
+        { "initial-congestion-window",         CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_initial_congestion_window)},
+        { "initial-advertised-receive-window", CONF_TYPE_DHCP4,     parse_yaml_uint32, offsetof(Network, dhcp4_advertised_receive_window)},
+        { NULL,                                _CONF_TYPE_INVALID,  0,                 0}
 };
 
 static ParserTable dhcp6_overrides_vtable[] = {

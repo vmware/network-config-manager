@@ -12,6 +12,8 @@ network:
       dhcp4-overrides:
         send-release: no
         use-dns: no
+        initial-congestion-window: 40
+        initial-advertised-receive-window: 50
       dhcp6-overrides:
         send-release: no
         use-dns: no
