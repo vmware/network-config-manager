@@ -1236,12 +1236,12 @@ int generate_network_config(Network *n) {
         }
 
         if (n->dhcp4 >= 0 || n->dhcp6 >= 0) {
-               if (n->dhcp4 > 0  && n->dhcp6 > 0)
-                       r = set_config(key_file, "Network", "DHCP", "yes");
-               else if (n->dhcp4 > 0)
-                       r = set_config(key_file, "Network", "DHCP", "ipv4");
-               else if (n->dhcp6 > 0)
-                       r = set_config(key_file, "Network", "DHCP", "ipv6");
+                if (n->dhcp4 > 0  && n->dhcp6 > 0)
+                        r = set_config(key_file, "Network", "DHCP", "yes");
+                else if (n->dhcp4 > 0)
+                        r = set_config(key_file, "Network", "DHCP", "ipv4");
+                else if (n->dhcp6 > 0)
+                        r = set_config(key_file, "Network", "DHCP", "ipv6");
         }
 
         if (n->lldp >= 0) {
@@ -1404,6 +1404,18 @@ int generate_network_config(Network *n) {
 
         if (n->dhcp4_route_metric > 0) {
                 r = set_config_uint(key_file, "DHCPv4", "RouteMetric", n->dhcp4_route_metric);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp4_initial_congestion_window > 0) {
+                r = set_config_uint(key_file, "DHCPv4", "InitialCongestionWindow", n->dhcp4_initial_congestion_window);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp4_advertised_receive_window > 0) {
+                r = set_config_uint(key_file, "DHCPv4", "InitialAdvertisedReceiveWindow", n->dhcp4_advertised_receive_window);
                 if (r < 0)
                         return r;
         }

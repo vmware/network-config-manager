@@ -217,6 +217,8 @@ typedef struct Network {
 
         /* dhcp4 section  */
         uint32_t dhcp4_route_metric;
+        uint32_t dhcp4_initial_congestion_window;
+        uint32_t dhcp4_advertised_receive_window;
         int dhcp4_use_mtu;
         int dhcp4_use_dns;
         int dhcp4_use_domains;

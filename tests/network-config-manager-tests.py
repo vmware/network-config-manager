@@ -405,6 +405,8 @@ class TestNetworkConfigManagerYAML:
 
         assert(parser.get('DHCPv4', 'UseDNS') == 'no')
         assert(parser.get('DHCPv4', 'SendRelease') == 'no')
+        assert(parser.get('DHCPv4', 'InitialCongestionWindow') == '40')
+        assert(parser.get('DHCPv4', 'InitialAdvertisedReceiveWindow') == '50')
 
         assert(parser.get('DHCPv6', 'UseDNS') == 'no')
         assert(parser.get('DHCPv6', 'SendRelease') == 'no')
