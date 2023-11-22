@@ -1,0 +1,12 @@
+network:
+  version: 2
+  ethernets:
+    test98:
+      dhcp4: yes
+      nameservers:
+        addresses: [1.1.1.1, 1.0.0.1]
+      dhcp4-overrides:
+        route-metric: 100
+        send-release: no
+        iaid: 0xb6220feb
+        use-dns: no
