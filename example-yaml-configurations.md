@@ -110,6 +110,7 @@ network:
       dhcp4: yes
       dhcp6: yes
       accept-ra: yes
+      link-local: ipv6
       ra-overrides:
           token: eui64
           use-dns: true

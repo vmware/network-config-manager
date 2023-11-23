@@ -2,6 +2,7 @@ network:
   version: 2
   ethernets:
     test98:
+      link-local: ipv6
       dhcp4: yes
       nameservers:
         addresses: [1.1.1.1, 1.0.0.1]

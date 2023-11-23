@@ -382,6 +382,7 @@ class TestNetworkConfigManagerYAML:
 
         assert(parser.get('Match', 'Name') == 'test98')
 
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'ipv6')
         assert(parser.get('Network', 'DHCP') == 'ipv4')
         assert(parser.get('Network', 'DNS') == '1.1.1.1 1.0.0.1')
 
