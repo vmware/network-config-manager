@@ -240,6 +240,7 @@ typedef struct Network {
         int dhcp6_send_release;
         int dhcp6_rapid_commit;
         int dhcp6_use_address;
+        int dhcp6_without_ra;
         char *dhcp6_iaid;
 
         /* RA section  */

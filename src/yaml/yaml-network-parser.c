@@ -84,6 +84,7 @@ static ParserTable dhcp6_overrides_vtable[] = {
         { "without-ra",    CONF_TYPE_DHCP6,     parse_yaml_dhcp6_without_ra, offsetof(Network, dhcp6_client_start_mode)},
         { "rapid-commit",  CONF_TYPE_DHCP6,     parse_yaml_bool,             offsetof(Network, dhcp6_rapid_commit)},
         { "iaid",          CONF_TYPE_DHCP6,     parse_yaml_string,           offsetof(Network, dhcp6_iaid)},
+        { "without-ra",    CONF_TYPE_DHCP6,     parse_yaml_bool,             offsetof(Network, dhcp6_without_ra)},
         { NULL,            _CONF_TYPE_INVALID,  0,                           0}
 };
 

@@ -690,6 +690,7 @@ int network_new(Network **ret) {
                 .dhcp6_send_release = -1,
                 .dhcp6_rapid_commit = -1,
                 .dhcp6_use_address = -1,
+                .dhcp6_without_ra = -1,
                 .dhcp6_client_start_mode = _DHCP6_CLIENT_START_MODE_INVALID,
                 .ipv6_ra_use_dns = -1,
                 .ipv6_ra_use_domains = -1,
@@ -1484,6 +1485,12 @@ int generate_network_config(Network *n) {
 
         if (n->dhcp6_iaid) {
                 r = set_config(key_file, "DHCPv6", "IAID", n->dhcp6_iaid);
+                if (r < 0)
+                        return r;
+        }
+
+        if (n->dhcp6_without_ra >= 0) {
+                r = set_config(key_file, "DHCPv6", "WithoutRA", bool_to_str(n->dhcp6_without_ra));
                 if (r < 0)
                         return r;
         }
