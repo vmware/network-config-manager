@@ -19,3 +19,4 @@ network:
         send-release: no
         use-dns: no
         rapid-commit: yes
+        without-ra: yes
