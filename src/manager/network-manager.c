@@ -391,7 +391,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient
                 return r;
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient kind, char **iaid) {
@@ -447,7 +447,7 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                 }
         }
 
-        return 0;
+        return dbus_network_reload();
 }
 
 int manager_set_link_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
