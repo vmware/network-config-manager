@@ -28,6 +28,8 @@ int dbus_add_dns_server(int ifindex, DNSServers *serv);
 int dbus_add_dns_domains(int ifindex, char **domains);
 int dbus_revert_resolve_link(int ifindex);
 int dbus_acquire_dns_domains_from_resolved(DNSDomains **domains);
+
+int dbus_describe_network(char **ret);
 int dbus_network_reload(void);
 int dbus_reconfigure_link(int ifindex);
 
