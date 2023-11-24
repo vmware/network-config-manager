@@ -1036,7 +1036,6 @@ int json_parse_dns_config_source(const json_object *jobj,
         int r;
 
         assert(jobj);
-        assert(link);
         assert(address);
 
         if (!json_object_object_get_ex(jobj, "Interfaces", &interfaces))
@@ -1166,7 +1165,6 @@ int json_parse_gateway_config_source(const json_object *jobj,
         int r;
 
         assert(jobj);
-        assert(link);
         assert(address);
 
         if (!json_object_object_get_ex(jobj, "Interfaces", &interfaces))
@@ -1250,4 +1248,41 @@ int json_acquire_network_status(void) {
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
 
         return 0;
+}
+
+int json_get_link_address(IfNameIndex *p, char **ret) {
+        _cleanup_(json_object_putp) json_object *jn = NULL, *jobj = NULL;
+        _cleanup_(link_freep) Link *l = NULL;
+        int r;
+
+        r = json_acquire_and_parse_network_data(&jn);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
+        }
+
+        jobj = json_object_new_object();
+        if (!jobj)
+                return log_oom();
+
+        r = netlink_acqure_one_link(p->ifname, &l);
+        if (r < 0)
+                return r;
+
+        r = json_fill_address(false, l, jn, jobj);
+        if (r < 0)
+                return r;
+
+        if (ret) {
+                char *s;
+
+                s = strdup(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+                if (!s)
+                        return log_oom();
+
+                *ret = steal_ptr(s);
+        } else
+                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+
+        return r;
 }
