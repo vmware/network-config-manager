@@ -2602,6 +2602,7 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_strv_ char **dns_config = NULL;
         _auto_cleanup_ DNSServer *current = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -2629,13 +2630,19 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         if (p) {
                 r = manager_get_link_dns(p, &dns_config);
                 if (r < 0)
-                       dns_config = NULL;
+                        dns_config = NULL;
         } else
                 /* Read all links managed by networkd and parse DNS= */
                 manager_get_all_link_dns(&dns_config);
 
+
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
+        }
         if (json_enabled())
-                return json_fill_dns_server(p, dns_config, 0);
+                return json_fill_dns_server(p, dns_config, 0, jobj);
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
@@ -2707,6 +2714,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
 _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
         _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_strv_ char **dns_config = NULL;
         _auto_cleanup_ DNSServer *current = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -2742,8 +2750,14 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
                 /* Read all links managed by networkd and parse DNS= */
                 manager_get_all_link_dns(&dns_config);
 
+r = json_acquire_and_parse_network_data(&jobj);
+       if (r < 0) {
+              log_warning("Failed acquire network data: %s", strerror(-r));
+             return r;
+        }
+
         if (json_enabled())
-                return json_fill_dns_server(p, dns_config, p->ifindex);
+                return json_fill_dns_server(p, dns_config, p->ifindex, jobj);
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {

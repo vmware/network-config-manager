@@ -293,7 +293,7 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
 }
 
 int json_fill_system_status(char **ret) {
-        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL, *jn = NULL;
         _auto_cleanup_ char *state = NULL, *carrier_state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
                 *online_state = NULL, *address_state = NULL, *ipv4_address_state = NULL,
@@ -306,6 +306,12 @@ int json_fill_system_status(char **ret) {
         _auto_cleanup_ DNSServer *c = NULL;
         sd_id128_t machine_id = {};
         int r;
+
+        r = json_acquire_and_parse_network_data(&jn);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
+        }
 
         jobj = json_object_new_object();
         if (!jobj)
@@ -557,10 +563,10 @@ int json_fill_system_status(char **ret) {
 
                         r = parse_ifname_or_index(link->name, &p);
                         if (r >= 0) {
-                                r = json_fill_one_link(p, false, &js);
+                                r = json_fill_one_link(p, false, jn, &js);
                                 if (r >= 0) {
-                                       json_object_array_add(ja, js);
-                                       steal_ptr(js);
+                                        json_object_array_add(ja, js);
+                                        steal_ptr(js);
                                 }
                         }
                 }
@@ -602,7 +608,7 @@ int json_fill_system_status(char **ret) {
 
                 js = json_object_new_string(str_na(mdns));
                 if (!js)
-                                return log_oom();
+                        return log_oom();
 
                 json_object_object_add(j, "MDNS", js);
                 steal_ptr(js);
@@ -679,7 +685,7 @@ int json_fill_system_status(char **ret) {
         return r;
 }
 
-int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex) {
+int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, json_object *jn) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_strv_ char **dhcp_dns = NULL;
@@ -688,6 +694,8 @@ int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex) {
         GSequenceIter *i;
         DNSServer *d;
         int r;
+
+        assert(jn);
 
         jobj = json_object_new_object();
         if (!jobj)
@@ -704,6 +712,7 @@ int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex) {
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
                 _cleanup_(json_object_putp) json_object *jdns = json_object_new_array();
+                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL;
                 if (!jdns)
                         return log_oom();
 
@@ -727,27 +736,29 @@ int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex) {
                                 json_object_object_add(jaddr, "Address", s);
                                 steal_ptr(s);
 
-                                if (dns_config && strv_contains((const char **) dns_config, pretty))
-                                        s = json_object_new_string("static");
-                                else if (dhcp_dns && strv_contains((const char **) dhcp_dns, pretty)){
-                                        s = json_object_new_string("DHCPv4");
+                                if (p) {
+                                        r = json_parse_dns_config_source(jn, p->ifname, pretty, &config_source, &config_provider);
+                                        if (r < 0)
+                                                continue;
 
-                                        if(provider) {
-                                                json_object *js = json_object_new_string(provider);
+                                        if (config_source) {
+                                                json_object *js = json_object_new_string(config_source);
+                                                if (!js)
+                                                        return log_oom();
+
+                                                json_object_object_add(jaddr, "ConfigSource", js);
+                                                steal_ptr(js);
+                                        }
+
+                                        if(config_provider) {
+                                                json_object *js = json_object_new_string(config_provider);
                                                 if (!js)
                                                         return log_oom();
 
                                                 json_object_object_add(jaddr, "ConfigProvider", js);
                                                 steal_ptr(js);
                                         }
-                                } else
-                                        s = json_object_new_string("foreign");
-
-                                if (!s)
-                                        return log_oom();
-
-                                json_object_object_add(jaddr, "ConfigSource", s);
-                                steal_ptr(s);
+                                }
 
                                 json_object_array_add(jdns, jaddr);
                                 steal_ptr(jaddr);
@@ -826,7 +837,7 @@ int json_fill_dns_server_domains(void) {
                 log_warning("No DNS Domain configured: %s", strerror(ENODATA));
                 return -ENODATA;
         } else {
-                 _cleanup_(json_object_putp) json_object *ja = NULL;
+                _cleanup_(json_object_putp) json_object *ja = NULL;
                 _cleanup_(set_freep) Set *all_domains = NULL;
 
                 ja = json_object_new_array();
@@ -886,12 +897,12 @@ int json_fill_dns_server_domains(void) {
                         if (r >= 0) {
                                 _cleanup_(json_object_putp) json_object *a = NULL;
 
-                                 a = json_object_new_string(d->domain);
-                                 if (!a)
-                                         return log_oom();
+                                a = json_object_new_string(d->domain);
+                                if (!a)
+                                        return log_oom();
 
-                                 json_object_array_add(j, a);
-                                 steal_ptr(a);
+                                json_object_array_add(j, a);
+                                steal_ptr(a);
 
                         }
                         json_object_object_add(jobj, p->ifname, j);
@@ -970,6 +981,70 @@ static int json_array_to_ip(const json_object *obj, const int family, const char
         return 0;
 }
 
+int json_parse_dns_config_source(const json_object *jobj,
+                                 const char *link,
+                                 const char *address,
+                                 char **ret_config_source,
+                                 char **ret_config_provider) {
+        json_object *interfaces = NULL;
+        int r;
+
+        assert(jobj);
+        assert(link);
+        assert(address);
+
+        if (!json_object_object_get_ex(jobj, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++){
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                json_object *name;
+
+                if (json_object_object_get_ex(interface, "Name", &name) && str_eq(json_object_get_string(name), link)) {
+                        json_object *dns = NULL;
+
+                        if (!json_object_object_get_ex(interface, "DNS", &dns))
+                                continue;
+
+                        for (size_t j = 0; j < json_object_array_length(dns); j++){
+                                json_object *config_source = NULL, *config_provider = NULL, *a = NULL, *family = NULL;
+                                json_object *addr = json_object_array_get_idx(dns, j);
+
+                                if (json_object_object_get_ex(addr, "Address", &a) && json_object_object_get_ex(addr, "Family", &family)) {
+                                        _auto_cleanup_ char *ip = NULL, *provider = NULL;
+
+                                        r = json_array_to_ip(a, json_object_get_int(family), NULL, &ip);
+                                        if (r < 0)
+                                                return r;
+
+                                        if (str_eq(address, ip)) {
+                                                if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
+                                                        *ret_config_source = strdup(json_object_get_string(config_source));
+                                                        if (!*ret_config_source)
+                                                                return -ENOMEM;
+                                                }
+
+                                                if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
+                                                        r = json_array_to_ip(config_provider, json_object_get_int(family), NULL, &provider);
+                                                        if (r < 0)
+                                                                return r;
+
+                                                        *ret_config_provider = strdup(provider);
+                                                        if (!*ret_config_provider)
+                                                                return -ENOMEM;
+                                                }
+
+                                                return 0;
+                                        }
+                                }
+                        }
+                }
+        }
+
+        return -ENOENT;
+}
+
+
 int json_parse_address_config_source(const json_object *jobj,
                                      const char *link,
                                      const char *address,
@@ -1001,7 +1076,7 @@ int json_parse_address_config_source(const json_object *jobj,
 
                                 if (json_object_object_get_ex(addr, "Address", &a) && json_object_object_get_ex(addr, "PrefixLength", &prefix) &&
                                     json_object_object_get_ex(addr, "Family", &family)) {
-                                        _auto_cleanup_ char *ip;
+                                        _auto_cleanup_ char *ip = NULL, *provider = NULL;
 
                                         r = json_array_to_ip(a, json_object_get_int(family), json_object_get_string(prefix), &ip);
                                         if (r < 0)
@@ -1015,12 +1090,9 @@ int json_parse_address_config_source(const json_object *jobj,
                                                 }
 
                                                 if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
-                                                       _auto_cleanup_ char *provider = NULL;
-
-
-                                                       r = json_array_to_ip(config_provider, json_object_get_int(family), NULL, &provider);
-                                                       if (r < 0)
-                                                               return r;
+                                                        r = json_array_to_ip(config_provider, json_object_get_int(family), NULL, &provider);
+                                                        if (r < 0)
+                                                                return r;
 
                                                         *ret_config_provider = strdup(provider);
                                                         if (!*ret_config_provider)

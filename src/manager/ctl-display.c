@@ -151,7 +151,7 @@ static int list_links(int argc, char *argv[]) {
 }
 
 static void list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_ char *c = NULL, *dhcp = NULL, *config_source = NULL, *config_provider = NULL;
+        _auto_cleanup_ char *c = NULL, *config_source = NULL, *config_provider = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buf[IF_NAMESIZE + 1] = {};
         json_object *jobj = userdata;
@@ -252,7 +252,6 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool ipv4 = false, ipv6 = false;
-        _auto_cleanup_ char *dhcp = NULL;
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
@@ -468,7 +467,7 @@ static int list_one_link(char *argv[]) {
                 *online_state = NULL, *link = NULL, *dhcp4_identifier = NULL, *dhcp6_duid = NULL, *dhcp6_iaid = NULL, *iaid = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
-        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _cleanup_(json_object_putp) json_object *jn = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _cleanup_(routes_freep) Routes *route = NULL;
         _cleanup_(link_freep) Link *l = NULL;
@@ -481,14 +480,14 @@ static int list_one_link(char *argv[]) {
                 return r;
         }
 
-        r = json_acquire_and_parse_network_data(&jobj);
+        r = json_acquire_and_parse_network_data(&jn);
         if (r < 0) {
                 log_warning("Failed acquire network data: %s", strerror(-r));
                 return r;
         }
 
         if (arg_json)
-                return json_fill_one_link(p, false, NULL);
+                return json_fill_one_link(p, false, jn, NULL);
 
         r = netlink_acqure_one_link(p->ifname, &l);
         if (r < 0)
@@ -604,7 +603,7 @@ static int list_one_link(char *argv[]) {
         r = netlink_get_one_link_address(l->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                     Address: ");
-                set_foreach(addr->addresses, list_one_link_addresses, jobj);
+                set_foreach(addr->addresses, list_one_link_addresses, jn);
         }
 
         r = netlink_get_one_link_route(l->ifindex, &route);
@@ -1087,7 +1086,7 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
         }
 
         if (arg_json)
-                return json_fill_one_link(p, true, NULL);
+                return json_fill_one_link(p, true, jobj, NULL);
 
         r = netlink_get_one_link_address(p->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0)
@@ -1166,7 +1165,7 @@ _public_ int ncm_get_system_status(char **ret) {
 }
 
 _public_ int ncm_get_link_status(const char *ifname, char **ret) {
-        _cleanup_(json_object_putp) json_object *j = NULL;
+        _cleanup_(json_object_putp) json_object *j = NULL, *jobj = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *s = NULL;
         int r;
@@ -1178,7 +1177,13 @@ _public_ int ncm_get_link_status(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        r = json_fill_one_link(p, false, &j);
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
+        }
+
+        r = json_fill_one_link(p, false, jobj, &j);
         if (r < 0)
                 return r;
 

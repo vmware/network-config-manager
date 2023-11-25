@@ -199,7 +199,7 @@ static int json_fill_ipv6_link_local_addresses(Link *l, Addresses *addr, json_ob
         return 0;
 }
 
-static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, json_object *ret) {
+static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, json_object *jn, json_object *ret) {
         _cleanup_(json_object_putp) json_object *js = NULL, *jobj = NULL;
         GHashTableIter iter;
         gpointer key, value;
@@ -214,7 +214,7 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
         while (g_hash_table_iter_next (&iter, &key, &value)) {
                 _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jlft = NULL, *jlabel = NULL, *jproto = NULL;
                 Address *a = (Address *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *b = NULL, *dhcp = NULL;
+                _auto_cleanup_ char *c = NULL, *b = NULL, *cp = NULL, *config_source = NULL, *config_provider = NULL;
 
                 if (ipv4 && a->family != AF_INET)
                         continue;
@@ -309,44 +309,30 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                 json_object_object_add(jobj, "Protocol", jproto);
                 steal_ptr(jproto);
 
-                r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
-                if (r >= 0 && string_has_prefix(c, dhcp)) {
-                        _auto_cleanup_ char *provider = NULL;
+                r = ip_to_str_prefix(a->family, &a->address, &cp);
+                if (r < 0)
+                        return r;
 
-                        js = json_object_new_string("DHCPv4");
+                r = json_parse_address_config_source(jn, l->name, cp, &config_source, &config_provider);
+                if (r < 0) {
+                        config_source = strdup("foreign");
+                        if (!config_source)
+                                return log_oom();
+                }
+
+                js = json_object_new_string(config_source);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "ConfigSource", js);
+                steal_ptr(js);
+
+                if (config_provider) {
+                        js = json_object_new_string(config_provider);
                         if (!js)
                                 return log_oom();
 
-                        json_object_object_add(jobj, "ConfigSource", js);
-                        steal_ptr(js);
-
-                        r = network_parse_link_dhcp4_server_address(a->ifindex, &provider);
-                        if (r >= 0) {
-                                js = json_object_new_string(provider);
-                                if (!js)
-                                        return log_oom();
-
-                                json_object_object_add(jobj, "ConfigProvider", js);
-                                steal_ptr(js);
-
-                        }
-                } else {
-                        _auto_cleanup_ char *network = NULL;
-
-                        r = parse_network_file(l->ifindex, l->name, &network);
-                        if (r >= 0) {
-                                if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c)) {
-                                        js = json_object_new_string("static");
-                                        if (!js)
-                                                return log_oom();
-                                } else {
-                                        js = json_object_new_string("foreign");
-                                        if (!js)
-                                        return log_oom();
-                                }
-                        }
-
-                        json_object_object_add(jobj, "ConfigSource", js);
+                        json_object_object_add(jobj, "ConfigProvider", js);
                         steal_ptr(js);
                 }
 
@@ -1712,7 +1698,7 @@ static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
         return 0;
 }
 
-int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object **ret) {
+int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object **ret) {
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
@@ -1721,6 +1707,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object **ret) {
         int r;
 
         assert(p);
+        assert(jn);
 
         jobj = json_object_new_object();
         if (!jobj)
@@ -1807,7 +1794,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object **ret) {
                 if (!ja)
                         return log_oom();
 
-                json_fill_one_link_addresses(ipv4, l, addr, ja);
+                json_fill_one_link_addresses(ipv4, l, addr, jn, ja);
 
                 json_object_object_add(jobj, "Addresses", ja);
                 steal_ptr(ja);
