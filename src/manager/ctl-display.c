@@ -151,7 +151,7 @@ static int list_links(int argc, char *argv[]) {
 }
 
 static void list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_ char *c = NULL, *dhcp = NULL, *config_source = NULL;
+        _auto_cleanup_ char *c = NULL, *dhcp = NULL, *config_source = NULL, *config_provider = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buf[IF_NAMESIZE + 1] = {};
         json_object *jobj = userdata;
@@ -176,7 +176,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 return;
         }
 
-        r = json_parse_address_config_source(jobj, buf, c, &config_source);
+        r = json_parse_address_config_source(jobj, buf, c, &config_source, &config_provider);
         if (r < 0) {
                 config_source = strdup("foreign");
                 if (!config_source)
@@ -191,13 +191,17 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 (void) network_parse_link_dhcp4_address_lifetime_t1(a->ifindex, &t1);
                 (void) network_parse_link_dhcp4_address_lifetime_t2(a->ifindex, &t2);
 
-                printf("(DHCPv4 via %s) lease time: %s seconds T1: %s seconds T2: %s seconds", str_na(server), str_na(life_time),
+                printf("(DHCPv4 via %s) lease time: %s seconds T1: %s seconds T2: %s seconds", str_na(config_provider), str_na(life_time),
                        str_na(t1), str_na(t2));
         } else {
                 if (a->family == AF_INET6 && IN6_IS_ADDR_LINKLOCAL(&a->address.in6))
                         printf("(IPv6 Link Local) ");
-                else
+                else {
                         printf("(%s)", config_source);
+                        if (config_provider)
+                                printf(" via (%s)", config_provider);
+
+                }
         }
 
         printf("\n");
@@ -232,7 +236,7 @@ static void list_one_link_address_with_address_mode(gpointer key, gpointer value
                 if (!if_indextoname(a->ifindex, ifname))
                         return;
 
-                r = json_parse_address_config_source(jobj, ifname, c, &config_source);
+                r = json_parse_address_config_source(jobj, ifname, c, &config_source, NULL);
                 if (r < 0) {
                         config_source = strdup("foreign");
                         if (!config_source)
@@ -311,7 +315,7 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
                 if (r < 0)
                         return r;
 
-                r = json_parse_address_config_source(jobj, p->ifname, c, &config_source);
+                r = json_parse_address_config_source(jobj, p->ifname, c, &config_source, NULL);
                 if (r < 0) {
                         config_source = strdup("foreign");
                         if (!config_source)
@@ -477,6 +481,12 @@ static int list_one_link(char *argv[]) {
                 return r;
         }
 
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
+        }
+
         if (arg_json)
                 return json_fill_one_link(p, false, NULL);
 
@@ -590,12 +600,6 @@ static int list_one_link(char *argv[]) {
         }
 
         list_link_attributes(l);
-
-        r = json_acquire_and_parse_network_data(&jobj);
-        if (r < 0) {
-                log_warning("Failed acquire network data: %s", strerror(-r));
-                return r;
-        }
 
         r = netlink_get_one_link_address(l->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0) {
