@@ -608,11 +608,13 @@ static int list_one_link(char *argv[]) {
 
         r = netlink_get_one_link_route(l->ifindex, &route);
         if (r >= 0 && route && set_size(route->routes) > 0) {
+                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL;
                 _auto_cleanup_strv_ char **gws = NULL;
                 _auto_cleanup_ char *router = NULL;
                 gpointer key, value;
                 GHashTableIter iter;
                 bool first = true;
+
 
                 r = network_parse_link_dhcp4_router(p->ifindex, &router);
                 display(arg_beautify, ansi_color_bold_cyan(), "                     Gateway: ");
@@ -650,17 +652,15 @@ static int list_one_link(char *argv[]) {
                         } else
                                 printf("                              %s ", c);
 
-                        if (router && c && string_has_prefix(c, router))
-                                printf("(DHCPv4)");
-                        else {
-                                r = parse_network_file(p->ifindex, p->ifname, &network);
-                                if (r >= 0) {
-                                        if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c))
-                                                printf("(static)");
-                                        else
-                                                printf("(foreign)");
-                                }
-                        }
+                        r = json_parse_gateway_config_source(jn, c, &config_source, &config_provider);
+                        if (r < 0)
+                                continue;
+
+                        if (config_source)
+                                printf("(%s)", config_source);
+                        if (config_provider)
+                                printf(" via (%s)", config_provider);
+
                         steal_ptr(c);
                 }
                 printf("\n");
