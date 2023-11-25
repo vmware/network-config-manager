@@ -14,9 +14,9 @@
 DEFINE_CLEANUP(json_object*, json_object_put);
 
 int json_fill_system_status(char **ret);
-int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object **ret);
+int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn, json_object **ret);
 
-int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex);
+int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, json_object *jn);
 int json_fill_dns_server_domains(void);
 
 int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags);
@@ -30,3 +30,19 @@ int json_parse_address_config_source(const json_object *jobj,
                                      const char *address,
                                      char **config_source,
                                      char **config_provider);
+
+int json_parse_dns_config_source(const json_object *jobj,
+                                 const char *address,
+                                 char **ret_config_source,
+                                 char **ret_config_provider);
+
+int json_parse_search_domain_config_source(const json_object *jobj,
+                                           const char *address,
+                                           char **ret_config_source,
+                                           char **ret_config_provider);
+
+
+int json_parse_gateway_config_source(const json_object *jobj,
+                                     const char *address,
+                                     char **ret_config_source,
+                                     char **ret_config_provider);
