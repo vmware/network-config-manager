@@ -979,6 +979,53 @@ static int json_array_to_ip(const json_object *obj, const int family, const char
         return 0;
 }
 
+int json_parse_search_domain_config_source(const json_object *jobj,
+                                           const char *domain_name,
+                                           char **ret_config_source,
+                                           char **ret_config_provider) {
+        json_object *interfaces = NULL;
+
+        assert(jobj);
+        assert(domain_name);
+
+        if (!json_object_object_get_ex(jobj, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++){
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                json_object *domain;
+
+                if (!json_object_object_get_ex(interface, "SearchDomains", &domain))
+                        continue;
+
+                for (size_t j = 0; j < json_object_array_length(domain); j++){
+                        json_object *config_source = NULL, *config_provider = NULL, *a = NULL;
+                        json_object *addr = json_object_array_get_idx(domain, j);
+
+                        if (json_object_object_get_ex(addr, "Domain", &a)) {
+                                if (str_eq(domain_name, json_object_get_string(a))) {
+                                        if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
+                                                *ret_config_source = strdup(json_object_get_string(config_source));
+                                                if (!*ret_config_source)
+                                                        return -ENOMEM;
+                                        }
+
+                                        if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
+                                                *ret_config_provider = strdup(json_object_get_string(config_provider));
+                                                if (!*ret_config_provider)
+                                                        return -ENOMEM;
+                                        }
+
+                                        return 0;
+                                }
+                        }
+                }
+        }
+
+        return -ENOENT;
+}
+
+
 int json_parse_dns_config_source(const json_object *jobj,
                                  const char *address,
                                  char **ret_config_source,

@@ -1518,7 +1518,8 @@ static int fill_link_dns_message(json_object *jobj, json_object *jn, Link *l, ch
                 return log_oom();
 
         strv_foreach(d, search_domains) {
-                _cleanup_(json_object_putp) json_object *j = NULL, *jdomain = NULL;
+                _cleanup_(json_object_putp) json_object *j = NULL, *jdomain = NULL, *js = NULL;
+                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL;
 
                 jdomain = json_object_new_string(*d);
                 if (!jdomain)
@@ -1531,39 +1532,24 @@ static int fill_link_dns_message(json_object *jobj, json_object *jn, Link *l, ch
                 json_object_object_add(j, "Domain", jdomain);
                 steal_ptr(jdomain);
 
-                if (dns_domains && strv_length(dns_domains) && strv_contains((const char **) dns_domains, *d)) {
-                        _cleanup_(json_object_putp) json_object *js = NULL;
-                        _auto_cleanup_ char *provider = NULL;
+                r = json_parse_search_domain_config_source(jn, *d, &config_source, &config_provider);
+                if (r < 0)
+                        continue;
 
-                        js = json_object_new_string("DHCPv4");
+                if (config_source) {
+                        js = json_object_new_string(config_source);
                         if (!js)
                                 return log_oom();
 
                         json_object_object_add(j, "ConfigSource", js);
                         steal_ptr(js);
+                }
 
-                        r = network_parse_link_dhcp4_server_address(l->ifindex, &provider);
-                        if (r >= 0) {
-                                js = json_object_new_string(provider);
-                                if (!js)
-                                        return log_oom();
+                if (config_provider) {
+                        js = json_object_new_string(config_provider);
+                        if (!js)
+                                return log_oom();
 
-                                json_object_object_add(j, "ConfigProvider", js);
-                                steal_ptr(js);
-                                steal_ptr(provider);
-                        }
-                } else  {
-                        _cleanup_(json_object_putp) json_object *js = NULL;
-
-                        if (config_contains(network, "Network", "Domains", *d)) {
-                                js = json_object_new_string("static");
-                                if (!js)
-                                        return log_oom();
-                        } else {
-                                js = json_object_new_string("foreign");
-                                if (!js)
-                                        return log_oom();
-                        }
                         json_object_object_add(j, "ConfigProvider", js);
                         steal_ptr(js);
                 }
