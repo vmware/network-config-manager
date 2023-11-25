@@ -457,7 +457,7 @@ int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags) {
         return 0;
 }
 
-static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_object *ret) {
+static int json_fill_one_link_routes(bool ipv4, json_object *jn, Link *l, Routes *rts, json_object *ret) {
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
@@ -610,49 +610,33 @@ static int json_fill_one_link_routes(bool ipv4, Link *l, Routes *rts, json_objec
                 routes_flags_to_string(rt, jobj, rt->flags);
 
                 if (c) {
-                        r = network_parse_link_dhcp4_router(rt->ifindex, &dhcp);
-                        if (r >= 0 && string_has_prefix(c, dhcp)) {
-                                _auto_cleanup_ char *provider = NULL;
+                        _auto_cleanup_ char *config_source = NULL, *config_profiver = NULL;
 
-                                js = json_object_new_string("DHCPv4");
+                        r = json_parse_gateway_config_source(jn, c, &config_source, &config_profiver);
+                        if (r < 0)
+                                continue;
+
+                        if (config_source) {
+                                js = json_object_new_string(config_source);
                                 if (!js)
                                         return log_oom();
 
                                 json_object_object_add(jobj, "ConfigSource", js);
                                 steal_ptr(js);
-
-                                r = network_parse_link_dhcp4_server_address(rt->ifindex, &provider);
-                                if (r >= 0) {
-                                        js = json_object_new_string(provider);
-                                        if (!js)
-                                                return log_oom();
-
-                                        json_object_object_add(jobj, "ConfigProvider", js);
-                                        steal_ptr(js);
-                                }
-                        } else {
-                                _auto_cleanup_ char *network = NULL;
-
-                                r = parse_network_file(l->ifindex, l->name, &network);
-                                if (r >= 0) {
-                                        if (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c)) {
-                                                js = json_object_new_string("static");
-                                                if (!js)
-                                                        return log_oom();
-                                        } else {
-                                                js = json_object_new_string("foreign");
-                                                if (!js)
-                                                        return log_oom();
-                                        }
-                                }
-
-                                json_object_object_add(jobj, "ConfigSource", js);
-                                steal_ptr(js);
                         }
 
-                        json_object_array_add(ret, jobj);
-                        steal_ptr(jobj);
+                        if (config_profiver) {
+                                js = json_object_new_string(config_profiver);
+                                if (!js)
+                                        return log_oom();
+
+                                json_object_object_add(jobj, "ConfigProvider", js);
+                                steal_ptr(js);
+                        }
                 }
+
+                json_object_array_add(ret, jobj);
+                steal_ptr(jobj);
         }
 
         return 0;
@@ -1637,7 +1621,7 @@ static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
                         r = network_parse_link_dhcp4_server_address(l->ifindex, &provider);
                         if (r >= 0) {
                                 js = json_object_new_string(provider);
-                                if (!js)
+                               if (!js)
                                         return log_oom();
 
                                 json_object_object_add(j, "ConfigProvider", js);
@@ -1780,7 +1764,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
                 if (!ja)
                         return log_oom();
 
-                json_fill_one_link_routes(ipv4, l, route, ja);
+                json_fill_one_link_routes(ipv4, jn, l, route, ja);
 
                 json_object_object_add(jobj, "Routes", ja);
                 steal_ptr(ja);

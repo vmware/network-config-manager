@@ -1148,6 +1148,64 @@ int json_parse_address_config_source(const json_object *jobj,
         return -ENOENT;
 }
 
+int json_parse_gateway_config_source(const json_object *jobj,
+                                     const char *address,
+                                     char **ret_config_source,
+                                     char **ret_config_provider) {
+        json_object *interfaces = NULL;
+        int r;
+
+        assert(jobj);
+        assert(link);
+        assert(address);
+
+        if (!json_object_object_get_ex(jobj, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++){
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                json_object *gws = NULL;
+
+                if (!json_object_object_get_ex(interface, "Routes", &gws))
+                        continue;
+
+                for (size_t j = 0; j < json_object_array_length(gws); j++){
+                        json_object *config_source = NULL, *config_provider = NULL, *a = NULL, *family = NULL;
+                                json_object *addr = json_object_array_get_idx(gws, j);
+
+                                if (json_object_object_get_ex(addr, "Gateway", &a) && json_object_object_get_ex(addr, "Family", &family)) {
+                                        _auto_cleanup_ char *ip = NULL, *provider = NULL;
+
+                                        r = json_array_to_ip(a, json_object_get_int(family), NULL, &ip);
+                                        if (r < 0)
+                                                return r;
+
+                                        if (str_eq(address, ip)) {
+                                                if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
+                                                        *ret_config_source = strdup(json_object_get_string(config_source));
+                                                        if (!*ret_config_source)
+                                                                return -ENOMEM;
+                                                }
+
+                                                if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
+                                                        r = json_array_to_ip(config_provider, json_object_get_int(family), NULL, &provider);
+                                                        if (r < 0)
+                                                                return r;
+
+                                                        *ret_config_provider = strdup(provider);
+                                                        if (!*ret_config_provider)
+                                                                return -ENOMEM;
+                                                }
+
+                                                return 0;
+                                        }
+                                }
+                }
+        }
+
+        return -ENOENT;
+}
+
 int json_acquire_and_parse_network_data(json_object **ret) {
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ char *s = NULL;
