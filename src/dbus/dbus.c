@@ -783,3 +783,36 @@ int dbus_get_system_property_from_networkd(const char *p, char **ret) {
 
         return 0;
 }
+
+int dbus_describe_network(char **ret) {
+        _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+        _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
+        _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
+        _auto_cleanup_ char *v = NULL;
+        int r;
+
+        assert(ret);
+
+        r = sd_bus_open_system(&bus);
+        if (r < 0)
+                return r;
+
+        r = sd_bus_call_method(bus,
+                               "org.freedesktop.network1",
+                               "/org/freedesktop/network1",
+                               "org.freedesktop.network1.Manager",
+                               "Describe",
+                               &bus_error,
+                               &reply, NULL);
+        if (r < 0) {
+                log_warning("Failed to issue method call: %s", bus_error.message);
+                return r;
+        }
+
+        r = sd_bus_message_read(reply, "s", &v);
+        if (r < 0)
+                return r;
+
+        *ret = strdup(steal_ptr(v));
+        return 0;
+}

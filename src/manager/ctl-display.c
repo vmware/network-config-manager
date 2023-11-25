@@ -151,13 +151,17 @@ static int list_links(int argc, char *argv[]) {
 }
 
 static void list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_ char *c = NULL, *dhcp = NULL;
+        _auto_cleanup_ char *c = NULL, *dhcp = NULL, *config_source = NULL, *config_provider = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buf[IF_NAMESIZE + 1] = {};
+        json_object *jobj = userdata;
         static bool first = true;
         unsigned long size;
         Address *a = NULL;
         int r;
+
+        assert(key);
+        assert(jobj);
 
         a = (Address *) g_bytes_get_data(key, &size);
         (void) ip_to_str_prefix(a->family, &a->address, &c);
@@ -172,8 +176,14 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 return;
         }
 
-        r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
-        if (r >= 0 && string_has_prefix(c, dhcp)) {
+        r = json_parse_address_config_source(jobj, buf, c, &config_source, &config_provider);
+        if (r < 0) {
+                config_source = strdup("foreign");
+                if (!config_source)
+                        return;
+        }
+
+        if (str_eq(config_source, "DHCPv4")) {
                 _auto_cleanup_ char *server = NULL, *life_time = NULL, *t1 = NULL, *t2 = NULL;
 
                 (void) network_parse_link_dhcp4_server_address(a->ifindex, &server);
@@ -181,20 +191,15 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 (void) network_parse_link_dhcp4_address_lifetime_t1(a->ifindex, &t1);
                 (void) network_parse_link_dhcp4_address_lifetime_t2(a->ifindex, &t2);
 
-                printf("(DHCPv4 via %s) lease time: %s seconds T1: %s seconds T2: %s seconds", str_na(server), str_na(life_time),
+                printf("(DHCPv4 via %s) lease time: %s seconds T1: %s seconds T2: %s seconds", str_na(config_provider), str_na(life_time),
                        str_na(t1), str_na(t2));
         } else {
-                _auto_cleanup_ char *network = NULL;
-
-                r = parse_network_file(a->ifindex, buf, &network);
-                if (r >= 0) {
-                        if (a->family == AF_INET6 && IN6_IS_ADDR_LINKLOCAL(&a->address.in6))
-                                printf("(IPv6 Link Local) ");
-
-                        if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c))
-                                printf("(static)");
-                        else
-                                printf("(foreign)");
+                if (a->family == AF_INET6 && IN6_IS_ADDR_LINKLOCAL(&a->address.in6))
+                        printf("(IPv6 Link Local) ");
+                else {
+                        printf("(%s)", config_source);
+                        if (config_provider)
+                                printf(" via (%s)", config_provider);
 
                 }
         }
@@ -205,13 +210,22 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
 static void list_one_link_address_with_address_mode(gpointer key, gpointer value, gpointer userdata) {
         _auto_cleanup_ char *c = NULL, *dhcp = NULL;
         static bool first = true;
+        json_object *jobj = NULL;
         unsigned long size;
         Address *a = NULL;
         int r;
 
+        assert(userdata);
+        assert(key);
+
+        jobj = userdata;
+
         a = (Address *) g_bytes_get_data(key, &size);
         (void) ip_to_str_prefix(a->family, &a->address, &c);
         if (a->family == AF_INET) {
+                _auto_cleanup_ char *config_source = NULL;
+                char ifname[IF_NAMESIZE] = {};
+
                 if (first) {
                         display(arg_beautify, ansi_color_bold_cyan(), "IPv4 Address: ");
                         printf("%s ", c);
@@ -219,30 +233,22 @@ static void list_one_link_address_with_address_mode(gpointer key, gpointer value
                 } else
                         printf("              %s ", c);
 
-                r = network_parse_link_dhcp4_address(a->ifindex, &dhcp);
-                if (r >= 0 && string_has_prefix(c, dhcp))
-                        display(arg_beautify, ansi_color_bold_blue(), "(DHCPv4) \n");
-                else {
-                        _auto_cleanup_ char *network = NULL;
-                        char buf[IF_NAMESIZE + 1] = {};
+                if (!if_indextoname(a->ifindex, ifname))
+                        return;
 
-                        if (!if_indextoname(a->ifindex, buf)) {
-                                log_warning("Failed to find device ifindex='%d'", a->ifindex);
+                r = json_parse_address_config_source(jobj, ifname, c, &config_source, NULL);
+                if (r < 0) {
+                        config_source = strdup("foreign");
+                        if (!config_source)
                                 return;
-                        }
-
-                        r = parse_network_file(a->ifindex, buf, &network);
-                        if (r >= 0) {
-                                if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c))
-                                        display(arg_beautify, ansi_color_bold_blue(), "(static) \n");
-                                else
-                                        display(arg_beautify, ansi_color_bold_blue(), "(foreign) \n");
-                        }
                 }
+
+                display(arg_beautify, ansi_color_bold_blue(), "(%s) \n", config_source);
         }
 }
 
 _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool ipv4 = false, ipv6 = false;
@@ -292,53 +298,44 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         if (!set_size(addr->addresses))
                 return -ENODATA;
 
-        (void) network_parse_link_dhcp4_address(p->ifindex, &dhcp);
-        printf("Addresses: ");
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
+        }
+
+        display(arg_beautify, ansi_color_bold_cyan(), " Addresses:");
 
         g_hash_table_iter_init(&iter, addr->addresses->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
                 Address *a = (Address *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *source = NULL;
+                _auto_cleanup_ char *c = NULL, *config_source = NULL;
 
                 r = ip_to_str_prefix(a->family, &a->address, &c);
                 if (r < 0)
                         return r;
 
-                if (dhcp && string_has_prefix(c, dhcp))
-                        source = strdup("dhcp");
-                else {
-                        _auto_cleanup_ char *network = NULL;
-
-                        char buf[IF_NAMESIZE + 1] = {};
-
-                        if (!if_indextoname(a->ifindex, buf)) {
-                                log_warning("Failed to find device ifindex='%d'", a->ifindex);
-                                return -ENOENT;
-                        }
-
-                        r = parse_network_file(a->ifindex, buf, &network);
-                        if (r >= 0) {
-                                if (config_exists(network, "Network", "Address", c) || config_exists(network, "Address", "Address", c))
-                                        source = strdup("static");
-                                else
-                                        source = strdup("foreign");
-                        }
+                r = json_parse_address_config_source(jobj, p->ifname, c, &config_source, NULL);
+                if (r < 0) {
+                        config_source = strdup("foreign");
+                        if (!config_source)
+                                return -ENOMEM;
                 }
 
                 if ((a->family == AF_INET && ipv4) || (a->family == AF_INET6 && ipv6)) {
                         if (first) {
-                                printf("%s (%s) \n", c, source);
+                                printf(" %s (%s) \n", c, config_source);
                                 first = false;
                         } else
-                                printf("           %s (%s)\n", c, source);
+                                printf("            %s (%s)\n", c, config_source);
                 }
 
                 if (!ipv4 && !ipv6){
                         if (first) {
-                                printf("%s (%s) \n", c, source);
+                                printf(" %s (%s) \n", c, config_source);
                                 first = false;
                         } else
-                                printf("           %s (%s)\n", c, source);
+                                printf("            %s (%s)\n", c, config_source);
                 }
         }
 
@@ -471,6 +468,7 @@ static int list_one_link(char *argv[]) {
                 *online_state = NULL, *link = NULL, *dhcp4_identifier = NULL, *dhcp6_duid = NULL, *dhcp6_iaid = NULL, *iaid = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _cleanup_(routes_freep) Routes *route = NULL;
         _cleanup_(link_freep) Link *l = NULL;
@@ -480,6 +478,12 @@ static int list_one_link(char *argv[]) {
         r = parse_ifname_or_index(*argv, &p);
         if (r < 0) {
                 log_warning("Failed to find device: %s", *argv);
+                return r;
+        }
+
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
                 return r;
         }
 
@@ -600,7 +604,7 @@ static int list_one_link(char *argv[]) {
         r = netlink_get_one_link_address(l->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                     Address: ");
-                set_foreach(addr->addresses, list_one_link_addresses, NULL);
+                set_foreach(addr->addresses, list_one_link_addresses, jobj);
         }
 
         r = netlink_get_one_link_route(l->ifindex, &route);
@@ -1048,8 +1052,9 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 }
 
 _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
-        _cleanup_(routes_freep) Routes *routes = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
+        _cleanup_(routes_freep) Routes *routes = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         GHashTableIter iter;
         gpointer key, value;
@@ -1075,12 +1080,18 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
                 }
         }
 
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
+        }
+
         if (arg_json)
                 return json_fill_one_link(p, true, NULL);
 
         r = netlink_get_one_link_address(p->ifindex, &addr);
         if (r >= 0 && addr && set_size(addr->addresses) > 0)
-                set_foreach(addr->addresses, list_one_link_address_with_address_mode, NULL);
+                set_foreach(addr->addresses, list_one_link_address_with_address_mode, jobj);
 
         r = netlink_acquire_all_link_routes(&routes);
         if (r >= 0 && set_size(routes->routes) > 0) {
