@@ -1448,7 +1448,7 @@ static int fill_link_networkd_message(json_object *jobj, Link *l, char *network)
         return 0;
 }
 
-static int fill_link_dns_message(json_object *jobj, Link *l, char *network) {
+static int fill_link_dns_message(json_object *jobj, json_object *jn, Link *l, char *network) {
         _auto_cleanup_strv_ char **dns_servers = NULL, **dns_domains = NULL, **search_domains = NULL, **dns = NULL;
         _auto_cleanup_ char *mdns = NULL, *llmnr = NULL;
         _cleanup_(json_object_putp) json_object *ja = NULL;
@@ -1465,7 +1465,8 @@ static int fill_link_dns_message(json_object *jobj, Link *l, char *network) {
                 return log_oom();
 
         strv_foreach(d, dns) {
-                _cleanup_(json_object_putp) json_object *j = NULL, *jdns = NULL;
+                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL;
+                _cleanup_(json_object_putp) json_object *j = NULL, *jdns = NULL, *js = NULL;
 
                 jdns = json_object_new_string(*d);
                 if (!jdns)
@@ -1478,39 +1479,24 @@ static int fill_link_dns_message(json_object *jobj, Link *l, char *network) {
                 json_object_object_add(j, "Address", jdns);
                 steal_ptr(jdns);
 
-                if (dns_servers && strv_length(dns_servers) && strv_contains((const char **) dns_servers, *d)) {
-                        _cleanup_(json_object_putp) json_object *js = NULL;
-                        _auto_cleanup_ char *provider = NULL;
+                r = json_parse_dns_config_source(jn, *d, &config_source, &config_provider);
+                if (r < 0)
+                        continue;
 
-                        js = json_object_new_string("DHCPv4");
+                if (config_source) {
+                        js = json_object_new_string(config_source);
                         if (!js)
                                 return log_oom();
 
                         json_object_object_add(j, "ConfigSource", js);
                         steal_ptr(js);
+                }
 
-                        r = network_parse_link_dhcp4_server_address(l->ifindex, &provider);
-                        if (r >= 0) {
-                                js = json_object_new_string(provider);
-                                if (!js)
-                                        return log_oom();
+                if (config_provider) {
+                        js = json_object_new_string(config_provider);
+                        if (!js)
+                                return log_oom();
 
-                                json_object_object_add(j, "ConfigProvider", js);
-                                steal_ptr(js);
-                                steal_ptr(provider);
-                        }
-                } else  {
-                        _cleanup_(json_object_putp) json_object *js = NULL;
-
-                        if (config_contains(network, "Network", "DNS", *d)) {
-                                js = json_object_new_string("static");
-                                if (!js)
-                                        return log_oom();
-                        } else {
-                                js = json_object_new_string("foreign");
-                                if (!js)
-                                        return log_oom();
-                        }
                         json_object_object_add(j, "ConfigProvider", js);
                         steal_ptr(js);
                 }
@@ -1814,7 +1800,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
                 steal_ptr(ja);
         }
 
-        r = fill_link_dns_message(jobj, l, network);
+        r = fill_link_dns_message(jobj, jn, l, network);
         if (r < 0)
                 return r;
 
