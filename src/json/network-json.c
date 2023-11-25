@@ -928,3 +928,109 @@ int json_get_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static_dns
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
         return 0;
 }
+
+static int json_array_to_ip(const json_object *obj, const int family, const char *prefix, char **ret) {
+        _auto_cleanup_ char *ip = NULL;
+
+        assert(obj);
+
+        for (size_t i = 0; i < json_object_array_length(obj); i++) {
+                json_object *a = json_object_array_get_idx(obj, i);
+
+                if (!ip)
+                        ip = strdup(json_object_get_string(a));
+                else {
+                        if (family == AF_INET)
+                                ip = strjoin(".", ip, json_object_get_string(a), NULL);
+                        else
+                                ip = strjoin(":", ip, json_object_get_string(a), NULL);
+                }
+                if (!ip)
+                        return -ENOMEM;
+        }
+
+        if (family == AF_INET6) {
+                _auto_cleanup_ IPAddress *addr = NULL;
+                int r;
+
+                r = parse_ipv6(ip, &addr);
+                if (r < 0)
+                        return r;
+
+                r = ip_to_str(AF_INET6, addr, &ip);
+                if (r < 0)
+                        return r;
+        }
+
+        ip = strjoin("/", ip, prefix, NULL);
+        if (!ip)
+                return -ENOMEM;
+
+        *ret = steal_ptr(ip);
+        return 0;
+}
+
+int json_parse_address_config_source(const json_object *jobj, const char *link, const char *address, char **ret) {
+        json_object *interfaces = NULL;
+        int r;
+
+        assert(jobj);
+        assert(link);
+        assert(address);
+
+        if (!json_object_object_get_ex(jobj, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++){
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                json_object *name;
+
+                if (json_object_object_get_ex(interface, "Name", &name) && str_eq(json_object_get_string(name), link)) {
+                        json_object *addresses = NULL;
+
+                        if (json_object_object_get_ex(interface, "Addresses", &addresses)) {
+                                for (size_t j = 0; j < json_object_array_length(addresses); j++){
+                                        json_object *config_source = NULL, *a = NULL, *prefix = NULL, *family = NULL;
+                                        json_object *addr = json_object_array_get_idx(addresses, j);
+
+                                        if (json_object_object_get_ex(addr, "Address", &a) && json_object_object_get_ex(addr, "PrefixLength", &prefix) &&
+                                            json_object_object_get_ex(addr, "Family", &family)) {
+                                                char *ip;
+
+                                                r = json_array_to_ip(a, json_object_get_int(family), json_object_get_string(prefix), &ip);
+                                                if (r < 0)
+                                                        return r;
+
+                                                if (str_eq(address, ip)) {
+                                                        if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
+                                                                *ret = strdup(json_object_get_string(config_source));
+                                                                if (!*ret)
+                                                                        return -ENOMEM;
+
+                                                                return 0;
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+
+        return -ENOENT;
+}
+
+int json_acquire_and_parse_network_data(json_object **ret) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _auto_cleanup_ char *s = NULL;
+        int r;
+
+        r = dbus_describe_network(&s);
+        if (r < 0)
+                return r;
+
+        jobj = json_tokener_parse(s);
+
+        *ret = steal_ptr(jobj);
+
+        return 0;
+}
