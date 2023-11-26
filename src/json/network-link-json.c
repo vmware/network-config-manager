@@ -234,6 +234,13 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                 json_object_object_add(jobj, "Address", js);
                 steal_ptr(js);
 
+                js = json_object_new_int(a->family);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Family", js);
+                steal_ptr(js);
+
                 js = json_object_new_int(a->address.prefix_len);
                 if (!js)
                         return log_oom();

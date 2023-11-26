@@ -1058,7 +1058,7 @@ int json_parse_dns_config_source(const json_object *jobj,
 
                                 r = json_array_to_ip(a, json_object_get_int(family), -1, &ip);
                                 if (r < 0)
-                                        return r;
+                                        continue;
 
                                 if (str_eq(address, ip)) {
                                         if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
@@ -1121,7 +1121,7 @@ int json_parse_address_config_source(const json_object *jobj,
 
                                         r = json_array_to_ip(a, json_object_get_int(family), json_object_get_int(prefix), &ip);
                                         if (r < 0)
-                                                return r;
+                                                continue;
 
                                         if (str_eq(address, ip)) {
                                                 if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
@@ -1180,7 +1180,7 @@ int json_parse_gateway_config_source(const json_object *jobj,
 
                                         r = json_array_to_ip(a, json_object_get_int(family), -1, &ip);
                                         if (r < 0)
-                                                return r;
+                                                continue;
 
                                         if (str_eq(address, ip)) {
                                                 if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
