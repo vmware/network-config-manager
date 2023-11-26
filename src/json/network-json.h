@@ -29,7 +29,8 @@ int json_parse_address_config_source(const json_object *jobj,
                                      const char *link,
                                      const char *address,
                                      char **config_source,
-                                     char **config_provider);
+                                     char **config_provider,
+                                     char **config_state);
 
 int json_parse_dns_config_source(const json_object *jobj,
                                  const char *address,

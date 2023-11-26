@@ -1090,7 +1090,8 @@ int json_parse_address_config_source(const json_object *jobj,
                                      const char *link,
                                      const char *address,
                                      char **ret_config_source,
-                                     char **ret_config_provider) {
+                                     char **ret_config_provider,
+                                     char **ret_config_state) {
         json_object *interfaces = NULL;
         int r;
 
@@ -1112,7 +1113,7 @@ int json_parse_address_config_source(const json_object *jobj,
                                 continue;
 
                         for (size_t j = 0; j < json_object_array_length(addresses); j++){
-                                json_object *config_source = NULL, *config_provider = NULL, *a = NULL, *prefix = NULL, *family = NULL;
+                                json_object *config_source = NULL, *config_provider = NULL, *config_state = NULL, *a = NULL, *prefix = NULL, *family = NULL;
                                 json_object *addr = json_object_array_get_idx(addresses, j);
 
                                 if (json_object_object_get_ex(addr, "Address", &a) && json_object_object_get_ex(addr, "PrefixLength", &prefix) &&
@@ -1137,6 +1138,12 @@ int json_parse_address_config_source(const json_object *jobj,
 
                                                         *ret_config_provider = strdup(provider);
                                                         if (!*ret_config_provider)
+                                                                return -ENOMEM;
+                                                }
+
+                                                if (json_object_object_get_ex(addr, "ConfigState", &config_state)) {
+                                                        *ret_config_state = strdup(json_object_get_string(config_state));
+                                                        if (!*ret_config_state)
                                                                 return -ENOMEM;
                                                 }
 

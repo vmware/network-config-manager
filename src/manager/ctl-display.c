@@ -151,7 +151,7 @@ static int list_links(int argc, char *argv[]) {
 }
 
 static void list_one_link_addresses(gpointer key, gpointer value, gpointer userdata) {
-        _auto_cleanup_ char *c = NULL, *config_source = NULL, *config_provider = NULL;
+        _auto_cleanup_ char *c = NULL, *config_source = NULL, *config_provider = NULL, *config_state = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buf[IF_NAMESIZE + 1] = {};
         json_object *jobj = userdata;
@@ -176,7 +176,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                 return;
         }
 
-        r = json_parse_address_config_source(jobj, buf, c, &config_source, &config_provider);
+        r = json_parse_address_config_source(jobj, buf, c, &config_source, &config_provider, &config_state);
         if (r < 0) {
                 config_source = strdup("foreign");
                 if (!config_source)
@@ -223,7 +223,7 @@ static void list_one_link_address_with_address_mode(gpointer key, gpointer value
         a = (Address *) g_bytes_get_data(key, &size);
         (void) ip_to_str_prefix(a->family, &a->address, &c);
         if (a->family == AF_INET) {
-                _auto_cleanup_ char *config_source = NULL;
+                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL, *config_state = NULL;
                 char ifname[IF_NAMESIZE] = {};
 
                 if (first) {
@@ -236,7 +236,7 @@ static void list_one_link_address_with_address_mode(gpointer key, gpointer value
                 if (!if_indextoname(a->ifindex, ifname))
                         return;
 
-                r = json_parse_address_config_source(jobj, ifname, c, &config_source, NULL);
+                r = json_parse_address_config_source(jobj, ifname, c, &config_source, &config_provider, &config_state);
                 if (r < 0) {
                         config_source = strdup("foreign");
                         if (!config_source)
@@ -307,14 +307,14 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
 
         g_hash_table_iter_init(&iter, addr->addresses->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
+                _auto_cleanup_ char *c = NULL, *config_source = NULL, *config_provider = NULL, *config_state = NULL;
                 Address *a = (Address *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *config_source = NULL;
 
                 r = ip_to_str_prefix(a->family, &a->address, &c);
                 if (r < 0)
                         return r;
 
-                r = json_parse_address_config_source(jobj, p->ifname, c, &config_source, NULL);
+                r = json_parse_address_config_source(jobj, p->ifname, c, &config_source, &config_provider, &config_state);
                 if (r < 0) {
                         config_source = strdup("foreign");
                         if (!config_source)

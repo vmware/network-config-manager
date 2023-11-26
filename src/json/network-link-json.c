@@ -212,9 +212,9 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
 
         g_hash_table_iter_init(&iter, addr->addresses->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
+                _auto_cleanup_ char *c = NULL, *b = NULL, *cp = NULL, *config_source = NULL, *config_provider = NULL, *config_state = NULL;
                 _cleanup_(json_object_putp) json_object *jscope = NULL, *jflags = NULL, *jlft = NULL, *jlabel = NULL, *jproto = NULL;
                 Address *a = (Address *) g_bytes_get_data(key, &size);
-                _auto_cleanup_ char *c = NULL, *b = NULL, *cp = NULL, *config_source = NULL, *config_provider = NULL;
 
                 if (ipv4 && a->family != AF_INET)
                         continue;
@@ -320,7 +320,7 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                 if (r < 0)
                         return r;
 
-                r = json_parse_address_config_source(jn, l->name, cp, &config_source, &config_provider);
+                r = json_parse_address_config_source(jn, l->name, cp, &config_source, &config_provider, &config_state);
                 if (r < 0) {
                         config_source = strdup("foreign");
                         if (!config_source)
@@ -340,6 +340,15 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
                                 return log_oom();
 
                         json_object_object_add(jobj, "ConfigProvider", js);
+                        steal_ptr(js);
+                }
+
+                if (config_state) {
+                        js = json_object_new_string(config_state);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_object_add(jobj, "ConfigState", js);
                         steal_ptr(js);
                 }
 
