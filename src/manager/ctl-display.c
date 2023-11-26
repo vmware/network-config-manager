@@ -615,7 +615,6 @@ static int list_one_link(char *argv[]) {
                 GHashTableIter iter;
                 bool first = true;
 
-
                 r = network_parse_link_dhcp4_router(p->ifindex, &router);
                 display(arg_beautify, ansi_color_bold_cyan(), "                     Gateway: ");
 
