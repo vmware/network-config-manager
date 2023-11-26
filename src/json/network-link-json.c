@@ -626,9 +626,9 @@ static int json_fill_one_link_routes(bool ipv4, json_object *jn, Link *l, Routes
                 routes_flags_to_string(rt, jobj, rt->flags);
 
                 if (c) {
-                        _auto_cleanup_ char *config_source = NULL, *config_profiver = NULL;
+                        _auto_cleanup_ char *config_source = NULL, *config_profiver = NULL, *config_state = NULL;
 
-                        r = json_parse_gateway_config_source(jn, c, &config_source, &config_profiver);
+                        r = json_parse_gateway_config_source(jn, c, &config_source, &config_profiver, &config_state);
                         if (r < 0)
                                 continue;
 
@@ -647,6 +647,15 @@ static int json_fill_one_link_routes(bool ipv4, json_object *jn, Link *l, Routes
                                         return log_oom();
 
                                 json_object_object_add(jobj, "ConfigProvider", js);
+                                steal_ptr(js);
+                        }
+
+                        if (config_state) {
+                                js = json_object_new_string(config_state);
+                                if (!js)
+                                        return log_oom();
+
+                                json_object_object_add(jobj, "ConfigState", js);
                                 steal_ptr(js);
                         }
                 }
@@ -686,22 +695,22 @@ static int json_fill_one_link_udev(json_object *j, Link *l, char **link_file) {
                 if (!js)
                         return log_oom();
 
-               json_object_object_add(j, "Kind", js);
-               steal_ptr(js);
+                json_object_object_add(j, "Kind", js);
+                steal_ptr(js);
         }
 
         if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 && !isempty_str(t)) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-               if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_str(t))
+                if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_str(t))
                         js = json_object_new_string(t);
-               else
-                       js = json_object_new_string(str_na(arphrd_to_name(l->iftype)));
-               if (!js)
-                       return log_oom();
+                else
+                        js = json_object_new_string(str_na(arphrd_to_name(l->iftype)));
+                if (!js)
+                        return log_oom();
 
-               json_object_object_add(j, "Type", js);
-               steal_ptr(js);
+                json_object_object_add(j, "Type", js);
+                steal_ptr(js);
         }
 
         if (path) {
@@ -841,7 +850,7 @@ static int json_fill_link_attributes(json_object *jobj, Link *l) {
         }
 
         if (l->qdisc) {
-                 _cleanup_(json_object_putp) json_object *js = NULL;
+                _cleanup_(json_object_putp) json_object *js = NULL;
 
                 js = json_object_new_string(l->qdisc);
                 if (!js)
@@ -1401,8 +1410,8 @@ static int fill_link_networkd_message(json_object *jobj, Link *l, char *network)
         if (r >= 0) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                 js = json_object_new_string(ipv6_state);
-                 if (!js)
+                js = json_object_new_string(ipv6_state);
+                if (!js)
                         return log_oom();
 
                 json_object_object_add(jobj, "IPv6AddressState", js);
@@ -1413,8 +1422,8 @@ static int fill_link_networkd_message(json_object *jobj, Link *l, char *network)
         if (r >= 0) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                 js = json_object_new_string(online_state);
-                 if (!js)
+                js = json_object_new_string(online_state);
+                if (!js)
                         return log_oom();
 
                 json_object_object_add(jobj, "OnlineState", js);
@@ -1605,12 +1614,12 @@ static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
         if (r < 0)
                 return r;
 
-       ja = json_object_new_array();
-       if (!ja)
-               return log_oom();
+        ja = json_object_new_array();
+        if (!ja)
+                return log_oom();
 
-       strv_foreach(d, config_ntp) {
-               _cleanup_(json_object_putp) json_object *j = NULL, *jntp = NULL;
+        strv_foreach(d, config_ntp) {
+                _cleanup_(json_object_putp) json_object *j = NULL, *jntp = NULL;
 
                 jntp = json_object_new_string(*d);
                 if (!jntp)
@@ -1637,7 +1646,7 @@ static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
                         r = network_parse_link_dhcp4_server_address(l->ifindex, &provider);
                         if (r >= 0) {
                                 js = json_object_new_string(provider);
-                               if (!js)
+                                if (!js)
                                         return log_oom();
 
                                 json_object_object_add(j, "ConfigProvider", js);

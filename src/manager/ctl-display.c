@@ -608,7 +608,7 @@ static int list_one_link(char *argv[]) {
 
         r = netlink_get_one_link_route(l->ifindex, &route);
         if (r >= 0 && route && set_size(route->routes) > 0) {
-                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL;
+                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL, *config_state = NULL;
                 _auto_cleanup_strv_ char **gws = NULL;
                 _auto_cleanup_ char *router = NULL;
                 gpointer key, value;
@@ -651,7 +651,7 @@ static int list_one_link(char *argv[]) {
                         } else
                                 printf("                              %s ", c);
 
-                        r = json_parse_gateway_config_source(jn, c, &config_source, &config_provider);
+                        r = json_parse_gateway_config_source(jn, c, &config_source, &config_provider, &config_state);
                         if (r < 0)
                                 continue;
 
@@ -659,7 +659,8 @@ static int list_one_link(char *argv[]) {
                                 printf("(%s)", config_source);
                         if (config_provider)
                                 printf(" via (%s)", config_provider);
-
+                        if (config_state)
+                                printf(" (%s)", config_state);
                         steal_ptr(c);
                 }
                 printf("\n");
