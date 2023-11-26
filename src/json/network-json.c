@@ -938,7 +938,7 @@ int json_get_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static_dns
         return 0;
 }
 
-static int json_array_to_ip(const json_object *obj, const int family, const char *prefix, char **ret) {
+static int json_array_to_ip(const json_object *obj, const int family, const int prefix, char **ret) {
         _auto_cleanup_ char *ip = NULL;
 
         assert(obj);
@@ -971,9 +971,11 @@ static int json_array_to_ip(const json_object *obj, const int family, const char
                         return r;
         }
 
-        ip = strjoin("/", ip, prefix, NULL);
-        if (!ip)
-                return -ENOMEM;
+        if (prefix > 0) {
+                ip = g_strdup_printf("%s/%d", ip, prefix);
+                if (!ip)
+                        return -ENOMEM;
+        }
 
         *ret = steal_ptr(ip);
         return 0;
@@ -1054,9 +1056,9 @@ int json_parse_dns_config_source(const json_object *jobj,
                         if (json_object_object_get_ex(addr, "Address", &a) && json_object_object_get_ex(addr, "Family", &family)) {
                                 _auto_cleanup_ char *ip = NULL, *provider = NULL;
 
-                                r = json_array_to_ip(a, json_object_get_int(family), NULL, &ip);
+                                r = json_array_to_ip(a, json_object_get_int(family), -1, &ip);
                                 if (r < 0)
-                                        return r;
+                                        continue;
 
                                 if (str_eq(address, ip)) {
                                         if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
@@ -1066,7 +1068,7 @@ int json_parse_dns_config_source(const json_object *jobj,
                                         }
 
                                         if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
-                                                r = json_array_to_ip(config_provider, json_object_get_int(family), NULL, &provider);
+                                                r = json_array_to_ip(config_provider, json_object_get_int(family), -1, &provider);
                                                 if (r < 0)
                                                         return r;
 
@@ -1117,9 +1119,9 @@ int json_parse_address_config_source(const json_object *jobj,
                                     json_object_object_get_ex(addr, "Family", &family)) {
                                         _auto_cleanup_ char *ip = NULL, *provider = NULL;
 
-                                        r = json_array_to_ip(a, json_object_get_int(family), json_object_get_string(prefix), &ip);
+                                        r = json_array_to_ip(a, json_object_get_int(family), json_object_get_int(prefix), &ip);
                                         if (r < 0)
-                                                return r;
+                                                continue;
 
                                         if (str_eq(address, ip)) {
                                                 if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
@@ -1129,7 +1131,7 @@ int json_parse_address_config_source(const json_object *jobj,
                                                 }
 
                                                 if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
-                                                        r = json_array_to_ip(config_provider, json_object_get_int(family), NULL, &provider);
+                                                        r = json_array_to_ip(config_provider, json_object_get_int(family), -1, &provider);
                                                         if (r < 0)
                                                                 return r;
 
@@ -1176,9 +1178,9 @@ int json_parse_gateway_config_source(const json_object *jobj,
                                 if (json_object_object_get_ex(addr, "Gateway", &a) && json_object_object_get_ex(addr, "Family", &family)) {
                                         _auto_cleanup_ char *ip = NULL, *provider = NULL;
 
-                                        r = json_array_to_ip(a, json_object_get_int(family), NULL, &ip);
+                                        r = json_array_to_ip(a, json_object_get_int(family), -1, &ip);
                                         if (r < 0)
-                                                return r;
+                                                continue;
 
                                         if (str_eq(address, ip)) {
                                                 if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
@@ -1188,7 +1190,7 @@ int json_parse_gateway_config_source(const json_object *jobj,
                                                 }
 
                                                 if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
-                                                        r = json_array_to_ip(config_provider, json_object_get_int(family), NULL, &provider);
+                                                        r = json_array_to_ip(config_provider, json_object_get_int(family), -1, &provider);
                                                         if (r < 0)
                                                                 return r;
 
