@@ -34,6 +34,7 @@
 #include "udev-hwdb.h"
 
 static bool arg_json = false;
+static bool arg_network_json = false;
 static bool arg_log = false;
 static bool arg_beautify = true;
 
@@ -41,6 +42,10 @@ static int arg_log_line;
 
 void set_json(bool k) {
         arg_json = k;
+}
+
+void set_network_json(bool k) {
+        arg_network_json = k;
 }
 
 bool json_enabled(void) {
@@ -813,6 +818,9 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
         if (argc > 1)
                 return list_one_link(argv + 1);
+
+        if (arg_network_json && arg_json)
+                return json_acquire_network_status();
 
         if (arg_json)
                 return json_fill_system_status(NULL);
