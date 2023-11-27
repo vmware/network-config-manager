@@ -1236,3 +1236,18 @@ int json_acquire_and_parse_network_data(json_object **ret) {
         *ret = steal_ptr(jobj);
         return 0;
 }
+
+int json_acquire_network_status(void) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        int r;
+
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
+        }
+
+        printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+
+        return 0;
+}

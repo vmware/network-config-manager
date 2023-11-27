@@ -312,6 +312,7 @@ static int parse_argv(int argc, char *argv[]) {
                 { "help",        no_argument,       NULL, 'h'   },
                 { "version",     no_argument,       NULL, 'v'   },
                 { "json",        no_argument,       NULL, 'j'   },
+                { "network",     no_argument,       NULL, 'n'   },
                 { "no-beautify", no_argument,       NULL, 'b'   },
                 { "alias",       no_argument,       NULL, 'a'   },
                 { "log",         optional_argument, NULL, 'l'   },
@@ -322,7 +323,7 @@ static int parse_argv(int argc, char *argv[]) {
         assert(argc >= 0);
         assert(argv);
 
-        while ((c = getopt_long(argc, argv, "ahvjbl", options, 0)) >= 0) {
+        while ((c = getopt_long(argc, argv, "ahvjnbl", options, 0)) >= 0) {
                 switch (c) {
                 case 'h':
                         return help();
@@ -330,6 +331,9 @@ static int parse_argv(int argc, char *argv[]) {
                         return ncm_show_version();
                 case 'j':
                         set_json(true);
+                        break;
+                case 'n':
+                        set_network_json(true);
                         break;
                 case 'b':
                         set_beautify(false);

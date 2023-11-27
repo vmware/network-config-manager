@@ -5,6 +5,7 @@
 #pragma once
 
 void set_json(bool k);
+void set_network_json(bool k);
 void set_beautify(bool k);
 void set_log(bool k, int size);
 
