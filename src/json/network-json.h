@@ -20,6 +20,9 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn, json_object *
 int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, json_object *jn);
 int json_fill_dns_server_domains(void);
 
+int json_get_link_address(IfNameIndex *p, char **ret);
+int json_fill_address(bool ipv4, Link *l, json_object *jn,  json_object *jobj);
+
 int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags);
 int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags);
 

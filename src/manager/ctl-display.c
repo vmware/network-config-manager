@@ -282,6 +282,10 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
                 }
         }
 
+        if (arg_json)
+                return json_get_link_address(p, NULL);
+
+
         if (argc >= 2) {
                 for (int i = 2; i < argc; i++) {
                         if (str_eq(argv[i], "family") || str_eq(argv[i], "f")) {

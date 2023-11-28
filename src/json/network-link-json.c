@@ -208,7 +208,6 @@ static int json_fill_one_link_addresses(bool ipv4, Link *l, Addresses *addr, jso
 
         assert(l);
         assert(addr);
-        assert(l);
 
         g_hash_table_iter_init(&iter, addr->addresses->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
@@ -1679,6 +1678,33 @@ static int fill_link_ntp_message(json_object *jobj, Link *l, char *network) {
         return 0;
 }
 
+int json_fill_address(bool ipv4, Link *l, json_object *jn,  json_object *jobj) {
+        _cleanup_(addresses_freep) Addresses *addr = NULL;
+        int r;
+
+        assert(l);
+        assert(jn);
+        assert(jobj);
+
+        r = netlink_get_one_link_address(l->ifindex, &addr);
+        if (r >= 0 && addr && set_size(addr->addresses) > 0) {
+                _cleanup_(json_object_putp) json_object *ja = NULL;
+
+                json_fill_ipv6_link_local_addresses(l, addr, jobj);
+
+                ja = json_object_new_array();
+                if (!ja)
+                        return log_oom();
+
+                json_fill_one_link_addresses(ipv4, l, addr, jn, ja);
+
+                json_object_object_add(jobj, "Addresses", ja);
+                steal_ptr(ja);
+        }
+
+        return r;
+}
+
 int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object **ret) {
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
@@ -1765,21 +1791,9 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
         if (r < 0)
                 return r;
 
-        r = netlink_get_one_link_address(l->ifindex, &addr);
-        if (r >= 0 && addr && set_size(addr->addresses) > 0) {
-                _cleanup_(json_object_putp) json_object *ja = NULL;
-
-                json_fill_ipv6_link_local_addresses(l, addr, jobj);
-
-                ja = json_object_new_array();
-                if (!ja)
-                        return log_oom();
-
-                json_fill_one_link_addresses(ipv4, l, addr, jn, ja);
-
-                json_object_object_add(jobj, "Addresses", ja);
-                steal_ptr(ja);
-        }
+        r = json_fill_address(ipv4, l, jn, jobj);
+        if (r < 0)
+                return r;
 
         r = netlink_get_one_link_route(l->ifindex, &route);
         if (r >= 0 && route && set_size(route->routes) > 0) {
