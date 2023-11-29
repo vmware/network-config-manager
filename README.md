@@ -74,8 +74,8 @@ Or by simply doing
 ➜  ~ nmctl --help
 ```
 
-For a comprehensive list of YAML examples, see [YAML example configurations](https://github.com/vmware/network-config-manager/blob/main/example-yaml-configurations.md)
-Introspect system or network via ```nmctl```  [nmctl display](https://github.com/vmware/network-config-manager/blob/main/example-nmctl-display.md)
+- For a comprehensive list of YAML examples, see [YAML example configurations](https://github.com/vmware/network-config-manager/blob/main/example-yaml-configurations.md)
+- Introspect system or network via ```nmctl```  [nmctl display](https://github.com/vmware/network-config-manager/blob/main/example-nmctl-display.md)
 
 
 ### Contributing
