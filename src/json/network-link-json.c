@@ -1487,9 +1487,7 @@ static int fill_link_dns_message(json_object *jobj, json_object *jn, Link *l, ch
                 json_object_object_add(j, "Address", jdns);
                 steal_ptr(jdns);
 
-                r = json_parse_dns_config_source(jn, *d, &config_source, &config_provider);
-                if (r < 0)
-                        continue;
+                (void) json_parse_dns_config_source(jn, *d, &config_source, &config_provider);
 
                 if (config_source) {
                         js = json_object_new_string(config_source);
@@ -1540,9 +1538,7 @@ static int fill_link_dns_message(json_object *jobj, json_object *jn, Link *l, ch
                 json_object_object_add(j, "Domain", jdomain);
                 steal_ptr(jdomain);
 
-                r = json_parse_search_domain_config_source(jn, *d, &config_source, &config_provider);
-                if (r < 0)
-                        continue;
+                (void) json_parse_search_domain_config_source(jn, *d, &config_source, &config_provider);
 
                 if (config_source) {
                         js = json_object_new_string(config_source);
