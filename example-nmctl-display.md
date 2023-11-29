@@ -226,11 +226,11 @@ JSON output:
   "NTP": [
     {
       "Address": "test3",
-      "ConfigProvider": "static"
+      "ConfigSource": "runtime"
     },
     {
       "Address": "test4",
-      "ConfigProvider": "static"
+      "ConfigSource": "runtime"
     }
   ]
 }
@@ -280,4 +280,26 @@ DNS Mode: merged
 {
   "DNSMode": "merged"
 }
+```
+
+Display Search domains
+```bash
+❯ nmctl show-domains dev ens33
+DNS Domain: test1
+INDEX LINK                 Domain
+    2 ens33                test1
+```
+
+JSON format
+```bash
+❯ nmctl show-domains dev ens33 -j | jq
+{
+  "SearchDomains": [
+    "test1"
+  ],
+  "ens33": [
+    "test1"
+  ]
+}
+
 ```
