@@ -1027,6 +1027,46 @@ int json_parse_search_domain_config_source(const json_object *jobj,
         return -ENOENT;
 }
 
+int json_parse_ntp_config_source(const json_object *jobj, const char *address, char **ret_config_source, char **ret_config_provider) {
+        json_object *interfaces = NULL;
+
+        assert(jobj);
+
+        if (!json_object_object_get_ex(jobj, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++){
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                json_object *ntp;
+
+                if (!json_object_object_get_ex(interface, "NTP", &ntp))
+                        continue;
+                for (size_t j = 0; j < json_object_array_length(ntp); j++) {
+                        json_object *config_source = NULL, *config_provider = NULL, *a = NULL;
+                        json_object *addr = json_object_array_get_idx(ntp, j);
+
+                        if (json_object_object_get_ex(addr, "Server", &a)) {
+                                if (str_eq(address, json_object_get_string(a))) {
+                                        if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
+                                                *ret_config_source = strdup(json_object_get_string(config_source));
+                                                if (!*ret_config_source)
+                                                        return -ENOMEM;
+                                        }
+
+                                        if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
+                                                *ret_config_provider = strdup(json_object_get_string(config_provider));
+                                                if (!*ret_config_provider)
+                                                        return -ENOMEM;
+                                        }
+
+                                        return 0;
+                                }
+                        }
+                }
+        }
+
+        return -ENOENT;
+}
 
 int json_parse_dns_config_source(const json_object *jobj,
                                  const char *address,
@@ -1246,7 +1286,6 @@ int json_acquire_network_status(void) {
         }
 
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
-
         return 0;
 }
 
