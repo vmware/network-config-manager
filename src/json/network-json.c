@@ -44,10 +44,7 @@ static void json_fill_routing_policy_rules(gpointer key, gpointer value, gpointe
                 return;
 
         rule = (RoutingPolicyRule *) g_bytes_get_data(key, &size);
-        if (rule->family == AF_INET)
-                jd = json_object_new_string("ipv4");
-        else
-                jd = json_object_new_string("ipv6");
+        jd = json_object_new_int(rule->family);
         if (!jd)
                 return;
 
