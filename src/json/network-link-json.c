@@ -666,11 +666,11 @@ static int json_fill_one_link_routes(bool ipv4, json_object *jn, Link *l, Routes
 
                 routes_flags_to_string(rt, jobj, rt->flags);
 
-                if (c && json_parse_route_config_source(jn, "Gateway", c, &config_source, &config_profiver, &config_state) >= 0)
+                if (c && json_parse_route_config_source(jn, l->name, "Gateway", c, &config_source, &config_profiver, &config_state) >= 0)
                         json_fill_config_source(jobj, config_source, config_profiver, config_state);
-                else if (prefsrc && json_parse_route_config_source(jn, "PreferredSource", prefsrc, &config_source, &config_profiver, &config_state) >= 0)
+                else if (prefsrc && json_parse_route_config_source(jn, l->name, "PreferredSource", prefsrc, &config_source, &config_profiver, &config_state) >= 0)
                         json_fill_config_source(jobj, config_source, config_profiver, config_state);
-                else if (destination && json_parse_route_config_source(jn, "Destination", destination, &config_source, &config_profiver, &config_state) >= 0)
+                else if (destination && json_parse_route_config_source(jn, l->name, "Destination", destination, &config_source, &config_profiver, &config_state) >= 0)
                         json_fill_config_source(jobj, config_source, config_profiver, config_state);
 
                 json_object_array_add(ret, jobj);

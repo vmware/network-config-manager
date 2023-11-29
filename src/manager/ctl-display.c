@@ -660,7 +660,7 @@ static int list_one_link(char *argv[]) {
                         } else
                                 printf("                              %s ", c);
 
-                        r = json_parse_route_config_source(jn, "Gateway", c, &config_source, &config_provider, &config_state);
+                        r = json_parse_route_config_source(jn, l->name, "Gateway", c, &config_source, &config_provider, &config_state);
                         if (r < 0)
                                 continue;
 
