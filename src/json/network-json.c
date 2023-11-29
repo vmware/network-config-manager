@@ -1196,11 +1196,12 @@ int json_parse_address_config_source(const json_object *jobj,
         return -ENOENT;
 }
 
-int json_parse_gateway_config_source(const json_object *jobj,
-                                     const char *address,
-                                     char **ret_config_source,
-                                     char **ret_config_provider,
-                                     char **ret_config_state) {
+int json_parse_route_config_source(const json_object *jobj,
+                                   const char *config,
+                                   const char *address,
+                                   char **ret_config_source,
+                                   char **ret_config_provider,
+                                   char **ret_config_state) {
         json_object *interfaces = NULL;
         int r;
 
@@ -1221,7 +1222,7 @@ int json_parse_gateway_config_source(const json_object *jobj,
                         json_object *config_source = NULL, *config_provider = NULL, *config_state = NULL, *a = NULL, *family = NULL;
                         json_object *addr = json_object_array_get_idx(gws, j);
 
-                        if (json_object_object_get_ex(addr, "Gateway", &a) && json_object_object_get_ex(addr, "Family", &family)) {
+                        if (json_object_object_get_ex(addr, config, &a) && json_object_object_get_ex(addr, "Family", &family)) {
                                 _auto_cleanup_ char *ip = NULL, *provider = NULL;
 
                                 r = json_array_to_ip(a, json_object_get_int(family), -1, &ip);

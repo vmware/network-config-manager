@@ -472,7 +472,42 @@ int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags) {
         return 0;
 }
 
+static int json_fill_config_source(json_object *jobj, const char *config_source, const char *config_profiver, const char *config_state) {
+        _cleanup_(json_object_putp) json_object *js = NULL;
+        assert(jobj);
+
+        if (config_source) {
+                js = json_object_new_string(config_source);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "ConfigSource", js);
+                steal_ptr(js);
+        }
+
+        if (config_profiver) {
+                js = json_object_new_string(config_profiver);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "ConfigProvider", js);
+                steal_ptr(js);
+        }
+
+        if (config_state) {
+                js = json_object_new_string(config_state);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "ConfigState", js);
+                steal_ptr(js);
+        }
+
+        return 0;
+}
+
 static int json_fill_one_link_routes(bool ipv4, json_object *jn, Link *l, Routes *rts, json_object *ret) {
+        _auto_cleanup_ char *config_source = NULL, *config_profiver = NULL, *config_state = NULL;
         GHashTableIter iter;
         gpointer key, value;
         unsigned long size;
@@ -534,6 +569,13 @@ static int json_fill_one_link_routes(bool ipv4, json_object *jn, Link *l, Routes
                         json_object_object_add(jobj, "TableString", js);
                         steal_ptr(js);
                 }
+
+                js = json_object_new_int(rt->family);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "Family", js);
+                steal_ptr(js);
 
                 js = json_object_new_int(rt->protocol);
                 if (!js)
@@ -624,40 +666,12 @@ static int json_fill_one_link_routes(bool ipv4, json_object *jn, Link *l, Routes
 
                 routes_flags_to_string(rt, jobj, rt->flags);
 
-                if (c) {
-                        _auto_cleanup_ char *config_source = NULL, *config_profiver = NULL, *config_state = NULL;
-
-                        r = json_parse_gateway_config_source(jn, c, &config_source, &config_profiver, &config_state);
-                        if (r < 0)
-                                continue;
-
-                        if (config_source) {
-                                js = json_object_new_string(config_source);
-                                if (!js)
-                                        return log_oom();
-
-                                json_object_object_add(jobj, "ConfigSource", js);
-                                steal_ptr(js);
-                        }
-
-                        if (config_profiver) {
-                                js = json_object_new_string(config_profiver);
-                                if (!js)
-                                        return log_oom();
-
-                                json_object_object_add(jobj, "ConfigProvider", js);
-                                steal_ptr(js);
-                        }
-
-                        if (config_state) {
-                                js = json_object_new_string(config_state);
-                                if (!js)
-                                        return log_oom();
-
-                                json_object_object_add(jobj, "ConfigState", js);
-                                steal_ptr(js);
-                        }
-                }
+                if (c && json_parse_route_config_source(jn, "Gateway", c, &config_source, &config_profiver, &config_state) >= 0)
+                        json_fill_config_source(jobj, config_source, config_profiver, config_state);
+                else if (prefsrc && json_parse_route_config_source(jn, "PreferredSource", prefsrc, &config_source, &config_profiver, &config_state) >= 0)
+                        json_fill_config_source(jobj, config_source, config_profiver, config_state);
+                else if (destination && json_parse_route_config_source(jn, "Destination", destination, &config_source, &config_profiver, &config_state) >= 0)
+                        json_fill_config_source(jobj, config_source, config_profiver, config_state);
 
                 json_object_array_add(ret, jobj);
                 steal_ptr(jobj);

@@ -51,7 +51,8 @@ int json_parse_ntp_config_source(const json_object *jobj,
                                  char **ret_config_source,
                                  char **ret_config_provider);
 
-int json_parse_gateway_config_source(const json_object *jobj,
+int json_parse_route_config_source(const json_object *jobj,
+                                     const char *config,
                                      const char *address,
                                      char **ret_config_source,
                                      char **ret_config_provider,
