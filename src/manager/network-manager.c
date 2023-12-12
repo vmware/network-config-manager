@@ -1587,6 +1587,54 @@ int manager_add_dns_server(const IfNameIndex *i, DNSServers *dns, bool system, b
         return dbus_network_reload();
 }
 
+int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(i);
+
+        r = create_or_parse_network_file(i, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        if (dns) {
+                r = set_config(key_file, "Network", "DNS", dns);
+                if (r < 0) {
+                        log_warning("Failed to write Network DNS= '%s': %s", network, strerror(-r));
+                        return r;
+                }
+        }
+
+        if(ipv4 >= 0) {
+                r = set_config(key_file, "DHCPv4", "UseDNS", bool_to_str(ipv4));
+                if (r < 0) {
+                        log_warning("Failed to write to DHCPv4 UseDNS= '%s': %s", network, strerror(-r));
+                        return r;
+                }
+        }
+
+        if(ipv6 >= 0) {
+                r = set_config(key_file, "DHCPv6", "UseDNS", bool_to_str(ipv6));
+                if (r < 0) {
+                        log_warning("Failed to write to DHCPv6 UseDNS= '%s': %s", network, strerror(-r));
+                        return r;
+                }
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
 int manager_add_dns_server_domain(const IfNameIndex *i, char **domains, bool system, bool global) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config_domain = NULL, *a = NULL;
         char **d;
