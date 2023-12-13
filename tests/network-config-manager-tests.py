@@ -1301,7 +1301,7 @@ class TestCLINetwork:
     def test_cli_set_ipv4(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("set-ipv4 dev test99 addr 192.168.1.45/24 gw 192.168.1.2 dhcp ipv4", shell = True)
+        subprocess.check_call("nmctl set-ipv4 dev test99 addr 192.168.1.45/24 gw 192.168.1.2 dhcp yes", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -1318,14 +1318,14 @@ class TestCLINetwork:
     def test_cli_set_ipv6(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-ipv6 dev test99 accept-ra yes dhcp ipv4", shell = True)
+        subprocess.check_call("nmctl set-ipv6 dev test99 accept-ra yes dhcp yes", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'DHCP') == 'ipv4')
+        assert(parser.get('Network', 'DHCP') == 'ipv6')
         assert(parser.get('Network', 'IPv6AcceptRA') == 'yes')
 
         parser = configparser.ConfigParser()
