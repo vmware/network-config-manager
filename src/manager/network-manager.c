@@ -1956,12 +1956,6 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_str(network, "Network", "DHCP", "ipv4");
-        if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
-                return r;
-        }
-
         if (enable)
                 r = set_config_file_str(network, "Network", "LinkLocalAddressing", "ipv6");
         else
