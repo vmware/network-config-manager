@@ -1609,9 +1609,8 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *gw = NULL, *address = NULL;
-        DHCPClient dhcp = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        int accept_ra = -1;
+        int accept_ra = -1, dhcp = -1;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -1637,12 +1636,12 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "dhcp")) {
                         parse_next_arg(argv, argc, i);
 
-                        dhcp = dhcp_client_name_to_mode(argv[i]);
-                        if (dhcp < 0) {
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
                                 log_warning("Failed to parse dhcp: %s", argv[i]);
                                 return -EINVAL;
                         }
-
+                        dhcp = r;
                         continue;
                 }
 
@@ -1666,8 +1665,8 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *gw = NULL, *address = NULL;
-        DHCPClient dhcp = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        int dhcp = -1;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -1701,12 +1700,13 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "dhcp")) {
                         parse_next_arg(argv, argc, i);
 
-                        dhcp = dhcp_client_name_to_mode(argv[i]);
-                        if (dhcp < 0) {
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
                                 log_warning("Failed to parse dhcp: %s", argv[i]);
                                 return -EINVAL;
                         }
 
+                        dhcp = r;
                         continue;
                 }
 

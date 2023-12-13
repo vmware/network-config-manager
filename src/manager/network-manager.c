@@ -928,7 +928,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway) {
         return dbus_network_reload();
 }
 
-int manager_set_ipv6(const IfNameIndex *ifidx, const DHCPClient dhcp, const int accept_ra) {
+int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_ra) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         _auto_cleanup_ char *network = NULL;
@@ -947,8 +947,8 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const DHCPClient dhcp, const int 
         if (accept_ra >= 0)
                 set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
 
-        if (dhcp != _DHCP_CLIENT_INVALID)
-                set_config(key_file, "Network", "DHCP", dhcp_client_modes_to_name(dhcp));
+        if (dhcp >= 0)
+                set_config(key_file, "Network", "DHCP", "ipv6");
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -963,7 +963,7 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const DHCPClient dhcp, const int 
         return dbus_network_reload();
 }
 
-int manager_set_ipv4(const IfNameIndex *ifidx, const DHCPClient dhcp, const IPAddress *address, const IPAddress *gateway) {
+int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *address, const IPAddress *gateway) {
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL, *src = NULL, *pref_src = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
@@ -979,8 +979,8 @@ int manager_set_ipv4(const IfNameIndex *ifidx, const DHCPClient dhcp, const IPAd
         if (r < 0)
                 return r;
 
-        if (dhcp != _DHCP_CLIENT_INVALID)
-                set_config(key_file, "Network", "DHCP", dhcp_client_modes_to_name(dhcp));
+        if (dhcp >= 0)
+                set_config(key_file, "Network", "DHCP", "ipv4");
 
         if (address) {
                 r = ip_to_str_prefix(address->family, address, &addr);
