@@ -1635,6 +1635,25 @@ int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6) 
         return dbus_network_reload();
 }
 
+int manager_remove_dns_server(const IfNameIndex *i) {
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(i);
+
+        r = create_or_parse_network_file(i, &network);
+        if (r < 0)
+                return r;
+
+        r = remove_key_from_config_file(network, "Network", "DNS");
+        if (r < 0) {
+                log_warning("Failed to remove Network DNS= '%s': %s", network, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
 int manager_add_dns_server_domain(const IfNameIndex *i, char **domains, bool system, bool global) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config_domain = NULL, *a = NULL;
         char **d;

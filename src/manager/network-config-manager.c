@@ -2983,6 +2983,29 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_remove_dns_server(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        return manager_remove_dns_server(p);
+}
 
 _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
        _auto_cleanup_strv_ char **domains = NULL;
