@@ -532,8 +532,6 @@ int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, uin
 
 int remove_key_from_config_file(const char *path, const char *section, const char *k) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        _cleanup_ (key_freep) Key *p = NULL;
-        GList *l = NULL;
         int r;
 
         assert(path);
@@ -552,16 +550,13 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
                                 Key *key = (Key *) i->data;
 
                                 if (str_eq(key->name, k)) {
-                                        l = g_list_remove_link(s->keys, i);
+                                        g_list_remove_link(s->keys, i);
                                         break;
                                 }
 
                         }
                 }
         }
-
-        if (l)
-                p = (Key *) l->data;
 
         r = key_file_save (key_file);
         if (r < 0)

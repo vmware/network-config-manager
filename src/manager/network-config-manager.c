@@ -2906,6 +2906,107 @@ _public_ int ncm_add_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_set_dns_server(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *dns = NULL;
+        int ipv4 = -1, ipv6 = -1;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                } else if (str_eq_fold(argv[i], "dns")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (strchr(argv[i], ',')) {
+                                _auto_cleanup_strv_ char **s = NULL;
+                                char **d;
+
+                                s = strsplit(argv[i], ",", -1);
+                                if (!s) {
+                                        log_warning("Failed to parse DNS ervers '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                strv_foreach(d, s) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip(*d, &a);
+                                        if (r < 0) {
+                                                log_warning("Failed to parse DNS server address: %s", *d);
+                                                return r;
+                                        }
+                                }
+
+                                dns = strv_join(" ", s);
+                                if (!dns)
+                                        return log_oom();
+                        }
+                } else if (str_eq_fold(argv[i], "use-dns-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns-ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-dns-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        ipv6 = r;
+                        continue;
+                }
+        }
+
+        r = manager_set_dns_server(p, dns, ipv4, ipv6);
+        if (r < 0) {
+                log_warning("Failed to set DNS config %s: %s", argv[1], strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_remove_dns_server(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        return manager_remove_dns_server(p);
+}
+
 _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
        _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;

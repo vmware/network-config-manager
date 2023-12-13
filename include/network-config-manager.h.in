@@ -9,6 +9,9 @@
 #include <gmodule.h>
 
 int ncm_add_dns_server(int argc, char *argv[]);
+int ncm_set_dns_server(int argc, char *argv[]);
+int ncm_remove_dns_server(int argc, char *argv[]);
+
 int ncm_get_dns_server(char ***ret);
 int ncm_show_dns_server(int argc, char *argv[]);
 int ncm_show_dns_servers_and_mode(int argc, char *argv[]);
