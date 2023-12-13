@@ -408,7 +408,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "del-dns",                       "ddns",             2,        WORD_ANY, false, ncm_remove_dns_server },
                 { "add-domain",                    "adomain",          1,        WORD_ANY, false, ncm_add_dns_domains },
                 { "show-domains",                  "domain",           WORD_ANY, WORD_ANY, false, ncm_show_dns_server_domains },
-                { "revert-resolve-link",           "rrl",              1,        WORD_ANY, false, ncm_revert_resolve_link },
+                { "revert-resolve-link",           "rrl",              3,        WORD_ANY, false, ncm_revert_resolve_link },
                 { "set-ipv6mtu",                   "mtu6",             3,        WORD_ANY, false, ncm_link_set_network_ipv6_mtu },
                 { "set-lla",                       "lla",              3,        WORD_ANY, false, ncm_link_set_link_local_address },
                 { "set-ipv4ll-route",              "ipv4ll-route",     3,        WORD_ANY, false, ncm_link_set_network_section },

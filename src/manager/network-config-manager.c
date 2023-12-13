@@ -3348,7 +3348,8 @@ _public_ int ncm_get_dns_domains(char ***ret) {
 
 _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        int r, dns = -1, domain = -1;
+        bool dns = false, domain = false;
+        int r;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev")) {

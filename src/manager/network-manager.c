@@ -1789,7 +1789,7 @@ int manager_read_domains_from_system_config(char **domains) {
         return 0;
 }
 
-int manager_revert_dns_server_and_domain(const IfNameIndex *i, int dns, int domain) {
+int manager_revert_dns_server_and_domain(const IfNameIndex *i, bool dns, bool domain) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config = NULL;
         int r;
 
@@ -1805,7 +1805,7 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *i, int dns, int doma
                 return r;
         }
 
-        if (dns > 0) {
+        if (dns) {
                 r = parse_config_file(network, "Network", "DNS", &config);
                 if (r >= 0) {
                         r = remove_key_from_config_file(network, "Network", "DNS");
@@ -1814,7 +1814,7 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *i, int dns, int doma
                 }
         }
 
-        if (domain > 0) {
+        if (domain) {
                 r = parse_config_file(network, "Network", "Domains", &config);
                 if (r >= 0) {
                         r = remove_key_from_config_file(network, "Network", "Domains");
