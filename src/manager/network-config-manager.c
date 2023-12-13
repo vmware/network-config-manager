@@ -2871,10 +2871,10 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
                 /* Read all links managed by networkd and parse DNS= */
                 manager_get_all_link_dns(&dns_config);
 
-r = json_acquire_and_parse_network_data(&jobj);
-       if (r < 0) {
-              log_warning("Failed acquire network data: %s", strerror(-r));
-             return r;
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
         }
 
         if (json_enabled())
