@@ -1607,6 +1607,63 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
+        _auto_cleanup_ IPAddress *gw = NULL, *address = NULL;
+        DHCPClient dhcp = _DHCP_CLIENT_INVALID;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int accept_ra = -1;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                       continue;
+                } else if (str_eq_fold(argv[i], "accept-ra") || str_eq_fold(argv[i], "ara")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse accept-ra%s': %s", argv[2], strerror(-r));
+                                return r;
+                        }
+                        accept_ra = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "dhcp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        dhcp = dhcp_client_name_to_mode(argv[i]);
+                        if (dhcp < 0) {
+                                log_warning("Failed to parse dhcp: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_set_ipv6(p, dhcp, accept_ra);
+        if (r < 0) {
+                log_warning("Failed to configure IPv4 on device '%s': %s", argv[1], strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *gw = NULL, *address = NULL;
         DHCPClient dhcp = _DHCP_CLIENT_INVALID;
@@ -1642,19 +1699,19 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                         }
                         continue;
                 } else if (str_eq_fold(argv[i], "dhcp")) {
-                                parse_next_arg(argv, argc, i);
+                        parse_next_arg(argv, argc, i);
 
-                                dhcp = dhcp_client_name_to_mode(argv[i]);
-                                if (dhcp < 0) {
-                                        log_warning("Failed to parse dhcp: %s", argv[i]);
-                                        return -EINVAL;
-                                }
-
-                                continue;
+                        dhcp = dhcp_client_name_to_mode(argv[i]);
+                        if (dhcp < 0) {
+                                log_warning("Failed to parse dhcp: %s", argv[i]);
+                                return -EINVAL;
                         }
 
-                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
-                        return -EINVAL;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (!p) {
