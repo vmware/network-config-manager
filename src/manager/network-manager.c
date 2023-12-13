@@ -964,7 +964,7 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
 }
 
 int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *address, const IPAddress *gateway) {
-        _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL, *src = NULL, *pref_src = NULL;
+        _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         int r;
