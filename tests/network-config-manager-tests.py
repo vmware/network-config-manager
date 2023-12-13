@@ -1298,6 +1298,39 @@ class TestCLINetwork:
         assert(parser.get('Route', 'IPv6Preference') == 'medium')
         assert(parser.get('Route', 'Source') == '192.168.1.4')
 
+    def test_cli_set_ipv4(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-ipv4 dev test99 addr 192.168.1.45/24 gw 192.168.1.2 dhcp yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'DHCP') == 'ipv4')
+        assert(parser.get('Address', 'Address') == '192.168.1.45/24')
+        assert(parser.get('Route', 'Gateway') == '192.168.1.2')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+    def test_cli_set_ipv6(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-ipv6 dev test99 accept-ra yes dhcp yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'DHCP') == 'ipv6')
+        assert(parser.get('Network', 'IPv6AcceptRA') == 'yes')
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
     def test_cli_add_routing_policy_rule(self):
         assert(link_exist('test99') == True)
 
