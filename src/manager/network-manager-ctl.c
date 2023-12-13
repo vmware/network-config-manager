@@ -155,6 +155,7 @@ static int help(void) {
                                                      "\n\t\t\t\t      table [TABLE {default|main|local|NUMBER}] proto [PROTOCOL {boot|static|ra|dhcp|NUMBER}]"
                                                      "\n\t\t\t\t      type [TYPE {unicast|local|broadcast|anycast|multicast|blackhole|unreachable|prohibit|throw|nat|resolve}]"
                                                      "\n\t\t\t\t      ipv6-pref [IPV6PREFERENCE {low|medium|high}] onlink [{ONLINK BOOLEN}] Configures Link route.\n"
+               "  set-ipv4                     dev [DEVICE] addr [ADDRESS] gw [GATEWAY ADDRESS] dhcp [DHCP {yes|no|ipv4|ipv6}] Configures device IPv4.\n"
                "  delete-route                 dev [DEVICE] Removes route from device\n"
                "  add-addl-gw                  dev [DEVICE] address|addr|a [ADDRESS] destination|dest [DESTINATION address] gw [GW address] table [TABLE NUMBER]"
                                                       "\n\t\t\t\t Configures additional gateway for another NIC/DEVICE with routing policy rules.\n"
@@ -392,6 +393,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_add_default_gateway },
                 { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-route",                     "ar" ,              4,        WORD_ANY, false, ncm_link_add_route },
+                { "set-ipv4",                      "sip4" ,            2,        WORD_ANY, false, ncm_link_set_ipv4 },
                 { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-addl-gw",                   "agw",              9,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "add-rule",                      "rule",             4,        WORD_ANY, false, ncm_link_add_routing_policy_rules },

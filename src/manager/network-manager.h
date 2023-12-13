@@ -111,6 +111,9 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
 
 int manager_remove_routing_policy_rules(const IfNameIndex *ifidx);
 
+
+int manager_set_ipv4(const IfNameIndex *ifidx, DHCPClient dhcp, const IPAddress *address, const IPAddress *gateway);
+
 int manager_configure_dhcpv4_server (const IfNameIndex *ifidx,
                                      const IPAddress *dns,
                                      const IPAddress *ntp,
