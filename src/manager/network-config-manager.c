@@ -3348,7 +3348,7 @@ _public_ int ncm_get_dns_domains(char ***ret) {
 
 _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        int r;
+        int r, dns = -1, domain = -1;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev")) {
@@ -3359,7 +3359,30 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
+                        continue;
+                } else if (str_eq_fold(argv[i], "dns")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse dns=%s: %s", argv[i], strerror(-r));
+                                return r;
+                        }
+                        dns = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "domain")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse domain=%s: %s", argv[i], strerror(-r));
+                                return r;
+                        }
+                        domain = r;
+                        continue;
                 }
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (!p) {
@@ -3367,7 +3390,7 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_revert_dns_server_and_domain(p);
+        r = manager_revert_dns_server_and_domain(p, dns, domain);
         if (r < 0) {
                 log_warning("Failed to flush resolved settings for %s: %s", p->ifname, strerror(-r));
                 return r;

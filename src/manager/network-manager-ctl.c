@@ -171,7 +171,7 @@ static int help(void) {
                "  del-dns                      dev [DEVICE]\n"
                "  add-domain                   dev|global|system [DEVICE] domains [DOMAIN] Configures Link or global Domain.\n"
                "  show-domains                        Show DNS server Domains.\n"
-               "  revert-resolve-link          dev [DEVICE] Flushes all DNS server and Domain settings of the link.\n"
+               "  revert-resolve-link          dev [DEVICE] dns [BOOLEAN] domain [BOOLEAN] Flushes all DNS server and Domain settings of the device.\n"
                "  set-lla                      dev [DEVICE] [LinkLocalAddressing BOOLEAN|ipv6|ipv4] Configures link local address.\n"
                "  set-ipv4ll-route             dev [DEVICE] [IPv4LLRoute BOOLEAN] Configures the route needed for non-IPv4LL hosts to communicate.\n"
                "                                      with IPv4LL-only hosts.\n"
