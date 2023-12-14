@@ -2794,15 +2794,6 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        if (p) {
-                r = manager_parse_link_dns_servers(p, &dns_config);
-                if (r < 0)
-                        dns_config = NULL;
-        } else
-                /* Read all links managed by networkd and parse DNS= */
-                manager_acquire_all_link_dns(&dns_config);
-
-
         r = json_acquire_and_parse_network_data(&jobj);
         if (r < 0) {
                 log_warning("Failed acquire network data: %s", strerror(-r));
