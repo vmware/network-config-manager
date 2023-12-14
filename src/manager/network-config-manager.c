@@ -616,7 +616,7 @@ _public_ int ncm_link_get_dhcp_mode(const char *ifname, int *ret) {
         if (r < 0)
                 return r;
 
-        r = manager_get_link_dhcp_client(p, &mode);
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (r < 0)
                 return r;
 
@@ -685,7 +685,7 @@ _public_ int ncm_link_get_dhcp4_client_identifier(const char *ifname, char **ret
         if (r < 0)
                 return r;
 
-        r = manager_get_link_dhcp4_client_identifier(p, &d);
+        r = manager_acquire_link_dhcp4_client_identifier(p, &d);
         if (r < 0)
                 return r;
 
@@ -773,7 +773,7 @@ _public_ int ncm_link_get_dhcp_client_iaid(char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        r = manager_get_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV4, ret);
+        r = manager_acquire_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV4, ret);
         if (r < 0)
                 return r;
 
@@ -2668,7 +2668,7 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
         if (r < 0)
                 return r;
 
-        r = manager_get_link_dhcp_client(p, &mode);
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (r < 0 && r != -ENOENT) {
                 log_warning("Failed to parse 'DHCP=' : %s",  strerror(-r));
                 return r;
@@ -2749,12 +2749,12 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         }
 
         if (p) {
-                r = manager_get_link_dns(p, &dns_config);
+                r = manager_parse_link_dns_servers(p, &dns_config);
                 if (r < 0)
                         dns_config = NULL;
         } else
                 /* Read all links managed by networkd and parse DNS= */
-                manager_get_all_link_dns(&dns_config);
+                manager_acquire_all_link_dns(&dns_config);
 
 
         r = json_acquire_and_parse_network_data(&jobj);
@@ -2864,12 +2864,12 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_get_link_dns(p, &dns_config);
+        r = manager_parse_link_dns_servers(p, &dns_config);
         if (r < 0)
                 dns_config = NULL;
         else
                 /* Read all links managed by networkd and parse DNS= */
-                manager_get_all_link_dns(&dns_config);
+                manager_acquire_all_link_dns(&dns_config);
 
         r = json_acquire_and_parse_network_data(&jobj);
         if (r < 0) {

@@ -14,7 +14,7 @@ int manager_set_link_mtu(const IfNameIndex *ifidx, uint32_t mtu);
 int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac);
 
 int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode);
-int manager_get_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient *mode);
+int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *mode);
 
 int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v);
 int manager_set_link_state(const IfNameIndex *ifidx, LinkState state);
@@ -24,19 +24,19 @@ int manager_set_link_rf_online(const IfNameIndex *ifidx, const char *addrfamily)
 int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy);
 
 int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHCPClientIdentifier identifier);
-int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret);
+int manager_acquire_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret);
 
 int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad);
 int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *ifidx, int mode);
 
-int manager_get_link_dns(const IfNameIndex *ifidx, char ***ret);
-int manager_get_all_link_dns(char ***ret);
-int manager_get_all_link_dhcp_lease_dns(char ***ret);
+int manager_parse_link_dns_servers(const IfNameIndex *ifidx, char ***ret);
+int manager_acquire_all_link_dns(char ***ret);
+int manager_acquire_all_link_dhcp_lease_dns(char ***ret);
 
 bool manager_is_link_static_address(const IfNameIndex *ifidx);
 
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, const char *iaid);
-int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, char **iaid);
+int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, char **iaid);
 
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                                       const DHCPClientDUIDType duid,

@@ -169,7 +169,7 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode) {
         return dbus_network_reload();
 }
 
-int manager_get_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient *mode) {
+int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *mode) {
         _auto_cleanup_ char *network = NULL, *config_dhcp = NULL;
         int r;
 
@@ -269,7 +269,7 @@ int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *
         return dbus_network_reload();
 }
 
-int manager_get_link_dns(const IfNameIndex *ifidx, char ***ret) {
+int manager_parse_link_dns_servers(const IfNameIndex *ifidx, char ***ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
@@ -288,7 +288,7 @@ int manager_get_link_dns(const IfNameIndex *ifidx, char ***ret) {
         return 0;
 }
 
-int manager_get_all_link_dns(char ***ret) {
+int manager_acquire_all_link_dns(char ***ret) {
         _cleanup_(links_freep) Links *links = NULL;
         _auto_cleanup_ char *dns = NULL;
         int r;
@@ -324,7 +324,7 @@ int manager_get_all_link_dns(char ***ret) {
         return 0;
 }
 
-int manager_get_all_link_dhcp_lease_dns(char ***ret) {
+int manager_acquire_all_link_dhcp_lease_dns(char ***ret) {
         _cleanup_(links_freep) Links *links = NULL;
         _auto_cleanup_ char *dns = NULL;
         int r;
@@ -357,7 +357,7 @@ int manager_get_all_link_dhcp_lease_dns(char ***ret) {
         return 0;
 }
 
-int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret) {
+int manager_acquire_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
@@ -394,7 +394,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient
         return dbus_network_reload();
 }
 
-int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient kind, char **iaid) {
+int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient kind, char **iaid) {
         _auto_cleanup_ char *network = NULL, *v = NULL;
         int r;
 
@@ -1021,7 +1021,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
 
         r = create_or_parse_network_file(ifidx, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find or create network file for device '%s': %s\n", ifidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1122,7 +1122,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
 
         r = create_or_parse_network_file(ifidx, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find or create network file for device '%s': %s", ifidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1284,7 +1284,7 @@ int manager_configure_dhcpv4_server(const IfNameIndex *i,
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to find or create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
@@ -1366,7 +1366,7 @@ int manager_remove_dhcpv4_server(const IfNameIndex *i) {
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
@@ -1441,7 +1441,7 @@ int manager_remove_dhcpv4_server_static_address(const IfNameIndex *i, const IPAd
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
@@ -1488,7 +1488,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *i,
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to find or create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
@@ -1605,7 +1605,7 @@ int manager_remove_ipv6_router_advertisement(const IfNameIndex *i) {
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
