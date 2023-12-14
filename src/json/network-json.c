@@ -685,125 +685,13 @@ int json_fill_system_status(char **ret) {
 int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, json_object *jn) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
-        _auto_cleanup_strv_ char **dhcp_dns = NULL;
-        _auto_cleanup_ DNSServer *current = NULL;
-        _auto_cleanup_ char *provider = NULL;
-        GSequenceIter *i;
-        DNSServer *d;
         int r;
 
         assert(jn);
 
-        jobj = json_object_new_object();
-        if (!jobj)
-                return log_oom();
-
-        if(p) {
-                r = network_parse_link_dhcp4_server_address(p->ifindex, &provider);
-                if(r < 0)
-                        return r;
-        }
-
-        (void) manager_acquire_all_link_dhcp_lease_dns(&dhcp_dns);
-
-        r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
-        if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
-                _cleanup_(json_object_putp) json_object *jdns = json_object_new_array();
-                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL;
-                if (!jdns)
-                        return log_oom();
-
-                for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        _cleanup_(json_object_putp) json_object *jaddr = json_object_new_object();
-                        _auto_cleanup_ char *pretty = NULL;
-
-                        if (!jaddr)
-                                return log_oom();
-
-                        d = g_sequence_get(i);
-                        if (!d->ifindex && d->ifindex != ifindex)
-                                continue;
-
-                        r = ip_to_str(d->address.family, &d->address, &pretty);
-                        if (r >= 0) {
-                                json_object *s = json_object_new_string(pretty);
-                                if (!s)
-                                        return log_oom();
-
-                                json_object_object_add(jaddr, "Address", s);
-                                steal_ptr(s);
-
-                                r = json_parse_dns_config_source(jn, pretty, &config_source, &config_provider);
-                                if (r < 0)
-                                        continue;
-
-                                if (config_source) {
-                                        json_object *js = json_object_new_string(config_source);
-                                        if (!js)
-                                                return log_oom();
-
-                                        json_object_object_add(jaddr, "ConfigSource", js);
-                                        steal_ptr(js);
-                                }
-
-                                if(config_provider) {
-                                        json_object *js = json_object_new_string(config_provider);
-                                        if (!js)
-                                                return log_oom();
-
-                                        json_object_object_add(jaddr, "ConfigProvider", js);
-                                        steal_ptr(js);
-                                }
-
-                                json_object_array_add(jdns, jaddr);
-                                steal_ptr(jaddr);
-                        }
-                }
-
-                json_object_object_add(jobj, "DNS", jdns);
-                steal_ptr(jdns);
-        }
-
-        if (ifindex == 0) {
-                r = dbus_get_current_dns_server_from_resolved(&current);
-                if (r >= 0 && current) {
-                        _auto_cleanup_ char *pretty = NULL;
-
-                        r = ip_to_str(current->address.family, &current->address, &pretty);
-                        if (r >= 0) {
-                                json_object *s = json_object_new_string(pretty);
-                                if (!s)
-                                        return log_oom();
-
-                                json_object_object_add(jobj, "CurrentDNSServer", s);
-                                steal_ptr(s);
-                        }
-                }
-
-                r = dbus_acquire_dns_servers_from_resolved("FallbackDNS", &fallback);
-                if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
-                        _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
-                        if (!ja)
-                                return log_oom();
-
-                        for (i = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                                _auto_cleanup_ char *pretty = NULL;
-
-                                d = g_sequence_get(i);
-
-                                r = ip_to_str(d->address.family, &d->address, &pretty);
-                                if (r >= 0) {
-                                        json_object *s = json_object_new_string(pretty);
-                                        if (!s)
-                                                return log_oom();
-
-                                        json_object_array_add(ja, s);
-                                }
-                        }
-                        json_object_object_add(jobj, "FallbackDNS", ja);
-                        steal_ptr(ja);
-                }
-        }
+        r = json_parse_dns_from_networkd(jn, p ? p->ifname : NULL, &jobj);
+        if (r < 0)
+                return r;
 
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
         return 0;
@@ -1077,6 +965,117 @@ int json_parse_ntp_config_source(const json_object *jobj, const char *address, c
         }
 
         return -ENOENT;
+}
+
+int json_parse_dns_from_networkd(const json_object *jn, const char *link, json_object **ret) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _cleanup_(json_object_putp) json_object *jdns = NULL;
+        json_object *interfaces = NULL, *ifname = NULL;
+        int r;
+
+        assert(jn);
+
+        jobj = json_object_new_object();
+        if (!jobj)
+                return log_oom();
+
+        if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        jdns = json_object_new_array();
+        if (!jdns)
+                return log_oom();
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                _cleanup_(json_object_putp) json_object *jaddr = NULL;
+                json_object *dns;
+
+                if (!json_object_object_get_ex(interface, "Name", &ifname))
+                        continue;
+
+                if (link && str_eq(link, json_object_get_string(ifname)))
+                        continue;
+
+                if (!json_object_object_get_ex(interface, "DNS", &dns))
+                        continue;
+
+                for (size_t j = 0; j < json_object_array_length(dns); j++) {
+                        json_object *config_source = NULL, *config_provider = NULL, *a = NULL, *family = NULL;
+                        _cleanup_(json_object_putp) json_object *name = NULL;
+                        json_object *addr = json_object_array_get_idx(dns, j);
+
+                        jaddr = json_object_new_object();
+                        if (!jaddr)
+                                return log_oom();
+
+                        name = json_object_new_string(json_object_get_string(ifname));
+                        if (!name)
+                                return log_oom();
+
+                        json_object_object_add(jaddr, "Name", name);
+                        steal_ptr(name);
+
+                        if (json_object_object_get_ex(addr, "Address", &a) && json_object_object_get_ex(addr, "Family", &family)) {
+                                _cleanup_(json_object_putp) json_object *dns_address = NULL,  *address_family = NULL;
+                                _auto_cleanup_ char *ip = NULL;
+
+                                r = json_array_to_ip(a, json_object_get_int(family), -1, &ip);
+                                if (r < 0)
+                                        continue;
+
+                                dns_address = json_object_new_string(ip);
+                                if (!dns_address)
+                                        return log_oom();
+
+                                json_object_object_add(jaddr, "Address", dns_address);
+                                steal_ptr(dns_address);
+
+                                address_family = json_object_new_int(json_object_get_int(family));
+                                if (!address_family)
+                                        return log_oom();
+
+                                json_object_object_add(jaddr, "Family", address_family);
+                                steal_ptr(address_family);
+
+                                if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
+                                        _cleanup_(json_object_putp) json_object *s = json_object_new_string(json_object_get_string(config_source));
+
+                                        s = json_object_new_string(json_object_get_string(config_source));
+                                        if (!s)
+                                                return log_oom();
+
+                                        json_object_object_add(jaddr, "ConfigSource", s);
+                                        steal_ptr(s);
+                                }
+
+                                if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
+                                        _cleanup_(json_object_putp) json_object *s = NULL;
+                                        _auto_cleanup_ char *provider = NULL;
+
+                                        r = json_array_to_ip(config_provider, json_object_get_int(family), -1, &provider);
+                                        if (r < 0)
+                                                return r;
+
+                                        s = json_object_new_string(provider);
+                                        if (!s)
+                                                return log_oom();
+
+                                        json_object_object_add(jaddr, "ConfigProvider", s);
+                                        steal_ptr(s);
+                                }
+
+                                json_object_array_add(jdns, jaddr);
+                                steal_ptr(jaddr);
+                        }
+                }
+        }
+
+        json_object_object_add(jobj, "DNS", jdns);
+        steal_ptr(jdns);
+
+        *ret = steal_ptr(jobj);
+        return 0;
 }
 
 int json_parse_dns_config_source(const json_object *jobj,
