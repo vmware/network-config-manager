@@ -835,6 +835,37 @@ class TestCLINetwork:
         subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
         subprocess.check_call("nmctl domain", text=True, shell = True)
 
+    def test_cli_set_dhcp(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'DHCP') == 'yes')
+
+    def test_cli_set_dhcp_with_section(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes use-dns-ipv4 yes use-dns-ipv6 yes send-release-ipv4 no send-release-ipv6 no", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'DHCP') == 'yes')
+
+        assert(parser.get('DHCPv4', 'SendRelease') == 'no')
+        assert(parser.get('DHCPv6', 'SendRelease') == 'no')
+        assert(parser.get('DHCPv4', 'UseDNS') == 'yes')
+        assert(parser.get('DHCPv6', 'UseDNS') == 'yes')
+
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
 

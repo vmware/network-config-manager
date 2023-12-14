@@ -557,9 +557,9 @@ _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
+        int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, send_release_ipv4 = -1, send_release_ipv6 = -1;
         _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClient dhcp = _DHCP_CLIENT_INVALID;
-        int r;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev")) {
@@ -581,6 +581,52 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else if (str_eq_fold(argv[i], "use-dns-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns-ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_dns_ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-dns-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_dns_ipv6 = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "send-release-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse send-release-ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        send_release_ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "send-release-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse send-release-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        send_release_ipv6 = r;
+                        continue;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
@@ -597,9 +643,9 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_link_dhcp_client(p, dhcp);
+        r = manager_set_link_dhcp_client(p, dhcp, use_dns_ipv4, use_dns_ipv6, send_release_ipv4, send_release_ipv6);
         if (r < 0) {
-                log_warning("Failed to set device='%s' dhcp: %s\n", p->ifname, strerror(-r));
+                log_warning("Failed to set DHCP configuration for device='%s': %s\n", p->ifname, strerror(-r));
                 return r;
         }
 
