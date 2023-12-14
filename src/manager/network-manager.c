@@ -1021,7 +1021,7 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
 
         r = create_or_parse_network_file(ifidx, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find or create network file for device '%s': %s\n", ifidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1122,7 +1122,7 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
 
         r = create_or_parse_network_file(ifidx, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find or create network file for device '%s': %s", ifidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1284,7 +1284,7 @@ int manager_configure_dhcpv4_server(const IfNameIndex *i,
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to find or create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
@@ -1366,7 +1366,7 @@ int manager_remove_dhcpv4_server(const IfNameIndex *i) {
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
@@ -1441,7 +1441,7 @@ int manager_remove_dhcpv4_server_static_address(const IfNameIndex *i, const IPAd
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
@@ -1488,7 +1488,7 @@ int manager_configure_ipv6_router_advertisement(const IfNameIndex *i,
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to find or create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
@@ -1605,7 +1605,7 @@ int manager_remove_ipv6_router_advertisement(const IfNameIndex *i) {
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to create network file '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to create network file for device '%s': %s\n", i->ifname, strerror(-r));
                 return r;
         }
 
