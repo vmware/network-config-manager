@@ -142,7 +142,6 @@ static int network_parse_link_lease_strv(int ifindex, const char *key, char ***r
         return r;
 }
 
-
 static int network_parse_link_lease_string(int ifindex, const char *key, char **ret) {
         _auto_cleanup_ char *s = NULL, *path = NULL;
         int r;

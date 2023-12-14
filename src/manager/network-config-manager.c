@@ -3348,7 +3348,7 @@ _public_ int ncm_get_dns_domains(char ***ret) {
 
 _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool dns = false, domain = false;
+        int dns = -1, domain = -1;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -3389,6 +3389,11 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         if (!p) {
                 log_warning("Failed to find device: %s",  strerror(EINVAL));
                 return -EINVAL;
+        }
+
+        if (dns < 0 && domain < 0) {
+                dns = true;
+                domain = true;
         }
 
         r = manager_revert_dns_server_and_domain(p, dns, domain);
