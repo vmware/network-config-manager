@@ -730,13 +730,13 @@ static int list_one_link(char *argv[]) {
                 printf("%s\n", tz);
         }
 
-        r = manager_get_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV4, &iaid);
+        r = manager_acquire_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV4, &iaid);
         if (r >= 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                 DHCPv4 IAID: ");
                 printf("%s\n", iaid);
         }
 
-        r = manager_get_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV6, &iaid);
+        r = manager_acquire_link_dhcp_client_iaid(p, DHCP_CLIENT_IPV6, &iaid);
         if (r >= 0) {
                 display(arg_beautify, ansi_color_bold_cyan(), "                 DHCPv6 IAID: ");
                 printf("%s\n", iaid);

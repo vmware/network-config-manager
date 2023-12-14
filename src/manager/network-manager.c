@@ -288,7 +288,7 @@ int manager_parse_link_dns_servers(const IfNameIndex *ifidx, char ***ret) {
         return 0;
 }
 
-int manager_get_all_link_dns(char ***ret) {
+int manager_acquire_all_link_dns(char ***ret) {
         _cleanup_(links_freep) Links *links = NULL;
         _auto_cleanup_ char *dns = NULL;
         int r;
@@ -324,7 +324,7 @@ int manager_get_all_link_dns(char ***ret) {
         return 0;
 }
 
-int manager_get_all_link_dhcp_lease_dns(char ***ret) {
+int manager_acquire_all_link_dhcp_lease_dns(char ***ret) {
         _cleanup_(links_freep) Links *links = NULL;
         _auto_cleanup_ char *dns = NULL;
         int r;
@@ -357,7 +357,7 @@ int manager_get_all_link_dhcp_lease_dns(char ***ret) {
         return 0;
 }
 
-int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret) {
+int manager_acquire_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
@@ -394,7 +394,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient
         return dbus_network_reload();
 }
 
-int manager_get_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient kind, char **iaid) {
+int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient kind, char **iaid) {
         _auto_cleanup_ char *network = NULL, *v = NULL;
         int r;
 

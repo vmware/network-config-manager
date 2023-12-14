@@ -704,7 +704,7 @@ int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, j
                         return r;
         }
 
-        (void) manager_get_all_link_dhcp_lease_dns(&dhcp_dns);
+        (void) manager_acquire_all_link_dhcp_lease_dns(&dhcp_dns);
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
