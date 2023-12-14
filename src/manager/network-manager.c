@@ -150,7 +150,14 @@ int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v
         return dbus_network_reload();
 }
 
-int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode) {
+int manager_set_link_dhcp_client(const IfNameIndex *ifidx,
+                                 DHCPClient mode,
+                                 int use_dns_ipv4,
+                                 int use_dns_ipv6,
+                                 int send_release_ipv4,
+                                 int send_release_ipv6) {
+
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
@@ -160,9 +167,41 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_str(network, "Network", "DHCP", dhcp_client_modes_to_name(mode));
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = key_file_set_str(key_file, "Network", "DHCP", dhcp_client_modes_to_name(mode));
+        if (r < 0)
+                return r;
+
+        if (use_dns_ipv4 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "UseDNS", bool_to_str(use_dns_ipv4));
+                if (r < 0)
+                        return r;
+        }
+
+        if (use_dns_ipv6 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv6", "UseDNS", bool_to_str(use_dns_ipv4));
+                if (r < 0)
+                        return r;
+        }
+
+        if (send_release_ipv4 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "SendRelease", bool_to_str(send_release_ipv4));
+                if (r < 0)
+                        return r;
+        }
+
+        if (send_release_ipv6 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv6", "SendRelease", bool_to_str(send_release_ipv6));
+                if (r < 0)
+                        return r;
+        }
+
+        r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to configuration file: %s", network);
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 
