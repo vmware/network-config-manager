@@ -863,8 +863,28 @@ class TestCLINetwork:
 
         assert(parser.get('DHCPv4', 'SendRelease') == 'no')
         assert(parser.get('DHCPv6', 'SendRelease') == 'no')
+
         assert(parser.get('DHCPv4', 'UseDNS') == 'yes')
         assert(parser.get('DHCPv6', 'UseDNS') == 'yes')
+
+    def test_cli_set_dhcp_with_section_reversed(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes use-dns-ipv4 no use-dns-ipv6 no send-release-ipv4 yes send-release-ipv6 yes", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'DHCP') == 'yes')
+
+        assert(parser.get('DHCPv4', 'SendRelease') == 'yes')
+        assert(parser.get('DHCPv6', 'SendRelease') == 'yes')
+
+        assert(parser.get('DHCPv4', 'UseDNS') == 'no')
+        assert(parser.get('DHCPv6', 'UseDNS') == 'no')
 
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)

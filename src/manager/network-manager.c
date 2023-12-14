@@ -230,7 +230,7 @@ int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *
         return 0;
 }
 
-bool manager_is_link_static_address(const IfNameIndex *ifidx) {
+bool manager_link_has_static_address(const IfNameIndex *ifidx) {
         _auto_cleanup_ char *network = NULL, *addr = NULL;
         int r;
 

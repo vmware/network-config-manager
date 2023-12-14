@@ -38,7 +38,7 @@ int manager_parse_link_dns_servers(const IfNameIndex *ifidx, char ***ret);
 int manager_acquire_all_link_dns(char ***ret);
 int manager_acquire_all_link_dhcp_lease_dns(char ***ret);
 
-bool manager_is_link_static_address(const IfNameIndex *ifidx);
+bool manager_link_has_static_address(const IfNameIndex *ifidx);
 
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, const char *iaid);
 int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, char **iaid);
