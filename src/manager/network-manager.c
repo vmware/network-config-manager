@@ -169,7 +169,7 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode) {
         return dbus_network_reload();
 }
 
-int manager_get_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient *mode) {
+int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *mode) {
         _auto_cleanup_ char *network = NULL, *config_dhcp = NULL;
         int r;
 

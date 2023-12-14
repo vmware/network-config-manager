@@ -14,7 +14,7 @@ int manager_set_link_mtu(const IfNameIndex *ifidx, uint32_t mtu);
 int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac);
 
 int manager_set_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient mode);
-int manager_get_link_dhcp_client(const IfNameIndex *ifidx, DHCPClient *mode);
+int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *mode);
 
 int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v);
 int manager_set_link_state(const IfNameIndex *ifidx, LinkState state);

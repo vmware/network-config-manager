@@ -616,7 +616,7 @@ _public_ int ncm_link_get_dhcp_mode(const char *ifname, int *ret) {
         if (r < 0)
                 return r;
 
-        r = manager_get_link_dhcp_client(p, &mode);
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (r < 0)
                 return r;
 
@@ -2668,7 +2668,7 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
         if (r < 0)
                 return r;
 
-        r = manager_get_link_dhcp_client(p, &mode);
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (r < 0 && r != -ENOENT) {
                 log_warning("Failed to parse 'DHCP=' : %s",  strerror(-r));
                 return r;
