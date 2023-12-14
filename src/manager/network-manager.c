@@ -269,7 +269,7 @@ int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *
         return dbus_network_reload();
 }
 
-int manager_get_link_dns(const IfNameIndex *ifidx, char ***ret) {
+int manager_parse_link_dns_servers(const IfNameIndex *ifidx, char ***ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 

@@ -29,7 +29,7 @@ int manager_get_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClien
 int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad);
 int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *ifidx, int mode);
 
-int manager_get_link_dns(const IfNameIndex *ifidx, char ***ret);
+int manager_parse_link_dns_servers(const IfNameIndex *ifidx, char ***ret);
 int manager_get_all_link_dns(char ***ret);
 int manager_get_all_link_dhcp_lease_dns(char ***ret);
 

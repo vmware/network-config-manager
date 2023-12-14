@@ -2749,7 +2749,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         }
 
         if (p) {
-                r = manager_get_link_dns(p, &dns_config);
+                r = manager_parse_link_dns_servers(p, &dns_config);
                 if (r < 0)
                         dns_config = NULL;
         } else
@@ -2864,7 +2864,7 @@ _public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_get_link_dns(p, &dns_config);
+        r = manager_parse_link_dns_servers(p, &dns_config);
         if (r < 0)
                 dns_config = NULL;
         else
