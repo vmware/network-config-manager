@@ -1470,207 +1470,100 @@ static int fill_link_networkd_message(json_object *jobj, Link *l, char *network)
         return 0;
 }
 
-static int fill_link_dns_message(json_object *jobj, json_object *jn, Link *l, char *network) {
-        _auto_cleanup_strv_ char **dns_servers = NULL, **dns_domains = NULL, **search_domains = NULL, **dns = NULL;
-        _auto_cleanup_ char *mdns = NULL, *llmnr = NULL;
-        _cleanup_(json_object_putp) json_object *ja = NULL;
-        char **d;
-        int r;
+static int fill_link_ntp_message(json_object *jobj, json_object *jn, const char *link) {
+        _cleanup_(json_object_putp) json_object *jntp = NULL;
+        json_object *interfaces = NULL, *ifname = NULL;
 
-        (void) network_parse_link_dhcp4_dns(l->ifindex, &dns_servers);
-        r = network_parse_link_dns(l->ifindex, &dns);
-        if (r < 0)
-                return r;
+        assert(jn);
 
-        ja = json_object_new_array();
-        if (!ja)
-                return log_oom();
+        if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
+                return -ENOENT;
 
-        strv_foreach(d, dns) {
-                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL;
-                _cleanup_(json_object_putp) json_object *j = NULL, *jdns = NULL, *js = NULL;
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                _cleanup_(json_object_putp) json_object *jaddr = NULL;
+                json_object *ntp;
 
-                jdns = json_object_new_string(*d);
-                if (!jdns)
-                        return log_oom();
+                if (!json_object_object_get_ex(interface, "Name", &ifname))
+                        continue;
 
-                j = json_object_new_object();
-                if (!j)
-                        return log_oom();
+                if (link && str_eq(link, json_object_get_string(ifname)))
+                        continue;
 
-                json_object_object_add(j, "Address", jdns);
-                steal_ptr(jdns);
+                if (!json_object_object_get_ex(interface, "NTP", &ntp))
+                        continue;
 
-                (void) json_parse_dns_config_source(jn, *d, &config_source, &config_provider);
+                json_object_object_add(jobj, "NTP", json_object_get(ntp));
+                steal_ptr(ntp);
 
-                if (config_source) {
-                        js = json_object_new_string(config_source);
-                        if (!js)
-                                return log_oom();
-
-                        json_object_object_add(j, "ConfigSource", js);
-                        steal_ptr(js);
-                }
-
-                if (config_provider) {
-                        js = json_object_new_string(config_provider);
-                        if (!js)
-                                return log_oom();
-
-                        json_object_object_add(j, "ConfigProvider", js);
-                        steal_ptr(js);
-                }
-
-                json_object_array_add(ja, j);
-                steal_ptr(j);
+                return 0;
         }
 
-        json_object_object_add(jobj, "DNS", ja);
-        steal_ptr(ja);
-
-        (void) network_parse_link_dhcp4_search_domains(l->ifindex, &dns_domains);
-        r = network_parse_link_search_domains(l->ifindex, &search_domains);
-        if (r < 0)
-                return r;
-
-        ja = json_object_new_array();
-        if (!ja)
-                return log_oom();
-
-        strv_foreach(d, search_domains) {
-                _cleanup_(json_object_putp) json_object *j = NULL, *jdomain = NULL, *js = NULL;
-                _auto_cleanup_ char *config_source = NULL, *config_provider = NULL;
-
-                jdomain = json_object_new_string(*d);
-                if (!jdomain)
-                        return log_oom();
-
-                j = json_object_new_object();
-                if (!j)
-                        return log_oom();
-
-                json_object_object_add(j, "Domain", jdomain);
-                steal_ptr(jdomain);
-
-                (void) json_parse_search_domain_config_source(jn, *d, &config_source, &config_provider);
-
-                if (config_source) {
-                        js = json_object_new_string(config_source);
-                        if (!js)
-                                return log_oom();
-
-                        json_object_object_add(j, "ConfigSource", js);
-                        steal_ptr(js);
-                }
-
-                if (config_provider) {
-                        js = json_object_new_string(config_provider);
-                        if (!js)
-                                return log_oom();
-
-                        json_object_object_add(j, "ConfigProvider", js);
-                        steal_ptr(js);
-                }
-
-                json_object_array_add(ja, j);
-                steal_ptr(j);
-        }
-
-        json_object_object_add(jobj, "SearchDomains", ja);
-        steal_ptr(ja);
-
-        (void) network_parse_link_mdns(l->ifindex, &mdns);
-        (void) network_parse_link_llmnr(l->ifindex, &llmnr);
-        if (mdns || llmnr) {
-                _cleanup_(json_object_putp) json_object *j = NULL, *jmdns = NULL, *jllmnr = NULL;
-
-                j = json_object_new_object();
-                if (!j)
-                        return log_oom();
-
-                jmdns = json_object_new_string(str_na(mdns));
-                if (!jmdns)
-                        return log_oom();
-
-                json_object_object_add(j, "MDNS", jmdns);
-                steal_ptr(jmdns);
-
-                jllmnr = json_object_new_string(str_na(llmnr));
-                if (!jllmnr)
-                        return log_oom();
-
-                json_object_object_add(j, "LLMNR", jllmnr);
-                steal_ptr(jllmnr);
-
-                json_object_object_add(jobj, "DNSSettings", j);
-                steal_ptr(j);
-        }
-
-        return 0;
+        return -ENOENT;
 }
 
-static int fill_link_ntp_message(json_object *jobj, json_object *jn, Link *l, char *network) {
-        _auto_cleanup_ char *config_source = NULL, *config_provider = NULL;
-        _auto_cleanup_strv_ char **ntp = NULL, **config_ntp = NULL;
-        _cleanup_(json_object_putp) json_object *ja = NULL;
-        char **d;
-        int r;
+static int fill_link_dns_settings(json_object *jobj, json_object *jn, const char *link) {
+        json_object *interfaces = NULL, *ifname = NULL;
 
-        assert(jobj);
-        assert(l);
+        assert(jn);
 
-        (void) network_parse_link_dhcp4_ntp(l->ifindex, &ntp);
-        r = network_parse_link_ntp(l->ifindex, &config_ntp);
-        if (r < 0)
-                return r;
+        if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
+                return -ENOENT;
 
-        ja = json_object_new_array();
-        if (!ja)
-                return log_oom();
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                _cleanup_(json_object_putp) json_object *jaddr = NULL;
+                json_object *settings;
 
-        strv_foreach(d, config_ntp) {
-                _cleanup_(json_object_putp) json_object *j = NULL, *jntp = NULL, *js = NULL;
+                if (!json_object_object_get_ex(interface, "Name", &ifname))
+                        continue;
 
-                jntp = json_object_new_string(*d);
-                if (!jntp)
-                        return log_oom();
+                if (link && str_eq(link, json_object_get_string(ifname)))
+                        continue;
 
-                j = json_object_new_object();
-                if (!j)
-                        return log_oom();
+                if (!json_object_object_get_ex(interface, "DNSSettings", &settings))
+                        continue;
 
-                json_object_object_add(j, "Server", jntp);
-                steal_ptr(jntp);
+                json_object_object_add(jobj, "DNSSettings", json_object_get(settings));
+                steal_ptr(settings);
 
-                (void) json_parse_ntp_config_source(jn, *d, &config_source, &config_provider);
-
-                if (config_source) {
-                        js = json_object_new_string(config_source);
-                        if (!js)
-                                return log_oom();
-
-                        json_object_object_add(j, "ConfigSource", js);
-                        steal_ptr(js);
-                }
-
-                if (config_provider) {
-                        js = json_object_new_string(config_provider);
-                        if (!js)
-                                return log_oom();
-
-                        json_object_object_add(j, "ConfigProvider", js);
-                        steal_ptr(js);
-                }
-
-                json_object_array_add(ja, j);
-                steal_ptr(j);
+                return 0;
         }
 
-        json_object_object_add(jobj, "NTP", ja);
-        steal_ptr(ja);
-
-        return 0;
+        return -ENOENT;
 }
+
+static int fill_link_search_domain(json_object *jobj, json_object *jn, const char *link) {
+        json_object *interfaces = NULL, *ifname = NULL;
+
+        assert(jn);
+
+        if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                _cleanup_(json_object_putp) json_object *jaddr = NULL;
+                json_object *d;
+
+                if (!json_object_object_get_ex(interface, "Name", &ifname))
+                        continue;
+
+                if (link && str_eq(link, json_object_get_string(ifname)))
+                        continue;
+
+                if (!json_object_object_get_ex(interface, "SearchDomains", &d))
+                        continue;
+
+                json_object_object_add(jobj, "SearchDomains", json_object_get(d));
+                steal_ptr(d);
+
+                return 0;
+        }
+
+        return -ENOENT;
+}
+
 
 int json_fill_address(bool ipv4, Link *l, json_object *jn,  json_object *jobj) {
         _cleanup_(addresses_freep) Addresses *addr = NULL;
@@ -1701,7 +1594,7 @@ int json_fill_address(bool ipv4, Link *l, json_object *jn,  json_object *jobj) {
 
 int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object **ret) {
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL;
-        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL, *jdns = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _cleanup_(routes_freep) Routes *route = NULL;
         _cleanup_(link_freep) Link *l = NULL;
@@ -1803,13 +1696,15 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
                 steal_ptr(ja);
         }
 
-        r = fill_link_dns_message(jobj, jn, l, network);
-        if (r < 0)
-                return r;
+        r = json_parse_dns_from_networkd(jn, l->name, &jdns);
+        if (r >= 0) {
+                json_object_object_add(jobj, "DNS", jdns);
+                steal_ptr(jdns);
+        }
 
-        r = fill_link_ntp_message(jobj, jn, l, network);
-        if (r < 0)
-                return r;
+        (void) fill_link_search_domain(jobj, jn, l->name);
+        (void) fill_link_dns_settings(jobj, jn, l->name);
+        (void) fill_link_ntp_message(jobj, jn, l->name);
 
         (void) network_parse_link_timezone(l->ifindex, &tz);
         if (tz) {
