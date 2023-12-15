@@ -470,7 +470,7 @@ static void display_alterative_names(gpointer data, gpointer user_data) {
         printf("%s ", s);
 }
 
-static int list_one_link(char *argv[]) {
+static int list_one_link(int argc, char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *address_state = NULL, *ipv4_state = NULL,
                 *ipv6_state = NULL, *required_for_online = NULL, *device_activation_policy = NULL, *tz = NULL, *network = NULL,
                 *online_state = NULL, *link = NULL, *dhcp4_identifier = NULL, *dhcp6_duid = NULL, *dhcp6_iaid = NULL, *iaid = NULL;
@@ -483,10 +483,25 @@ static int list_one_link(char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
-        r = parse_ifname_or_index(*argv, &p);
-        if (r < 0) {
-                log_warning("Failed to find device: %s", *argv);
-                return r;
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        break;
+                } else {
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0)
+                                return r;
+                        break;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = json_acquire_and_parse_network_data(&jn);
@@ -821,7 +836,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         int r;
 
         if (argc > 1)
-                return list_one_link(argv + 1);
+                return list_one_link(argc, argv);
 
         if (arg_network_json && arg_json)
                 return json_acquire_network_status();
@@ -1165,7 +1180,7 @@ _public_ int ncm_link_status(int argc, char *argv[]) {
         if (argc <= 1)
                 return list_links(argc, argv);
         else
-                r = list_one_link(argv + 1);
+                r = list_one_link(argc, argv);
 
         return r;
 }
