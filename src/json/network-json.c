@@ -804,7 +804,7 @@ int json_fill_dns_server_domains(void) {
         return 0;
 }
 
-int json_get_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static_dns) {
+int json_acquire_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static_dns) {
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(json_object_putp) json_object *s = NULL;
 

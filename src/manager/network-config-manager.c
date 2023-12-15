@@ -2749,7 +2749,7 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
         }
 
         if (json_enabled())
-                return json_get_dns_mode(mode, dhcpv4, dhcpv6, static_dns);
+                return json_acquire_dns_mode(mode, dhcpv4, dhcpv6, static_dns);
 
         display(beautify_enabled() ? true : false, ansi_color_bold_blue(),"DNS Mode: ");
 
