@@ -1564,6 +1564,67 @@ static int fill_link_search_domain(json_object *jobj, json_object *jn, const cha
         return -ENOENT;
 }
 
+static int fill_link_dhcpv4_client(json_object *jobj, json_object *jn, const char *link) {
+        json_object *interfaces = NULL, *ifname = NULL;
+
+        assert(jn);
+
+        if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                _cleanup_(json_object_putp) json_object *jaddr = NULL;
+                json_object *d;
+
+                if (!json_object_object_get_ex(interface, "Name", &ifname))
+                        continue;
+
+                if (link && str_eq(link, json_object_get_string(ifname)))
+                        continue;
+
+                if (!json_object_object_get_ex(interface, "DHCPv4Client", &d))
+                        continue;
+
+                json_object_object_add(jobj, "DHCPv4Client", json_object_get(d));
+                steal_ptr(d);
+
+                return 0;
+        }
+
+        return -ENOENT;
+}
+
+static int fill_link_dhcpv6_client(json_object *jobj, json_object *jn, const char *link) {
+        json_object *interfaces = NULL, *ifname = NULL;
+
+        assert(jn);
+
+        if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                _cleanup_(json_object_putp) json_object *jaddr = NULL;
+                json_object *d;
+
+                if (!json_object_object_get_ex(interface, "Name", &ifname))
+                        continue;
+
+                if (link && str_eq(link, json_object_get_string(ifname)))
+                        continue;
+
+                if (!json_object_object_get_ex(interface, "DHCPv6Client", &d))
+                        continue;
+
+                json_object_object_add(jobj, "DHCPv6Client", json_object_get(d));
+                steal_ptr(d);
+
+                return 0;
+        }
+
+        return -ENOENT;
+}
 
 int json_fill_address(bool ipv4, Link *l, json_object *jn,  json_object *jobj) {
         _cleanup_(addresses_freep) Addresses *addr = NULL;
@@ -1660,27 +1721,14 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
                 steal_ptr(js);
         }
 
-        r = json_fill_link_attributes(jobj, l);
-        if (r < 0)
-                return r;
-
-
+        (void) json_fill_link_attributes(jobj, l);
         (void) network_parse_link_network_file(l->ifindex, &network);
-        r = fill_link_networkd_message(jobj, l, network);
-        if (r < 0)
-                return r;
+        (void) fill_link_networkd_message(jobj, l, network);
 
-        r = fill_link_flags(jobj, l);
-        if (r < 0)
-                return r;
+        (void) fill_link_flags(jobj, l);
 
-        r = fill_link_message(jobj, l);
-        if (r < 0)
-                return r;
-
-        r = json_fill_address(ipv4, l, jn, jobj);
-        if (r < 0)
-                return r;
+        (void) fill_link_message(jobj, l);
+        (void) json_fill_address(ipv4, l, jn, jobj);
 
         r = netlink_get_one_link_route(l->ifindex, &route);
         if (r >= 0 && route && set_size(route->routes) > 0) {
@@ -1696,7 +1744,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
                 steal_ptr(ja);
         }
 
-        r = json_parse_dns_from_networkd(jn, l->name, &jdns);
+        r = json_fill_dns_servers(jn, l->name, &jdns);
         if (r >= 0) {
                 json_object_object_add(jobj, "DNS", jdns);
                 steal_ptr(jdns);
@@ -1705,6 +1753,8 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
         (void) fill_link_search_domain(jobj, jn, l->name);
         (void) fill_link_dns_settings(jobj, jn, l->name);
         (void) fill_link_ntp_message(jobj, jn, l->name);
+        (void) fill_link_dhcpv4_client(jobj, jn, l->name);
+        (void) fill_link_dhcpv6_client(jobj, jn, l->name);
 
         (void) network_parse_link_timezone(l->ifindex, &tz);
         if (tz) {
