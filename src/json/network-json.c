@@ -689,7 +689,7 @@ int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, j
 
         assert(jn);
 
-        r = json_parse_dns_from_networkd(jn, p ? p->ifname : NULL, &jdns);
+        r = json_fill_dns_servers(jn, p ? p->ifname : NULL, &jdns);
         if (r < 0)
                 return r;
 
@@ -933,7 +933,7 @@ int json_parse_search_domain_config_source(const json_object *jobj,
         return -ENOENT;
 }
 
-int json_parse_dns_from_networkd(const json_object *jn, const char *link, json_object **ret) {
+int json_fill_dns_servers(const json_object *jn, const char *link, json_object **ret) {
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(json_object_putp) json_object *jdns = NULL;
         json_object *interfaces = NULL, *ifname = NULL;
