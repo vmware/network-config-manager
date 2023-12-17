@@ -960,7 +960,7 @@ int json_fill_dns_servers(const json_object *jn, const char *link, json_object *
                 if (!json_object_object_get_ex(interface, "Name", &ifname))
                         continue;
 
-                if (link && str_eq(link, json_object_get_string(ifname)))
+                if (link && !str_eq(link, json_object_get_string(ifname)))
                         continue;
 
                 if (!json_object_object_get_ex(interface, "DNS", &dns))
@@ -985,6 +985,16 @@ int json_fill_dns_servers(const json_object *jn, const char *link, json_object *
                                 dns_address = json_object_new_string(ip);
                                 if (!dns_address)
                                         return log_oom();
+
+                                if (!link) {
+                                        _cleanup_(json_object_putp) json_object *s = NULL;
+
+                                        s = json_object_new_string(json_object_get_string(ifname));
+                                        if (!s)
+                                                return log_oom();
+                                        json_object_object_add(jaddr, "Name", s);
+                                        steal_ptr(s);
+                                }
 
                                 json_object_object_add(jaddr, "Address", dns_address);
                                 steal_ptr(dns_address);
