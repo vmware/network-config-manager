@@ -216,10 +216,8 @@ static int parse_sriov(GHashTable *config, yaml_document_t *dp, yaml_node_t *nod
                 steal_ptr(s);
         }
 
-
         return 0;
 }
-
 
 static int parse_route(GHashTable *config, yaml_document_t *dp, yaml_node_t *node, Network *network) {
         _auto_cleanup_ Route *rt = NULL;
