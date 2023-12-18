@@ -831,6 +831,9 @@ class TestCLINetwork:
     def test_cli_show_dns_json(self):
         subprocess.check_call("nmctl dns -j", text=True, shell = True)
 
+    def test_cli_show_dns_dev_json(self):
+        subprocess.check_call("nmctl dns dev 2 -j", text=True, shell = True)
+
     def test_cli_show_domains(self):
         subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
         subprocess.check_call("nmctl domain", text=True, shell = True)
