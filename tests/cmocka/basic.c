@@ -524,7 +524,30 @@ static void test_revert_dns(void **state) {
     assert_true(r >= 0);
 
     display_key_file(key_file2);
-    assert_false(key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
+    assert_true(!!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
+}
+
+static void test_revert_dns_with_parametre(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file1 = NULL, *key_file2 = NULL;
+    int r;
+
+    assert_true(system("nmctl set-dns dev test99 dns 192.168.1.5,192.168.1.4") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file1);
+    assert_true(r >= 0);
+
+    display_key_file(key_file1);
+    assert_true(key_file_config_exists(key_file1, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file1, "Network", "DNS", "192.168.1.5 192.168.1.4"));
+
+    assert_true(system("nmctl revert-resolve-link dev test99 dns yes") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file2);
+    assert_true(r >= 0);
+
+    display_key_file(key_file2);
+    assert_true(!!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
 }
 
 static void test_additional_gw_source_routing(void **state) {
@@ -1287,6 +1310,7 @@ int main(void) {
         cmocka_unit_test (test_multiple_routes_address),
         cmocka_unit_test (test_set_dns),
         cmocka_unit_test (test_revert_dns),
+        cmocka_unit_test (test_revert_dns_with_parametre),
         cmocka_unit_test (test_source_routing),
         cmocka_unit_test (test_additional_gw_source_routing),
         cmocka_unit_test (test_wireguard_multiple_peers),
