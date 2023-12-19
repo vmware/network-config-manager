@@ -112,6 +112,9 @@ int dbus_call_hostnamed_describe(char **ret) {
                 return r;
 
         *ret = strdup(steal_ptr(v));
+        if (!*ret)
+                return log_oom();
+
         return 0;
 }
 
@@ -201,10 +204,7 @@ int dbus_restart_unit(const char *unit) {
                                "ss",
                                unit,
                                "replace");
-        if (r < 0)
-                return r;
-
-        return 0;
+        return r;
 }
 
 int dbus_get_current_dns_server_from_resolved(DNSServer **ret) {
@@ -282,6 +282,9 @@ int dbus_get_current_dns_server_from_resolved(DNSServer **ret) {
         }
 
         *ret = steal_ptr(dns);
+        if (!*ret)
+                return log_oom();
+
         return 0;
 }
 
@@ -390,6 +393,9 @@ int dbus_acquire_dns_servers_from_resolved(const char *dns, DNSServers **ret) {
         }
 
         *ret = steal_ptr(serv);
+        if (!*ret)
+                return log_oom();
+
         return 0;
 }
 
@@ -613,8 +619,7 @@ int dbus_acquire_dns_domains_from_resolved(DNSDomains **domains) {
                 if (r < 0)
                         return r;
 
-                i = NULL;
-
+                steal_ptr(i);
         }
 
         r = sd_bus_message_exit_container(m);
@@ -684,6 +689,9 @@ int dbus_acqure_dns_setting_from_resolved(const char *setting, char **ret) {
         }
 
         *ret = strdup(a);
+        if (!*ret)
+                return log_oom();
+
         return 0;
 }
 
@@ -814,5 +822,8 @@ int dbus_describe_network(char **ret) {
                 return r;
 
         *ret = strdup(steal_ptr(v));
+        if (!*ret)
+                return log_oom();
+
         return 0;
 }
