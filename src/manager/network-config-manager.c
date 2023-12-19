@@ -3088,7 +3088,7 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
 
                                 s = strsplit(argv[i], ",", -1);
                                 if (!s) {
-                                        log_warning("Failed to parse DNS ervers '%s': %s", argv[i], strerror(EINVAL));
+                                        log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
                                         return -EINVAL;
                                 }
 
