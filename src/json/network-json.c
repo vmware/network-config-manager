@@ -868,8 +868,7 @@ static int json_array_to_ip(const json_object *obj, const int family, const int 
 }
 
 int json_fill_ntp_servers(const json_object *jn, const char *link, json_object **ret) {
-        _cleanup_(json_object_putp) json_object *jobj = NULL;
-        _cleanup_(json_object_putp) json_object *jntp = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL, *jntp = NULL;
         json_object *interfaces = NULL, *ifname = NULL;
         int r;
 
@@ -882,9 +881,6 @@ int json_fill_ntp_servers(const json_object *jn, const char *link, json_object *
         if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
                 return -ENOENT;
 
-        jntp = json_object_new_array();
-        if (!jntp)
-                return log_oom();
 
         for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
                 json_object *interface = json_object_array_get_idx(interfaces, i);
@@ -967,8 +963,15 @@ int json_fill_ntp_servers(const json_object *jn, const char *link, json_object *
                                         steal_ptr(s);
                                 }
 
+                                if (!jntp) {
+                                        jntp = json_object_new_array();
+                                        if (!jntp)
+                                                return log_oom();
+                                }
+
                                 json_object_array_add(jntp, jaddr);
                                 steal_ptr(jaddr);
+
                         }
                 }
         }

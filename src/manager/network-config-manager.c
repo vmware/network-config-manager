@@ -3475,15 +3475,21 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 log_warning("Failed acquire NTP servers: %s", strerror(-r));
                 return r;
         }
-        j = json_object_new_object();
-        if (!j)
-                return log_oom();
 
-        json_object_object_add(j, "NTP", jntp);
-        if (json_enabled() && jntp) {
-                printf("%s\n", json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+        if (jntp) {
+                j = json_object_new_object();
+                if (!j)
+                        return log_oom();
+
+                json_object_object_add(j, "NTP", jntp);
+                if (json_enabled() && jntp) {
+                        printf("%s\n", json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+                        return 0;
+                }
+
                 return 0;
-        }
+        } else
+                return -ENOENT;
 
         if (!json_object_object_get_ex(j, "NTP", &ja))
                 return -ENOENT;
