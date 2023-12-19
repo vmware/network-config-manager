@@ -3166,7 +3166,7 @@ _public_ int ncm_remove_dns_server(int argc, char *argv[]) {
 }
 
 _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
-       _auto_cleanup_strv_ char **domains = NULL;
+        _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false, global = false;
         int r;
@@ -3443,8 +3443,9 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
 }
 
 _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
-        _cleanup_(json_object_putp) json_object *jobj = NULL, *jntp = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL, *jntp = NULL, *j = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        json_object *ja = NULL;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -3474,15 +3475,53 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 log_warning("Failed acquire NTP servers: %s", strerror(-r));
                 return r;
         }
+        j = json_object_new_object();
+        if (!j)
+                return log_oom();
 
-        json_object_object_add(jobj, "NTP", jntp);
-
+        json_object_object_add(j, "NTP", jntp);
         if (json_enabled() && jntp) {
-                printf("%s\n", json_object_to_json_string_ext(jntp, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+                printf("%s\n", json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
                 return 0;
         }
 
-        return -ENOENT;
+        if (!json_object_object_get_ex(j, "NTP", &ja))
+                return -ENOENT;
+
+        display(beautify_enabled() ? true : false, ansi_color_bold_cyan(), "      NTP Servers: ");
+        for (size_t i = 0; i < json_object_array_length(ja); i++) {
+                json_object *ntp = json_object_array_get_idx(ja, i);
+                json_object *addr = NULL;
+
+                if (!json_object_object_get_ex(ntp, "Address", &addr))
+                        continue;
+
+                printf("%s ", json_object_get_string(addr));
+        }
+
+        if (p)
+                return 0;
+
+        if (beautify_enabled())
+                printf("\n%5s %-20s %-14s\n", "INDEX", "LINK", "NTP");
+
+        for (size_t i = 0; i < json_object_array_length(ja); i++) {
+                json_object *ntp = json_object_array_get_idx(ja, i);
+                json_object *name = NULL, *addr = NULL;
+
+                if (!json_object_object_get_ex(ntp, "Name", &name))
+                        continue;
+
+                if (p && !str_eq(p->ifname, json_object_get_string(name)))
+                        continue;
+
+                if (!json_object_object_get_ex(ntp, "Address", &addr))
+                        continue;
+
+                printf("%5d %-16s %-16s\n", if_nametoindex(json_object_get_string(name)), json_object_get_string(name), json_object_get_string(addr));
+        }
+
+        return 0;
 }
 
 _public_ int ncm_set_system_hostname(int argc, char *argv[]) {
