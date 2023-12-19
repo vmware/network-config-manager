@@ -3442,6 +3442,49 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL, *jntp = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0) {
+                log_warning("Failed acquire network data: %s", strerror(-r));
+                return r;
+        }
+
+        r = json_fill_ntp_servers(jobj, p ? p->ifname : NULL, &jntp);
+        if (r < 0) {
+                log_warning("Failed acquire NTP servers: %s", strerror(-r));
+                return r;
+        }
+
+        json_object_object_add(jobj, "NTP", jntp);
+
+        if (json_enabled() && jntp) {
+                printf("%s\n", json_object_to_json_string_ext(jntp, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+                return 0;
+        }
+
+        return -ENOENT;
+}
+
 _public_ int ncm_set_system_hostname(int argc, char *argv[]) {
         int r;
 
