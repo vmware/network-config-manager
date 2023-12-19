@@ -673,7 +673,7 @@ int dbus_acqure_dns_setting_from_resolved(const char *setting, char **ret) {
                                 &reply,
                                 "s");
         if (r < 0) {
-                log_warning("Failed to get D-Bus property 'CurrentDNSServer': %s", bus_error.message);
+                log_warning("Failed to get D-Bus property '%s': %s", setting, bus_error.message);
                 return r;
         }
 

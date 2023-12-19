@@ -1470,38 +1470,6 @@ static int fill_link_networkd_message(json_object *jobj, Link *l, char *network)
         return 0;
 }
 
-static int fill_link_ntp_message(json_object *jobj, json_object *jn, const char *link) {
-        _cleanup_(json_object_putp) json_object *jntp = NULL;
-        json_object *interfaces = NULL, *ifname = NULL;
-
-        assert(jn);
-
-        if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
-                return -ENOENT;
-
-        for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
-                json_object *interface = json_object_array_get_idx(interfaces, i);
-                _cleanup_(json_object_putp) json_object *jaddr = NULL;
-                json_object *ntp;
-
-                if (!json_object_object_get_ex(interface, "Name", &ifname))
-                        continue;
-
-                if (link && str_eq(link, json_object_get_string(ifname)))
-                        continue;
-
-                if (!json_object_object_get_ex(interface, "NTP", &ntp))
-                        continue;
-
-                json_object_object_add(jobj, "NTP", json_object_get(ntp));
-                steal_ptr(ntp);
-
-                return 0;
-        }
-
-        return -ENOENT;
-}
-
 static int fill_link_dns_settings(json_object *jobj, json_object *jn, const char *link) {
         json_object *interfaces = NULL, *ifname = NULL;
 
@@ -1654,8 +1622,8 @@ int json_fill_address(bool ipv4, Link *l, json_object *jn,  json_object *jobj) {
 }
 
 int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object **ret) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL, *jdns = NULL, *jntp = NULL;
         _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL;
-        _cleanup_(json_object_putp) json_object *jobj = NULL, *jdns = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _cleanup_(routes_freep) Routes *route = NULL;
         _cleanup_(link_freep) Link *l = NULL;
@@ -1752,9 +1720,14 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
 
         (void) fill_link_search_domain(jobj, jn, l->name);
         (void) fill_link_dns_settings(jobj, jn, l->name);
-        (void) fill_link_ntp_message(jobj, jn, l->name);
         (void) fill_link_dhcpv4_client(jobj, jn, l->name);
         (void) fill_link_dhcpv6_client(jobj, jn, l->name);
+
+        r = json_fill_ntp_servers(jn, l->name, &jntp);
+        if (r >= 0) {
+                json_object_object_add(jobj, "NTP", jntp);
+                steal_ptr(jntp);
+        }
 
         (void) network_parse_link_timezone(l->ifindex, &tz);
         if (tz) {

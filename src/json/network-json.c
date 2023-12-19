@@ -635,26 +635,6 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(j);
         }
 
-        r = network_parse_ntp(&ntp);
-        if (r >= 0 && ntp) {
-                _cleanup_(json_object_putp) json_object *ja = json_object_new_array();
-                char **d;
-
-                if (!ja)
-                        return log_oom();
-
-                strv_foreach(d, ntp) {
-                        json_object *jntp = json_object_new_string(*d);
-                        if (!jntp)
-                                return log_oom();
-
-                        json_object_array_add(ja, jntp);
-                }
-
-                json_object_object_add(jobj, "NTP", ja);
-                steal_ptr(ja);
-        }
-
         r = acquire_routing_policy_rules(&rules);
         if (r >= 0 && set_size(rules->routing_policy_rules) > 0) {
                 _cleanup_(json_object_putp) json_object *jrules = NULL;
@@ -884,6 +864,116 @@ static int json_array_to_ip(const json_object *obj, const int family, const int 
                         return -ENOMEM;
         }
 
+        return 0;
+}
+
+int json_fill_ntp_servers(const json_object *jn, const char *link, json_object **ret) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _cleanup_(json_object_putp) json_object *jntp = NULL;
+        json_object *interfaces = NULL, *ifname = NULL;
+        int r;
+
+        assert(jn);
+
+        jobj = json_object_new_object();
+        if (!jobj)
+                return log_oom();
+
+        if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        jntp = json_object_new_array();
+        if (!jntp)
+                return log_oom();
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                _cleanup_(json_object_putp) json_object *jaddr = NULL;
+                json_object *ntp;
+
+                if (!json_object_object_get_ex(interface, "Name", &ifname))
+                        continue;
+
+                if (link && !str_eq(link, json_object_get_string(ifname)))
+                        continue;
+
+                if (!json_object_object_get_ex(interface, "NTP", &ntp))
+                        continue;
+
+                for (size_t j = 0; j < json_object_array_length(ntp); j++) {
+                        json_object *config_source = NULL, *config_provider = NULL, *a = NULL, *family = NULL;
+                        json_object *addr = json_object_array_get_idx(ntp, j);
+
+                        jaddr = json_object_new_object();
+                        if (!jaddr)
+                                return log_oom();
+
+                        if (json_object_object_get_ex(addr, "Address", &a) && json_object_object_get_ex(addr, "Family", &family)) {
+                                _cleanup_(json_object_putp) json_object *dns_address = NULL,  *address_family = NULL;
+                                _auto_cleanup_ char *ip = NULL;
+
+                                r = json_array_to_ip(a, json_object_get_int(family), -1, &ip);
+                                if (r < 0)
+                                        continue;
+
+                                dns_address = json_object_new_string(ip);
+                                if (!dns_address)
+                                        return log_oom();
+
+                                if (!link) {
+                                        _cleanup_(json_object_putp) json_object *s = NULL;
+
+                                        s = json_object_new_string(json_object_get_string(ifname));
+                                        if (!s)
+                                                return log_oom();
+                                        json_object_object_add(jaddr, "Name", s);
+                                        steal_ptr(s);
+                                }
+
+                                json_object_object_add(jaddr, "Address", dns_address);
+                                steal_ptr(dns_address);
+
+                                address_family = json_object_new_int(json_object_get_int(family));
+                                if (!address_family)
+                                        return log_oom();
+
+                                json_object_object_add(jaddr, "Family", address_family);
+                                steal_ptr(address_family);
+
+                                if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
+                                        _cleanup_(json_object_putp) json_object *s = json_object_new_string(json_object_get_string(config_source));
+
+                                        s = json_object_new_string(json_object_get_string(config_source));
+                                        if (!s)
+                                                return log_oom();
+
+                                        json_object_object_add(jaddr, "ConfigSource", s);
+                                        steal_ptr(s);
+                                }
+
+                                if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
+                                        _cleanup_(json_object_putp) json_object *s = NULL;
+                                        _auto_cleanup_ char *provider = NULL;
+
+                                        r = json_array_to_ip(config_provider, json_object_get_int(family), -1, &provider);
+                                        if (r < 0)
+                                                return r;
+
+                                        s = json_object_new_string(provider);
+                                        if (!s)
+                                                return log_oom();
+
+                                        json_object_object_add(jaddr, "ConfigProvider", s);
+                                        steal_ptr(s);
+                                }
+
+                                json_object_array_add(jntp, jaddr);
+                                steal_ptr(jaddr);
+                        }
+                }
+        }
+
+        *ret = steal_ptr(jntp);
         return 0;
 }
 
