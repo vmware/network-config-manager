@@ -17,6 +17,8 @@ int ncm_show_dns_server(int argc, char *argv[]);
 int ncm_show_dns_servers_and_mode(int argc, char *argv[]);
 int ncm_get_dns_mode(int argc, char *argv[]);
 
+int ncm_show_ntp_servers(int argc, char *argv[]);
+
 int ncm_add_dns_domains(int argc, char *argv[]);
 int ncm_show_dns_server_domains(int argc, char *argv[]);
 int ncm_get_dns_domains(char ***ret);
