@@ -1653,6 +1653,123 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
         return 0;
 }
 
+_public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
+        int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1, keep = -1;
+        DHCPClient dhcp = _DHCP_CLIENT_INVALID;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                } else if (str_eq_fold(argv[i], "dhcp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        dhcp = dhcp_client_name_to_mode(argv[i]);
+                        if (dhcp < 0) {
+                                log_warning("Failed to parse dhcp: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-dns-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns-ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_dns_ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-dns-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_dns_ipv6 = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "send-release-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse send-release-ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        send_release_ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "send-release-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse send-release-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        send_release_ipv6 = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "accept-ra") || str_eq_fold(argv[i], "ara")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse accept-ra%s': %s", argv[2], strerror(-r));
+                                return r;
+                        }
+                        accept_ra = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "keep")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        keep = r;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (dhcp == _DHCP_CLIENT_INVALID) {
+                log_warning("Failed to parse dhcp : %s", strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_set_link_dynamic_conf(p, accept_ra, dhcp, use_dns_ipv4, use_dns_ipv6, send_release_ipv4, send_release_ipv6, keep);
+        if (r < 0) {
+                log_warning("Failed to set dynamic configuration for device='%s': %s\n", p->ifname, strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *gw = NULL, *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -3480,11 +3597,13 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
         if (!j)
                 return log_oom();
 
+        if (jntp) {
         json_object_object_add(j, "NTP", jntp);
         if (json_enabled() && jntp) {
                 printf("%s\n", json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
                 return 0;
         }
+}
 
         if (!json_object_object_get_ex(j, "NTP", &ja))
                 return -ENOENT;

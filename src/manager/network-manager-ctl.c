@@ -144,6 +144,8 @@ static int help(void) {
                "  set-dhcp-duid                dev|system [DEVICE] family|f [ipv4|ipv6|4|6] duid [DUID {link-layer-time|vendor|link-layer|uuid}] data [RAWDATA]"
                                                       "\n\t\t\t\t      Sets DUID of DHCPv4 or DHCPv6 Client.\n"
                "  set-link-state               dev [DEVICE] [STATE {up|down}] Configures device State.\n"
+               "  set-dynamic                  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN]"
+                                                      "\n\t\t\t\t accept-ra [BOOLEAN] Configures dynamic configration of the device (IPv4|IPv6|RA).\n"
                "  show-addr                    dev [DEVICE] [family|f ipv4|ipv6|4|6] Show device addresses\n"
                "  add-addr                     dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [STRING] pref-lifetime|pl [{forever|infinity|0}]"
                                                       "\n\t\t\t\t      scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN]"
@@ -398,6 +400,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-route",                     "ar" ,              4,        WORD_ANY, false, ncm_link_add_route },
                 { "set-ipv4",                      "sip4" ,            2,        WORD_ANY, false, ncm_link_set_ipv4 },
                 { "set-ipv6",                      "sip6" ,            2,        WORD_ANY, false, ncm_link_set_ipv6 },
+                { "set-dynamic",                   "sd" ,              2,        WORD_ANY, false, ncm_link_set_dynamic },
                 { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-addl-gw",                   "agw",              9,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "add-rule",                      "rule",             4,        WORD_ANY, false, ncm_link_add_routing_policy_rules },

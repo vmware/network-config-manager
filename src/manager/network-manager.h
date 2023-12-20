@@ -21,6 +21,15 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx,
                                  int send_release_ipv6);
 int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *mode);
 
+int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
+                                  int accept_ra,
+                                  DHCPClient mode,
+                                  int use_dns_ipv4,
+                                  int use_dns_ipv6,
+                                  int send_release_ipv4,
+                                  int send_release_ipv6,
+                                  bool keep);
+
 int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v);
 int manager_set_link_state(const IfNameIndex *ifidx, LinkState state);
 

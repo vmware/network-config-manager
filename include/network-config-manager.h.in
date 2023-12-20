@@ -61,6 +61,8 @@ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]);
 int ncm_link_set_dhcp_mode(int argc, char *argv[]);
 int ncm_link_get_dhcp_mode(const char *ifname, int *ret);
 
+int ncm_link_set_dynamic(int argc, char *argv[]);
+
 int ncm_link_set_mac(int argc, char *argv[]);
 int ncm_link_get_mac(const char *ifname, char **ret);
 
