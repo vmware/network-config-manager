@@ -895,6 +895,23 @@ class TestCLINetwork:
         assert(parser.get('DHCPv4', 'UseDNS') == 'no')
         assert(parser.get('DHCPv6', 'UseDNS') == 'no')
 
+    def test_cli_set_dynamic(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dynamic dev test99 dhcp yes send-release-ipv4 no", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'ipv6')
+        assert(parser.get('Network', 'IPv6AcceptRA') == 'yes')
+        assert(parser.get('Network', 'DHCP') == 'yes')
+
+        assert(parser.get('DHCPv4', 'SendRelease') == 'no')
+
     def test_cli_add_dns(self):
         assert(link_exist('test99') == True)
 
