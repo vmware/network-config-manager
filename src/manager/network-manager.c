@@ -230,6 +230,99 @@ int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *
         return 0;
 }
 
+int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
+                                  int accept_ra,
+                                  DHCPClient dhcp_kind,
+                                  int use_dns_ipv4,
+                                  int use_dns_ipv6,
+                                  int send_release_ipv4,
+                                  int send_release_ipv6,
+                                  bool keep) {
+
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifidx);
+
+        if (keep) {
+                r = create_or_parse_network_file(ifidx, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = create_network_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
+        }
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        /* IPv6AcceptRA= and LinkLocalAddressing= is required for DHCPv6 */
+        if (dhcp_kind == DHCP_CLIENT_YES || dhcp_kind == DHCP_CLIENT_IPV6 || accept_ra > 0) {
+                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                if (r < 0)
+                        return r;
+
+                r = key_file_set_str(key_file, "Network", "IPv6AcceptRA", "yes");
+                if (r < 0)
+                        return r;
+        } else if (dhcp_kind == DHCP_CLIENT_IPV4) {
+                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "no");
+                if (r < 0)
+                        return r;
+
+                r = key_file_set_str(key_file, "Network", "IPv6AcceptRA", "no");
+                if (r < 0)
+                        return r;
+        }
+
+        if (accept_ra >= 0) {
+                r = key_file_set_str(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
+                if (r < 0)
+                        return r;
+        }
+
+        if (dhcp_kind >= 0) {
+                r = key_file_set_str(key_file, "Network", "DHCP", dhcp_client_modes_to_name(dhcp_kind));
+                if (r < 0)
+                        return r;
+        }
+
+        if (use_dns_ipv4 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "UseDNS", bool_to_str(use_dns_ipv4));
+                if (r < 0)
+                        return r;
+        }
+
+        if (use_dns_ipv6 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv6", "UseDNS", bool_to_str(use_dns_ipv6));
+                if (r < 0)
+                        return r;
+        }
+
+        if (send_release_ipv4 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "SendRelease", bool_to_str(send_release_ipv4));
+                if (r < 0)
+                        return r;
+        }
+
+        if (send_release_ipv6 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv6", "SendRelease", bool_to_str(send_release_ipv6));
+                if (r < 0)
+                        return r;
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
 bool manager_link_has_static_address(const IfNameIndex *ifidx) {
         _auto_cleanup_ char *network = NULL, *addr = NULL;
         int r;
