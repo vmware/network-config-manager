@@ -673,6 +673,9 @@ int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, j
         if (r < 0)
                 return r;
 
+        if (!jdns)
+                return -ENOENT;
+
         jobj = json_object_new_object();
         if (!jobj)
                 return log_oom();
@@ -868,23 +871,14 @@ static int json_array_to_ip(const json_object *obj, const int family, const int 
 }
 
 int json_fill_ntp_servers(const json_object *jn, const char *link, json_object **ret) {
-        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(json_object_putp) json_object *jntp = NULL;
         json_object *interfaces = NULL, *ifname = NULL;
         int r;
 
         assert(jn);
 
-        jobj = json_object_new_object();
-        if (!jobj)
-                return log_oom();
-
         if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
                 return -ENOENT;
-
-        jntp = json_object_new_array();
-        if (!jntp)
-                return log_oom();
 
         for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
                 json_object *interface = json_object_array_get_idx(interfaces, i);
@@ -967,11 +961,21 @@ int json_fill_ntp_servers(const json_object *jn, const char *link, json_object *
                                         steal_ptr(s);
                                 }
 
+                                if (!jntp) {
+                                        jntp = json_object_new_array();
+                                        if (!jntp)
+                                                return log_oom();
+                                }
+
                                 json_object_array_add(jntp, jaddr);
                                 steal_ptr(jaddr);
+
                         }
                 }
         }
+
+        if (!jntp)
+                return -ENOENT;
 
         *ret = steal_ptr(jntp);
         return 0;
@@ -1024,23 +1028,14 @@ int json_parse_search_domain_config_source(const json_object *jobj,
 }
 
 int json_fill_dns_servers(const json_object *jn, const char *link, json_object **ret) {
-        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _cleanup_(json_object_putp) json_object *jdns = NULL;
         json_object *interfaces = NULL, *ifname = NULL;
         int r;
 
         assert(jn);
 
-        jobj = json_object_new_object();
-        if (!jobj)
-                return log_oom();
-
         if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
                 return -ENOENT;
-
-        jdns = json_object_new_array();
-        if (!jdns)
-                return log_oom();
 
         for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
                 json_object *interface = json_object_array_get_idx(interfaces, i);
@@ -1123,11 +1118,20 @@ int json_fill_dns_servers(const json_object *jn, const char *link, json_object *
                                         steal_ptr(s);
                                 }
 
+                                if (!jdns) {
+                                        jdns = json_object_new_array();
+                                        if (!jdns)
+                                                return log_oom();
+                                }
+
                                 json_object_array_add(jdns, jaddr);
                                 steal_ptr(jaddr);
                         }
                 }
         }
+
+        if (!jdns)
+                return -ENOENT;
 
         *ret = steal_ptr(jdns);
         return 0;

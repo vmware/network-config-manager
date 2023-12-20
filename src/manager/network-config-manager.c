@@ -3471,10 +3471,11 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
         }
 
         r = json_fill_ntp_servers(jobj, p ? p->ifname : NULL, &jntp);
-        if (r < 0) {
+        if (r < 0 || !jntp) {
                 log_warning("Failed acquire NTP servers: %s", strerror(-r));
                 return r;
         }
+
         j = json_object_new_object();
         if (!j)
                 return log_oom();
