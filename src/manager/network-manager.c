@@ -396,6 +396,62 @@ int manager_acquire_all_link_dhcp_lease_dns(char ***ret) {
         return 0;
 }
 
+int manager_parse_link_ntp_servers(const IfNameIndex *ifidx, char ***ret) {
+        _auto_cleanup_ char *network = NULL, *config = NULL;
+        int r;
+
+        assert(ifidx);
+
+        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_config_file(network, "Network", "NTP", &config);
+        if (r < 0)
+                return r;
+
+        if (config)
+                *ret = strsplit(config, " ", 0);
+        return 0;
+}
+
+int manager_acquire_all_link_ntp(char ***ret) {
+        _cleanup_(links_freep) Links *links = NULL;
+        _auto_cleanup_ char *ntp = NULL;
+        int r;
+
+        r = netlink_acquire_all_links(&links);
+        if (r < 0)
+                return r;
+
+        for (GList *i = links->links; i; i = g_list_next (i)) {
+                _auto_cleanup_ char *c = NULL, *network = NULL;
+                _auto_cleanup_ IfNameIndex *p = NULL;
+                Link *link = (Link *) i->data;
+
+                r = parse_ifname_or_index(link->name, &p);
+                if (r < 0)
+                        continue;
+
+                r = network_parse_link_network_file(link->ifindex, &network);
+                if (r < 0)
+                        continue;
+
+                r = parse_config_file(network, "Network", "NTP", &c);
+                if (r < 0)
+                        continue;
+
+                ntp = strjoin(" ", c, ntp, NULL);
+                if (!ntp)
+                        return log_oom();
+        }
+
+        if (ntp)
+                *ret = strsplit(ntp, " ", 0);
+        return 0;
+}
+
+
 int manager_acquire_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;

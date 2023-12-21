@@ -36,6 +36,11 @@ int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *
 
 int manager_parse_link_dns_servers(const IfNameIndex *ifidx, char ***ret);
 int manager_acquire_all_link_dns(char ***ret);
+
+
+int manager_parse_link_ntp_servers(const IfNameIndex *ifidx, char ***ret);
+int manager_acquire_all_link_ntp(char ***ret);
+
 int manager_acquire_all_link_dhcp_lease_dns(char ***ret);
 
 bool manager_link_has_static_address(const IfNameIndex *ifidx);
