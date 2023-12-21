@@ -687,6 +687,94 @@ int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, j
         return 0;
 }
 
+int json_build_dns_server(const IfNameIndex *p, char **dns_config, int ifindex) {
+        _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL, *jdns = NULL;
+        _auto_cleanup_strv_ char **dhcp_dns = NULL;
+        _auto_cleanup_ DNSServer *current = NULL;
+        _auto_cleanup_ char *provider = NULL;
+        GSequenceIter *i;
+        DNSServer *d;
+        int r;
+
+        jobj = json_object_new_object();
+        if (!jobj)
+                return log_oom();
+
+        (void) manager_acquire_all_link_dhcp_lease_dns(&dhcp_dns);
+
+        r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
+        if (r < 0)
+                return r;
+
+        jdns = json_object_new_array();
+        if (!jdns)
+                return log_oom();
+
+        for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                _cleanup_(json_object_putp) json_object *jaddr = json_object_new_object();
+                _auto_cleanup_ char *pretty = NULL;
+                json_object *s;
+
+                if (!jaddr)
+                        return log_oom();
+
+                d = g_sequence_get(i);
+                if (!d->ifindex && d->ifindex != ifindex)
+                        continue;
+
+                r = ip_to_str(d->address.family, &d->address, &pretty);
+                if (r < 0)
+                        continue;
+
+                s = json_object_new_string(pretty);
+                if (!s)
+                        return log_oom();
+
+                json_object_object_add(jaddr, "Address", s);
+                steal_ptr(s);
+
+                s = json_object_new_int(d->address.family);
+                if (!s)
+                        return log_oom();
+
+                json_object_object_add(jaddr, "Family", s);
+                steal_ptr(s);
+
+                if (dns_config && strv_contains((const char **) dns_config, pretty))
+                        s = json_object_new_string("static");
+                else if (dhcp_dns && strv_contains((const char **) dhcp_dns, pretty)) {
+                        s = json_object_new_string("DHCPv4");
+
+                        (void) network_parse_link_dhcp4_server_address(d->ifindex, &provider);
+                } else
+                        s = json_object_new_string("foreign");
+                if (!s)
+                        return log_oom();
+
+                json_object_object_add(jaddr, "ConfigSource", s);
+                steal_ptr(s);
+
+                if(provider) {
+                        json_object *js = json_object_new_string(provider);
+                        if (!js)
+                                return log_oom();
+
+                        json_object_object_add(jaddr, "ConfigProvider", js);
+                        steal_ptr(js);
+                }
+
+                json_object_array_add(jdns, jaddr);
+                steal_ptr(jaddr);
+        }
+        json_object_object_add(jobj, "DNS", jdns);
+        steal_ptr(jdns);
+
+        printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+        return 0;
+}
+
+
 int json_fill_dns_server_domains(void) {
         _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
