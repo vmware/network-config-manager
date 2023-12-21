@@ -812,10 +812,8 @@ int dbus_describe_network(char **ret) {
                                "Describe",
                                &bus_error,
                                &reply, NULL);
-        if (r < 0) {
-                log_warning("Failed to issue method call: %s", bus_error.message);
+        if (r < 0)
                 return r;
-        }
 
         r = sd_bus_message_read(reply, "s", &v);
         if (r < 0)
