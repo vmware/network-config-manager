@@ -712,16 +712,31 @@ int json_build_dns_server(const IfNameIndex *p, char **dns_config, int ifindex) 
                 return log_oom();
 
         for (i = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                _cleanup_(json_object_putp) json_object *jaddr = json_object_new_object();
+                _cleanup_(json_object_putp) json_object *jaddr = NULL;
                 _auto_cleanup_ char *pretty = NULL;
                 json_object *s;
 
+                jaddr = json_object_new_object();
                 if (!jaddr)
                         return log_oom();
 
                 d = g_sequence_get(i);
-                if (!d->ifindex && d->ifindex != ifindex)
-                        continue;
+
+                if (!p) {
+                        char buf[IF_NAMESIZE + 1] = {};
+
+                        if (if_indextoname(d->ifindex, buf)) {
+                                s = json_object_new_string(buf);
+                                if (!s)
+                                        return log_oom();
+
+                                json_object_object_add(jaddr, "Name", s);
+                                steal_ptr(s);
+                        }
+                } else {
+                        if (p->ifindex != d->ifindex)
+                                continue;
+                }
 
                 r = ip_to_str(d->address.family, &d->address, &pretty);
                 if (r < 0)
