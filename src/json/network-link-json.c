@@ -1712,7 +1712,7 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
                 steal_ptr(ja);
         }
 
-        r = json_fill_dns_servers(jn, l->name, &jdns);
+        r = json_parse_dns_servers(jn, l->name, &jdns);
         if (r >= 0) {
                 json_object_object_add(jobj, "DNS", jdns);
                 steal_ptr(jdns);
