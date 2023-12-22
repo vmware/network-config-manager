@@ -789,7 +789,6 @@ int json_build_dns_server(const IfNameIndex *p, char **dns_config, int ifindex) 
         return 0;
 }
 
-
 int json_fill_dns_server_domains(void) {
         _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
@@ -913,6 +912,60 @@ int json_acquire_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static
         steal_ptr(s);
 
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+        return 0;
+}
+
+int json_build_ntp_server(const IfNameIndex *p, char **ntp_config, json_object **ret) {
+        _auto_cleanup_strv_ char **dhcp_ntp = NULL, **link_ntp = NULL, **ntp = NULL;
+        _cleanup_(json_object_putp) json_object *jntp = NULL;
+        _auto_cleanup_ char *provider = NULL;
+        char **n;
+        int r;
+
+        assert(ntp_config);
+
+        r = network_parse_ntp(&ntp);
+        if(r < 0)
+                return r;
+
+        jntp = json_object_new_array();
+        if (!jntp)
+                return log_oom();
+
+        strv_foreach(n, ntp_config) {
+                _cleanup_(json_object_putp) json_object *jaddr = NULL, *s = NULL;
+                _auto_cleanup_ IPAddress *a = NULL;
+                _auto_cleanup_ char *pretty = NULL;
+
+                jaddr = json_object_new_object();
+                if (!jaddr)
+                        return log_oom();
+
+                s = json_object_new_string(*n);
+                if (!s)
+                        return log_oom();
+
+                r = parse_ip(*n, &a);
+                if (r < 0) {
+                        json_object_object_add(jaddr, "Server", s);
+                        steal_ptr(s);
+                } else  {
+                        json_object_object_add(jaddr, "Address", s);
+                        steal_ptr(s);
+
+                        s = json_object_new_int(a->family);
+                        if (!s)
+                                return log_oom();
+
+                        json_object_object_add(jaddr, "Family", s);
+                        steal_ptr(s);
+                }
+
+                json_object_array_add(jntp, jaddr);
+                steal_ptr(jaddr);
+        }
+
+        *ret = steal_ptr(jntp);
         return 0;
 }
 

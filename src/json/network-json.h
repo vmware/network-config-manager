@@ -23,7 +23,9 @@ int json_parse_dns_servers(const json_object *jn, const char *link, json_object 
 int json_build_dns_server(const IfNameIndex *p, char **dns_config, int ifindex);
 
 int json_fill_dns_server_domains(void);
+
 int json_fill_ntp_servers(const json_object *jn, const char *link, json_object **ret);
+int json_build_ntp_server(const IfNameIndex *p, char **ntp_config, json_object **ret);
 
 int json_get_link_address(IfNameIndex *p, char **ret);
 int json_fill_address(bool ipv4, Link *l, json_object *jn,  json_object *jobj);
