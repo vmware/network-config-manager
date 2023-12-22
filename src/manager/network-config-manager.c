@@ -2800,7 +2800,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 (void) manager_acquire_all_link_dns(&dns_config);
 
         r = json_acquire_and_parse_network_data(&jobj);
-        if (r < 0 && json_enabled()) {
+        if ((r < 0 || json_parse_dns_servers(jobj, p ? p->ifname : NULL, NULL)) && json_enabled()) {
                 r = json_build_dns_server(p, dns_config);
                 if (r < 0) {
                         log_warning("Failed acquire DNS servers: %s", strerror(-r));
