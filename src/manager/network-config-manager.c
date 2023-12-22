@@ -2801,7 +2801,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         r = json_acquire_and_parse_network_data(&jobj);
         if (r < 0 && json_enabled()) {
-                r = json_build_dns_server(p, dns_config, 0);
+                r = json_build_dns_server(p, dns_config);
                 if (r < 0) {
                         log_warning("Failed acquire DNS servers: %s", strerror(-r));
                         return r;
@@ -2809,7 +2809,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
                 return 0;
         } else if (json_enabled())
-                return json_fill_dns_server(p, dns_config, 0, jobj);
+                return json_fill_dns_server(p, 0, jobj);
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
@@ -2874,84 +2874,6 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                         if (r >= 0)
                                 printf("%5d %-16s %s\n", d->ifindex, buf, pretty);
                 }
-        }
-
-        return 0;
-}
-
-_public_ int ncm_show_dns_servers_and_mode(int argc, char *argv[]) {
-        _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
-        _cleanup_(json_object_putp) json_object *jobj = NULL;
-        _auto_cleanup_strv_ char **dns_config = NULL;
-        _auto_cleanup_ DNSServer *current = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
-        GSequenceIter *itr;
-        DNSServer *d;
-        int r;
-
-        for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
-                        parse_next_arg(argv, argc, i);
-
-                        r = parse_ifname_or_index(argv[i], &p);
-                        if (r < 0) {
-                                log_warning("Failed to find device: %s", argv[i]);
-                                return r;
-                        }
-                        continue;
-                }
-
-                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
-                return -EINVAL;
-        }
-
-        if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
-        }
-
-        r = manager_parse_link_dns_servers(p, &dns_config);
-        if (r < 0)
-                dns_config = NULL;
-        else
-                /* Read all links managed by networkd and parse DNS= */
-                manager_acquire_all_link_dns(&dns_config);
-
-        r = json_acquire_and_parse_network_data(&jobj);
-        if (r < 0) {
-                log_warning("Failed acquire network data: %s", strerror(-r));
-                return r;
-        }
-
-        if (json_enabled())
-                return json_fill_dns_server(p, dns_config, p->ifindex, jobj);
-
-        r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
-        if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
-
-                for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
-                        _auto_cleanup_ char *pretty = NULL;
-                        d = g_sequence_get(itr);
-                        if (!d->ifindex)
-                                continue;
-
-                        r = ip_to_str(d->address.family, &d->address, &pretty);
-                        if (r >= 0) {
-                                static bool first = true;
-                                if(first) {
-                                        display(beautify_enabled() ? true : false, ansi_color_bold_cyan(), "      DNSServers: ");
-                                        printf("%s ", str_strip(pretty));
-                                        first = false;
-                                } else
-                                        printf("                  %s ", str_strip(pretty));
-
-                                if (dns_config && strv_contains((const char **) dns_config, pretty))
-                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(static) \n");
-                                else
-                                        display(beautify_enabled() ? true : false, ansi_color_bold_blue(), "(DHCPv4) \n");
-                        }
-                }
-                printf("\n");
         }
 
         return 0;
@@ -3150,30 +3072,6 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_remove_dns_server(int argc, char *argv[]) {
-        _auto_cleanup_ IfNameIndex *p = NULL;
-        int r;
-
-        for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
-                        parse_next_arg(argv, argc, i);
-
-                        r = parse_ifname_or_index(argv[i], &p);
-                        if (r < 0) {
-                                log_warning("Failed to find device: %s", argv[i]);
-                                return r;
-                        }
-                }
-        }
-
-        if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
-        }
-
-        return manager_remove_dns_server(p);
-}
-
 _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -3205,7 +3103,6 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
                                 return r;
                         }
                 }
-
         }
 
         if (!domains && strv_length(domains) <= 0) {

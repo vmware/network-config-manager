@@ -166,10 +166,8 @@ static int help(void) {
                "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
                "  set-hostname                 [HOSTNAME] Configures hostname.\n"
                "  show-dns                     Show DNS servers.\n"
-               "  show-dns-servers             dev [DEVICE] Show one device DNS servers and DNS mode.\n"
                "  add-dns                      dev|global|system [DEVICE] dns [ADDRESS] Configures Link or global DNS servers.\n"
                "  set-dns                      dev [DEVICE] dns [SERVER1,SERVER2...] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN].\n"
-               "  del-dns                      dev [DEVICE]\n"
                "  add-domain                   dev|global|system [DEVICE] domains [DOMAIN] Configures Link or global Domain.\n"
                "  show-domains                        Show DNS server Domains.\n"
                "  revert-resolve-link          dev [DEVICE] dns [BOOLEAN] domain [BOOLEAN] Flushes all DNS server and Domain settings of the device.\n"
@@ -404,10 +402,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "remove-rule",                   "rrule",            1,        WORD_ANY, false, ncm_link_remove_routing_policy_rules },
                 { "set-hostname",                  "hostname",         1,        WORD_ANY, false, ncm_set_system_hostname },
                 { "show-dns",                      "dns",              WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
-                { "show-dns-servers",              "dnsm",             2,        WORD_ANY, false, ncm_show_dns_servers_and_mode },
                 { "add-dns",                       "adns",             2,        WORD_ANY, false, ncm_add_dns_server },
                 { "set-dns",                       "sdns",             2,        WORD_ANY, false, ncm_set_dns_server },
-                { "del-dns",                       "ddns",             2,        WORD_ANY, false, ncm_remove_dns_server },
                 { "add-domain",                    "adomain",          1,        WORD_ANY, false, ncm_add_dns_domains },
                 { "show-domains",                  "domain",           WORD_ANY, WORD_ANY, false, ncm_show_dns_server_domains },
                 { "revert-resolve-link",           "rrl",              1,        WORD_ANY, false, ncm_revert_resolve_link },

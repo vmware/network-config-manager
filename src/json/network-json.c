@@ -662,7 +662,7 @@ int json_fill_system_status(char **ret) {
         return r;
 }
 
-int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, json_object *jn) {
+int json_fill_dns_server(const IfNameIndex *p, int ifindex, json_object *jn) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jdns = NULL;
         int r;
@@ -687,7 +687,7 @@ int json_fill_dns_server(const IfNameIndex *p, char **dns_config, int ifindex, j
         return 0;
 }
 
-int json_build_dns_server(const IfNameIndex *p, char **dns_config, int ifindex) {
+int json_build_dns_server(const IfNameIndex *p, char **dns_config) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jdns = NULL;
         _auto_cleanup_strv_ char **dhcp_dns = NULL;
@@ -922,8 +922,6 @@ int json_build_ntp_server(const IfNameIndex *p, char **ntp_config, json_object *
         char **n;
         int r;
 
-        assert(ntp_config);
-
         r = network_parse_ntp(&ntp);
         if(r < 0)
                 return r;
@@ -932,7 +930,7 @@ int json_build_ntp_server(const IfNameIndex *p, char **ntp_config, json_object *
         if (!jntp)
                 return log_oom();
 
-        strv_foreach(n, ntp_config) {
+        strv_foreach(n, ntp) {
                 _cleanup_(json_object_putp) json_object *jaddr = NULL, *s = NULL;
                 _auto_cleanup_ IPAddress *a = NULL;
                 _auto_cleanup_ char *pretty = NULL;
@@ -1444,7 +1442,6 @@ int json_acquire_and_parse_network_data(json_object **ret) {
                 return r;
 
         jobj = json_tokener_parse(s);
-
         *ret = steal_ptr(jobj);
         return 0;
 }
