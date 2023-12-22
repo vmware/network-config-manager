@@ -1286,7 +1286,8 @@ int json_parse_dns_servers(const json_object *jn, const char *link, json_object 
         if (!jdns)
                 return -ENOENT;
 
-        *ret = steal_ptr(jdns);
+        if (ret)
+                *ret = steal_ptr(jdns);
         return 0;
 }
 
