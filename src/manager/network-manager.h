@@ -45,6 +45,10 @@ int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *
 
 int manager_parse_link_dns_servers(const IfNameIndex *ifidx, char ***ret);
 int manager_acquire_all_link_dns(char ***ret);
+
+int manager_parse_link_ntp_servers(const IfNameIndex *ifidx, char ***ret);
+int manager_acquire_all_link_ntp(char ***ret);
+
 int manager_acquire_all_link_dhcp_lease_dns(char ***ret);
 
 bool manager_link_has_static_address(const IfNameIndex *ifidx);
@@ -90,7 +94,6 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway);
 
 int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool system, bool global);
 int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6);
-int manager_remove_dns_server(const IfNameIndex *i);
 
 int manager_add_dns_server_domain(const IfNameIndex *ifidx, char **domains, bool system, bool global);
 int manager_revert_dns_server_and_domain(const IfNameIndex *ifidx, bool dns, bool domain);
