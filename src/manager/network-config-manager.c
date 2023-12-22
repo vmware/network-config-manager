@@ -3453,6 +3453,7 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
 
 _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jntp = NULL, *j = NULL;
+        _auto_cleanup_strv_ char **ntp_config = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         json_object *ja = NULL;
         int r;
@@ -3473,16 +3474,24 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = json_acquire_and_parse_network_data(&jobj);
-        if (r < 0) {
-                log_warning("Failed acquire network data: %s", strerror(-r));
-                return r;
-        }
+       if (p)
+               (void) manager_parse_link_ntp_servers(p, &ntp_config);
+       else
+               (void) manager_acquire_all_link_ntp(&ntp_config);
 
-        r = json_fill_ntp_servers(jobj, p ? p->ifname : NULL, &jntp);
-        if (r < 0 || !jntp) {
-                log_warning("Failed acquire NTP servers: %s", strerror(-r));
-                return r;
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r < 0 && json_enabled()) {
+                r = json_build_ntp_server(p, ntp_config, &jntp);
+                if (r < 0) {
+                        log_warning("Failed parse NTP servers: %s", strerror(-r));
+                        return r;
+                }
+        } else {
+                r = json_fill_ntp_servers(jobj, p ? p->ifname : NULL, &jntp);
+                if (r < 0) {
+                        log_warning("Failed acquire NTP servers: %s", strerror(-r));
+                        return r;
+                }
         }
 
         j = json_object_new_object();
@@ -3490,7 +3499,8 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 return log_oom();
 
         json_object_object_add(j, "NTP", jntp);
-        if (json_enabled() && jntp) {
+        steal_ptr(jntp);
+        if (json_enabled()) {
                 printf("%s\n", json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
                 return 0;
         }

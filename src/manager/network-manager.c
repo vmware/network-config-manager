@@ -451,7 +451,6 @@ int manager_acquire_all_link_ntp(char ***ret) {
         return 0;
 }
 
-
 int manager_acquire_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
