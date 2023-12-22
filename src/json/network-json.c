@@ -1049,24 +1049,17 @@ int json_fill_ntp_servers(const json_object *jn, const char *link, json_object *
                         continue;
 
                 for (size_t j = 0; j < json_object_array_length(ntp); j++) {
-                        json_object *config_source = NULL, *config_provider = NULL, *a = NULL, *family = NULL;
+                        json_object *config_source = NULL, *config_provider = NULL, *a = NULL, *server = NULL;
                         json_object *addr = json_object_array_get_idx(ntp, j);
 
                         jaddr = json_object_new_object();
                         if (!jaddr)
                                 return log_oom();
 
-                        if (json_object_object_get_ex(addr, "Address", &a) && json_object_object_get_ex(addr, "Family", &family)) {
+                        if (json_object_object_get_ex(addr, "Address", &a) || json_object_object_get_ex(addr, "Server", &server)) {
                                 _cleanup_(json_object_putp) json_object *address = NULL,  *address_family = NULL;
                                 _auto_cleanup_ char *ip = NULL;
-
-                                r = json_array_to_ip(a, json_object_get_int(family), -1, &ip);
-                                if (r < 0)
-                                        continue;
-
-                                address = json_object_new_string(ip);
-                                if (!address)
-                                        return log_oom();
+                                json_object *family = NULL;
 
                                 if (!link) {
                                         _cleanup_(json_object_putp) json_object *s = NULL;
@@ -1078,15 +1071,24 @@ int json_fill_ntp_servers(const json_object *jn, const char *link, json_object *
                                         steal_ptr(s);
                                 }
 
-                                json_object_object_add(jaddr, "Address", address);
-                                steal_ptr(address);
+                                if (a && json_object_object_get_ex(addr, "Family", &family)) {
+                                        r = json_array_to_ip(a, json_object_get_int(family), -1, &ip);
+                                        if (r < 0)
+                                                continue;
 
-                                address_family = json_object_new_int(json_object_get_int(family));
-                                if (!address_family)
-                                        return log_oom();
+                                        address = json_object_new_string(ip);
+                                        if (!address)
+                                                return log_oom();
 
-                                json_object_object_add(jaddr, "Family", address_family);
-                                steal_ptr(address_family);
+                                        json_object_object_add(jaddr, "Address", address);
+                                        steal_ptr(address);
+
+                                        json_object_object_add(jaddr, "Family", json_object_get(family));
+                                        steal_ptr(address_family);
+                                }
+
+                                if (server)
+                                        json_object_object_add(jaddr, "Server", json_object_get(server));
 
                                 if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
                                         _cleanup_(json_object_putp) json_object *s = json_object_new_string(json_object_get_string(config_source));
