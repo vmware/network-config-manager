@@ -1132,7 +1132,8 @@ int json_fill_ntp_servers(const json_object *jn, const char *link, json_object *
         if (!jntp)
                 return -ENOENT;
 
-        *ret = steal_ptr(jntp);
+        if (ret)
+                *ret = steal_ptr(jntp);
         return 0;
 }
 

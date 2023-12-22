@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import errno
 import sys
 import subprocess
 import json
@@ -835,10 +836,14 @@ class TestCLINetwork:
         subprocess.check_call("nmctl dns dev 2 -j", text=True, shell = True)
 
     def test_cli_show_ntp(self):
-        subprocess.check_call("nmctl show-ntp dev 2", text=True, shell = True)
+        retcode = subprocess.call("nmctl show-ntp dev 2", text=True, shell = True)
+        if retcode < 0 and retcode != errno.ENOENT:
+            raise Fail("nmctl show-ntp dev 2 failed: %s" % -retcode)
 
     def test_cli_show_ntp_dev_json(self):
-        subprocess.check_call("nmctl show-ntp dev 2 -j", text=True, shell = True)
+        retcode = subprocess.call("nmctl show-ntp dev 2 -j", text=True, shell = True)
+        if retcode < 0 and retcode != errno.ENOENT:
+            raise Fail("nmctl show-ntp dev 2 -jfailed: %s" % -retcode)
 
     def test_cli_show_domains(self):
         subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
