@@ -2917,7 +2917,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 (void) manager_acquire_all_link_dns(&dns_config);
 
         r = json_acquire_and_parse_network_data(&jobj);
-        if ((r < 0 || json_parse_dns_servers(jobj, p ? p->ifname : NULL, NULL)) && json_enabled()) {
+        if ((r < 0 || json_parse_dns_servers(jobj, p ? p->ifname : NULL, NULL) < 0) && json_enabled()) {
                 r = json_build_dns_server(p, dns_config);
                 if (r < 0) {
                         log_warning("Failed acquire DNS servers: %s", strerror(-r));
@@ -3488,24 +3488,20 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-       if (p)
-               (void) manager_parse_link_ntp_servers(p, &ntp_config);
-       else
-               (void) manager_acquire_all_link_ntp(&ntp_config);
+        if (p)
+                (void) manager_parse_link_ntp_servers(p, &ntp_config);
+        else
+                (void) manager_acquire_all_link_ntp(&ntp_config);
 
         r = json_acquire_and_parse_network_data(&jobj);
-        if (r < 0 && json_enabled()) {
+        if ((r < 0 || json_fill_ntp_servers(jobj, p ? p->ifname : NULL, NULL) < 0) && json_enabled())
                 r = json_build_ntp_server(p, ntp_config, &jntp);
-                if (r < 0) {
-                        log_warning("Failed parse NTP servers: %s", strerror(-r));
-                        return r;
-                }
-        } else {
+        else
                 r = json_fill_ntp_servers(jobj, p ? p->ifname : NULL, &jntp);
-                if (r < 0) {
-                        log_warning("Failed acquire NTP servers: %s", strerror(-r));
-                        return r;
-                }
+
+        if (r < 0) {
+                log_warning("Failed acquire NTP servers: %s", strerror(-r));
+                return r;
         }
 
         j = json_object_new_object();
@@ -3513,13 +3509,13 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 return log_oom();
 
         if (jntp) {
-        json_object_object_add(j, "NTP", jntp);
-        steal_ptr(jntp);
-        if (json_enabled()) {
-                printf("%s\n", json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
-                return 0;
+                json_object_object_add(j, "NTP", jntp);
+                steal_ptr(jntp);
+                if (json_enabled()) {
+                        printf("%s\n", json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+                        return 0;
+                }
         }
-}
 
         if (!json_object_object_get_ex(j, "NTP", &ja))
                 return -ENOENT;
