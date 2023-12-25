@@ -1090,16 +1090,8 @@ int json_fill_ntp_servers(const json_object *jn, const char *link, json_object *
                                 if (server)
                                         json_object_object_add(jaddr, "Server", json_object_get(server));
 
-                                if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
-                                        _cleanup_(json_object_putp) json_object *s = json_object_new_string(json_object_get_string(config_source));
-
-                                        s = json_object_new_string(json_object_get_string(config_source));
-                                        if (!s)
-                                                return log_oom();
-
-                                        json_object_object_add(jaddr, "ConfigSource", s);
-                                        steal_ptr(s);
-                                }
+                                if (json_object_object_get_ex(addr, "ConfigSource", &config_source))
+                                        json_object_object_add(jaddr, "ConfigSource", json_object_get(config_source));
 
                                 if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
                                         _cleanup_(json_object_putp) json_object *s = NULL;
@@ -1247,16 +1239,8 @@ int json_parse_dns_servers(const json_object *jn, const char *link, json_object 
                                 json_object_object_add(jaddr, "Family", address_family);
                                 steal_ptr(address_family);
 
-                                if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
-                                        _cleanup_(json_object_putp) json_object *s = json_object_new_string(json_object_get_string(config_source));
-
-                                        s = json_object_new_string(json_object_get_string(config_source));
-                                        if (!s)
-                                                return log_oom();
-
-                                        json_object_object_add(jaddr, "ConfigSource", s);
-                                        steal_ptr(s);
-                                }
+                                if (json_object_object_get_ex(addr, "ConfigSource", &config_source))
+                                        json_object_object_add(jaddr, "ConfigSource", json_object_get(config_source));
 
                                 if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
                                         _cleanup_(json_object_putp) json_object *s = NULL;

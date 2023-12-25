@@ -2917,7 +2917,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 (void) manager_acquire_all_link_dns(&dns_config);
 
         r = json_acquire_and_parse_network_data(&jobj);
-        if ((r < 0 || json_parse_dns_servers(jobj, p ? p->ifname : NULL, NULL) < 0) && json_enabled()) {
+        if ((r < 0 || (r >= 0 && json_parse_dns_servers(jobj, p ? p->ifname : NULL, NULL) < 0)) && json_enabled()) {
                 r = json_build_dns_server(p, dns_config);
                 if (r < 0) {
                         log_warning("Failed acquire DNS servers: %s", strerror(-r));
@@ -3182,7 +3182,7 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
 
         r = manager_set_dns_server(p, dns, ipv4, ipv6);
         if (r < 0) {
-                log_warning("Failed to set DNS config %s: %s", argv[1], strerror(-r));
+                log_warning("Failed to set DNS servers %s: %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -3216,7 +3216,7 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
 
                         r = argv_to_strv(argc - 4, argv + i, &domains);
                         if (r < 0) {
-                                log_warning("Failed to parse domains addresses: %s", strerror(-r));
+                                log_warning("Failed to parse domains: %s", strerror(-r));
                                 return r;
                         }
                 }
@@ -3229,7 +3229,7 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
 
         r = manager_add_dns_server_domain(p, domains, system, global);
         if (r < 0) {
-                log_warning("Failed to add DNS domain to resolved: %s", strerror(-r));
+                log_warning("Failed to add DNS domain: %s", strerror(-r));
                 return r;
         }
 
@@ -3257,7 +3257,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
 
                 r = network_parse_link_setup_state(p->ifindex, &setup);
                 if (r < 0) {
-                        log_warning("Failed to get device setup '%s': %s\n", p->ifname, strerror(-r));
+                        log_warning("Failed to parse device setup '%s': %s\n", p->ifname, strerror(-r));
                         return r;
                 }
 
@@ -3295,7 +3295,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
 
         r = dbus_acquire_dns_domains_from_resolved(&domains);
         if (r < 0){
-                log_warning("Failed to fetch DNS domain from resolved: %s", strerror(-r));
+                log_warning("Failed to acquire DNS domain from 'systemd-resolved': %s", strerror(-r));
                 return r;
         }
 
@@ -3458,7 +3458,7 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
 
         r = manager_revert_dns_server_and_domain(p, dns, domain);
         if (r < 0) {
-                log_warning("Failed to flush resolved settings for %s: %s", p->ifname, strerror(-r));
+                log_warning("Failed to revert DNS / Domain settings for %s: %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -3494,11 +3494,10 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 (void) manager_acquire_all_link_ntp(&ntp_config);
 
         r = json_acquire_and_parse_network_data(&jobj);
-        if ((r < 0 || json_fill_ntp_servers(jobj, p ? p->ifname : NULL, NULL) < 0) && json_enabled())
+        if ((r < 0 || (r >= 0 && json_fill_ntp_servers(jobj, p ? p->ifname : NULL, NULL) < 0)) && json_enabled())
                 r = json_build_ntp_server(p, ntp_config, &jntp);
         else
                 r = json_fill_ntp_servers(jobj, p ? p->ifname : NULL, &jntp);
-
         if (r < 0) {
                 log_warning("Failed acquire NTP servers: %s", strerror(-r));
                 return r;
@@ -3511,6 +3510,7 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
         if (jntp) {
                 json_object_object_add(j, "NTP", jntp);
                 steal_ptr(jntp);
+
                 if (json_enabled()) {
                         printf("%s\n", json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
                         return 0;
