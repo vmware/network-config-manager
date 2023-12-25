@@ -910,6 +910,105 @@ int manager_delete_link_address(const IfNameIndex *ifidx, const char *a) {
         return dbus_network_reload();
 }
 
+static int manager_set_gateway(KeyFile *key_file, Route *rt) {
+        _auto_cleanup_ IPAddress *a = NULL;
+        _auto_cleanup_ char *gw = NULL;
+        bool b = false;
+        int r;
+
+        assert(key_file);
+        assert(rt);
+
+        for (GList *i = key_file->sections; i; i = g_list_next (i)) {
+                Section *s = (Section *) i->data;
+
+                if (str_eq(s->name, "Route")) {
+                        for (GList *j = s->keys; j; j = g_list_next (j)) {
+                                Key *key = (Key *) j->data;
+
+                                if (str_eq(key->name, "Gateway")) {
+                                        r = parse_ip(key->v, &a);
+                                        if (r >= 0) {
+                                                if (a->family == rt->family) {
+                                                        free(key->v);
+
+                                                        r = ip_to_str(rt->family, &rt->gw, &gw);
+                                                        if (r >= 0) {
+                                                                key->v = steal_ptr(gw);
+                                                                b = true;
+
+                                                                break;
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+
+        if (!b) {
+                _cleanup_(section_freep) Section *section = NULL;
+
+                r = ip_to_str(rt->gw.family, &rt->gw, &gw);
+                if (r < 0)
+                        return r;
+
+                r = section_new("Route", &section);
+                if (r < 0)
+                        return r;
+
+                add_key_to_section(section, "Gateway", gw);
+
+                r = add_section_to_key_file(key_file, section);
+                if (r < 0)
+                        return r;
+
+                steal_ptr(section);
+        }
+
+        return 0;
+}
+
+int manager_configure_default_gateway_full(const IfNameIndex *ifidx, Route *rt4, Route *rt6) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifidx);
+
+        r = create_or_parse_network_file(ifidx, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        if (rt4) {
+                r = manager_set_gateway(key_file, rt4);
+                if (r < 0)
+                        return r;
+        }
+
+        if (rt6) {
+                r = manager_set_gateway(key_file, rt6);
+                if (r < 0)
+                        return r;
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
+        }
+
+        r = set_file_permisssion(network, "systemd-network");
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
 int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
         _auto_cleanup_ char *network = NULL, *a = NULL;
         int r;
@@ -920,6 +1019,12 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
         r = create_or_parse_network_file(ifidx, &network);
         if (r < 0)
                 return r;
+
+        r = netlink_add_link_default_gateway(rt);
+        if (r < 0 && r != -EEXIST) {
+                log_warning("Failed to add Gateway to kernel : %s\n", strerror(-r));
+                return r;
+        }
 
         r = ip_to_str(rt->gw.family, &rt->gw, &a);
         if (r < 0)

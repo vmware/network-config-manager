@@ -29,6 +29,7 @@ int ncm_link_add_address(int argc, char *argv[]);
 int ncm_link_delete_address(int argc, char *argv[]);
 
 int ncm_link_add_default_gateway(int argc, char *argv[]);
+int ncm_link_set_default_gateway(int argc, char *argv[]);
 int ncm_link_add_route(int argc, char *argv[]);
 
 int ncm_link_set_ipv4(int argc, char *argv[]);

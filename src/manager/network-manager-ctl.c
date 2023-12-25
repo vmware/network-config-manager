@@ -152,6 +152,7 @@ static int help(void) {
                                                       "\n\t\t\t\t      prefix-route|pr [PREFIXROUTE BOOLEAN] Configures device Address.\n"
                "  del-addr                     dev [DEVICE] address|a|addr [ADDRESS] Removes address from device.\n"
                "  add-default-gw               dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures device default Gateway.\n"
+               "  set-gw                       dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS] Configures device default Gateway.\n"
                "  delete-gw                    dev [DEVICE] Removes Gateway from device.\n"
                "  add-route                    dev [DEVICE] gw [GATEWAY ADDRESS] dest [DESTINATION ADDRESS] src [SOURCE ADDRESS] pref-src [PREFFREDSOURCE ADDRESS]"
                                                      "\n\t\t\t\t      metric [METRIC NUMBER] scope [SCOPE {global|site|link|host|nowhere}] mtu [MTU NUMBER]"
@@ -394,6 +395,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "show-addr",                     "a",                1,        WORD_ANY, false, ncm_display_one_link_addresses },
                 { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_delete_address },
                 { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_add_default_gateway },
+                { "set-gw",                        "sgw",              4,        WORD_ANY, false, ncm_link_set_default_gateway },
                 { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_delete_gateway_or_route },
                 { "add-route",                     "ar" ,              4,        WORD_ANY, false, ncm_link_add_route },
                 { "set-ipv4",                      "sip4" ,            2,        WORD_ANY, false, ncm_link_set_ipv4 },
