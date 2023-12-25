@@ -3488,14 +3488,9 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        if (p)
-                (void) manager_parse_link_ntp_servers(p, &ntp_config);
-        else
-                (void) manager_acquire_all_link_ntp(&ntp_config);
-
         r = json_acquire_and_parse_network_data(&jobj);
         if ((r < 0 || (r >= 0 && json_fill_ntp_servers(jobj, p ? p->ifname : NULL, NULL) < 0)) && json_enabled())
-                r = json_build_ntp_server(p, ntp_config, &jntp);
+                r = json_build_ntp_server(p, &jntp);
         else
                 r = json_fill_ntp_servers(jobj, p ? p->ifname : NULL, &jntp);
         if (r < 0) {

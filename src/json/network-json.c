@@ -915,12 +915,16 @@ int json_acquire_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static
         return 0;
 }
 
-int json_build_ntp_server(const IfNameIndex *p, char **ntp_config, json_object **ret) {
+int json_build_ntp_server(const IfNameIndex *p, json_object **ret) {
         _auto_cleanup_strv_ char **dhcp_ntp = NULL, **link_ntp = NULL, **ntp = NULL;
         _cleanup_(json_object_putp) json_object *jntp = NULL;
-        _auto_cleanup_ char *provider = NULL;
         char **n;
         int r;
+
+        if (p) {
+                (void) network_parse_link_dhcp4_ntp(p->ifindex, &dhcp_ntp);
+                (void) network_parse_link_ntp(p->ifindex, &link_ntp);
+        }
 
         r = network_parse_ntp(&ntp);
         if(r < 0)
@@ -930,7 +934,7 @@ int json_build_ntp_server(const IfNameIndex *p, char **ntp_config, json_object *
         if (!jntp)
                 return log_oom();
 
-        strv_foreach(n, ntp) {
+        strv_foreach(n, link_ntp ? link_ntp : ntp) {
                 _cleanup_(json_object_putp) json_object *jaddr = NULL, *s = NULL;
                 _auto_cleanup_ IPAddress *a = NULL;
                 _auto_cleanup_ char *pretty = NULL;
@@ -959,11 +963,45 @@ int json_build_ntp_server(const IfNameIndex *p, char **ntp_config, json_object *
                         steal_ptr(s);
                 }
 
+                if (ntp && strv_length(ntp) && (dhcp_ntp && strv_contains((const char **) dhcp_ntp, *n))) {
+                        _cleanup_(json_object_putp) json_object *js = NULL;
+                        _auto_cleanup_ char *provider = NULL;
+
+                        js = json_object_new_string("DHCPv4");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_object_add(jaddr, "ConfigSource", js);
+                        steal_ptr(js);
+
+                        r = network_parse_link_dhcp4_server_address(p->ifindex, &provider);
+                        if (r >= 0) {
+                                js = json_object_new_string(provider);
+                                if (!js)
+                                        return log_oom();
+
+                                json_object_object_add(jaddr, "ConfigProvider", js);
+                                steal_ptr(js);
+                                steal_ptr(provider);
+                        }
+                } else  {
+                        _cleanup_(json_object_putp) json_object *js = NULL;
+
+                        js = json_object_new_string("static");
+                        if (!js)
+                                return log_oom();
+
+                        json_object_object_add(jaddr, "ConfigProvider", js);
+                        steal_ptr(js);
+                }
+
                 json_object_array_add(jntp, jaddr);
                 steal_ptr(jaddr);
         }
 
-        *ret = steal_ptr(jntp);
+        if (ret)
+                *ret = steal_ptr(jntp);
+
         return 0;
 }
 
