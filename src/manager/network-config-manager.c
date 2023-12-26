@@ -1351,12 +1351,11 @@ _public_ int ncm_link_delete_address(int argc, char *argv[]) {
         }
 
         if (!a) {
-
                 log_warning("Failed to parse address: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
 
-        r = manager_delete_link_address(p, a);
+        r = manager_remove_link_address(p, a);
         if (r < 0) {
                 log_warning("Failed to remove device address '%s': %s\n", p->ifname, strerror(-r));
                 return r;
@@ -2034,7 +2033,7 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
         return 0;
 }
 
-_public_ int ncm_link_delete_gateway_or_route(int argc, char *argv[]) {
+_public_ int ncm_link_remove_gateway_or_route(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
@@ -2055,7 +2054,8 @@ _public_ int ncm_link_delete_gateway_or_route(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        if (str_eq_fold(argv[0], "delete-gateway") || str_eq_fold(argv[0], "dgw"))
+        if (str_eq_fold(argv[0], "delete-gateway") || str_eq_fold(argv[0], "dgw") || str_eq_fold(argv[0], "remove-gateway") ||
+            str_eq_fold(argv[0], "rgw") || str_eq_fold(argv[0], "remove-gw") )
                 r = manager_remove_gateway_or_route(p, true);
         else
                 r = manager_remove_gateway_or_route(p, false);

@@ -882,7 +882,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-int manager_delete_link_address(const IfNameIndex *ifidx, const char *a) {
+int manager_remove_link_address(const IfNameIndex *ifidx, const char *a) {
         _auto_cleanup_ char *setup = NULL, *network = NULL;
         int r;
 
@@ -901,7 +901,7 @@ int manager_delete_link_address(const IfNameIndex *ifidx, const char *a) {
                 return r;
         }
 
-        r = remove_section_from_config_file_key(network, "Address", "Address", a);
+        r = remove_section_from_config_file_key_value(network, "Address", "Address", a);
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -1192,23 +1192,17 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway) {
         if (gateway) {
                 r = parse_config_file(network, "Route", "Gateway", &config);
                 if (r >= 0) {
-                        r = remove_key_from_config_file(network, "Route", "Gateway");
+                        r = remove_section_from_config_file_key(network, "Route", "Gateway");
                         if (r < 0)
                                 return r;
-
-                        (void) remove_key_from_config_file(network, "Route", "GatewayOnlink");
                 }
         } else {
                 r = parse_config_file(network, "Route", "Destination", &config);
                 if (r >= 0) {
-                        r = remove_key_from_config_file(network, "Route", "Destination");
+                        r = remove_section_from_config_file_key(network, "Route", "Destination");
                         if (r < 0)
                                 return r;
                 }
-
-                r = parse_config_file(network, "Route", "Metric", &config);
-                if (r >= 0)
-                        (void) remove_key_from_config_file(network, "Route", "Metric");
         }
 
         return dbus_network_reload();
@@ -1735,9 +1729,9 @@ int manager_remove_dhcpv4_server_static_address(const IfNameIndex *i, const IPAd
         if (r < 0)
                 return r;
 
-        r = remove_section_from_config_file_key(network, "DHCPServerStaticLease", "Address", a);
+        r = remove_section_from_config_file_key_value(network, "DHCPServerStaticLease", "Address", a);
         if (r < 0) {
-                r = remove_section_from_config_file_key(network, "DHCPServerStaticLease", "MACAddress", mac);
+                r = remove_section_from_config_file_key_value(network, "DHCPServerStaticLease", "MACAddress", mac);
                 if (r < 0)
                         return r;
         }
