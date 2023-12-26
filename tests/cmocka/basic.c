@@ -550,6 +550,22 @@ static void test_revert_dns_with_parametre(void **state) {
     assert_true(!!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
 }
 
+static void test_set_gw_family(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-gw dev test99 gw6 ::1 gw4 192.168.1.1") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "::1"));
+}
+
 static void test_additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1311,6 +1327,7 @@ int main(void) {
         cmocka_unit_test (test_set_dns),
         cmocka_unit_test (test_revert_dns),
         cmocka_unit_test (test_revert_dns_with_parametre),
+        cmocka_unit_test (test_set_gw_family),
         cmocka_unit_test (test_source_routing),
         cmocka_unit_test (test_additional_gw_source_routing),
         cmocka_unit_test (test_wireguard_multiple_peers),
