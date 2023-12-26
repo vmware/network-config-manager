@@ -1173,7 +1173,55 @@ int manager_configure_route(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway) {
+static int manager_remove_gateway_or_route_full(const char *network, bool gateway, AddressFamily family) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert(network);
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        for (GList *i = key_file->sections; i; i = g_list_next (i)) {
+                _auto_cleanup_ IPAddress *a = NULL;
+                Section *s = (Section *) i->data;
+
+                if (str_eq(s->name, "Route")) {
+                        for (GList *j = s->keys; j; j = g_list_next (j)) {
+                                Key *key = (Key *) j->data;
+
+                                if (gateway) {
+                                        if (str_eq(key->name, "Gateway")) {
+                                                r = parse_ip(key->v, &a);
+                                                if (r >= 0) {
+                                                        if ((a->family == AF_INET && family == ADDRESS_FAMILY_IPV4) ||
+                                                            (a->family == AF_INET6 && family == ADDRESS_FAMILY_IPV6) || family == ADDRESS_FAMILY_YES)
+                                                                g_list_remove_link(key_file->sections, i);
+                                                }
+                                        }
+                                } else {
+                                        if (str_eq(key->name, "Destination")) {
+                                                r = parse_ip(key->v, &a);
+                                                if (r >= 0) {
+                                                        if ((a->family == AF_INET && family == ADDRESS_FAMILY_IPV4) ||
+                                                            (a->family == AF_INET6 && family == ADDRESS_FAMILY_IPV6) || family == ADDRESS_FAMILY_YES)
+                                                                g_list_remove_link(key_file->sections, i);
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
+
+        return dbus_network_reload();
+}
+
+int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, AddressFamily family) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config = NULL;
         int r;
 
@@ -1188,6 +1236,9 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway) {
         r = network_parse_link_network_file(ifidx->ifindex, &network);
         if (r < 0)
                 return r;
+
+        if (family >= 0)
+                return manager_remove_gateway_or_route_full(network, gateway, family);
 
         if (gateway) {
                 r = parse_config_file(network, "Route", "Gateway", &config);

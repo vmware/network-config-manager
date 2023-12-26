@@ -21,9 +21,9 @@
 
 static const char * const address_family_table[_ADDRESS_FAMILY_MAX] = {
         [ADDRESS_FAMILY_NO]   = "no",
-        [ADDRESS_FAMILY_YES]  = "yes",
         [ADDRESS_FAMILY_IPV4] = "ipv4",
         [ADDRESS_FAMILY_IPV6] = "ipv6",
+        [ADDRESS_FAMILY_YES]  = "yes",
 };
 
 const char *address_family_type_to_name(int id) {

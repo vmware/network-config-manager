@@ -135,7 +135,7 @@ static int help(void) {
                "  set-link-option              dev [DEVICE] [arp BOOLEAN] [mc BOOLEAN] [amc BOOLEAN] [pcs BOOLEAN]"
                                                      "\n\t\t\t\t\tConfigures device's arp, multicast, allmulticast and promiscuous.\n"
                "  set-link-group               dev [DEVICE] group [GROUP NUMBER] Configures device group.\n"
-               "  set-link-rfo                 dev [DEVICE] f|family [ipv4|ipv6|both|any] Configures device required family for online.\n"
+               "  set-link-rfo                 dev [DEVICE] f|family [ipv4|ipv6|yes] Configures device required family for online.\n"
                "  set-link-ap                  dev [DEVICE] ap|act-policy [up|always-up|manual|always-down|down|bound] Configures device activation policy.\n"
                "  set-dhcp                     dev [DEVICE] dhcp [DHCP {yes|no|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN]"
                                                       "\n\t\t\t\t      send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN] \n"
@@ -153,7 +153,7 @@ static int help(void) {
                "  del-addr                     dev [DEVICE] address|a|addr [ADDRESS] Removes address from device.\n"
                "  add-default-gw               dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures device default Gateway.\n"
                "  set-gw                       dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS] Configures device default Gateway.\n"
-               "  remove-gw                    dev [DEVICE] Removes Gateway from device.\n"
+               "  remove-gw                    dev [DEVICE] f|family [ipv4|ipv6|yes] Removes Gateway from device.\n"
                "  add-route                    dev [DEVICE] gw [GATEWAY ADDRESS] dest [DESTINATION ADDRESS] src [SOURCE ADDRESS] pref-src [PREFFREDSOURCE ADDRESS]"
                                                      "\n\t\t\t\t      metric [METRIC NUMBER] scope [SCOPE {global|site|link|host|nowhere}] mtu [MTU NUMBER]"
                                                      "\n\t\t\t\t      table [TABLE {default|main|local|NUMBER}] proto [PROTOCOL {boot|static|ra|dhcp|NUMBER}]"
@@ -161,7 +161,7 @@ static int help(void) {
                                                      "\n\t\t\t\t      ipv6-pref [IPV6PREFERENCE {low|medium|high}] onlink [{ONLINK BOOLEN}] Configures Link route.\n"
                "  set-ipv4                     dev [DEVICE] addr [ADDRESS] gw [GATEWAY ADDRESS] dhcp [BOOLEAN] Configures device IPv4.\n"
                "  set-ipv6                     dev [DEVICE] accept-ra [BOOLEAN] dhcp [BOOLEAN] Configures device IPv6.\n"
-               "  remove-route                 dev [DEVICE] Removes route from device\n"
+               "  remove-route                 dev [DEVICE] f|family [ipv4|ipv6|yes] Removes route from device\n"
                "  add-addl-gw                  dev [DEVICE] address|addr|a [ADDRESS] destination|dest [DESTINATION address] gw [GW address] table [TABLE NUMBER]"
                                                       "\n\t\t\t\t Configures additional gateway for another NIC/DEVICE with routing policy rules.\n"
                "  add-rule                     dev [DEVICE] table [TABLE NUMBER] [from ADDRESS] [to ADDRESS] [oif DEVICE] [iif DEVICE] [priority NUMBER] [tos NUMBER]"
@@ -393,17 +393,18 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-link-state",                "ls",               3,        WORD_ANY, false, ncm_link_update_state },
                 { "add-addr",                      "aa",               4,        WORD_ANY, false, ncm_link_add_address },
                 { "show-addr",                     "a",                1,        WORD_ANY, false, ncm_display_one_link_addresses },
-                { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_delete_address },
+                { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_remove_address },
+                { "remove-addr",                   "raddr",            3,        WORD_ANY, false, ncm_link_remove_address },
                 { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_add_default_gateway },
                 { "set-gw",                        "sgw",              4,        WORD_ANY, false, ncm_link_set_default_gateway },
-                { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_remove_gateway_or_route },
-                { "remove-gw",                     "rgw",              2,        WORD_ANY, false, ncm_link_remove_gateway_or_route },
+                { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
+                { "remove-gw",                     "rgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
                 { "add-route",                     "ar" ,              4,        WORD_ANY, false, ncm_link_add_route },
                 { "set-ipv4",                      "sip4" ,            2,        WORD_ANY, false, ncm_link_set_ipv4 },
                 { "set-ipv6",                      "sip6" ,            2,        WORD_ANY, false, ncm_link_set_ipv6 },
                 { "set-dynamic",                   "sd" ,              2,        WORD_ANY, false, ncm_link_set_dynamic },
-                { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_remove_gateway_or_route },
-                { "remove-route",                  "rr",               4,        WORD_ANY, false, ncm_link_remove_gateway_or_route },
+                { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_remove_route },
+                { "remove-route",                  "rr",               4,        WORD_ANY, false, ncm_link_remove_route },
                 { "add-addl-gw",                   "agw",              9,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "add-rule",                      "rule",             4,        WORD_ANY, false, ncm_link_add_routing_policy_rules },
                 { "remove-rule",                   "rrule",            1,        WORD_ANY, false, ncm_link_remove_routing_policy_rules },
@@ -440,7 +441,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "remove-ipv6ra",                 "rra6",             2,        WORD_ANY, false, ncm_link_remove_ipv6_router_advertisement },
                 { "add-ntp",                       "antp",             2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "set-ntp",                       "sntp" ,            2,        WORD_ANY, false, ncm_link_add_ntp },
-                { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_delete_ntp },
+                { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
+                { "remove-ntp",                    "rntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
                 { "enable-ipv6",                   "ipv6",             2,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "create-vlan",                   "vlan",             4,        WORD_ANY, false, ncm_create_vlan },
                 { "create-bridge",                 "bridge",           3,        WORD_ANY, false, ncm_create_bridge },
