@@ -198,7 +198,7 @@ static int help(void) {
                                                      "\n\t\t\t\t     [without-ra BOOLEAN] [use-ntp BOOLEAN] [use-hostname BOOLEAN] [send-release BOOLEAN] Configures DHCPv6.\n"
                "  add-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Add Link NTP server address. This option may be specified more than once.\n"
                "  set-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Set Link NTP server address. This option may be specified more than once.\n"
-               "  delete-ntp                   dev [DEVICE] Delete Link NTP server addresses.\n"
+               "  remove-ntp                   dev [DEVICE] Removes devices NTP servers.\n"
                "  add-dhcpv4-server            dev [DEVICE] pool-offset [PoolOffset NUMBER] pool-size [PoolSize NUMBER] default-lease-time [DefaultLeaseTimeSec NUMBER]"
                                                       "\n\t\t\t\t      max-lease-time [MaxLeaseTimeSec NUMBER] emit-dns [EmitDNS BOOLEAN]"
                                                       "\n\t\t\t\t      dns [DNS ADDRESS] emit-ntp [EmitNTP BOOLEAN] ntp [NTP ADDRESS]"
@@ -393,17 +393,14 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-link-state",                "ls",               3,        WORD_ANY, false, ncm_link_update_state },
                 { "add-addr",                      "aa",               4,        WORD_ANY, false, ncm_link_add_address },
                 { "show-addr",                     "a",                1,        WORD_ANY, false, ncm_display_one_link_addresses },
-                { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_remove_address },
                 { "remove-addr",                   "raddr",            3,        WORD_ANY, false, ncm_link_remove_address },
                 { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_add_default_gateway },
                 { "set-gw",                        "sgw",              4,        WORD_ANY, false, ncm_link_set_default_gateway },
-                { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
                 { "remove-gw",                     "rgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
                 { "add-route",                     "ar" ,              4,        WORD_ANY, false, ncm_link_add_route },
                 { "set-ipv4",                      "sip4" ,            2,        WORD_ANY, false, ncm_link_set_ipv4 },
                 { "set-ipv6",                      "sip6" ,            2,        WORD_ANY, false, ncm_link_set_ipv6 },
                 { "set-dynamic",                   "sd" ,              2,        WORD_ANY, false, ncm_link_set_dynamic },
-                { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_remove_route },
                 { "remove-route",                  "rr",               4,        WORD_ANY, false, ncm_link_remove_route },
                 { "add-addl-gw",                   "agw",              9,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "add-rule",                      "rule",             4,        WORD_ANY, false, ncm_link_add_routing_policy_rules },
@@ -441,7 +438,6 @@ static int cli_run(int argc, char *argv[]) {
                 { "remove-ipv6ra",                 "rra6",             2,        WORD_ANY, false, ncm_link_remove_ipv6_router_advertisement },
                 { "add-ntp",                       "antp",             2,        WORD_ANY, false, ncm_link_add_ntp },
                 { "set-ntp",                       "sntp" ,            2,        WORD_ANY, false, ncm_link_add_ntp },
-                { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
                 { "remove-ntp",                    "rntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
                 { "enable-ipv6",                   "ipv6",             2,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "create-vlan",                   "vlan",             4,        WORD_ANY, false, ncm_create_vlan },
@@ -500,6 +496,10 @@ static int cli_run(int argc, char *argv[]) {
                 { "nft-run",                       "nftr",             WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
                 /* Deprecated */
                 { "show",                          "",                 WORD_ANY, WORD_ANY, false, ncm_link_status },
+                { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
+                { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_remove_route },
+                { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
+                { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_remove_address },
                 {}
         };
 
