@@ -83,7 +83,8 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
 int remove_key_value_from_config_file(const char *path, const char *section, const char *k, const char *v);
 
 int remove_section_from_config_file(const char *path, const char *section);
-int remove_section_from_config_file_key(const char *path, const char *section, const char *k, const char *v);
+int remove_section_from_config_file_key_value(const char *path, const char *section, const char *k, const char *v);
+int remove_section_from_config_file_key(const char *path, const char *section, const char *k);
 
 int remove_config_files_glob(const char *path, const char *section, const char *k, const char *v);
 int remove_config_files_section_glob(const char *path, const char *section, const char *k, const char *v);

@@ -362,7 +362,6 @@ int key_file_set_bool(KeyFile *key_file, const char *section, const char *k, con
         return set_config(key_file, section, k, bool_to_str(b));
 }
 
-
 static int add_config(KeyFile *key_file, const char *section, const char *k, const char *v) {
         _cleanup_(section_freep) Section *sec = NULL;
         int r;
@@ -636,9 +635,8 @@ int remove_section_from_config_file(const char *path, const char *section) {
         return set_file_permisssion(path, "systemd-network");
 }
 
-int remove_section_from_config_file_key(const char *path, const char *section, const char *k, const char *v) {
+int remove_section_from_config_file_key_value(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        GList *l = NULL;
         int r;
 
         assert(path);
@@ -656,8 +654,40 @@ int remove_section_from_config_file_key(const char *path, const char *section, c
                                 Key *key = (Key *) i->data;
 
                                 if (str_eq(key->name, k) && str_eq(key->v, v)) {
-                                        l = g_list_remove_link(key_file->sections, iter);
-                                        (void) l;
+                                        g_list_remove_link(key_file->sections, iter);
+                                        break;
+                                }
+                        }
+                }
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0)
+                return r;
+
+        return set_file_permisssion(path, "systemd-network");
+}
+
+int remove_section_from_config_file_key(const char *path, const char *section, const char *k) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert(path);
+        assert(section);
+
+        r = parse_key_file(path, &key_file);
+        if (r < 0)
+                return r;
+
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
+
+                if (str_eq(s->name, section)) {
+                        for (GList *i = s->keys; i; i = g_list_next (i)) {
+                                Key *key = (Key *) i->data;
+
+                                if (str_eq(key->name, k)) {
+                                        g_list_remove_link(key_file->sections, iter);
                                         break;
                                 }
                         }
