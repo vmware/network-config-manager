@@ -91,7 +91,7 @@ int manager_configure_route(const IfNameIndex *ifidx,
                             const int onlink,
                             const bool b);
 
-int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway);
+int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, AddressFamily family);
 
 int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool system, bool global);
 int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6);

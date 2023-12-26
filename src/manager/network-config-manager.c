@@ -2033,8 +2033,10 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
         return 0;
 }
 
-_public_ int ncm_link_remove_gateway_or_route(int argc, char *argv[]) {
+
+_public_ int ncm_link_remove_gateway(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
+        AddressFamily family = -1;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -2046,6 +2048,20 @@ _public_ int ncm_link_remove_gateway_or_route(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
+                        continue;
+                } else if(str_eq_fold(argv[i], "family") || str_eq_fold(argv[i], "f")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = address_family_name_to_type(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse family='%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
+                        }
+                        family = r;
+                        continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                        return -EINVAL;
                 }
         }
 
@@ -2054,14 +2070,55 @@ _public_ int ncm_link_remove_gateway_or_route(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        if (str_eq_fold(argv[0], "delete-gateway") || str_eq_fold(argv[0], "dgw") || str_eq_fold(argv[0], "remove-gateway") ||
-            str_eq_fold(argv[0], "rgw") || str_eq_fold(argv[0], "remove-gw") )
-                r = manager_remove_gateway_or_route(p, true);
-        else
-                r = manager_remove_gateway_or_route(p, false);
-
+        r = manager_remove_gateway_or_route(p, true, family);
         if (r < 0) {
-                log_warning("Failed to delete route or gatwway '%s' on '%s': %s\n", argv[0], p->ifname, strerror(-r));
+                log_warning("Failed to remove gateway from device=%s: %s", p->ifname, strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_link_remove_route(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        AddressFamily family = -1;
+        int r;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                } else if(str_eq_fold(argv[i], "family") || str_eq_fold(argv[i], "f")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = address_family_name_to_type(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse family='%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
+                        }
+                        family = r;
+                        printf("family = %d\n", family);
+                        continue;
+                } else {
+                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                        return -EINVAL;
+                }
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_remove_gateway_or_route(p, false, family);
+        if (r < 0) {
+                log_warning("Failed to remove route on device='%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
