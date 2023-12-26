@@ -2033,10 +2033,9 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
         return 0;
 }
 
-
 _public_ int ncm_link_remove_gateway(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        AddressFamily family = -1;
+        AddressFamily family = ADDRESS_FAMILY_NO;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -2057,12 +2056,12 @@ _public_ int ncm_link_remove_gateway(int argc, char *argv[]) {
                                 log_warning("Failed to parse family='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
-                        family = r;
+                        family |= r;
                         continue;
-                } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
-                        return -EINVAL;
                 }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (!p) {
@@ -2081,7 +2080,7 @@ _public_ int ncm_link_remove_gateway(int argc, char *argv[]) {
 
 _public_ int ncm_link_remove_route(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
-        AddressFamily family = -1;
+        AddressFamily family = ADDRESS_FAMILY_NO;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -2102,13 +2101,12 @@ _public_ int ncm_link_remove_route(int argc, char *argv[]) {
                                 log_warning("Failed to parse family='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
-                        family = r;
-                        printf("family = %d\n", family);
+                        family |= r;
                         continue;
-                } else {
-                        log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
-                        return -EINVAL;
                 }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (!p) {
