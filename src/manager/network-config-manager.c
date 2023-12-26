@@ -1314,7 +1314,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_link_delete_address(int argc, char *argv[]) {
+_public_ int ncm_link_remove_address(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *a = NULL;
@@ -3788,7 +3788,7 @@ _public_ int ncm_link_add_ntp(int argc, char *argv[]) {
        return 0;
 }
 
-_public_ int ncm_link_delete_ntp(int argc, char *argv[]) {
+_public_ int ncm_link_remove_ntp(int argc, char *argv[]) {
        _auto_cleanup_ IfNameIndex *p = NULL;
        int r;
 
