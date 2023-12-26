@@ -23,12 +23,11 @@
 
 #define parse_ether_address(mac) ether_aton(mac)
 
-
 typedef enum AddressFamily {
-        ADDRESS_FAMILY_NO,
-        ADDRESS_FAMILY_IPV4,
-        ADDRESS_FAMILY_IPV6,
-        ADDRESS_FAMILY_YES,
+        ADDRESS_FAMILY_NO             = 0,
+        ADDRESS_FAMILY_IPV4           = 1 << 0,
+        ADDRESS_FAMILY_IPV6           = 1 << 1,
+        ADDRESS_FAMILY_YES            = ADDRESS_FAMILY_IPV4 | ADDRESS_FAMILY_IPV6,
         _ADDRESS_FAMILY_MAX,
         _ADDRESS_FAMILY_INVALID = -EINVAL,
 } AddressFamily;
