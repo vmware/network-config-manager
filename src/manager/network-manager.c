@@ -1195,18 +1195,18 @@ static int manager_remove_gateway_or_route_full(const char *network, bool gatewa
                                         if (str_eq(key->name, "Gateway")) {
                                                 r = parse_ip(key->v, &a);
                                                 if (r >= 0) {
-                                                        if ((a->family == AF_INET && family == ADDRESS_FAMILY_IPV4) ||
-                                                            (a->family == AF_INET6 && family == ADDRESS_FAMILY_IPV6) || family == ADDRESS_FAMILY_YES)
-                                                                g_list_remove_link(key_file->sections, i);
+                                                        if ((a->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
+                                                            (a->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
+                                                                i = g_list_delete_link(key_file->sections, i);
                                                 }
                                         }
                                 } else {
                                         if (str_eq(key->name, "Destination")) {
                                                 r = parse_ip(key->v, &a);
                                                 if (r >= 0) {
-                                                        if ((a->family == AF_INET && family == ADDRESS_FAMILY_IPV4) ||
-                                                            (a->family == AF_INET6 && family == ADDRESS_FAMILY_IPV6) || family == ADDRESS_FAMILY_YES)
-                                                                g_list_remove_link(key_file->sections, i);
+                                                        if ((a->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
+                                                            (a->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
+                                                                i = g_list_delete_link(key_file->sections, i);
                                                 }
                                         }
                                 }
