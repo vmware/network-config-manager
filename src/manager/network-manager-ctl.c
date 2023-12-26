@@ -161,7 +161,7 @@ static int help(void) {
                                                      "\n\t\t\t\t      ipv6-pref [IPV6PREFERENCE {low|medium|high}] onlink [{ONLINK BOOLEN}] Configures Link route.\n"
                "  set-ipv4                     dev [DEVICE] addr [ADDRESS] gw [GATEWAY ADDRESS] dhcp [BOOLEAN] Configures device IPv4.\n"
                "  set-ipv6                     dev [DEVICE] accept-ra [BOOLEAN] dhcp [BOOLEAN] Configures device IPv6.\n"
-               "  remove-route                 dev [DEVICE] Removes route from device\n"
+               "  remove-route                 dev [DEVICE] f|family [ipv4|ipv6|yes] Removes route from device\n"
                "  add-addl-gw                  dev [DEVICE] address|addr|a [ADDRESS] destination|dest [DESTINATION address] gw [GW address] table [TABLE NUMBER]"
                                                       "\n\t\t\t\t Configures additional gateway for another NIC/DEVICE with routing policy rules.\n"
                "  add-rule                     dev [DEVICE] table [TABLE NUMBER] [from ADDRESS] [to ADDRESS] [oif DEVICE] [iif DEVICE] [priority NUMBER] [tos NUMBER]"
