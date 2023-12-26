@@ -198,7 +198,7 @@ static int help(void) {
                                                      "\n\t\t\t\t     [without-ra BOOLEAN] [use-ntp BOOLEAN] [use-hostname BOOLEAN] [send-release BOOLEAN] Configures DHCPv6.\n"
                "  add-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Add Link NTP server address. This option may be specified more than once.\n"
                "  set-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Set Link NTP server address. This option may be specified more than once.\n"
-               "  delete-ntp                   dev [DEVICE] Delete Link NTP server addresses.\n"
+               "  remove-ntp                   dev [DEVICE] Removes devices NTP servers.\n"
                "  add-dhcpv4-server            dev [DEVICE] pool-offset [PoolOffset NUMBER] pool-size [PoolSize NUMBER] default-lease-time [DefaultLeaseTimeSec NUMBER]"
                                                       "\n\t\t\t\t      max-lease-time [MaxLeaseTimeSec NUMBER] emit-dns [EmitDNS BOOLEAN]"
                                                       "\n\t\t\t\t      dns [DNS ADDRESS] emit-ntp [EmitNTP BOOLEAN] ntp [NTP ADDRESS]"
