@@ -552,7 +552,6 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
                                         s->keys = g_list_delete_link(s->keys, i);
                                         break;
                                 }
-
                         }
                 }
         }
@@ -618,7 +617,6 @@ int remove_section_from_config_file(const char *path, const char *section) {
                         key_file->sections = g_list_delete_link(key_file->sections, iter);
                         break;
                 }
-
         }
 
         r = key_file_save (key_file);
