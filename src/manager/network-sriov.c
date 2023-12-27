@@ -153,10 +153,6 @@ int sriov_configure(const IfNameIndex *i, SRIOV *s, bool link) {
                 return r;
         }
 
-        r = set_file_permisssion(network, "systemd-network");
-        if (r < 0)
-                return r;
-
         return dbus_network_reload();
 }
 
