@@ -865,7 +865,7 @@ class TestCLINetwork:
     def test_cli_set_dhcp_with_section(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes use-dns-ipv4 yes use-dns-ipv6 yes send-release-ipv4 no send-release-ipv6 no", shell = True)
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes use-dns-ipv4 yes use-dns-ipv6 yes use-domains-ipv4 yes use-domains-ipv6 yes send-release-ipv4 no send-release-ipv6 no", shell = True)
         subprocess.check_call("sleep 5", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
@@ -880,6 +880,9 @@ class TestCLINetwork:
 
         assert(parser.get('DHCPv4', 'UseDNS') == 'yes')
         assert(parser.get('DHCPv6', 'UseDNS') == 'yes')
+
+        assert(parser.get('DHCPv4', 'UseDomains') == 'yes')
+        assert(parser.get('DHCPv6', 'UseDomains') == 'yes')
 
     def test_cli_set_dhcp_with_section_reversed(self):
         assert(link_exist('test99') == True)
@@ -903,7 +906,7 @@ class TestCLINetwork:
     def test_cli_set_dynamic(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-dynamic dev test99 dhcp yes send-release-ipv4 no use-dns-ipv4 yes use-dns-ipv6 yes", shell = True)
+        subprocess.check_call("nmctl set-dynamic dev test99 dhcp yes send-release-ipv4 no use-dns-ipv4 yes use-dns-ipv6 yes use-domains-ipv4 yes use-domains-ipv6 yes", shell = True)
         subprocess.check_call("sleep 5", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
