@@ -145,7 +145,7 @@ static int help(void) {
                                                       "\n\t\t\t\t      Sets DUID of DHCPv4 or DHCPv6 Client.\n"
                "  set-link-state               dev [DEVICE] [STATE {up|down}] Configures device State.\n"
                "  set-dynamic                  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN]"
-                                                      "\n\t\t\t\t accept-ra [BOOLEAN] Configures dynamic configration of the device (IPv4|IPv6|RA).\n"
+                                                      "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] Configures dynamic configration of the device (IPv4|IPv6|RA).\n"
                "  show-addr                    dev [DEVICE] [family|f ipv4|ipv6|4|6] Show device addresses\n"
                "  add-addr                     dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [STRING] pref-lifetime|pl [{forever|infinity|0}]"
                                                       "\n\t\t\t\t      scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN]"
