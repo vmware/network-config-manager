@@ -524,7 +524,7 @@ static void test_revert_dns(void **state) {
     assert_true(r >= 0);
 
     display_key_file(key_file2);
-    assert_true(!!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
+    assert_true(!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
 }
 
 static void test_revert_dns_with_parametre(void **state) {
@@ -547,7 +547,7 @@ static void test_revert_dns_with_parametre(void **state) {
     assert_true(r >= 0);
 
     display_key_file(key_file2);
-    assert_true(!!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
+    assert_true(!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
 }
 
 static void test_set_gw_family(void **state) {
@@ -570,7 +570,7 @@ static void test_remove_gw_family(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    assert_true(system("nmctl remove-gw dev test99 family gw6 family gw4 ") >= 0);
+    assert_true(system("nmctl remove-gw dev test99 family ipv4 family ipv6") >= 0);
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -578,8 +578,8 @@ static void test_remove_gw_family(void **state) {
     display_key_file(key_file);
 
     assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
-    assert_true(!!key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
-    assert_true(!!key_file_config_exists(key_file, "Route", "Gateway", "::1"));
+    assert_true(!key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+    assert_true(!key_file_config_exists(key_file, "Route", "Gateway", "::1"));
 }
 
 static void test_additional_gw_source_routing(void **state) {

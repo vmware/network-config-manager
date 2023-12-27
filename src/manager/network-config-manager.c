@@ -424,9 +424,9 @@ _public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "family") || str_eq_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = address_family_name_to_type(argv[i]);
+                        r = required_address_family_for_online_name_to_type(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse RequiredFamilyForOnline '%s': %s", argv[2], strerror(EINVAL));
+                                log_warning("Failed to parse RequiredFamilyForOnline= '%s': %s", argv[2], strerror(EINVAL));
                                 return r;
                         }
                         family = strdup(argv[i]);
@@ -2034,8 +2034,8 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
 }
 
 _public_ int ncm_link_remove_gateway(int argc, char *argv[]) {
-        _auto_cleanup_ IfNameIndex *p = NULL;
         AddressFamily family = ADDRESS_FAMILY_NO;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -2079,8 +2079,8 @@ _public_ int ncm_link_remove_gateway(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_remove_route(int argc, char *argv[]) {
-        _auto_cleanup_ IfNameIndex *p = NULL;
         AddressFamily family = ADDRESS_FAMILY_NO;
+        _auto_cleanup_ IfNameIndex *p = NULL;
         int r;
 
         for (int i = 1; i < argc; i++) {

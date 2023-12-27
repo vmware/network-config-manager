@@ -245,7 +245,7 @@ int parse_yaml_rf_online(const char *key,
         assert(node);
 
         family = (char **) userdata;
-        r = address_family_name_to_type(value);
+        r = required_address_family_for_online_name_to_type(value);
         if(r < 0) {
                 log_warning("Failed to parse RequiredFamilyForOnline: %s", value);
                 return -EINVAL;

@@ -43,6 +43,15 @@ typedef enum ActivationPolicy {
         _DEVICE_ACTIVATION_POLICY_INVALID = -EINVAL,
 } ActivationPolicy;
 
+typedef enum RequiredAddressFamilyForOnline {
+        REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_IPV4,
+        REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_IPV6,
+        REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_BOTH,
+        REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_ANY,
+        _REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_MAX,
+        _REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_INVALID = -EINVAL,
+} RequiredAddressFamilyForOnline;
+
 typedef struct IPAddress {
         struct in_addr in;
         struct in6_addr in6;
@@ -94,3 +103,6 @@ int address_family_name_to_type(const char *name);
 
 const char *device_activation_policy_type_to_name(int id);
 int device_activation_policy_name_to_type(const char *name);
+
+const char *required_address_family_for_online_type_to_name(int id);
+int required_address_family_for_online_name_to_type(const char *name);

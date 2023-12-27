@@ -549,10 +549,9 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
                                 Key *key = (Key *) i->data;
 
                                 if (str_eq(key->name, k)) {
-                                        g_list_remove_link(s->keys, i);
+                                        s->keys = g_list_delete_link(s->keys, i);
                                         break;
                                 }
-
                         }
                 }
         }
@@ -566,7 +565,6 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
 
 int remove_key_value_from_config_file(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        GList *l = NULL;
         int r;
 
         assert(path);
@@ -585,15 +583,13 @@ int remove_key_value_from_config_file(const char *path, const char *section, con
                                 Key *key = (Key *) i->data;
 
                                 if (str_eq(key->name, k) && str_eq(key->v, v)) {
-                                        l = g_list_remove_link(s->keys, g_list_nth(s->keys, g_list_position(s->keys, i)));
+                                        s->keys = g_list_delete_link(s->keys, g_list_nth(s->keys, g_list_position(s->keys, i)));
                                         break;
                                 }
 
                         }
                 }
         }
-
-        (void) l;
 
         r = key_file_save (key_file);
         if (r < 0)
@@ -605,7 +601,6 @@ int remove_key_value_from_config_file(const char *path, const char *section, con
 int remove_section_from_config_file(const char *path, const char *section) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_ (section_freep) Section *sec = NULL;
-        GList *l = NULL;
         int r;
 
         assert(path);
@@ -619,14 +614,10 @@ int remove_section_from_config_file(const char *path, const char *section) {
                 Section *s = (Section *) iter->data;
 
                 if (str_eq(s->name, section)) {
-                        l = g_list_remove_link(key_file->sections, iter);
+                        key_file->sections = g_list_delete_link(key_file->sections, iter);
                         break;
                 }
-
         }
-
-        if (l)
-                sec = (Section *) l->data;
 
         r = key_file_save (key_file);
         if (r < 0)
@@ -654,7 +645,7 @@ int remove_section_from_config_file_key_value(const char *path, const char *sect
                                 Key *key = (Key *) i->data;
 
                                 if (str_eq(key->name, k) && str_eq(key->v, v)) {
-                                        g_list_remove_link(key_file->sections, iter);
+                                        key_file->sections = g_list_delete_link(key_file->sections, iter);
                                         break;
                                 }
                         }
@@ -687,7 +678,7 @@ int remove_section_from_config_file_key(const char *path, const char *section, c
                                 Key *key = (Key *) i->data;
 
                                 if (str_eq(key->name, k)) {
-                                        g_list_remove_link(key_file->sections, iter);
+                                        key_file->sections = g_list_delete_link(key_file->sections, iter);
                                         break;
                                 }
                         }
@@ -786,6 +777,7 @@ int remove_config_files_glob(const char *path, const char *section, const char *
 int remove_config_files_section_glob(const char *path, const char *section, const char *k, const char *v) {
         _cleanup_(globfree) glob_t g = {};
         int r;
+
         assert(path);
         assert(section);
         assert(k);
@@ -848,7 +840,7 @@ int write_to_proxy_conf_file(GHashTable *table) {
                 return log_oom();
 
         g_hash_table_iter_init (&iter, table);
-        for (;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
+        for ( ;g_hash_table_iter_next (&iter, (gpointer *) &k, (gpointer *) &v);) {
 
                 if (v) {
                         if (*v != '"')

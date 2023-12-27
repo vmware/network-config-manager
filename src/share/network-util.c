@@ -46,6 +46,33 @@ int address_family_name_to_type(const char *name) {
         return _ADDRESS_FAMILY_INVALID;
 }
 
+static const char * const required_address_family_for_online_table[_REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_MAX] = {
+        [REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_IPV4] = "ipv4",
+        [REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_IPV6] = "ipv6",
+        [REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_BOTH] = "both",
+        [REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_ANY]  = "any",
+};
+
+const char *required_address_family_for_online_type_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(required_address_family_for_online_table))
+                return NULL;
+
+        return address_family_table[id];
+}
+
+int required_address_family_for_online_name_to_type(const char *name) {
+        assert(name);
+
+        for (size_t i = REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_IPV4; i < (size_t) ELEMENTSOF(required_address_family_for_online_table); i++)
+                if (str_eq_fold(name, required_address_family_for_online_table[i]))
+                        return i;
+
+        return _ADDRESS_FAMILY_INVALID;
+}
+
 static const char* const device_activation_policy_table[_DEVICE_ACTIVATION_POLICY_MAX] = {
         [DEVICE_ACTIVATION_POLICY_UP] =          "up",
         [DEVICE_ACTIVATION_POLICY_ALWAYS_UP] =   "always-up",
