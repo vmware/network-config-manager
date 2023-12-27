@@ -1749,7 +1749,8 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
-        int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1, keep = -1;
+        int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, use_domains_ipv4 = -1, use_domains_ipv6 = -1,
+                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1, keep = -1;
         DHCPClient dhcp = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
 
@@ -1795,6 +1796,29 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
                         }
 
                         use_dns_ipv6 = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-domains-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use_domains_ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_domains_ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-domains-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use_domains_ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_domains_ipv6 = r;
                         continue;
                 } else if (str_eq_fold(argv[i], "send-release-ipv4")) {
                         parse_next_arg(argv, argc, i);
@@ -1856,7 +1880,16 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_link_dynamic_conf(p, accept_ra, dhcp, use_dns_ipv4, use_dns_ipv6, send_release_ipv4, send_release_ipv6, keep);
+        r = manager_set_link_dynamic_conf(p,
+                                          accept_ra,
+                                          dhcp,
+                                          use_dns_ipv4,
+                                          use_dns_ipv6,
+                                          use_domains_ipv4,
+                                          use_domains_ipv6,
+                                          send_release_ipv4,
+                                          send_release_ipv6,
+                                          keep);
         if (r < 0) {
                 log_warning("Failed to set dynamic configuration for device='%s': %s\n", p->ifname, strerror(-r));
                 return r;
