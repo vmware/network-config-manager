@@ -1020,12 +1020,6 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
         if (r < 0)
                 return r;
 
-        r = netlink_add_link_default_gateway(rt);
-        if (r < 0 && r != -EEXIST) {
-                log_warning("Failed to add Gateway to kernel : %s\n", strerror(-r));
-                return r;
-        }
-
         r = ip_to_str(rt->gw.family, &rt->gw, &a);
         if (r < 0)
                 return r;

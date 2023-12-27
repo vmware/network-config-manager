@@ -151,8 +151,8 @@ static int help(void) {
                                                       "\n\t\t\t\t      scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN]"
                                                       "\n\t\t\t\t      prefix-route|pr [PREFIXROUTE BOOLEAN] Configures device Address.\n"
                "  remove-addr                  dev [DEVICE] address|a|addr [ADDRESS] Removes address from device.\n"
-               "  add-default-gw               dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures device default Gateway.\n"
-               "  set-gw                       dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS] Configures device default Gateway.\n"
+               "  set-gw                       dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures device default Gateway.\n"
+               "  set-gw-family                       dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS] Configures device default IPv4/IPv6 Gateway.\n"
                "  remove-gw                    dev [DEVICE] f|family [ipv4|ipv6|yes] Removes Gateway from device.\n"
                "  add-route                    dev [DEVICE] gw [GATEWAY ADDRESS] dest [DESTINATION ADDRESS] src [SOURCE ADDRESS] pref-src [PREFFREDSOURCE ADDRESS]"
                                                      "\n\t\t\t\t      metric [METRIC NUMBER] scope [SCOPE {global|site|link|host|nowhere}] mtu [MTU NUMBER]"
@@ -394,8 +394,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "add-addr",                      "aa",               4,        WORD_ANY, false, ncm_link_add_address },
                 { "show-addr",                     "a",                1,        WORD_ANY, false, ncm_display_one_link_addresses },
                 { "remove-addr",                   "raddr",            3,        WORD_ANY, false, ncm_link_remove_address },
-                { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_add_default_gateway },
                 { "set-gw",                        "sgw",              4,        WORD_ANY, false, ncm_link_set_default_gateway },
+                { "set-gw-family",                 "sgwf",             4,        WORD_ANY, false, ncm_link_set_default_gateway_family },
                 { "remove-gw",                     "rgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
                 { "add-route",                     "ar" ,              4,        WORD_ANY, false, ncm_link_add_route },
                 { "set-ipv4",                      "sip4" ,            2,        WORD_ANY, false, ncm_link_set_ipv4 },
@@ -500,6 +500,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_remove_route },
                 { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
                 { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_remove_address },
+                { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_set_default_gateway },
                 {}
         };
 

@@ -1412,7 +1412,7 @@ _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
         return 0;
 }
 
-_public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
+_public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
         _auto_cleanup_ Route *rt4 = NULL, *rt6 = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r, onlink4 = -1, onlink6 = -1;
@@ -1508,7 +1508,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_link_add_default_gateway(int argc, char *argv[]) {
+_public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ IPAddress *gw = NULL;
         _auto_cleanup_ Route *rt = NULL;
