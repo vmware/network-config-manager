@@ -1231,20 +1231,20 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, Addr
         if (r < 0)
                 return r;
 
-        if (family >= 0)
+        if (family > 0)
                 return manager_remove_gateway_or_route_full(network, gateway, family);
 
         if (gateway) {
                 r = parse_config_file(network, "Route", "Gateway", &config);
                 if (r >= 0) {
-                        r = remove_section_from_config_file_key(network, "Route", "Gateway");
+                        r = remove_section_from_config_file_key(network, "Route", "Gateway", true);
                         if (r < 0)
                                 return r;
                 }
         } else {
                 r = parse_config_file(network, "Route", "Destination", &config);
                 if (r >= 0) {
-                        r = remove_section_from_config_file_key(network, "Route", "Destination");
+                        r = remove_section_from_config_file_key(network, "Route", "Destination", true);
                         if (r < 0)
                                 return r;
                 }
