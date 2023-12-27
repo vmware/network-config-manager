@@ -154,6 +154,8 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx,
                                  DHCPClient mode,
                                  int use_dns_ipv4,
                                  int use_dns_ipv6,
+                                 int use_domains_ipv4,
+                                 int use_domains_ipv6,
                                  int send_release_ipv4,
                                  int send_release_ipv6) {
 
@@ -183,6 +185,18 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx,
 
         if (use_dns_ipv6 >= 0) {
                 r = key_file_set_str(key_file, "DHCPv6", "UseDNS", bool_to_str(use_dns_ipv6));
+                if (r < 0)
+                        return r;
+        }
+
+        if (use_domains_ipv4 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "UseDomains", bool_to_str(use_domains_ipv4));
+                if (r < 0)
+                        return r;
+        }
+
+        if (use_domains_ipv6 >= 0) {
+                r = key_file_set_str(key_file, "DHCPv6", "UseDomains", bool_to_str(use_domains_ipv6));
                 if (r < 0)
                         return r;
         }

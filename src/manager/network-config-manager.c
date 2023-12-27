@@ -557,7 +557,7 @@ _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
-        int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, send_release_ipv4 = -1, send_release_ipv6 = -1;
+        int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, use_domains_ipv4 = -1, use_domains_ipv6 = -1, send_release_ipv4 = -1, send_release_ipv6 = -1;
         _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClient dhcp = _DHCP_CLIENT_INVALID;
 
@@ -604,6 +604,29 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
 
                         use_dns_ipv6 = r;
                         continue;
+                } else if (str_eq_fold(argv[i], "use-domains-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-domains-ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_domains_ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-domains-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-domains-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_domains_ipv6 = r;
+                        continue;
                 } else if (str_eq_fold(argv[i], "send-release-ipv4")) {
                         parse_next_arg(argv, argc, i);
 
@@ -643,9 +666,16 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_link_dhcp_client(p, dhcp, use_dns_ipv4, use_dns_ipv6, send_release_ipv4, send_release_ipv6);
+        r = manager_set_link_dhcp_client(p,
+                                         dhcp,
+                                         use_dns_ipv4,
+                                         use_dns_ipv6,
+                                         use_domains_ipv4,
+                                         use_domains_ipv6,
+                                         send_release_ipv4,
+                                         send_release_ipv6);
         if (r < 0) {
-                log_warning("Failed to set DHCP configuration for device='%s': %s\n", p->ifname, strerror(-r));
+                log_warning("Failed to set DHCP configuration for device='%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -1802,7 +1832,7 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
 
                         r = parse_bool(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse use_domains_ipv4='%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse use-domains-ipv4='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -1814,7 +1844,7 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
 
                         r = parse_bool(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse use_domains_ipv6='%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse use-domains-ipv6='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
