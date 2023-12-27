@@ -875,10 +875,6 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
                 return r;
         }
 
-        r = set_file_permisssion(network, "systemd-network");
-        if (r < 0)
-                return r;
-
         return dbus_network_reload();
 }
 
@@ -1002,14 +998,11 @@ int manager_configure_default_gateway_full(const IfNameIndex *ifidx, Route *rt4,
                 return r;
         }
 
-        r = set_file_permisssion(network, "systemd-network");
-        if (r < 0)
-                return r;
-
         return dbus_network_reload();
 }
 
 int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *network = NULL, *a = NULL;
         int r;
 
@@ -1024,18 +1017,24 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_str(network, "Route", "Gateway", a);
-        if (r < 0) {
-                log_warning("Failed to write to configuration file: %s", network);
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
                 return r;
+
+        r = key_file_set_str(key_file, "Route", "Gateway", a);
+        if (r < 0)
+                return r;
+
+        if (rt->onlink >= 0) {
+                r = key_file_set_str(key_file, "Route", "GatewayOnlink", bool_to_str(rt->onlink));
+                if (r < 0)
+                        return r;
         }
 
-        if (rt->onlink > 0) {
-                r = set_config_file_str(network, "Route", "GatewayOnlink", bool_to_str(rt->onlink));
-                if (r < 0) {
-                        log_warning("Failed to write to configuration file: %s", network);
-                        return r;
-                }
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
         }
 
         return dbus_network_reload();
@@ -1281,10 +1280,6 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
                 return r;
         }
 
-        r = set_file_permisssion(network, "systemd-network");
-        if (r < 0)
-                return r;
-
         return dbus_network_reload();
 }
 
@@ -1328,10 +1323,6 @@ int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *
                 log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
-
-        r = set_file_permisssion(network, "systemd-network");
-        if (r < 0)
-                return r;
 
         return dbus_network_reload();
 }
@@ -1675,10 +1666,6 @@ int manager_configure_dhcpv4_server(const IfNameIndex *i,
                 log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
-
-        r = set_file_permisssion(network, "systemd-network");
-        if (r < 0)
-                return r;
 
         return dbus_network_reload();
 }
