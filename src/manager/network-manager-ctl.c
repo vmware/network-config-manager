@@ -138,7 +138,7 @@ static int help(void) {
                "  set-link-rfo                 dev [DEVICE] f|family [ipv4|ipv6|yes] Configures device required family for online.\n"
                "  set-link-ap                  dev [DEVICE] ap|act-policy [up|always-up|manual|always-down|down|bound] Configures device activation policy.\n"
                "  set-dhcp                     dev [DEVICE] dhcp [DHCP {yes|no|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN]"
-                                                      "\n\t\t\t\t      send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN] \n"
+                                                      "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN] Configures DHCP client.\n"
                "  set-dhcp4-cid                dev [DEVICE] id [IDENTIFIER {mac|duid|duid-only} Configures device DHCPv4 identifier.\n"
                "  set-dhcp-iaid                dev [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID)\n"
                "  set-dhcp-duid                dev|system [DEVICE] family|f [ipv4|ipv6|4|6] duid [DUID {link-layer-time|vendor|link-layer|uuid}] data [RAWDATA]"
