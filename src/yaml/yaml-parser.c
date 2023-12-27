@@ -277,7 +277,7 @@ int parse_yaml_activation_policy(const char *key,
         activation_policy = (char **) userdata;
         r = device_activation_policy_name_to_type(value);
         if (r < 0) {
-                log_warning("Failed to parse activation-mode='%s': %s", value, strerror(EINVAL));
+                log_warning("Failed to parse ActivationPolicy='%s': %s", value, strerror(EINVAL));
                 return r;
         }
 
@@ -352,7 +352,7 @@ int parse_yaml_dhcp_client_identifier(const char *key,
 
         r = dhcp_client_identifier_to_mode((char *) value);
         if (r < 0) {
-                log_warning("Failed to parse dhcp client identifier='%s'\n", value);
+                log_warning("Failed to parse dhcp client identifier='%s'", value);
                 return r;
         }
 
@@ -415,7 +415,7 @@ int parse_yaml_link_local_type(const char *key,
 
         r = link_local_address_type_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to parse link local address type='%s'\n", value);
+                log_warning("Failed to parse link local address type='%s'", value);
                 return r;
         }
         n->link_local = r;
@@ -441,7 +441,7 @@ int parse_yaml_keep_configuration(const char *key,
 
         r = keep_configuration_type_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to parse keep configuration mode='%s'\n", value);
+                log_warning("Failed to parse keep configuration mode='%s'", value);
                 return r;
         }
         n->keep_configuration = r;
@@ -467,7 +467,7 @@ int parse_yaml_ipv6_address_generation_mode(const char *key,
 
         r = ipv6_link_local_address_gen_type_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to parse IPv6 link local address generation mode='%s'\n", value);
+                log_warning("Failed to parse IPv6 link local address generation mode='%s'", value);
                 return r;
         }
         n->ipv6_address_generation = r;
@@ -493,7 +493,7 @@ int parse_yaml_infiniband_mode(const char *key,
 
         r = ipoib_name_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to parse ipoib mode='%s'\n", value);
+                log_warning("Failed to parse ipoib mode='%s'", value);
                 return r;
         }
         n->ipoib_mode = r;
@@ -519,7 +519,7 @@ int parse_yaml_dhcp6_without_ra(const char *key,
 
         r = dhcp6_client_start_name_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to parse DHCP6 client start mode='%s'\n", value);
+                log_warning("Failed to parse DHCP6 client start mode='%s'", value);
                 return r;
         }
         n->dhcp6_client_start_mode = r;
@@ -546,7 +546,7 @@ int parse_yaml_ipv6_privacy_extensions(const char *key,
 
         r = ipv6_privacy_extensions_to_type((const char *) value);
         if (r < 0) {
-                log_warning("Failed to parse IPv6 Privacy extension='%s'\n", value);
+                log_warning("Failed to parse IPv6PrivacyExtension='%s'", value);
                 return r;
         }
         n->ipv6_privacy = r;
@@ -572,7 +572,7 @@ int parse_yaml_bond_mode(const char *key,
 
         r = bond_name_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to parse Bond mode='%s'\n", value);
+                log_warning("Failed to parse Bond mode='%s'", value);
                 return r;
         }
         b->mode = r;
@@ -598,7 +598,7 @@ int parse_yaml_macvlan_mode(const char *key,
 
         r = macvlan_name_to_mode((const char *) value);
         if (r < 0) {
-                log_warning("Failed to parse MACVLAN mode='%s'\n", value);
+                log_warning("Failed to parse MACVLAN mode='%s'", value);
                 return r;
 
         }
@@ -627,7 +627,7 @@ int parse_yaml_address(const char *key,
 
         r = parse_ip_from_str(value, &address);
         if (r < 0) {
-                log_warning("Failed to parse address %s = %s", key, value);
+                log_warning("Failed to parse address='%s': %s", key, value);
                 return r;
         }
 
@@ -881,7 +881,7 @@ int parse_yaml_route_type(const char *key,
 
         r = route_type_to_mode(value);
         if (r < 0) {
-                log_warning("Failed to parse route type='%s'\n", value);
+                log_warning("Failed to parse route type='%s'", value);
                 return r;
         }
         rt->type = r;
@@ -908,7 +908,7 @@ int parse_yaml_route_scope(const char *key,
 
         r = route_scope_type_to_mode(value);
         if (r < 0) {
-                log_warning("Failed to parse route scope='%s'\n", value);
+                log_warning("Failed to parse route scope='%s'", value);
                 return r;
         }
         rt->scope = r;
@@ -1070,7 +1070,7 @@ int parse_yaml_bond_lacp_rate(const char *key,
 
         r = bond_lacp_rate_to_mode(value);
         if (r < 0) {
-                log_warning("Failed to parse bond lacp rate type='%s'\n", value);
+                log_warning("Failed to parse bond lacp rate type='%s'", value);
                 return r;
         }
 
@@ -1098,7 +1098,7 @@ int parse_yaml_bond_arp_validate(const char *key,
 
         r = bond_arp_validate_table_name_to_mode(value);
         if (r < 0) {
-                log_warning("Failed to parse bond arp validate type='%s'\n", value);
+                log_warning("Failed to parse bond arp validate type='%s'", value);
                 return r;
         }
 
@@ -1126,7 +1126,7 @@ int parse_yaml_bond_fail_over_mac(const char *key,
 
         r = bond_fail_over_mac_name_to_mode(value);
         if (r < 0) {
-                log_warning("Failed to parse bond fail over mac type='%s'\n", value);
+                log_warning("Failed to parse bond fail over mac type='%s'", value);
                 return r;
         }
 
@@ -1154,7 +1154,7 @@ int parse_yaml_bond_ad_select(const char *key,
 
         r = bond_ad_select_name_to_mode(value);
         if (r < 0) {
-                log_warning("Failed to parse bond fail over mac type='%s'\n", value);
+                log_warning("Failed to parse bond fail over mac type='%s'", value);
                 return r;
         }
 
@@ -1182,7 +1182,7 @@ int parse_yaml_bond_primary_reselect(const char *key,
 
         r = bond_primary_reselect_name_to_mode(value);
         if (r < 0) {
-                log_warning("Failed to parse bond primary reselect type='%s'\n", value);
+                log_warning("Failed to parse bond primary reselect type='%s'", value);
                 return r;
         }
 
@@ -1210,7 +1210,7 @@ int parse_yaml_bond_xmit_hash_policy(const char *key,
 
         r = bond_xmit_hash_policy_name_to_mode(value);
         if (r < 0) {
-                log_warning("Failed to parse bond xmit hash policy type='%s'\n", value);
+                log_warning("Failed to parse bond xmit hash policy type='%s'", value);
                 return r;
         }
 
@@ -1317,7 +1317,7 @@ int parse_yaml_bridge_path_cost(const char *key,
 
                 r = parse_uint32(scalar(v), &t);
                 if (r < 0) {
-                        log_warning("Failed to parse bridge cost='%s'\n", scalar(v));
+                        log_warning("Failed to parse bridge cost='%s'", scalar(v));
                         return r;
                 }
 
@@ -1361,7 +1361,7 @@ int parse_yaml_bridge_port_priority(const char *key,
 
                 r = parse_uint16(scalar(v), &t);
                 if (r < 0) {
-                        log_warning("Failed to parse bridge cost='%s'\n", scalar(v));
+                        log_warning("Failed to parse bridge cost='%s'", scalar(v));
                         return r;
                 }
 
