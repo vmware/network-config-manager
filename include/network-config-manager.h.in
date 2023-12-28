@@ -174,4 +174,3 @@ int ncm_get_link_status(const char *ifname, char **ret);
 /* deprecated API*/
 
 #define ncm_link_add_default_gateway ncm_link_set_default_gateway
-#define ncm_add_dns_domains ncm_set_dns_domains
