@@ -3105,6 +3105,7 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
 }
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
+        _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL, *dns_sec = NULL;
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_strv_ char **dns_config = NULL;
@@ -3150,18 +3151,33 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
-                printf("               DNS: ");
+                _cleanup_(set_freep) Set *all_dns = NULL;
+
+                r = set_new(&all_dns, NULL, NULL);
+                if (r < 0) {
+                        log_debug("Failed to init set for DNS Servers: %s", strerror(-r));
+                        return r;
+                }
+
+                printf("       DNS Servers: ");
 
                 for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(itr);
-                        if (!d->ifindex)
+
+                        if (p &&d->ifindex == 0)
                                 continue;
 
                         r = ip_to_str(d->address.family, &d->address, &pretty);
-                        if (r >= 0)
-                                printf("%s ", str_strip(pretty));
+                        if (r < 0)
+                                continue;
+
+                        if (!set_add(all_dns, strdup(pretty)))
+                                continue;
+
+                        printf("%s ", str_strip(pretty));
+                        steal_ptr(pretty);
                 }
                 printf("\n");
         }
@@ -3178,7 +3194,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         r = dbus_acquire_dns_servers_from_resolved("FallbackDNS", &fallback);
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
 
-                printf("     Fallback DNS: ");
+                printf("Fallback DNS Servers: ");
                 for (itr = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
 
@@ -3187,11 +3203,20 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                         r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r >= 0)
                                 printf("%s ", pretty);
-
                 }
-                printf("\n\n");
         }
 
+        (void) dbus_acqure_dns_setting_from_resolved("MulticastDNS", &mdns);
+        (void) dbus_acqure_dns_setting_from_resolved("LLMNR", &llmnr);
+        (void) dbus_acqure_dns_setting_from_resolved("DNSOverTLS", &dns_over_tls);
+        (void) dbus_acqure_dns_setting_from_resolved("ResolvConfMode", &conf_mode);
+        (void) dbus_acqure_dns_setting_from_resolved("DNSSEC", &dns_sec);
+
+        printf("      DNS Settings: ");
+        printf("MulticastDNS (%s) LLMNR (%s) DNSOverTLS (%s) ResolvConfMode (%s) DNSSEC (%s)\n",
+               str_na(mdns), str_na(llmnr), str_na(dns_over_tls), str_na(conf_mode), str_na(dns_sec));
+
+        printf("\n");
         if (dns && !g_sequence_is_empty(dns->dns_servers)) {
                 if (beautify_enabled())
                         printf("%5s %-20s %-14s\n", "INDEX", "DEVICE", "DNS");
@@ -3200,8 +3225,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                         _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(itr);
-
-                        if (!d->ifindex)
+                        if (d->ifindex == 0 || (p && p->ifindex != d->ifindex))
                                 continue;
 
                         if_indextoname(d->ifindex, buf);
