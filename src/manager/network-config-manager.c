@@ -3292,8 +3292,10 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
+                        continue;
                 } else if (str_eq_fold(argv[i], "dns")) {
                         _auto_cleanup_strv_ char **s = NULL;
+                        bool white_space = false;
 
                         parse_next_arg(argv, argc, i);
 
@@ -3322,13 +3324,17 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                                         log_warning("Failed to parse DNS Servers: %s", strerror(-r));
                                         return r;
                                 }
+                                white_space = true;
                         }
 
                         dns = strv_join(" ", s);
                         if (!dns)
                                 return log_oom();
 
-                        continue;
+                        if (!white_space)
+                                continue;
+                        else
+                                break;
                 } else if (str_eq_fold(argv[i], "use-dns-ipv4")) {
                         parse_next_arg(argv, argc, i);
 
@@ -3353,6 +3359,9 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                         ipv6 = r;
                         continue;
                 }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_set_dns_server(p, dns, ipv4, ipv6);

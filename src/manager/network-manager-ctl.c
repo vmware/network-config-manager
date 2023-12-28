@@ -494,6 +494,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "nft-run",                       "nftr",             WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
                 /* Deprecated */
                 { "show",                          "",                 WORD_ANY, WORD_ANY, false, ncm_link_status },
+                { "add-dns",                       "adns",             2,        WORD_ANY, false, ncm_set_dns_server },
                 { "add-domain",                    "adomain",          1,        WORD_ANY, false, ncm_set_dns_domains },
                 { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
                 { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_remove_route },
