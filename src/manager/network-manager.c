@@ -2068,9 +2068,8 @@ int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6) 
         return dbus_network_reload();
 }
 
-int manager_add_dns_server_domain(const IfNameIndex *i, char **domains, bool system, bool global) {
+int manager_set_dns_server_domain(const IfNameIndex *i, char **domains, bool system, bool global) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config_domain = NULL, *a = NULL;
-        char **d;
         int r;
 
         assert(domains);
@@ -2093,11 +2092,9 @@ int manager_add_dns_server_domain(const IfNameIndex *i, char **domains, bool sys
                         return r;
         }
 
-        strv_foreach(d, domains) {
-                a = strjoin(" ", *d, a, NULL);
-                if (!a)
-                        return log_oom();
-        }
+        a = strv_join(" ", domains);
+        if (!a)
+                return log_oom();
 
         r = set_config_file_str(network, "Network", "Domains", a);
         if (r < 0) {
