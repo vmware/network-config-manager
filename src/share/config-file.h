@@ -79,6 +79,8 @@ int key_file_parse_int(KeyFile *key_file, const char *section, const char *k, un
 int key_file_add_str(KeyFile *key_file, const char *section, const char *k, const char *v);
 int add_key_to_section_str(const char *path, const char *section, const char *k, const char *v);
 
+int key_file_remove_section_key_value(KeyFile *key_file, const char *section, const char *k, const char *v);
+
 int remove_key_from_config_file(const char *path, const char *section, const char *k);
 int remove_key_value_from_config_file(const char *path, const char *section, const char *k, const char *v);
 

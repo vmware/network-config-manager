@@ -529,6 +529,31 @@ int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, uin
         return set_file_permisssion(key_file->name, "systemd-network");
 }
 
+int key_file_remove_section_key_value(KeyFile *key_file, const char *section, const char *k, const char *v) {
+        assert(key_file);
+        assert(section);
+        assert(k);
+
+        for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
+                Section *s = (Section *) iter->data;
+                GList *new_link;
+
+                new_link = g_list_previous(iter);
+                if (str_eq(s->name, section)) {
+                        for (GList *i = s->keys; i; i = g_list_next (i)) {
+                                Key *key = (Key *) i->data;
+
+                                if (str_eq(key->name, k) && str_eq(key->v, v)) {
+                                        key_file->sections = g_list_delete_link(key_file->sections, iter);
+                                        return 0;
+                                }
+                        }
+                }
+        }
+
+        return -ENXIO;
+}
+
 int remove_key_from_config_file(const char *path, const char *section, const char *k) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
