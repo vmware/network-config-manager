@@ -3150,7 +3150,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
-                display(beautify_enabled() ? true : false, ansi_color_bold_cyan(), "             DNS: ");
+                printf("               DNS: ");
 
                 for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
@@ -3171,16 +3171,14 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 _auto_cleanup_ char *pretty = NULL;
 
                 r = ip_to_str(current->address.family, &current->address, &pretty);
-                if (r >= 0) {
-                        display(beautify_enabled(), ansi_color_bold_cyan(), "CurrentDNSServer:");
-                        printf(" %s\n", pretty);
-                }
+                if (r >= 0)
+                        printf("Current DNS Server: %s\n", pretty);
         }
 
         r = dbus_acquire_dns_servers_from_resolved("FallbackDNS", &fallback);
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
 
-                display(beautify_enabled(), ansi_color_bold_cyan(), "     FallbackDNS: ");
+                printf("     Fallback DNS: ");
                 for (itr = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
 
@@ -3196,7 +3194,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         if (dns && !g_sequence_is_empty(dns->dns_servers)) {
                 if (beautify_enabled())
-                        printf("%5s %-20s %-14s\n", "INDEX", "LINK", "DNS");
+                        printf("%5s %-20s %-14s\n", "INDEX", "DEVICE", "DNS");
 
                 for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
@@ -3450,8 +3448,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 i = g_sequence_get_begin_iter(domains->dns_domains);
                 d = g_sequence_get(i);
 
-                display(beautify_enabled(), ansi_color_bold_cyan(), "DNS Domain: ");
-                printf("%s\n", d->domain);
+                printf("Search Domains: %s\n", d->domain);
         } else {
                 _cleanup_(set_freep) Set *all_domains = NULL;
 
@@ -3461,7 +3458,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                         return r;
                 }
 
-                display(beautify_enabled(), ansi_color_bold_cyan(), "DNS Domain: ");
+                printf("Search Domains: ");
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i))  {
                         char *s;
 
@@ -3477,16 +3474,14 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                         if (!s)
                                 log_oom();
 
-                        if (!set_add(all_domains, s)) {
-                                log_debug("Failed to add domain to set '%s': %s", d->domain, strerror(-r));
-                                return -EINVAL;
-                        }
+                        if (!set_add(all_domains, s))
+                                continue;
 
                         printf("%s ", d->domain);
                 }
 
                 if (beautify_enabled() && g_sequence_get_length(domains->dns_domains) > 0)
-                        printf("\n%5s %-20s %-18s\n", "INDEX", "LINK", "Domain");
+                        printf("\n%5s %-20s %-18s\n", "INDEX", "DEVICE", "Search Domain");
 
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
                         d = g_sequence_get(i);
@@ -3673,7 +3668,7 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 return 0;
 
         if (beautify_enabled())
-                printf("\n%5s %-20s %-14s\n", "INDEX", "LINK", "NTP");
+                printf("\n%5s %-20s %-14s\n", "INDEX", "DEVICE", "NTP");
 
         for (size_t i = 0; i < json_object_array_length(ja); i++) {
                 json_object *ntp = json_object_array_get_idx(ja, i);
