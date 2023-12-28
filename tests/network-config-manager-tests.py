@@ -923,24 +923,6 @@ class TestCLINetwork:
         assert(parser.get('DHCPv4', 'UseDomains') == 'yes')
         assert(parser.get('DHCPv6', 'UseDomains') == 'yes')
 
-    def test_cli_add_dns(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
-        subprocess.check_call("sleep 5", shell = True)
-        subprocess.check_call("nmctl add-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-
-        dns = parser.get('Network', 'DNS')
-        print(dns)
-        assert(dns.find("192.168.1.46") != -1)
-        assert(dns.find("192.168.1.45") != -1)
-
     def test_cli_set_dns(self):
         assert(link_exist('test99') == True)
 
@@ -1005,7 +987,7 @@ class TestCLINetwork:
 
         subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
         subprocess.check_call("sleep 5", shell = True)
-        subprocess.check_call("nmctl add-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
+        subprocess.check_call("nmctl set-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
 
         subprocess.check_call("nmctl sdm dev test99 -j", shell = True)
 
@@ -1035,7 +1017,7 @@ class TestCLINetwork:
 
         subprocess.check_call("nmctl set-dhcp dev test99 dhcp no", shell = True)
         subprocess.check_call("sleep 5", shell = True)
-        subprocess.check_call("nmctl add-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
+        subprocess.check_call("nmctl set-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
         subprocess.check_call("nmctl sdm dev test99 -j", shell = True)
 
         out = subprocess.check_output(['/usr/bin/nmctl', 'sdm', 'dev', 'test99', '-j'], text=True)
@@ -1052,7 +1034,7 @@ class TestCLINetwork:
         subprocess.check_call("nmctl set-dhcp4 dev test99 use-dns no", shell = True)
         subprocess.check_call("nmctl set-dhcp6 dev test99 use-dns no", shell = True)
         subprocess.check_call("sleep 5", shell = True)
-        subprocess.check_call("nmctl add-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
+        subprocess.check_call("nmctl set-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
         subprocess.check_call("nmctl sdm dev test99 -j", shell = True)
 
         out = subprocess.check_output(['/usr/bin/nmctl', 'sdm', 'dev', 'test99', '-j'], text=True)
@@ -1069,7 +1051,7 @@ class TestCLINetwork:
         subprocess.check_call("nmctl set-dhcp4 dev test99 use-dns yes", shell = True)
         subprocess.check_call("nmctl set-dhcp6 dev test99 use-dns yes", shell = True)
         subprocess.check_call("sleep 5", shell = True)
-        subprocess.check_call("nmctl add-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
+        subprocess.check_call("nmctl set-dns dev test99 dns 192.168.1.45 192.168.1.46", shell = True)
         subprocess.check_call("nmctl sdm dev test99 -j", shell = True)
 
         out = subprocess.check_output(['/usr/bin/nmctl', 'sdm', 'dev', 'test99', '-j'], text=True)
@@ -1692,7 +1674,7 @@ class TestCLINetwork:
         assert(link_exist('test99') == True)
 
         assert(call_shell("nmctl set-manage dev test99 manag yes") != 0)
-        assert(call_shell("nmctl add-dns dev test99 ds 192.168.1.45 192.168.1.46") != 0)
+        assert(call_shell("nmctl set-dns dev test99 ds 192.168.1.45 192.168.1.46") != 0)
 
         assert(unit_exist('10-test99.network') == False)
 
@@ -2598,30 +2580,6 @@ class TestCLINetDev:
         assert(unit_exist('10-test-99.network') == False)
         assert(unit_exist('10-bond-98.network') == False)
         assert(unit_exist('10-bond-98.netdev') == False)
-
-class TestCLIGlobalDNSDomain:
-    @pytest.mark.skip(reason="skipping")
-    def test_cli_configure_global_dns_server(self):
-        subprocess.check_call("nmctl add-dns global dns 8.8.4.4 8.8.8.8 8.8.8.1", shell = True)
-
-        parser = configparser.ConfigParser()
-        parser.read('/etc/systemd/resolved.conf')
-
-        dns = parser.get('Resolve', 'DNS')
-        assert(dns.find("8.8.4.4") != -1)
-        assert(dns.find("8.8.8.8") != -1)
-        assert(dns.find("8.8.8.1") != -1)
-
-    @pytest.mark.skip(reason="skipping")
-    def test_cli_configure_global_domain_server(self):
-        subprocess.check_call("nmctl add-domain global domains test1 test2", shell = True)
-
-        parser = configparser.ConfigParser()
-        parser.read('/etc/systemd/resolved.conf')
-
-        d = parser.get('Resolve', 'Domains')
-        assert(dns.find("test1") != -1)
-        assert(dns.find("test2") != -1)
 
 class TestCLINetworkProxy:
     def test_cli_configure_network_proxy(self):
