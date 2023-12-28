@@ -1621,10 +1621,6 @@ int generate_network_config(Network *n) {
                 return r;
         }
 
-        r = set_file_permisssion(network, "systemd-network");
-        if (r < 0)
-                return r;
-
         (void) dbus_network_reload();
         return 0;
 }

@@ -554,7 +554,7 @@ static void test_set_gw_family(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    assert_true(system("nmctl set-gw dev test99 gw6 ::1 gw4 192.168.1.1") >= 0);
+    assert_true(system("nmctl set-gw-family dev test99 gw6 ::1 gw4 192.168.1.1") >= 0);
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);

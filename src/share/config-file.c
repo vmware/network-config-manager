@@ -659,12 +659,13 @@ int remove_section_from_config_file_key_value(const char *path, const char *sect
         return set_file_permisssion(path, "systemd-network");
 }
 
-int remove_section_from_config_file_key(const char *path, const char *section, const char *k) {
+int remove_section_from_config_file_key(const char *path, const char *section, const char *k, bool all) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
         assert(path);
         assert(section);
+        assert(k);
 
         r = parse_key_file(path, &key_file);
         if (r < 0)
@@ -672,14 +673,21 @@ int remove_section_from_config_file_key(const char *path, const char *section, c
 
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
+                GList *new_link;
 
+                new_link = g_list_previous(iter);
                 if (str_eq(s->name, section)) {
                         for (GList *i = s->keys; i; i = g_list_next (i)) {
                                 Key *key = (Key *) i->data;
 
                                 if (str_eq(key->name, k)) {
-                                        key_file->sections = g_list_delete_link(key_file->sections, iter);
-                                        break;
+                                        key_file->sections =  g_list_remove_link(key_file->sections, iter);
+
+                                        key_free(key);
+                                        if (!all)
+                                                break;
+
+                                        iter = new_link;
                                 }
                         }
                 }

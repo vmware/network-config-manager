@@ -1351,7 +1351,7 @@ class TestCLINetwork:
         assert(parser.get('Address', 'DuplicateAddressDetection') == 'ipv4')
         assert(parser.get('Address', 'Label') == 'test')
 
-    def test_cli_add_default_gateway(self):
+    def test_cli_set_default_gateway(self):
         assert(link_exist('test99') == True)
 
         subprocess.check_call("nmctl add-addr dev test99 a 192.168.1.45/24 peer 192.168.1.46/24 dad "
@@ -1364,7 +1364,7 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Address', 'Address') == '192.168.1.45/24')
 
-        subprocess.check_call("nmctl add-default-gw dev test99 gw 192.168.1.1 onlink True", shell = True)
+        subprocess.check_call("nmctl set-gw dev test99 gw 192.168.1.1 onlink True", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
@@ -1809,7 +1809,7 @@ class TestCLINetwork:
 
         assert(unit_exist('10-test99.network') == False)
 
-        assert(call_shell("nmctl add-default-gw dev test99 xgw 192.168.1.1 onlink") != 0)
+        assert(call_shell("nmctl set-gw dev test99 xgw 192.168.1.1 onlink") != 0)
 
     def test_cli_add_route_failure(self):
         assert(link_exist('test99') == True)

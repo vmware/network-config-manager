@@ -28,8 +28,9 @@ int ncm_link_get_addresses(const char *ifname, char ***ret);
 int ncm_link_add_address(int argc, char *argv[]);
 int ncm_link_remove_address(int argc, char *argv[]);
 
-int ncm_link_add_default_gateway(int argc, char *argv[]);
 int ncm_link_set_default_gateway(int argc, char *argv[]);
+int ncm_link_set_default_gateway_family(int argc, char *argv[]);
+
 int ncm_link_add_route(int argc, char *argv[]);
 
 int ncm_link_set_ipv4(int argc, char *argv[]);
@@ -168,3 +169,8 @@ int ncm_nft_run_command(int argc, char *argv[]);
 
 int ncm_get_system_status(char **ret);
 int ncm_get_link_status(const char *ifname, char **ret);
+
+
+/* deprecated API*/
+
+#define ncm_link_add_default_gateway ncm_link_set_default_gateway
