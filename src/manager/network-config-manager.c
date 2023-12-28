@@ -3425,9 +3425,22 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
         _auto_cleanup_ char *config_domain = NULL, *setup = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buffer[LINE_MAX] = {};
-        GSequenceIter *i;
+        GSequenceIter *iter;
         DNSDomain *d;
         int r;
+
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
 
         if (json_enabled())
                 return json_fill_dns_server_domains();
@@ -3443,38 +3456,56 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 return -ENODATA;
         } else if (g_sequence_get_length(domains->dns_domains) == 1) {
 
-                i = g_sequence_get_begin_iter(domains->dns_domains);
-                d = g_sequence_get(i);
+                iter = g_sequence_get_begin_iter(domains->dns_domains);
+                d = g_sequence_get(iter);
 
                 printf("Search Domains: %s\n", d->domain);
         } else {
+                _cleanup_(set_freep) Set *all_search_domains = NULL;
+
+                r = set_new(&all_search_domains, NULL, NULL);
+                if (r < 0) {
+                        log_debug("Failed to init set for DNS Search Servers: %s", strerror(-r));
+                        return r;
+                }
+
                 printf("Search Domains: ");
-                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i))  {
-                        d = g_sequence_get(i);
+                for (iter = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(iter); iter = g_sequence_iter_next(iter))  {
+                        char *s = NULL;
+
+                        d = g_sequence_get(iter);
 
                         if (*d->domain == '.')
                                 continue;
 
+                        s = strdup(d->domain);
+                        if (!s)
+                                return log_oom();
+
+                        if (!set_add(all_search_domains, s))
+                                continue;
+
                         printf("%s ", d->domain);
+                        steal_ptr(s);
                 }
 
+                printf("\n");
                 if (beautify_enabled() && g_sequence_get_length(domains->dns_domains) > 0)
                         printf("\n%5s %-20s %-18s\n", "INDEX", "DEVICE", "Search Domain");
 
-                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        d = g_sequence_get(i);
+                for (iter = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(iter); iter = g_sequence_iter_next(iter)) {
+                        d = g_sequence_get(iter);
 
-                        sprintf(buffer, "%" PRIu32, d->ifindex);
-
-                        if (!d->ifindex)
+                        if (d->ifindex == 0)
                                 continue;
 
-                        r = parse_ifname_or_index(buffer, &p);
-                        if (r < 0) {
-                                log_warning("Failed to find device '%d': %s", d->ifindex, strerror(-r));
-                                return r;
-                        }
-                        printf("%5d %-20s %-18s\n", d->ifindex, p->ifname, *d->domain == '.' ? "~." : d->domain);
+                        if (p && p->ifindex != d->ifindex)
+                                continue;
+
+                        if (!if_indextoname(d->ifindex, buffer))
+                                continue;
+
+                        printf("%5d %-20s %-18s\n", d->ifindex, buffer, *d->domain == '.' ? "~." : d->domain);
                 }
         }
 
