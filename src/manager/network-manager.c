@@ -878,8 +878,10 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-int manager_remove_link_address(const IfNameIndex *ifidx, const char *a) {
+int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *setup = NULL, *network = NULL;
+        char **a;
         int r;
 
         assert(ifidx);
@@ -897,9 +899,17 @@ int manager_remove_link_address(const IfNameIndex *ifidx, const char *a) {
                 return r;
         }
 
-        r = remove_section_from_config_file_key_value(network, "Address", "Address", a);
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        strv_foreach(a, addresses) {
+                key_file_remove_section_key_value(key_file, "Address", "Address", *a);
+        }
+
+        r = key_file_save (key_file);
         if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
 
