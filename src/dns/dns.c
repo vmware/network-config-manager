@@ -50,34 +50,6 @@ int dns_servers_new(DNSServers **ret) {
                 return -ENOMEM;
 
         *ret = steal_ptr(h);
-
-        return 0;
-}
-
-static int dns_compare_func(gconstpointer x, gconstpointer y, gpointer user_data) {
-        const DNSServer *a, *b;
-
-        assert(x);
-        assert(y);
-
-        a = x;
-        b = y;
-
-        if (a->address.family != b->address.family)
-                return a->address.family - b->address.family;
-
-        if (a->ifindex != b->ifindex)
-                return a->ifindex - b->ifindex;
-
-        switch(a->address.family) {
-                case AF_INET:
-                        return memcmp(&a->address.in, &b->address.in, sizeof(struct in_addr));
-                case AF_INET6:
-                        return memcmp(&a->address.in6, &b->address.in6, sizeof(struct in6_addr));
-                default:
-                        break;
-        }
-
         return 0;
 }
 
@@ -94,12 +66,9 @@ int dns_server_add(DNSServers **h, DNSServer *a) {
                         return r;
         }
 
-        iter = g_sequence_lookup((*h)->dns_servers, a, dns_compare_func, NULL);
-        if (!iter) {
-                iter = g_sequence_insert_sorted((*h)->dns_servers, a, dns_compare_func, NULL);
-                if (!iter)
-                        return -EEXIST;
-        }
+        iter = g_sequence_append((*h)->dns_servers, a);
+        if (!iter)
+                return -EEXIST;
 
         return 0;
 }
@@ -152,21 +121,6 @@ void dns_domains_free(DNSDomains *d) {
         free(d);
 }
 
-static int dns_domain_compare_func(gconstpointer x, gconstpointer y, gpointer user_data) {
-        const DNSDomain *a, *b;
-
-        assert(x);
-        assert(y);
-
-        a = x;
-        b = y;
-
-        if (a->ifindex != b->ifindex)
-                return a->ifindex - b->ifindex;
-
-        return str_eq(a->domain, b->domain);
-}
-
 int dns_domain_add(DNSDomains **h, DNSDomain *a) {
         GSequenceIter *iter = NULL;
         int r;
@@ -180,12 +134,9 @@ int dns_domain_add(DNSDomains **h, DNSDomain *a) {
                         return r;
         }
 
-        iter = g_sequence_lookup((*h)->dns_domains, a, dns_compare_func, NULL);
-        if (!iter) {
-                iter = g_sequence_insert_sorted((*h)->dns_domains, a, dns_domain_compare_func, NULL);
-                if (!iter)
-                        return -EEXIST;
-        }
+        iter = g_sequence_append((*h)->dns_domains, a);
+        if (!iter)
+                return -EEXIST;
 
         return 0;
 }
