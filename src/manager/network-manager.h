@@ -76,7 +76,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
                                    const int prefix_route,
                                    const char *label);
 
-int manager_remove_link_address(const IfNameIndex *ifidx, const char *a);
+int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses);
 
 int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt);
 int manager_configure_default_gateway_full(const IfNameIndex *ifidx, Route *rt4, Route *rt6);

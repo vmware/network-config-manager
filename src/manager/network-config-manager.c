@@ -1345,9 +1345,9 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_remove_address(int argc, char *argv[]) {
-        _auto_cleanup_ IPAddress *address = NULL;
+        _auto_cleanup_strv_ char **addrs = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_ char *a = NULL;
+        char **d;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -1361,17 +1361,23 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                         }
                         continue;
                 } else if (str_eq_fold(argv[i], "address") || str_eq_fold(argv[i], "a") || str_eq_fold(argv[i], "addr")) {
+                        _auto_cleanup_ IPAddress *a = NULL;
+
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_str(argv[i], &address);
+                        r = argv_to_strv(argc - 4, argv + i, &addrs);
                         if (r < 0) {
-                                log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse addresses: %s", strerror(-r));
                                 return r;
                         }
-                        a = strdup(argv[i]);
-                        if (!a)
-                                return log_oom();
-                        break;
+
+                        strv_foreach(d, addrs) {
+                                r = parse_ip_from_str(*d, &a);
+                                if (r < 0) {
+                                        log_warning("Failed to parse address '%s': %s", *d, strerror(-r));
+                                        return r;
+                                }
+                        }
                 }
         }
 
@@ -1380,14 +1386,14 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        if (!a) {
+        if (!addrs) {
                 log_warning("Failed to parse address: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
 
-        r = manager_remove_link_address(p, a);
+        r = manager_remove_link_address(p, addrs);
         if (r < 0) {
-                log_warning("Failed to remove device address '%s': %s\n", p->ifname, strerror(-r));
+                log_warning("Failed to remove address from device='%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
