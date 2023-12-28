@@ -536,9 +536,7 @@ int key_file_remove_section_key_value(KeyFile *key_file, const char *section, co
 
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
-                GList *new_link;
 
-                new_link = g_list_previous(iter);
                 if (str_eq(s->name, section)) {
                         for (GList *i = s->keys; i; i = g_list_next (i)) {
                                 Key *key = (Key *) i->data;

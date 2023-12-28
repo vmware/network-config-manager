@@ -3409,7 +3409,7 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_add_dns_domains(int argc, char *argv[]) {
+_public_ int ncm_set_dns_domains(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool system = false, global = false;
@@ -3442,14 +3442,14 @@ _public_ int ncm_add_dns_domains(int argc, char *argv[]) {
                 }
         }
 
-        if (!domains && strv_length(domains) <= 0) {
+        if (!domains || strv_length(domains) <= 0) {
                 log_warning("Failed to parse domains: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
-        r = manager_add_dns_server_domain(p, domains, system, global);
+        r = manager_set_dns_server_domain(p, domains, system, global);
         if (r < 0) {
-                log_warning("Failed to add DNS domain: %s", strerror(-r));
+                log_warning("Failed to set DNS domain: %s", strerror(-r));
                 return r;
         }
 

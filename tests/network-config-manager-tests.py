@@ -846,8 +846,9 @@ class TestCLINetwork:
             raise Fail("nmctl show-ntp dev 2 -jfailed: %s" % -retcode)
 
     def test_cli_show_domains(self):
-        subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
+        subprocess.check_call("nmctl set-dns-domains dev test99 domains domain2 domain2 domain3", shell = True)
         subprocess.check_call("nmctl domain", text=True, shell = True)
+        subprocess.check_call("nmctl domain dev test99", text=True, shell = True)
 
     def test_cli_set_dhcp(self):
         assert(link_exist('test99') == True)
