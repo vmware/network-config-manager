@@ -3105,6 +3105,7 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
 }
 
 _public_ int ncm_show_dns_server(int argc, char *argv[]) {
+        _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL, *dns_sec = NULL;
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_strv_ char **dns_config = NULL;
@@ -3150,18 +3151,33 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
 
         r = dbus_acquire_dns_servers_from_resolved("DNS", &dns);
         if (r >= 0 && dns && !g_sequence_is_empty(dns->dns_servers)) {
-                display(beautify_enabled() ? true : false, ansi_color_bold_cyan(), "             DNS: ");
+                _cleanup_(set_freep) Set *all_dns = NULL;
+
+                r = set_new(&all_dns, NULL, NULL);
+                if (r < 0) {
+                        log_debug("Failed to init set for DNS Servers: %s", strerror(-r));
+                        return r;
+                }
+
+                printf("       DNS Servers: ");
 
                 for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(itr);
-                        if (!d->ifindex)
+
+                        if (p &&d->ifindex == 0)
                                 continue;
 
                         r = ip_to_str(d->address.family, &d->address, &pretty);
-                        if (r >= 0)
-                                printf("%s ", str_strip(pretty));
+                        if (r < 0)
+                                continue;
+
+                        if (!set_add(all_dns, strdup(pretty)))
+                                continue;
+
+                        printf("%s ", str_strip(pretty));
+                        steal_ptr(pretty);
                 }
                 printf("\n");
         }
@@ -3171,16 +3187,14 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                 _auto_cleanup_ char *pretty = NULL;
 
                 r = ip_to_str(current->address.family, &current->address, &pretty);
-                if (r >= 0) {
-                        display(beautify_enabled(), ansi_color_bold_cyan(), "CurrentDNSServer:");
-                        printf(" %s\n", pretty);
-                }
+                if (r >= 0)
+                        printf("Current DNS Server: %s\n", pretty);
         }
 
         r = dbus_acquire_dns_servers_from_resolved("FallbackDNS", &fallback);
         if (r >= 0 && !g_sequence_is_empty(fallback->dns_servers)) {
 
-                display(beautify_enabled(), ansi_color_bold_cyan(), "     FallbackDNS: ");
+                printf("Fallback DNS Servers: ");
                 for (itr = g_sequence_get_begin_iter(fallback->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
 
@@ -3189,21 +3203,29 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
                         r = ip_to_str(d->address.family, &d->address, &pretty);
                         if (r >= 0)
                                 printf("%s ", pretty);
-
                 }
-                printf("\n\n");
         }
 
+        (void) dbus_acqure_dns_setting_from_resolved("MulticastDNS", &mdns);
+        (void) dbus_acqure_dns_setting_from_resolved("LLMNR", &llmnr);
+        (void) dbus_acqure_dns_setting_from_resolved("DNSOverTLS", &dns_over_tls);
+        (void) dbus_acqure_dns_setting_from_resolved("ResolvConfMode", &conf_mode);
+        (void) dbus_acqure_dns_setting_from_resolved("DNSSEC", &dns_sec);
+
+        printf("      DNS Settings: ");
+        printf("MulticastDNS (%s) LLMNR (%s) DNSOverTLS (%s) ResolvConfMode (%s) DNSSEC (%s)\n",
+               str_na(mdns), str_na(llmnr), str_na(dns_over_tls), str_na(conf_mode), str_na(dns_sec));
+
+        printf("\n");
         if (dns && !g_sequence_is_empty(dns->dns_servers)) {
                 if (beautify_enabled())
-                        printf("%5s %-20s %-14s\n", "INDEX", "LINK", "DNS");
+                        printf("%5s %-20s %-14s\n", "INDEX", "DEVICE", "DNS");
 
                 for (itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
                         _auto_cleanup_ char *pretty = NULL;
 
                         d = g_sequence_get(itr);
-
-                        if (!d->ifindex)
+                        if (d->ifindex == 0 || (p && p->ifindex != d->ifindex))
                                 continue;
 
                         if_indextoname(d->ifindex, buf);
@@ -3255,83 +3277,6 @@ _public_ int ncm_get_dns_server(char ***ret) {
         return 0;
 }
 
-_public_ int ncm_add_dns_server(int argc, char *argv[]) {
-        _cleanup_(dns_servers_freep) DNSServers *dns = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_strv_ char **d = NULL;
-        bool system = false, global = false;
-        char **s;
-        int r;
-
-        for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
-                        parse_next_arg(argv, argc, i);
-
-                        r = parse_ifname_or_index(argv[i], &p);
-                        if (r < 0) {
-                                log_warning("Failed to find device: %s", argv[i]);
-                                return r;
-                        }
-                        continue;
-                } else if (str_eq_fold(argv[i], "system"))
-                        system = true;
-
-                else if (str_eq_fold(argv[i], "global"))
-                        global = true;
-
-                if (str_eq_fold(argv[i], "dns")) {
-                        parse_next_arg(argv, argc, i);
-
-                        r = argv_to_strv(argc - 4, argv + i, &d);
-                        if (r < 0) {
-                                log_warning("Failed to parse dns addresses: %s", strerror(-r));
-                                return r;
-                        }
-                }
-        }
-
-        if (!d || strv_length(d) <= 0) {
-                log_warning("Failed to parse dns addresses: %s", strerror(EINVAL));
-                return -EINVAL;
-        }
-
-        strv_foreach(s, d) {
-                _auto_cleanup_ IPAddress *a = NULL;
-                _auto_cleanup_ DNSServer *t = NULL;
-
-                r = parse_ip(*s, &a);
-                if (r < 0) {
-                        log_warning("Failed to parse DNS server address: %s", *s);
-                        return r;
-                }
-
-                r = dns_server_new(&t);
-                if (r < 0)
-                        return log_oom();
-
-                *t = (DNSServer) {
-                        .ifindex = p ? p->ifindex : 0,
-                        .address = *a,
-                };
-
-                r = dns_server_add(&dns, t);
-                if (r < 0) {
-                        log_warning("Failed to add DNS server address: %s", *s);
-                        return r;
-                }
-
-                steal_ptr(t);
-        }
-
-        r = manager_add_dns_server(p, dns, system, global);
-        if (r < 0) {
-                log_warning("Failed to add DNS server %s: %s", argv[1], strerror(-r));
-                return r;
-        }
-
-        return 0;
-}
-
 _public_ int ncm_set_dns_server(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *dns = NULL;
@@ -3347,11 +3292,14 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
+                        continue;
                 } else if (str_eq_fold(argv[i], "dns")) {
+                        _auto_cleanup_strv_ char **s = NULL;
+                        bool white_space = false;
+
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
-                                _auto_cleanup_strv_ char **s = NULL;
                                 char **d;
 
                                 s = strsplit(argv[i], ",", -1);
@@ -3370,10 +3318,23 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                                         }
                                 }
 
-                                dns = strv_join(" ", s);
-                                if (!dns)
-                                        return log_oom();
+                       } else {
+                                r = argv_to_strv(argc - 4, argv + i, &s);
+                                if (r < 0) {
+                                        log_warning("Failed to parse DNS Servers: %s", strerror(-r));
+                                        return r;
+                                }
+                                white_space = true;
                         }
+
+                        dns = strv_join(" ", s);
+                        if (!dns)
+                                return log_oom();
+
+                        if (!white_space)
+                                continue;
+                        else
+                                break;
                 } else if (str_eq_fold(argv[i], "use-dns-ipv4")) {
                         parse_next_arg(argv, argc, i);
 
@@ -3398,6 +3359,9 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                         ipv6 = r;
                         continue;
                 }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
         r = manager_set_dns_server(p, dns, ipv4, ipv6);
@@ -3461,124 +3425,87 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
         _auto_cleanup_ char *config_domain = NULL, *setup = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buffer[LINE_MAX] = {};
-        GSequenceIter *i;
+        GSequenceIter *iter;
         DNSDomain *d;
         int r;
+
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                }
+        }
 
         if (json_enabled())
                 return json_fill_dns_server_domains();
 
-        if (argc > 1 && str_eq_fold(argv[1], "system")) {
-                r = parse_ifname_or_index(argv[1], &p);
-                if (r < 0) {
-                        log_warning("Failed to find device '%s': %s", argv[1], strerror(-r));
-                        return r;
-                }
-
-                r = network_parse_link_setup_state(p->ifindex, &setup);
-                if (r < 0) {
-                        log_warning("Failed to parse device setup '%s': %s\n", p->ifname, strerror(-r));
-                        return r;
-                }
-
-                if (str_eq_fold(setup, "unmanaged")) {
-                       _auto_cleanup_strv_ char **a = NULL, **b = NULL;
-                        char **j;
-
-                        r = dns_read_resolv_conf(&a, &b);
-                        if (r < 0) {
-                                log_warning("Failed to read resolv.conf: %s", strerror(-r));
-                                return r;
-
-                        }
-
-                        printf("Domains:");
-                        strv_foreach(j, b) {
-                                printf("%s ", *j);
-                        }
-
-                        printf("\n");
-                        return 0;
-                }
-        }
-
-        if (argc >= 2 && str_eq_fold(argv[1], "system")) {
-                r = manager_read_domains_from_system_config(&config_domain);
-                if (r < 0) {
-                        log_warning("Failed to read DNS domain from '/etc/systemd/resolved.conf': %s", strerror(-r));
-                        return r;
-                }
-
-                printf("%s\n", config_domain);
-                return 0;
-        }
-
         r = dbus_acquire_dns_domains_from_resolved(&domains);
         if (r < 0){
-                log_warning("Failed to acquire DNS domain from 'systemd-resolved': %s", strerror(-r));
+                log_warning("Failed to acquire DNS Search domains from 'systemd-resolved': %s", strerror(-r));
                 return r;
         }
 
         if (!domains || g_sequence_is_empty(domains->dns_domains)) {
-                log_warning("No DNS Domain configured: %s", strerror(ENODATA));
+                log_warning("No DNS Search Domains configured: %s", strerror(ENODATA));
                 return -ENODATA;
         } else if (g_sequence_get_length(domains->dns_domains) == 1) {
 
-                i = g_sequence_get_begin_iter(domains->dns_domains);
-                d = g_sequence_get(i);
+                iter = g_sequence_get_begin_iter(domains->dns_domains);
+                d = g_sequence_get(iter);
 
-                display(beautify_enabled(), ansi_color_bold_cyan(), "DNS Domain: ");
-                printf("%s\n", d->domain);
+                printf("Search Domains: %s\n", d->domain);
         } else {
-                _cleanup_(set_freep) Set *all_domains = NULL;
+                _cleanup_(set_freep) Set *all_search_domains = NULL;
 
-                r = set_new(&all_domains, NULL, NULL);
+                r = set_new(&all_search_domains, NULL, NULL);
                 if (r < 0) {
-                        log_debug("Failed to init set for domains: %s", strerror(-r));
+                        log_debug("Failed to init set for DNS Search Servers: %s", strerror(-r));
                         return r;
                 }
 
-                display(beautify_enabled(), ansi_color_bold_cyan(), "DNS Domain: ");
-                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i))  {
-                        char *s;
+                printf("Search Domains: ");
+                for (iter = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(iter); iter = g_sequence_iter_next(iter))  {
+                        char *s = NULL;
 
-                        d = g_sequence_get(i);
+                        d = g_sequence_get(iter);
 
                         if (*d->domain == '.')
                                 continue;
 
-                        if (set_contains(all_domains, d->domain))
-                                continue;
-
-                        s = g_strdup(d->domain);
+                        s = strdup(d->domain);
                         if (!s)
-                                log_oom();
+                                return log_oom();
 
-                        if (!set_add(all_domains, s)) {
-                                log_debug("Failed to add domain to set '%s': %s", d->domain, strerror(-r));
-                                return -EINVAL;
-                        }
+                        if (!set_add(all_search_domains, s))
+                                continue;
 
                         printf("%s ", d->domain);
+                        steal_ptr(s);
                 }
 
+                printf("\n");
                 if (beautify_enabled() && g_sequence_get_length(domains->dns_domains) > 0)
-                        printf("\n%5s %-20s %-18s\n", "INDEX", "LINK", "Domain");
+                        printf("\n%5s %-20s %-18s\n", "INDEX", "DEVICE", "Search Domain");
 
-                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        d = g_sequence_get(i);
+                for (iter = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(iter); iter = g_sequence_iter_next(iter)) {
+                        d = g_sequence_get(iter);
 
-                        sprintf(buffer, "%" PRIu32, d->ifindex);
-
-                        if (!d->ifindex)
+                        if (d->ifindex == 0)
                                 continue;
 
-                        r = parse_ifname_or_index(buffer, &p);
-                        if (r < 0) {
-                                log_warning("Failed to find device '%d': %s", d->ifindex, strerror(-r));
-                                return r;
-                        }
-                        printf("%5d %-20s %-18s\n", d->ifindex, p->ifname, *d->domain == '.' ? "~." : d->domain);
+                        if (p && p->ifindex != d->ifindex)
+                                continue;
+
+                        if (!if_indextoname(d->ifindex, buffer))
+                                continue;
+
+                        printf("%5d %-20s %-18s\n", d->ifindex, buffer, *d->domain == '.' ? "~." : d->domain);
                 }
         }
 
@@ -3735,7 +3662,7 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
         if (!json_object_object_get_ex(j, "NTP", &ja))
                 return -ENOENT;
 
-        display(beautify_enabled() ? true : false, ansi_color_bold_cyan(), "      NTP Servers: ");
+        printf("      NTP Servers: ");
         for (size_t i = 0; i < json_object_array_length(ja); i++) {
                 json_object *ntp = json_object_array_get_idx(ja, i);
                 json_object *addr = NULL;
@@ -3750,7 +3677,7 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
                 return 0;
 
         if (beautify_enabled())
-                printf("\n%5s %-20s %-14s\n", "INDEX", "LINK", "NTP");
+                printf("\n%5s %-20s %-14s\n", "INDEX", "DEVICE", "NTP");
 
         for (size_t i = 0; i < json_object_array_length(ja); i++) {
                 json_object *ntp = json_object_array_get_idx(ja, i);

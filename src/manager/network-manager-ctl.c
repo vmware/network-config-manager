@@ -168,13 +168,12 @@ static int help(void) {
                                                 "\n\t\t\t\t [invert BOOLEAN] [sport NUMBER] [dport NUMBER] [proto tcp|udp|sctp] Configures Routing Policy Rule.\n"
                "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
                "  set-hostname                 [HOSTNAME] Configures system hostname.\n"
-               "  show-dns                     Show DNS servers.\n"
-               "  add-dns                      dev|global|system [DEVICE] dns [ADDRESS] Configures Link or global DNS servers.\n"
+               "  show-dns                                  Show DNS servers.\n"
                "  set-dns                      dev [DEVICE] dns [SERVER1,SERVER2...] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN].\n"
-               "  set-dns-domains              dev|global|system [DEVICE] domains [DOMAIN] [DOMAIN] [DOMAIN] Configures device or global Domain.\n"
-               "  show-domains                        Show DNS server Domains.\n"
+               "  set-dns-domains              dev [DEVICE] domains [DOMAIN] [DOMAIN] [DOMAIN] Configures device Search Domains.\n"
+               "  show-domains                              Show DNS Search Domains.\n"
                "  revert-resolve-link          dev [DEVICE] dns [BOOLEAN] domain [BOOLEAN] Flushes all DNS server and Domain settings of the device.\n"
-               "  show-ntp                     Show NTP servers.\n"
+               "  show-ntp                                  Show NTP servers.\n"
                "  set-lla                      dev [DEVICE] [LinkLocalAddressing BOOLEAN|ipv6|ipv4] Configures link local address.\n"
                "  set-ipv4ll-route             dev [DEVICE] [IPv4LLRoute BOOLEAN] Configures the route needed for non-IPv4LL hosts to communicate.\n"
                "                                      with IPv4LL-only hosts.\n"
@@ -407,7 +406,6 @@ static int cli_run(int argc, char *argv[]) {
                 { "remove-rule",                   "rrule",            1,        WORD_ANY, false, ncm_link_remove_routing_policy_rules },
                 { "set-hostname",                  "hostname",         1,        WORD_ANY, false, ncm_set_system_hostname },
                 { "show-dns",                      "dns",              WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
-                { "add-dns",                       "adns",             2,        WORD_ANY, false, ncm_add_dns_server },
                 { "set-dns",                       "sdns",             2,        WORD_ANY, false, ncm_set_dns_server },
                 { "set-dns-domains",               "sdnsdomains",      4,        WORD_ANY, false, ncm_set_dns_domains },
                 { "show-domains",                  "domain",           WORD_ANY, WORD_ANY, false, ncm_show_dns_server_domains },
@@ -496,6 +494,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "nft-run",                       "nftr",             WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
                 /* Deprecated */
                 { "show",                          "",                 WORD_ANY, WORD_ANY, false, ncm_link_status },
+                { "add-dns",                       "adns",             2,        WORD_ANY, false, ncm_set_dns_server },
                 { "add-domain",                    "adomain",          1,        WORD_ANY, false, ncm_set_dns_domains },
                 { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
                 { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_remove_route },
