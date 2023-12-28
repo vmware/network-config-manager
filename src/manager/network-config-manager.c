@@ -3653,7 +3653,7 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
         if (!json_object_object_get_ex(j, "NTP", &ja))
                 return -ENOENT;
 
-        display(beautify_enabled() ? true : false, ansi_color_bold_cyan(), "      NTP Servers: ");
+        printf("      NTP Servers: ");
         for (size_t i = 0; i < json_object_array_length(ja); i++) {
                 json_object *ntp = json_object_array_get_idx(ja, i);
                 json_object *addr = NULL;
