@@ -171,7 +171,7 @@ static int help(void) {
                "  show-dns                     Show DNS servers.\n"
                "  add-dns                      dev|global|system [DEVICE] dns [ADDRESS] Configures Link or global DNS servers.\n"
                "  set-dns                      dev [DEVICE] dns [SERVER1,SERVER2...] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN].\n"
-               "  add-domain                   dev|global|system [DEVICE] domains [DOMAIN] Configures Link or global Domain.\n"
+               "  set-dns-domains              dev|global|system [DEVICE] domains [DOMAIN] [DOMAIN] [DOMAIN] Configures device or global Domain.\n"
                "  show-domains                        Show DNS server Domains.\n"
                "  revert-resolve-link          dev [DEVICE] dns [BOOLEAN] domain [BOOLEAN] Flushes all DNS server and Domain settings of the device.\n"
                "  show-ntp                     Show NTP servers.\n"
@@ -409,7 +409,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "show-dns",                      "dns",              WORD_ANY, WORD_ANY, false, ncm_show_dns_server },
                 { "add-dns",                       "adns",             2,        WORD_ANY, false, ncm_add_dns_server },
                 { "set-dns",                       "sdns",             2,        WORD_ANY, false, ncm_set_dns_server },
-                { "add-domain",                    "adomain",          1,        WORD_ANY, false, ncm_add_dns_domains },
+                { "set-dns-domains",               "sdnsdomains",      4,        WORD_ANY, false, ncm_set_dns_domains },
                 { "show-domains",                  "domain",           WORD_ANY, WORD_ANY, false, ncm_show_dns_server_domains },
                 { "revert-resolve-link",           "rrl",              1,        WORD_ANY, false, ncm_revert_resolve_link },
                 { "show-ntp",                      "ntp",              WORD_ANY, WORD_ANY, false, ncm_show_ntp_servers },
@@ -496,6 +496,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "nft-run",                       "nftr",             WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
                 /* Deprecated */
                 { "show",                          "",                 WORD_ANY, WORD_ANY, false, ncm_link_status },
+                { "add-domain",                    "adomain",          1,        WORD_ANY, false, ncm_set_dns_domains },
                 { "delete-gw",                     "dgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
                 { "delete-route",                  "dr",               4,        WORD_ANY, false, ncm_link_remove_route },
                 { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
