@@ -3389,59 +3389,14 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
         if (json_enabled())
                 return json_fill_dns_server_domains();
 
-        if (argc > 1 && str_eq_fold(argv[1], "system")) {
-                r = parse_ifname_or_index(argv[1], &p);
-                if (r < 0) {
-                        log_warning("Failed to find device '%s': %s", argv[1], strerror(-r));
-                        return r;
-                }
-
-                r = network_parse_link_setup_state(p->ifindex, &setup);
-                if (r < 0) {
-                        log_warning("Failed to parse device setup '%s': %s\n", p->ifname, strerror(-r));
-                        return r;
-                }
-
-                if (str_eq_fold(setup, "unmanaged")) {
-                       _auto_cleanup_strv_ char **a = NULL, **b = NULL;
-                        char **j;
-
-                        r = dns_read_resolv_conf(&a, &b);
-                        if (r < 0) {
-                                log_warning("Failed to read resolv.conf: %s", strerror(-r));
-                                return r;
-
-                        }
-
-                        printf("Domains:");
-                        strv_foreach(j, b) {
-                                printf("%s ", *j);
-                        }
-
-                        printf("\n");
-                        return 0;
-                }
-        }
-
-        if (argc >= 2 && str_eq_fold(argv[1], "system")) {
-                r = manager_read_domains_from_system_config(&config_domain);
-                if (r < 0) {
-                        log_warning("Failed to read DNS domain from '/etc/systemd/resolved.conf': %s", strerror(-r));
-                        return r;
-                }
-
-                printf("%s\n", config_domain);
-                return 0;
-        }
-
         r = dbus_acquire_dns_domains_from_resolved(&domains);
         if (r < 0){
-                log_warning("Failed to acquire DNS domain from 'systemd-resolved': %s", strerror(-r));
+                log_warning("Failed to acquire DNS Search domains from 'systemd-resolved': %s", strerror(-r));
                 return r;
         }
 
         if (!domains || g_sequence_is_empty(domains->dns_domains)) {
-                log_warning("No DNS Domain configured: %s", strerror(ENODATA));
+                log_warning("No DNS Search Domains configured: %s", strerror(ENODATA));
                 return -ENODATA;
         } else if (g_sequence_get_length(domains->dns_domains) == 1) {
 
@@ -3450,31 +3405,11 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
 
                 printf("Search Domains: %s\n", d->domain);
         } else {
-                _cleanup_(set_freep) Set *all_domains = NULL;
-
-                r = set_new(&all_domains, NULL, NULL);
-                if (r < 0) {
-                        log_debug("Failed to init set for domains: %s", strerror(-r));
-                        return r;
-                }
-
                 printf("Search Domains: ");
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i))  {
-                        char *s;
-
                         d = g_sequence_get(i);
 
                         if (*d->domain == '.')
-                                continue;
-
-                        if (set_contains(all_domains, d->domain))
-                                continue;
-
-                        s = g_strdup(d->domain);
-                        if (!s)
-                                log_oom();
-
-                        if (!set_add(all_domains, s))
                                 continue;
 
                         printf("%s ", d->domain);
