@@ -144,8 +144,6 @@ static int help(void) {
                "  set-dhcp-duid                dev|system [DEVICE] family|f [ipv4|ipv6|4|6] duid [DUID {link-layer-time|vendor|link-layer|uuid}] data [RAWDATA]"
                                                       "\n\t\t\t\t      Sets DUID of DHCPv4 or DHCPv6 Client.\n"
                "  set-link-state               dev [DEVICE] [STATE {up|down}] Configures device State.\n"
-               "  set-dynamic                  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN]"
-                                                      "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] Configures dynamic configration of the device (IPv4|IPv6|RA).\n"
                "  show-addr                    dev [DEVICE] [family|f ipv4|ipv6|4|6] Show device addresses\n"
                "  add-addr                     dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [STRING] pref-lifetime|pl [{forever|infinity|0}]"
                                                       "\n\t\t\t\t      scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN]"
@@ -162,6 +160,9 @@ static int help(void) {
                "  remove-route                 dev [DEVICE] f|family [ipv4|ipv6|yes] Removes route from device\n"
                "  add-addl-gw                  dev [DEVICE] address|addr|a [ADDRESS] destination|dest [DESTINATION address] gw [GW address] table [TABLE NUMBER]"
                                                       "\n\t\t\t\t Configures additional gateway for another NIC/DEVICE with routing policy rules.\n"
+               "  set-dynamic                  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN]"
+                                                      "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] Configures dynamic configuration of the device (IPv4|IPv6|RA).\n"
+               "  set-static                   dev [DEVICE] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] ... Configures static configuration of the device\n"
                "  add-rule                     dev [DEVICE] table [TABLE NUMBER] [from ADDRESS] [to ADDRESS] [oif DEVICE] [iif DEVICE] [priority NUMBER] [tos NUMBER]"
                                                 "\n\t\t\t\t [invert BOOLEAN] [sport NUMBER] [dport NUMBER] [proto tcp|udp|sctp] Configures Routing Policy Rule.\n"
                "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
@@ -396,6 +397,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "remove-gw",                     "rgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
                 { "add-route",                     "ar" ,              4,        WORD_ANY, false, ncm_link_add_route },
                 { "set-dynamic",                   "sd" ,              2,        WORD_ANY, false, ncm_link_set_dynamic },
+                { "set-static",                    "ss" ,              2,        WORD_ANY, false, ncm_link_set_static },
                 { "remove-route",                  "rr",               4,        WORD_ANY, false, ncm_link_remove_route },
                 { "add-addl-gw",                   "agw",              9,        WORD_ANY, false, ncm_link_add_additional_gw },
                 { "add-rule",                      "rule",             4,        WORD_ANY, false, ncm_link_add_routing_policy_rules },

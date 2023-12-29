@@ -1290,6 +1290,73 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, Addr
         return dbus_network_reload();
 }
 
+int manager_configure_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, bool keep) {
+        _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        char **a;
+        int r;
+
+        assert(ifidx);
+
+        if (keep) {
+                r = create_or_parse_network_file(ifidx, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = create_network_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
+        }
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        strv_foreach(a, addrs) {
+                _cleanup_(section_freep) Section *section = NULL;
+
+                r = section_new("Address", &section);
+                if (r < 0)
+                        return r;
+
+                r = add_key_to_section(section, "Address", *a);
+                if (r < 0)
+                        return r;
+
+                r = add_section_to_key_file(key_file, section);
+                if (r < 0)
+                        return r;
+
+                steal_ptr(section);
+        }
+
+        strv_foreach(a, gws) {
+                _cleanup_(section_freep) Section *section = NULL;
+
+                r = section_new("Route", &section);
+                if (r < 0)
+                        return r;
+
+                r = add_key_to_section(section, "Gateway", *a);
+                if (r < 0)
+                        return r;
+
+                r = add_section_to_key_file(key_file, section);
+                if (r < 0)
+                        return r;
+
+                steal_ptr(section);
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
 int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPolicyRule *rule) {
         _auto_cleanup_ char *network = NULL, *to = NULL, *from = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -1363,10 +1430,6 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
                 log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
                 return r;
         }
-
-        r = set_file_permisssion(network, "systemd-network");
-        if (r < 0)
-                return r;
 
         return dbus_network_reload();
 }
