@@ -1937,7 +1937,7 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
 _public_ int ncm_link_set_static(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **addrs = NULL, **gws = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        int r;
+        int r, keep = -1;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev")) {
@@ -1980,6 +1980,17 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
                         if (r < 0)
                                 return log_oom();
                         continue;
+                } else if (str_eq_fold(argv[i], "keep")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        keep = r;
+                        continue;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
@@ -1991,7 +2002,7 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_configure_static_conf(p, addrs, gws, false);
+        r = manager_configure_static_conf(p, addrs, gws, keep);
         if (r < 0) {
                 log_warning("Failed to set static configrution for device='%s': %s", p->ifname, strerror(-r));
                 return r;
