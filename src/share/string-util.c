@@ -190,6 +190,39 @@ int strv_add(char ***l, const char *value) {
         return 0;
 }
 
+int strv_extend(char ***l, const char *value) {
+        char **c;
+        size_t n, m;
+
+        assert(l);
+        assert(value);
+
+        if (!*l) {
+                *l = strv_new(value);
+                if (!*l)
+                        return -ENOMEM;
+
+                return 0;
+        }
+
+        n = g_strv_length(*l);
+        m = n + 2;
+
+        c = realloc(*l, m * sizeof(char*));
+        if (!c)
+                return -ENOMEM;
+
+        c[n] = strdup(value);
+        if (!c[n])
+                return -ENOMEM;
+
+        c[n+1] = NULL;
+
+        *l = c;
+        return 0;
+}
+
+
 int argv_to_strv(int argc, char *argv[], char ***ret) {
         _auto_cleanup_strv_ char **s = NULL;
         int r;
