@@ -790,8 +790,8 @@ int json_build_dns_server(const IfNameIndex *p, char **dns_config) {
 }
 
 int json_fill_dns_server_domains(void) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL, *j= NULL;
         _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
-        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buffer[LINE_MAX] = {};
         GSequenceIter *i;
@@ -856,33 +856,27 @@ int json_fill_dns_server_domains(void) {
                 json_object_object_add(jobj, "SearchDomains", ja);
                 steal_ptr(ja);
 
-                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        _cleanup_(json_object_putp) json_object *j = NULL;
+                j = json_object_new_array();
+                if (!j)
+                        return log_oom();
 
-                        j = json_object_new_array();
-                        if (!j)
-                                return log_oom();
+                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                        _cleanup_(json_object_putp) json_object *a = NULL;
 
                         d = g_sequence_get(i);
-                        if (!d->ifindex)
+                        if (d->ifindex == 0)
                                 continue;
 
-                        sprintf(buffer, "%" PRIu32, d->ifindex);
-                        r = parse_ifname_or_index(buffer, &p);
-                        if (r >= 0) {
-                                _cleanup_(json_object_putp) json_object *a = NULL;
+                        if_indextoname(d->ifindex, buffer);
+                        a = json_object_new_string(d->domain);
+                        if (!a)
+                                return log_oom();
 
-                                a = json_object_new_string(d->domain);
-                                if (!a)
-                                        return log_oom();
-
-                                json_object_array_add(j, a);
-                                steal_ptr(a);
-
-                        }
-                        json_object_object_add(jobj, p->ifname, j);
-                        steal_ptr(j);
+                        json_object_array_add(j, a);
+                        steal_ptr(a);
                 }
+                json_object_object_add(jobj, buffer, j);
+                steal_ptr(j);
         }
 
         printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
