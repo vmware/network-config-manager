@@ -789,97 +789,153 @@ int json_build_dns_server(const IfNameIndex *p, char **dns_config) {
         return 0;
 }
 
-int json_fill_dns_server_domains(void) {
-        _cleanup_(json_object_putp) json_object *jobj = NULL, *j= NULL;
+static int json_parse_dns_search_domains(const json_object *jn, const char *link, json_object **ret) {
+        _cleanup_(json_object_putp) json_object *jdns = NULL;
+        json_object *interfaces = NULL, *ifname = NULL;
+
+        assert(jn);
+
+        if (!json_object_object_get_ex(jn, "Interfaces", &interfaces))
+                return -ENOENT;
+
+        for (size_t i = 0; i < json_object_array_length(interfaces); i++) {
+                json_object *interface = json_object_array_get_idx(interfaces, i);
+                json_object *d;
+
+                if (!json_object_object_get_ex(interface, "Name", &ifname))
+                        continue;
+
+                if (link && !str_eq(link, json_object_get_string(ifname)))
+                        continue;
+
+                if (!json_object_object_get_ex(interface, "SearchDomains", &d))
+                        continue;
+
+                if (ret)
+                        *ret = json_object_get(d);
+
+                return 0;
+        }
+
+        return -ENXIO;
+}
+
+int json_fill_dns_server_domains(IfNameIndex *p, json_object *jn) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL, *j = NULL;
         _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
-        _auto_cleanup_ IfNameIndex *p = NULL;
-        char buffer[LINE_MAX] = {};
+        _cleanup_(links_freep) Links *links = NULL;
         GSequenceIter *i;
         DNSDomain *d;
         int r;
-
-        r = dbus_acquire_dns_domains_from_resolved(&domains);
-        if (r < 0){
-                log_warning("Failed to fetch DNS domain from resolved: %s", strerror(-r));
-                return r;
-        }
 
         jobj = json_object_new_object();
         if (!jobj)
                 return log_oom();
 
+        if (p && jn) {
+                json_object *jd = NULL;
+
+                r = json_parse_dns_search_domains(jn, p->ifname, &jd);
+                if (r >= 0) {
+                        json_object_object_add(jobj, "SearchDomains", jd);
+
+                        printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+                        return 0;
+                }
+        }
+
+        r = dbus_acquire_dns_domains_from_resolved(&domains);
+        if (r < 0){
+                log_warning("Failed to acquire DNS Search domain from resolved: %s", strerror(-r));
+                return r;
+        }
+
         if (!domains || g_sequence_is_empty(domains->dns_domains)) {
-                log_warning("No DNS Domain configured: %s", strerror(ENODATA));
+                log_warning("No DNS Search Domain configured: %s", strerror(ENODATA));
                 return -ENODATA;
-        } else {
-                _cleanup_(json_object_putp) json_object *ja = NULL;
-                _cleanup_(set_freep) Set *all_domains = NULL;
+        }
 
-                ja = json_object_new_array();
-                if (!ja)
-                        return log_oom();
+        if (p) {
+                _cleanup_(json_object_putp) json_object *jdomains = NULL;
 
-                r = set_new(&all_domains, NULL, NULL);
-                if (r < 0) {
-                        log_debug("Failed to init set for domains: %s", strerror(-r));
-                        return r;
-                }
-
-                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i))  {
-                        json_object *a;
-                        char *s;
-
-                        d = g_sequence_get(i);
-
-                        if (*d->domain == '.')
-                                continue;
-
-                        if (set_contains(all_domains, d->domain))
-                                continue;
-
-                        s = g_strdup(d->domain);
-                        if (!s)
-                                log_oom();
-
-                        if (!set_add(all_domains, s)) {
-                                log_debug("Failed to add domain to set '%s': %s", d->domain, strerror(-r));
-                                return -EINVAL;
-                        }
-
-                        a = json_object_new_string(s);
-                        if (!a)
-                                return log_oom();
-
-                        json_object_array_add(ja, a);
-                }
-
-                json_object_object_add(jobj, "SearchDomains", ja);
-                steal_ptr(ja);
-
-                j = json_object_new_array();
-                if (!j)
+                jdomains = json_object_new_array();
+                if (!jdomains)
                         return log_oom();
 
                 for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
-                        _cleanup_(json_object_putp) json_object *a = NULL;
+                        _cleanup_(json_object_putp) json_object *a = NULL, *b = NULL;
 
                         d = g_sequence_get(i);
-                        if (d->ifindex == 0)
+                        if (d->ifindex == 0 ||  p->ifindex != d->ifindex)
                                 continue;
 
-                        if_indextoname(d->ifindex, buffer);
                         a = json_object_new_string(d->domain);
                         if (!a)
                                 return log_oom();
 
-                        json_object_array_add(j, a);
+                        b = json_object_new_object();
+                        if (!b)
+                                return log_oom();
+
+                        json_object_object_add(b, "Domain", a);
+                        json_object_array_add(jdomains, b);
                         steal_ptr(a);
+                        steal_ptr(b);
                 }
-                json_object_object_add(jobj, buffer, j);
-                steal_ptr(j);
+
+                json_object_object_add(jobj, "SearchDomains", jdomains);
+                steal_ptr(jdomains);
+
+                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+
+                return 0;
         }
 
-        printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+        r = netlink_acquire_all_links(&links);
+        if (r < 0)
+                return r;
+
+        for (GList *iter = links->links; iter; iter = g_list_next (iter)) {
+                _cleanup_(json_object_putp) json_object *jdomains = NULL;
+                Link *link = (Link *) iter->data;
+
+                jdomains = json_object_new_array();
+                if (!jdomains)
+                        return log_oom();
+
+                for (i = g_sequence_get_begin_iter(domains->dns_domains); !g_sequence_iter_is_end(i); i = g_sequence_iter_next(i)) {
+                        _cleanup_(json_object_putp) json_object *a = NULL, *b = NULL;
+
+                        d = g_sequence_get(i);
+                        if (d->ifindex == 0 ||  link->ifindex != d->ifindex)
+                                continue;
+
+                        b = json_object_new_object();
+                        if (!b)
+                                return log_oom();
+
+                        a = json_object_new_string(d->domain);
+                        if (!a)
+                                return log_oom();
+
+                        json_object_object_add(b, "Domain", a);
+                        json_object_array_add(jdomains, b);
+                        steal_ptr(a);
+                        steal_ptr(b);
+                }
+
+                json_object_object_add(jobj, link->name, jdomains);
+                steal_ptr(jdomains);
+        }
+
+        j = json_object_new_object();
+        if (!j)
+                return log_oom();
+
+        json_object_object_add(j, "SearchDomains", jobj);
+        steal_ptr(jobj);
+
+        printf("%s\n", json_object_to_json_string_ext(j, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
         return 0;
 }
 
