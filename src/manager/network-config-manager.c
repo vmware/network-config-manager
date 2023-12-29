@@ -33,7 +33,7 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -115,7 +115,7 @@ _public_ int ncm_link_set_mac(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -205,7 +205,7 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
         }
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -259,7 +259,7 @@ _public_ int ncm_link_set_option(int argc, char *argv[]) {
         bool k;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -361,7 +361,7 @@ _public_ int ncm_link_set_group(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -412,7 +412,7 @@ _public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -467,7 +467,7 @@ _public_ int ncm_link_set_act_policy(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -522,7 +522,7 @@ _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -562,7 +562,7 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
         DHCPClient dhcp = _DHCP_CLIENT_INVALID;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -706,7 +706,7 @@ _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -779,7 +779,7 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -865,7 +865,7 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -941,7 +941,7 @@ _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -979,7 +979,7 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1021,7 +1021,7 @@ _public_ int ncm_link_set_network_ipv6_dad(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1052,7 +1052,7 @@ _public_ int ncm_link_set_network_ipv6_link_local_address_generation_mode(int ar
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1084,7 +1084,7 @@ _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1221,7 +1221,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
         int r, prefix_route = -1;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1351,7 +1351,7 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1454,7 +1454,7 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
         int r, onlink4 = -1, onlink6 = -1;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1551,7 +1551,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
         int r, onlink = -1;
 
        for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1622,7 +1622,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
         bool b = false;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1791,7 +1791,7 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1940,7 +1940,7 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
         int r, keep = -1;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1965,14 +1965,14 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_eq_fold(argv[i], "gw")) {
+                } else if (str_eq_fold(argv[i], "gw") || str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "g")) {
                         _auto_cleanup_ IPAddress *a = NULL;
 
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
-                                log_warning("Failed to parse gateway '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse gateway='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -1980,7 +1980,7 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
                         if (r < 0)
                                 return log_oom();
                         continue;
-                } else if (str_eq_fold(argv[i], "keep")) {
+                } else if (str_eq_fold(argv[i], "keep") || str_eq_fold(argv[i], "k")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -2020,7 +2020,7 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2162,7 +2162,7 @@ _public_ int ncm_link_remove_gateway(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2207,7 +2207,7 @@ _public_ int ncm_link_remove_route(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2256,7 +2256,7 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2425,7 +2425,7 @@ _public_ int ncm_link_remove_routing_policy_rules(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2459,7 +2459,7 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2587,7 +2587,7 @@ _public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2621,7 +2621,7 @@ _public_ int ncm_link_add_dhcpv4_server_static_address(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2694,7 +2694,7 @@ _public_ int ncm_link_remove_dhcpv4_server_static_address(int argc, char *argv[]
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2763,7 +2763,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2947,7 +2947,7 @@ _public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -2982,7 +2982,7 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3072,7 +3072,7 @@ _public_ int ncm_show_dns_server(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3239,7 +3239,7 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3347,7 +3347,7 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3398,7 +3398,7 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3527,7 +3527,7 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3588,7 +3588,7 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3704,7 +3704,7 @@ _public_ int ncm_link_add_ntp(int argc, char *argv[]) {
        int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3755,7 +3755,7 @@ _public_ int ncm_link_remove_ntp(int argc, char *argv[]) {
        int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3807,7 +3807,7 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3849,7 +3849,7 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3875,7 +3875,7 @@ _public_ int ncm_link_show_network_config(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3911,7 +3911,7 @@ _public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -3947,7 +3947,7 @@ _public_ int ncm_link_edit_link_config(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
