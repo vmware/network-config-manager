@@ -3318,11 +3318,24 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                                         }
                                 }
 
-                       } else {
-                                r = argv_to_strv(argc - 4, argv + i, &s);
+                      } else {
+                                _auto_cleanup_strv_ char **t = NULL;
+                                char **d;
+
+                                r = argv_to_strv(argc - 4, argv + i, &t);
                                 if (r < 0) {
                                         log_warning("Failed to parse DNS Servers: %s", strerror(-r));
                                         return r;
+                                }
+
+                                strv_foreach(d, t) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip(*d, &a);
+                                        if (r >= 0) {
+                                                strv_extend(&s, *d);
+                                                i++;
+                                        }
                                 }
                                 white_space = true;
                         }
@@ -3331,10 +3344,9 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                         if (!dns)
                                 return log_oom();
 
-                        if (!white_space)
-                                continue;
-                        else
-                                break;
+                        if (white_space)
+                                i--;
+                        continue;
                 } else if (str_eq_fold(argv[i], "use-dns-ipv4")) {
                         parse_next_arg(argv, argc, i);
 
