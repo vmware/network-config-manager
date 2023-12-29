@@ -944,6 +944,45 @@ class TestCLINetwork:
         assert(parser.get('DHCPv4', 'UseDNS') == 'no')
         assert(parser.get('DHCPv6', 'UseDNS') == 'no')
 
+    def test_cli_set_dns_space_separated(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
+        subprocess.check_call("nmctl set-dns dev test99 dns 192.168.1.46 192.168.1.45 use-dns-ipv4 no use-dns-ipv6 no", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+        dns = parser.get('Network', 'DNS')
+        print(dns)
+        assert(dns.find("192.168.1.46") != -1)
+        assert(dns.find("192.168.1.45") != -1)
+
+        assert(parser.get('DHCPv4', 'UseDNS') == 'no')
+        assert(parser.get('DHCPv6', 'UseDNS') == 'no')
+
+    def test_cli_set_dns_only_one(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
+        subprocess.check_call("nmctl set-dns dev test99 dns 192.168.1.46 use-dns-ipv4 yes use-dns-ipv6 yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+
+        assert(parser.get('Network', 'DNS') == '192.168.1.46')
+
+        assert(parser.get('DHCPv4', 'UseDNS') == 'yes')
+        assert(parser.get('DHCPv6', 'UseDNS') == 'yes')
+
     def test_cli_revert_dns_or_domain(self):
         assert(link_exist('test99') == True)
 
