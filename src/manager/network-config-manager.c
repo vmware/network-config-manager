@@ -3435,12 +3435,12 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
 _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
         _cleanup_(dns_domains_freep) DNSDomains *domains = NULL;
         _auto_cleanup_ char *config_domain = NULL, *setup = NULL;
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char buffer[LINE_MAX] = {};
         GSequenceIter *iter;
         DNSDomain *d;
         int r;
-
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev")) {
@@ -3454,8 +3454,9 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                 }
         }
 
-        if (json_enabled())
-                return json_fill_dns_server_domains();
+        r = json_acquire_and_parse_network_data(&jobj);
+        if (r >= 0 && json_enabled())
+                return json_fill_dns_server_domains(p, jobj);
 
         r = dbus_acquire_dns_domains_from_resolved(&domains);
         if (r < 0){

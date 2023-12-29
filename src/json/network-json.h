@@ -22,7 +22,7 @@ int json_parse_dns_servers(const json_object *jn, const char *link, json_object 
 
 int json_build_dns_server(const IfNameIndex *p, char **dns_config);
 
-int json_fill_dns_server_domains(void);
+int json_fill_dns_server_domains(IfNameIndex *p, json_object *jn);
 
 int json_fill_ntp_servers(const json_object *jn, const char *link, json_object **ret);
 int json_build_ntp_server(const IfNameIndex *p, json_object **ret);
