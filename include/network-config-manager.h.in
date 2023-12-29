@@ -33,9 +33,6 @@ int ncm_link_set_default_gateway_family(int argc, char *argv[]);
 
 int ncm_link_add_route(int argc, char *argv[]);
 
-int ncm_link_set_ipv4(int argc, char *argv[]);
-int ncm_link_set_ipv6(int argc, char *argv[]);
-
 int ncm_link_remove_gateway(int argc, char *argv[]);
 int ncm_link_remove_route(int argc, char *argv[]);
 int ncm_link_get_routes(char *ifname, char ***ret);
