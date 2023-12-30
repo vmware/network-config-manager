@@ -828,19 +828,60 @@ int json_fill_dns_server_domains(IfNameIndex *p, json_object *jn) {
         DNSDomain *d;
         int r;
 
+        r = netlink_acquire_all_links(&links);
+        if (r < 0)
+                return r;
+
         jobj = json_object_new_object();
         if (!jobj)
                 return log_oom();
 
-        if (p && jn) {
-                json_object *jd = NULL;
+        if (jn) {
+                if (p) {
+                        json_object *jd = NULL;
 
-                r = json_parse_dns_search_domains(jn, p->ifname, &jd);
-                if (r >= 0) {
-                        json_object_object_add(jobj, "SearchDomains", jd);
+                        r = json_parse_dns_search_domains(jn, p->ifname, &jd);
+                        if (r >= 0) {
+                                json_object_object_add(jobj, "SearchDomains", jd);
 
-                        printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
-                        return 0;
+                                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+                                return 0;
+                        }
+                } else {
+                        _cleanup_(json_object_putp) json_object *ja = NULL;
+                        bool found = false;
+
+                        ja= json_object_new_array();
+                        if (!ja)
+                                return log_oom();
+
+                        for (GList *iter = links->links; iter; iter = g_list_next (iter)) {
+                                _cleanup_(json_object_putp) json_object *s = NULL, *jd = NULL;
+                                Link *link = (Link *) iter->data;
+
+                                r = json_parse_dns_search_domains(jn, link->name, &jd);
+                                if (r >= 0) {
+                                        s = json_object_new_object();
+                                        if (!s)
+                                                return log_oom();
+
+                                        json_object_object_add(s, link->name, jd);
+                                        json_object_array_add(ja, s);
+
+                                        steal_ptr(s);
+                                        steal_ptr(jd);
+
+                                        found = true;
+                                }
+                        }
+
+                        if (found) {
+                                json_object_object_add(jobj, "SearchDomains", ja);
+                                steal_ptr(ja);
+
+                                printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+                                return 0;
+                        }
                 }
         }
 
@@ -891,10 +932,6 @@ int json_fill_dns_server_domains(IfNameIndex *p, json_object *jn) {
                 return 0;
         }
 
-        r = netlink_acquire_all_links(&links);
-        if (r < 0)
-                return r;
-
         for (GList *iter = links->links; iter; iter = g_list_next (iter)) {
                 _cleanup_(json_object_putp) json_object *jdomains = NULL;
                 Link *link = (Link *) iter->data;
@@ -923,6 +960,9 @@ int json_fill_dns_server_domains(IfNameIndex *p, json_object *jn) {
                         steal_ptr(a);
                         steal_ptr(b);
                 }
+
+                if (json_object_array_length(jdomains) <= 0)
+                        continue;
 
                 json_object_object_add(jobj, link->name, jdomains);
                 steal_ptr(jdomains);
@@ -1215,52 +1255,6 @@ int json_fill_ntp_servers(const json_object *jn, const char *link, json_object *
         if (ret)
                 *ret = steal_ptr(jntp);
         return 0;
-}
-
-int json_parse_search_domain_config_source(const json_object *jobj,
-                                           const char *domain_name,
-                                           char **ret_config_source,
-                                           char **ret_config_provider) {
-        json_object *interfaces = NULL;
-
-        assert(jobj);
-        assert(domain_name);
-
-        if (!json_object_object_get_ex(jobj, "Interfaces", &interfaces))
-                return -ENOENT;
-
-        for (size_t i = 0; i < json_object_array_length(interfaces); i++){
-                json_object *interface = json_object_array_get_idx(interfaces, i);
-                json_object *domain;
-
-                if (!json_object_object_get_ex(interface, "SearchDomains", &domain))
-                        continue;
-
-                for (size_t j = 0; j < json_object_array_length(domain); j++){
-                        json_object *config_source = NULL, *config_provider = NULL, *a = NULL;
-                        json_object *addr = json_object_array_get_idx(domain, j);
-
-                        if (json_object_object_get_ex(addr, "Domain", &a)) {
-                                if (str_eq(domain_name, json_object_get_string(a))) {
-                                        if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
-                                                *ret_config_source = strdup(json_object_get_string(config_source));
-                                                if (!*ret_config_source)
-                                                        return -ENOMEM;
-                                        }
-
-                                        if (json_object_object_get_ex(addr, "ConfigProvider", &config_provider)) {
-                                                *ret_config_provider = strdup(json_object_get_string(config_provider));
-                                                if (!*ret_config_provider)
-                                                        return -ENOMEM;
-                                        }
-
-                                        return 0;
-                                }
-                        }
-                }
-        }
-
-        return -ENOENT;
 }
 
 int json_parse_dns_servers(const json_object *jn, const char *link, json_object **ret) {

@@ -3404,11 +3404,16 @@ _public_ int ncm_show_dns_server_domains(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
+
+                        continue;
                 }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
-        r = json_acquire_and_parse_network_data(&jobj);
-        if (r >= 0 && json_enabled())
+        (void) json_acquire_and_parse_network_data(&jobj);
+        if (json_enabled())
                 return json_fill_dns_server_domains(p, jobj);
 
         r = dbus_acquire_dns_domains_from_resolved(&domains);

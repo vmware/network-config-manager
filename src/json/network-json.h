@@ -48,11 +48,6 @@ int json_parse_dns_config_source(const json_object *jobj,
                                  char **ret_config_source,
                                  char **ret_config_provider);
 
-int json_parse_search_domain_config_source(const json_object *jobj,
-                                           const char *address,
-                                           char **ret_config_source,
-                                           char **ret_config_provider);
-
 int json_parse_ntp_config_source(const json_object *jobj,
                                  const char *address,
                                  char **ret_config_source,
