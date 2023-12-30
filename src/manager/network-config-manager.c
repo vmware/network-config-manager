@@ -3312,7 +3312,6 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                         }
 
                         ipv4 = r;
-
                         continue;
                 } else if (str_eq_fold(argv[i], "use-dns-ipv6")) {
                         parse_next_arg(argv, argc, i);
@@ -3343,7 +3342,6 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
 _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        bool system = false, global = false;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -3356,31 +3354,31 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "system"))
-                        system = true;
-
-                else if (str_eq_fold(argv[i], "global"))
-                        global = true;
-
-                if (str_eq_fold(argv[i], "domains")) {
+                } else if (str_eq_fold(argv[i], "domains")) {
                         parse_next_arg(argv, argc, i);
 
                         r = argv_to_strv(argc - 4, argv + i, &domains);
                         if (r < 0) {
-                                log_warning("Failed to parse domains: %s", strerror(-r));
+                                log_warning("Failed to parse DNS Search domains: %s", strerror(-r));
                                 return r;
                         }
-                }
-        }
 
-        if (!domains || strv_length(domains) <= 0) {
-                log_warning("Failed to parse domains: %s", strerror(EINVAL));
+                        i += strv_length(domains);
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                 return -EINVAL;
         }
 
-        r = manager_set_dns_server_domain(p, domains, system, global);
+        if (!domains || strv_length(domains) <= 0) {
+                log_warning("Failed to parse DNS Search domains: %s", strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        r = manager_set_dns_server_domain(p, domains);
         if (r < 0) {
-                log_warning("Failed to set DNS domain: %s", strerror(-r));
+                log_warning("Failed to set DNS Search domain: %s", strerror(-r));
                 return r;
         }
 

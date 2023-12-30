@@ -2056,29 +2056,20 @@ int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6) 
         return dbus_network_reload();
 }
 
-int manager_set_dns_server_domain(const IfNameIndex *i, char **domains, bool system, bool global) {
-        _auto_cleanup_ char *setup = NULL, *network = NULL, *config_domain = NULL, *a = NULL;
+int manager_set_dns_server_domain(const IfNameIndex *i, char **domains) {
+        _auto_cleanup_ char *setup = NULL, *network = NULL, *a = NULL;
         int r;
 
-        assert(domains);
-
-        if (system)
-                return add_dns_server_and_domain_to_resolv_conf(NULL, domains);
-        else if (global)
-                return add_dns_server_and_domain_to_resolved_conf(NULL, domains);
-
         assert(i);
+        assert(domains);
 
         r = network_parse_link_setup_state(i->ifindex, &setup);
         if (r < 0 || str_eq(setup, "unmanaged"))
                 return dbus_add_dns_domains(i->ifindex, domains);
 
-        r = network_parse_link_network_file(i->ifindex, &network);
-        if (r < 0) {
-                r = create_network_conf_file(i->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        r = create_or_parse_network_file(i, &network);
+        if (r < 0)
+                return r;
 
         a = strv_join(" ", domains);
         if (!a)
