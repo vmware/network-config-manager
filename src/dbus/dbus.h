@@ -14,6 +14,7 @@ DEFINE_CLEANUP(sd_bus *, sd_bus_free);
 
 int dbus_get_string_systemd_manager(const char *p, char **ret);
 int dbus_get_property_from_hostnamed(const char *p, char **ret);
+int dbus_get_property_from_hostnamed_time(const char *p, uint64_t *ret);
 int dbus_call_hostnamed_describe(char **ret);
 
 int dbus_set_hostname(const char *hostname);

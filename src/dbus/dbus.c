@@ -118,6 +118,37 @@ int dbus_call_hostnamed_describe(char **ret) {
         return 0;
 }
 
+int dbus_get_property_from_hostnamed_time(const char *p, uint64_t *ret) {
+        _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+        _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
+        _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
+        uint64_t t;
+        char *s;
+        int r;
+
+        r = sd_bus_open_system(&bus);
+        if (r < 0)
+                return r;
+
+        r = sd_bus_get_property(bus,
+                                "org.freedesktop.hostname1",
+                                "/org/freedesktop/hostname1",
+                                "org.freedesktop.hostname1",
+                                p,
+                                &bus_error,
+                                &reply,
+                                "t");
+        if (r < 0)
+                return r;
+
+        r = sd_bus_message_read(reply, "t", &t);
+        if (r < 0)
+                return r;
+
+        *ret = t;
+        return 0;
+}
+
 int dbus_get_property_from_hostnamed(const char *p, char **ret) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
         _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
@@ -153,6 +184,7 @@ int dbus_get_property_from_hostnamed(const char *p, char **ret) {
 
         return 0;
 }
+
 
 int dbus_stop_unit(const char *unit) {
         _cleanup_(sd_bus_error_free) sd_bus_error bus_error = SD_BUS_ERROR_NULL;
