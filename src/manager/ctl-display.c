@@ -828,11 +828,12 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         _auto_cleanup_ char *state = NULL, *hostname = NULL, *kernel = NULL,
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL,
                 *systemd = NULL, *hwvendor = NULL, *hwmodel = NULL, *firmware = NULL,
-                *firmware_vendor = NULL, *firmware_date = NULL;
+                *firmware_vendor = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **search_domains = NULL, **ntp = NULL;
         _cleanup_(routes_freep) Routes *routes = NULL;
         _cleanup_(addresses_freep) Addresses *h = NULL;
         sd_id128_t machine_id = {};
+        uint64_t firmware_date;
         int r;
 
         if (argc > 1)
@@ -905,10 +906,12 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
                 printf("%s\n", firmware_vendor);
         }
 
-        r = dbus_get_property_from_hostnamed("FirmwareDate", &firmware_date);
-        if (r >= 0 && firmware_date) {
-                display(arg_beautify, ansi_color_bold_cyan(), "      Firmware Date: ");
-                printf("%s\n", firmware_date);
+        r = dbus_get_property_from_hostnamed_time("FirmwareDate", &firmware_date);
+        if (r >= 0) {
+                time_t now = firmware_date / 1000000;
+
+                display(arg_beautify, ansi_color_bold_cyan(), "       Firmware Date: ");
+                printf("%s", ctime(&now));
         }
 
         r = sd_id128_get_machine(&machine_id);
