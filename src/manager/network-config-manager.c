@@ -3775,7 +3775,7 @@ _public_ int ncm_link_remove_ntp(int argc, char *argv[]) {
 
        r = manager_remove_ntp_addresses(p);
        if (r < 0) {
-               log_warning("Failed to delete NTP addresses '%s': %s", argv[1], strerror(-r));
+               log_warning("Failed to remove NTP server addres '%s': %s", argv[1], strerror(-r));
                return r;
        }
 
