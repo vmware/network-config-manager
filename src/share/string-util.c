@@ -11,6 +11,7 @@
 
 #include "alloc-util.h"
 #include "macros.h"
+#include "set.h"
 #include "string-util.h"
 
 char *rstrip(char *s) {
@@ -222,7 +223,6 @@ int strv_extend(char ***l, const char *value) {
         return 0;
 }
 
-
 int argv_to_strv(int argc, char *argv[], char ***ret) {
         _auto_cleanup_strv_ char **s = NULL;
         int r;
@@ -231,19 +231,62 @@ int argv_to_strv(int argc, char *argv[], char ***ret) {
         assert(argv);
 
         for (int i = 0; i < argc; i++) {
-                if (!s) {
-                        s = strv_new(str_strip(argv[i]));
-                        if (!s)
-                                return -ENOMEM;
-
-                        continue;
-                }
-
-                r = strv_add(&s, str_strip(argv[i]));
+                r = strv_extend(&s, str_strip(argv[i]));
                 if (r < 0)
                         return r;
         }
 
         *ret = steal_ptr(s);
         return 0;
+}
+
+int strv_unique(char **s, char **t, char ***ret) {
+        _auto_cleanup_strv_ char **u = NULL;
+        _cleanup_(set_freep) Set *st = NULL;
+        GHashTableIter iter;
+        gpointer key, value;
+        unsigned long size;
+        char **d;
+        int r;
+
+        assert(s);
+        assert(t);
+
+        r = set_new(&st, NULL, NULL);
+        if (r < 0)
+                return r;
+
+        strv_foreach(d, s)
+                set_add(st, *d);
+
+        strv_foreach(d, t)
+                set_add(st, *d);
+
+        g_hash_table_iter_init(&iter, st->hash);
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+                char *v = (char *) g_bytes_get_data(key, &size);
+
+                r = strv_extend(&u, v);
+                if (r < 0)
+                        return r;
+        }
+
+        *ret = steal_ptr(u);
+        return 0;
+}
+
+char **strv_remove(char **p, const char *s) {
+        char **a, **t;
+
+        assert(p);
+        assert(s);
+
+        for (a = t = p; *a; a++)
+                if (str_eq(*a, s))
+                        free(*a);
+                else
+                        *(t++) = *a;
+
+        *t = NULL;
+        return p;
 }

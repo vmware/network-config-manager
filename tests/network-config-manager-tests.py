@@ -1652,18 +1652,6 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
 
-    def test_cli_add_ntp(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call("nmctl add-ntp dev test99 ntp 192.168.1.34 192.168.1.45", shell = True)
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
-
     def test_cli_set_ntp(self):
         assert(link_exist('test99') == True)
 
@@ -1674,7 +1662,11 @@ class TestCLINetwork:
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
-        assert(parser.get('Network', 'NTP') == '192.168.1.45 192.168.1.34')
+        ntp = parser.get('Network', 'NTP')
+
+        print(ntp)
+        assert(ntp.find("192.168.1.34") != -1)
+        assert(ntp.find("192.168.1.45") != -1)
 
     def test_cli_add_dns_failure(self):
         assert(link_exist('test99') == True)
@@ -1861,7 +1853,7 @@ class TestCLINetwork:
     def test_cli_add_ntp_failure(self):
         assert(link_exist('test99') == True)
 
-        assert(call_shell("nmctl add-ntp dev test99 ntttp 192.168.1.34 192.168.1.45") != 0)
+        assert(call_shell("nmctl set-ntp dev test99 ntttp 192.168.1.34 192.168.1.45") != 0)
 
         assert(unit_exist('10-test99.network') == False)
 

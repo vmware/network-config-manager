@@ -119,7 +119,7 @@ static bool runs_without_networkd(char *c) {
 
 static int help(void) {
         printf("%s [OPTIONS...]\n\n"
-               "Query and control the netmanager subsystem.\n\n"
+               "Query and control the systemd-networkd daemon.\n\n"
                "  -h --help                    Show this help message and exit\n"
                "  -v --version                 Show package version\n"
                "  -j --json                    Show in JSON format\n"
@@ -161,7 +161,8 @@ static int help(void) {
                "  add-addl-gw                  dev [DEVICE] address|addr|a [ADDRESS] destination|dest [DESTINATION address] gw [GW address] table [TABLE NUMBER]"
                                                       "\n\t\t\t\t Configures additional gateway for another NIC/DEVICE with routing policy rules.\n"
                "  set-dynamic                  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN]"
-                                                      "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] keep [BOOLEAN] Configures dynamic configuration of the device (IPv4|IPv6|RA).\n"
+                                                      "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] keep [BOOLEAN]"
+               "                                       \n\t\t\t\t Configures dynamic configuration of the device (IPv4|IPv6|RA).\n"
                "  set-static                   dev [DEVICE] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] ... keep [BOOLEAN] Configures static configuration of the device\n"
                "  add-rule                     dev [DEVICE] table [TABLE NUMBER] [from ADDRESS] [to ADDRESS] [oif DEVICE] [iif DEVICE] [priority NUMBER] [tos NUMBER]"
                                                 "\n\t\t\t\t [invert BOOLEAN] [sport NUMBER] [dport NUMBER] [proto tcp|udp|sctp] Configures Routing Policy Rule.\n"
@@ -432,8 +433,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "remove-dhcpv4-static-addr",     "rdhcp4-srv-sa",    4,        WORD_ANY, false, ncm_link_remove_dhcpv4_server_static_address },
                 { "add-ipv6ra",                    "ra6",              2,        WORD_ANY, false, ncm_link_add_ipv6_router_advertisement },
                 { "remove-ipv6ra",                 "rra6",             2,        WORD_ANY, false, ncm_link_remove_ipv6_router_advertisement },
-                { "add-ntp",                       "antp",             2,        WORD_ANY, false, ncm_link_add_ntp },
-                { "set-ntp",                       "sntp" ,            2,        WORD_ANY, false, ncm_link_add_ntp },
+                { "set-ntp",                       "sntp" ,            2,        WORD_ANY, false, ncm_link_set_ntp },
                 { "remove-ntp",                    "rntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
                 { "enable-ipv6",                   "ipv6",             2,        WORD_ANY, false, ncm_link_enable_ipv6 },
                 { "create-vlan",                   "vlan",             4,        WORD_ANY, false, ncm_create_vlan },

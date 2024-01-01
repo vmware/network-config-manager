@@ -931,9 +931,8 @@ int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses) {
         if (r < 0)
                 return r;
 
-        strv_foreach(a, addresses) {
+        strv_foreach(a, addresses)
                 key_file_remove_section_key_value(key_file, "Address", "Address", *a);
-        }
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -2193,37 +2192,18 @@ int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *i, const char *
         return dbus_network_reload();
 }
 
-int manager_add_ntp_addresses(const IfNameIndex *i, char **ntps, bool add) {
-        _auto_cleanup_ char *network = NULL, *config_ntp = NULL, *a = NULL, *b = NULL;
-        char **d;
+int manager_set_ntp_servers(const IfNameIndex *i, char **ntp) {
+        _auto_cleanup_ char *network = NULL, *config_ntp = NULL;
         int r;
 
         assert(i);
-        assert(ntps);
+        assert(ntp);
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0)
                 return r;
 
-        strv_foreach(d, ntps) {
-                a = strjoin(" ", *d, a, NULL);
-                if (!a)
-                        return log_oom();
-        }
-
-        r = parse_config_file(network, "Network", "NTP", &config_ntp);
-        if (r >= 0) {
-                if (str_eq(a, config_ntp))
-                        return 0;
-        }
-
-        if (add) {
-                b = strv_join(config_ntp, &a);
-                if (!b)
-                        return log_oom();
-        }
-
-        r = set_config_file_str(network, "Network", "NTP", add ? b : a);
+        r = set_config_file_str(network, "Network", "NTP", strv_join(" ", ntp));
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;

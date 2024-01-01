@@ -52,6 +52,9 @@ char **strv_new(const char *x);
 #define strv_contains(s, t) g_strv_contains(s, t)
 #define strv_length(s) g_strv_length(s)
 
+int strv_unique(char **s, char **t, char ***ret);
+char **strv_remove(char **p, const char *s);
+
 int strv_add(char ***l, const char *value);
 
 #define strv_parse_shell g_shell_parse_argv

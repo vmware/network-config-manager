@@ -123,7 +123,6 @@ int dbus_get_property_from_hostnamed_time(const char *p, uint64_t *ret) {
         _cleanup_(sd_bus_message_unrefp) sd_bus_message *reply = NULL;
         _cleanup_(sd_bus_freep) sd_bus *bus = NULL;
         uint64_t t;
-        char *s;
         int r;
 
         r = sd_bus_open_system(&bus);
