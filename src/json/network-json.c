@@ -295,13 +295,14 @@ int json_fill_system_status(char **ret) {
                 *kernel_release = NULL, *arch = NULL, *virt = NULL, *os = NULL, *systemd = NULL,
                 *online_state = NULL, *address_state = NULL, *ipv4_address_state = NULL,
                 *ipv6_address_state = NULL, *hwvendor = NULL, *hwmodel = NULL, *firmware = NULL,
-                *firmware_vendor = NULL, *firmware_date = NULL;
+                *firmware_vendor = NULL;
         _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
         _cleanup_(routing_policy_rules_freep) RoutingPolicyRules *rules = NULL;
         _cleanup_(links_freep) Links *links = NULL;
         _auto_cleanup_strv_ char **ntp = NULL;
         _auto_cleanup_ DNSServer *c = NULL;
         sd_id128_t machine_id = {};
+        usec_t firmware_date;
         int r;
 
         r = json_acquire_and_parse_network_data(&jn);
@@ -446,11 +447,12 @@ int json_fill_system_status(char **ret) {
                 steal_ptr(js);
         }
 
-        r = dbus_get_property_from_hostnamed("FirmwareDate", &firmware_date);
+        r = dbus_get_property_from_hostnamed_time("FirmwareDate", &firmware_date);
         if (r >= 0 && firmware_date) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
+                time_t now = firmware_date / USEC_PER_SEC;
 
-                js = json_object_new_string(firmware_date);
+                js = json_object_new_string(rstrip(ctime(&now)));
                 if (!js)
                         return log_oom();
 
