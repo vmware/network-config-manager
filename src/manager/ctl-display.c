@@ -908,7 +908,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
         r = dbus_get_property_from_hostnamed_time("FirmwareDate", &firmware_date);
         if (r >= 0) {
-                time_t now = firmware_date / 1000000;
+                time_t now = firmware_date / USEC_PER_SEC;
 
                 display(arg_beautify, ansi_color_bold_cyan(), "       Firmware Date: ");
                 printf("%s", ctime(&now));
