@@ -53,6 +53,7 @@ char **strv_new(const char *x);
 #define strv_length(s) g_strv_length(s)
 
 int strv_unique(char **s, char **t, char ***ret);
+char **strv_remove(char **p, const char *s);
 
 int strv_add(char ***l, const char *value);
 

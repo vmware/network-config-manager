@@ -274,3 +274,19 @@ int strv_unique(char **s, char **t, char ***ret) {
         *ret = steal_ptr(u);
         return 0;
 }
+
+char **strv_remove(char **p, const char *s) {
+        char **a, **t;
+
+        assert(p);
+        assert(s);
+
+        for (a = t = p; *a; a++)
+                if (str_eq(*a, s))
+                        free(*a);
+                else
+                        *(t++) = *a;
+
+        *t = NULL;
+        return p;
+}
