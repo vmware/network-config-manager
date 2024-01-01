@@ -931,9 +931,8 @@ int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses) {
         if (r < 0)
                 return r;
 
-        strv_foreach(a, addresses) {
+        strv_foreach(a, addresses)
                 key_file_remove_section_key_value(key_file, "Address", "Address", *a);
-        }
 
         r = key_file_save (key_file);
         if (r < 0) {
