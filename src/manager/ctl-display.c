@@ -917,7 +917,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
         r = sd_id128_get_boot(&boot_id);
         if (r >= 0) {
-                char *p;
+                _auto_cleanup_ char *p = NULL;
 
                 p = new(char, SD_ID128_STRING_MAX);
                 if (!p)
