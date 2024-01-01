@@ -833,6 +833,7 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
         _cleanup_(routes_freep) Routes *routes = NULL;
         _cleanup_(addresses_freep) Addresses *h = NULL;
         sd_id128_t machine_id = {};
+        sd_id128_t boot_id = {};
         uint64_t firmware_date;
         int r;
 
@@ -912,6 +913,18 @@ _public_ int ncm_system_status(int argc, char *argv[]) {
 
                 display(arg_beautify, ansi_color_bold_cyan(), "       Firmware Date: ");
                 printf("%s", ctime(&now));
+        }
+
+        r = sd_id128_get_boot(&boot_id);
+        if (r >= 0) {
+                char *p;
+
+                p = new(char, SD_ID128_STRING_MAX);
+                if (!p)
+                        return log_oom();
+
+                display(arg_beautify, ansi_color_bold_cyan(), "             Boot ID: ");
+                printf("%s\n", sd_id128_to_string(boot_id, p));
         }
 
         r = sd_id128_get_machine(&machine_id);
