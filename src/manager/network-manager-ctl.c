@@ -119,7 +119,7 @@ static bool runs_without_networkd(char *c) {
 
 static int help(void) {
         printf("%s [OPTIONS...]\n\n"
-               "Query and control the netmanager subsystem.\n\n"
+               "Query and control the systemd-networkd daemon.\n\n"
                "  -h --help                    Show this help message and exit\n"
                "  -v --version                 Show package version\n"
                "  -j --json                    Show in JSON format\n"
