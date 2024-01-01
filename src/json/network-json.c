@@ -302,6 +302,7 @@ int json_fill_system_status(char **ret) {
         _auto_cleanup_strv_ char **ntp = NULL;
         _auto_cleanup_ DNSServer *c = NULL;
         sd_id128_t machine_id = {};
+        sd_id128_t boot_id = {};
         usec_t firmware_date;
         int r;
 
@@ -457,6 +458,23 @@ int json_fill_system_status(char **ret) {
                         return log_oom();
 
                 json_object_object_add(jobj, "FirmwareDate", js);
+                steal_ptr(js);
+        }
+
+        r = sd_id128_get_boot(&boot_id);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL;
+                _auto_cleanup_ char *p = NULL;
+
+                p = new(char, SD_ID128_STRING_MAX);
+                if (!p)
+                        return log_oom();
+
+                js = json_object_new_string(sd_id128_to_string(boot_id, p));
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(jobj, "BootID", js);
                 steal_ptr(js);
         }
 
