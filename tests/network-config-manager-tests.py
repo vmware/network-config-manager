@@ -846,7 +846,7 @@ class TestCLINetwork:
             raise Fail("nmctl show-ntp dev 2 -jfailed: %s" % -retcode)
 
     def test_cli_show_domains(self):
-        subprocess.check_call("nmctl set-dns-domains dev test99 domains domain2 domain2 domain3", shell = True)
+        subprocess.check_call("nmctl set-dns-domains dev test99 domains domain1,domain2,domain3", shell = True)
         subprocess.check_call("nmctl domain", text=True, shell = True)
         subprocess.check_call("nmctl domain dev test99", text=True, shell = True)
 
@@ -1651,6 +1651,23 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
+
+    def test_cli_set_domains(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dns-domains dev test99 domains domain1,domain2", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        d = parser.get('Network', 'Domains')
+
+        print(d)
+
+        assert(d.find("domain1") != -1)
+        assert(d.find("domain2") != -1)
 
     def test_cli_set_ntp(self):
         assert(link_exist('test99') == True)
