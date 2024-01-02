@@ -7,6 +7,11 @@
 
 #include "config-file.h"
 
+static inline void gkey_file_freep(GKeyFile **f) {
+        if (f && *f)
+                g_key_file_free(*f);
+}
+
 int load_config_file(const char *path, KeyFile **ret);
 
 int parse_line(const char *line, char **key, char **value);
@@ -25,7 +30,8 @@ int parse_config_file(const char *path, const char *section, const char *key, ch
 int parse_config_file_integer(const char *path, const char *section, const char *k, unsigned *ret);
 int parse_resolv_conf(char ***dns, char ***domains);
 
-static inline void gkey_file_freep(GKeyFile **f) {
-        if (f && *f)
-                g_key_file_free(*f);
-}
+int key_file_parse_strv(const char *path, const char *section, const char *key, char ***ret);
+
+int key_file_network_parse_dns(const char *path, char ***ret);
+int key_file_network_parse_search_domains(const char *path, char ***ret);
+int key_file_network_parse_ntp(const char *path, char ***ret);
