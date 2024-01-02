@@ -20,7 +20,7 @@
 #define string_has_suffix g_str_has_suffix
 #define strerror g_strerror
 
-char *free_and_strdup(char *s, char *t);
+char* free_and_strdup(char *s, char *t);
 
 static inline const char *str_na(const char *s) {
         return s ?: "n/a";
@@ -38,11 +38,10 @@ static inline bool strv_empty(const char **p) {
         return !p || !p[0];
 }
 
-
-char *rstrip(char *s);
-char *lskip(const char *s);
-char *find_chars_or_comment(const char *s, const char *chars);
-char *string_copy(char *dest, const char *src, size_t size);
+char* rstrip(char *s);
+char* lskip(const char *s);
+char* find_chars_or_comment(const char *s, const char *chars);
+char* string_copy(char *dest, const char *src, size_t size);
 
 int split_pair(const char *s, const char *sep, char **l, char **r);
 
@@ -62,7 +61,7 @@ char** strv_unique(char **s, char **t);
 char** strv_remove(char **p, const char *s);
 
 int strv_add(char ***l, const char *value);
-char **strv_merge(char **a, char **b);
+char** strv_merge(char **a, char **b);
 
 #define strv_parse_shell g_shell_parse_argv
 int argv_to_strv(int argc, char *argv[], char ***ret);
