@@ -56,6 +56,7 @@ int strv_unique(char **s, char **t, char ***ret);
 char **strv_remove(char **p, const char *s);
 
 int strv_add(char ***l, const char *value);
+char **strv_merge(char **a, char **b);
 
 #define strv_parse_shell g_shell_parse_argv
 int argv_to_strv(int argc, char *argv[], char ***ret);

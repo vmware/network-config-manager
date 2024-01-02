@@ -245,7 +245,6 @@ int strv_unique(char **s, char **t, char ***ret) {
         _cleanup_(set_freep) Set *st = NULL;
         GHashTableIter iter;
         gpointer key, value;
-        unsigned long size;
         char **d;
         int r;
 
@@ -264,9 +263,7 @@ int strv_unique(char **s, char **t, char ***ret) {
 
         g_hash_table_iter_init(&iter, st->hash);
         while (g_hash_table_iter_next (&iter, &key, &value)) {
-                char *v = (char *) g_bytes_get_data(key, &size);
-
-                r = strv_extend(&u, v);
+                r = strv_extend(&u, key);
                 if (r < 0)
                         return r;
         }
@@ -289,4 +286,20 @@ char **strv_remove(char **p, const char *s) {
 
         *t = NULL;
         return p;
+}
+
+char **strv_merge(char **a, char **b) {
+        GStrvBuilder *s;
+
+        assert(a);
+        assert(b);
+
+        s = g_strv_builder_new();
+        if (!s)
+                return NULL;
+
+        g_strv_builder_addv(s, (const char **) a);
+        g_strv_builder_addv(s, (const char **) b);
+
+        return g_strv_builder_end(s);
 }
