@@ -1637,9 +1637,11 @@ class TestCLINetwork:
     def test_cli_set_domains(self):
         assert(link_exist('test99') == True)
 
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
         subprocess.check_call("nmctl set-dns-domains dev test99 domains domain1,domain2", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
+
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
@@ -1654,6 +1656,7 @@ class TestCLINetwork:
     def test_cli_set_domains_keep(self):
         assert(link_exist('test99') == True)
 
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
         subprocess.check_call("nmctl set-dns-domains dev test99 domains domain1,domain2", shell = True)
         subprocess.check_call("nmctl set-dns-domains dev test99 domains domain3,domain4 keep yes", shell = True)
 
