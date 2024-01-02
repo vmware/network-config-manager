@@ -1965,51 +1965,11 @@ int manager_remove_ipv6_router_advertisement(const IfNameIndex *i) {
         return dbus_network_reload();
 }
 
-int manager_add_dns_server(const IfNameIndex *i, DNSServers *dns, bool system, bool global) {
-        _auto_cleanup_ char *setup = NULL, *network = NULL, *config_dns = NULL, *a = NULL;
-        int r;
-
-        assert(dns);
-
-        if (system)
-                return add_dns_server_and_domain_to_resolv_conf(dns, NULL);
-        else if (global)
-                return add_dns_server_and_domain_to_resolved_conf(dns, NULL);
-
-        assert(i);
-
-        r = network_parse_link_setup_state(i->ifindex, &setup);
-        if (r < 0 || str_eq(setup, "unmanaged"))
-                return dbus_add_dns_server(i->ifindex, dns);
-
-        r = create_or_parse_network_file(i, &network);
-        if (r < 0)
-                return r;
-
-        for (GSequenceIter *itr = g_sequence_get_begin_iter(dns->dns_servers); !g_sequence_iter_is_end(itr); itr = g_sequence_iter_next(itr)) {
-                _auto_cleanup_ char *pretty = NULL;
-                DNSServer *d = g_sequence_get(itr);
-
-                r = ip_to_str(d->address.family, &d->address, &pretty);
-                if (r >= 0) {
-                        a = strjoin(" ", pretty, a, NULL);
-                        if (!a)
-                                return log_oom();
-                }
-        }
-
-        r = set_config_file_str(network, "Network", "DNS", a);
-        if (r < 0) {
-                log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
-                return r;
-        }
-
-        return dbus_network_reload();
-}
-
-int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6) {
+int manager_set_dns_server(const IfNameIndex *i, char **dns, int ipv4, int ipv6, bool keep) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_strv_ char **s = NULL, **t = NULL;
         _auto_cleanup_ char *network = NULL;
+        char **l;
         int r;
 
         assert(i);
@@ -2023,7 +1983,26 @@ int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6) 
                 return r;
 
         if (dns) {
-                r = set_config(key_file, "Network", "DNS", dns);
+                if (keep) {
+                        r = key_file_network_parse_dns(network, &s);
+                        if (r < 0)
+                                return r;
+
+                        if (strv_empty((const char **) s)) {
+                                t = strv_dup(dns);
+                                if (!t)
+                                        return log_oom();
+                        } else {
+                                t = strv_unique(dns, s);
+                                if (!t)
+                                        return log_oom();
+                        }
+
+                        l = t;
+                } else
+                        l = dns;
+
+                r = set_config(key_file, "Network", "DNS", strv_join(" ", l));
                 if (r < 0) {
                         log_warning("Failed to write Network DNS= '%s': %s", network, strerror(-r));
                         return r;
