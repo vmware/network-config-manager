@@ -1,4 +1,4 @@
-/* Copyright 2023 VMware, Inc.
+/* Copyright 2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 #include <net/if.h>
@@ -2055,8 +2055,10 @@ int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6) 
         return dbus_network_reload();
 }
 
-int manager_set_dns_server_domain(const IfNameIndex *i, char **domains) {
-        _auto_cleanup_ char *setup = NULL, *network = NULL, *a = NULL;
+int manager_set_dns_server_domain(const IfNameIndex *i, char **domains, bool keep) {
+        _auto_cleanup_ char *network = NULL, *setup = NULL, *c = NULL;
+        _auto_cleanup_strv_ char **s = NULL, **t = NULL;
+        char **l;
         int r;
 
         assert(i);
@@ -2070,11 +2072,26 @@ int manager_set_dns_server_domain(const IfNameIndex *i, char **domains) {
         if (r < 0)
                 return r;
 
-        a = strv_join(" ", domains);
-        if (!a)
-                return log_oom();
+        if (keep) {
+                r = key_file_network_parse_search_domains(network, &s);
+                if (r < 0)
+                        return r;
 
-        r = set_config_file_str(network, "Network", "Domains", a);
+                if (strv_empty((const char **) s)) {
+                        t = strv_dup(domains);
+                        if (!t)
+                                return log_oom();
+                } else {
+                        t = strv_unique(domains, s);
+                        if (!t)
+                                return log_oom();
+                }
+
+                l = t;
+        } else
+                l = domains;
+
+        r = set_config_file_str(network, "Network", "Domains", strv_join(" ", l));
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
@@ -2215,7 +2232,7 @@ int manager_set_ntp_servers(const IfNameIndex *i, char **ntp, bool keep) {
                         if (!t)
                                 return log_oom();
                 } else {
-                        t = strv_merge(ntp, s);
+                        t = strv_unique(ntp, s);
                         if (!t)
                                 return log_oom();
                 }

@@ -1,4 +1,4 @@
-/* Copyright 2023 VMware, Inc.
+/* Copyright 2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
@@ -103,7 +103,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, Addr
 int manager_add_dns_server(const IfNameIndex *ifidx, DNSServers *dns, bool system, bool global);
 int manager_set_dns_server(const IfNameIndex *i, char *dns, int ipv4, int ipv6);
 
-int manager_set_dns_server_domain(const IfNameIndex *ifidx, char **domains);
+int manager_set_dns_server_domain(const IfNameIndex *ifidx, char **domains, bool keep);
 int manager_revert_dns_server_and_domain(const IfNameIndex *ifidx, bool dns, bool domain);
 int manager_read_domains_from_system_config(char **domains);
 int manager_set_ntp_servers(const IfNameIndex *ifidx, char **ntp, bool keep);

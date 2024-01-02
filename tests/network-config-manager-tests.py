@@ -846,7 +846,7 @@ class TestCLINetwork:
             raise Fail("nmctl show-ntp dev 2 -jfailed: %s" % -retcode)
 
     def test_cli_show_domains(self):
-        subprocess.check_call("nmctl set-dns-domains dev test99 domains domain2 domain2 domain3", shell = True)
+        subprocess.check_call("nmctl set-dns-domains dev test99 domains domain1,domain2,domain3", shell = True)
         subprocess.check_call("nmctl domain", text=True, shell = True)
         subprocess.check_call("nmctl domain dev test99", text=True, shell = True)
 
@@ -1002,24 +1002,6 @@ class TestCLINetwork:
         assert(dns.find("192.168.1.45") != -1)
 
         subprocess.check_call("nmctl revert-resolve-link dev test99 dns yes", shell = True)
-
-    def test_cli_add_domain(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
-        subprocess.check_call("sleep 5", shell = True)
-        subprocess.check_call("nmctl add-domain dev test99 domains domain1 domain2", shell = True)
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
-
-        d = parser.get('Network', 'Domains')
-        print(d)
-        assert(d.find("domain1") != -1)
-        assert(d.find("domain2") != -1)
 
     def test_cli_dns_mode_merged(self):
         assert(link_exist('test99') == True)
@@ -1652,6 +1634,47 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
 
+    def test_cli_set_domains(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        subprocess.check_call("nmctl set-dns-domains dev test99 domains domain1,domain2", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        d = parser.get('Network', 'Domains')
+
+        print(d)
+
+        assert(d.find("domain1") != -1)
+        assert(d.find("domain2") != -1)
+
+    def test_cli_set_domains_keep(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-manage dev test99 manage yes", shell = True)
+        subprocess.check_call("nmctl set-dns-domains dev test99 domains domain1,domain2", shell = True)
+        subprocess.check_call("nmctl set-dns-domains dev test99 domains domain3,domain4 keep yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        d = parser.get('Network', 'Domains')
+
+        print(d)
+
+        assert(d.find("domain1") != -1)
+        assert(d.find("domain2") != -1)
+        assert(d.find("domain3") != -1)
+        assert(d.find("domain4") != -1)
+
+
     def test_cli_set_ntp(self):
         assert(link_exist('test99') == True)
 
@@ -1665,22 +1688,36 @@ class TestCLINetwork:
         ntp = parser.get('Network', 'NTP')
 
         print(ntp)
+
         assert(ntp.find("192.168.1.34") != -1)
         assert(ntp.find("192.168.1.45") != -1)
+
+    def test_cli_set_ntp_keep(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-ntp dev test99 ntp 192.168.1.34,192.168.1.45", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        subprocess.check_call("nmctl set-ntp dev test99 ntp 192.168.1.31,192.168.1.42 keep yes", shell = True)
+
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        ntp = parser.get('Network', 'NTP')
+
+        print(ntp)
+
+        assert(ntp.find("192.168.1.34") != -1)
+        assert(ntp.find("192.168.1.45") != -1)
+        assert(ntp.find("192.168.1.31") != -1)
+        assert(ntp.find("192.168.1.42") != -1)
 
     def test_cli_add_dns_failure(self):
         assert(link_exist('test99') == True)
 
         assert(call_shell("nmctl set-manage dev test99 manag yes") != 0)
         assert(call_shell("nmctl set-dns dev test99 ds 192.168.1.45 192.168.1.46") != 0)
-
-        assert(unit_exist('10-test99.network') == False)
-
-    def test_cli_add_domain_failure(self):
-        assert(link_exist('test99') == True)
-
-        assert(call_shell("nmctl set-manage dev test99 maage yes") != 0)
-        assert(call_shell("nmctl add-domain dev test99 doains domain1 domain2") != 0)
 
         assert(unit_exist('10-test99.network') == False)
 

@@ -1,4 +1,4 @@
-/* Copyright 2023 VMware, Inc.
+/* Copyright 2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -240,39 +240,27 @@ int argv_to_strv(int argc, char *argv[], char ***ret) {
         return 0;
 }
 
-int strv_unique(char **s, char **t, char ***ret) {
-        _auto_cleanup_strv_ char **u = NULL;
-        _cleanup_(set_freep) Set *st = NULL;
-        GHashTableIter iter;
-        gpointer key, value;
-        char **d;
-        int r;
+char** strv_unique(char **a, char **b) {
+        GStrvBuilder *s;
+        char **t;
 
-        assert(s);
-        assert(t);
+        assert(a);
+        assert(b);
 
-        r = set_new(&st, NULL, NULL);
-        if (r < 0)
-                return r;
+        s = g_strv_builder_new();
+        if (!s)
+                return NULL;
 
-        strv_foreach(d, s)
-                set_add(st, *d);
-
-        strv_foreach(d, t)
-                set_add(st, *d);
-
-        g_hash_table_iter_init(&iter, st->hash);
-        while (g_hash_table_iter_next (&iter, &key, &value)) {
-                r = strv_extend(&u, key);
-                if (r < 0)
-                        return r;
+        g_strv_builder_addv(s, (const char **) a);
+        strv_foreach(t, b) {
+                if (!strv_contains((const char **) a, *t))
+                        g_strv_builder_add(s, *t);
         }
 
-        *ret = steal_ptr(u);
-        return 0;
+        return g_strv_builder_end(s);
 }
 
-char **strv_remove(char **p, const char *s) {
+char** strv_remove(char **p, const char *s) {
         char **a, **t;
 
         assert(p);
@@ -288,7 +276,7 @@ char **strv_remove(char **p, const char *s) {
         return p;
 }
 
-char **strv_merge(char **a, char **b) {
+char** strv_merge(char **a, char **b) {
         GStrvBuilder *s;
 
         assert(a);

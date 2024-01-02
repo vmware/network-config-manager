@@ -1,4 +1,4 @@
-/* Copyright 2023 VMware, Inc.
+/* Copyright 2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
@@ -46,20 +46,20 @@ char *string_copy(char *dest, const char *src, size_t size);
 
 int split_pair(const char *s, const char *sep, char **l, char **r);
 
-char *truncate_newline(char *s);
-char *str_strip(char *s);
+char* truncate_newline(char *s);
+char* str_strip(char *s);
 
 #define strv_foreach(s, l)                      \
         for ((s) = (l); (s) && *(s); (s)++)
 
-char **strv_new(const char *x);
+char** strv_new(const char *x);
 #define strv_join(s, t) g_strjoinv(s, t)
 #define strv_contains(s, t) g_strv_contains(s, t)
 #define strv_length(s) g_strv_length(s)
 #define strv_dup(s) g_strdupv(s)
 
-int strv_unique(char **s, char **t, char ***ret);
-char **strv_remove(char **p, const char *s);
+char** strv_unique(char **s, char **t);
+char** strv_remove(char **p, const char *s);
 
 int strv_add(char ***l, const char *value);
 char **strv_merge(char **a, char **b);
