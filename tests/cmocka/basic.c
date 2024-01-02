@@ -665,13 +665,13 @@ static void test_add_dhcp4_server_static_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.21 mac 00:0c:29:5f:d1:41") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.21/24 mac 00:0c:29:5f:d1:41") >= 0);
     system("sleep 1");
-    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.22 mac 00:0c:29:5f:d1:42") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.22/24 mac 00:0c:29:5f:d1:42") >= 0);
     system("sleep 1");
-    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.23 mac 00:0c:29:5f:d1:43") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.23/24 mac 00:0c:29:5f:d1:43") >= 0);
     system("sleep 1");
-    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.24 mac 00:0c:29:5f:d1:44") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.24/24 mac 00:0c:29:5f:d1:44") >= 0);
     system("sleep 1");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
@@ -685,10 +685,11 @@ static void test_add_dhcp4_server_static_address(void **state) {
     assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:43"));
     assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:44"));
 
-    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.21"));
-    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.22"));
-    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.23"));
-    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.24"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.21/24"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.22/24"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.23/24"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.24/24"));
+
     unlink("/etc/systemd/network/10-test99.network");
 }
 
@@ -696,13 +697,13 @@ static void test_remove_dhcp4_server_static_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.21 mac 00:0c:29:5f:d1:41") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.21/23 mac 00:0c:29:5f:d1:41") >= 0);
     system("sleep 1");
-    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.22 mac 00:0c:29:5f:d1:42") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.22/23 mac 00:0c:29:5f:d1:42") >= 0);
     system("sleep 1");
-    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.23 mac 00:0c:29:5f:d1:43") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.23/23 mac 00:0c:29:5f:d1:43") >= 0);
     system("sleep 1");
-    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.24 mac 00:0c:29:5f:d1:44") >= 0);
+    assert_true(system("nmctl adhcp4-srv-sa dev test99 a 192.168.1.24/23 mac 00:0c:29:5f:d1:44") >= 0);
     system("sleep 1");
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
@@ -716,17 +717,17 @@ static void test_remove_dhcp4_server_static_address(void **state) {
     assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:43"));
     assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:44"));
 
-    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.21"));
-    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.22"));
-    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.23"));
-    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.24"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.21/23"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.22/23"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.23/23"));
+    assert_true(key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.24/23"));
 
     key_file_free(key_file);
 
-    assert_true(system("nmctl rdhcp4-srv-sa dev test99 a 192.168.1.21 mac 00:0c:29:5f:d1:41") >= 0);
-    assert_true(system("nmctl rdhcp4-srv-sa dev test99 a 192.168.1.22 mac 00:0c:29:5f:d1:42") >= 0);
-    assert_true(system("nmctl rdhcp4-srv-sa dev test99 a 192.168.1.23 mac 00:0c:29:5f:d1:43") >= 0);
-    assert_true(system("nmctl rdhcp4-srv-sa dev test99 a 192.168.1.24 mac 00:0c:29:5f:d1:44") >= 0);
+    assert_true(system("nmctl rdhcp4-srv-sa dev test99 a 192.168.1.21/23 mac 00:0c:29:5f:d1:41") >= 0);
+    assert_true(system("nmctl rdhcp4-srv-sa dev test99 a 192.168.1.22/23 mac 00:0c:29:5f:d1:42") >= 0);
+    assert_true(system("nmctl rdhcp4-srv-sa dev test99 a 192.168.1.23/23 mac 00:0c:29:5f:d1:43") >= 0);
+    assert_true(system("nmctl rdhcp4-srv-sa dev test99 a 192.168.1.24/23 mac 00:0c:29:5f:d1:44") >= 0);
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -739,10 +740,10 @@ static void test_remove_dhcp4_server_static_address(void **state) {
     assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:43"));
     assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "MACAddress", "00:0c:29:5f:d1:44"));
 
-    assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.21"));
-    assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.22"));
-    assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.23"));
-    assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.24"));
+    assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.21/23"));
+    assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.22/23"));
+    assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.23/23"));
+    assert_true(!key_file_config_exists(key_file, "DHCPServerStaticLease", "Address", "192.168.1.24/23"));
     unlink("/etc/systemd/network/10-test99.network");
 }
 
