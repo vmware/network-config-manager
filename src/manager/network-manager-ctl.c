@@ -170,7 +170,7 @@ static int help(void) {
                "  set-hostname                 [HOSTNAME] Configures system hostname.\n"
                "  show-dns                                  Show DNS servers.\n"
                "  set-dns                      dev [DEVICE] dns [SERVER1,SERVER2...] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN].\n"
-               "  set-dns-domains              dev [DEVICE] domains [DOMAIN1,DOMAIN2 ...] Configures device Search Domains.\n"
+               "  set-dns-domains              dev [DEVICE] domains [DOMAIN1,DOMAIN2 ...] keep [BOOLEAN] Configures device Search Domains.\n"
                "  show-domains                              Show DNS Search Domains.\n"
                "  revert-resolve-link          dev [DEVICE] dns [BOOLEAN] domain [BOOLEAN] Flushes all DNS server and Domain settings of the device.\n"
                "  set-ntp                      dev [DEVICE] ntp [NTP1,NTP2...] keep [BOOLEAN] Set device NTP server address. This option may be specified more than once.\n"

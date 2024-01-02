@@ -3342,6 +3342,7 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
 _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        bool keep = false;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -3379,6 +3380,17 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
                                         return log_oom();
                         }
                         continue;
+                } else if (str_eq_fold(argv[i], "keep")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        keep = r;
+                        continue;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
@@ -3390,7 +3402,7 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_dns_server_domain(p, domains);
+        r = manager_set_dns_server_domain(p, domains, keep);
         if (r < 0) {
                 log_warning("Failed to set DNS Search domain: %s", strerror(-r));
                 return r;
