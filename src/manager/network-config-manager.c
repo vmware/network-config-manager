@@ -3385,7 +3385,7 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        if (!domains || strv_length(domains) <= 0) {
+        if (strv_empty((const char **) domains)) {
                 log_warning("Failed to parse DNS Search domains: %s", strerror(EINVAL));
                 return -EINVAL;
         }
