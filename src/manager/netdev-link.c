@@ -212,7 +212,7 @@ int create_or_parse_netdev_link_conf_file(const char *ifname, char **ret) {
         if (r < 0)
                 return r;
 
-        if (!isempty_str(mac)) {
+        if (!isempty(mac)) {
                 r = set_config_file_str(path, "Match", "MACAddress", mac);
                 if (r < 0)
                         return r;

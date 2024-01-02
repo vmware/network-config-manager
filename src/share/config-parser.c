@@ -54,7 +54,7 @@ int parse_key_file(const char *path, KeyFile **ret) {
                 if (n <= 0)
                         continue;
 
-                if (isempty_str(s) || strchr(COMMENTS, *s))
+                if (isempty(s) || strchr(COMMENTS, *s))
                         continue;
 
                 e = find_chars_or_comment(s, NULL);
@@ -219,7 +219,7 @@ char *key_file_config_get(const KeyFile *key_file, const char *section, const ch
                                 Key *key = (Key *) j->data;
 
                                 if (str_eq(key->name, k))
-                                        return key->v;
+                                        return strdup(key->v);
                         }
                 }
         }
@@ -264,7 +264,7 @@ int parse_line(const char *line, char **key, char **value) {
         if (!s)
                 return -ENODATA;
 
-        if (isempty_str(s) || *s == '#')
+        if (isempty(s) || *s == '#')
                 return -ENODATA;
 
         return split_pair(s, "=", key, value);
@@ -405,4 +405,39 @@ int parse_resolv_conf(char ***dns, char ***domains) {
         *dns = steal_ptr(a);
         *domains = steal_ptr(b);
         return 0;
+}
+
+int key_file_parse_strv(const char *path, const char *section, const char *key, char ***ret) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ char *s = NULL;
+        int r;
+
+        assert(path);
+        assert(section);
+        assert(key);
+
+        r = parse_key_file(path, &key_file);
+        if (r < 0)
+                return r;
+
+        s = key_file_config_get(key_file, section, key);
+        if (isempty(s)) {
+                *ret = NULL;
+                return 0;
+        }
+
+        *ret = strsplit(s, " ", -1);
+        return r;
+}
+
+int key_file_network_parse_dns(const char *path, char ***ret) {
+        return key_file_parse_strv(path, "Network", "DNS", ret);
+}
+
+int key_file_network_parse_search_domains(const char *path, char ***ret) {
+        return key_file_parse_strv(path, "Network", "Domains", ret);
+}
+
+int key_file_network_parse_ntp(const char *path, char ***ret) {
+        return key_file_parse_strv(path, "Network", "NTP", ret);
 }

@@ -30,9 +30,14 @@ static inline const char *str_na_json(const char *s) {
         return s ?: "";
 }
 
-static inline bool isempty_str(const char *p) {
+static inline bool isempty(const char *p) {
         return !p || !p[0];
 }
+
+static inline bool strv_empty(const char **p) {
+        return !p || !p[0];
+}
+
 
 char *rstrip(char *s);
 char *lskip(const char *s);
@@ -51,11 +56,13 @@ char **strv_new(const char *x);
 #define strv_join(s, t) g_strjoinv(s, t)
 #define strv_contains(s, t) g_strv_contains(s, t)
 #define strv_length(s) g_strv_length(s)
+#define strv_dup(s) g_strdupv(s)
 
 int strv_unique(char **s, char **t, char ***ret);
 char **strv_remove(char **p, const char *s);
 
 int strv_add(char ***l, const char *value);
+char **strv_merge(char **a, char **b);
 
 #define strv_parse_shell g_shell_parse_argv
 int argv_to_strv(int argc, char *argv[], char ***ret);

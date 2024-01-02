@@ -173,6 +173,8 @@ static int help(void) {
                "  set-dns-domains              dev [DEVICE] domains [DOMAIN] [DOMAIN] [DOMAIN] Configures device Search Domains.\n"
                "  show-domains                              Show DNS Search Domains.\n"
                "  revert-resolve-link          dev [DEVICE] dns [BOOLEAN] domain [BOOLEAN] Flushes all DNS server and Domain settings of the device.\n"
+               "  set-ntp                      dev [DEVICE] ntp [NTP1,NTP2...] keep [BOOLEAN] Set device NTP server address. This option may be specified more than once.\n"
+               "  remove-ntp                   dev [DEVICE] Removes devices NTP servers.\n"
                "  show-ntp                                  Show NTP servers.\n"
                "  set-lla                      dev [DEVICE] [LinkLocalAddressing BOOLEAN|ipv6|ipv4] Configures link local address.\n"
                "  set-ipv4ll-route             dev [DEVICE] [IPv4LLRoute BOOLEAN] Configures the route needed for non-IPv4LL hosts to communicate.\n"
@@ -195,9 +197,6 @@ static int help(void) {
                                                      "\n\t\t\t\t     [use-hostname BOOLEAN] [use-routes BOOLEAN] [use-gw BOOLEAN] [use-tz BOOLEAN] Configures Link DHCPv4\n"
                "  set-dhcp6                    dev [DEVICE] [use-dns BOOLEAN] [use-domains BOOLEAN] [rapid-commit BOOLEAN] [use-addr BOOLEAN] [use-delegataed-prefix BOOLEAN]"
                                                      "\n\t\t\t\t     [without-ra BOOLEAN] [use-ntp BOOLEAN] [use-hostname BOOLEAN] [send-release BOOLEAN] Configures DHCPv6.\n"
-               "  add-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Add Link NTP server address. This option may be specified more than once.\n"
-               "  set-ntp                      dev [DEVICE] ntp [NTP] [NTP] ... Set Link NTP server address. This option may be specified more than once.\n"
-               "  remove-ntp                   dev [DEVICE] Removes devices NTP servers.\n"
                "  add-dhcpv4-server            dev [DEVICE] pool-offset [PoolOffset NUMBER] pool-size [PoolSize NUMBER] default-lease-time [DefaultLeaseTimeSec NUMBER]"
                                                       "\n\t\t\t\t      max-lease-time [MaxLeaseTimeSec NUMBER] emit-dns [EmitDNS BOOLEAN]"
                                                       "\n\t\t\t\t      dns [DNS ADDRESS] emit-ntp [EmitNTP BOOLEAN] ntp [NTP ADDRESS]"
@@ -509,14 +508,14 @@ static int cli_run(int argc, char *argv[]) {
         if (alias) {
                 printf("%s   %28s\n", "Command", "Alias");
                 for (size_t i = 0; i < ELEMENTSOF(commands); i++) {
-                        if (!isempty_str(commands[i].alias))
+                        if (!isempty(commands[i].alias))
                                 printf("%-30s   %-30s\n", commands[i].name, commands[i].alias);
                 }
 
                 return 0;
         }
 
-        if (!isempty_str(argv[1]) && !runs_without_networkd(argv[1]))
+        if (!isempty(argv[1]) && !runs_without_networkd(argv[1]))
                 if (!ncm_is_netword_running())
                         exit(-1);
 

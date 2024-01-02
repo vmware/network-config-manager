@@ -1655,7 +1655,7 @@ class TestCLINetwork:
     def test_cli_set_ntp(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-ntp dev test99 ntp 192.168.1.34 192.168.1.45", shell = True)
+        subprocess.check_call("nmctl set-ntp dev test99 ntp 192.168.1.34,192.168.1.45", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -1853,7 +1853,7 @@ class TestCLINetwork:
     def test_cli_add_ntp_failure(self):
         assert(link_exist('test99') == True)
 
-        assert(call_shell("nmctl set-ntp dev test99 ntttp 192.168.1.34 192.168.1.45") != 0)
+        assert(call_shell("nmctl set-ntp dev test99 ntttp 192.168.1.34,192.168.1.45") != 0)
 
         assert(unit_exist('10-test99.network') == False)
 

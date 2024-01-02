@@ -2192,8 +2192,10 @@ int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *i, const char *
         return dbus_network_reload();
 }
 
-int manager_set_ntp_servers(const IfNameIndex *i, char **ntp) {
-        _auto_cleanup_ char *network = NULL, *config_ntp = NULL;
+int manager_set_ntp_servers(const IfNameIndex *i, char **ntp, bool keep) {
+        _auto_cleanup_strv_ char **s = NULL, **t = NULL;
+        _auto_cleanup_ char *network = NULL, *c = NULL;
+        char **l;
         int r;
 
         assert(i);
@@ -2203,7 +2205,26 @@ int manager_set_ntp_servers(const IfNameIndex *i, char **ntp) {
         if (r < 0)
                 return r;
 
-        r = set_config_file_str(network, "Network", "NTP", strv_join(" ", ntp));
+        if (keep) {
+                r = key_file_network_parse_ntp(network, &s);
+                if (r < 0)
+                        return r;
+
+                if (strv_empty((const char **) s)) {
+                        t = strv_dup(ntp);
+                        if (!t)
+                                return log_oom();
+                } else {
+                        t = strv_merge(ntp, s);
+                        if (!t)
+                                return log_oom();
+                }
+
+                l = t;
+        } else
+                l = ntp;
+
+        r = set_config_file_str(network, "Network", "NTP", strv_join(" ", l));
         if (r < 0) {
                 log_warning("Failed to write to configuration file '%s': %s", network, strerror(-r));
                 return r;
