@@ -3707,8 +3707,6 @@ _public_ int ncm_link_set_ntp(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                printf("%s\n", argv[i]);
-
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 

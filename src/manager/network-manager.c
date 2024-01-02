@@ -2215,7 +2215,7 @@ int manager_set_ntp_servers(const IfNameIndex *i, char **ntp, bool keep) {
                         if (!t)
                                 return log_oom();
                 } else {
-                        t = strv_merge(ntp, s);
+                        t = strv_unique(ntp, s);
                         if (!t)
                                 return log_oom();
                 }
