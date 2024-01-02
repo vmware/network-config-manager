@@ -3357,13 +3357,27 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "domains")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = argv_to_strv(argc - 4, argv + i, &domains);
-                        if (r < 0) {
-                                log_warning("Failed to parse DNS Search domains: %s", strerror(-r));
-                                return r;
-                        }
+                        if (strchr(argv[i], ',')) {
+                                char **d;
 
-                        i += strv_length(domains);
+                                d = strsplit(argv[i], ",", -1);
+                                if (!d) {
+                                        log_warning("Failed to parse DNS Search domains '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                if (!domains)
+                                        domains = d;
+                                else {
+                                        domains = strv_merge(domains, d);
+                                        if (!domains)
+                                                return log_oom();
+                                }
+                        } else {
+                                r = strv_extend(&domains, argv[i]);
+                                if (r < 0)
+                                        return log_oom();
+                        }
                         continue;
                 }
 
