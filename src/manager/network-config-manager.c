@@ -3233,9 +3233,10 @@ _public_ int ncm_get_dns_server(char ***ret) {
 }
 
 _public_ int ncm_set_dns_server(int argc, char *argv[]) {
+        _auto_cleanup_strv_ char **dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_ char *dns = NULL;
         int ipv4 = -1, ipv6 = -1;
+        bool keep = false;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -3273,7 +3274,7 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                                         }
                                 }
 
-                      } else {
+                        } else {
                                 _auto_cleanup_strv_ char **t = NULL;
                                 char **d;
 
@@ -3295,10 +3296,7 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                                 white_space = true;
                         }
 
-                        dns = strv_join(" ", s);
-                        if (!dns)
-                                return log_oom();
-
+                        dns = steal_ptr(s);
                         if (white_space)
                                 i--;
                         continue;
@@ -3324,7 +3322,19 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
 
                         ipv6 = r;
                         continue;
+                } else if (str_eq_fold(argv[i], "keep")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        keep = r;
+                        continue;
                 }
+
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                 return -EINVAL;
@@ -3335,7 +3345,7 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_dns_server(p, dns, ipv4, ipv6);
+        r = manager_set_dns_server(p, dns, ipv4, ipv6, keep);
         if (r < 0) {
                 log_warning("Failed to set DNS servers %s: %s", argv[1], strerror(-r));
                 return r;
