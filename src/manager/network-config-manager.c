@@ -3023,7 +3023,7 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
                 return r;
         }
 
-        if (!isempty_str(c))
+        if (!isempty(c))
                 static_dns = true;
 
         r = parse_config_file(network, "DHCPv4", "UseDNS", &c4);
@@ -3672,7 +3672,7 @@ _public_ int ncm_show_ntp_servers(int argc, char *argv[]) {
 _public_ int ncm_set_system_hostname(int argc, char *argv[]) {
         int r;
 
-        if (isempty_str(argv[1])) {
+        if (isempty(argv[1])) {
                 log_warning("Invalid hostname. Ignoring");
                 return -EINVAL;
         }
@@ -3707,6 +3707,8 @@ _public_ int ncm_link_set_ntp(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
+                printf("%s\n", argv[i]);
+
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
                         parse_next_arg(argv, argc, i);
 
@@ -3735,7 +3737,6 @@ _public_ int ncm_link_set_ntp(int argc, char *argv[]) {
                                         if (!n)
                                                 return log_oom();
                                 }
-                                i += strv_length(d);
                         } else {
                                 r = strv_extend(&n, argv[i]);
                                 if (r < 0)

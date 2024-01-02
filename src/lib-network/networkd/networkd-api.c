@@ -17,7 +17,7 @@ int network_parse_string(const char *key, char **state) {
         if (r < 0)
                 return r;
 
-        if (isempty_str(s))
+        if (isempty(s))
                 return -ENODATA;
 
         *state = steal_ptr(s);
@@ -54,7 +54,7 @@ static int network_parse_strv(const char *key, char ***ret) {
         if (r < 0)
                 return r;
 
-        if (isempty_str(s)) {
+        if (isempty(s)) {
                 *ret = NULL;
                 return 0;
         }
@@ -91,7 +91,7 @@ static int network_parse_link_strv(int ifindex, const char *key, char ***ret) {
         if (r < 0)
                 return r;
 
-        if (isempty_str(s)) {
+        if (isempty(s)) {
                 *ret = NULL;
                 return 0;
         }
@@ -112,7 +112,7 @@ static int network_parse_link_string(int ifindex, const char *key, char **ret) {
         if (r < 0)
                 return r;
 
-        if (isempty_str(s)) {
+        if (isempty(s)) {
                 *ret = NULL;
                 return 0;
         }
@@ -133,7 +133,7 @@ static int network_parse_link_lease_strv(int ifindex, const char *key, char ***r
         if (r < 0)
                 return r;
 
-        if (isempty_str(s)) {
+        if (isempty(s)) {
                 *ret = NULL;
                 return 0;
         }
@@ -154,7 +154,7 @@ static int network_parse_link_lease_string(int ifindex, const char *key, char **
         if (r < 0)
                 return r;
 
-        if (isempty_str(s)) {
+        if (isempty(s)) {
                 *ret = NULL;
                 return 0;
         }

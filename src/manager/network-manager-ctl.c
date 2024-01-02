@@ -508,14 +508,14 @@ static int cli_run(int argc, char *argv[]) {
         if (alias) {
                 printf("%s   %28s\n", "Command", "Alias");
                 for (size_t i = 0; i < ELEMENTSOF(commands); i++) {
-                        if (!isempty_str(commands[i].alias))
+                        if (!isempty(commands[i].alias))
                                 printf("%-30s   %-30s\n", commands[i].name, commands[i].alias);
                 }
 
                 return 0;
         }
 
-        if (!isempty_str(argv[1]) && !runs_without_networkd(argv[1]))
+        if (!isempty(argv[1]) && !runs_without_networkd(argv[1]))
                 if (!ncm_is_netword_running())
                         exit(-1);
 

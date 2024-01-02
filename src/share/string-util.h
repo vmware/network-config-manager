@@ -30,7 +30,7 @@ static inline const char *str_na_json(const char *s) {
         return s ?: "";
 }
 
-static inline bool isempty_str(const char *p) {
+static inline bool isempty(const char *p) {
         return !p || !p[0];
 }
 

@@ -712,10 +712,10 @@ static int json_fill_one_link_udev(json_object *j, Link *l, char **link_file) {
                 steal_ptr(js);
         }
 
-        if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 && !isempty_str(t)) {
+        if (sd_device && sd_device_get_devtype(sd_device, &t) >= 0 && !isempty(t)) {
                 _cleanup_(json_object_putp) json_object *js = NULL;
 
-                if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty_str(t))
+                if (sd_device_get_devtype(sd_device, &t) >= 0 &&  !isempty(t))
                         js = json_object_new_string(t);
                 else
                         js = json_object_new_string(str_na(arphrd_to_name(l->iftype)));
