@@ -543,13 +543,13 @@ _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
                 return r;
 
         if (mtu < 1280) {
-                log_warning("MTU must be greater than or equal to 1280 bytes. Failed to update MTU for '%s': %s", p->ifname, strerror(EINVAL));
+                log_warning("MTU must be greater than or equal to 1280 bytes. Failed to update IPv6 MTU for device '%s': %s", p->ifname, strerror(EINVAL));
                 return r;
         }
 
         r = manager_link_set_network_ipv6_mtu(p, mtu);
         if (r < 0) {
-                log_warning("Failed to update MTU for '%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to update IPv6 MTU for device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -675,7 +675,7 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
                                          send_release_ipv4,
                                          send_release_ipv6);
         if (r < 0) {
-                log_warning("Failed to set DHCP configuration for device='%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to set DHCP configuration for device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -743,7 +743,7 @@ _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
 
         r = manager_set_link_dhcp4_client_identifier(p, d);
         if (r < 0) {
-                log_warning("Failed to set device DHCP4 client identifier '%s': %s", p->ifname, strerror(r));
+                log_warning("Failed to set device DHCP4 client identifier for device '%s': %s", p->ifname, strerror(r));
                 return r;
         }
 
@@ -834,7 +834,7 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
 
         r = manager_set_link_dhcp_client_iaid(p, kind, iaid);
         if (r < 0) {
-                log_warning("Failed to set device DHCP client IAID for '%s': %s", p->ifname, strerror(r));
+                log_warning("Failed to set device DHCP client IAID for device '%s': %s", p->ifname, strerror(r));
                 return r;
         }
 
@@ -927,7 +927,7 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
 
         r = manager_set_link_dhcp_client_duid(p, d, raw_data, system, kind);
         if (r < 0) {
-                log_warning("Failed to set device DHCP client DUID for '%s': %s", p->ifname, strerror(r));
+                log_warning("Failed to set device DHCP client DUID for device '%s': %s", p->ifname, strerror(r));
                 return r;
         }
 
@@ -1393,7 +1393,7 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
 
         r = manager_remove_link_address(p, addrs);
         if (r < 0) {
-                log_warning("Failed to remove address from device='%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to remove address from device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -1537,7 +1537,7 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
 
         r = manager_configure_default_gateway_full(p, rt4, rt6);
         if (r < 0) {
-                log_warning("Failed to configure device default gateway on '%s': %s", argv[1], strerror(-r));
+                log_warning("Failed to configure default gateway on device '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -1602,7 +1602,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
 
         r = manager_configure_default_gateway(p, rt);
         if (r < 0) {
-                log_warning("Failed to configure device default gateway on '%s': %s", argv[1], strerror(-r));
+                log_warning("Failed to configure default gateway on device '%s': %s", argv[1], strerror(-r));
                 return r;
         }
 
@@ -1912,7 +1912,7 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
         }
 
         if (dhcp == _DHCP_CLIENT_INVALID) {
-                log_warning("Failed to parse dhcp : %s", strerror(EINVAL));
+                log_warning("Failed to parse dhcp: %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -3330,6 +3330,11 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                return -EINVAL;
+        }
+
         r = manager_set_dns_server(p, dns, ipv4, ipv6);
         if (r < 0) {
                 log_warning("Failed to set DNS servers %s: %s", argv[1], strerror(-r));
@@ -3394,6 +3399,11 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -3945,6 +3955,7 @@ _public_ int ncm_link_show_network_config(int argc, char *argv[]) {
                          break;
                 }
         }
+
         if (!p) {
                 log_warning("Failed to find device: %s",  strerror(EINVAL));
                 return -EINVAL;
