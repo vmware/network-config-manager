@@ -3703,6 +3703,7 @@ _public_ int ncm_get_system_hostname(char **ret) {
 _public_ int ncm_link_set_ntp(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_strv_ char **n = NULL;
+        bool keep = false;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -3718,13 +3719,40 @@ _public_ int ncm_link_set_ntp(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "ntp")) {
                         parse_next_arg(argv, argc, i);
 
-                        r = argv_to_strv(argc - 4, argv + i, &n);
+                        if (strchr(argv[i], ',')) {
+                                char **d;
+
+                                d = strsplit(argv[i], ",", -1);
+                                if (!d) {
+                                        log_warning("Failed to parse NTP servers '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                if (!n)
+                                        n = d;
+                                else {
+                                        n = strv_merge(n, d);
+                                        if (!n)
+                                                return log_oom();
+                                }
+                                i += strv_length(d);
+                        } else {
+                                r = strv_extend(&n, argv[i]);
+                                if (r < 0)
+                                        return log_oom();
+                        }
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "keep")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse NTP server address: %s", strerror(-r));
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
-                        i += strv_length(n);
+                        keep = r;
                         continue;
                 }
 
@@ -3742,9 +3770,9 @@ _public_ int ncm_link_set_ntp(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ntp_servers(p, n);
+        r = manager_set_ntp_servers(p, n, keep);
         if (r < 0) {
-                log_warning("Failed to set NTP server address for device'%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to set NTP server address for device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
