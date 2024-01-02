@@ -1736,7 +1736,7 @@ int manager_add_dhcpv4_server_static_address(const IfNameIndex *i, const IPAddre
         if (r < 0)
                 return r;
 
-        r = ip_to_str(addr->family, addr, &a);
+        r = ip_to_str_prefix(addr->family, addr, &a);
         if (r < 0)
                 return r;
 
@@ -1778,11 +1778,11 @@ int manager_remove_dhcpv4_server_static_address(const IfNameIndex *i, const IPAd
 
         r = create_or_parse_network_file(i, &network);
         if (r < 0) {
-                log_warning("Failed to create network file for device '%s': %s\n", i->ifname, strerror(-r));
+                log_warning("Failed to create network file for device '%s': %s", i->ifname, strerror(-r));
                 return r;
         }
 
-        r = ip_to_str(addr->family, addr, &a);
+        r = ip_to_str_prefix(addr->family, addr, &a);
         if (r < 0)
                 return r;
 
