@@ -167,7 +167,7 @@ static int help(void) {
                "  add-rule                     dev [DEVICE] table [TABLE NUMBER] [from ADDRESS] [to ADDRESS] [oif DEVICE] [iif DEVICE] [priority NUMBER] [tos NUMBER]"
                                                 "\n\t\t\t\t [invert BOOLEAN] [sport NUMBER] [dport NUMBER] [proto tcp|udp|sctp] Configures Routing Policy Rule.\n"
                "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
-               "  set-hostname                 [HOSTNAME] Configures system hostname.\n"
+               "  set-hostname                 [HOSTNAME] Configures system Static hostname.\n"
                "  show-dns                                  Show DNS servers.\n"
                "  set-dns                      dev [DEVICE] dns [SERVER1,SERVER2...] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN].\n"
                "  set-dns-domains              dev [DEVICE] domains [DOMAIN1,DOMAIN2 ...] keep [BOOLEAN] Configures device Search Domains.\n"
