@@ -1431,15 +1431,9 @@ _public_ int ncm_link_get_addresses(const char *ifname, char ***ret) {
                 if (r < 0)
                         return r;
 
-                if (!s) {
-                        s = strv_new(c);
-                        if (!s)
-                                return log_oom();
-                } else {
-                        r = strv_add(&s, c);
-                        if (r < 0)
-                                return log_oom();
-                }
+                r = strv_extend(&s, c);
+                if (r < 0)
+                        return log_oom();
 
                 steal_ptr(c);
         }
@@ -2139,15 +2133,9 @@ _public_ int ncm_link_get_routes(char *ifname, char ***ret) {
                 if (r < 0)
                         return r;
 
-                if (!s) {
-                        s = strv_new(c);
-                        if (!s)
-                                return log_oom();
-                } else {
-                        r = strv_add(&s, c);
-                        if (r < 0)
-                                return log_oom();
-                }
+                r = strv_extend(&s, c);
+                if (r < 0)
+                        return log_oom();
 
                 steal_ptr(c);
         }
@@ -3214,15 +3202,9 @@ _public_ int ncm_get_dns_server(char ***ret) {
 
                 r = ip_to_str(d->address.family, &d->address, &k);
                 if (r >= 0) {
-                        if (!s) {
-                                s = strv_new(k);
-                                if (!s)
-                                        return -ENOMEM;
-                        } else {
-                                r = strv_add(&s, k);
-                                if (r < 0)
-                                        return r;
-                        }
+                        r = strv_extend(&s, k);
+                        if (r < 0)
+                                return r;
                 }
 
                 steal_ptr(k);
@@ -3334,7 +3316,6 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                         keep = r;
                         continue;
                 }
-
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                 return -EINVAL;

@@ -991,15 +991,16 @@ class TestCLINetwork:
         subprocess.check_call("nmctl set-dns dev test99 dns 192.168.1.46 use-dns-ipv4 yes use-dns-ipv6 yes", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
-        subprocess.check_call("nmctl set-dns dev test99 dns 192.168.1.45 use-dns-ipv4 yes use-dns-ipv6 yes", shell = True)
+        subprocess.check_call("nmctl set-dns dev test99 dns 192.168.1.45 keep yes", shell = True)
 
         parser = configparser.ConfigParser()
         parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
 
         assert(parser.get('Match', 'Name') == 'test99')
 
-        assert(parser.get('Network', 'DNS') == '192.168.1.46')
-        assert(parser.get('Network', 'DNS') == '192.168.1.45')
+        dns = parser.get('Network', 'DNS')
+        assert(dns.find("192.168.1.46") != -1)
+        assert(dns.find("192.168.1.45") != -1)
 
         assert(parser.get('DHCPv4', 'UseDNS') == 'yes')
         assert(parser.get('DHCPv6', 'UseDNS') == 'yes')
