@@ -754,18 +754,12 @@ int parse_yaml_scalar_or_sequence(const char *key,
                 if (!c)
                         return log_oom();
 
-                if (!*s) {
-                        *s = strv_new(c);
-                        if (!*s)
-                                return log_oom();
-                } else {
-                        if (!strv_contains((const char **)*s, c)) {
-                                r = strv_add(s, c);
-                                if (r < 0)
-                                        return r;
-                        }
+                if (!strv_contains((const char **)*s, c)) {
+                        r = strv_extend(s, c);
+                        if (r < 0)
+                                return r;
                 }
-       }
+        }
 
         return 0;
 }
@@ -793,16 +787,10 @@ int parse_yaml_sequence(const char *key,
                 if (!c)
                         return log_oom();
 
-                if (!*s) {
-                        *s = strv_new(c);
-                        if (!*s)
-                                return log_oom();
-                } else {
-                        if (!strv_contains((const char **)*s, c)) {
-                                r = strv_add(s, c);
-                                if (r < 0)
-                                        return r;
-                        }
+                if (!strv_contains((const char **)*s, c)) {
+                        r = strv_extend(s, c);
+                        if (r < 0)
+                                return r;
                 }
         }
 
