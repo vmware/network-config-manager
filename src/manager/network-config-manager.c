@@ -67,8 +67,8 @@ _public_ int ncm_link_set_mtu(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (!have_mtu) {
@@ -155,8 +155,8 @@ _public_ int ncm_link_set_mac(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (!have_mac) {
@@ -239,8 +239,8 @@ _public_ int ncm_link_set_mode(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_set_link_flag(p, ctl_to_config(m, "manage"), bool_to_str(!k));
@@ -387,7 +387,7 @@ _public_ int ncm_link_set_group(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
                 return -EINVAL;
         }
 
@@ -442,8 +442,8 @@ _public_ int ncm_link_set_rf_online(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (!have_family) {
@@ -498,8 +498,8 @@ _public_ int ncm_link_set_act_policy(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (!have_ap) {
@@ -534,7 +534,7 @@ _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
                 return -EINVAL;
         }
 
@@ -657,8 +657,8 @@ _public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (dhcp == _DHCP_CLIENT_INVALID) {
@@ -732,8 +732,8 @@ _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
@@ -823,8 +823,8 @@ _public_ int ncm_link_set_dhcp_client_iaid(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (kind == _DHCP_CLIENT_INVALID) {
@@ -916,8 +916,8 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
         }
 
         if (!p && !system) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (d == _DHCP_CLIENT_DUID_TYPE_INVALID) {
@@ -953,8 +953,8 @@ _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         s = parse_bool_or_ip_family(argv[3]);
@@ -991,8 +991,8 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_network_section_configs_new(&m);
@@ -1033,8 +1033,8 @@ _public_ int ncm_link_set_network_ipv6_dad(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = parse_bool(argv[3]);
@@ -1064,7 +1064,7 @@ _public_ int ncm_link_set_network_ipv6_link_local_address_generation_mode(int ar
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
                 return -EINVAL;
         }
 
@@ -1095,8 +1095,8 @@ _public_ int ncm_link_set_dhcp4_section(int argc, char *argv[]) {
                 }
         }
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_network_dhcp4_section_configs_new(&m);
@@ -1144,8 +1144,8 @@ _public_ int ncm_link_set_dhcp6_section(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_network_dhcp6_section_configs_new(&m);
@@ -1194,8 +1194,8 @@ _public_ int ncm_link_update_state(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         state = link_name_to_state(argv[3]);
@@ -1331,8 +1331,8 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_configure_link_address(p, address, peer, scope, pref_lft, dad, prefix_route, label);
@@ -1382,8 +1382,8 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (!addrs) {
@@ -1519,8 +1519,8 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (rt4 && onlink4 >= 0)
@@ -1579,8 +1579,8 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = route_new(&rt);
@@ -1765,8 +1765,8 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_configure_route(p, gw, dst, source , pref_source, rt_pref, protocol, scope, type, table, mtu, metric, onlink, b);
@@ -1901,8 +1901,8 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (dhcp == _DHCP_CLIENT_INVALID) {
@@ -1992,13 +1992,13 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
                 return -EINVAL;
         }
 
-        r = manager_configure_static_conf(p, addrs, gws, keep);
+        r = manager_set_link_static_conf(p, addrs, gws, keep);
         if (r < 0) {
-                log_warning("Failed to set static configrution for device='%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to set static configuration for device='%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -2073,8 +2073,8 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = route_new(&rt);
@@ -2176,8 +2176,8 @@ _public_ int ncm_link_remove_gateway(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_remove_gateway_or_route(p, true, family);
@@ -2221,8 +2221,8 @@ _public_ int ncm_link_remove_route(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_remove_gateway_or_route(p, false, family);
@@ -2395,8 +2395,8 @@ _public_ int ncm_link_add_routing_policy_rules(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_configure_routing_policy_rules(p, rule);
@@ -2426,8 +2426,8 @@ _public_ int ncm_link_remove_routing_policy_rules(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_remove_routing_policy_rules(p);
@@ -2556,8 +2556,8 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_configure_dhcpv4_server(p, dns, ntp, pool_offset, pool_size, default_lease_time, max_lease_time,
@@ -2587,8 +2587,8 @@ _public_ int ncm_link_remove_dhcpv4_server(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_remove_dhcpv4_server(p);
@@ -2650,8 +2650,8 @@ _public_ int ncm_link_add_dhcpv4_server_static_address(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (!have_mac) {
@@ -2723,8 +2723,8 @@ _public_ int ncm_link_remove_dhcpv4_server_static_address(int argc, char *argv[]
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (!have_mac && !have_address) {
@@ -2916,8 +2916,8 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_configure_ipv6_router_advertisement(p, prefix, route_prefix, dns, domain, pref_lifetime, valid_lifetime,
@@ -2947,8 +2947,8 @@ _public_ int ncm_link_remove_ipv6_router_advertisement(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_remove_ipv6_router_advertisement(p);
@@ -2986,8 +2986,8 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = network_parse_link_network_file(p->ifindex, &network);
@@ -3322,8 +3322,8 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_set_dns_server(p, dns, ipv4, ipv6, keep);
@@ -3394,8 +3394,8 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (strv_empty((const char **) domains)) {
@@ -3592,8 +3592,8 @@ _public_ int ncm_revert_resolve_link(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (dns < 0 && domain < 0) {
@@ -3787,8 +3787,8 @@ _public_ int ncm_link_set_ntp(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         if (!n) {
@@ -3823,8 +3823,8 @@ _public_ int ncm_link_remove_ntp(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
        r = manager_remove_ntp_addresses(p);
@@ -3882,8 +3882,8 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_enable_ipv6(p, b);
@@ -3916,8 +3916,8 @@ _public_ int ncm_link_reconfigure(int argc, char *argv[]) {
                 }
         }
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
 
@@ -3948,8 +3948,8 @@ _public_ int ncm_link_show_network_config(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_show_link_network_config(p, &config);
@@ -3985,8 +3985,8 @@ _public_ int ncm_link_edit_network_config(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_edit_link_network_config(p);
@@ -4021,8 +4021,8 @@ _public_ int ncm_link_edit_link_config(int argc, char *argv[]) {
         }
 
         if (!p) {
-                log_warning("Failed to find device: %s",  strerror(EINVAL));
-                return -EINVAL;
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
         }
 
         r = manager_edit_link_config(p);

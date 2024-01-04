@@ -1259,7 +1259,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, Addr
 
         r = network_parse_link_setup_state(ifidx->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find device setup '%s': %s\n", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find setup for device'%s': %s", ifidx->ifname, strerror(-r));
                 return r;
         }
 
@@ -1289,7 +1289,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, Addr
         return dbus_network_reload();
 }
 
-int manager_configure_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, bool keep) {
+int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, bool keep) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         char **a;
