@@ -318,11 +318,11 @@ int parse_ifname_or_index(const char *s, IfNameIndex **ret) {
 
                 r = parse_int(s, &ifindex);
                 if (r < 0)
-                        return -ENOENT;
+                        return -ENXIO;
 
                 n = if_indextoname(ifindex, p->ifname);
                 if (!n)
-                        return -ENOENT;
+                        return -ENXIO;
                 p->ifindex = ifindex;
         } else {
                 p->ifindex = r;
