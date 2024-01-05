@@ -1696,7 +1696,6 @@ class TestCLINetwork:
         assert(d.find("domain3") != -1)
         assert(d.find("domain4") != -1)
 
-
     def test_cli_set_ntp(self):
         assert(link_exist('test99') == True)
 
