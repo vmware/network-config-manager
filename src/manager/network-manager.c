@@ -1304,7 +1304,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, Addr
         return dbus_network_reload();
 }
 
-int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, bool keep) {
+int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, bool keep) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         char **a;
@@ -1325,6 +1325,12 @@ int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **
         r = parse_key_file(network, &key_file);
         if (r < 0)
                 return r;
+
+        if (dns) {
+                r = set_config(key_file, "Network", "DNS", strv_join(" ", dns));
+                if (r < 0)
+                        return r;
+        }
 
         strv_foreach(a, addrs) {
                 _cleanup_(section_freep) Section *section = NULL;

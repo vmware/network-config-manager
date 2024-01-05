@@ -163,7 +163,7 @@ static int help(void) {
                "  set-dynamic                  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN]"
                                                       "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] keep [BOOLEAN]"
                "                                       \n\t\t\t\t Configures dynamic configuration of the device (IPv4|IPv6|RA).\n"
-               "  set-static                   dev [DEVICE] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] ... keep [BOOLEAN] Configures static configuration of the device\n"
+               "  set-static                   dev [DEVICE] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] dns [SERVER1,SERVER2...] ... keep [BOOLEAN] Configures static configuration of the device\n"
                "  add-rule                     dev [DEVICE] table [TABLE NUMBER] [from ADDRESS] [to ADDRESS] [oif DEVICE] [iif DEVICE] [priority NUMBER] [tos NUMBER]"
                                                 "\n\t\t\t\t [invert BOOLEAN] [sport NUMBER] [dport NUMBER] [proto tcp|udp|sctp] Configures Routing Policy Rule.\n"
                "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
