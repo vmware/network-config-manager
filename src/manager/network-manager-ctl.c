@@ -169,7 +169,7 @@ static int help(void) {
                "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
                "  set-hostname                 [HOSTNAME] Configures system Static hostname.\n"
                "  show-dns                                  Show DNS servers.\n"
-               "  set-dns                      dev [DEVICE] dns [SERVER1,SERVER2...] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN].\n"
+               "  set-dns                      dev [DEVICE] dns [SERVER1,SERVER2...] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] keep [BOOLEAN].\n"
                "  set-dns-domains              dev [DEVICE] domains [DOMAIN1,DOMAIN2 ...] keep [BOOLEAN] Configures device Search Domains.\n"
                "  show-domains                              Show DNS Search Domains.\n"
                "  revert-resolve-link          dev [DEVICE] dns [BOOLEAN] domain [BOOLEAN] Flushes all DNS server and Domain settings of the device.\n"
