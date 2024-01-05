@@ -1931,7 +1931,8 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
 _public_ int ncm_link_set_static(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **addrs = NULL, **gws = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        int r, keep = -1;
+        bool keep = false;
+        int r;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
