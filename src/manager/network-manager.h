@@ -35,7 +35,7 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                                   int send_release_ipv6,
                                   bool keep);
 
-int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, bool keep);
+int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, bool keep);
 
 int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v);
 int manager_set_link_state(const IfNameIndex *ifidx, LinkState state);

@@ -1942,7 +1942,7 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_static(int argc, char *argv[]) {
-        _auto_cleanup_strv_ char **addrs = NULL, **gws = NULL;
+        _auto_cleanup_strv_ char **addrs = NULL, **gws = NULL, **dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool keep = false;
         int r;
@@ -1988,6 +1988,51 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
                         if (r < 0)
                                 return log_oom();
                         continue;
+                } else if (str_eq_fold(argv[i], "dns")) {
+                        _auto_cleanup_strv_ char **s = NULL;
+
+                        parse_next_arg(argv, argc, i);
+
+                        if (strchr(argv[i], ',')) {
+                                char **d;
+
+                                s = strsplit(argv[i], ",", -1);
+                                if (!s) {
+                                        log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                strv_foreach(d, s) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip(*d, &a);
+                                        if (r < 0) {
+                                                log_warning("Failed to parse DNS server address: %s", *d);
+                                                return r;
+                                        }
+                                }
+
+                                if (!dns) {
+                                        dns = s;
+                                        steal_ptr(s);
+                                } else {
+                                        dns = strv_unique(dns, s);
+                                        if (!dns)
+                                                return log_oom();
+                                }
+                        } else {
+                                _auto_cleanup_ IPAddress *a = NULL;
+
+                                r = parse_ip(argv[i], &a);
+                                if (r < 0) {
+                                        log_warning("Failed to parse DNS Server address: %s", strerror(-r));
+                                        return r;
+                                }
+
+                                strv_extend(&dns, argv[i]);
+                        }
+
+                        continue;
                 } else if (str_eq_fold(argv[i], "keep") || str_eq_fold(argv[i], "k")) {
                         parse_next_arg(argv, argc, i);
 
@@ -2010,7 +2055,7 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_link_static_conf(p, addrs, gws, keep);
+        r = manager_set_link_static_conf(p, addrs, gws, dns, keep);
         if (r < 0) {
                 log_warning("Failed to set static configuration for device='%s': %s", p->ifname, strerror(-r));
                 return r;
@@ -2574,8 +2619,16 @@ _public_ int ncm_link_add_dhcpv4_server(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        r = manager_configure_dhcpv4_server(p, dns, ntp, pool_offset, pool_size, default_lease_time, max_lease_time,
-                                            emit_dns, emit_ntp, emit_router);
+        r = manager_configure_dhcpv4_server(p,
+                                            dns,
+                                            ntp,
+                                            pool_offset,
+                                            pool_size,
+                                            default_lease_time,
+                                            max_lease_time,
+                                            emit_dns,
+                                            emit_ntp,
+                                            emit_router);
         if (r < 0) {
                 log_warning("Failed to configure DHCPv4 server on device '%s': %s", argv[1], strerror(-r));
                 return r;
@@ -2934,8 +2987,21 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        r = manager_configure_ipv6_router_advertisement(p, prefix, route_prefix, dns, domain, pref_lifetime, valid_lifetime,
-                                                        dns_lifetime, route_lifetime, preference, managed, other, emit_dns, emit_domain, assign);
+        r = manager_configure_ipv6_router_advertisement(p,
+                                                        prefix,
+                                                        route_prefix,
+                                                        dns,
+                                                        domain,
+                                                        pref_lifetime,
+                                                        valid_lifetime,
+                                                        dns_lifetime,
+                                                        route_lifetime,
+                                                        preference,
+                                                        managed,
+                                                        other,
+                                                        emit_dns,
+                                                        emit_domain,
+                                                        assign);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 RA on device '%s': %s", p->ifname, strerror(-r));
                 return r;
