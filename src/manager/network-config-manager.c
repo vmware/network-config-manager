@@ -1542,6 +1542,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ IPAddress *gw = NULL;
         _auto_cleanup_ Route *rt = NULL;
+        bool keep = false;
         int r, onlink = -1;
 
        for (int i = 1; i < argc; i++) {
@@ -1572,7 +1573,19 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
                                 return -EINVAL;
                         }
                         continue;
+                } else if (str_eq_fold(argv[i], "keep")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        keep = r;
+                        continue;
                 }
+
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                 return -EINVAL;
@@ -1594,7 +1607,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
                   .gw = *gw,
         };
 
-        r = manager_configure_default_gateway(p, rt);
+        r = manager_configure_default_gateway(p, rt, keep);
         if (r < 0) {
                 log_warning("Failed to configure default gateway on device '%s': %s", argv[1], strerror(-r));
                 return r;

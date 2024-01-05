@@ -80,7 +80,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
 
 int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses);
 
-int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt);
+int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt, bool keep);
 int manager_configure_default_gateway_full(const IfNameIndex *ifidx, Route *rt4, Route *rt6);
 
 int manager_configure_route(const IfNameIndex *ifidx,

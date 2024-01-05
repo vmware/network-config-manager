@@ -1038,9 +1038,9 @@ int manager_configure_default_gateway_full(const IfNameIndex *ifidx, Route *rt4,
         return dbus_network_reload();
 }
 
-int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
+int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt, bool keep) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        _auto_cleanup_ char *network = NULL, *a = NULL;
+        _auto_cleanup_ char *network = NULL, *gw = NULL;
         int r;
 
         assert(ifidx);
@@ -1050,22 +1050,37 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt) {
         if (r < 0)
                 return r;
 
-        r = ip_to_str(rt->gw.family, &rt->gw, &a);
-        if (r < 0)
-                return r;
-
         r = parse_key_file(network, &key_file);
         if (r < 0)
                 return r;
 
-        r = key_file_set_str(key_file, "Route", "Gateway", a);
+        r = ip_to_str(rt->gw.family, &rt->gw, &gw);
         if (r < 0)
                 return r;
 
-        if (rt->onlink >= 0) {
-                r = key_file_set_str(key_file, "Route", "GatewayOnlink", bool_to_str(rt->onlink));
+        if (!keep) {
+                   r = key_file_set_str(key_file, "Route", "Gateway", gw);
                 if (r < 0)
                         return r;
+
+                if (rt->onlink >= 0) {
+                        r = key_file_set_str(key_file, "Route", "GatewayOnlink", bool_to_str(rt->onlink));
+                        if (r < 0)
+                                return r;
+                }
+        } else {
+                _cleanup_(section_freep) Section *section = NULL;
+
+                r = section_new("Route", &section);
+                if (r < 0)
+                        return r;
+
+                add_key_to_section(section, "Gateway", gw);
+                if (rt->onlink >= 0)
+                        add_key_to_section(section, "GatewayOnlink", bool_to_str(rt->onlink));
+
+                add_section_to_key_file(key_file, section);
+                steal_ptr(section);
         }
 
         r = key_file_save (key_file);
