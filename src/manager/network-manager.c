@@ -253,6 +253,7 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                                   int use_domains_ipv6,
                                   int send_release_ipv4,
                                   int send_release_ipv6,
+                                  const DHCPClientIdentifier dhcp4_identifier,
                                   bool keep) {
 
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -274,6 +275,14 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
         r = parse_key_file(network, &key_file);
         if (r < 0)
                 return r;
+
+        if (dhcp4_identifier >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(dhcp4_identifier));
+                if (r < 0) {
+                        log_warning("Failed to update DHCP4 ClientIdentifier= to configuration file '%s': %s", network, strerror(-r));
+                        return r;
+                }
+        }
 
         /* IPv6AcceptRA= and LinkLocalAddressing= is required for DHCPv6 */
         if (dhcp_kind == DHCP_CLIENT_YES || dhcp_kind == DHCP_CLIENT_IPV6 || accept_ra > 0) {
@@ -586,7 +595,7 @@ int manager_acquire_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPC
         if (r < 0)
                 return r;
 
-        *ret = dhcp_client_identifier_to_mode(config);
+        *ret = dhcp_client_identifier_to_kind(config);
         return 0;
 }
 

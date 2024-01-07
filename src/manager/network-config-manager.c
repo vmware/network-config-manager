@@ -718,7 +718,7 @@ _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "id")) {
                         parse_next_arg(argv, argc, i);
 
-                        d = dhcp_client_identifier_to_mode(argv[i]);
+                        d = dhcp_client_identifier_to_kind(argv[i]);
                         if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
                                 log_warning("Failed to parse DHCP4 client identifier: %s", argv[i]);
                                 return -EINVAL;
@@ -1793,9 +1793,11 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
         int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, use_domains_ipv4 = -1, use_domains_ipv6 = -1,
-                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1, keep = -1;
+                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1;
+        DHCPClientIdentifier d = _DHCP_CLIENT_IDENTIFIER_INVALID;
         DHCPClient dhcp = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        bool keep = false;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
@@ -1886,6 +1888,16 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
 
                         send_release_ipv6 = r;
                         continue;
+                } else if (str_eq_fold(argv[i], "dhcp4-client-identifier") || str_eq_fold(argv[i], "dhcp4-client-id")) {
+                        parse_next_arg(argv, argc, i);
+
+                        d = dhcp_client_identifier_to_kind(argv[i]);
+                        if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
+                                log_warning("Failed to parse DHCP4 client identifier: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
                 } else if (str_eq_fold(argv[i], "accept-ra") || str_eq_fold(argv[i], "ara")) {
                         parse_next_arg(argv, argc, i);
 
@@ -1932,6 +1944,7 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
                                           use_domains_ipv6,
                                           send_release_ipv4,
                                           send_release_ipv6,
+                                          d,
                                           keep);
         if (r < 0) {
                 log_warning("Failed to set dynamic configuration for device='%s': %s", p->ifname, strerror(-r));
