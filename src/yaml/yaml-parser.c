@@ -350,13 +350,13 @@ int parse_yaml_dhcp_client_identifier(const char *key,
 
         n = data;
 
-        r = dhcp_client_identifier_to_mode((char *) value);
+        r = dhcp_client_identifier_to_kind((char *) value);
         if (r < 0) {
                 log_warning("Failed to parse dhcp client identifier='%s'", value);
                 return r;
         }
 
-        n->dhcp_client_identifier_type = dhcp_client_identifier_to_mode((char *) value);
+        n->dhcp_client_identifier_type = dhcp_client_identifier_to_kind((char *) value);
         return 0;
 }
 
