@@ -672,6 +672,31 @@ static void test_set_static_address_gw_dns(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
 }
 
+static void test_set_static_address_gw_dns_keep_yes(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-static dev test99 a 192.168.1.12/24 gw 192.168.1.1 a 192.168.1.13/24 gw 192.168.1.2 dns 192.168.1.2,192.168.1.1") >= 0);
+    assert_true(system("nmctl set-static dev test99 a 192.168.1.14/24 a 192.168.1.15/24 dns 192.168.1.4,192.168.1.5 keep yes") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.4 192.168.1.5 192.168.1.2 192.168.1.1"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.12/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.13/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.15/24"));
+
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+}
+
 static void test_additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1440,6 +1465,7 @@ int main(void) {
         cmocka_unit_test (test_remove_gw_family),
         cmocka_unit_test (test_set_static_address_gw),
         cmocka_unit_test (test_set_static_address_gw_dns),
+        cmocka_unit_test (test_set_static_address_gw_dns_keep_yes),
         cmocka_unit_test (test_source_routing),
         cmocka_unit_test (test_additional_gw_source_routing),
         cmocka_unit_test (test_wireguard_multiple_peers),

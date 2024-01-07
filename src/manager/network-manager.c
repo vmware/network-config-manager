@@ -1327,7 +1327,29 @@ int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **
                 return r;
 
         if (dns) {
-                r = set_config(key_file, "Network", "DNS", strv_join(" ", dns));
+                _auto_cleanup_strv_ char **s = NULL, **t = NULL;
+                char **l;
+
+                if (keep) {
+                        r = key_file_network_parse_dns(network, &s);
+                        if (r < 0)
+                                return r;
+
+                        if (strv_empty((const char **) s)) {
+                                t = strv_dup(dns);
+                                if (!t)
+                                        return log_oom();
+                        } else {
+                                t = strv_unique(dns, s);
+                                if (!t)
+                                        return log_oom();
+                        }
+
+                        l = t;
+                } else
+                        l = dns;
+
+                r = set_config(key_file, "Network", "DNS", strv_join(" ", l));
                 if (r < 0)
                         return r;
         }
