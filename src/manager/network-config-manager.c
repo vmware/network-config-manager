@@ -1964,8 +1964,8 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        if (dhcp == _DHCP_CLIENT_INVALID) {
-                log_warning("Failed to parse dhcp: %s", strerror(EINVAL));
+        if (dhcp == _DHCP_CLIENT_INVALID && accept_ra < 0) {
+                log_warning("Failed to parse dynamic conf (DHCP or RA): %s", strerror(EINVAL));
                 return -EINVAL;
         }
 

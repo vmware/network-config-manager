@@ -701,7 +701,7 @@ static void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **st
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    assert_true(system(" set-dynamic dev test99 dhcp yes dhcp4-client-id mac") >= 0);
+    assert_true(system("nmctl set-dynamic dev test99 dhcp yes dhcp4-client-id mac") >= 0);
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
@@ -721,7 +721,7 @@ static void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    assert_true(system(" set-dynamic dev test99 dhcp yes dhcp4-client-id mac dhcp4-iaid 0x12345 dhcp6-iaid 0x12346") >= 0);
+    assert_true(system("nmctl set-dynamic dev test99 dhcp yes dhcp4-client-id mac dhcp4-iaid 0x12345 dhcp6-iaid 0x12346") >= 0);
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
