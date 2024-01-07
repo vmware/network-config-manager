@@ -78,6 +78,11 @@ Or by simply doing
 - For a comprehensive list of YAML examples, see [YAML example configurations](https://github.com/vmware/network-config-manager/blob/main/example-yaml-configurations.md)
 - Introspect system or network via ```nmctl```  [nmctl display](https://github.com/vmware/network-config-manager/blob/main/example-nmctl-display.md)
 
+### Howto 
+- [Configure static address and route GW](https://www.linkedin.com/pulse/configure-static-address-route-gw-susant-sahani-dljdf)
+- [Configure dynamic address and routes (DHCPv4/DHCPv6/RA)](https://www.linkedin.com/pulse/configure-dynamic-addrss-routes-dhcpv4dhcpv6ra-susant-sahani-krz5f)
+- [How to Configure Networking on Photon OS](https://www.linkedin.com/pulse/how-configure-networking-photon-os-network-config-manager-sahani)
+- [Generate systemd-networkd's configuration from yaml](https://www.linkedin.com/pulse/generate-systemd-networkds-configuration-from-yml-file-susant-sahani)
 
 ### Contributing
 
