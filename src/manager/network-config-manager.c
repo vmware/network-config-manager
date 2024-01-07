@@ -556,7 +556,7 @@ _public_ int ncm_link_set_network_ipv6_mtu(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_link_set_dhcp_mode(int argc, char *argv[]) {
+_public_ int ncm_link_set_dhcp_client_kind(int argc, char *argv[]) {
         int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, use_domains_ipv4 = -1, use_domains_ipv6 = -1, send_release_ipv4 = -1, send_release_ipv6 = -1;
         _auto_cleanup_ IfNameIndex *p = NULL;
         DHCPClient dhcp = _DHCP_CLIENT_INVALID;

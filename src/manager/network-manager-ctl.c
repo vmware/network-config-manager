@@ -384,7 +384,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-link-group",                "lgrp",             4,        WORD_ANY, false, ncm_link_set_group },
                 { "set-link-rfo",                  "lrfo",             4,        WORD_ANY, false, ncm_link_set_rf_online },
                 { "set-link-ap",                   "lap",              4,        WORD_ANY, false, ncm_link_set_act_policy },
-                { "set-dhcp",                      "dhcp",             4,        WORD_ANY, false, ncm_link_set_dhcp_mode },
+                { "set-dhcp",                      "dhcp",             4,        WORD_ANY, false, ncm_link_set_dhcp_client_kind },
                 { "set-dhcp4-cid",                 "dhcp4-cid",        3,        WORD_ANY, false, ncm_link_set_dhcp4_client_identifier},
                 { "set-dhcp-iaid",                 "dhcp-iaid",        4,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
                 { "set-dhcp-duid",                 "dhcp-duid",        4,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
