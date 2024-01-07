@@ -350,13 +350,13 @@ int parse_yaml_dhcp_client_identifier(const char *key,
 
         n = data;
 
-        r = dhcp_client_identifier_to_mode((char *) value);
+        r = dhcp_client_identifier_to_kind((char *) value);
         if (r < 0) {
                 log_warning("Failed to parse dhcp client identifier='%s'", value);
                 return r;
         }
 
-        n->dhcp_client_identifier_type = dhcp_client_identifier_to_mode((char *) value);
+        n->dhcp_client_identifier_type = dhcp_client_identifier_to_kind((char *) value);
         return 0;
 }
 
@@ -754,11 +754,13 @@ int parse_yaml_scalar_or_sequence(const char *key,
                 if (!c)
                         return log_oom();
 
-                if (!strv_contains((const char **)*s, c)) {
+                if (!*s)
                         r = strv_extend(s, c);
-                        if (r < 0)
-                                return r;
-                }
+                else  if (!strv_contains((const char **)*s, c))
+                        r = strv_extend(s, c);
+
+                if (r < 0)
+                        return r;
         }
 
         return 0;
@@ -787,11 +789,13 @@ int parse_yaml_sequence(const char *key,
                 if (!c)
                         return log_oom();
 
-                if (!strv_contains((const char **)*s, c)) {
+                if (!*s)
                         r = strv_extend(s, c);
-                        if (r < 0)
-                                return r;
-                }
+                else  if (!strv_contains((const char **)*s, c))
+                        r = strv_extend(s, c);
+
+                if (r < 0)
+                        return r;
         }
 
         return 0;

@@ -93,7 +93,7 @@ const char *dhcp_client_identifier_to_name(int id) {
         return dhcp_client_identifier[id];
 }
 
-int dhcp_client_identifier_to_mode(char *name) {
+int dhcp_client_identifier_to_kind(char *name) {
         assert(name);
 
         for (size_t i = DHCP_CLIENT_IDENTIFIER_MAC; i < (size_t) ELEMENTSOF(dhcp_client_identifier); i++)

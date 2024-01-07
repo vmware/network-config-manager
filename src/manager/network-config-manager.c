@@ -718,7 +718,7 @@ _public_ int ncm_link_set_dhcp4_client_identifier(int argc, char *argv[]) {
                 } else if (str_eq_fold(argv[i], "id")) {
                         parse_next_arg(argv, argc, i);
 
-                        d = dhcp_client_identifier_to_mode(argv[i]);
+                        d = dhcp_client_identifier_to_kind(argv[i]);
                         if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
                                 log_warning("Failed to parse DHCP4 client identifier: %s", argv[i]);
                                 return -EINVAL;
@@ -1793,9 +1793,12 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
         int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, use_domains_ipv4 = -1, use_domains_ipv6 = -1,
-                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1, keep = -1;
+                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1;
+        DHCPClientIdentifier d = _DHCP_CLIENT_IDENTIFIER_INVALID;
+        _auto_cleanup_ char *iaid4 = NULL, *iaid6 = NULL;
         DHCPClient dhcp = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        bool keep = false;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
@@ -1886,6 +1889,49 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
 
                         send_release_ipv6 = r;
                         continue;
+                } else if (str_eq_fold(argv[i], "client-id-ipv4") || str_eq_fold(argv[i], "dhcp4-client-id")) {
+                        parse_next_arg(argv, argc, i);
+
+                        d = dhcp_client_identifier_to_kind(argv[i]);
+                        if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
+                                log_warning("Failed to parse DHCP4 client identifier: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "iaid-ipv4") || str_eq_fold(argv[i], "dhcp4-iaid")) {
+                        uint32_t v;
+
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_uint32(argv[i], &v);
+                        if (r < 0) {
+                                log_warning("Failed to parse IAID iaid-ipv4='%s' for device '%s': %s", argv[i], p->ifname, strerror(-r));
+                                return r;
+                        }
+
+                        iaid4 = strdup(argv[i]);
+                        if (!iaid4)
+                                return log_oom();
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "iaid-ipv6") || str_eq_fold(argv[i], "dhcp6-iaid")) {
+                        uint32_t v;
+
+                        parse_next_arg(argv, argc, i);
+
+
+                        r = parse_uint32(argv[i], &v);
+                        if (r < 0) {
+                                log_warning("Failed to parse IAID iaid-ipv6='%s' for device '%s': %s", argv[i], p->ifname, strerror(-r));
+                                return r;
+                        }
+
+                        iaid6 = strdup(argv[i]);
+                        if (!iaid6)
+                                return log_oom();
+
+                        continue;
                 } else if (str_eq_fold(argv[i], "accept-ra") || str_eq_fold(argv[i], "ara")) {
                         parse_next_arg(argv, argc, i);
 
@@ -1918,8 +1964,8 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        if (dhcp == _DHCP_CLIENT_INVALID) {
-                log_warning("Failed to parse dhcp: %s", strerror(EINVAL));
+        if (dhcp == _DHCP_CLIENT_INVALID && accept_ra < 0) {
+                log_warning("Failed to parse dynamic conf (DHCP or RA): %s", strerror(EINVAL));
                 return -EINVAL;
         }
 
@@ -1932,6 +1978,9 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
                                           use_domains_ipv6,
                                           send_release_ipv4,
                                           send_release_ipv6,
+                                          d,
+                                          iaid4,
+                                          iaid6,
                                           keep);
         if (r < 0) {
                 log_warning("Failed to set dynamic configuration for device='%s': %s", p->ifname, strerror(-r));

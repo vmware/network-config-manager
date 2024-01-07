@@ -307,7 +307,7 @@ const char *dhcp_client_to_name(int id);
 int dhcp_name_to_client(char *name);
 
 const char *dhcp_client_identifier_to_name(int id);
-int dhcp_client_identifier_to_mode(char *name);
+int dhcp_client_identifier_to_kind(char *name);
 
 const char *dhcp_client_duid_type_to_name(int id);
 int dhcp_client_duid_name_to_type(char *name);

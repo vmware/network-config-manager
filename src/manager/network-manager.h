@@ -33,6 +33,9 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                                   int use_domains_ipv6,
                                   int send_release_ipv4,
                                   int send_release_ipv6,
+                                  const DHCPClientIdentifier identifier,
+                                  const char *iaid,
+                                  const char *iaid6,
                                   bool keep);
 
 int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, bool keep);
