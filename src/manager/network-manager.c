@@ -254,6 +254,8 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                                   int send_release_ipv4,
                                   int send_release_ipv6,
                                   const DHCPClientIdentifier dhcp4_identifier,
+                                  const char *iaid4,
+                                  const char *iaid6,
                                   bool keep) {
 
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -280,6 +282,22 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                 r = key_file_set_str(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(dhcp4_identifier));
                 if (r < 0) {
                         log_warning("Failed to update DHCP4 ClientIdentifier= to configuration file '%s': %s", network, strerror(-r));
+                        return r;
+                }
+        }
+
+        if (iaid4) {
+                r = key_file_set_str(key_file, "DHCPv4", "IAID", iaid4);
+                if (r < 0) {
+                        log_warning("Failed to update DHCP4 IAID= to configuration file '%s': %s", network, strerror(-r));
+                        return r;
+                }
+        }
+
+        if (iaid6) {
+                r = key_file_set_str(key_file, "DHCPv6", "IAID", iaid6);
+                if (r < 0) {
+                        log_warning("Failed to update DHCP6 IAID= to configuration file '%s': %s", network, strerror(-r));
                         return r;
                 }
         }
