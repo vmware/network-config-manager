@@ -697,6 +697,26 @@ static void test_set_static_address_gw_dns_keep_yes(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
 }
 
+static void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system(" set-dynamic dev test99 dhcp yes dhcp4-client-id mac") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "DHCPv4", "ClientIdentifier", "mac"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
+    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+}
+
 static void test_additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1489,6 +1509,7 @@ int main(void) {
         cmocka_unit_test (test_ipv6_ra_overrides),
         cmocka_unit_test (test_add_dhcp4_server_static_address),
         cmocka_unit_test (test_remove_dhcp4_server_static_address),
+        cmocka_unit_test (test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier),
         cmocka_unit_test (test_yaml_add_dhcp4_server_static_address),
         cmocka_unit_test (test_yaml_add_sriov),
     };
