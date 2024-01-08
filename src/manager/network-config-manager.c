@@ -957,7 +957,7 @@ _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        s = parse_bool_or_ip_family(argv[3]);
+        s = link_local_address_type_to_mode(argv[3]);
         if (!s) {
                 log_warning("Failed to parse %s=%s for device '%s': %s", argv[0], argv[2], argv[1], strerror(-r));
                 return r;

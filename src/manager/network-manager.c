@@ -287,7 +287,7 @@ static int manager_set_link_dynamic_conf_internal(KeyFile *key_file,
         }
 
         /* IPv6AcceptRA= and LinkLocalAddressing= is required for DHCPv6 */
-        if (dhcp_kind == DHCP_CLIENT_YES || dhcp_kind == DHCP_CLIENT_IPV6 || accept_ra > 0) {
+        if (dhcp_kind == DHCP_CLIENT_YES || dhcp_kind == DHCP_CLIENT_IPV6) {
                 r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "ipv6");
                 if (r < 0)
                         return r;
@@ -306,6 +306,10 @@ static int manager_set_link_dynamic_conf_internal(KeyFile *key_file,
         }
 
         if (accept_ra >= 0) {
+                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                if (r < 0)
+                        return r;
+
                 r = key_file_set_str(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
                 if (r < 0)
                         return r;
@@ -498,6 +502,7 @@ static int manager_set_link_static_conf_internal(KeyFile *key_file,
 int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, bool keep) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        char **a;
         int r;
 
         assert(ifidx);
@@ -519,6 +524,21 @@ int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **
         r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, keep);
         if (r < 0)
                 return r;
+
+        strv_foreach(a, addrs) {
+                _auto_cleanup_ IPAddress *addr = NULL;
+
+                r = parse_ip(*a, &addr);
+                if (r < 0)
+                        continue;
+
+                if (addr->family == AF_INET6) {
+                        r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                        if (r < 0)
+                                return r;
+                        break;
+                }
+        }
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -547,6 +567,7 @@ int manager_set_link_network_conf(const IfNameIndex *ifidx,
                                   bool keep) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        char **a;
         int r;
 
         assert(ifidx);
@@ -584,6 +605,21 @@ int manager_set_link_network_conf(const IfNameIndex *ifidx,
         r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, keep);
         if (r < 0)
                 return r;
+
+        strv_foreach(a, addrs) {
+                _auto_cleanup_ IPAddress *addr = NULL;
+
+                r = parse_ip(*a, &addr);
+                if (r < 0)
+                        continue;
+
+                if (addr->family == AF_INET6) {
+                        r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                        if (r < 0)
+                                return r;
+                        break;
+                }
+        }
 
         r = key_file_save (key_file);
         if (r < 0) {
