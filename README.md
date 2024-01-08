@@ -69,6 +69,17 @@ Or by simply doing
 ❯ sudo make install
 ```
 
+### Building in photon OS.
+
+```bash
+❯ git clone git@github.com:vmware/network-config-manager.git
+❯ cd network-config-manager
+❯ wget  https://raw.githubusercontent.com/vmware/photon/master/SPECS/network-config-manager/network-config-manager.spec
+❯ sudo rpmspec -q --srpm --requires network-config-manager.spec | sudo xargs -d '\n' tdnf -y install
+❯ make
+❯ sudo make install
+
+```
 ### Use cases
 
 ```bash
