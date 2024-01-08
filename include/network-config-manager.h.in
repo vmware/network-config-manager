@@ -172,6 +172,9 @@ int ncm_get_link_status(const char *ifname, char **ret);
 
 /* deprecated API*/
 
+int ncm_link_set_ipv6(int argc, char *argv[]);
+int ncm_link_set_ipv4(int argc, char *argv[]);
+
 #define ncm_link_add_default_gateway ncm_link_set_default_gateway
 #define ncm_add_dns_domains ncm_set_dns_domains
 #define ncm_link_set_dhcp_mode ncm_link_set_dhcp_client_kind
