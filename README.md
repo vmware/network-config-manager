@@ -94,6 +94,7 @@ Or by simply doing
 - [Configure dynamic address and routes (DHCPv4/DHCPv6/RA)](https://www.linkedin.com/pulse/configure-dynamic-addrss-routes-dhcpv4dhcpv6ra-susant-sahani-krz5f)
 - [How to Configure Networking on Photon OS](https://www.linkedin.com/pulse/how-configure-networking-photon-os-network-config-manager-sahani)
 - [Generate systemd-networkd's configuration from yaml](https://www.linkedin.com/pulse/generate-systemd-networkds-configuration-from-yml-file-susant-sahani)
+- [VCSA Photon OS Network Configurations via network-config-manager](https://www.linkedin.com/pulse/vcsa-network-configurations-via-nmctl-susant-sahani-5xh8f)
 
 ### Contributing
 
