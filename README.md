@@ -74,7 +74,7 @@ Or by simply doing
 ```bash
 ❯ git clone git@github.com:vmware/network-config-manager.git
 ❯ cd network-config-manager
-❯ wget  https://raw.githubusercontent.com/vmware/photon/master/SPECS/network-config-manager/network-config-manager.spec
+❯ wget https://raw.githubusercontent.com/vmware/photon/master/SPECS/network-config-manager/network-config-manager.spec
 ❯ sudo rpmspec -q --srpm --requires network-config-manager.spec | sudo xargs -d '\n' tdnf -y install
 ❯ make
 ❯ sudo make install
@@ -89,7 +89,7 @@ Or by simply doing
 - For a comprehensive list of YAML examples, see [YAML example configurations](https://github.com/vmware/network-config-manager/blob/main/example-yaml-configurations.md)
 - Introspect system or network via ```nmctl```  [nmctl display](https://github.com/vmware/network-config-manager/blob/main/example-nmctl-display.md)
 
-### Howto 
+### Howto get started with nmctl
 - [Configure static address and route GW](https://www.linkedin.com/pulse/configure-static-address-route-gw-susant-sahani-dljdf)
 - [Configure dynamic address and routes (DHCPv4/DHCPv6/RA)](https://www.linkedin.com/pulse/configure-dynamic-addrss-routes-dhcpv4dhcpv6ra-susant-sahani-krz5f)
 - [How to Configure Networking on Photon OS](https://www.linkedin.com/pulse/how-configure-networking-photon-os-network-config-manager-sahani)
