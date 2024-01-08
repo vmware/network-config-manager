@@ -936,8 +936,8 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
         _cleanup_(config_manager_freep) ConfigManager *m = NULL;
+        LinkLocalAddress lla = _LINK_LOCAL_ADDRESS_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        const char *s;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -957,11 +957,13 @@ _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        s = link_local_address_type_to_mode(argv[3]);
-        if (!s) {
+        r = link_local_address_type_to_mode(argv[3]);
+        if (r < 0) {
                 log_warning("Failed to parse %s=%s for device '%s': %s", argv[0], argv[2], argv[1], strerror(-r));
                 return r;
         }
+
+        lla = r;
 
         r = manager_network_section_configs_new(&m);
         if (r < 0) {
@@ -969,7 +971,7 @@ _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
                 return r;
         }
 
-        return manager_set_link_local_address(p, ctl_to_config(m, argv[0]), s);
+        return manager_set_link_local_address(p, ctl_to_config(m, argv[0]), link_local_address_type_to_name(lla));
 }
 
 _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
