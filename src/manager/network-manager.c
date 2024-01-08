@@ -244,44 +244,28 @@ int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *
         return 0;
 }
 
-int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
-                                  int accept_ra,
-                                  DHCPClient dhcp_kind,
-                                  int use_dns_ipv4,
-                                  int use_dns_ipv6,
-                                  int use_domains_ipv4,
-                                  int use_domains_ipv6,
-                                  int send_release_ipv4,
-                                  int send_release_ipv6,
-                                  const DHCPClientIdentifier dhcp4_identifier,
-                                  const char *iaid4,
-                                  const char *iaid6,
-                                  bool keep) {
+static int manager_set_link_dynamic_conf_internal(KeyFile *key_file,
+                                                  const IfNameIndex *ifidx,
+                                                  int accept_ra,
+                                                  DHCPClient dhcp_kind,
+                                                  int use_dns_ipv4,
+                                                  int use_dns_ipv6,
+                                                  int use_domains_ipv4,
+                                                  int use_domains_ipv6,
+                                                  int send_release_ipv4,
+                                                  int send_release_ipv6,
+                                                  const DHCPClientIdentifier dhcp4_identifier,
+                                                  const char *iaid4,
+                                                  const char *iaid6) {
 
-        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        _auto_cleanup_ char *network = NULL;
         int r;
 
         assert(ifidx);
 
-        if (keep) {
-                r = create_or_parse_network_file(ifidx, &network);
-                if (r < 0)
-                        return r;
-        } else {
-                r = create_network_conf_file(ifidx->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
-
-        r = parse_key_file(network, &key_file);
-        if (r < 0)
-                return r;
-
         if (dhcp4_identifier >= 0) {
                 r = key_file_set_str(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(dhcp4_identifier));
                 if (r < 0) {
-                        log_warning("Failed to update DHCP4 ClientIdentifier= to configuration file '%s': %s", network, strerror(-r));
+                        log_warning("Failed to update DHCP4 ClientIdentifier= to configuration file '%s': %s", key_file->name, strerror(-r));
                         return r;
                 }
         }
@@ -289,7 +273,7 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
         if (iaid4) {
                 r = key_file_set_str(key_file, "DHCPv4", "IAID", iaid4);
                 if (r < 0) {
-                        log_warning("Failed to update DHCP4 IAID= to configuration file '%s': %s", network, strerror(-r));
+                        log_warning("Failed to update DHCP4 IAID= to configuration file '%s': %s", key_file->name, strerror(-r));
                         return r;
                 }
         }
@@ -297,13 +281,13 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
         if (iaid6) {
                 r = key_file_set_str(key_file, "DHCPv6", "IAID", iaid6);
                 if (r < 0) {
-                        log_warning("Failed to update DHCP6 IAID= to configuration file '%s': %s", network, strerror(-r));
+                        log_warning("Failed to update DHCP6 IAID= to configuration file '%s': %s", key_file->name, strerror(-r));
                         return r;
                 }
         }
 
         /* IPv6AcceptRA= and LinkLocalAddressing= is required for DHCPv6 */
-        if (dhcp_kind == DHCP_CLIENT_YES || dhcp_kind == DHCP_CLIENT_IPV6 || accept_ra > 0) {
+        if (dhcp_kind == DHCP_CLIENT_YES || dhcp_kind == DHCP_CLIENT_IPV6) {
                 r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "ipv6");
                 if (r < 0)
                         return r;
@@ -322,6 +306,10 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
         }
 
         if (accept_ra >= 0) {
+                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                if (r < 0)
+                        return r;
+
                 r = key_file_set_str(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
                 if (r < 0)
                         return r;
@@ -367,6 +355,270 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                 r = key_file_set_str(key_file, "DHCPv6", "SendRelease", bool_to_str(send_release_ipv6));
                 if (r < 0)
                         return r;
+        }
+
+        return 0;
+}
+int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
+                                  int accept_ra,
+                                  DHCPClient dhcp_kind,
+                                  int use_dns_ipv4,
+                                  int use_dns_ipv6,
+                                  int use_domains_ipv4,
+                                  int use_domains_ipv6,
+                                  int send_release_ipv4,
+                                  int send_release_ipv6,
+                                  const DHCPClientIdentifier dhcp4_identifier,
+                                  const char *iaid4,
+                                  const char *iaid6,
+                                  bool keep) {
+
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifidx);
+
+        if (keep) {
+                r = create_or_parse_network_file(ifidx, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = create_network_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
+        }
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = manager_set_link_dynamic_conf_internal(key_file,
+                                                   ifidx,
+                                                   accept_ra,
+                                                   dhcp_kind,
+                                                   use_dns_ipv4,
+                                                   use_dns_ipv6,
+                                                   use_domains_ipv4,
+                                                   use_domains_ipv6,
+                                                   send_release_ipv4,
+                                                   send_release_ipv6,
+                                                   dhcp4_identifier,
+                                                   iaid4,
+                                                   iaid6);
+
+        if (r < 0)
+                return r;
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
+
+static int manager_set_link_static_conf_internal(KeyFile *key_file,
+                                                 const IfNameIndex *ifidx,
+                                                 char **addrs,
+                                                 char **gws,
+                                                 char **dns,
+                                                 bool keep) {
+        _auto_cleanup_ char *address = NULL, *gw = NULL;
+        char **a;
+        int r;
+
+        assert(ifidx);
+
+        if (dns) {
+                _auto_cleanup_strv_ char **s = NULL, **t = NULL;
+                char **l;
+
+                if (keep) {
+                        r = key_file_network_parse_dns(key_file->name, &s);
+                        if (r < 0)
+                                return r;
+
+                        if (strv_empty((const char **) s)) {
+                                t = strv_dup(dns);
+                                if (!t)
+                                        return log_oom();
+                        } else {
+                                t = strv_unique(dns, s);
+                                if (!t)
+                                        return log_oom();
+                        }
+
+                        l = t;
+                } else
+                        l = dns;
+
+                r = set_config(key_file, "Network", "DNS", strv_join(" ", l));
+                if (r < 0)
+                        return r;
+        }
+
+        strv_foreach(a, addrs) {
+                _cleanup_(section_freep) Section *section = NULL;
+
+                r = section_new("Address", &section);
+                if (r < 0)
+                        return r;
+
+                r = add_key_to_section(section, "Address", *a);
+                if (r < 0)
+                        return r;
+
+                r = add_section_to_key_file(key_file, section);
+                if (r < 0)
+                        return r;
+
+                steal_ptr(section);
+        }
+
+        strv_foreach(a, gws) {
+                _cleanup_(section_freep) Section *section = NULL;
+
+                r = section_new("Route", &section);
+                if (r < 0)
+                        return r;
+
+                r = add_key_to_section(section, "Gateway", *a);
+                if (r < 0)
+                        return r;
+
+                r = add_section_to_key_file(key_file, section);
+                if (r < 0)
+                        return r;
+
+                steal_ptr(section);
+        }
+
+        return 0;
+}
+
+int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, bool keep) {
+        _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        char **a;
+        int r;
+
+        assert(ifidx);
+
+        if (keep) {
+                r = create_or_parse_network_file(ifidx, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = create_network_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
+        }
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, keep);
+        if (r < 0)
+                return r;
+
+        strv_foreach(a, addrs) {
+                _auto_cleanup_ IPAddress *addr = NULL;
+
+                r = parse_ip(*a, &addr);
+                if (r < 0)
+                        continue;
+
+                if (addr->family == AF_INET6) {
+                        r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                        if (r < 0)
+                                return r;
+                        break;
+                }
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
+int manager_set_link_network_conf(const IfNameIndex *ifidx,
+                                  int accept_ra,
+                                  DHCPClient dhcp_kind,
+                                  int use_dns_ipv4,
+                                  int use_dns_ipv6,
+                                  int use_domains_ipv4,
+                                  int use_domains_ipv6,
+                                  int send_release_ipv4,
+                                  int send_release_ipv6,
+                                  const DHCPClientIdentifier dhcp4_identifier,
+                                  const char *iaid4,
+                                  const char *iaid6,
+                                  char **addrs,
+                                  char **gws,
+                                  char **dns,
+                                  bool keep) {
+        _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        char **a;
+        int r;
+
+        assert(ifidx);
+
+        if (keep) {
+                r = create_or_parse_network_file(ifidx, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = create_network_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
+        }
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = manager_set_link_dynamic_conf_internal(key_file,
+                                                   ifidx,
+                                                   accept_ra,
+                                                   dhcp_kind,
+                                                   use_dns_ipv4,
+                                                   use_dns_ipv6,
+                                                   use_domains_ipv4,
+                                                   use_domains_ipv6,
+                                                   send_release_ipv4,
+                                                   send_release_ipv6,
+                                                   dhcp4_identifier,
+                                                   iaid4,
+                                                   iaid6);
+        if (r < 0)
+                return r;
+
+        r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, keep);
+        if (r < 0)
+                return r;
+
+        strv_foreach(a, addrs) {
+                _auto_cleanup_ IPAddress *addr = NULL;
+
+                r = parse_ip(*a, &addr);
+                if (r < 0)
+                        continue;
+
+                if (addr->family == AF_INET6) {
+                        r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                        if (r < 0)
+                                return r;
+                        break;
+                }
         }
 
         r = key_file_save (key_file);
@@ -1330,102 +1582,6 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, Addr
 
         return dbus_network_reload();
 }
-
-int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, bool keep) {
-        _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
-        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        char **a;
-        int r;
-
-        assert(ifidx);
-
-        if (keep) {
-                r = create_or_parse_network_file(ifidx, &network);
-                if (r < 0)
-                        return r;
-        } else {
-                r = create_network_conf_file(ifidx->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
-
-        r = parse_key_file(network, &key_file);
-        if (r < 0)
-                return r;
-
-        if (dns) {
-                _auto_cleanup_strv_ char **s = NULL, **t = NULL;
-                char **l;
-
-                if (keep) {
-                        r = key_file_network_parse_dns(network, &s);
-                        if (r < 0)
-                                return r;
-
-                        if (strv_empty((const char **) s)) {
-                                t = strv_dup(dns);
-                                if (!t)
-                                        return log_oom();
-                        } else {
-                                t = strv_unique(dns, s);
-                                if (!t)
-                                        return log_oom();
-                        }
-
-                        l = t;
-                } else
-                        l = dns;
-
-                r = set_config(key_file, "Network", "DNS", strv_join(" ", l));
-                if (r < 0)
-                        return r;
-        }
-
-        strv_foreach(a, addrs) {
-                _cleanup_(section_freep) Section *section = NULL;
-
-                r = section_new("Address", &section);
-                if (r < 0)
-                        return r;
-
-                r = add_key_to_section(section, "Address", *a);
-                if (r < 0)
-                        return r;
-
-                r = add_section_to_key_file(key_file, section);
-                if (r < 0)
-                        return r;
-
-                steal_ptr(section);
-        }
-
-        strv_foreach(a, gws) {
-                _cleanup_(section_freep) Section *section = NULL;
-
-                r = section_new("Route", &section);
-                if (r < 0)
-                        return r;
-
-                r = add_key_to_section(section, "Gateway", *a);
-                if (r < 0)
-                        return r;
-
-                r = add_section_to_key_file(key_file, section);
-                if (r < 0)
-                        return r;
-
-                steal_ptr(section);
-        }
-
-        r = key_file_save (key_file);
-        if (r < 0) {
-                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
-                return r;
-        }
-
-        return dbus_network_reload();
-}
-
 int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPolicyRule *rule) {
         _auto_cleanup_ char *network = NULL, *to = NULL, *from = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;

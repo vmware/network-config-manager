@@ -40,6 +40,23 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
 
 int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, bool keep);
 
+int manager_set_link_network_conf(const IfNameIndex *ifidx,
+                                  int accept_ra,
+                                  DHCPClient dhcp_kind,
+                                  int use_dns_ipv4,
+                                  int use_dns_ipv6,
+                                  int use_domains_ipv4,
+                                  int use_domains_ipv6,
+                                  int send_release_ipv4,
+                                  int send_release_ipv6,
+                                  const DHCPClientIdentifier dhcp4_identifier,
+                                  const char *iaid4,
+                                  const char *iaid6,
+                                  char **addrs,
+                                  char **gws,
+                                  char **dns,
+                                  bool keep);
+
 int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v);
 int manager_set_link_state(const IfNameIndex *ifidx, LinkState state);
 
