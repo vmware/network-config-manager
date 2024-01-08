@@ -2507,6 +2507,81 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         return dbus_network_reload();
 }
 
+int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_ra) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _cleanup_(section_freep) Section *section = NULL;
+        _auto_cleanup_ char *network = NULL;
+        int r;
+
+        assert(ifidx);
+
+        r = create_or_parse_network_file(ifidx, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        if (accept_ra >= 0)
+                set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
+
+        if (dhcp >= 0)
+                set_config(key_file, "Network", "DHCP", "ipv6");
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
+int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *address, const IPAddress *gateway) {
+        _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _cleanup_(section_freep) Section *section = NULL;
+        int r;
+
+        assert(ifidx);
+
+        r = create_or_parse_network_file(ifidx, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        if (dhcp >= 0)
+                set_config(key_file, "Network", "DHCP", "ipv4");
+
+        if (address) {
+                r = ip_to_str_prefix(address->family, address, &addr);
+                if (r < 0)
+                        return r;
+
+                set_config(key_file, "Address", "Address", addr);
+        }
+
+        if (gateway) {
+                r = ip_to_str(gateway->family, gateway, &gw);
+                if (r < 0)
+                        return r;
+
+                set_config(key_file, "Route", "Gateway", gw);
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
 int manager_reload_network(void) {
         return dbus_network_reload();
 }

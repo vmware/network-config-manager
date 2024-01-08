@@ -216,6 +216,8 @@ static int help(void) {
                                                       "\n\t\t\t\t      route [Prefix ADDRESS] route-lifetime [LifetimeSec NUMBER] Configures IPv6 Router Advertisement.\n"
                "  remove-ipv6ra                dev [DEVICE] Removes Ipv6 Router Advertisement.\n"
                "  enable-ipv6                  dev [DEVICE] [BOOLEAN] Enable or disables IPv6 on the link.\n"
+               "  set-ipv4                     dev [DEVICE] addr [ADDRESS] gw [GATEWAY ADDRESS] dhcp [BOOLEAN] Configures device IPv4.\n"
+               "  set-ipv6                     dev [DEVICE] accept-ra [BOOLEAN] dhcp [BOOLEAN] Configures device IPv6.\n"
                "  add-sr-iov                   dev [DEVICE] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN]"
                                                      "\n\t\t\t\t      [trust BOOLEAN] [linkstate BOOLEAN or STRING] [macaddr ADDRESS] Configures SR-IOV VirtualFunction, "
                                                      "\n\t\t\t\t      VLANId, QualityOfService, VLANProtocol, MACSpoofCheck, QueryReceiveSideScaling, Trust, LinkState, MACAddress \n"
@@ -503,6 +505,8 @@ static int cli_run(int argc, char *argv[]) {
                 { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
                 { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_remove_address },
                 { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_set_default_gateway },
+                { "set-ipv4",                      "sip4" ,            2,        WORD_ANY, false, ncm_link_set_ipv4 },
+                { "set-ipv6",                      "sip6" ,            2,        WORD_ANY, false, ncm_link_set_ipv6 },
                 {}
         };
 
