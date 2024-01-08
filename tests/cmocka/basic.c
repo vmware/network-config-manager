@@ -764,7 +764,7 @@ static void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid
     assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.1 192.168.1.2"));
 
     assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.41/24"));
-    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1 "));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
 }
 
 static void test_additional_gw_source_routing(void **state) {
