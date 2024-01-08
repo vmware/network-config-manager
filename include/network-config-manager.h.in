@@ -37,8 +37,6 @@ int ncm_link_remove_gateway(int argc, char *argv[]);
 int ncm_link_remove_route(int argc, char *argv[]);
 int ncm_link_get_routes(char *ifname, char ***ret);
 int ncm_link_add_additional_gw(int argc, char *argv[]);
-int ncm_link_set_static(int argc, char *argv[]);
-
 int ncm_link_add_routing_policy_rules(int argc, char *argv[]);
 int ncm_link_remove_routing_policy_rules(int argc, char *argv[]);
 
@@ -63,6 +61,8 @@ int ncm_link_set_dhcp_mode(int argc, char *argv[]);
 int ncm_link_get_dhcp_mode(const char *ifname, int *ret);
 
 int ncm_link_set_dynamic(int argc, char *argv[]);
+int ncm_link_set_static(int argc, char *argv[]);
+int ncm_link_set_network(int argc, char *argv[]);
 
 int ncm_link_set_mac(int argc, char *argv[]);
 int ncm_link_get_mac(const char *ifname, char **ret);

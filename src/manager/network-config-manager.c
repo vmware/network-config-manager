@@ -1942,7 +1942,7 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
                         }
                         accept_ra = r;
                         continue;
-                } else if (str_eq_fold(argv[i], "keep")) {
+                } else if (str_eq_fold(argv[i], "keep") || str_eq_fold(argv[i], "k")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -2107,6 +2107,280 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
         r = manager_set_link_static_conf(p, addrs, gws, dns, keep);
         if (r < 0) {
                 log_warning("Failed to set static configuration for device='%s': %s", p->ifname, strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
+_public_ int ncm_link_set_network(int argc, char *argv[]) {
+        int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, use_domains_ipv4 = -1, use_domains_ipv6 = -1,
+                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1;
+        _auto_cleanup_strv_ char **addrs = NULL, **gws = NULL, **dns = NULL;
+        DHCPClientIdentifier d = _DHCP_CLIENT_IDENTIFIER_INVALID;
+        _auto_cleanup_ char *iaid4 = NULL, *iaid6 = NULL;
+        DHCPClient dhcp = _DHCP_CLIENT_INVALID;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        bool keep = false;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                } else if (str_eq_fold(argv[i], "dhcp")) {
+                        parse_next_arg(argv, argc, i);
+
+                        dhcp = dhcp_client_name_to_mode(argv[i]);
+                        if (dhcp < 0) {
+                                log_warning("Failed to parse dhcp: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-dns-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns-ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_dns_ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-dns-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_dns_ipv6 = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-domains-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-domains-ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_domains_ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "use-domains-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-domains-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_domains_ipv6 = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "send-release-ipv4")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse send-release-ipv4='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        send_release_ipv4 = r;
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "send-release-ipv6")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse send-release-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        send_release_ipv6 = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "client-id-ipv4") || str_eq_fold(argv[i], "dhcp4-client-id")) {
+                        parse_next_arg(argv, argc, i);
+
+                        d = dhcp_client_identifier_to_kind(argv[i]);
+                        if (d == _DHCP_CLIENT_IDENTIFIER_INVALID) {
+                                log_warning("Failed to parse DHCP4 client identifier: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "iaid-ipv4") || str_eq_fold(argv[i], "dhcp4-iaid")) {
+                        uint32_t v;
+
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_uint32(argv[i], &v);
+                        if (r < 0) {
+                                log_warning("Failed to parse IAID iaid-ipv4='%s' for device '%s': %s", argv[i], p->ifname, strerror(-r));
+                                return r;
+                        }
+
+                        iaid4 = strdup(argv[i]);
+                        if (!iaid4)
+                                return log_oom();
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "iaid-ipv6") || str_eq_fold(argv[i], "dhcp6-iaid")) {
+                        uint32_t v;
+
+                        parse_next_arg(argv, argc, i);
+
+
+                        r = parse_uint32(argv[i], &v);
+                        if (r < 0) {
+                                log_warning("Failed to parse IAID iaid-ipv6='%s' for device '%s': %s", argv[i], p->ifname, strerror(-r));
+                                return r;
+                        }
+
+                        iaid6 = strdup(argv[i]);
+                        if (!iaid6)
+                                return log_oom();
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "accept-ra") || str_eq_fold(argv[i], "ara")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse accept-ra%s': %s", argv[2], strerror(-r));
+                                return r;
+                        }
+                        accept_ra = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "address") || str_eq_fold(argv[i], "addr") || str_eq_fold(argv[i], "a")) {
+                        _auto_cleanup_ IPAddress *a = NULL;
+
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ip_from_str(argv[i], &a);
+                        if (r < 0) {
+                                log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        r = strv_extend(&addrs, argv[i]);
+                        if (r < 0)
+                                return log_oom();
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "gw") || str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "g")) {
+                        _auto_cleanup_ IPAddress *a = NULL;
+
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ip_from_str(argv[i], &a);
+                        if (r < 0) {
+                                log_warning("Failed to parse gateway='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        r = strv_extend(&gws, argv[i]);
+                        if (r < 0)
+                                return log_oom();
+                        continue;
+                } else if (str_eq_fold(argv[i], "dns")) {
+                        _auto_cleanup_strv_ char **s = NULL;
+
+                        parse_next_arg(argv, argc, i);
+
+                        if (strchr(argv[i], ',')) {
+                                char **t;
+
+                                s = strsplit(argv[i], ",", -1);
+                                if (!s) {
+                                        log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                strv_foreach(t, s) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip(*t, &a);
+                                        if (r < 0) {
+                                                log_warning("Failed to parse DNS server address: %s", *t);
+                                                return r;
+                                        }
+                                }
+
+                                if (!dns) {
+                                        dns = s;
+                                        steal_ptr(s);
+                                } else {
+                                        dns = strv_unique(dns, s);
+                                        if (!dns)
+                                                return log_oom();
+                                }
+                        } else {
+                                _auto_cleanup_ IPAddress *a = NULL;
+
+                                r = parse_ip(argv[i], &a);
+                                if (r < 0) {
+                                        log_warning("Failed to parse DNS Server address: %s", strerror(-r));
+                                        return r;
+                                }
+
+                                strv_extend(&dns, argv[i]);
+                        }
+
+                        continue;
+                } else if (str_eq_fold(argv[i], "keep") || str_eq_fold(argv[i], "k")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        keep = r;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
+        }
+
+        r = manager_set_link_network_conf(p,
+                                          accept_ra,
+                                          dhcp,
+                                          use_dns_ipv4,
+                                          use_dns_ipv6,
+                                          use_domains_ipv4,
+                                          use_domains_ipv6,
+                                          send_release_ipv4,
+                                          send_release_ipv6,
+                                          d,
+                                          iaid4,
+                                          iaid6,
+                                          addrs,
+                                          gws,
+                                          dns,
+                                          keep);
+        if (r < 0) {
+                log_warning("Failed to set network configuration for device='%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
