@@ -135,8 +135,6 @@ static const char *const link_local_address_type[_LINK_LOCAL_ADDRESS_MAX] =  {
         [LINK_LOCAL_ADDRESS_NO]            = "no",
         [LINK_LOCAL_ADDRESS_IPV4]          = "ipv4",
         [LINK_LOCAL_ADDRESS_IPV6]          = "ipv6",
-        [LINK_LOCAL_ADDRESS_FALLBACK]      = "fallback",
-        [LINK_LOCAL_ADDRESS_IPV4_FALLBACK] = "ipv4-fallback",
 };
 
 const char *link_local_address_type_to_name(int id) {
