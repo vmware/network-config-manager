@@ -1374,6 +1374,8 @@ int main(void) {
         cmocka_unit_test (test_set_network_address_gw),
         cmocka_unit_test (test_set_network_address_gw_dns),
         cmocka_unit_test (test_set_network_address_gw_dns_keep_yes),
+        cmocka_unit_test (test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier),
+        cmocka_unit_test (test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

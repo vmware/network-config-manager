@@ -149,7 +149,6 @@ void test_set_network_address_gw_dns_keep_yes(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
 }
 
-
 void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -169,6 +168,27 @@ void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **state) {
     assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
 }
+
+void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-network dev test99 dhcp yes dhcp4-client-id mac") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "DHCPv4", "ClientIdentifier", "mac"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
+    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+}
+
 
 void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -192,6 +212,30 @@ void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid(void *
     assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
 }
+
+void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-network dev test99 dhcp yes dhcp4-client-id mac dhcp4-iaid 0x12345 dhcp6-iaid 0x12346") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "DHCPv4", "ClientIdentifier", "mac"));
+    assert_true(key_file_config_exists(key_file, "DHCPv4", "IAID", "0x12345"));
+
+    assert_true(key_file_config_exists(key_file, "DHCPv6", "IAID", "0x12346"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
+    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+}
+
 
 void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid_static_address_gw_dns(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
