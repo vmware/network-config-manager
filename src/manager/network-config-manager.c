@@ -4321,7 +4321,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 
                         r = parse_bool(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse accept-ra%s': %s", argv[2], strerror(-r));
+                                log_warning("Failed to parse accept-ra %s': %s", argv[i], strerror(-r));
                                 return r;
                         }
                         accept_ra = r;
@@ -4349,7 +4349,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 
         r = manager_set_ipv6(p, dhcp, accept_ra);
         if (r < 0) {
-                log_warning("Failed to configure IPv4 on device '%s': %s", argv[1], strerror(-r));
+                log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -4377,7 +4377,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
 
                         r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
-                                log_warning("Failed to parse route gateway address '%s': %s", argv[2], strerror(-r));
+                                log_warning("Failed to parse gateway address '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
                         continue;
@@ -4386,7 +4386,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
 
                         r = parse_ip_from_str(argv[i], &address);
                         if (r < 0) {
-                                log_warning("Failed to parse route destination address '%s': %s", argv[2], strerror(-r));
+                                log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
                         continue;
@@ -4414,7 +4414,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
 
         r = manager_set_ipv4(p, dhcp, address, gw);
         if (r < 0) {
-                log_warning("Failed to configure IPv4 on device '%s': %s", argv[1], strerror(-r));
+                log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
