@@ -2526,9 +2526,10 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
         if (accept_ra >= 0)
                 set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
 
-        if (dhcp > 0)
+        if (dhcp > 0) {
+                set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
                 set_config(key_file, "Network", "DHCP", "ipv6");
-        else if (dhcp == 0)
+        } else if (dhcp == 0)
                 set_config(key_file, "Network", "DHCP", "no");
 
         r = key_file_save (key_file);
