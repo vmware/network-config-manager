@@ -17,6 +17,78 @@
 #include "set-network.h"
 #include "shared.h"
 
+void test_set_ipv4_dhcp_yes_with_static(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-ipv4 dev test99 dhcp yes a 192.168.1.14/24 gw 192.168.1.1") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+}
+
+void test_set_ipv4_dhcp_no_with_static(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-ipv4 dev test99 dhcp no a 192.168.1.14/24 gw 192.168.1.1") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "no"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+}
+
+void test_set_ipv6_dhcp_yes_accept_ra_yes(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-ipv6 dev test99 dhcp yes accept-ra yes") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
+    assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
+    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+}
+
+void test_set_ipv6_dhcp_no_accept_ra_yes(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-ipv6 dev test99 dhcp no accept-ra yes") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "no"));
+    assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
+    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+}
+
 void test_set_static_address_gw(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -235,7 +307,6 @@ void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid(void *
     assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
 }
-
 
 void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid_static_address_gw_dns(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;

@@ -1371,11 +1371,21 @@ int main(void) {
         cmocka_unit_test (test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid_static_address_gw_dns),
         cmocka_unit_test (test_yaml_add_dhcp4_server_static_address),
         cmocka_unit_test (test_yaml_add_sriov),
+        cmocka_unit_test (test_set_ipv4_dhcp_yes_with_static),
+        cmocka_unit_test (test_set_ipv4_dhcp_no_with_static),
+        cmocka_unit_test (test_set_ipv6_dhcp_yes_accept_ra_yes),
+        cmocka_unit_test (test_set_ipv6_dhcp_no_accept_ra_yes),
         cmocka_unit_test (test_set_network_address_gw),
         cmocka_unit_test (test_set_network_address_gw_dns),
         cmocka_unit_test (test_set_network_address_gw_dns_keep_yes),
         cmocka_unit_test (test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier),
         cmocka_unit_test (test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid),
+        /* vami test cases */
+        cmocka_unit_test (test_vami_set_network_autov6),
+        cmocka_unit_test (test_vami_set_network_dhcpv4),
+        cmocka_unit_test (test_vami_set_network_dhcpv6),
+        cmocka_unit_test (test_vami_set_network_dhcpv4_and_dhcpv6),
+        cmocka_unit_test (test_vami_set_network_ipv4_static_address_gw),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
