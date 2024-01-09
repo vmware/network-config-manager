@@ -30,3 +30,5 @@ void test_vami_set_network_dhcpv4(void **state);
 void test_vami_set_network_dhcpv6(void **state);
 void test_vami_set_network_dhcpv4_and_dhcpv6(void **state);
 void test_vami_set_network_ipv4_static_address_gw(void **state);
+void test_vami_set_network_ipv6_static_address_gw(void **state);
+void test_vami_set_network_ipv4_ipv6_static_address_gw(void **state);
