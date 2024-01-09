@@ -172,6 +172,7 @@ network_config_manager_tests = executable(
                               'tests/cmocka/shared.h',
                               'tests/cmocka/set-network.c',
                               'tests/cmocka/set-network.h',
+                              'tests/cmocka/vami-set-network-port.c',
                               ],
                               include_directories : includes,
                               dependencies : [

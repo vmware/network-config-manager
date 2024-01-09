@@ -32,7 +32,7 @@ void test_set_ipv4_dhcp_yes_with_static(void **state) {
 
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
 
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.41/14"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
 }
 
@@ -51,7 +51,7 @@ void test_set_ipv4_dhcp_no_with_static(void **state) {
 
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "no"));
 
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.41/14"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
 }
 
