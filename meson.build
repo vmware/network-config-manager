@@ -166,7 +166,11 @@ cmocka_dep = dependency('cmocka')
 
 network_config_manager_tests = executable(
                               'nmctl-tests',
-                              [network_config_manager_sources, 'tests/cmocka/basic.c'],
+                              [network_config_manager_sources,
+                              'tests/cmocka/basic.c',
+                              'tests/cmocka/shared.c',
+                              'tests/cmocka/shared.h',
+                              ],
                               include_directories : includes,
                               dependencies : [
                               libsystemd, cmocka_dep, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnnft_dep, libjson_dep],
