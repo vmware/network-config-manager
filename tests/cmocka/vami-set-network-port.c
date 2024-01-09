@@ -99,3 +99,19 @@ void test_vami_set_network_ipv4_static_address_gw(void **state) {
     assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.10.51/24"));
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.10.1"));
 }
+
+void test_vami_set_network_ipv6_static_address_gw(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-network dev test99 a fe80::10/64 gw fe80::1") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "fe80::10/64"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "fe80::1"));
+}
