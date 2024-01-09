@@ -176,7 +176,7 @@ void test_vami_set_network_static_ipv4_dhcp6(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.10.1"));
 }
 
-void test_vami_set_network_dhcp_ipv4_autov6(void **state) {
+void test_vami_set_network_dhcp4_autov6(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
@@ -192,4 +192,24 @@ void test_vami_set_network_dhcp_ipv4_autov6(void **state) {
     assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
     assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+}
+
+void test_vami_set_network_static_ipv4_autov6(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl set-network dev test99 accept-ra yes a 192.168.1.41/24 gw 192.168.1.1") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
+    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.41/24"));
+    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
 }
