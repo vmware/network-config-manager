@@ -170,6 +170,8 @@ network_config_manager_tests = executable(
                               'tests/cmocka/basic.c',
                               'tests/cmocka/shared.c',
                               'tests/cmocka/shared.h',
+                              'tests/cmocka/set-network.c',
+                              'tests/cmocka/set-network.h',
                               ],
                               include_directories : includes,
                               dependencies : [

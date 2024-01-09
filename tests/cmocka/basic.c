@@ -14,6 +14,7 @@
 #include "log.h"
 #include "macros.h"
 #include "parse-util.h"
+#include "set-network.h"
 #include "shared.h"
 
 static void test_multiple_address(void **state) {
@@ -573,143 +574,6 @@ static void test_remove_gw_family(void **state) {
     assert_true(!key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
     assert_true(!key_file_config_exists(key_file, "Route", "Gateway", "::1"));
 }
-
-static void test_set_static_address_gw(void **state) {
-    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-    int r;
-
-    assert_true(system("nmctl set-static dev test99 a 192.168.1.12/24 gw 192.168.1.1 a 192.168.1.13/24 gw 192.168.1.2") >= 0);
-
-    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
-    assert_true(r >= 0);
-
-    display_key_file(key_file);
-
-    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.12/24"));
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.13/24"));
-
-    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
-    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
-}
-
-static void test_set_static_address_gw_dns(void **state) {
-    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-    int r;
-
-    assert_true(system("nmctl set-static dev test99 a 192.168.1.12/24 gw 192.168.1.1 a 192.168.1.13/24 gw 192.168.1.2 dns 192.168.1.2,192.168.1.1") >= 0);
-
-    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
-    assert_true(r >= 0);
-
-    display_key_file(key_file);
-
-    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
-
-    assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.2 192.168.1.1"));
-
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.12/24"));
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.13/24"));
-
-    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
-    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
-}
-
-static void test_set_static_address_gw_dns_keep_yes(void **state) {
-    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-    int r;
-
-    assert_true(system("nmctl set-static dev test99 a 192.168.1.12/24 gw 192.168.1.1 a 192.168.1.13/24 gw 192.168.1.2 dns 192.168.1.2,192.168.1.1") >= 0);
-    assert_true(system("nmctl set-static dev test99 a 192.168.1.14/24 a 192.168.1.15/24 dns 192.168.1.4,192.168.1.5 keep yes") >= 0);
-
-    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
-    assert_true(r >= 0);
-
-    display_key_file(key_file);
-
-    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
-
-    assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.4 192.168.1.5 192.168.1.2 192.168.1.1"));
-
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.12/24"));
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.13/24"));
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.15/24"));
-
-    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
-    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
-}
-
-static void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **state) {
-    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-    int r;
-
-    assert_true(system("nmctl set-dynamic dev test99 dhcp yes dhcp4-client-id mac") >= 0);
-
-    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
-    assert_true(r >= 0);
-
-    display_key_file(key_file);
-
-    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
-
-    assert_true(key_file_config_exists(key_file, "DHCPv4", "ClientIdentifier", "mac"));
-
-    assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
-    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
-    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
-}
-
-static void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid(void **state) {
-    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-    int r;
-
-    assert_true(system("nmctl set-dynamic dev test99 dhcp yes dhcp4-client-id mac dhcp4-iaid 0x12345 dhcp6-iaid 0x12346") >= 0);
-
-    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
-    assert_true(r >= 0);
-
-    display_key_file(key_file);
-
-    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
-
-    assert_true(key_file_config_exists(key_file, "DHCPv4", "ClientIdentifier", "mac"));
-    assert_true(key_file_config_exists(key_file, "DHCPv4", "IAID", "0x12345"));
-
-    assert_true(key_file_config_exists(key_file, "DHCPv6", "IAID", "0x12346"));
-
-    assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
-    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
-    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
-}
-
-static void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid_static_address_gw_dns(void **state) {
-    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-    int r;
-
-    assert_true(system("nmctl set-network dev test99 dhcp yes dhcp4-client-id mac dhcp4-iaid 0x12345 dhcp6-iaid 0x12346 a 192.168.1.41/24 gw 192.168.1.1 dns 192.168.1.1,192.168.1.2") >= 0);
-
-    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
-    assert_true(r >= 0);
-
-    display_key_file(key_file);
-
-    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
-
-    assert_true(key_file_config_exists(key_file, "DHCPv4", "ClientIdentifier", "mac"));
-    assert_true(key_file_config_exists(key_file, "DHCPv4", "IAID", "0x12345"));
-
-    assert_true(key_file_config_exists(key_file, "DHCPv6", "IAID", "0x12346"));
-
-    assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
-    assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
-    assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
-    assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.1 192.168.1.2"));
-
-    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.41/24"));
-    assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
-}
-
 static void test_additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1507,6 +1371,11 @@ int main(void) {
         cmocka_unit_test (test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid_static_address_gw_dns),
         cmocka_unit_test (test_yaml_add_dhcp4_server_static_address),
         cmocka_unit_test (test_yaml_add_sriov),
+        cmocka_unit_test (test_set_network_address_gw),
+        cmocka_unit_test (test_set_network_address_gw_dns),
+        cmocka_unit_test (test_set_network_address_gw_dns_keep_yes),
+        cmocka_unit_test (test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier),
+        cmocka_unit_test (test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
