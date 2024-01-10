@@ -96,7 +96,8 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
                                    const char *pref_lft,
                                    const IPDuplicateAddressDetection dad,
                                    const int prefix_route,
-                                   const char *label);
+                                   const char *label,
+                                   char **many);
 
 int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses);
 

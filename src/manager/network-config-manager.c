@@ -1219,6 +1219,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
         IPDuplicateAddressDetection dad = _IP_DUPLICATE_ADDRESS_DETECTION_INVALID;
         _auto_cleanup_ char *scope = NULL, *pref_lft = NULL, *label = NULL;
         _auto_cleanup_ IPAddress *address = NULL, *peer = NULL;
+        _auto_cleanup_strv_ char **many = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int r, prefix_route = -1;
 
@@ -1326,6 +1327,57 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
 
                         prefix_route = r;
                         continue;
+                } else if (str_eq_fold(argv[i], "many")) {
+                        _auto_cleanup_strv_ char **s = NULL;
+                        bool white_space = false;
+
+                        parse_next_arg(argv, argc, i);
+
+                        if (strchr(argv[i], ',')) {
+                                char **d;
+
+                                s = strsplit(argv[i], ",", -1);
+                                if (!s) {
+                                        log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                strv_foreach(d, s) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip_from_str(*d, &a);
+                                        if (r < 0) {
+                                                log_warning("Failed to parse 11 address: %s", *d);
+                                                return r;
+                                        }
+                                }
+
+                        } else {
+                                _auto_cleanup_strv_ char **t = NULL;
+                                char **d;
+
+                                r = argv_to_strv(argc - 4, argv + i, &t);
+                                if (r < 0) {
+                                        log_warning("Failed to parse address: %s", strerror(-r));
+                                        return r;
+                                }
+
+                                strv_foreach(d, t) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip_from_str(*d, &a);
+                                        if (r >= 0) {
+                                                strv_extend(&s, *d);
+                                                i++;
+                                        }
+                                }
+                                white_space = true;
+                        }
+
+                        many = steal_ptr(s);
+                        if (white_space)
+                                i--;
+                        continue;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
@@ -1337,7 +1389,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        r = manager_configure_link_address(p, address, peer, scope, pref_lft, dad, prefix_route, label);
+        r = manager_configure_link_address(p, address, peer, scope, pref_lft, dad, prefix_route, label, many);
         if (r < 0) {
                 log_warning("Failed to configure device address: %s", strerror(-r));
                 return r;

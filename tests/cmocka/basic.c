@@ -494,6 +494,42 @@ static void test_revert_dns_with_parametre(void **state) {
     assert_true(!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
 }
 
+static void test_add_many_address(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl add-addr dev test99 many 192.168.1.5/24,192.168.1.6/24,192.168.1.7/24,192.168.1.8/24") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.5/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.6/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.7/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.8/24"));
+}
+
+static void test_add_many_address_space_separated(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl add-addr dev test99 many 192.168.1.5/24 192.168.1.6/24 192.168.1.7/24 192.168.1.8/24") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.5/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.6/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.7/24"));
+    assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.8/24"));
+}
+
 static void test_add_remove_multiple_address(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file1 = NULL, *key_file2 = NULL;
     int r;
@@ -574,6 +610,7 @@ static void test_remove_gw_family(void **state) {
     assert_true(!key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
     assert_true(!key_file_config_exists(key_file, "Route", "Gateway", "::1"));
 }
+
 static void test_additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1332,6 +1369,8 @@ static int teardown (void **state) {
 int main(void) {
     const struct CMUnitTest tests [] = {
         cmocka_unit_test (test_multiple_address),
+        cmocka_unit_test (test_add_many_address),
+        cmocka_unit_test (test_add_many_address_space_separated),
         cmocka_unit_test (test_multiple_routes_address),
         cmocka_unit_test (test_set_dns),
         cmocka_unit_test (test_revert_dns),
