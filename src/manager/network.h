@@ -320,7 +320,7 @@ const char *auth_eap_method_to_name(int id);
 int auth_eap_method_to_mode(const char *name);
 
 const char *link_local_address_type_to_name(int id);
-int link_local_address_type_to_mode(const char *name);
+int link_local_address_type_to_kind(const char *name);
 
 const char *ip_duplicate_address_detection_type_to_name(int id);
 int ip_duplicate_address_detection_type_to_mode(const char *name);

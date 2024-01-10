@@ -413,7 +413,7 @@ int parse_yaml_link_local_type(const char *key,
 
         n = data;
 
-        r = link_local_address_type_to_mode((const char *) value);
+        r = link_local_address_type_to_kind((const char *) value);
         if (r < 0) {
                 log_warning("Failed to parse link local address type='%s'", value);
                 return r;

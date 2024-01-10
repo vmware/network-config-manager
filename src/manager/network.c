@@ -147,7 +147,7 @@ const char *link_local_address_type_to_name(int id) {
         return link_local_address_type[id];
 }
 
-int link_local_address_type_to_mode(const char *name) {
+int link_local_address_type_to_kind(const char *name) {
         assert(name);
 
         for (size_t i = LINK_LOCAL_ADDRESS_YES; i < (size_t) ELEMENTSOF(link_local_address_type); i++)
