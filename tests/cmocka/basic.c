@@ -615,7 +615,7 @@ static void test_additional_gw_source_routing(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    assert_true(system("nmctl add-addl-gw dev test99 address 192.168.10.5/24 dest default gw 172.16.85.1 table 100") >= 0);
+    assert_true(system("nmctl set-rule dev test99 address 192.168.10.5/24 dest default gw 172.16.85.1 table 100") >= 0);
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);

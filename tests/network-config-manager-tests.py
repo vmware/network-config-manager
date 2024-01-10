@@ -1862,7 +1862,7 @@ class TestCLINetwork:
     def test_cli_add_additional_gateway_failure(self):
         assert(link_exist('test99') == True)
 
-        assert(call_shell("nmctl add-addl-gw dev test99 192.168.10.5/24 dest 0.0.0.0 gw table 100 ") != 0)
+        assert(call_shell("nmctl set-rule dev test99 192.168.10.5/24 dest 0.0.0.0 gw table 100 ") != 0)
 
         assert(unit_exist('10-test99.network') == False)
 

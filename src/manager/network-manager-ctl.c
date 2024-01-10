@@ -158,8 +158,6 @@ static int help(void) {
                                                      "\n\t\t\t\t      type [TYPE {unicast|local|broadcast|anycast|multicast|blackhole|unreachable|prohibit|throw|nat|resolve}]"
                                                      "\n\t\t\t\t      ipv6-pref [IPV6PREFERENCE {low|medium|high}] onlink [{ONLINK BOOLEN}] Configures Link route.\n"
                "  remove-route                 dev [DEVICE] f|family [ipv4|ipv6|yes] Removes route from device\n"
-               "  add-addl-gw                  dev [DEVICE] address|addr|a [ADDRESS] destination|dest [DESTINATION address] gw [GW address] table [TABLE NUMBER]"
-                                                      "\n\t\t\t\t Configures additional gateway for another DEVICE with routing policy rules.\n"
                "  set-dynamic                  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN]"
                                                       "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] client-id-ipv4|dhcp4-client-id [DHCPv4 IDENTIFIER {mac|duid|duid-only}"
                "                                       \n\t\t\t\t iaid-ipv4|dhcpv4-iaid  [DHCPv4 IAID] iaid-ipv6|dhcp6-iaid [DHCPv6 IAID] keep [BOOLEAN] Configures dynamic configuration of the device (IPv4|IPv6|RA).\n"
@@ -168,6 +166,8 @@ static int help(void) {
                                                       "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] client-id-ipv4|dhcp4-client-id [DHCPv4 IDENTIFIER {mac|duid|duid-only}"
                "                                       \n\t\t\t\t iaid-ipv4|dhcpv4-iaid  [DHCPv4 IAID] iaid-ipv6|dhcp6-iaid [DHCPv6 IAID] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] dns [SERVER1,SERVER2...]"
                "                                       \n\t\t\t\t keep [BOOLEAN] Configures dynamic and static configuration of the device.\n"
+               "  set-rule                     dev [DEVICE] address|addr|a [ADDRESS] destination|dest [DESTINATION address] gw [GW address] table [TABLE NUMBER]"
+                                                      "\n\t\t\t\t Configures device address and gateway with routing policy rules.\n"
                "  add-rule                     dev [DEVICE] table [TABLE NUMBER] [from ADDRESS] [to ADDRESS] [oif DEVICE] [iif DEVICE] [priority NUMBER] [tos NUMBER]"
                                                 "\n\t\t\t\t [invert BOOLEAN] [sport NUMBER] [dport NUMBER] [proto tcp|udp|sctp] Configures Routing Policy Rule.\n"
                "  remove-rule                  dev [DEVICE] Removes Routing Policy Rule.\n"
@@ -406,7 +406,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-static",                    "ss" ,              2,        WORD_ANY, false, ncm_link_set_static },
                 { "set-network",                   "sn" ,              2,        WORD_ANY, false, ncm_link_set_network },
                 { "remove-route",                  "rr",               4,        WORD_ANY, false, ncm_link_remove_route },
-                { "add-addl-gw",                   "agw",              9,        WORD_ANY, false, ncm_link_add_additional_gw },
+                { "set-rule",                      "srule",              9,      WORD_ANY, false, ncm_link_set_routing_policy_rule },
                 { "add-rule",                      "rule",             4,        WORD_ANY, false, ncm_link_add_routing_policy_rules },
                 { "remove-rule",                   "rrule",            1,        WORD_ANY, false, ncm_link_remove_routing_policy_rules },
                 { "set-hostname",                  "hostname",         1,        WORD_ANY, false, ncm_set_system_hostname },

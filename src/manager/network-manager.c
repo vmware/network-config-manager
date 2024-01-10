@@ -1690,7 +1690,7 @@ int manager_remove_routing_policy_rules(const IfNameIndex *ifidx) {
         return dbus_network_reload();
 }
 
-int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a, const Route *rt) {
+int manager_configure_routing_policy_rule(const IfNameIndex *ifidx, const IPAddress *a, const Route *rt, bool keep) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL, *destination = NULL, *pref_source = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
          _cleanup_(section_freep) Section *section = NULL;
@@ -1699,10 +1699,14 @@ int manager_configure_additional_gw(const IfNameIndex *ifidx, const IPAddress *a
         assert(ifidx);
         assert(rt);
 
-        r = create_or_parse_network_file(ifidx, &network);
-        if (r < 0) {
-                log_warning("Failed to find or create network file for device '%s': %s", ifidx->ifname, strerror(-r));
-                return r;
+        if (keep) {
+                r = create_or_parse_network_file(ifidx, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = create_network_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
         }
 
         r = parse_key_file(network, &key_file);
