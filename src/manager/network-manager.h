@@ -36,9 +36,10 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                                   const DHCPClientIdentifier identifier,
                                   const char *iaid,
                                   const char *iaid6,
+                                  int lla,
                                   bool keep);
 
-int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, bool keep);
+int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, int lla, bool keep);
 
 int manager_set_link_network_conf(const IfNameIndex *ifidx,
                                   int accept_ra,
@@ -55,6 +56,7 @@ int manager_set_link_network_conf(const IfNameIndex *ifidx,
                                   char **addrs,
                                   char **gws,
                                   char **dns,
+                                  int lla,
                                   bool keep);
 
 int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v);

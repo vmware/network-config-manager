@@ -957,7 +957,7 @@ _public_ int ncm_link_set_link_local_address(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        r = link_local_address_type_to_mode(argv[3]);
+        r = link_local_address_type_to_kind(argv[3]);
         if (r < 0) {
                 log_warning("Failed to parse %s=%s for device '%s': %s", argv[0], argv[2], argv[1], strerror(-r));
                 return r;
@@ -1846,7 +1846,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
         int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, use_domains_ipv4 = -1, use_domains_ipv6 = -1,
-                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1;
+                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1, lla = -1;
         DHCPClientIdentifier d = _DHCP_CLIENT_IDENTIFIER_INVALID;
         _auto_cleanup_ char *iaid4 = NULL, *iaid6 = NULL;
         DHCPClient dhcp = _DHCP_CLIENT_INVALID;
@@ -1990,10 +1990,20 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
 
                         r = parse_bool(argv[i]);
                         if (r < 0) {
-                                log_warning("Failed to parse accept-ra%s': %s", argv[2], strerror(-r));
+                                log_warning("Failed to parse accept-ra %s': %s", argv[2], strerror(-r));
                                 return r;
                         }
                         accept_ra = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "lla") || str_eq_fold(argv[i], "link-local")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = link_local_address_type_to_kind(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link-local %s': %s", argv[2], strerror(-r));
+                                return r;
+                        }
+                        lla = r;
                         continue;
                 } else if (str_eq_fold(argv[i], "keep") || str_eq_fold(argv[i], "k")) {
                         parse_next_arg(argv, argc, i);
@@ -2034,6 +2044,7 @@ _public_ int ncm_link_set_dynamic(int argc, char *argv[]) {
                                           d,
                                           iaid4,
                                           iaid6,
+                                          lla,
                                           keep);
         if (r < 0) {
                 log_warning("Failed to set dynamic configuration for device='%s': %s", p->ifname, strerror(-r));
@@ -2047,7 +2058,7 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **addrs = NULL, **gws = NULL, **dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool keep = false;
-        int r;
+        int r, lla = -1;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
@@ -2135,6 +2146,16 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else if (str_eq_fold(argv[i], "lla") || str_eq_fold(argv[i], "link-local")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = link_local_address_type_to_kind(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link-local %s': %s", argv[2], strerror(-r));
+                                return r;
+                        }
+                        lla = r;
+                        continue;
                 } else if (str_eq_fold(argv[i], "keep") || str_eq_fold(argv[i], "k")) {
                         parse_next_arg(argv, argc, i);
 
@@ -2157,7 +2178,7 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_link_static_conf(p, addrs, gws, dns, keep);
+        r = manager_set_link_static_conf(p, addrs, gws, dns, lla, keep);
         if (r < 0) {
                 log_warning("Failed to set static configuration for device='%s': %s", p->ifname, strerror(-r));
                 return r;
@@ -2168,7 +2189,7 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_network(int argc, char *argv[]) {
         int r, use_dns_ipv4 = -1, use_dns_ipv6 = -1, use_domains_ipv4 = -1, use_domains_ipv6 = -1,
-                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1;
+                send_release_ipv4 = -1, send_release_ipv6 = -1, accept_ra = -1, lla = -1;
         _auto_cleanup_strv_ char **addrs = NULL, **gws = NULL, **dns = NULL;
         DHCPClientIdentifier d = _DHCP_CLIENT_IDENTIFIER_INVALID;
         _auto_cleanup_ char *iaid4 = NULL, *iaid6 = NULL;
@@ -2317,6 +2338,16 @@ _public_ int ncm_link_set_network(int argc, char *argv[]) {
                                 return r;
                         }
                         accept_ra = r;
+                        continue;
+                } else if (str_eq_fold(argv[i], "lla") || str_eq_fold(argv[i], "link-local")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = link_local_address_type_to_kind(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link-local %s': %s", argv[2], strerror(-r));
+                                return r;
+                        }
+                        lla = r;
                         continue;
                 } else if (str_eq_fold(argv[i], "address") || str_eq_fold(argv[i], "addr") || str_eq_fold(argv[i], "a")) {
                         _auto_cleanup_ IPAddress *a = NULL;
@@ -2431,6 +2462,7 @@ _public_ int ncm_link_set_network(int argc, char *argv[]) {
                                           addrs,
                                           gws,
                                           dns,
+                                          lla,
                                           keep);
         if (r < 0) {
                 log_warning("Failed to set network configuration for device='%s': %s", p->ifname, strerror(-r));
