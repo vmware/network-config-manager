@@ -231,9 +231,11 @@ int argv_to_strv(int argc, char *argv[], char ***ret) {
         assert(argv);
 
         for (int i = 0; i < argc; i++) {
-                r = strv_extend(&s, str_strip(argv[i]));
-                if (r < 0)
-                        return r;
+                if (argv[i]) {
+                        r = strv_extend(&s, str_strip(argv[i]));
+                        if (r < 0)
+                                return r;
+                }
         }
 
         *ret = steal_ptr(s);
