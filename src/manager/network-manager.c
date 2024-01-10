@@ -2519,7 +2519,7 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         return dbus_network_reload();
 }
 
-int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_ra) {
+int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_ra, bool keep) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         _auto_cleanup_ char *network = NULL;
@@ -2527,9 +2527,15 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
 
         assert(ifidx);
 
-        r = create_or_parse_network_file(ifidx, &network);
-        if (r < 0)
-                return r;
+        if (keep) {
+                r = create_or_parse_network_file(ifidx, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = create_network_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
+        }
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -2553,7 +2559,7 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
         return dbus_network_reload();
 }
 
-int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *address, const IPAddress *gateway) {
+int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *address, const IPAddress *gateway, bool keep) {
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
@@ -2561,9 +2567,15 @@ int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *
 
         assert(ifidx);
 
-        r = create_or_parse_network_file(ifidx, &network);
-        if (r < 0)
-                return r;
+        if (keep) {
+                r = create_or_parse_network_file(ifidx, &network);
+                if (r < 0)
+                        return r;
+        } else {
+                r = create_network_conf_file(ifidx->ifname, &network);
+                if (r < 0)
+                        return r;
+        }
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
