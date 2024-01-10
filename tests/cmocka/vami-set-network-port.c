@@ -17,6 +17,7 @@
 #include "set-network.h"
 #include "shared.h"
 
+/* AUTOv6 */
 void test_vami_set_network_autov6(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -33,6 +34,7 @@ void test_vami_set_network_autov6(void **state) {
     assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
 }
 
+/* DHCPv4 */
 void test_vami_set_network_dhcpv4(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -50,6 +52,7 @@ void test_vami_set_network_dhcpv4(void **state) {
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
 }
 
+/* DHCPv6 */
 void test_vami_set_network_dhcpv6(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -67,6 +70,7 @@ void test_vami_set_network_dhcpv6(void **state) {
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
 }
 
+/* DHCPv4 + DHCPv6  */
 void test_vami_set_network_dhcpv4_and_dhcpv6(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -84,6 +88,7 @@ void test_vami_set_network_dhcpv4_and_dhcpv6(void **state) {
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
 }
 
+/* Static IPv4 Address and GW */
 void test_vami_set_network_ipv4_static_address_gw(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -100,6 +105,7 @@ void test_vami_set_network_ipv4_static_address_gw(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.10.1"));
 }
 
+/* STATICv6 */
 void test_vami_set_network_ipv6_static_address_gw(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -116,6 +122,7 @@ void test_vami_set_network_ipv6_static_address_gw(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "fe80::1"));
 }
 
+/* STATICv4 + STATICv6 */
 void test_vami_set_network_ipv4_ipv6_static_address_gw(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -134,6 +141,7 @@ void test_vami_set_network_ipv4_ipv6_static_address_gw(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.10.1"));
 }
 
+/* DHCPv4 + STATICv6 */
 void test_vami_set_network_dhcpv4_ipv6_static_address_gw(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -155,6 +163,7 @@ void test_vami_set_network_dhcpv4_ipv6_static_address_gw(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "fe80::1"));
 }
 
+/* DHCPv4 + AUTOv6 */
 void test_vami_set_network_static_ipv4_dhcp6(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -176,6 +185,7 @@ void test_vami_set_network_static_ipv4_dhcp6(void **state) {
     assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.10.1"));
 }
 
+/* DHCPv4 autov6 */
 void test_vami_set_network_dhcp4_autov6(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -194,6 +204,7 @@ void test_vami_set_network_dhcp4_autov6(void **state) {
     assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
 }
 
+/* STATICv4 + AUTOv6 */
 void test_vami_set_network_static_ipv4_autov6(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -318,7 +329,7 @@ void test_vami_set_static_ipv4_ipv6_static_address_gw(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
 
-    assert_true(system("nmctl set-staticdev test99 a 192.168.10.51/24 gw 192.168.10.1 a fe80::10/64 gw fe80::1") >= 0);
+    assert_true(system("nmctl set-static dev test99 a 192.168.10.51/24 gw 192.168.10.1 a fe80::10/64 gw fe80::1") >= 0);
 
     r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
     assert_true(r >= 0);
