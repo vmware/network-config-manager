@@ -1431,6 +1431,14 @@ int main(void) {
         cmocka_unit_test (test_vami_set_network_static_ipv4_dhcp6),
         cmocka_unit_test (test_vami_set_network_dhcp4_autov6),
         cmocka_unit_test (test_vami_set_network_static_ipv4_autov6),
+        /* vami test cases with set-dynamic and set-static */
+        cmocka_unit_test (test_vami_set_dynamic_autov6),
+        cmocka_unit_test (test_vami_set_dynamic_dhcpv4),
+        cmocka_unit_test (test_vami_set_dynamic_dhcpv6),
+        cmocka_unit_test (test_vami_set_dynamic_dhcpv4_and_dhcpv6),
+        cmocka_unit_test (test_vami_set_dynamic_ipv4_static_address_gw),
+        cmocka_unit_test (test_vami_set_static_ipv6_static_address_gw),
+        cmocka_unit_test (test_vami_set_static_ipv4_ipv6_static_address_gw),
     };
 
     int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

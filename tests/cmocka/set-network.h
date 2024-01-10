@@ -36,3 +36,12 @@ void test_vami_set_network_dhcpv4_ipv6_static_address_gw(void **state);
 void test_vami_set_network_static_ipv4_dhcp6(void **state);
 void test_vami_set_network_dhcp4_autov6(void **state);
 void test_vami_set_network_static_ipv4_autov6(void **state);
+
+/* with set-static and set-dynamic */
+void test_vami_set_dynamic_autov6(void **state);
+void test_vami_set_dynamic_dhcpv4(void **state);
+void test_vami_set_dynamic_dhcpv6(void **state);
+void test_vami_set_dynamic_dhcpv4_and_dhcpv6(void **state);
+void test_vami_set_dynamic_ipv4_static_address_gw(void **state);
+void test_vami_set_static_ipv6_static_address_gw(void **state);
+void test_vami_set_static_ipv4_ipv6_static_address_gw(void **state);
