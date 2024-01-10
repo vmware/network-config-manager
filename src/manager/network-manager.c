@@ -256,7 +256,8 @@ static int manager_set_link_dynamic_conf_internal(KeyFile *key_file,
                                                   int send_release_ipv6,
                                                   const DHCPClientIdentifier dhcp4_identifier,
                                                   const char *iaid4,
-                                                  const char *iaid6) {
+                                                  const char *iaid6,
+                                                  int lla) {
 
         int r;
 
@@ -311,6 +312,12 @@ static int manager_set_link_dynamic_conf_internal(KeyFile *key_file,
                         return r;
 
                 r = key_file_set_str(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
+                if (r < 0)
+                        return r;
+        }
+
+        if (lla >= 0) {
+                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(lla));
                 if (r < 0)
                         return r;
         }
@@ -371,6 +378,7 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                                   const DHCPClientIdentifier dhcp4_identifier,
                                   const char *iaid4,
                                   const char *iaid6,
+                                  int lla,
                                   bool keep) {
 
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -405,7 +413,8 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                                                    send_release_ipv6,
                                                    dhcp4_identifier,
                                                    iaid4,
-                                                   iaid6);
+                                                   iaid6,
+                                                   lla);
 
         if (r < 0)
                 return r;
@@ -425,12 +434,19 @@ static int manager_set_link_static_conf_internal(KeyFile *key_file,
                                                  char **addrs,
                                                  char **gws,
                                                  char **dns,
+                                                 int lla,
                                                  bool keep) {
         _auto_cleanup_ char *address = NULL, *gw = NULL;
         char **a;
         int r;
 
         assert(ifidx);
+
+        if (lla >= 0) {
+                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(lla));
+                if (r < 0)
+                        return r;
+        }
 
         if (dns) {
                 _auto_cleanup_strv_ char **s = NULL, **t = NULL;
@@ -499,7 +515,7 @@ static int manager_set_link_static_conf_internal(KeyFile *key_file,
         return 0;
 }
 
-int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, bool keep) {
+int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, int lla, bool keep) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         char **a;
@@ -521,7 +537,7 @@ int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **
         if (r < 0)
                 return r;
 
-        r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, keep);
+        r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, lla, keep);
         if (r < 0)
                 return r;
 
@@ -564,6 +580,7 @@ int manager_set_link_network_conf(const IfNameIndex *ifidx,
                                   char **addrs,
                                   char **gws,
                                   char **dns,
+                                  int lla,
                                   bool keep) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -598,11 +615,12 @@ int manager_set_link_network_conf(const IfNameIndex *ifidx,
                                                    send_release_ipv6,
                                                    dhcp4_identifier,
                                                    iaid4,
-                                                   iaid6);
+                                                   iaid6,
+                                                   lla);
         if (r < 0)
                 return r;
 
-        r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, keep);
+        r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, lla,  keep);
         if (r < 0)
                 return r;
 
