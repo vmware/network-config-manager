@@ -1347,7 +1347,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
 
                                         r = parse_ip_from_str(*d, &a);
                                         if (r < 0) {
-                                                log_warning("Failed to parse 11 address: %s", *d);
+                                                log_warning("Failed to parse address: %s", *d);
                                                 return r;
                                         }
                                 }
