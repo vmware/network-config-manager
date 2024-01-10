@@ -1640,7 +1640,6 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
                         continue;
                 }
 
-
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                 return -EINVAL;
         }
@@ -4356,6 +4355,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *gw = NULL, *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         int accept_ra = -1, dhcp = -1;
+        bool keep = true;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -4388,7 +4388,19 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                         }
                         dhcp = r;
                         continue;
+                } else if (str_eq_fold(argv[i], "keep")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        keep = r;
+                        continue;
                 }
+
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                 return -EINVAL;
@@ -4399,7 +4411,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv6(p, dhcp, accept_ra);
+        r = manager_set_ipv6(p, dhcp, accept_ra, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
@@ -4411,6 +4423,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *gw = NULL, *address = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        bool keep = true;
         int dhcp = -1;
         int r;
 
@@ -4453,6 +4466,17 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
 
                         dhcp = r;
                         continue;
+                } else if (str_eq_fold(argv[i], "keep")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        keep = r;
+                        continue;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
@@ -4464,7 +4488,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv4(p, dhcp, address, gw);
+        r = manager_set_ipv4(p, dhcp, address, gw, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
