@@ -2440,12 +2440,12 @@ _public_ int ncm_link_set_network(int argc, char *argv[]) {
         return 0;
 }
 
-_public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
+_public_ int ncm_link_set_routing_policy_rule(int argc, char *argv[]) {
         _auto_cleanup_ IPAddress *a = NULL, *gw = NULL, *destination = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt = NULL;
         uint32_t table = random() % 999;
-        bool b = false;
+        bool b = false, keep = true;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -2501,6 +2501,17 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else if (str_eq_fold(argv[i], "keep") || str_eq_fold(argv[i], "k")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        keep = r;
+                        continue;
                 }
 
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
@@ -2529,9 +2540,9 @@ _public_ int ncm_link_add_additional_gw(int argc, char *argv[]) {
                 rt->dst = *destination;
         }
 
-        r = manager_configure_additional_gw(p, a, rt);
+        r = manager_configure_routing_policy_rule(p, a, rt, keep);
         if (r < 0) {
-                log_warning("Failed to add additional gw to device '%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to configure routing policy rule for device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 

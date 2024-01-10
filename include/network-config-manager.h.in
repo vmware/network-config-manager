@@ -36,7 +36,8 @@ int ncm_link_add_route(int argc, char *argv[]);
 int ncm_link_remove_gateway(int argc, char *argv[]);
 int ncm_link_remove_route(int argc, char *argv[]);
 int ncm_link_get_routes(char *ifname, char ***ret);
-int ncm_link_add_additional_gw(int argc, char *argv[]);
+
+int ncm_link_set_routing_policy_rule(int argc, char *argv[]);
 int ncm_link_add_routing_policy_rules(int argc, char *argv[]);
 int ncm_link_remove_routing_policy_rules(int argc, char *argv[]);
 
