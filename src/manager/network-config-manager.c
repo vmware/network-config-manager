@@ -1543,7 +1543,6 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
                              .gw = *gw,
                         };
 
-
                         continue;
                 } else if (str_eq_fold(argv[i], "gateway6") || str_eq_fold(argv[i], "gw6")) {
                         _auto_cleanup_ IPAddress *gw = NULL;
@@ -2519,7 +2518,7 @@ _public_ int ncm_link_set_routing_policy_rule(int argc, char *argv[]) {
                         }
 
                         continue;
-                } else if (str_eq_fold(argv[i], "gw")) {
+                } else if (str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "gw")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &gw);
@@ -4352,7 +4351,7 @@ _public_ int ncm_link_remove_ntp(int argc, char *argv[]) {
 
        r = manager_remove_ntp_addresses(p);
        if (r < 0) {
-               log_warning("Failed to remove NTP server addres '%s': %s", argv[1], strerror(-r));
+               log_warning("Failed to remove NTP server address '%s': %s", argv[1], strerror(-r));
                return r;
        }
 
