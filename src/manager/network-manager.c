@@ -1223,7 +1223,6 @@ int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses, Addr
         int r;
 
         assert(ifidx);
-        assert(a);
 
         r = network_parse_link_setup_state(ifidx->ifindex, &setup);
         if (r < 0) {
