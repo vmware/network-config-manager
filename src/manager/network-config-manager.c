@@ -1614,7 +1614,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "gw")) {
+                } else if (str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "gw") || str_eq_fold(argv[i], "g")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &gw);
@@ -1696,7 +1696,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "gw")) {
+                } else if (str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "gw") || str_eq_fold(argv[i], "g")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &gw);
@@ -2518,7 +2518,7 @@ _public_ int ncm_link_set_routing_policy_rule(int argc, char *argv[]) {
                         }
 
                         continue;
-                } else if (str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "gw")) {
+                } else if (str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "gw") || str_eq_fold(argv[i], "g")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &gw);
@@ -4503,7 +4503,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "gw")) {
+                } else if (str_eq_fold(argv[i], "gateway") || str_eq_fold(argv[i], "gw") || str_eq_fold(argv[i], "g")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &gw);
