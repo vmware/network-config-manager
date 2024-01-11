@@ -1619,7 +1619,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
 
                         r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
-                                log_warning("Failed to parse gateway address '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse gateway address='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
                         continue;
@@ -1628,7 +1628,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
 
                         onlink = parse_bool(argv[i]);
                         if (onlink < 0) {
-                                log_warning("Failed to parse onlink '%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to parse onlink='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
                         continue;
@@ -1842,7 +1842,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
         r = manager_configure_route(p, gw, dst, source , pref_source, rt_pref, protocol, scope, type, table, mtu, metric, onlink, b);
         if (r < 0) {
-                log_warning("Failed to configure route on device '%s': %s", argv[1], strerror(-r));
+                log_warning("Failed to configure route on device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
