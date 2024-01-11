@@ -530,6 +530,8 @@ int key_file_set_uint(KeyFile *key_file, const char *section, const char *k, uin
 }
 
 int key_file_remove_section_key_value(KeyFile *key_file, const char *section, const char *k, const char *v) {
+        int r = -ENXIO;
+
         assert(key_file);
         assert(section);
         assert(k);
@@ -537,19 +539,20 @@ int key_file_remove_section_key_value(KeyFile *key_file, const char *section, co
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
-                if (str_eq(s->name, section)) {
-                        for (GList *i = s->keys; i; i = g_list_next (i)) {
-                                Key *key = (Key *) i->data;
+                if (!str_eq(s->name, section))
+                        continue;
 
-                                if (str_eq(key->name, k) && str_eq(key->v, v)) {
-                                        key_file->sections = g_list_delete_link(key_file->sections, iter);
-                                        return 0;
-                                }
+                for (GList *i = s->keys; i; i = g_list_next (i)) {
+                        Key *key = (Key *) i->data;
+
+                        if (str_eq(key->name, k) && str_eq(key->v, v)) {
+                                key_file->sections = g_list_delete_link(key_file->sections, iter);
+                                r = 0;
                         }
                 }
         }
 
-        return -ENXIO;
+        return r;
 }
 
 int remove_key_from_config_file(const char *path, const char *section, const char *k) {
