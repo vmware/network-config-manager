@@ -1342,6 +1342,12 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                                         return -EINVAL;
                                 }
 
+                                s = strv_remove(s, "");
+                                if (!s) {
+                                        log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
                                 strv_foreach(d, s) {
                                         _auto_cleanup_ IPAddress *a = NULL;
 
