@@ -148,7 +148,7 @@ static int help(void) {
                "  add-addr                     dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [STRING] pref-lifetime|pl [{forever|infinity|0}]"
                                                       "\n\t\t\t\t      scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN]"
                                                       "\n\t\t\t\t      prefix-route|pr [PREFIXROUTE BOOLEAN] many [ADDRESS1,ADDRESS2...] Configures device Address.\n"
-               "  remove-addr                  dev [DEVICE] address|a|addr [ADDRESS] [ADDRESS] [ADDRESS] Removes address from device.\n"
+               "  remove-addr                  dev [DEVICE] address|a|addr [ADDRESS] [ADDRESS] [ADDRESS] f|family [ipv4|ipv6|yes] Removes address or family of addresses from device.\n"
                "  set-gw                       dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] keep [BOOLEAN] Configures device default Gateway.\n"
                "  set-gw-family                dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS] Configures device default IPv4/IPv6 Gateway.\n"
                "  remove-gw                    dev [DEVICE] f|family [ipv4|ipv6|yes] Removes Gateway from device.\n"

@@ -581,6 +581,45 @@ static void test_add_remove_multiple_address(void **state) {
     assert_true(!key_file_config_exists(key_file2, "Address", "Address", "192.168.1.8"));
 }
 
+static void test_add_remove_many_address_family_ipv6(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl add-addr dev test99 many fe80::10/64,fe80::11/64,fe80::12/64,fe80::13/64,fe80::14/64,") >= 0);
+    assert_true(system("nmctl remove-addr dev test99 family ipv6") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(!key_file_config_exists(key_file, "Address", "Address", "fe80::10/64"));
+    assert_true(!key_file_config_exists(key_file, "Address", "Address", "fe80::11/64"));
+    assert_true(!key_file_config_exists(key_file, "Address", "Address", "fe80::12/64"));
+    assert_true(!key_file_config_exists(key_file, "Address", "Address", "fe80::13/64"));
+    assert_true(!key_file_config_exists(key_file, "Address", "Address", "fe80::14/64"));
+}
+
+static void test_add_remove_many_address_family_ipv4(void **state) {
+    _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+    int r;
+
+    assert_true(system("nmctl add-addr dev test99 many 192.168.1.5/24,192.168.1.6/24,192.168.1.7/24,192.168.1.8/24") >= 0);
+    assert_true(system("nmctl remove-addr dev test99 family ipv4") >= 0);
+
+    r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+    assert_true(r >= 0);
+
+    display_key_file(key_file);
+    assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+    assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.5/24"));
+    assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.6/24"));
+    assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.7/24"));
+    assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.8/24"));
+}
+
 static void test_set_gw_keep(void **state) {
     _cleanup_(key_file_freep) KeyFile *key_file = NULL;
     int r;
@@ -1391,6 +1430,8 @@ int main(void) {
         cmocka_unit_test (test_add_many_address),
         cmocka_unit_test (test_add_many_address_ipv6),
         cmocka_unit_test (test_add_many_address_space_separated),
+        cmocka_unit_test (test_add_remove_many_address_family_ipv6),
+        cmocka_unit_test (test_add_remove_many_address_family_ipv4),
         cmocka_unit_test (test_multiple_routes_address),
         cmocka_unit_test (test_set_dns),
         cmocka_unit_test (test_revert_dns),

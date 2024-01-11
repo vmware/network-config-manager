@@ -541,6 +541,7 @@ int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **
         if (r < 0)
                 return r;
 
+        /* Enable IPv6 for the device */
         strv_foreach(a, addrs) {
                 _auto_cleanup_ IPAddress *addr = NULL;
 
@@ -1215,7 +1216,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses) {
+int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses, AddressFamily family) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *setup = NULL, *network = NULL;
         char **a;
@@ -1242,6 +1243,25 @@ int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses) {
 
         strv_foreach(a, addresses)
                 key_file_remove_section_key_value(key_file, "Address", "Address", *a);
+
+        for (GList *i = key_file->sections; i; i = g_list_next (i)) {
+                _auto_cleanup_ IPAddress *addr = NULL;
+                Section *s = (Section *) i->data;
+
+                if (str_eq(s->name, "Address")) {
+                        for (GList *j = s->keys; j; j = g_list_next (j)) {
+                                Key *key = (Key *) j->data;
+                                if (str_eq(key->name, "Address")) {
+                                        r = parse_ip_from_str(key->v, &addr);
+                                        if (r >= 0) {
+                                                if ((addr->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
+                                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
+                                                        i = g_list_delete_link(key_file->sections, i);
+                                        }
+                                }
+                        }
+                }
+        }
 
         r = key_file_save (key_file);
         if (r < 0) {

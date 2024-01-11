@@ -1405,6 +1405,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_remove_address(int argc, char *argv[]) {
+        AddressFamily family = ADDRESS_FAMILY_NO;
         _auto_cleanup_strv_ char **addrs = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char **d;
@@ -1438,7 +1439,20 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                                         return r;
                                 }
                         }
+                } else if(str_eq_fold(argv[i], "family") || str_eq_fold(argv[i], "f")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = address_family_name_to_type(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse family='%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
+                        }
+                        family |= r;
+                        continue;
                 }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (!p) {
@@ -1446,12 +1460,12 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        if (!addrs) {
-                log_warning("Failed to parse address: %s",  strerror(EINVAL));
-                return -EINVAL;
+        if (!addrs && family == ADDRESS_FAMILY_NO) {
+                log_warning("Failed to parse address or family for device '%s': %s", p->ifname, strerror(-r));
+                return r;
         }
 
-        r = manager_remove_link_address(p, addrs);
+        r = manager_remove_link_address(p, addrs, family);
         if (r < 0) {
                 log_warning("Failed to remove address from device '%s': %s", p->ifname, strerror(-r));
                 return r;
@@ -1517,14 +1531,14 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "gateway4") || str_eq_fold(argv[i], "gw4")) {
+                } else if (str_eq_fold(argv[i], "gateway4") || str_eq_fold(argv[i], "gw4") || str_eq_fold(argv[i], "g4")) {
                         _auto_cleanup_ IPAddress *gw = NULL;
 
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
-                                log_warning("Failed to parse gw4 '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse gw4='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -1544,7 +1558,7 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
                         };
 
                         continue;
-                } else if (str_eq_fold(argv[i], "gateway6") || str_eq_fold(argv[i], "gw6")) {
+                } else if (str_eq_fold(argv[i], "gateway6") || str_eq_fold(argv[i], "gw6") || str_eq_fold(argv[i], "g6")) {
                         _auto_cleanup_ IPAddress *gw = NULL;
 
                         parse_next_arg(argv, argc, i);
@@ -1555,7 +1569,7 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
 
                         r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
-                                log_warning("Failed to parse gw6 '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse gw6='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -1590,7 +1604,7 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
 
         r = manager_configure_default_gateway_full(p, rt4, rt6);
         if (r < 0) {
-                log_warning("Failed to configure default gateway on device '%s': %s", argv[1], strerror(-r));
+                log_warning("Failed to configure default gateway on device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -1619,7 +1633,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
 
                         r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
-                                log_warning("Failed to parse gateway address '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse gateway address='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
                         continue;
@@ -1628,7 +1642,7 @@ _public_ int ncm_link_set_default_gateway(int argc, char *argv[]) {
 
                         onlink = parse_bool(argv[i]);
                         if (onlink < 0) {
-                                log_warning("Failed to parse onlink '%s': %s", argv[i], strerror(EINVAL));
+                                log_warning("Failed to parse onlink='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
                         continue;
@@ -1842,7 +1856,7 @@ _public_ int ncm_link_add_route(int argc, char *argv[]) {
 
         r = manager_configure_route(p, gw, dst, source , pref_source, rt_pref, protocol, scope, type, table, mtu, metric, onlink, b);
         if (r < 0) {
-                log_warning("Failed to configure route on device '%s': %s", argv[1], strerror(-r));
+                log_warning("Failed to configure route on device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
