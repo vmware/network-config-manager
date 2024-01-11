@@ -146,12 +146,12 @@ int add_key_to_section(Section *s, const char *k, const char *v) {
 }
 
 int add_section_to_key_file(KeyFile *k, Section *s) {
-       assert(k);
-       assert(s);
+        assert(k);
+        assert(s);
 
-       k->sections = g_list_append(k->sections, s);
-       k->nsections++;
-       return 0;
+        k->sections = g_list_append(k->sections, s);
+        k->nsections++;
+        return 0;
 }
 
 int add_key_to_section_int(Section *s, const char *k, int v) {
@@ -192,8 +192,8 @@ int config_manager_new(const Config *configs, ConfigManager **ret) {
                 return log_oom();
 
         *m = (ConfigManager) {
-                    .ctl_to_config_table = g_hash_table_new(g_str_hash, g_str_equal),
-        };
+        .ctl_to_config_table = g_hash_table_new(g_str_hash, g_str_equal),
+};
         if (!m->ctl_to_config_table)
                 return log_oom();
 
@@ -710,7 +710,7 @@ int remove_section_from_config_file_key(const char *path, const char *section, c
                                         break;
 
                                 iter = new_link;
-                                }
+                        }
                 }
         }
 
@@ -905,5 +905,4 @@ int determine_conf_file_name(const char *ifname, char **ret) {
 
         *ret = steal_ptr(file);
         return 0;
-
 }
