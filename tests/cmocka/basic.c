@@ -553,7 +553,7 @@ static void test_add_one_address(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file;
         int r;
 
-        assert_true(system("nmctl add-addr dev test99 a 191.168.1.5/24") >= 0);
+        assert_true(system("nmctl add-addr dev test99 a 192.168.1.5/24") >= 0);
 
         r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
         assert_true(r >= 0);
@@ -568,9 +568,9 @@ static void test_add_remove_multiple_address(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file1 = NULL, *key_file2 = NULL;
         int r;
 
-        assert_true(system("nmctl add-addr dev test99 a 191.168.1.5/24") >= 0);
-        assert_true(system("nmctl add-addr dev test99 a 191.168.1.6/24") >= 0);
-        assert_true(system("nmctl add-addr dev test99 a 191.168.1.7/24") >= 0);
+        assert_true(system("nmctl add-addr dev test99 a 192.168.1.5/24") >= 0);
+        assert_true(system("nmctl add-addr dev test99 a 192.168.1.6/24") >= 0);
+        assert_true(system("nmctl add-addr dev test99 a 192.168.1.7/24") >= 0);
 
         r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file1);
         assert_true(r >= 0);
@@ -1460,7 +1460,7 @@ static int teardown (void **state) {
 }
 
 int main(void) {
-    const struct CMUnitTest tests [] = {
+        const struct CMUnitTest tests [] = {
         cmocka_unit_test (test_add_one_address),
         cmocka_unit_test (test_multiple_address),
         cmocka_unit_test (test_add_many_address),
@@ -1537,9 +1537,9 @@ int main(void) {
         cmocka_unit_test (test_vami_set_dynamic_ipv4_static_address_gw),
         cmocka_unit_test (test_vami_set_static_ipv6_static_address_gw),
         cmocka_unit_test (test_vami_set_static_ipv4_ipv6_static_address_gw),
-    };
+};
 
-    int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
+        int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);
 
-    return count_fail_tests;
+        return count_fail_tests;
 }
