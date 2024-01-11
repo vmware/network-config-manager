@@ -1405,6 +1405,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_remove_address(int argc, char *argv[]) {
+        AddressFamily family = ADDRESS_FAMILY_NO;
         _auto_cleanup_strv_ char **addrs = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         char **d;
@@ -1438,7 +1439,21 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                                         return r;
                                 }
                         }
+                } else if(str_eq_fold(argv[i], "family") || str_eq_fold(argv[i], "f")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = address_family_name_to_type(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse family='%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
+                        }
+                        family |= r;
+                        continue;
                 }
+
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
         }
 
         if (!p) {
@@ -1446,12 +1461,12 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        if (!addrs) {
-                log_warning("Failed to parse address: %s",  strerror(EINVAL));
-                return -EINVAL;
+        if (!addrs && family == ADDRESS_FAMILY_NO) {
+                log_warning("Failed to parse address or family for device '%s': %s", p->ifname, strerror(-r));
+                return r;
         }
 
-        r = manager_remove_link_address(p, addrs);
+        r = manager_remove_link_address(p, addrs, family);
         if (r < 0) {
                 log_warning("Failed to remove address from device '%s': %s", p->ifname, strerror(-r));
                 return r;

@@ -101,7 +101,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
                                    const char *label,
                                    char **many);
 
-int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses);
+int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses, AddressFamily family);
 
 int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt, bool keep);
 int manager_configure_default_gateway_full(const IfNameIndex *ifidx, Route *rt4, Route *rt6);
