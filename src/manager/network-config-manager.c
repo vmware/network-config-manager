@@ -3751,6 +3751,12 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                                         return -EINVAL;
                                 }
 
+                                s = strv_remove(s, "");
+                                if (!s) {
+                                        log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
                                 strv_foreach(d, s) {
                                         _auto_cleanup_ IPAddress *a = NULL;
 
@@ -3863,6 +3869,12 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
                                 char **d;
 
                                 d = strsplit(argv[i], ",", -1);
+                                if (!d) {
+                                        log_warning("Failed to parse DNS Search domains '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                d = strv_remove(d, "");
                                 if (!d) {
                                         log_warning("Failed to parse DNS Search domains '%s': %s", argv[i], strerror(EINVAL));
                                         return -EINVAL;
@@ -4255,6 +4267,12 @@ _public_ int ncm_link_set_ntp(int argc, char *argv[]) {
                                 char **d;
 
                                 d = strsplit(argv[i], ",", -1);
+                                if (!d) {
+                                        log_warning("Failed to parse NTP servers '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                d = strv_remove(d, "");
                                 if (!d) {
                                         log_warning("Failed to parse NTP servers '%s': %s", argv[i], strerror(EINVAL));
                                         return -EINVAL;
