@@ -1517,14 +1517,14 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "gateway4") || str_eq_fold(argv[i], "gw4")) {
+                } else if (str_eq_fold(argv[i], "gateway4") || str_eq_fold(argv[i], "gw4") || str_eq_fold(argv[i], "g4")) {
                         _auto_cleanup_ IPAddress *gw = NULL;
 
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
-                                log_warning("Failed to parse gw4 '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse gw4='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -1544,7 +1544,7 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
                         };
 
                         continue;
-                } else if (str_eq_fold(argv[i], "gateway6") || str_eq_fold(argv[i], "gw6")) {
+                } else if (str_eq_fold(argv[i], "gateway6") || str_eq_fold(argv[i], "gw6") || str_eq_fold(argv[i], "g6")) {
                         _auto_cleanup_ IPAddress *gw = NULL;
 
                         parse_next_arg(argv, argc, i);
@@ -1555,7 +1555,7 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
 
                         r = parse_ip_from_str(argv[i], &gw);
                         if (r < 0) {
-                                log_warning("Failed to parse gw6 '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse gw6='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
@@ -1590,7 +1590,7 @@ _public_ int ncm_link_set_default_gateway_family(int argc, char *argv[]) {
 
         r = manager_configure_default_gateway_full(p, rt4, rt6);
         if (r < 0) {
-                log_warning("Failed to configure default gateway on device '%s': %s", argv[1], strerror(-r));
+                log_warning("Failed to configure default gateway on device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 

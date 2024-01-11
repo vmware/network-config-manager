@@ -541,6 +541,7 @@ int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **
         if (r < 0)
                 return r;
 
+        /* Enable IPv6 for the device */
         strv_foreach(a, addrs) {
                 _auto_cleanup_ IPAddress *addr = NULL;
 
