@@ -1451,7 +1451,6 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                         continue;
                 }
 
-
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                 return -EINVAL;
         }
