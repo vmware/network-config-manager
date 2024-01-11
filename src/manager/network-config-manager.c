@@ -1408,6 +1408,7 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
         AddressFamily family = ADDRESS_FAMILY_NO;
         _auto_cleanup_strv_ char **addrs = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        char **many = NULL;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -1436,6 +1437,64 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                                 return log_oom();
 
                       continue;
+                } else if (str_eq_fold(argv[i], "many")) {
+                        _auto_cleanup_strv_ char **s = NULL;
+                        bool white_space = false;
+
+                        parse_next_arg(argv, argc, i);
+
+                        if (strchr(argv[i], ',')) {
+                                char **d;
+
+                                s = strsplit(argv[i], ",", -1);
+                                if (!s) {
+                                        log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                s = strv_remove(s, "");
+                                if (!s) {
+                                        log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                strv_foreach(d, s) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip_from_str(*d, &a);
+                                        if (r < 0) {
+                                                log_warning("Failed to parse address: %s", *d);
+                                                return r;
+                                        }
+                                }
+
+                        } else {
+                                _auto_cleanup_strv_ char **t = NULL;
+                                char **d;
+
+                                r = argv_to_strv(argc - 4, argv + i, &t);
+                                if (r < 0) {
+                                        log_warning("Failed to parse address: %s", strerror(-r));
+                                        return r;
+                                }
+
+                                strv_foreach(d, t) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip_from_str(*d, &a);
+                                        if (r >= 0) {
+                                                strv_extend(&s, *d);
+                                                i++;
+                                        }
+                                }
+                                white_space = true;
+                        }
+
+                        many = steal_ptr(s);
+                        if (white_space)
+                                i--;
+                        addrs = many;
+                        continue;
                 } else if(str_eq_fold(argv[i], "family") || str_eq_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
