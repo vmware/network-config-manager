@@ -1408,7 +1408,6 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
         AddressFamily family = ADDRESS_FAMILY_NO;
         _auto_cleanup_strv_ char **addrs = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        char **many = NULL;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -1490,10 +1489,9 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                                 white_space = true;
                         }
 
-                        many = steal_ptr(s);
+                        addrs = steal_ptr(s);
                         if (white_space)
                                 i--;
-                        addrs = many;
                         continue;
                 } else if(str_eq_fold(argv[i], "family") || str_eq_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
