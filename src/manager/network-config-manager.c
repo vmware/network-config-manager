@@ -1408,7 +1408,6 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
         AddressFamily family = ADDRESS_FAMILY_NO;
         _auto_cleanup_strv_ char **addrs = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        char **d;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -1426,19 +1425,17 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
 
                         parse_next_arg(argv, argc, i);
 
-                        r = argv_to_strv(argc - 4, argv + i, &addrs);
+                        r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
-                                log_warning("Failed to parse addresses: %s", strerror(-r));
+                                log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
-                        strv_foreach(d, addrs) {
-                                r = parse_ip_from_str(*d, &a);
-                                if (r < 0) {
-                                        log_warning("Failed to parse address '%s': %s", *d, strerror(-r));
-                                        return r;
-                                }
-                        }
+                        r = strv_extend(&addrs, argv[i]);
+                        if (r < 0)
+                                return log_oom();
+
+                      continue;
                 } else if(str_eq_fold(argv[i], "family") || str_eq_fold(argv[i], "f")) {
                         parse_next_arg(argv, argc, i);
 
