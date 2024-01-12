@@ -1395,6 +1395,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
+        many = strv_remove_duplicates(many);
         r = manager_configure_link_address(p, address, peer, scope, pref_lft, dad, prefix_route, label, many);
         if (r < 0) {
                 log_warning("Failed to configure device address: %s", strerror(-r));

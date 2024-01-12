@@ -1170,33 +1170,37 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
                         return r;
         }
 
-        if (a)
+        if (a && !key_file_config_exists(key_file, "Address", "Address", a)) {
                 add_key_to_section(section, "Address", a);
 
-        if (p)
-                add_key_to_section(section, "Peer", p);
+                if (p)
+                        add_key_to_section(section, "Peer", p);
 
-        if (scope)
-                add_key_to_section(section, "Scope", scope);
+                if (scope)
+                        add_key_to_section(section, "Scope", scope);
 
-        if (pref_lft)
-                add_key_to_section(section, "PreferredLifetime", pref_lft);
+                if (pref_lft)
+                        add_key_to_section(section, "PreferredLifetime", pref_lft);
 
-        if (label)
-                add_key_to_section(section, "Label", label);
+                if (label)
+                        add_key_to_section(section, "Label", label);
 
-        if (prefix_route >= 0)
+                if (prefix_route >= 0)
                 add_key_to_section(section, "AddPrefixRoute", bool_to_str(prefix_route));
 
-        if (dad != _IP_DUPLICATE_ADDRESS_DETECTION_INVALID)
-                add_key_to_section(section, "DuplicateAddressDetection", ip_duplicate_address_detection_type_to_name(dad));
+                if (dad != _IP_DUPLICATE_ADDRESS_DETECTION_INVALID)
+                        add_key_to_section(section, "DuplicateAddressDetection", ip_duplicate_address_detection_type_to_name(dad));
 
-        r = add_section_to_key_file(key_file, section);
-        if (r < 0)
-                return r;
+                r = add_section_to_key_file(key_file, section);
+                if (r < 0)
+                        return r;
 
-        steal_ptr(section);
+                steal_ptr(section);
+        }
+
         strv_foreach(t, many) {
+                if (key_file_config_exists(key_file, "Address", "Address", *t))
+                        continue;
 
                 r = section_new("Address", &section);
                 if (r < 0)
@@ -1250,6 +1254,7 @@ int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses, Addr
                 if (str_eq(s->name, "Address")) {
                         for (GList *j = s->keys; j; j = g_list_next (j)) {
                                 Key *key = (Key *) j->data;
+
                                 if (str_eq(key->name, "Address")) {
                                         r = parse_ip_from_str(key->v, &addr);
                                         if (r >= 0) {
