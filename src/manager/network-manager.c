@@ -1251,18 +1251,20 @@ int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses, Addr
                 _auto_cleanup_ IPAddress *addr = NULL;
                 Section *s = (Section *) i->data;
 
-                if (str_eq(s->name, "Address")) {
-                        for (GList *j = s->keys; j; j = g_list_next (j)) {
-                                Key *key = (Key *) j->data;
+                if (!str_eq(s->name, "Address"))
+                        continue;
 
-                                if (str_eq(key->name, "Address")) {
-                                        r = parse_ip_from_str(key->v, &addr);
-                                        if (r >= 0) {
-                                                if ((addr->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
-                                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
-                                                        i = g_list_delete_link(key_file->sections, i);
-                                        }
-                                }
+                for (GList *j = s->keys; j; j = g_list_next (j)) {
+                        Key *key = (Key *) j->data;
+
+                        if (!str_eq(key->name, "Address"))
+                                continue;
+
+                        r = parse_ip_from_str(key->v, &addr);
+                        if (r >= 0) {
+                                if ((addr->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
+                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
+                                        i = g_list_delete_link(key_file->sections, i);
                         }
                 }
         }
@@ -1288,24 +1290,26 @@ static int manager_set_gateway(KeyFile *key_file, Route *rt) {
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
-                if (str_eq(s->name, "Route")) {
-                        for (GList *j = s->keys; j; j = g_list_next (j)) {
-                                Key *key = (Key *) j->data;
+                if (!str_eq(s->name, "Route"))
+                        continue;
 
-                                if (str_eq(key->name, "Gateway")) {
-                                        r = parse_ip(key->v, &a);
+                for (GList *j = s->keys; j; j = g_list_next (j)) {
+                        Key *key = (Key *) j->data;
+
+                        if (!str_eq(key->name, "Gateway"))
+                                continue;
+
+                        r = parse_ip(key->v, &a);
+                        if (r >= 0) {
+                                if (a->family == rt->family) {
+                                        free(key->v);
+
+                                        r = ip_to_str(rt->family, &rt->gw, &gw);
                                         if (r >= 0) {
-                                                if (a->family == rt->family) {
-                                                        free(key->v);
+                                                key->v = steal_ptr(gw);
+                                                b = true;
 
-                                                        r = ip_to_str(rt->family, &rt->gw, &gw);
-                                                        if (r >= 0) {
-                                                                key->v = steal_ptr(gw);
-                                                                b = true;
-
-                                                                break;
-                                                        }
-                                                }
+                                                break;
                                         }
                                 }
                         }
