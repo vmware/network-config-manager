@@ -433,6 +433,54 @@ static void test_netdev_vxlans(void **state) {
         system("nmctl remove-netdev vxlan2 kind vxlan");
 }
 
+static void test_set_dhcp6_duid_custom(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl set-dhcp-duid dev test99 f 6 duid 1234 data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "DHCPv6", "DUIDType", "1234"));
+        assert_true(key_file_config_exists(key_file, "DHCPv6", "DUIDRawData", "00:00:ab:11:f9:2a:c2:77:29:f9:5c:00"));
+}
+
+static void test_set_dhcp6_duid(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl set-dhcp-duid dev test99 f 6 duid vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "DHCPv6", "DUIDType", "vendor"));
+        assert_true(key_file_config_exists(key_file, "DHCPv6", "DUIDRawData", "00:00:ab:11:f9:2a:c2:77:29:f9:5c:00"));
+}
+
+static void test_set_dhcp4_duid(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl set-dhcp-duid dev test99 f 4 duid vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "DHCPv4", "DUIDType", "vendor"));
+        assert_true(key_file_config_exists(key_file, "DHCPv4", "DUIDRawData", "00:00:ab:11:f9:2a:c2:77:29:f9:5c:00"));
+}
+
 static void test_set_dns(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
@@ -1474,6 +1522,9 @@ static int teardown (void **state) {
 
 int main(void) {
         const struct CMUnitTest tests [] = {
+        cmocka_unit_test (test_set_dhcp6_duid_custom),
+        cmocka_unit_test (test_set_dhcp6_duid),
+        cmocka_unit_test (test_set_dhcp4_duid),
         cmocka_unit_test (test_add_one_address),
         cmocka_unit_test (test_add_remove_address),
         cmocka_unit_test (test_multiple_address),

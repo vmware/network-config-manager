@@ -23,6 +23,8 @@
 
 #define parse_ether_address(mac) ether_aton(mac)
 
+#define MAX_DUID_DATA_LEN 128
+
 typedef enum AddressFamily {
         ADDRESS_FAMILY_NO             = 0,
         ADDRESS_FAMILY_IPV4           = 1 << 0,
@@ -97,6 +99,7 @@ int parse_group(char *mtu, uint32_t *ret);
 
 bool valid_hostname(const char *host);
 bool valid_ifname(const char *s);
+bool valid_duid(const char *p);
 
 const char *address_family_type_to_name(int id);
 int address_family_name_to_type(const char *name);

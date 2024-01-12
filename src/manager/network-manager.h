@@ -86,7 +86,7 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind,
 int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, char **iaid);
 
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
-                                      const DHCPClientDUIDType duid,
+                                      const char *duid,
                                       const char *raw_data,
                                       const bool system,
                                       const DHCPClient kind);

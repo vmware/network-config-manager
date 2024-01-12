@@ -858,9 +858,9 @@ _public_ int ncm_link_get_dhcp_client_iaid(char *ifname, char **ret) {
 
 _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
         DHCPClientDUIDType d = _DHCP_CLIENT_DUID_TYPE_INVALID;
+        _auto_cleanup_ char *raw_data = NULL, *duid_type = NULL;
         DHCPClient kind = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        _auto_cleanup_ char *raw_data = NULL;
         bool system = false;
         int r;
 
@@ -892,13 +892,24 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
 
                         continue;
                 } else if (str_eq_fold(argv[i], "duid")) {
+                        int k = -1;
+
                         parse_next_arg(argv, argc, i);
 
-                        d = dhcp_client_duid_name_to_type(argv[i]);
-                        if (d == _DHCP_CLIENT_DUID_TYPE_INVALID) {
-                                log_warning("Failed to parse DHCPv4 DUID type '%s': %s", argv[i], strerror(EINVAL));
-                                return -EINVAL;
-                        }
+                        r = dhcp_client_duid_name_to_type(argv[i]);
+                        if (r < 0) {
+                                r = parse_int(argv[i], &k);
+                                if (r < 0 || k > 65535 || k < 0) {
+                                        log_warning("Failed to parse DHCP DUID type='%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                duid_type = strdup(argv[i]);
+                        } else
+                                duid_type = strdup(argv[i]);
+
+                        if (!duid_type)
+                                return log_oom();
 
                         continue;
                 } else if (str_eq_fold(argv[i], "data") || str_eq_fold(argv[i], "rawdata")) {
@@ -907,6 +918,11 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
                         raw_data = strdup(argv[i]);
                         if (!raw_data)
                                 return log_oom();
+
+                        if (!valid_duid(raw_data)) {
+                                log_warning("Failed to parse DUID='%s': %s", raw_data, strerror(EINVAL));
+                                return -EINVAL;
+                        }
 
                         continue;
                 }
@@ -920,12 +936,12 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        if (d == _DHCP_CLIENT_DUID_TYPE_INVALID) {
+        if (!duid_type) {
                 log_warning("Failed to parse 'duid' type: %s",  strerror(EINVAL));
                 return -EINVAL;
         }
 
-        r = manager_set_link_dhcp_client_duid(p, d, raw_data, system, kind);
+        r = manager_set_link_dhcp_client_duid(p, d >= 0 ? dhcp_client_duid_type_to_name(d) : duid_type, raw_data, system, kind);
         if (r < 0) {
                 log_warning("Failed to set device DHCP client DUID for device '%s': %s", p->ifname, strerror(r));
                 return r;
