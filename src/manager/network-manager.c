@@ -928,6 +928,35 @@ int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPCl
         return 0;
 }
 
+int manager_acquire_link_dhcp_client_duid(const IfNameIndex *ifidx, const DHCPClient kind, char **duid_kind, char **raw_data) {
+        _auto_cleanup_ char *network = NULL, *v = NULL;
+        int r;
+
+        assert(ifidx);
+
+        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_config_file(network, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", &v);
+        if (r < 0)
+                return r;
+
+        *duid_kind = strdup(v);
+        if(!*duid_kind)
+                return log_oom();
+
+        r = parse_config_file(network, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDRawData", &v);
+        if (r < 0)
+                return r;
+
+        *raw_data = strdup(v);
+        if(!*raw_data)
+                return log_oom();
+
+        return 0;
+}
+
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                                       const char *duid,
                                       const char *raw_data,

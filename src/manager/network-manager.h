@@ -85,6 +85,9 @@ bool manager_link_has_static_address(const IfNameIndex *ifidx);
 int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, const char *iaid);
 int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, DHCPClient kind, char **iaid);
 
+
+int manager_acquire_link_dhcp_client_duid(const IfNameIndex *ifidx, const DHCPClient kind, char **duid_kind, char **raw_data);
+
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                                       const char *duid,
                                       const char *raw_data,
