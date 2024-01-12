@@ -278,6 +278,18 @@ char** strv_remove(char **p, const char *s) {
         return p;
 }
 
+char** strv_remove_duplicates(char **s) {
+        char **a, **t;
+
+        if (!s)
+                return s;
+
+        strv_foreach(a, s)
+                strv_remove(a + 1, *a);
+
+        return s;
+}
+
 char** strv_merge(char **a, char **b) {
         GStrvBuilder *s;
 

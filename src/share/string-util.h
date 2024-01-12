@@ -59,6 +59,7 @@ char** strv_new(const char *x);
 
 char** strv_unique(char **s, char **t);
 char** strv_remove(char **p, const char *s);
+char** strv_remove_duplicates(char **s);
 
 int strv_add(char ***l, const char *value);
 char** strv_merge(char **a, char **b);
