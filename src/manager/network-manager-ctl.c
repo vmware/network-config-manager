@@ -141,7 +141,7 @@ static int help(void) {
                                                       "\n\t\t\t\t use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN] Configures DHCP client.\n"
                "  set-dhcp4-cid                dev [DEVICE] id [IDENTIFIER {mac|duid|duid-only} Configures device DHCPv4 identifier.\n"
                "  set-dhcp-iaid                dev [DEVICE] family|f iaid [IAID] Configures the DHCP Identity Association Identifier (IAID)\n"
-               "  set-dhcp-duid                dev|system [DEVICE] family|f [ipv4|ipv6|4|6] duid [DUID {link-layer-time|vendor|link-layer|uuid|0…65535}] data [RAWDATA]"
+               "  set-dhcp-duid                dev|system [DEVICE] family|f [ipv4|ipv6|4|6] type [DUIDType {link-layer-time|vendor|link-layer|uuid|0…65535}] data [RAWDATA]"
                                                       "\n\t\t\t\t      Sets DUID of DHCPv4 or DHCPv6 Client.\n"
                "  set-link-state               dev [DEVICE] [STATE {up|down}] Configures device State.\n"
                "  show-addr                    dev [DEVICE] [family|f ipv4|ipv6|4|6] Show device addresses\n"

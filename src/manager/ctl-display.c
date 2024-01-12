@@ -473,7 +473,8 @@ static void display_alterative_names(gpointer data, gpointer user_data) {
 static int list_one_link(int argc, char *argv[]) {
         _auto_cleanup_ char *setup_state = NULL, *operational_state = NULL, *address_state = NULL, *ipv4_state = NULL,
                 *ipv6_state = NULL, *required_for_online = NULL, *device_activation_policy = NULL, *tz = NULL, *network = NULL,
-                *online_state = NULL, *link = NULL, *dhcp4_identifier = NULL, *dhcp6_duid = NULL, *dhcp6_iaid = NULL, *iaid = NULL;
+                *online_state = NULL, *link = NULL, *dhcp4_identifier = NULL, *dhcp6_duid = NULL, *dhcp6_iaid = NULL, *iaid = NULL,
+                *dhcp4_duid_type = NULL, *dhcp6_duid_type = NULL, *dhcp4_duid_data = NULL, *dhcp6_duid_data = NULL;
         _auto_cleanup_strv_ char **dns = NULL, **ntp = NULL, **search_domains = NULL, **route_domains = NULL;
         const char *operational_state_color, *setup_set_color;
         _cleanup_(json_object_putp) json_object *jn = NULL;
@@ -757,6 +758,22 @@ static int list_one_link(int argc, char *argv[]) {
                 printf("%s\n", iaid);
         }
 
+        r = manager_acquire_link_dhcp_client_duid(p, DHCP_CLIENT_IPV4, &dhcp4_duid_type, &dhcp4_duid_data);
+        if (r >= 0) {
+                display(arg_beautify, ansi_color_bold_cyan(), "             DHCPv4 DUIDType: ");
+                printf("%s ", dhcp4_duid_type);
+                display(arg_beautify, ansi_color_bold_cyan(), "DUIDRawData: ");
+                printf("%s\n", dhcp4_duid_data);
+        }
+
+        r = manager_acquire_link_dhcp_client_duid(p, DHCP_CLIENT_IPV6, &dhcp6_duid_type, &dhcp6_duid_data);
+        if (r >= 0) {
+                display(arg_beautify, ansi_color_bold_cyan(), "             DHCPv6 DUIDType: ");
+                printf("%s ", dhcp6_duid_type);
+                display(arg_beautify, ansi_color_bold_cyan(), "DUIDRawData: ");
+                printf("%s\n", dhcp6_duid_data);
+        }
+
         r = network_parse_link_dhcp4_client_id(p->ifindex, &dhcp4_identifier);
         if (r >= 0) {
                 _auto_cleanup_ IfNameIndex *ifn = NULL;
@@ -796,6 +813,8 @@ static int list_one_link(int argc, char *argv[]) {
                 display(arg_beautify, ansi_color_bold_cyan(), "           DHCP6 Client DUID: ");
                 printf("%s\n", dhcp6_duid);
         }
+
+
 
         if (log_enabled())
                 display_network_logs(l->ifindex, l->name);
