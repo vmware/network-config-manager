@@ -1170,7 +1170,7 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
                         return r;
         }
 
-        if (!key_file_config_exists(key_file, "Address", "Address", a)) {
+        if (a && !key_file_config_exists(key_file, "Address", "Address", a)) {
                 add_key_to_section(section, "Address", a);
 
                 if (p)
