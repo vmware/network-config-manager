@@ -279,7 +279,7 @@ char** strv_remove(char **p, const char *s) {
 }
 
 char** strv_remove_duplicates(char **s) {
-        char **a, **t;
+        char **a;
 
         if (!s)
                 return s;

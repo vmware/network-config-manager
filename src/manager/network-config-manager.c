@@ -2252,6 +2252,9 @@ _public_ int ncm_link_set_static(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        if (!strv_empty((const char **) dns))
+                dns = strv_remove_duplicates(dns);
+
         r = manager_set_link_static_conf(p, addrs, gws, dns, lla, keep);
         if (r < 0) {
                 log_warning("Failed to set static configuration for device='%s': %s", p->ifname, strerror(-r));
@@ -2520,6 +2523,9 @@ _public_ int ncm_link_set_network(int argc, char *argv[]) {
                 log_warning("Failed to find device: %s",  strerror(ENXIO));
                 return -ENXIO;
         }
+
+        if (!strv_empty((const char **) dns))
+                dns = strv_remove_duplicates(dns);
 
         r = manager_set_link_network_conf(p,
                                           accept_ra,
@@ -3905,6 +3911,7 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
+        dns = strv_remove_duplicates(dns);
         r = manager_set_dns_server(p, dns, ipv4, ipv6, keep);
         if (r < 0) {
                 log_warning("Failed to set DNS servers %s: %s", argv[1], strerror(-r));
@@ -3988,6 +3995,7 @@ _public_ int ncm_set_dns_domains(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        domains = strv_remove_duplicates(domains);
         r = manager_set_dns_server_domain(p, domains, keep);
         if (r < 0) {
                 log_warning("Failed to set DNS Search domain: %s", strerror(-r));
