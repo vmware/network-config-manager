@@ -70,3 +70,5 @@ int strv_extend(char ***l, const char *value);
 
 int skip_first_word_and_split(char *line, const char *first_word, const char *sep, char ***ret);
 const char *bool_to_str(bool x);
+
+int unhexchar(char c);

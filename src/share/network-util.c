@@ -434,3 +434,37 @@ bool valid_ifname(const char *s) {
 
         return true;
 }
+
+bool valid_duid(const char *p) {
+        unsigned count = 0;
+        char **s, **d;
+
+        if (!p)
+                return false;
+
+        s = strsplit(p, ":", -1);
+        if (!s)
+                return false;
+
+        strv_foreach(d, s) {
+                int n1, n2, len;
+
+                if (count >= MAX_DUID_DATA_LEN)
+                        return false;
+
+                len = strlen(*s);
+                if (len != 1 && len != 2)
+                        return false;
+
+                n1 = unhexchar(*s[0]);
+                if (len == 2)
+                        n2 = unhexchar(*s[1]);
+                else
+                        n2 = 0;
+
+                if (n1 < 0 || n2 < 0)
+                        return false;
+        }
+
+        return true;
+}
