@@ -891,7 +891,7 @@ _public_ int ncm_link_set_dhcp_client_duid(int argc, char *argv[]) {
                         kind = r;
 
                         continue;
-                } else if (str_eq_fold(argv[i], "duid")) {
+                } else if (str_eq_fold(argv[i], "duid") || str_eq_fold(argv[i], "type")) {
                         int k = -1;
 
                         parse_next_arg(argv, argc, i);

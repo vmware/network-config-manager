@@ -437,7 +437,7 @@ static void test_set_dhcp6_duid_custom(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
-        assert_true(system("nmctl set-dhcp-duid dev test99 f 6 duid 1234 data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00") >= 0);
+        assert_true(system("nmctl set-dhcp-duid dev test99 f 6 type 1234 data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00") >= 0);
 
         r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
         assert_true(r >= 0);
@@ -453,7 +453,7 @@ static void test_set_dhcp6_duid(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
-        assert_true(system("nmctl set-dhcp-duid dev test99 f 6 duid vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00") >= 0);
+        assert_true(system("nmctl set-dhcp-duid dev test99 f 6 type vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00") >= 0);
 
         r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
         assert_true(r >= 0);
@@ -469,7 +469,7 @@ static void test_set_dhcp4_duid(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
-        assert_true(system("nmctl set-dhcp-duid dev test99 f 4 duid vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00") >= 0);
+        assert_true(system("nmctl set-dhcp-duid dev test99 f 4 type vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00") >= 0);
 
         r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
         assert_true(r >= 0);
