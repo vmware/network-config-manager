@@ -1622,8 +1622,9 @@ int json_fill_address(bool ipv4, Link *l, json_object *jn,  json_object *jobj) {
 }
 
 int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object **ret) {
+        _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL, *dhcp4_duid_type = NULL,
+                *dhcp6_duid_type = NULL, *dhcp4_duid_data = NULL, *dhcp6_duid_data = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jdns = NULL, *jntp = NULL;
-        _auto_cleanup_ char *setup_state = NULL, *tz = NULL, *network = NULL;
         _cleanup_(addresses_freep) Addresses *addr = NULL;
         _cleanup_(routes_freep) Routes *route = NULL;
         _cleanup_(link_freep) Link *l = NULL;
@@ -1739,6 +1740,61 @@ int json_fill_one_link(IfNameIndex *p, bool ipv4, json_object *jn,  json_object 
 
                 json_object_object_add(jobj, "TimeZone", js);
                 steal_ptr(js);
+        }
+
+
+        r = manager_acquire_link_dhcp_client_duid(p, DHCP_CLIENT_IPV4, &dhcp4_duid_type, &dhcp4_duid_data);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL, *j = NULL;
+
+                j = json_object_new_object();
+                if (!j)
+                        return log_oom();
+
+                js = json_object_new_string(dhcp4_duid_type);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(j, "DUIDType", js);
+                steal_ptr(js);
+
+
+                js = json_object_new_string(dhcp4_duid_data);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(j, "DUIDRawData", js);
+                steal_ptr(js);
+
+                json_object_object_add(jobj, "DHCPv4DUID", j);
+                steal_ptr(j);
+        }
+
+        r = manager_acquire_link_dhcp_client_duid(p, DHCP_CLIENT_IPV6, &dhcp6_duid_type, &dhcp6_duid_data);
+        if (r >= 0) {
+                _cleanup_(json_object_putp) json_object *js = NULL, *j = NULL;
+
+                j = json_object_new_object();
+                if (!j)
+                        return log_oom();
+
+                js = json_object_new_string(dhcp6_duid_type);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(j, "DUIDType", js);
+                steal_ptr(js);
+
+
+                js = json_object_new_string(dhcp6_duid_data);
+                if (!js)
+                        return log_oom();
+
+                json_object_object_add(j, "DUIDRawData", js);
+                steal_ptr(js);
+
+                json_object_object_add(jobj, "DHCPv6DUID", j);
+                steal_ptr(j);
         }
 
         if (ret)
