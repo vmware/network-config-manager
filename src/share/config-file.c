@@ -249,11 +249,7 @@ int set_config(KeyFile *key_file, const char *section, const char *k, const char
                 }
 
                 /* key not found. Add key to section */
-                r = add_key_to_section(s, k, v);
-                if (r < 0)
-                        return r;
-
-                return 0;
+                return add_key_to_section(s, k, v);
         }
 
         /* section not found. create a new section and add the key */
