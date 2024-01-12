@@ -929,7 +929,7 @@ int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPCl
 }
 
 int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
-                                      const DHCPClientDUIDType duid,
+                                      const char *duid,
                                       const char *raw_data,
                                       const bool system,
                                       const DHCPClient kind) {
@@ -946,7 +946,7 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                         return r;
         }
 
-        r = set_config_file_str(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", dhcp_client_duid_type_to_name(duid));
+        r = set_config_file_str(c, kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", "DUIDType", duid);
         if (r < 0) {
                 log_warning("Failed to update %s DUIDType= to configuration file '%s': %s", kind == DHCP_CLIENT_IPV4 ? "DHCPv4" : "DHCPv6", c, strerror(-r));
                 return r;
