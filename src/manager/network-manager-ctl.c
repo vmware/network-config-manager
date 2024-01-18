@@ -149,6 +149,7 @@ static int help(void) {
                                                       "\n\t\t\t\t      scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN]"
                                                       "\n\t\t\t\t      prefix-route|pr [PREFIXROUTE BOOLEAN] many [ADDRESS1,ADDRESS2...] Configures device Address.\n"
                "  remove-addr                  dev [DEVICE] address|a|addr [ADDRESS] many [ADDRESS1,ADDRESS2...] f|family [ipv4|ipv6|yes] Removes address or family of addresses from device.\n"
+               "  replace-addr                 dev [DEVICE] address|a|addr [ADDRESS] many [ADDRESS1,ADDRESS2...] f|family [ipv4|ipv6|yes] Replaces family of addresses, address with a address or many\n"
                "  set-gw                       dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] keep [BOOLEAN] Configures device default Gateway.\n"
                "  set-gw-family                dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS] Configures device default IPv4/IPv6 Gateway.\n"
                "  remove-gw                    dev [DEVICE] f|family [ipv4|ipv6|yes] Removes Gateway from device.\n"
@@ -395,9 +396,10 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-dhcp-iaid",                 "dhcp-iaid",        4,        WORD_ANY, false, ncm_link_set_dhcp_client_iaid},
                 { "set-dhcp-duid",                 "dhcp-duid",        4,        WORD_ANY, false, ncm_link_set_dhcp_client_duid},
                 { "set-link-state",                "ls",               3,        WORD_ANY, false, ncm_link_update_state },
-                { "add-addr",                      "aa",               4,        WORD_ANY, false, ncm_link_add_address },
                 { "show-addr",                     "a",                1,        WORD_ANY, false, ncm_display_one_link_addresses },
+                { "add-addr",                      "aa",               4,        WORD_ANY, false, ncm_link_add_address },
                 { "remove-addr",                   "raddr",            3,        WORD_ANY, false, ncm_link_remove_address },
+                { "replace-addr",                  "repa",             3,        WORD_ANY, false, ncm_link_replace_address },
                 { "set-gw",                        "sgw",              4,        WORD_ANY, false, ncm_link_set_default_gateway },
                 { "set-gw-family",                 "sgwf",             4,        WORD_ANY, false, ncm_link_set_default_gateway_family },
                 { "remove-gw",                     "rgw",              2,        WORD_ANY, false, ncm_link_remove_gateway },
