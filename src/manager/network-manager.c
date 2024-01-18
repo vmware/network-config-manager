@@ -1249,6 +1249,76 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
+int manager_replace_link_address(const IfNameIndex *ifidx, char **many, AddressFamily family) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ char *setup = NULL, *network = NULL;
+        char **t;
+        int r;
+
+        assert(ifidx);
+
+        r = network_parse_link_setup_state(ifidx->ifindex, &setup);
+        if (r < 0) {
+                log_warning("Failed to find device setup '%s': %s", ifidx->ifname, strerror(-r));
+                return r;
+        }
+
+        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        if (r < 0) {
+                log_warning("Failed to find .network file for '%s': %s", ifidx->ifname, strerror(-r));
+                return r;
+        }
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        for (GList *i = key_file->sections; i; i = g_list_next (i)) {
+                _auto_cleanup_ IPAddress *addr = NULL;
+                Section *s = (Section *) i->data;
+
+                if (!str_eq(s->name, "Address"))
+                        continue;
+
+                for (GList *j = s->keys; j; j = g_list_next (j)) {
+                        Key *key = (Key *) j->data;
+
+                        if (!str_eq(key->name, "Address"))
+                                continue;
+
+                        r = parse_ip_from_str(key->v, &addr);
+                        if (r >= 0) {
+                                if ((addr->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
+                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
+                                        i = g_list_delete_link(key_file->sections, i);
+                        }
+                }
+        }
+
+        strv_foreach(t, many) {
+                _cleanup_(section_freep) Section *section = NULL;
+
+                if (key_file_config_exists(key_file, "Address", "Address", *t))
+                        continue;
+
+                r = section_new("Address", &section);
+                if (r < 0)
+                        return r;
+
+                add_key_to_section(section, "Address", *t);
+                add_section_to_key_file(key_file, section);
+                steal_ptr(section);
+        }
+
+        r = key_file_save (key_file);
+        if (r < 0) {
+                log_warning("Failed to write to '%s': %s", key_file->name, strerror(-r));
+                return r;
+        }
+
+        return dbus_network_reload();
+}
+
 int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses, AddressFamily family) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *setup = NULL, *network = NULL;
