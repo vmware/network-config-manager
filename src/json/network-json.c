@@ -1025,6 +1025,23 @@ int json_acquire_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static
         return 0;
 }
 
+int json_acquire_dhcp_mode(DHCPClient mode) {
+        _cleanup_(json_object_putp) json_object *jobj = NULL;
+        _cleanup_(json_object_putp) json_object *s = NULL;
+
+        jobj = json_object_new_object();
+        if (!jobj)
+                return log_oom();
+
+        s = json_object_new_string(dhcp_client_modes_to_name(mode));
+
+        json_object_object_add(jobj, "DHCPMode", s);
+        steal_ptr(s);
+
+        printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_NOSLASHESCAPE | JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+        return 0;
+}
+
 int json_build_ntp_server(const IfNameIndex *p, json_object **ret) {
         _auto_cleanup_strv_ char **dhcp_ntp = NULL, **link_ntp = NULL, **ntp = NULL;
         _cleanup_(json_object_putp) json_object *jntp = NULL;

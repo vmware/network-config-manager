@@ -1425,7 +1425,7 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
         AddressFamily family = ADDRESS_FAMILY_NO;
         _auto_cleanup_strv_ char **addrs = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        int r;
+        int r = -1;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
@@ -1549,7 +1549,7 @@ _public_ int ncm_link_replace_address(int argc, char *argv[]) {
         AddressFamily family = ADDRESS_FAMILY_NO;
         _auto_cleanup_strv_ char **addrs = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
-        int r;
+        int r = -1;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
@@ -3385,7 +3385,7 @@ _public_ int ncm_link_remove_dhcpv4_server_static_address(int argc, char *argv[]
         _auto_cleanup_ char *mac = NULL;
         bool have_mac = false;
         bool have_address = false;
-        int r;
+        int r = -1;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
@@ -3454,7 +3454,7 @@ _public_ int ncm_link_add_ipv6_router_advertisement(int argc, char *argv[]) {
         IPv6RAPreference preference = _IPV6_RA_PREFERENCE_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ char *domain = NULL;
-        int r;
+        int r = -1;
 
         for (int i = 1; i < argc; i++) {
                 if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
@@ -3762,6 +3762,52 @@ _public_ int ncm_get_dns_mode(int argc, char *argv[]) {
                 else
                         printf("foreign\n");
         }
+
+        return 0;
+}
+
+_public_ int ncm_get_dhcp_mode(int argc, char *argv[]) {
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ char *network = NULL;
+        DHCPClient mode = DHCP_CLIENT_NO;
+        int r = -1;
+
+        for (int i = 1; i < argc; i++) {
+                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "d")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
+        }
+
+        r = network_parse_link_network_file(p->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
+        if (r < 0 && r != -ENOENT) {
+                log_warning("Failed to parse 'DHCP=' : %s",  strerror(-r));
+                return r;
+        }
+
+        if (json_enabled())
+                return json_acquire_dhcp_mode(mode);
+
+        display(beautify_enabled() ? true : false, ansi_color_bold_blue(),"DHCP Mode: ");
+        printf("%s\n", dhcp_client_modes_to_name(mode));
 
         return 0;
 }
