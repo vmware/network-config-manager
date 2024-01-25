@@ -863,6 +863,20 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'yes')
 
+    def test_cli_show_dhcp_mode(self):
+        assert(link_exist('test99') == True)
+
+        subprocess.check_call("nmctl set-dhcp dev test99 dhcp yes", shell = True)
+        subprocess.check_call("sleep 5", shell = True)
+        subprocess.check_call("nmctl sdhm dev test99 -j", shell = True)
+
+        out = subprocess.check_output(['nmctl', 'sdhm', 'dev', 'test99', '-j'], text=True)
+        print(out)
+        json_object = json.loads(out)
+        print(json_object["DHCPMode"])
+
+        assert(json_object["DHCPMode"] == "yes")
+
     def test_cli_set_dhcp_with_section(self):
         assert(link_exist('test99') == True)
 
