@@ -34,6 +34,7 @@ int address_flags_to_string(Address *a, json_object *jobj, uint32_t flags);
 int routes_flags_to_string(Route *rt, json_object *jobj, uint32_t flags);
 
 int json_acquire_dns_mode(DHCPClient mode, bool dhcpv4, bool dhcpv6, bool static_dns);
+int json_acquire_dhcp_mode(DHCPClient mode);
 
 int json_acquire_and_parse_network_data(json_object **ret);
 int json_parse_address_config_source(const json_object *jobj,

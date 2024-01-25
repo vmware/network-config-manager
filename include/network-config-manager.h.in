@@ -171,6 +171,8 @@ int ncm_nft_run_command(int argc, char *argv[]);
 int ncm_get_system_status(char **ret);
 int ncm_get_link_status(const char *ifname, char **ret);
 
+int ncm_get_dhcp_mode(int argc, char *argv[]);
+
 
 /* deprecated API*/
 
