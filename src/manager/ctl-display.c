@@ -74,27 +74,27 @@ int get_log_line(void) {
 }
 
 static void system_online_state_to_color(const char *state, const char **on) {
-        if (str_eq(state, "online"))
+        if (streq(state, "online"))
                 *on = ansi_color_green();
-        else if (str_eq(state, "offline"))
+        else if (streq(state, "offline"))
                 *on = ansi_color_red();
-        else if (str_eq(state, "partial"))
+        else if (streq(state, "partial"))
                 *on = ansi_color_bold_yellow();
         else
                 *on = ansi_color_reset();
 }
 
 static void link_state_to_color(const char *state, const char **on) {
-        if (str_eq(state, "routable") || str_eq(state, "configured") || str_eq(state,"up"))
+        if (streq(state, "routable") || streq(state, "configured") || streq(state,"up"))
                 *on = ansi_color_green();
-        else if (str_eq(state, "failed") || str_eq(state,"down") || str_eq(state,"no-carrier") ||
-                 str_eq(state,"off")|| str_eq(state, "lower-layerdown"))
+        else if (streq(state, "failed") || streq(state,"down") || streq(state,"no-carrier") ||
+                 streq(state,"off")|| streq(state, "lower-layerdown"))
                 *on = ansi_color_red();
-        else if (str_eq(state, "configuring") || str_eq(state, "carrier"))
+        else if (streq(state, "configuring") || streq(state, "carrier"))
                 *on = ansi_color_yellow();
-        else if (str_eq(state, "degraded") || str_eq(state, "dormant"))
+        else if (streq(state, "degraded") || streq(state, "dormant"))
                 *on = ansi_color_bold_yellow();
-        else if (str_eq(state, "unmanaged"))
+        else if (streq(state, "unmanaged"))
                 *on = ansi_color_blue();
         else
                 *on = ansi_color_reset();
@@ -188,7 +188,7 @@ static void list_one_link_addresses(gpointer key, gpointer value, gpointer userd
                         return;
         }
 
-        if (str_eq(config_source, "DHCPv4")) {
+        if (streq(config_source, "DHCPv4")) {
                 _auto_cleanup_ char *server = NULL, *life_time = NULL, *t1 = NULL, *t2 = NULL;
 
                 (void) network_parse_link_dhcp4_server_address(a->ifindex, &server);
@@ -264,7 +264,7 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (streq_fold(argv[i], "dev")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -288,12 +288,12 @@ _public_ int ncm_display_one_link_addresses(int argc, char *argv[]) {
 
         if (argc >= 2) {
                 for (int i = 2; i < argc; i++) {
-                        if (str_eq(argv[i], "family") || str_eq(argv[i], "f")) {
+                        if (streq(argv[i], "family") || streq(argv[i], "f")) {
                                 parse_next_arg(argv, argc, i);
 
-                                if (str_eq(argv[i], "ipv4") || str_eq(argv[i], "4"))
+                                if (streq(argv[i], "ipv4") || streq(argv[i], "4"))
                                         ipv4 = true;
-                                else if (str_eq(argv[i], "ipv6") || str_eq(argv[i], "6"))
+                                else if (streq(argv[i], "ipv6") || streq(argv[i], "6"))
                                         ipv6 = true;
                         }
                 }
@@ -485,7 +485,7 @@ static int list_one_link(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (streq_fold(argv[i], "dev")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -789,7 +789,7 @@ static int list_one_link(int argc, char *argv[]) {
                 if (r >= 0) {
                         r = parse_config_file(network, "DHCPv4", "ClientIdentifier", &c);
                         if (r >= 0) {
-                                if (str_eq(c, "mac")) {
+                                if (streq(c, "mac")) {
                                         _auto_cleanup_ char *e = NULL;
 
                                         (void) link_read_sysfs_attribute(l->name, "address", &e);
@@ -1123,7 +1123,7 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
         int r;
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev")) {
+                if (streq_fold(argv[i], "dev")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -1188,7 +1188,7 @@ _public_ int ncm_system_ipv4_status(int argc, char *argv[]) {
 
                         if (network && (config_exists(network, "Network", "Gateway", c) || config_exists(network, "Route", "Gateway", c)))
                                 provider = strdup("static");
-                        else if (dhcp4_router && str_eq(c, dhcp4_router))
+                        else if (dhcp4_router && streq(c, dhcp4_router))
                                 provider = strdup("DHCPv4");
                         else
                                 provider = strdup("foreign");

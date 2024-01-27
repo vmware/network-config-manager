@@ -307,12 +307,12 @@ static int parse_address(YAMLManager *m, yaml_document_t *dp, yaml_node_t *node,
                                 return log_oom();
                 }
 
-                if (str_eq(scalar(k), "lifetime")) {
+                if (streq(scalar(k), "lifetime")) {
                         free(a->lifetime);
                         a->lifetime = strdup(scalar(v));
                         if (!a->lifetime)
                                 return log_oom();
-                } else if (str_eq(scalar(k), "label")) {
+                } else if (streq(scalar(k), "label")) {
                         free(a->label);
                         a->label = strdup(scalar(v));
                         if (!a->label)
@@ -499,7 +499,7 @@ static int parse_dhcp4_server(YAMLManager *m, yaml_document_t *dp, yaml_node_t *
                         network->modified = true;
                 }
 
-                if (k && str_eq(scalar(k), "static-leases")) {
+                if (k && streq(scalar(k), "static-leases")) {
                         parse_dhcp4_server_static_lease(m->dhcp4_server_static_lease, dp, v, s);
                         continue;
                 }

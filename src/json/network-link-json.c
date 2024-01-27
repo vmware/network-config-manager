@@ -1486,7 +1486,7 @@ static int fill_link_dns_settings(json_object *jobj, json_object *jn, const char
                 if (!json_object_object_get_ex(interface, "Name", &ifname))
                         continue;
 
-                if (link && str_eq(link, json_object_get_string(ifname)))
+                if (link && streq(link, json_object_get_string(ifname)))
                         continue;
 
                 if (!json_object_object_get_ex(interface, "DNSSettings", &settings))
@@ -1517,7 +1517,7 @@ static int fill_link_search_domain(json_object *jobj, json_object *jn, const cha
                 if (!json_object_object_get_ex(interface, "Name", &ifname))
                         continue;
 
-                if (link && str_eq(link, json_object_get_string(ifname)))
+                if (link && streq(link, json_object_get_string(ifname)))
                         continue;
 
                 if (!json_object_object_get_ex(interface, "SearchDomains", &d))
@@ -1548,7 +1548,7 @@ static int fill_link_dhcpv4_client(json_object *jobj, json_object *jn, const cha
                 if (!json_object_object_get_ex(interface, "Name", &ifname))
                         continue;
 
-                if (link && str_eq(link, json_object_get_string(ifname)))
+                if (link && streq(link, json_object_get_string(ifname)))
                         continue;
 
                 if (!json_object_object_get_ex(interface, "DHCPv4Client", &d))
@@ -1579,7 +1579,7 @@ static int fill_link_dhcpv6_client(json_object *jobj, json_object *jn, const cha
                 if (!json_object_object_get_ex(interface, "Name", &ifname))
                         continue;
 
-                if (link && str_eq(link, json_object_get_string(ifname)))
+                if (link && streq(link, json_object_get_string(ifname)))
                         continue;
 
                 if (!json_object_object_get_ex(interface, "DHCPv6Client", &d))

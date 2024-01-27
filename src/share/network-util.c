@@ -40,7 +40,7 @@ int address_family_name_to_type(const char *name) {
         assert(name);
 
         for (size_t i = ADDRESS_FAMILY_NO; i < (size_t) ELEMENTSOF(address_family_table); i++)
-                if (str_eq_fold(name, address_family_table[i]))
+                if (streq_fold(name, address_family_table[i]))
                         return i;
 
         return _ADDRESS_FAMILY_INVALID;
@@ -67,7 +67,7 @@ int required_address_family_for_online_name_to_type(const char *name) {
         assert(name);
 
         for (size_t i = REQUIRED_ADDRESS_FAMILY_FOR_ONLINE_IPV4; i < (size_t) ELEMENTSOF(required_address_family_for_online_table); i++)
-                if (str_eq_fold(name, required_address_family_for_online_table[i]))
+                if (streq_fold(name, required_address_family_for_online_table[i]))
                         return i;
 
         return _ADDRESS_FAMILY_INVALID;
@@ -96,7 +96,7 @@ int device_activation_policy_name_to_type(const char *name) {
         assert(name);
 
         for (size_t i = DEVICE_ACTIVATION_POLICY_UP; i < (size_t) ELEMENTSOF(device_activation_policy_table); i++)
-                if (str_eq_fold(name, device_activation_policy_table[i]))
+                if (streq_fold(name, device_activation_policy_table[i]))
                         return i;
 
         return _DEVICE_ACTIVATION_POLICY_INVALID;

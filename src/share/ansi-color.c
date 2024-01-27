@@ -28,7 +28,7 @@ bool colors_supported(void) {
 
        e = getenv("TERM");
        if (e) {
-           if (str_eq(e, "dumb"))
+           if (streq(e, "dumb"))
                return false;
        }
 

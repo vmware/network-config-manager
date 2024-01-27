@@ -230,13 +230,13 @@ int set_config(KeyFile *key_file, const char *section, const char *k, const char
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
-                if (!str_eq(s->name, section))
+                if (!streq(s->name, section))
                         continue;
 
                 for (GList *i = s->keys; i; i = g_list_next (i)) {
                         Key *key = (Key *) i->data;
 
-                        if (str_eq(key->name, k)) {
+                        if (streq(key->name, k)) {
                                 free(key->v);
                                 if (v) {
                                         key->v = strdup(v);
@@ -423,7 +423,7 @@ int add_key_to_section_str(const char *path, const char *section, const char *k,
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
-                if (str_eq(s->name, section)) {
+                if (streq(s->name, section)) {
                         r = add_key_to_section(s, k, v);
                         if (r < 0)
                                 return r;
@@ -475,13 +475,13 @@ int key_file_parse_str(KeyFile *key_file, const char *section, const char *k, ch
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
-                if (!str_eq(s->name, section))
+                if (!streq(s->name, section))
                         continue;
 
                 for (GList *i = s->keys; i; i = g_list_next (i)) {
                         Key *key = (Key *) i->data;
 
-                        if (str_eq(key->name, k)) {
+                        if (streq(key->name, k)) {
                                 *v = strdup(key->v);
                                 if (!*v)
                                         return -ENOMEM;
@@ -535,11 +535,11 @@ int key_file_remove_section_key_value(KeyFile *key_file, const char *section, co
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
-                if (str_eq(s->name, section)) {
+                if (streq(s->name, section)) {
                         for (GList *j = s->keys; j; j = g_list_next (j)) {
                                 Key *key = (Key *) j->data;
 
-                                if (str_eq(key->name, k) && str_eq(key->v, v))
+                                if (streq(key->name, k) && streq(key->v, v))
                                         i = g_list_delete_link(key_file->sections, i);
                         }
                 }
@@ -563,13 +563,13 @@ int remove_key_from_config_file(const char *path, const char *section, const cha
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
-                if (!str_eq(s->name, section))
+                if (!streq(s->name, section))
                         continue;
 
                 for (GList *i = s->keys; i; i = g_list_next (i)) {
                         Key *key = (Key *) i->data;
 
-                        if (str_eq(key->name, k))
+                        if (streq(key->name, k))
                                 s->keys = g_list_delete_link(s->keys, i);
                 }
         }
@@ -596,13 +596,13 @@ int remove_key_value_from_config_file(const char *path, const char *section, con
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
-                if (!str_eq(s->name, section))
+                if (!streq(s->name, section))
                         continue;
 
                 for (GList *i = s->keys; i; i = g_list_next (i)) {
                         Key *key = (Key *) i->data;
 
-                        if (str_eq(key->name, k) && str_eq(key->v, v)) {
+                        if (streq(key->name, k) && streq(key->v, v)) {
                                 s->keys = g_list_delete_link(s->keys, g_list_nth(s->keys, g_list_position(s->keys, i)));
                                 break;
                         }
@@ -632,7 +632,7 @@ int remove_section_from_config_file(const char *path, const char *section) {
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
-                if (str_eq(s->name, section))
+                if (streq(s->name, section))
                         key_file->sections = g_list_delete_link(key_file->sections, iter);
         }
 
@@ -657,13 +657,13 @@ int remove_section_from_config_file_key_value(const char *path, const char *sect
         for (GList *iter = key_file->sections; iter; iter = g_list_next (iter)) {
                 Section *s = (Section *) iter->data;
 
-                if (!str_eq(s->name, section))
+                if (!streq(s->name, section))
                         continue;
 
                 for (GList *i = s->keys; i; i = g_list_next (i)) {
                         Key *key = (Key *) i->data;
 
-                        if (str_eq(key->name, k) && str_eq(key->v, v))
+                        if (streq(key->name, k) && streq(key->v, v))
                                 key_file->sections = g_list_delete_link(key_file->sections, iter);
                 }
         }
@@ -692,13 +692,13 @@ int remove_section_from_config_file_key(const char *path, const char *section, c
                 GList *new_link;
 
                 new_link = g_list_previous(iter);
-                if (!str_eq(s->name, section))
+                if (!streq(s->name, section))
                         continue;
 
                 for (GList *i = s->keys; i; i = g_list_next (i)) {
                         Key *key = (Key *) i->data;
 
-                        if (str_eq(key->name, k)) {
+                        if (streq(key->name, k)) {
                                 key_file->sections =  g_list_remove_link(key_file->sections, iter);
 
                                 key_free(key);
@@ -792,7 +792,7 @@ int remove_config_files_glob(const char *path, const char *section, const char *
                 if (r < 0)
                         return r;
 
-                if (str_eq(s, v))
+                if (streq(s, v))
                         unlink(g.gl_pathv[i]);
         }
 

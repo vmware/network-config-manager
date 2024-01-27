@@ -25,7 +25,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                 return log_oom();
 
        for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "link")) {
+                if (streq_fold(argv[i], "dev") || streq_fold(argv[i], "device") || streq_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         devs = strsplit(argv[i], ",", -1);
@@ -33,7 +33,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                                 log_warning("Failed to parse devices: %s", strerror(-r));
                                 return r;
                         }
-                } else if (str_eq_fold(argv[i], "stp")) {
+                } else if (streq_fold(argv[i], "stp")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -43,7 +43,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                         }
                         b->stp = r;
                         continue;
-                } else if (str_eq_fold(argv[i], "vlan-protocol")) {
+                } else if (streq_fold(argv[i], "vlan-protocol")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -53,7 +53,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                         }
                         b->vlan_protocol = r;
                         continue;
-                } else if (str_eq_fold(argv[i], "vlan-filtering")) {
+                } else if (streq_fold(argv[i], "vlan-filtering")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -63,7 +63,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                         }
                         b->vlan_filtering = r;
                         continue;
-                } else if (str_eq_fold(argv[i], "mcast-snooping")) {
+                } else if (streq_fold(argv[i], "mcast-snooping")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -73,7 +73,7 @@ _public_ int ncm_create_bridge(int argc, char *argv[]) {
                         }
                         b->mcast_snooping = r;
                         continue;
-                } else if (str_eq_fold(argv[i], "mcast-querier")) {
+                } else if (streq_fold(argv[i], "mcast-querier")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -126,7 +126,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "mode") || str_eq_fold(argv[i], "m")) {
+                if (streq_fold(argv[i], "mode") || streq_fold(argv[i], "m")) {
                         parse_next_arg(argv, argc, i);
 
                         r = bond_name_to_mode(argv[i]);
@@ -135,7 +135,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                                 return r;
                         }
                         b->mode = r;
-                } if (str_eq_fold(argv[i], "xmit-hash-policy") || str_eq_fold(argv[i], "xhp")) {
+                } if (streq_fold(argv[i], "xmit-hash-policy") || streq_fold(argv[i], "xhp")) {
                         parse_next_arg(argv, argc, i);
 
                         r = bond_xmit_hash_policy_name_to_mode(argv[i]);
@@ -144,7 +144,7 @@ _public_ int ncm_create_bond(int argc, char *argv[]) {
                                 return r;
                         }
                         b->xmit_hash_policy = r;
-                } else if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "link")) {
+                } else if (streq_fold(argv[i], "dev") || streq_fold(argv[i], "device") || streq_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         devs = strsplit(argv[i], ",", -1);
@@ -195,7 +195,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "link")) {
+                if (streq_fold(argv[i], "dev") || streq_fold(argv[i], "device") || streq_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -204,7 +204,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "mode")) {
+                } else if (streq_fold(argv[i], "mode")) {
                         parse_next_arg(argv, argc, i);
 
                         r = macvlan_name_to_mode(argv[i]);
@@ -237,7 +237,7 @@ _public_ int ncm_create_macvlan(int argc, char *argv[]) {
                 return r;
         }
 
-        if (str_eq_fold(argv[0], "create-macvlan"))
+        if (streq_fold(argv[0], "create-macvlan"))
                 r = manager_create_macvlan(argv[1], p->ifname, m, true);
         else
                 r = manager_create_macvlan(argv[1], p->ifname, m, false);
@@ -261,7 +261,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "link")) {
+                if (streq_fold(argv[i], "dev") || streq_fold(argv[i], "device") || streq_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -270,7 +270,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "mode")) {
+                } else if (streq_fold(argv[i], "mode")) {
                         parse_next_arg(argv, argc, i);
 
                         r = ipvlan_name_to_mode(argv[i]);
@@ -303,7 +303,7 @@ _public_ int ncm_create_ipvlan(int argc, char *argv[]) {
                 return r;
         }
 
-        if (str_eq_fold(argv[0], "create-ipvlan"))
+        if (streq_fold(argv[0], "create-ipvlan"))
                 r = manager_create_ipvlan(argv[1], p->ifname, v, true);
         else
                 r = manager_create_ipvlan(argv[1], p->ifname, v, false);
@@ -327,7 +327,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "link")) {
+                if (streq_fold(argv[i], "dev") || streq_fold(argv[i], "device") || streq_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -336,7 +336,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "vni")) {
+                } else if (streq_fold(argv[i], "vni")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v->vni);
@@ -347,7 +347,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
 
                         have_vni = true;
                         continue;
-                } else if (str_eq_fold(argv[i], "local")) {
+                } else if (streq_fold(argv[i], "local")) {
                        _auto_cleanup_ IPAddress *ip = NULL;
 
                         parse_next_arg(argv, argc, i);
@@ -359,7 +359,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                         }
                         v->local = *ip;
                         continue;
-                } else if (str_eq_fold(argv[i], "remote")) {
+                } else if (streq_fold(argv[i], "remote")) {
                        _auto_cleanup_ IPAddress *ip = NULL;
 
                        parse_next_arg(argv, argc, i);
@@ -371,7 +371,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                        }
                        v->remote = *ip;
                        continue;
-                } else if (str_eq_fold(argv[i], "group")) {
+                } else if (streq_fold(argv[i], "group")) {
                        _auto_cleanup_ IPAddress *ip = NULL;
 
                        parse_next_arg(argv, argc, i);
@@ -383,7 +383,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                         }
                         v->group = *ip;
                         continue;
-                } else if (str_eq_fold(argv[i], "independent")) {
+                } else if (streq_fold(argv[i], "independent")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -393,7 +393,7 @@ _public_ int ncm_create_vxlan(int argc, char *argv[]) {
                         }
                         v->independent = r;
                         continue;
-                } else if (str_eq_fold(argv[i], "dport")) {
+                } else if (streq_fold(argv[i], "dport")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint16(argv[i], &v->destination_port);
@@ -443,7 +443,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "link")) {
+                if (streq_fold(argv[i], "dev") || streq_fold(argv[i], "device") || streq_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -453,7 +453,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         }
                         have_dev = true;
                         continue;
-                } else if (str_eq_fold(argv[i], "id")) {
+                } else if (streq_fold(argv[i], "id")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[i], &v->id);
@@ -463,10 +463,10 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         }
                         have_id = true;
                         continue;
-                } else if (str_eq_fold(argv[i], "proto") || str_eq_fold(argv[i], "protocol")) {
+                } else if (streq_fold(argv[i], "proto") || streq_fold(argv[i], "protocol")) {
                         parse_next_arg(argv, argc, i);
 
-                        if (str_eq_fold(argv[i], "802.1q") || str_eq_fold(argv[i], "802.1ad")) {
+                        if (streq_fold(argv[i], "802.1q") || streq_fold(argv[i], "802.1ad")) {
                                 v->proto = strdup(argv[i]);
                                 if (!v->proto)
                                         return log_oom();
@@ -476,7 +476,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         }
 
                         continue;
-                } else if (str_eq_fold(argv[i], "gvrp")) {
+                } else if (streq_fold(argv[i], "gvrp")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -487,7 +487,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         v->gvrp = r;
                         continue;
 
-                } else if (str_eq_fold(argv[i], "mvrp")) {
+                } else if (streq_fold(argv[i], "mvrp")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -498,7 +498,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         v->mvrp = r;
                         continue;
 
-                } else if (str_eq_fold(argv[i], "loose-binding")) {
+                } else if (streq_fold(argv[i], "loose-binding")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -509,7 +509,7 @@ _public_ int ncm_create_vlan(int argc, char *argv[]) {
                         v->loose_binding = r;
                         continue;
 
-                } else if (str_eq_fold(argv[i], "reorder-hdr")) {
+                } else if (streq_fold(argv[i], "reorder-hdr")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -562,7 +562,7 @@ _public_ int ncm_create_veth(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "peer")) {
+                if (streq_fold(argv[i], "peer")) {
                         parse_next_arg(argv, argc, i);
 
                          if (!valid_ifname(argv[i])) {
@@ -600,7 +600,7 @@ _public_ int ncm_create_vrf(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 1; i < argc; i++) {
-                if (str_eq_fold(argv[i], "table") || str_eq_fold(argv[i], "t")) {
+                if (streq_fold(argv[i], "table") || streq_fold(argv[i], "t")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint32(argv[3], &vrf->table);
@@ -650,7 +650,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                 return r;
 
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "dev") || str_eq_fold(argv[i], "device") || str_eq_fold(argv[i], "link")) {
+                if (streq_fold(argv[i], "dev") || streq_fold(argv[i], "device") || streq_fold(argv[i], "link")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ifname_or_index(argv[i], &p);
@@ -659,7 +659,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                                 return -errno;
                         }
                         continue;
-                } else if (str_eq_fold(argv[i], "local")) {
+                } else if (streq_fold(argv[i], "local")) {
                         _auto_cleanup_ IPAddress *a = NULL;
 
                         parse_next_arg(argv, argc, i);
@@ -671,7 +671,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                         }
                         t->local = *a;
                         continue;
-                } else if (str_eq_fold(argv[i], "remote")) {
+                } else if (streq_fold(argv[i], "remote")) {
                         _auto_cleanup_ IPAddress *a = NULL;
 
                         parse_next_arg(argv, argc, i);
@@ -683,7 +683,7 @@ _public_ int ncm_create_tunnel(int argc, char *argv[]) {
                         }
                         t->remote = *a;
                         continue;
-                } else if (str_eq_fold(argv[i], "independent")) {
+                } else if (streq_fold(argv[i], "independent")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -732,14 +732,14 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "private-key")) {
+                if (streq_fold(argv[i], "private-key")) {
                         parse_next_arg(argv, argc, i);
 
                         wg->private_key = strdup(argv[i]);
                         if (!wg->private_key)
                                 return log_oom();
 
-                } else if (str_eq_fold(argv[i], "private-key-file")) {
+                } else if (streq_fold(argv[i], "private-key-file")) {
                         parse_next_arg(argv, argc, i);
 
                         wg->private_key_file = strdup(argv[i]);
@@ -747,14 +747,14 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_eq_fold(argv[i], "public-key")) {
+                } else if (streq_fold(argv[i], "public-key")) {
                         parse_next_arg(argv, argc, i);
 
                         peer->public_key = strdup(argv[i]);
                         if (!peer->public_key)
                                 return log_oom();
 
-                } else if (str_eq_fold(argv[i], "preshared-key")) {
+                } else if (streq_fold(argv[i], "preshared-key")) {
                         parse_next_arg(argv, argc, i);
 
                         peer->preshared_key= strdup(argv[i]);
@@ -762,14 +762,14 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_eq_fold(argv[i], "preshared-key-file")) {
+                } else if (streq_fold(argv[i], "preshared-key-file")) {
                         parse_next_arg(argv, argc, i);
 
                         peer->preshared_key_file = strdup(argv[i]);
                         if (!peer->preshared_key_file)
                                 return log_oom();
                         continue;
-                } else if (str_eq_fold(argv[i], "allowed-ips")) {
+                } else if (streq_fold(argv[i], "allowed-ips")) {
                         parse_next_arg(argv, argc, i);
 
                         if (strchr(argv[i], ',')) {
@@ -808,7 +808,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                         }
 
                         continue;
-                } else if (str_eq_fold(argv[i], "endpoint")) {
+                } else if (streq_fold(argv[i], "endpoint")) {
                         _auto_cleanup_ IPAddress *address = NULL;
                         uint16_t port;
 
@@ -825,7 +825,7 @@ _public_ int ncm_create_wireguard_tunnel(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_eq_fold(argv[i], "listen-port")) {
+                } else if (streq_fold(argv[i], "listen-port")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_uint16(argv[i], &wg->listen_port);
@@ -867,7 +867,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
                 return log_oom();
 
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "user") || str_eq_fold(argv[i], "usr")) {
+                if (streq_fold(argv[i], "user") || streq_fold(argv[i], "usr")) {
                         struct passwd *pw;
 
                         parse_next_arg(argv, argc, i);
@@ -882,7 +882,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_eq_fold(argv[i], "group") || str_eq_fold(argv[i], "grp")) {
+                } else if (streq_fold(argv[i], "group") || streq_fold(argv[i], "grp")) {
                         struct group *g;
                         parse_next_arg(argv, argc, i);
 
@@ -897,7 +897,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
                                 return log_oom();
 
                         continue;
-                } else if (str_eq_fold(argv[i], "mq")) {
+                } else if (streq_fold(argv[i], "mq")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -908,7 +908,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                         t->multi_queue = r;
                         continue;
-                } else if (str_eq_fold(argv[i], "pkt-info")) {
+                } else if (streq_fold(argv[i], "pkt-info")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -919,7 +919,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                         t->packet_info = r;
                         continue;
-                } else if (str_eq_fold(argv[i], "kc")) {
+                } else if (streq_fold(argv[i], "kc")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -930,7 +930,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
 
                         t->keep_carrier = r;
                         continue;
-              } else if (str_eq_fold(argv[i], "vnet-hdr")) {
+              } else if (streq_fold(argv[i], "vnet-hdr")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_bool(argv[i]);
@@ -954,7 +954,7 @@ _public_ int ncm_create_tun_tap(int argc, char *argv[]) {
                 return r;
         }
 
-        r = manager_create_tun_tap(argv[1], str_eq(argv[0], "create-tun") ? NETDEV_KIND_TUN: NETDEV_KIND_TAP, t);
+        r = manager_create_tun_tap(argv[1], streq(argv[0], "create-tun") ? NETDEV_KIND_TUN: NETDEV_KIND_TAP, t);
         if (r < 0) {
                 log_warning("Failed to create tun tap='%s': %s", argv[1], strerror(-r));
                 return r;
@@ -974,7 +974,7 @@ _public_ int ncm_remove_netdev(int argc, char *argv[]) {
                 return r;
         }
         for (int i = 2; i < argc; i++) {
-                if (str_eq_fold(argv[i], "kind") || str_eq_fold(argv[i], "k")) {
+                if (streq_fold(argv[i], "kind") || streq_fold(argv[i], "k")) {
                         parse_next_arg(argv, argc, i);
 
                         if (!ctl_to_config(m, argv[i])) {

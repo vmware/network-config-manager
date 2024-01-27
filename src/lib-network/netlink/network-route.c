@@ -134,7 +134,7 @@ int route_table_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = ROUTE_TABLE_DEFAULT; i < (size_t) ELEMENTSOF(route_table); i++)
-                if (str_eq_fold(name, route_table[i]))
+                if (streq_fold(name, route_table[i]))
                         return i;
 
         return _ROUTE_TABLE_INVALID;
@@ -162,7 +162,7 @@ int route_scope_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = ROUTE_SCOPE_UNIVERSE; i < (size_t) ELEMENTSOF(route_scope_type); i++)
-                if (route_scope_type[i] && str_eq_fold(name, route_scope_type[i]))
+                if (route_scope_type[i] && streq_fold(name, route_scope_type[i]))
                         return i;
 
         return _ROUTE_SCOPE_INVALID;
@@ -196,7 +196,7 @@ int route_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = ROUTE_TYPE_UNICAST; i < (size_t) ELEMENTSOF(route_type); i++)
-                if (route_type[i] && str_eq_fold(name, route_type[i]))
+                if (route_type[i] && streq_fold(name, route_type[i]))
                         return i;
 
         return _ROUTE_TYPE_INVALID;
@@ -222,7 +222,7 @@ int ipv6_route_preference_type_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IPV6_ROUTE_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(ipv6_route_preference_type); i++)
-                if (str_eq_fold(name, ipv6_route_preference_type[i]))
+                if (streq_fold(name, ipv6_route_preference_type[i]))
                         return i;
 
         return _IPV6_ROUTE_PREFERENCE_INVALID;
@@ -249,7 +249,7 @@ int route_protocol_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IPV6_ROUTE_PREFERENCE_LOW; i < (size_t) ELEMENTSOF(route_protocol_type); i++)
-                if (str_eq_fold(name, route_protocol_type[i]))
+                if (streq_fold(name, route_protocol_type[i]))
                         return i;
 
         return _ROUTE_PROTOCOL_INVALID;
@@ -274,7 +274,7 @@ int ipoib_name_to_mode(const char *name) {
         assert(name);
 
         for (size_t i = IP_OIB_MODE_DATAGRAM; i < (size_t) ELEMENTSOF(ipoib_mode_table); i++)
-                if (str_eq_fold(name, ipoib_mode_table[i]))
+                if (streq_fold(name, ipoib_mode_table[i]))
                         return i;
 
         return _IP_OIB_MODE_MODE_INVALID;

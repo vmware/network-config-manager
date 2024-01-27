@@ -825,7 +825,7 @@ static int json_parse_dns_search_domains(const json_object *jn, const char *link
                 if (!json_object_object_get_ex(interface, "Name", &ifname))
                         continue;
 
-                if (link && !str_eq(link, json_object_get_string(ifname)))
+                if (link && !streq(link, json_object_get_string(ifname)))
                         continue;
 
                 if (!json_object_object_get_ex(interface, "SearchDomains", &d))
@@ -1207,7 +1207,7 @@ int json_fill_ntp_servers(const json_object *jn, const char *link, json_object *
                 if (!json_object_object_get_ex(interface, "Name", &ifname))
                         continue;
 
-                if (link && !str_eq(link, json_object_get_string(ifname)))
+                if (link && !streq(link, json_object_get_string(ifname)))
                         continue;
 
                 if (!json_object_object_get_ex(interface, "NTP", &ntp))
@@ -1312,7 +1312,7 @@ int json_parse_dns_servers(const json_object *jn, const char *link, json_object 
                 if (!json_object_object_get_ex(interface, "Name", &ifname))
                         continue;
 
-                if (link && !str_eq(link, json_object_get_string(ifname)))
+                if (link && !streq(link, json_object_get_string(ifname)))
                         continue;
 
                 if (!json_object_object_get_ex(interface, "DNS", &dns))
@@ -1417,7 +1417,7 @@ int json_parse_address_config_source(const json_object *jobj,
                 json_object *interface = json_object_array_get_idx(interfaces, i);
                 json_object *name;
 
-                if (json_object_object_get_ex(interface, "Name", &name) && str_eq(json_object_get_string(name), link)) {
+                if (json_object_object_get_ex(interface, "Name", &name) && streq(json_object_get_string(name), link)) {
                         json_object *addresses = NULL;
 
                         if (!json_object_object_get_ex(interface, "Addresses", &addresses))
@@ -1435,7 +1435,7 @@ int json_parse_address_config_source(const json_object *jobj,
                                         if (r < 0)
                                                 continue;
 
-                                        if (str_eq(address, ip)) {
+                                        if (streq(address, ip)) {
                                                 if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
                                                         *ret_config_source = strdup(json_object_get_string(config_source));
                                                         if (!*ret_config_source)
@@ -1491,7 +1491,7 @@ int json_parse_route_config_source(const json_object *jobj,
                 if (!json_object_object_get_ex(interface, "Name", &l))
                         continue;
 
-                if (!str_eq(link, json_object_get_string(l)))
+                if (!streq(link, json_object_get_string(l)))
                         continue;
 
                 if (!json_object_object_get_ex(interface, "Routes", &routes))
@@ -1508,7 +1508,7 @@ int json_parse_route_config_source(const json_object *jobj,
                                 if (r < 0)
                                         continue;
 
-                                if (str_eq(address, ip)) {
+                                if (streq(address, ip)) {
                                         if (json_object_object_get_ex(addr, "ConfigSource", &config_source)) {
                                                 *ret_config_source = strdup(json_object_get_string(config_source));
                                                 if (!*ret_config_source)
