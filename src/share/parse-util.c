@@ -119,7 +119,7 @@ bool is_uint32_or_max(const char *c) {
 
         assert(c);
 
-        if (str_eq(c, "max"))
+        if (streq(c, "max"))
             return true;
 
         r = parse_uint32(c, &v);
@@ -162,13 +162,13 @@ int parse_bool(const char *v) {
         if (!v)
                 return -EINVAL;
 
-        if (str_eq(v, "1") || str_eq_fold(v, "yes") || str_eq_fold(v, "y") ||
-            str_eq_fold(v, "true") || str_eq_fold(v, "t") || str_eq_fold(v, "on") ||
-            str_eq_fold(v, "enable"))
+        if (streq(v, "1") || streq_fold(v, "yes") || streq_fold(v, "y") ||
+            streq_fold(v, "true") || streq_fold(v, "t") || streq_fold(v, "on") ||
+            streq_fold(v, "enable"))
                 return 1;
-        else if (str_eq(v, "0") || str_eq_fold(v, "no") || str_eq_fold(v, "n") ||
-                 str_eq_fold(v, "false") || str_eq_fold(v, "f") || str_eq_fold(v, "off") ||
-                 str_eq_fold(v, "disable"))
+        else if (streq(v, "0") || streq_fold(v, "no") || streq_fold(v, "n") ||
+                 streq_fold(v, "false") || streq_fold(v, "f") || streq_fold(v, "off") ||
+                 streq_fold(v, "disable"))
                 return 0;
 
         return -EINVAL;
@@ -178,13 +178,13 @@ const char *parse_bool_or_ip_family(const char *v) {
         if (!v)
                 return NULL;
 
-        if (str_eq(v, "1") || str_eq_fold(v, "yes") || str_eq_fold(v, "y") ||
-            str_eq_fold(v, "true") || str_eq_fold(v, "t") || str_eq_fold(v, "on"))
+        if (streq(v, "1") || streq_fold(v, "yes") || streq_fold(v, "y") ||
+            streq_fold(v, "true") || streq_fold(v, "t") || streq_fold(v, "on"))
                 return "yes";
-        else if (str_eq(v, "0") || str_eq_fold(v, "no") || str_eq_fold(v, "n") ||
-                 str_eq_fold(v, "false") || str_eq_fold(v, "f") || str_eq_fold(v, "off"))
+        else if (streq(v, "0") || streq_fold(v, "no") || streq_fold(v, "n") ||
+                 streq_fold(v, "false") || streq_fold(v, "f") || streq_fold(v, "off"))
                 return "no";
-        else if (str_eq(v, "ipv4") || str_eq_fold(v, "ipv6"))
+        else if (streq(v, "ipv4") || streq_fold(v, "ipv6"))
                return v;
 
         return NULL;
@@ -193,7 +193,7 @@ const char *parse_bool_or_ip_family(const char *v) {
 int parse_link_alias(const char *c) {
         assert(c);
 
-        if (!str_eq(c, "ifalias"))
+        if (!streq(c, "ifalias"))
                 return -EINVAL;
 
         return 0;
@@ -202,7 +202,7 @@ int parse_link_alias(const char *c) {
 int parse_link_macpolicy(const char *c) {
         assert(c);
 
-        if ((!str_eq(c, "persistent")) && (!str_eq(c, "random")) && (!str_eq(c, "none")))
+        if ((!streq(c, "persistent")) && (!streq(c, "random")) && (!streq(c, "none")))
                 return -EINVAL;
 
         return 0;
@@ -224,10 +224,10 @@ bool valid_address_label(char *c) {
 int parse_link_namepolicy(const char *c) {
         assert(c);
 
-        if ((!str_eq(c, "kernel")) && (!str_eq(c, "database")) &&
-            (!str_eq(c, "onboard")) && (!str_eq(c, "slot")) &&
-            (!str_eq(c, "path")) && (!str_eq(c, "mac")) &&
-            (!str_eq(c, "keep")))
+        if ((!streq(c, "kernel")) && (!streq(c, "database")) &&
+            (!streq(c, "onboard")) && (!streq(c, "slot")) &&
+            (!streq(c, "path")) && (!streq(c, "mac")) &&
+            (!streq(c, "keep")))
                 return -EINVAL;
 
         return 0;
@@ -245,8 +245,8 @@ int parse_link_name(const char *c) {
 int parse_link_altnamepolicy(const char *c) {
         assert(c);
 
-        if ((!str_eq(c, "database")) && (!str_eq(c, "onboard")) &&
-            (!str_eq(c, "slot")) && (!str_eq(c, "path")) && (!str_eq(c, "mac")))
+        if ((!streq(c, "database")) && (!streq(c, "onboard")) &&
+            (!streq(c, "slot")) && (!streq(c, "path")) && (!streq(c, "mac")))
                 return -EINVAL;
 
         return 0;
@@ -271,7 +271,7 @@ int parse_link_bytes(const char *c) {
 int parse_link_duplex(const char *c) {
         assert(c);
 
-        if ((!str_eq(c, "full")) && (!str_eq(c, "half")))
+        if ((!streq(c, "full")) && (!streq(c, "half")))
                 return -EINVAL;
 
         return 0;
@@ -280,9 +280,9 @@ int parse_link_duplex(const char *c) {
 int parse_link_wakeonlan(const char *c) {
         assert(c);
 
-        if((!str_eq(c, "off")) && (!str_eq(c, "phy")) && (!str_eq(c, "unicast")) &&
-           (!str_eq(c, "multicast")) && (!str_eq(c, "broadcast")) &&
-           (!str_eq(c, "arp")) && (!str_eq(c, "magic")) && (!str_eq(c, "secureon")))
+        if((!streq(c, "off")) && (!streq(c, "phy")) && (!streq(c, "unicast")) &&
+           (!streq(c, "multicast")) && (!streq(c, "broadcast")) &&
+           (!streq(c, "arp")) && (!streq(c, "magic")) && (!streq(c, "secureon")))
                 return -EINVAL;
 
         return 0;
@@ -291,8 +291,8 @@ int parse_link_wakeonlan(const char *c) {
 int parse_link_port(const char *c) {
         assert(c);
 
-        if((!str_eq(c, "tp")) && (!str_eq(c, "aui")) && (!str_eq(c, "bnc")) &&
-           (!str_eq(c, "mii")) && (!str_eq(c, "fibre")))
+        if((!streq(c, "tp")) && (!streq(c, "aui")) && (!streq(c, "bnc")) &&
+           (!streq(c, "mii")) && (!streq(c, "fibre")))
                 return -EINVAL;
 
         return 0;
@@ -301,11 +301,11 @@ int parse_link_port(const char *c) {
 int parse_link_advertise(const char *c) {
         assert(c);
 
-        if((!str_eq(c, "10baset-half")) && (!str_eq(c, "10baset-full")) && (!str_eq(c, "100baset-half")) &&
-           (!str_eq(c, "100baset-full")) && (!str_eq(c, "1000baset-half")) && (!str_eq(c, "1000baset-full")) &&
-           (!str_eq(c, "10000baset-full")) && (!str_eq(c, "2500basex-full")) && (!str_eq(c, "1000basekx-full")) &&
-           (!str_eq(c, "10000basekx4-full")) && (!str_eq(c, "10000basekr-full")) && (!str_eq(c, "10000baser-fec")) &&
-           (!str_eq(c, "20000basemld2-full")) && (!str_eq(c, "20000basekr2-full")))
+        if((!streq(c, "10baset-half")) && (!streq(c, "10baset-full")) && (!streq(c, "100baset-half")) &&
+           (!streq(c, "100baset-full")) && (!streq(c, "1000baset-half")) && (!streq(c, "1000baset-full")) &&
+           (!streq(c, "10000baset-full")) && (!streq(c, "2500basex-full")) && (!streq(c, "1000basekx-full")) &&
+           (!streq(c, "10000basekx4-full")) && (!streq(c, "10000basekr-full")) && (!streq(c, "10000baser-fec")) &&
+           (!streq(c, "20000basemld2-full")) && (!streq(c, "20000basekr2-full")))
                 return -EINVAL;
 
         return 0;
@@ -314,7 +314,7 @@ int parse_link_advertise(const char *c) {
 int parse_sriov_vlan_protocol(const char *c) {
         assert(c);
 
-        if((!str_eq(c, "802.1Q")) && (!str_eq(c, "802.1ad")))
+        if((!streq(c, "802.1Q")) && (!streq(c, "802.1ad")))
                 return -EINVAL;
 
         return 0;

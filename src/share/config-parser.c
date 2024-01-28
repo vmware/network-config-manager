@@ -168,13 +168,13 @@ bool key_file_config_exists(const KeyFile *key_file, const char *section, const 
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
-                if (!str_eq(s->name, section))
+                if (!streq(s->name, section))
                         continue;
 
                 for (GList *j = s->keys; j; j = g_list_next (j)) {
                         Key *key = (Key *) j->data;
 
-                        if (str_eq(key->name, k) && str_eq(key->v, v))
+                        if (streq(key->name, k) && streq(key->v, v))
                                 return true;
                 }
         }
@@ -192,13 +192,13 @@ bool key_file_config_contains(const KeyFile *key_file, const char *section, cons
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
-                if (!str_eq(s->name, section))
+                if (!streq(s->name, section))
                         continue;
 
                 for (GList *j = s->keys; j; j = g_list_next (j)) {
                         Key *key = (Key *) j->data;
 
-                        if (str_eq(key->name, k) && strstr(key->v, v))
+                        if (streq(key->name, k) && strstr(key->v, v))
                                 return true;
                 }
         }
@@ -215,13 +215,13 @@ char *key_file_config_get(const KeyFile *key_file, const char *section, const ch
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
-                if (!str_eq(s->name, section))
+                if (!streq(s->name, section))
                         continue;
 
                 for (GList *j = s->keys; j; j = g_list_next (j)) {
                         Key *key = (Key *) j->data;
 
-                        if (str_eq(key->name, k))
+                        if (streq(key->name, k))
                                 return strdup(key->v);
                 }
         }

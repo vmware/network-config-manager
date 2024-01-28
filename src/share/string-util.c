@@ -269,7 +269,7 @@ char** strv_remove(char **p, const char *s) {
         assert(s);
 
         for (a = t = p; *a; a++)
-                if (str_eq(*a, s))
+                if (streq(*a, s))
                         free(*a);
                 else
                         *(t++) = *a;

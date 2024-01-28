@@ -45,7 +45,7 @@ int yaml_netdev_name_to_kind(const char *name) {
         assert(name);
 
         for (size_t i = YAML_NETDEV_KIND_VLAN; i < (int) ELEMENTSOF(yaml_netdev_kind_table); i++)
-                if (yaml_netdev_kind_table[i] && str_eq_fold(name, yaml_netdev_kind_table[i]))
+                if (yaml_netdev_kind_table[i] && streq_fold(name, yaml_netdev_kind_table[i]))
                         return i;
 
         return _YAML_NETDEV_KIND_INVALID;
@@ -78,7 +78,7 @@ static int yaml_detect_tunnel_kind(yaml_document_t *dp, yaml_node_t *node) {
                 if (!k && !v)
                         continue;
 
-                if (str_eq(scalar(k), "mode")) {
+                if (streq(scalar(k), "mode")) {
                         r = netdev_name_to_kind(scalar(v));
                         if (r < 0) {
                                 log_warning("Failed to parse tunnel mode = %s", scalar(v));
@@ -187,7 +187,7 @@ static int yaml_parse_bond(YAMLManager *m, yaml_document_t *dp, yaml_node_t *nod
 
                 table = g_hash_table_lookup(m->bond, scalar(k));
                 if (!table) {
-                        if (str_eq(scalar(k), "parameters"))
+                        if (streq(scalar(k), "parameters"))
                                 yaml_yaml_parse_bond_parameters(m, dp, v, bond);
                         else
                                 (void) parse_network(m, dp, node, network);
@@ -243,10 +243,10 @@ static int yaml_parse_bridge_parameters(YAMLManager *m, yaml_document_t *dp, yam
                 if (!k && !v)
                         continue;
 
-                if (str_eq("path-cost", scalar(k))) {
+                if (streq("path-cost", scalar(k))) {
                         parse_yaml_bridge_path_cost(scalar(k), scalar(v), networks, NULL, dp, v);
                         continue;
-                } else if (str_eq("port-priority", scalar(k))) {
+                } else if (streq("port-priority", scalar(k))) {
                         parse_yaml_bridge_port_priority(scalar(k), scalar(v), networks, NULL, dp, v);
                         continue;
                 }
@@ -297,7 +297,7 @@ static int yaml_parse_bridge(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
 
                 table = g_hash_table_lookup(m->bridge, scalar(k));
                 if (!table) {
-                        if (str_eq(scalar(k), "parameters"))
+                        if (streq(scalar(k), "parameters"))
                                 yaml_parse_bridge_parameters(m, dp, v, b, networks);
                         else
                                 (void) parse_network(m, dp, node, network);
@@ -457,14 +457,14 @@ static int yaml_parse_tunnel(YAMLManager *m, yaml_document_t *dp, yaml_node_t *n
 
                 table = g_hash_table_lookup(m->tunnel, scalar(k));
                 if (!table) {
-                        if (str_eq(scalar(k), "mode")) {
+                        if (streq(scalar(k), "mode")) {
                                 r = netdev_name_to_kind(scalar(v));
                                 if (r < 0) {
                                         log_warning("Failed to parse tunnel mode = %s", scalar(v));
                                         return -EINVAL;
                                 }
                                 network->netdev->kind = r;
-                        } else if (str_eq(scalar(k), "keys"))
+                        } else if (streq(scalar(k), "keys"))
                                 yaml_parse_tunnel_keys(m, dp, v, tnl);
                         else
                                 (void) parse_network(m, dp, node, network);
@@ -646,7 +646,7 @@ static int yaml_parse_wireguard_peer(YAMLManager *m, yaml_document_t *dp, yaml_n
                 if (!k && !v)
                         continue;
 
-                if (str_eq(scalar(k), "keys")) {
+                if (streq(scalar(k), "keys")) {
                         r = wireguard_peer_new(peer);
                         if (r < 0)
                                 return log_oom();
@@ -707,9 +707,9 @@ static int yaml_parse_wireguard(YAMLManager *m, yaml_document_t *dp, yaml_node_t
 
                 table = g_hash_table_lookup(m->wireguard, scalar(k));
                 if (!table) {
-                        if (str_eq(scalar(k), "mode"))
+                        if (streq(scalar(k), "mode"))
                                 continue;
-                        else if (str_eq(scalar(k), "peers")) {
+                        else if (streq(scalar(k), "peers")) {
                                 WireGuardPeer *peer = NULL;
 
                                 r = wireguard_peer_new(&peer);

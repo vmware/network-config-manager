@@ -1131,7 +1131,7 @@ int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac) {
 
         r = parse_config_file(network, "Link", "MACAddress", &config_mac);
         if (r >= 0) {
-                if (str_eq(config_mac, mac))
+                if (streq(config_mac, mac))
                         return 0;
         }
 
@@ -1277,13 +1277,13 @@ int manager_replace_link_address(const IfNameIndex *ifidx, char **many, AddressF
                 _auto_cleanup_ IPAddress *addr = NULL;
                 Section *s = (Section *) i->data;
 
-                if (!str_eq(s->name, "Address"))
+                if (!streq(s->name, "Address"))
                         continue;
 
                 for (GList *j = s->keys; j; j = g_list_next (j)) {
                         Key *key = (Key *) j->data;
 
-                        if (!str_eq(key->name, "Address"))
+                        if (!streq(key->name, "Address"))
                                 continue;
 
                         r = parse_ip_from_str(key->v, &addr);
@@ -1350,13 +1350,13 @@ int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses, Addr
                 _auto_cleanup_ IPAddress *addr = NULL;
                 Section *s = (Section *) i->data;
 
-                if (!str_eq(s->name, "Address"))
+                if (!streq(s->name, "Address"))
                         continue;
 
                 for (GList *j = s->keys; j; j = g_list_next (j)) {
                         Key *key = (Key *) j->data;
 
-                        if (!str_eq(key->name, "Address"))
+                        if (!streq(key->name, "Address"))
                                 continue;
 
                         r = parse_ip_from_str(key->v, &addr);
@@ -1389,13 +1389,13 @@ static int manager_set_gateway(KeyFile *key_file, Route *rt) {
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 Section *s = (Section *) i->data;
 
-                if (!str_eq(s->name, "Route"))
+                if (!streq(s->name, "Route"))
                         continue;
 
                 for (GList *j = s->keys; j; j = g_list_next (j)) {
                         Key *key = (Key *) j->data;
 
-                        if (!str_eq(key->name, "Gateway"))
+                        if (!streq(key->name, "Gateway"))
                                 continue;
 
                         r = parse_ip(key->v, &a);
@@ -1668,12 +1668,12 @@ static int manager_remove_gateway_or_route_full(const char *network, bool gatewa
                 _auto_cleanup_ IPAddress *a = NULL;
                 Section *s = (Section *) i->data;
 
-                if (str_eq(s->name, "Route")) {
+                if (streq(s->name, "Route")) {
                         for (GList *j = s->keys; j; j = g_list_next (j)) {
                                 Key *key = (Key *) j->data;
 
                                 if (gateway) {
-                                        if (str_eq(key->name, "Gateway")) {
+                                        if (streq(key->name, "Gateway")) {
                                                 r = parse_ip(key->v, &a);
                                                 if (r >= 0) {
                                                         if ((a->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
@@ -1682,7 +1682,7 @@ static int manager_remove_gateway_or_route_full(const char *network, bool gatewa
                                                 }
                                         }
                                 } else {
-                                        if (str_eq(key->name, "Destination")) {
+                                        if (streq(key->name, "Destination")) {
                                                 r = parse_ip(key->v, &a);
                                                 if (r >= 0) {
                                                         if ((a->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
@@ -1739,6 +1739,7 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, Addr
 
         return dbus_network_reload();
 }
+
 int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPolicyRule *rule) {
         _auto_cleanup_ char *network = NULL, *to = NULL, *from = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -2431,7 +2432,7 @@ int manager_set_dns_server_domain(const IfNameIndex *i, char **domains, bool kee
         assert(domains);
 
         r = network_parse_link_setup_state(i->ifindex, &setup);
-        if (r < 0 || str_eq(setup, "unmanaged"))
+        if (r < 0 || streq(setup, "unmanaged"))
                 return dbus_add_dns_domains(i->ifindex, domains);
 
         r = create_or_parse_network_file(i, &network);
@@ -2485,7 +2486,7 @@ int manager_revert_dns_server_and_domain(const IfNameIndex *i, bool dns, bool do
         assert(i);
 
         r = network_parse_link_setup_state(i->ifindex, &setup);
-        if (r < 0 || str_eq(setup, "unmanaged"))
+        if (r < 0 || streq(setup, "unmanaged"))
                 return dbus_revert_resolve_link(i->ifindex);
 
         r = network_parse_link_network_file(i->ifindex, &network);
