@@ -2673,6 +2673,7 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         _auto_cleanup_ char *network = NULL;
+        DHCPClient mode = _DHCP_CLIENT_INVALID;
         int r;
 
         assert(ifidx);
@@ -2694,11 +2695,19 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
         if (accept_ra >= 0)
                 set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
 
+        r = manager_acquire_link_dhcp_client_kind(ifidx, &mode);
         if (dhcp > 0) {
                 set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
-                set_config(key_file, "Network", "DHCP", "ipv6");
-        } else if (dhcp == 0)
-                set_config(key_file, "Network", "DHCP", "no");
+                if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
+                        set_config(key_file, "Network", "DHCP", "ipv6");
+                else  if (mode == DHCP_CLIENT_IPV4)
+                        set_config(key_file, "Network", "DHCP", "yes");
+        } else if (dhcp == 0) {
+                if (mode == DHCP_CLIENT_YES)
+                        set_config(key_file, "Network", "DHCP", "ipv4");
+                else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
+                        set_config(key_file, "Network", "DHCP", "no");
+        }
 
         r = key_file_save (key_file);
         if (r < 0) {
