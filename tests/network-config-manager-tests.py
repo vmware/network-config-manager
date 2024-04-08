@@ -1405,6 +1405,20 @@ class TestCLINetwork:
         assert(parser.get('Address', 'Address') == '192.168.1.34')
         assert(parser.get('Route', 'Gateway') == '192.168.1.1')
 
+    def test_cli_set_ipv6(self):
+        assert(link_exist('test99') == True);
+
+        subprocess.check_call("nmctl set-ipv6 dev test99 accept-ra no dhcp yes", shell = True)
+
+        assert(unit_exist('10-test99.network') == True)
+        parser = configparser.ConfigParser()
+        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
+
+        assert(parser.get('Match', 'Name') == 'test99')
+        assert(parser.get('Network', 'DHCP') == 'ipv6')
+        assert(parser.get('Network', 'IPv6AcceptRA') == 'no')
+        assert(parser.get('Network', 'LinkLocalAddressing') == 'ipv6')
+
     def test_cli_set_default_gateway(self):
         assert(link_exist('test99') == True)
 
