@@ -2713,6 +2713,7 @@ int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
+        DHCPClient mode = _DHCP_CLIENT_INVALID;
         int r;
 
         assert(ifidx);
@@ -2731,10 +2732,18 @@ int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *
         if (r < 0)
                 return r;
 
-        if (dhcp > 0)
-                set_config(key_file, "Network", "DHCP", "ipv4");
-        else if (dhcp == 0)
-                set_config(key_file, "Network", "DHCP", "no");
+        r = manager_acquire_link_dhcp_client_kind(ifidx, &mode);
+        if (dhcp > 0) {
+                if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
+                        set_config(key_file, "Network", "DHCP", "ipv4");
+                else  if (mode == DHCP_CLIENT_IPV6)
+                        set_config(key_file, "Network", "DHCP", "yes");
+        } else if (dhcp == 0) {
+                if (mode == DHCP_CLIENT_YES)
+                        set_config(key_file, "Network", "DHCP", "ipv6");
+                else  if (mode == DHCP_CLIENT_IPV4 || mode == _DHCP_CLIENT_INVALID)
+                        set_config(key_file, "Network", "DHCP", "no");
+        }
 
         if (address) {
                 r = ip_to_str_prefix(address->family, address, &addr);
