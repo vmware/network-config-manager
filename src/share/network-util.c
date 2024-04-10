@@ -468,3 +468,54 @@ bool valid_duid(const char *p) {
 
         return true;
 }
+
+int parse_address_many(char **argv, int argc, int *i, char ***ret) {
+        _auto_cleanup_strv_ char **s = NULL;
+        bool white_space = false;
+        int r = -1;
+
+        if (strchr(argv[*i], ',')) {
+                char **d;
+
+                s = strsplit(argv[*i], ",", -1);
+                if (!s)
+                        return -EINVAL;
+
+                s = strv_remove(s, "");
+                if (!s)
+                        return -EINVAL;
+
+                strv_foreach(d, s) {
+                        _auto_cleanup_ IPAddress *a = NULL;
+
+                        r = parse_ip_from_str(*d, &a);
+                        if (r < 0)
+                                return r;
+                }
+
+        } else {
+                _auto_cleanup_strv_ char **t = NULL;
+                char **d;
+
+                r = argv_to_strv(argc - 4, argv + *i, &t);
+                if (r < 0)
+                        return r;
+
+                strv_foreach(d, t) {
+                        _auto_cleanup_ IPAddress *a = NULL;
+
+                        r = parse_ip_from_str(*d, &a);
+                        if (r >= 0) {
+                                strv_extend(&s, *d);
+                                (*i)++;
+                        }
+                }
+                white_space = true;
+        }
+
+        *ret = steal_ptr(s);
+        if (white_space)
+                (*i)--;
+
+        return 0;
+}
