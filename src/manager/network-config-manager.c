@@ -4681,8 +4681,9 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
-        _auto_cleanup_ IPAddress *gw = NULL, *address = NULL;
+        _auto_cleanup_strv_ char **addrs = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ Route *rt6 = NULL;
         int accept_ra = -1, dhcp = -1;
         bool keep = true;
         int r;
@@ -4717,6 +4718,106 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                         }
                         dhcp = r;
                         continue;
+                } else if (streq_fold(argv[i], "gateway") || streq_fold(argv[i], "gw") || streq_fold(argv[i], "g")) {
+                        _auto_cleanup_ IPAddress *gw = NULL;
+
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ip_from_str(argv[i], &gw);
+                        if (r < 0) {
+                                log_warning("Failed to parse gw='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        if (gw->family != AF_INET6) {
+                                log_warning("Failed to parse gw='%s': invalid family", argv[i]);
+                                return r;
+                        }
+
+                        r = route_new(&rt6);
+                        if (r < 0)
+                                return log_oom();
+
+                        *rt6 = (Route) {
+                             .ifindex = p->ifindex,
+                             .family = gw->family,
+                             .gw = *gw,
+                        };
+
+                        continue;
+                } else if (streq_fold(argv[i], "address") || streq_fold(argv[i], "a") || streq_fold(argv[i], "addr")) {
+                        _auto_cleanup_ IPAddress *a = NULL;
+
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ip_from_str(argv[i], &a);
+                        if (r < 0) {
+                                log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        r = strv_extend(&addrs, argv[i]);
+                        if (r < 0)
+                                return log_oom();
+
+                      continue;
+                } else if (streq_fold(argv[i], "many")) {
+                        _auto_cleanup_strv_ char **s = NULL;
+                        bool white_space = false;
+
+                        parse_next_arg(argv, argc, i);
+
+                        if (strchr(argv[i], ',')) {
+                                char **d;
+
+                                s = strsplit(argv[i], ",", -1);
+                                if (!s) {
+                                        log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                s = strv_remove(s, "");
+                                if (!s) {
+                                        log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                strv_foreach(d, s) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip_from_str(*d, &a);
+                                        if (r < 0) {
+                                                log_warning("Failed to parse address: %s", *d);
+                                                return r;
+                                        }
+                                }
+
+                        } else {
+                                _auto_cleanup_strv_ char **t = NULL;
+                                char **d;
+
+                                r = argv_to_strv(argc - 4, argv + i, &t);
+                                if (r < 0) {
+                                        log_warning("Failed to parse address: %s", strerror(-r));
+                                        return r;
+                                }
+
+                                strv_foreach(d, t) {
+                                        _auto_cleanup_ IPAddress *a = NULL;
+
+                                        r = parse_ip_from_str(*d, &a);
+                                        if (r >= 0) {
+                                                strv_extend(&s, *d);
+                                                i++;
+                                        }
+                                }
+                                white_space = true;
+                        }
+
+                        addrs = steal_ptr(s);
+                        if (white_space)
+                                i--;
+                        continue;
                 } else if (streq_fold(argv[i], "keep")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4744,6 +4845,26 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
+        }
+
+        r = manager_replace_link_address(p, addrs, ADDRESS_FAMILY_IPV6);
+        if (r < 0) {
+                log_warning("Failed to reset address from device '%s': %s", p->ifname, strerror(-r));
+                return r;
+        }
+
+        if (rt6) {
+                r = manager_configure_default_gateway_full(p, NULL, rt6);
+                if (r < 0) {
+                        log_warning("Failed to configure gateway on device '%s': %s", p->ifname, strerror(-r));
+                        return r;
+                }
+        } else {
+                r = manager_remove_gateway_or_route(p, true, ADDRESS_FAMILY_IPV6);
+                if (r < 0) {
+                        log_warning("Failed to remove gateway from device=%s: %s", p->ifname, strerror(-r));
+                        return r;
+                }
         }
 
         return 0;
