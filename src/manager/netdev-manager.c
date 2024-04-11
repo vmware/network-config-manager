@@ -55,13 +55,13 @@ int manager_remove_netdev(const char *ifname, const char *kind) {
         return dbus_network_reload();
 }
 
-int manager_create_vlan(const IfNameIndex *ifidx, const char *ifname, VLan *v) {
+int manager_create_vlan(const IfNameIndex *p, const char *ifname, VLan *v) {
         _cleanup_(netdev_freep) NetDev *netdev = NULL;
         _cleanup_(network_freep) Network *n= NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(ifname);
         assert(v);
 
@@ -95,7 +95,7 @@ int manager_create_vlan(const IfNameIndex *ifidx, const char *ifname, VLan *v) {
                 return r;
         }
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 

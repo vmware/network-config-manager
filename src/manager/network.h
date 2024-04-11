@@ -294,7 +294,7 @@ DEFINE_CLEANUP(DHCP4Server*, dhcp4_server_free);
 int parse_address_from_str_and_add(const char *s, Set *a);
 
 int create_network_conf_file(const char *ifname, char **ret);
-int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret);
+int create_or_parse_network_file(const IfNameIndex *p, char **ret);
 int determine_network_conf_file(const char *ifname, char **ret);
 int parse_network_file(const int ifindex, const char *ifname, char **ret);
 

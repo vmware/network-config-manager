@@ -131,15 +131,15 @@ int manager_network_link_section_configs_new(ConfigManager **ret) {
         return 0;
 }
 
-int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v) {
+int manager_set_link_flag(const IfNameIndex *p, const char *k, const char *v) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(k);
         assert(v);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -150,7 +150,7 @@ int manager_set_link_flag(const IfNameIndex *ifidx, const char *k, const char *v
         return dbus_network_reload();
 }
 
-int manager_set_link_dhcp_client(const IfNameIndex *ifidx,
+int manager_set_link_dhcp_client(const IfNameIndex *p,
                                  DHCPClient mode,
                                  int use_dns_ipv4,
                                  int use_dns_ipv6,
@@ -163,9 +163,9 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx,
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -222,13 +222,13 @@ int manager_set_link_dhcp_client(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *mode) {
+int manager_acquire_link_dhcp_client_kind(const IfNameIndex *p, DHCPClient *mode) {
         _auto_cleanup_ char *network = NULL, *config_dhcp = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0)
                 return r;
 
@@ -245,7 +245,7 @@ int manager_acquire_link_dhcp_client_kind(const IfNameIndex *ifidx, DHCPClient *
 }
 
 static int manager_set_link_dynamic_conf_internal(KeyFile *key_file,
-                                                  const IfNameIndex *ifidx,
+                                                  const IfNameIndex *p,
                                                   int accept_ra,
                                                   DHCPClient dhcp_kind,
                                                   int use_dns_ipv4,
@@ -261,7 +261,7 @@ static int manager_set_link_dynamic_conf_internal(KeyFile *key_file,
 
         int r;
 
-        assert(ifidx);
+        assert(p);
 
         if (dhcp4_identifier >= 0) {
                 r = key_file_set_str(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(dhcp4_identifier));
@@ -366,7 +366,7 @@ static int manager_set_link_dynamic_conf_internal(KeyFile *key_file,
 
         return 0;
 }
-int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
+int manager_set_link_dynamic_conf(const IfNameIndex *p,
                                   int accept_ra,
                                   DHCPClient dhcp_kind,
                                   int use_dns_ipv4,
@@ -385,14 +385,14 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
         if (keep) {
-                r = create_or_parse_network_file(ifidx, &network);
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = create_network_conf_file(ifidx->ifname, &network);
+                r = create_network_conf_file(p->ifname, &network);
                 if (r < 0)
                         return r;
         }
@@ -402,7 +402,7 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
                 return r;
 
         r = manager_set_link_dynamic_conf_internal(key_file,
-                                                   ifidx,
+                                                   p,
                                                    accept_ra,
                                                    dhcp_kind,
                                                    use_dns_ipv4,
@@ -430,7 +430,7 @@ int manager_set_link_dynamic_conf(const IfNameIndex *ifidx,
 
 
 static int manager_set_link_static_conf_internal(KeyFile *key_file,
-                                                 const IfNameIndex *ifidx,
+                                                 const IfNameIndex *p,
                                                  char **addrs,
                                                  char **gws,
                                                  char **dns,
@@ -440,7 +440,7 @@ static int manager_set_link_static_conf_internal(KeyFile *key_file,
         char **a;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
         if (lla >= 0) {
                 r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(lla));
@@ -515,20 +515,20 @@ static int manager_set_link_static_conf_internal(KeyFile *key_file,
         return 0;
 }
 
-int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **gws, char **dns, int lla, bool keep) {
+int manager_set_link_static_conf(const IfNameIndex *p, char **addrs, char **gws, char **dns, int lla, bool keep) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         char **a;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
         if (keep) {
-                r = create_or_parse_network_file(ifidx, &network);
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = create_network_conf_file(ifidx->ifname, &network);
+                r = create_network_conf_file(p->ifname, &network);
                 if (r < 0)
                         return r;
         }
@@ -537,7 +537,7 @@ int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **
         if (r < 0)
                 return r;
 
-        r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, lla, keep);
+        r = manager_set_link_static_conf_internal(key_file, p, addrs, gws, dns, lla, keep);
         if (r < 0)
                 return r;
 
@@ -566,7 +566,7 @@ int manager_set_link_static_conf(const IfNameIndex *ifidx, char **addrs, char **
         return dbus_network_reload();
 }
 
-int manager_set_link_network_conf(const IfNameIndex *ifidx,
+int manager_set_link_network_conf(const IfNameIndex *p,
                                   int accept_ra,
                                   DHCPClient dhcp_kind,
                                   int use_dns_ipv4,
@@ -588,14 +588,14 @@ int manager_set_link_network_conf(const IfNameIndex *ifidx,
         char **a;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
         if (keep) {
-                r = create_or_parse_network_file(ifidx, &network);
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = create_network_conf_file(ifidx->ifname, &network);
+                r = create_network_conf_file(p->ifname, &network);
                 if (r < 0)
                         return r;
         }
@@ -605,7 +605,7 @@ int manager_set_link_network_conf(const IfNameIndex *ifidx,
                 return r;
 
         r = manager_set_link_dynamic_conf_internal(key_file,
-                                                   ifidx,
+                                                   p,
                                                    accept_ra,
                                                    dhcp_kind,
                                                    use_dns_ipv4,
@@ -621,7 +621,7 @@ int manager_set_link_network_conf(const IfNameIndex *ifidx,
         if (r < 0)
                 return r;
 
-        r = manager_set_link_static_conf_internal(key_file, ifidx, addrs, gws, dns, lla,  keep);
+        r = manager_set_link_static_conf_internal(key_file, p, addrs, gws, dns, lla,  keep);
         if (r < 0)
                 return r;
 
@@ -649,13 +649,13 @@ int manager_set_link_network_conf(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-bool manager_link_has_static_address(const IfNameIndex *ifidx) {
+bool manager_link_has_static_address(const IfNameIndex *p) {
         _auto_cleanup_ char *network = NULL, *addr = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0)
                 return false;
 
@@ -670,13 +670,13 @@ bool manager_link_has_static_address(const IfNameIndex *ifidx) {
         return false;
 }
 
-int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHCPClientIdentifier identifier) {
+int manager_set_link_dhcp4_client_identifier(const IfNameIndex *p, const DHCPClientIdentifier identifier) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -689,13 +689,13 @@ int manager_set_link_dhcp4_client_identifier(const IfNameIndex *ifidx, const DHC
         return dbus_network_reload();
 }
 
-int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad) {
+int manager_set_link_ipv6_dad(const IfNameIndex *p, int dad) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -708,13 +708,13 @@ int manager_set_link_ipv6_dad(const IfNameIndex *ifidx, int dad) {
         return dbus_network_reload();
 }
 
-int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *ifidx, int mode) {
+int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *p, int mode) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -727,13 +727,13 @@ int manager_set_link_ipv6_link_local_address_generation_mode(const IfNameIndex *
         return dbus_network_reload();
 }
 
-int manager_parse_link_dns_servers(const IfNameIndex *ifidx, char ***ret) {
+int manager_parse_link_dns_servers(const IfNameIndex *p, char ***ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0)
                 return r;
 
@@ -815,13 +815,13 @@ int manager_acquire_all_link_dhcp_lease_dns(char ***ret) {
         return 0;
 }
 
-int manager_parse_link_ntp_servers(const IfNameIndex *ifidx, char ***ret) {
+int manager_parse_link_ntp_servers(const IfNameIndex *p, char ***ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0)
                 return r;
 
@@ -870,13 +870,13 @@ int manager_acquire_all_link_ntp(char ***ret) {
         return 0;
 }
 
-int manager_acquire_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPClientIdentifier *ret) {
+int manager_acquire_link_dhcp4_client_identifier(const IfNameIndex *p, DHCPClientIdentifier *ret) {
         _auto_cleanup_ char *network = NULL, *config = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0)
                 return r;
 
@@ -888,13 +888,13 @@ int manager_acquire_link_dhcp4_client_identifier(const IfNameIndex *ifidx, DHCPC
         return 0;
 }
 
-int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient kind, const char *iaid) {
+int manager_set_link_dhcp_client_iaid(const IfNameIndex *p, const DHCPClient kind, const char *iaid) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -907,13 +907,13 @@ int manager_set_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient
         return dbus_network_reload();
 }
 
-int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPClient kind, char **iaid) {
+int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *p, const DHCPClient kind, char **iaid) {
         _auto_cleanup_ char *network = NULL, *v = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0)
                 return r;
 
@@ -928,13 +928,13 @@ int manager_acquire_link_dhcp_client_iaid(const IfNameIndex *ifidx, const DHCPCl
         return 0;
 }
 
-int manager_acquire_link_dhcp_client_duid(const IfNameIndex *ifidx, const DHCPClient kind, char **duid_kind, char **raw_data) {
+int manager_acquire_link_dhcp_client_duid(const IfNameIndex *p, const DHCPClient kind, char **duid_kind, char **raw_data) {
         _auto_cleanup_ char *network = NULL, *v = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0)
                 return r;
 
@@ -957,7 +957,7 @@ int manager_acquire_link_dhcp_client_duid(const IfNameIndex *ifidx, const DHCPCl
         return 0;
 }
 
-int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
+int manager_set_link_dhcp_client_duid(const IfNameIndex *p,
                                       const char *duid,
                                       const char *raw_data,
                                       const bool system,
@@ -970,7 +970,7 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
                 if (!c)
                         return log_oom();
         } else {
-                r = create_or_parse_network_file(ifidx, &c);
+                r = create_or_parse_network_file(p, &c);
                 if (r < 0)
                         return r;
         }
@@ -992,14 +992,14 @@ int manager_set_link_dhcp_client_duid(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-int manager_set_link_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
+int manager_set_link_mtu(const IfNameIndex *p, uint32_t mtu) {
         _auto_cleanup_ char *network = NULL, *config_update_mtu = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(mtu > 0);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1013,14 +1013,14 @@ int manager_set_link_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
         return dbus_network_reload();
 }
 
-int manager_set_link_group(const IfNameIndex *ifidx, uint32_t group) {
+int manager_set_link_group(const IfNameIndex *p, uint32_t group) {
         _auto_cleanup_ char *network = NULL, *config_update_group = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(group > 0);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1035,14 +1035,14 @@ int manager_set_link_group(const IfNameIndex *ifidx, uint32_t group) {
         return dbus_network_reload();
 }
 
-int manager_set_link_rf_online(const IfNameIndex *ifidx, const char *addrfamily) {
+int manager_set_link_rf_online(const IfNameIndex *p, const char *addrfamily) {
         _auto_cleanup_ char *network = NULL, *config_update_family = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(addrfamily);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1056,14 +1056,14 @@ int manager_set_link_rf_online(const IfNameIndex *ifidx, const char *addrfamily)
         return dbus_network_reload();
 }
 
-int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy) {
+int manager_set_link_act_policy(const IfNameIndex *p, const char *actpolicy) {
         _auto_cleanup_ char *network = NULL, *config_update_policy = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(actpolicy);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1077,14 +1077,14 @@ int manager_set_link_act_policy(const IfNameIndex *ifidx, const char *actpolicy)
         return dbus_network_reload();
 }
 
-int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
+int manager_link_set_network_ipv6_mtu(const IfNameIndex *p, uint32_t mtu) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(mtu > 0);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1097,15 +1097,15 @@ int manager_link_set_network_ipv6_mtu(const IfNameIndex *ifidx, uint32_t mtu) {
         return dbus_network_reload();
 }
 
-int manager_set_link_local_address(const IfNameIndex *ifidx, const char *k, const char *v) {
+int manager_set_link_local_address(const IfNameIndex *p, const char *k, const char *v) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(k);
         assert(v);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1118,14 +1118,14 @@ int manager_set_link_local_address(const IfNameIndex *ifidx, const char *k, cons
         return dbus_network_reload();
 }
 
-int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac) {
+int manager_set_link_mac_addr(const IfNameIndex *p, const char *mac) {
         _auto_cleanup_ char *network = NULL, *config_mac = NULL, *config_update_mac = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(mac);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1145,13 +1145,13 @@ int manager_set_link_mac_addr(const IfNameIndex *ifidx, const char *mac) {
         return dbus_network_reload();
 }
 
-int manager_set_link_state(const IfNameIndex *ifidx, LinkState state) {
-        assert(ifidx);
+int manager_set_link_state(const IfNameIndex *p, LinkState state) {
+        assert(p);
 
-        return netlink_set_link_state(ifidx, state);
+        return netlink_set_link_state(p, state);
 }
 
-int manager_configure_link_address(const IfNameIndex *ifidx,
+int manager_configure_link_address(const IfNameIndex *p,
                                    const IPAddress *address,
                                    const IPAddress *peer,
                                    const char *scope,
@@ -1161,15 +1161,15 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
                                    const char *label,
                                    char **many) {
 
-        _auto_cleanup_ char *network = NULL, *a = NULL, *p = NULL;
+        _auto_cleanup_ char *network = NULL, *a = NULL, *b = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         char **t;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1192,9 +1192,9 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
 
         if (peer) {
                 if (!peer->prefix_len)
-                        r = ip_to_str(peer->family, peer, &p);
+                        r = ip_to_str(peer->family, peer, &b);
                 else
-                        r = ip_to_str_prefix(peer->family, peer, &p);
+                        r = ip_to_str_prefix(peer->family, peer, &b);
                 if (r < 0)
                         return r;
         }
@@ -1202,8 +1202,8 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
         if (a && !key_file_config_exists(key_file, "Address", "Address", a)) {
                 add_key_to_section(section, "Address", a);
 
-                if (p)
-                        add_key_to_section(section, "Peer", p);
+                if (b)
+                        add_key_to_section(section, "Peer", b);
 
                 if (scope)
                         add_key_to_section(section, "Scope", scope);
@@ -1295,22 +1295,22 @@ int manager_replace_link_address_internal(KeyFile *key_file, char **many, Addres
         return 0;
 }
 
-int manager_replace_link_address(const IfNameIndex *ifidx, char **many, AddressFamily family) {
+int manager_replace_link_address(const IfNameIndex *p, char **many, AddressFamily family) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *setup = NULL, *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_setup_state(ifidx->ifindex, &setup);
+        r = network_parse_link_setup_state(p->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find device setup '%s': %s", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find device setup '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0) {
-                log_warning("Failed to find .network file for '%s': %s", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find .network file for '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -1331,23 +1331,23 @@ int manager_replace_link_address(const IfNameIndex *ifidx, char **many, AddressF
         return dbus_network_reload();
 }
 
-int manager_remove_link_address(const IfNameIndex *ifidx, char **addresses, AddressFamily family) {
+int manager_remove_link_address(const IfNameIndex *p, char **addresses, AddressFamily family) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *setup = NULL, *network = NULL;
         char **a;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_setup_state(ifidx->ifindex, &setup);
+        r = network_parse_link_setup_state(p->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find device setup '%s': %s", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find device setup '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0) {
-                log_warning("Failed to find .network file for '%s': %s", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find .network file for '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -1450,14 +1450,14 @@ static int manager_set_gateway(KeyFile *key_file, Route *rt) {
         return 0;
 }
 
-int manager_configure_default_gateway_full(const IfNameIndex *ifidx, Route *rt4, Route *rt6) {
+int manager_configure_default_gateway_full(const IfNameIndex *p, Route *rt4, Route *rt6) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1486,15 +1486,15 @@ int manager_configure_default_gateway_full(const IfNameIndex *ifidx, Route *rt4,
         return dbus_network_reload();
 }
 
-int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt, bool keep) {
+int manager_configure_default_gateway(const IfNameIndex *p, Route *rt, bool keep) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _auto_cleanup_ char *network = NULL, *gw = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(rt);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1540,7 +1540,7 @@ int manager_configure_default_gateway(const IfNameIndex *ifidx, Route *rt, bool 
         return dbus_network_reload();
 }
 
-int manager_configure_route(const IfNameIndex *ifidx,
+int manager_configure_route(const IfNameIndex *p,
                             const IPAddress *gateway,
                             const IPAddress *destination,
                             const IPAddress *source,
@@ -1560,9 +1560,9 @@ int manager_configure_route(const IfNameIndex *ifidx,
         _cleanup_(section_freep) Section *section = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0)
                 return r;
 
@@ -1726,19 +1726,19 @@ int manager_remove_gateway_or_route_full(const char *network, bool gateway, Addr
         return dbus_network_reload();
 }
 
-int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, AddressFamily family) {
+int manager_remove_gateway_or_route(const IfNameIndex *p, bool gateway, AddressFamily family) {
         _auto_cleanup_ char *setup = NULL, *network = NULL, *config = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_setup_state(ifidx->ifindex, &setup);
+        r = network_parse_link_setup_state(p->ifindex, &setup);
         if (r < 0) {
-                log_warning("Failed to find setup for device'%s': %s", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find setup for device'%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        r = network_parse_link_network_file(p->ifindex, &network);
         if (r < 0)
                 return r;
 
@@ -1764,17 +1764,17 @@ int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, Addr
         return dbus_network_reload();
 }
 
-int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPolicyRule *rule) {
+int manager_configure_routing_policy_rules(const IfNameIndex *p, RoutingPolicyRule *rule) {
         _auto_cleanup_ char *network = NULL, *to = NULL, *from = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0) {
-                log_warning("Failed to find or create network file for device '%s': %s\n", ifidx->ifname, strerror(-r));
+                log_warning("Failed to find or create network file for device '%s': %s\n", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -1841,15 +1841,15 @@ int manager_configure_routing_policy_rules(const IfNameIndex *ifidx, RoutingPoli
         return dbus_network_reload();
 }
 
-int manager_remove_routing_policy_rules(const IfNameIndex *ifidx) {
+int manager_remove_routing_policy_rules(const IfNameIndex *p) {
         _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = create_or_parse_network_file(ifidx, &network);
+        r = create_or_parse_network_file(p, &network);
         if (r < 0) {
-                log_warning("Failed to create or parse network file '%s': %s\n", ifidx->ifname, strerror(-r));
+                log_warning("Failed to create or parse network file '%s': %s\n", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -1860,21 +1860,21 @@ int manager_remove_routing_policy_rules(const IfNameIndex *ifidx) {
         return dbus_network_reload();
 }
 
-int manager_configure_routing_policy_rule(const IfNameIndex *ifidx, const IPAddress *a, const Route *rt, bool keep) {
+int manager_configure_routing_policy_rule(const IfNameIndex *p, const IPAddress *a, const Route *rt, bool keep) {
         _auto_cleanup_ char *network = NULL, *address = NULL, *gw = NULL, *destination = NULL, *pref_source = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
          _cleanup_(section_freep) Section *section = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
         assert(rt);
 
         if (keep) {
-                r = create_or_parse_network_file(ifidx, &network);
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = create_network_conf_file(ifidx->ifname, &network);
+                r = create_network_conf_file(p->ifname, &network);
                 if (r < 0)
                         return r;
         }
