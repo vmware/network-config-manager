@@ -36,6 +36,8 @@ static void test_multiple_address(void **state) {
 
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100/24"));
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.99/24"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_static_address(void **state) {
@@ -61,6 +63,8 @@ static void test_static_address(void **state) {
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.101"));
         assert_true(key_file_config_exists(key_file, "Route", "Destination", "172.16.0.0/24"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.100"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_multiple_routes_address(void **state) {
@@ -91,6 +95,8 @@ static void test_multiple_routes_address(void **state) {
         assert_true(key_file_config_exists(key_file, "Route", "RouteMetric", "200"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "11.0.0.1"));
         assert_true(key_file_config_exists(key_file, "Route", "RouteMetric", "300"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_dhcp6_overrides(void **state) {
@@ -113,6 +119,8 @@ static void test_dhcp6_overrides(void **state) {
         assert_true(key_file_config_exists(key_file, "DHCPv6", "UseDomains", "yes"));
         assert_true(key_file_config_exists(key_file, "DHCPv6", "RapidCommit", "no"));
         assert_true(key_file_config_exists(key_file, "DHCPv6", "UseAddress", "yes"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_ipv6_ra_overrides(void **state) {
@@ -135,6 +143,8 @@ static void test_ipv6_ra_overrides(void **state) {
         assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseRoutePrefix", "yes"));
         assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseAutonomousPrefix", "yes"));
         assert_true(key_file_config_exists(key_file, "IPv6AcceptRA", "UseOnLinkPrefix", "yes"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_source_routing(void **state) {
@@ -169,6 +179,8 @@ static void test_source_routing(void **state) {
 
         assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "From", "172.31.24.153"));
         assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "1000"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_wireguard_multiple_peers(void **state) {
@@ -198,6 +210,8 @@ static void test_wireguard_multiple_peers(void **state) {
         assert_true(key_file_config_exists(key_file, "WireGuardPeer", "AllowedIPs", "10.10.10.20/24"));
         assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PersistentKeepalive", "22"));
         assert_true(key_file_config_exists(key_file, "WireGuardPeer", "PublicKey", "M9nt4YujIOmNrRmpIRTmYSfMdrpvE7u6WkG8FY8WjG4="));
+
+        unlink("/etc/systemd/network/10-test99.network");
 
         system("nmctl remove-netdev wg0");
 }
@@ -271,6 +285,8 @@ static void test_netdev_vlans(void **state) {
 
         system("nmctl remove-netdev vlan10 kind vlan");
         system("nmctl remove-netdev vlan15 kind vlan");
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_netdev_vrfs(void **state) {
