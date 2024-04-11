@@ -126,6 +126,8 @@ int manager_configure_route(const IfNameIndex *ifidx,
                             const int onlink,
                             const bool b);
 
+int manager_remove_gateway_or_route_full_internal(KeyFile *key_file, bool gateway, AddressFamily family);
+int manager_remove_gateway_or_route_full(const char *network, bool gateway, AddressFamily family);
 int manager_remove_gateway_or_route(const IfNameIndex *ifidx, bool gateway, AddressFamily family);
 
 int manager_set_dns_server(const IfNameIndex *i, char **dns, int ipv4, int ipv6, bool keep);
@@ -218,5 +220,5 @@ int manager_write_network_config(const Network *n, const GString *config);
 
 bool manager_config_exists(const char *section, const char *k, const char *v);
 
-int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_ra, char **addrs, bool keep);
+int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_ra, char **addrs, Route *rt6, bool keep);
 int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *address, const IPAddress *gateway, bool keep);

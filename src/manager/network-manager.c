@@ -1667,15 +1667,10 @@ int manager_configure_route(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-static int manager_remove_gateway_or_route_full(const char *network, bool gateway, AddressFamily family) {
-        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+int manager_remove_gateway_or_route_full_internal(KeyFile *key_file, bool gateway, AddressFamily family) {
         int r;
 
-        assert(network);
-
-        r = parse_key_file(network, &key_file);
-        if (r < 0)
-                return r;
+        assert(key_file);
 
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 _auto_cleanup_ IPAddress *a = NULL;
@@ -1707,6 +1702,23 @@ static int manager_remove_gateway_or_route_full(const char *network, bool gatewa
                         }
                 }
         }
+
+        return 0;
+}
+
+int manager_remove_gateway_or_route_full(const char *network, bool gateway, AddressFamily family) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert(network);
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = manager_remove_gateway_or_route_full_internal(key_file, gateway, family);
+        if (r < 0)
+                return r;
 
         r = key_file_save (key_file);
         if (r < 0)
@@ -2682,7 +2694,7 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         return dbus_network_reload();
 }
 
-int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, bool keep) {
+int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, Route *rt6, bool keep) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
@@ -2726,6 +2738,20 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
         if (r < 0) {
                 log_warning("Failed to replaces address on device '%s': %s", p->ifname, strerror(-r));
                 return r;
+        }
+
+        if (rt6) {
+                r = manager_set_gateway(key_file, rt6);
+                if (r < 0) {
+                        log_warning("Failed to configure gateway on device '%s': %s", p->ifname, strerror(-r));
+                        return r;
+                }
+        } else {
+                r = manager_remove_gateway_or_route_full_internal(key_file, true, ADDRESS_FAMILY_IPV6);
+                if (r < 0) {
+                        log_warning("Failed to remove gateway from device=%s: %s", p->ifname, strerror(-r));
+                        return r;
+                }
         }
 
         r = key_file_save (key_file);
