@@ -2735,7 +2735,7 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
 
         r = manager_replace_link_address_internal(key_file, addrs, AF_INET6);
         if (r < 0) {
-                log_warning("Failed to replaces address on device '%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to replace address on device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
@@ -2800,7 +2800,7 @@ int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, const I
 
         r = manager_replace_link_address_internal(key_file, addrs, AF_INET);
         if (r < 0) {
-                log_warning("Failed to replaces address on device '%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to replace address on device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 

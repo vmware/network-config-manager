@@ -4700,7 +4700,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                                 return r;
                         }
 
-                        if (a->family != AF_INET6) {
+                        if (a->family != AF_INET) {
                                 log_warning("Failed to parse address='%s': invalid family", argv[i]);
                                 return -EINVAL;
                         }
