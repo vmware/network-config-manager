@@ -1254,7 +1254,6 @@ int manager_replace_link_address_internal(KeyFile *key_file, char **many, Addres
         int r;
 
         assert(key_file);
-        assert(many);
 
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 _auto_cleanup_ IPAddress *addr = NULL;
@@ -2792,7 +2791,7 @@ int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *
                         set_config(key_file, "Network", "DHCP", "ipv4");
                 else  if (mode == DHCP_CLIENT_IPV6)
                         set_config(key_file, "Network", "DHCP", "yes");
-        } else if (dhcp == 0) {
+        } else if (dhcp == DHCP_CLIENT_NO) {
                 if (mode == DHCP_CLIENT_YES)
                         set_config(key_file, "Network", "DHCP", "ipv6");
                 else  if (mode == DHCP_CLIENT_IPV4 || mode == _DHCP_CLIENT_INVALID)
