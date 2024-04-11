@@ -4608,11 +4608,11 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 
                         r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
-                                log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse address='%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
 
-                        if a->family != AF_INET6) {
+                        if (a->family != AF_INET6) {
                                 log_warning("Failed to parse address='%s': invalid family", argv[i]);
                                 return -EINVAL;
                         }
