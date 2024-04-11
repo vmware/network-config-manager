@@ -221,4 +221,4 @@ int manager_write_network_config(const Network *n, const GString *config);
 bool manager_config_exists(const char *section, const char *k, const char *v);
 
 int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, Route *rt6, bool keep);
-int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, const IPAddress *gateway, bool keep);
+int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *rt4, bool keep);

@@ -2762,7 +2762,7 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
         return dbus_network_reload();
 }
 
-int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, const IPAddress *gateway, bool keep) {
+int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *rt4, bool keep) {
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
@@ -2804,12 +2804,18 @@ int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, const I
                 return r;
         }
 
-        if (gateway) {
-                r = ip_to_str(gateway->family, gateway, &gw);
-                if (r < 0)
+        if (rt4) {
+                r = manager_set_gateway(key_file, rt4);
+                if (r < 0) {
+                        log_warning("Failed to configure gateway on device '%s': %s", p->ifname, strerror(-r));
                         return r;
-
-                set_config(key_file, "Route", "Gateway", gw);
+                }
+        } else {
+                r = manager_remove_gateway_or_route_full_internal(key_file, true, ADDRESS_FAMILY_IPV4);
+                if (r < 0) {
+                        log_warning("Failed to remove gateway from device=%s: %s", p->ifname, strerror(-r));
+                        return r;
+                }
         }
 
         r = key_file_save (key_file);
@@ -3063,7 +3069,7 @@ int manager_configure_proxy(int enable,
                 g_hash_table_replace(table, k, s);
 
                 steal_ptr(s);
-                steal_ptr(k);
+               steal_ptr(k);
         }
 
         if (no_proxy) {

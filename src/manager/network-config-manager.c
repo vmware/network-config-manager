@@ -4664,8 +4664,8 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **addrs = NULL;
-        _auto_cleanup_ IPAddress *gw = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
+        _auto_cleanup_ Route *rt4 = NULL;
         bool keep = true;
         int dhcp = -1;
         int r;
@@ -4681,6 +4681,8 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                         }
                         continue;
                 } else if (streq_fold(argv[i], "gateway") || streq_fold(argv[i], "gw") || streq_fold(argv[i], "gw4") || streq_fold(argv[i], "g")) {
+                        _auto_cleanup_ IPAddress *gw = NULL;
+
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &gw);
@@ -4688,6 +4690,22 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                                 log_warning("Failed to parse gateway address '%s': %s", argv[i], strerror(-r));
                                 return r;
                         }
+
+                        if (gw->family != AF_INET) {
+                                log_warning("Failed to parse gw='%s': invalid family", argv[i]);
+                                return r;
+                        }
+
+                        r = route_new(&rt4);
+                        if (r < 0)
+                                return log_oom();
+
+                        *rt4 = (Route) {
+                             .ifindex = p->ifindex,
+                             .family = gw->family,
+                             .gw = *gw,
+                        };
+
                         continue;
                 } else if (streq_fold(argv[i], "address") || streq_fold(argv[i], "a") || streq_fold(argv[i], "addr")) {
                         _auto_cleanup_ IPAddress *a = NULL;
@@ -4752,7 +4770,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv4(p, dhcp, addrs, gw, keep);
+        r = manager_set_ipv4(p, dhcp, addrs, rt4, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
