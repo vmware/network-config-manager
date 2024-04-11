@@ -6,6 +6,7 @@
 void test_set_ipv4_dhcp_yes_with_static(void **state);
 void test_set_ipv4_dhcp_no_with_static(void **state);
 void test_set_ipv4_dhcp_yes_with_static_address_static_dns(void **state);
+void test_set_ipv4_dhcp_yes_with_static_address_static_dns_use_dns_no(void **state);
 
 void test_set_ipv6_dhcp_yes_accept_ra_yes(void **state);
 void test_set_ipv6_dhcp_no_accept_ra_yes(void **state);
