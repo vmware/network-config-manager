@@ -387,15 +387,12 @@ int manager_set_link_dynamic_conf(const IfNameIndex *p,
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -523,15 +520,12 @@ int manager_set_link_static_conf(const IfNameIndex *p, char **addrs, char **gws,
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -590,15 +584,12 @@ int manager_set_link_network_conf(const IfNameIndex *p,
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -1869,15 +1860,12 @@ int manager_configure_routing_policy_rule(const IfNameIndex *p, const IPAddress 
         assert(p);
         assert(rt);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
