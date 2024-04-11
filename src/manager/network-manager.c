@@ -387,15 +387,12 @@ int manager_set_link_dynamic_conf(const IfNameIndex *p,
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -523,15 +520,12 @@ int manager_set_link_static_conf(const IfNameIndex *p, char **addrs, char **gws,
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -590,15 +584,12 @@ int manager_set_link_network_conf(const IfNameIndex *p,
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -1869,15 +1860,12 @@ int manager_configure_routing_policy_rule(const IfNameIndex *p, const IPAddress 
         assert(p);
         assert(rt);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -2693,7 +2681,7 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         return dbus_network_reload();
 }
 
-int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, Route *rt6, bool keep) {
+int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, Route *rt6, char **dns, bool keep) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
@@ -2702,15 +2690,12 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -2731,6 +2716,14 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
                         set_config(key_file, "Network", "DHCP", "ipv4");
                 else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
                         set_config(key_file, "Network", "DHCP", "no");
+        }
+
+        if (dns) {
+                r = set_config(key_file, "Network", "DNS", strv_join(" ", dns));
+                if (r < 0) {
+                        log_warning("Failed to write Network DNS= '%s': %s", network, strerror(-r));
+                        return r;
+                }
         }
 
         r = manager_replace_link_address_internal(key_file, addrs, AF_INET6);
@@ -2762,7 +2755,7 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
         return dbus_network_reload();
 }
 
-int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *rt4, bool keep) {
+int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *rt4, char **dns, bool keep) {
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
@@ -2771,15 +2764,12 @@ int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -2796,6 +2786,14 @@ int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *
                         set_config(key_file, "Network", "DHCP", "ipv6");
                 else  if (mode == DHCP_CLIENT_IPV4 || mode == _DHCP_CLIENT_INVALID)
                         set_config(key_file, "Network", "DHCP", "no");
+        }
+
+        if (dns) {
+                r = set_config(key_file, "Network", "DNS", strv_join(" ", dns));
+                if (r < 0) {
+                        log_warning("Failed to write Network DNS= '%s': %s", network, strerror(-r));
+                        return r;
+                }
         }
 
         r = manager_replace_link_address_internal(key_file, addrs, AF_INET);
