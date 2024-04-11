@@ -4574,7 +4574,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                         }
                         dhcp = r;
                         continue;
-                } else if (streq_fold(argv[i], "gateway") || streq_fold(argv[i], "gw") || streq_fold(argv[i], "g")) {
+                } else if (streq_fold(argv[i], "gateway") || streq_fold(argv[i], "gw") || streq_fold(argv[i], "gw6") || streq_fold(argv[i], "g")) {
                         _auto_cleanup_ IPAddress *gw = NULL;
 
                         parse_next_arg(argv, argc, i);
