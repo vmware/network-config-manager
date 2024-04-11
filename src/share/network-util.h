@@ -109,3 +109,5 @@ int device_activation_policy_name_to_type(const char *name);
 
 const char *required_address_family_for_online_type_to_name(int id);
 int required_address_family_for_online_name_to_type(const char *name);
+
+int parse_address_many(char **argv, int argc, int *i, char ***ret);
