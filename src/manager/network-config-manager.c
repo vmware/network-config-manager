@@ -4654,15 +4654,9 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv6(p, dhcp, accept_ra, keep);
+        r = manager_set_ipv6(p, dhcp, accept_ra, addrs, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
-                return r;
-        }
-
-        r = manager_replace_link_address(p, addrs, ADDRESS_FAMILY_IPV6);
-        if (r < 0) {
-                log_warning("Failed to reset address from device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 

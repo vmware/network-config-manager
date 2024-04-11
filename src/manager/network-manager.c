@@ -2682,21 +2682,21 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         return dbus_network_reload();
 }
 
-int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_ra, bool keep) {
+int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, bool keep) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
-        _auto_cleanup_ char *network = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
         if (keep) {
-                r = create_or_parse_network_file(ifidx, &network);
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = create_network_conf_file(ifidx->ifname, &network);
+                r = create_network_conf_file(p->ifname, &network);
                 if (r < 0)
                         return r;
         }
@@ -2708,7 +2708,7 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
         if (accept_ra >= 0)
                 set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
 
-        r = manager_acquire_link_dhcp_client_kind(ifidx, &mode);
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (dhcp > 0) {
                 set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
                 if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
@@ -2720,6 +2720,12 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
                         set_config(key_file, "Network", "DHCP", "ipv4");
                 else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
                         set_config(key_file, "Network", "DHCP", "no");
+        }
+
+        r = manager_replace_link_address_internal(key_file, addrs, AF_INET6);
+        if (r < 0) {
+                log_warning("Failed to replaces address on device '%s': %s", p->ifname, strerror(-r));
+                return r;
         }
 
         r = key_file_save (key_file);
