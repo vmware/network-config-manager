@@ -2681,7 +2681,7 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         return dbus_network_reload();
 }
 
-int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, Route *rt6, char **dns, bool keep) {
+int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, Route *rt6, char **dns, int use_dns, bool keep) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
@@ -2724,6 +2724,12 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
                         log_warning("Failed to write Network DNS= '%s': %s", network, strerror(-r));
                         return r;
                 }
+        }
+
+        if (use_dns >= 0) {
+                r = key_file_set_str(key_file, "DHCPv6", "UseDNS", bool_to_str(use_dns));
+                if (r < 0)
+                        return r;
         }
 
         r = manager_replace_link_address_internal(key_file, addrs, AF_INET6);
