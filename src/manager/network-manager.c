@@ -2701,12 +2701,16 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
         if (r < 0)
                 return r;
 
-        if (accept_ra >= 0)
+        if (accept_ra >= 0) {
+                if (accept_ra > 0)
+                        set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
+
                 set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
+        }
+
 
         r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (dhcp > 0) {
-                set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
                 if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
                         set_config(key_file, "Network", "DHCP", "ipv6");
                 else  if (mode == DHCP_CLIENT_IPV4)

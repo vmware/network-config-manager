@@ -34,6 +34,8 @@ void test_set_ipv4_dhcp_yes_with_static(void **state) {
 
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_ipv4_dhcp_no_with_static(void **state) {
@@ -53,6 +55,61 @@ void test_set_ipv4_dhcp_no_with_static(void **state) {
 
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
+}
+
+void test_set_ipv4_dhcp_yes_with_static_address_static_dns(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        char *dns = NULL;
+        int r;
+
+        assert_true(system("nmctl set-ipv4 dev test99 dhcp yes a 192.168.1.14/24 gw 192.168.1.1 dns 192.168.1.1,192.168.1.2") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+
+        assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+        assert_true(g_strrstr(dns, "192.168.1.1"));
+        assert_true(g_strrstr(dns, "192.168.1.2"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
+}
+
+void test_set_ipv4_dhcp_yes_with_static_address_static_dns_use_dns_no(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        char *dns = NULL;
+        int r;
+
+        assert_true(system("nmctl set-ipv4 dev test99 dhcp yes a 192.168.1.14/24 gw 192.168.1.1 dns 192.168.1.1,192.168.1.2 use-dns no") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(dns=key_file_config_get(key_file, "Network", "DNS"));
+        assert_true(g_strrstr(dns, "192.168.1.1"));
+        assert_true(g_strrstr(dns, "192.168.1.2"));
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+        assert_true(key_file_config_exists(key_file, "DHCPv4", "UseDNS", "no"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_ipv6_dhcp_yes_accept_ra_yes(void **state) {
@@ -70,6 +127,8 @@ void test_set_ipv6_dhcp_yes_accept_ra_yes(void **state) {
         assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
         assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
         assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_ipv6_dhcp_no_accept_ra_yes(void **state) {
@@ -87,6 +146,8 @@ void test_set_ipv6_dhcp_no_accept_ra_yes(void **state) {
         assert_true(key_file_config_exists(key_file, "Network", "DHCP", "no"));
         assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
         assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_static_address_gw(void **state) {
@@ -106,6 +167,8 @@ void test_set_static_address_gw(void **state) {
 
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_network_address_gw(void **state) {
@@ -125,6 +188,8 @@ void test_set_network_address_gw(void **state) {
 
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_static_address_gw_dns(void **state) {
@@ -147,6 +212,8 @@ void test_set_static_address_gw_dns(void **state) {
 
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_network_address_gw_dns(void **state) {
@@ -169,6 +236,8 @@ void test_set_network_address_gw_dns(void **state) {
 
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_static_address_gw_dns_keep_yes(void **state) {
@@ -194,6 +263,8 @@ void test_set_static_address_gw_dns_keep_yes(void **state) {
 
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_network_address_gw_dns_keep_yes(void **state) {
@@ -219,6 +290,8 @@ void test_set_network_address_gw_dns_keep_yes(void **state) {
 
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **state) {
@@ -239,6 +312,8 @@ void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **state) {
         assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
         assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
         assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **state) {
@@ -259,6 +334,8 @@ void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier(void **state) {
         assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
         assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
         assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 
@@ -283,6 +360,8 @@ void test_set_dynamic_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid(void *
         assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
         assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
         assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid(void **state) {
@@ -306,6 +385,8 @@ void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid(void *
         assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
         assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
         assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid_static_address_gw_dns(void **state) {
@@ -333,4 +414,6 @@ void test_set_network_dhcp_ipv4_ipv4_ra_dhcp4_client_identifier_dhcp_iaid_static
 
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.41/24"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
