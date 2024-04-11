@@ -3853,61 +3853,14 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                         }
                         continue;
                 } else if (streq_fold(argv[i], "dns")) {
-                        _auto_cleanup_strv_ char **s = NULL;
-                        bool white_space = false;
-
                         parse_next_arg(argv, argc, i);
 
-                        if (strchr(argv[i], ',')) {
-                                char **d;
-
-                                s = strsplit(argv[i], ",", -1);
-                                if (!s) {
-                                        log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
-                                        return -EINVAL;
-                                }
-
-                                s = strv_remove(s, "");
-                                if (!s) {
-                                        log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
-                                        return -EINVAL;
-                                }
-
-                                strv_foreach(d, s) {
-                                        _auto_cleanup_ IPAddress *a = NULL;
-
-                                        r = parse_ip(*d, &a);
-                                        if (r < 0) {
-                                                log_warning("Failed to parse DNS server address: %s", *d);
-                                                return r;
-                                        }
-                                }
-
-                        } else {
-                                _auto_cleanup_strv_ char **t = NULL;
-                                char **d;
-
-                                r = argv_to_strv(argc - 4, argv + i, &t);
-                                if (r < 0) {
-                                        log_warning("Failed to parse DNS Servers: %s", strerror(-r));
-                                        return r;
-                                }
-
-                                strv_foreach(d, t) {
-                                        _auto_cleanup_ IPAddress *a = NULL;
-
-                                        r = parse_ip(*d, &a);
-                                        if (r >= 0) {
-                                                strv_extend(&s, *d);
-                                                i++;
-                                        }
-                                }
-                                white_space = true;
+                        r = parse_address_many(argv, argc, &i, &dns);
+                        if (r < 0) {
+                                log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
                         }
 
-                        dns = steal_ptr(s);
-                        if (white_space)
-                                i--;
                         continue;
                 } else if (streq_fold(argv[i], "use-dns-ipv4")) {
                         parse_next_arg(argv, argc, i);
