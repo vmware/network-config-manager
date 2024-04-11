@@ -2761,7 +2761,7 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
         return dbus_network_reload();
 }
 
-int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *rt4, char **dns, bool keep) {
+int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *rt4, char **dns, int use_dns, bool keep) {
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
@@ -2800,6 +2800,12 @@ int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *
                         log_warning("Failed to write Network DNS= '%s': %s", network, strerror(-r));
                         return r;
                 }
+        }
+
+        if (use_dns >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "UseDNS", bool_to_str(use_dns));
+                if (r < 0)
+                        return r;
         }
 
         r = manager_replace_link_address_internal(key_file, addrs, AF_INET);
