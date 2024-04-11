@@ -4663,7 +4663,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
-        _auto_cleanup_strv_ char **addrs = NULL;
+        _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt4 = NULL;
         bool keep = true;
@@ -4748,6 +4748,17 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
 
                         dhcp = r;
                         continue;
+                } else if (streq_fold(argv[i], "dns")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_address_many(argv, argc, &i, &dns);
+                        if (r < 0) {
+
+                                log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
+                        }
+
+                        continue;
                 } else if (streq_fold(argv[i], "keep")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4755,7 +4766,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                         if (r < 0) {
                                 log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
                                 return r;
-                        }
+                                }
 
                         keep = r;
                         continue;
@@ -4770,7 +4781,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv4(p, dhcp, addrs, rt4, keep);
+        r = manager_set_ipv4(p, dhcp, addrs, rt4, dns, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
