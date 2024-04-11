@@ -444,14 +444,14 @@ int netlink_acquire_all_links(Links **ret) {
         return 0;
 }
 
-int netlink_remove_link(const IfNameIndex *ifidx) {
+int netlink_remove_link(const IfNameIndex *p) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
         _auto_cleanup_close_ int s = -1;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = ip_link_message_new(RTM_DELLINK, AF_UNSPEC, ifidx->ifindex, &m);
+        r = ip_link_message_new(RTM_DELLINK, AF_UNSPEC, p->ifindex, &m);
         if (r < 0)
                 return r;
 
@@ -486,24 +486,24 @@ int link_read_sysfs_attribute(const char *ifname, const char *attribute, char **
         return 0;
 }
 
-int netlink_set_link_state(const IfNameIndex *ifidx, LinkState state) {
+int netlink_set_link_state(const IfNameIndex *p, LinkState state) {
         _auto_cleanup_ IPlinkMessage *m = NULL;
         _auto_cleanup_ char *operstate = NULL;
         _auto_cleanup_close_ int s = -1;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = netlink_acquire_link_operstate(ifidx->ifname, &operstate);
+        r = netlink_acquire_link_operstate(p->ifname, &operstate);
         if (r < 0) {
-                log_warning("Failed to get link operstate: %s\n", ifidx->ifname);
+                log_warning("Failed to get link operstate: %s\n", p->ifname);
                 return r;
         }
 
         if ((int) state == link_name_to_state(operstate))
                 return 0;
 
-        r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, ifidx->ifindex, &m);
+        r = ip_link_message_new(RTM_SETLINK, AF_UNSPEC, p->ifindex, &m);
         if (r < 0)
                 return r;
 

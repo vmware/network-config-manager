@@ -473,28 +473,28 @@ int determine_network_conf_file(const char *ifname, char **ret) {
         return 0;
 }
 
-int create_or_parse_network_file(const IfNameIndex *ifidx, char **ret) {
+int create_or_parse_network_file(const IfNameIndex *p, char **ret) {
         _auto_cleanup_ char *setup = NULL, *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
-        r = network_parse_link_setup_state(ifidx->ifindex, &setup);
+        r = network_parse_link_setup_state(p->ifindex, &setup);
         if (r < 0) {
-                r = create_network_conf_file(ifidx->ifname, &network);
+                r = create_network_conf_file(p->ifname, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = network_parse_link_network_file(ifidx->ifindex, &network);
+                r = network_parse_link_network_file(p->ifindex, &network);
                 if (r < 0) {
-                        r = create_network_conf_file(ifidx->ifname, &network);
+                        r = create_network_conf_file(p->ifname, &network);
                         if (r < 0)
                                 return r;
                 }
         }
 
         if (!g_file_test(network, G_FILE_TEST_EXISTS)) {
-                r = create_network_conf_file(ifidx->ifname, &network);
+                r = create_network_conf_file(p->ifname, &network);
                 if (r < 0)
                         return r;
         }

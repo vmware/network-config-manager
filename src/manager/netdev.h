@@ -344,7 +344,7 @@ void bridge_free(Bridge *b);
 DEFINE_CLEANUP(Bridge*, bridge_free);
 
 int generate_netdev_config(NetDev *n);
-int create_netdev_conf_file(const char *ifidx, char **ret);
+int create_netdev_conf_file(const char *p, char **ret);
 
 const char *netdev_kind_to_name(NetDevKind id);
 int netdev_name_to_kind(const char *name);
