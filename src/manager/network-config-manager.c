@@ -1346,7 +1346,7 @@ _public_ int ncm_link_add_address(int argc, char *argv[]) {
                 } else if (streq_fold(argv[i], "many")) {
                         parse_next_arg(argv, argc, i);
 
-                        parse_address_many(argv, argc, &i, &many);
+                        r = parse_address_many(argv, argc, &i, &many);
                         if (r < 0) {
                                 log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -1408,7 +1408,7 @@ _public_ int ncm_link_remove_address(int argc, char *argv[]) {
                 } else if (streq_fold(argv[i], "many")) {
                         parse_next_arg(argv, argc, i);
 
-                        parse_address_many(argv, argc, &i, &addrs);
+                        r = parse_address_many(argv, argc, &i, &addrs);
                         if (r < 0) {
                                 log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -1484,7 +1484,7 @@ _public_ int ncm_link_replace_address(int argc, char *argv[]) {
                 } else if (streq_fold(argv[i], "many")) {
                         parse_next_arg(argv, argc, i);
 
-                        parse_address_many(argv, argc, &i, &addrs);
+                        r = parse_address_many(argv, argc, &i, &addrs);
                         if (r < 0) {
                                 log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
@@ -4625,7 +4625,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                 } else if (streq_fold(argv[i], "many")) {
                         parse_next_arg(argv, argc, i);
 
-                        parse_address_many(argv, argc, &i, &addrs);
+                        r = parse_address_many(argv, argc, &i, &addrs);
                         if (r < 0) {
                                 log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
