@@ -2762,21 +2762,21 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
         return dbus_network_reload();
 }
 
-int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *address, const IPAddress *gateway, bool keep) {
+int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, const IPAddress *gateway, bool keep) {
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
         if (keep) {
-                r = create_or_parse_network_file(ifidx, &network);
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = create_network_conf_file(ifidx->ifname, &network);
+                r = create_network_conf_file(p->ifname, &network);
                 if (r < 0)
                         return r;
         }
@@ -2785,7 +2785,7 @@ int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *
         if (r < 0)
                 return r;
 
-        r = manager_acquire_link_dhcp_client_kind(ifidx, &mode);
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (dhcp > 0) {
                 if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
                         set_config(key_file, "Network", "DHCP", "ipv4");
@@ -2798,12 +2798,10 @@ int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *
                         set_config(key_file, "Network", "DHCP", "no");
         }
 
-        if (address) {
-                r = ip_to_str_prefix(address->family, address, &addr);
-                if (r < 0)
-                        return r;
-
-                set_config(key_file, "Address", "Address", addr);
+        r = manager_replace_link_address_internal(key_file, addrs, AF_INET);
+        if (r < 0) {
+                log_warning("Failed to replaces address on device '%s': %s", p->ifname, strerror(-r));
+                return r;
         }
 
         if (gateway) {
