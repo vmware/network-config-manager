@@ -3853,61 +3853,14 @@ _public_ int ncm_set_dns_server(int argc, char *argv[]) {
                         }
                         continue;
                 } else if (streq_fold(argv[i], "dns")) {
-                        _auto_cleanup_strv_ char **s = NULL;
-                        bool white_space = false;
-
                         parse_next_arg(argv, argc, i);
 
-                        if (strchr(argv[i], ',')) {
-                                char **d;
-
-                                s = strsplit(argv[i], ",", -1);
-                                if (!s) {
-                                        log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
-                                        return -EINVAL;
-                                }
-
-                                s = strv_remove(s, "");
-                                if (!s) {
-                                        log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
-                                        return -EINVAL;
-                                }
-
-                                strv_foreach(d, s) {
-                                        _auto_cleanup_ IPAddress *a = NULL;
-
-                                        r = parse_ip(*d, &a);
-                                        if (r < 0) {
-                                                log_warning("Failed to parse DNS server address: %s", *d);
-                                                return r;
-                                        }
-                                }
-
-                        } else {
-                                _auto_cleanup_strv_ char **t = NULL;
-                                char **d;
-
-                                r = argv_to_strv(argc - 4, argv + i, &t);
-                                if (r < 0) {
-                                        log_warning("Failed to parse DNS Servers: %s", strerror(-r));
-                                        return r;
-                                }
-
-                                strv_foreach(d, t) {
-                                        _auto_cleanup_ IPAddress *a = NULL;
-
-                                        r = parse_ip(*d, &a);
-                                        if (r >= 0) {
-                                                strv_extend(&s, *d);
-                                                i++;
-                                        }
-                                }
-                                white_space = true;
+                        r = parse_address_many(argv, argc, &i, &dns);
+                        if (r < 0) {
+                                log_warning("Failed to parse DNS servers '%s': %s", argv[i], strerror(EINVAL));
+                                return -EINVAL;
                         }
 
-                        dns = steal_ptr(s);
-                        if (white_space)
-                                i--;
                         continue;
                 } else if (streq_fold(argv[i], "use-dns-ipv4")) {
                         parse_next_arg(argv, argc, i);
@@ -4538,9 +4491,9 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL;
+        int accept_ra = -1, dhcp = -1, use_dns = -1;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt6 = NULL;
-        int accept_ra = -1, dhcp = -1;
         bool keep = true;
         int r;
 
@@ -4642,6 +4595,18 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else if (streq_fold(argv[i], "use-dns")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_dns = r;
+                        continue;
+
                 } else if (streq_fold(argv[i], "keep")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4664,7 +4629,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv6(p, dhcp, accept_ra, addrs, rt6, dns, keep);
+        r = manager_set_ipv6(p, dhcp, accept_ra, addrs, rt6, dns, use_dns, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
@@ -4677,8 +4642,8 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt4 = NULL;
+        int dhcp = -1, use_dns = -1;
         bool keep = true;
-        int dhcp = -1;
         int r;
 
         for (int i = 1; i < argc; i++) {
@@ -4770,6 +4735,18 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else if (streq_fold(argv[i], "use-dns")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse use-dns='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        use_dns = r;
+                        continue;
+
                 } else if (streq_fold(argv[i], "keep")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4792,7 +4769,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv4(p, dhcp, addrs, rt4, dns, keep);
+        r = manager_set_ipv4(p, dhcp, addrs, rt4, dns, use_dns, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
