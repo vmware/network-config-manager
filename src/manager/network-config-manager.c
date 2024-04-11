@@ -4608,8 +4608,13 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 
                         r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
-                                log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse address='%s': %s", argv[i], strerror(-r));
                                 return r;
+                        }
+
+                        if (a->family != AF_INET6) {
+                                log_warning("Failed to parse address='%s': invalid family", argv[i]);
+                                return -EINVAL;
                         }
 
                         r = strv_extend(&addrs, argv[i]);
@@ -4649,30 +4654,10 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv6(p, dhcp, accept_ra, keep);
+        r = manager_set_ipv6(p, dhcp, accept_ra, addrs, rt6, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
-        }
-
-        r = manager_replace_link_address(p, addrs, ADDRESS_FAMILY_IPV6);
-        if (r < 0) {
-                log_warning("Failed to reset address from device '%s': %s", p->ifname, strerror(-r));
-                return r;
-        }
-
-        if (rt6) {
-                r = manager_configure_default_gateway_full(p, NULL, rt6);
-                if (r < 0) {
-                        log_warning("Failed to configure gateway on device '%s': %s", p->ifname, strerror(-r));
-                        return r;
-                }
-        } else {
-                r = manager_remove_gateway_or_route(p, true, ADDRESS_FAMILY_IPV6);
-                if (r < 0) {
-                        log_warning("Failed to remove gateway from device=%s: %s", p->ifname, strerror(-r));
-                        return r;
-                }
         }
 
         return 0;

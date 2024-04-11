@@ -1249,29 +1249,11 @@ int manager_configure_link_address(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-int manager_replace_link_address(const IfNameIndex *ifidx, char **many, AddressFamily family) {
-        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        _auto_cleanup_ char *setup = NULL, *network = NULL;
+int manager_replace_link_address_internal(KeyFile *key_file, char **many, AddressFamily family) {
         char **t;
         int r;
 
-        assert(ifidx);
-
-        r = network_parse_link_setup_state(ifidx->ifindex, &setup);
-        if (r < 0) {
-                log_warning("Failed to find device setup '%s': %s", ifidx->ifname, strerror(-r));
-                return r;
-        }
-
-        r = network_parse_link_network_file(ifidx->ifindex, &network);
-        if (r < 0) {
-                log_warning("Failed to find .network file for '%s': %s", ifidx->ifname, strerror(-r));
-                return r;
-        }
-
-        r = parse_key_file(network, &key_file);
-        if (r < 0)
-                return r;
+        assert(key_file);
 
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 _auto_cleanup_ IPAddress *addr = NULL;
@@ -1309,6 +1291,36 @@ int manager_replace_link_address(const IfNameIndex *ifidx, char **many, AddressF
                 add_section_to_key_file(key_file, section);
                 steal_ptr(section);
         }
+
+        return 0;
+}
+
+int manager_replace_link_address(const IfNameIndex *ifidx, char **many, AddressFamily family) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        _auto_cleanup_ char *setup = NULL, *network = NULL;
+        int r;
+
+        assert(ifidx);
+
+        r = network_parse_link_setup_state(ifidx->ifindex, &setup);
+        if (r < 0) {
+                log_warning("Failed to find device setup '%s': %s", ifidx->ifname, strerror(-r));
+                return r;
+        }
+
+        r = network_parse_link_network_file(ifidx->ifindex, &network);
+        if (r < 0) {
+                log_warning("Failed to find .network file for '%s': %s", ifidx->ifname, strerror(-r));
+                return r;
+        }
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = manager_replace_link_address_internal(key_file, many, family);
+        if (r < 0)
+                return r;
 
         r = key_file_save (key_file);
         if (r < 0) {
@@ -1654,15 +1666,10 @@ int manager_configure_route(const IfNameIndex *ifidx,
         return dbus_network_reload();
 }
 
-static int manager_remove_gateway_or_route_full(const char *network, bool gateway, AddressFamily family) {
-        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+int manager_remove_gateway_or_route_full_internal(KeyFile *key_file, bool gateway, AddressFamily family) {
         int r;
 
-        assert(network);
-
-        r = parse_key_file(network, &key_file);
-        if (r < 0)
-                return r;
+        assert(key_file);
 
         for (GList *i = key_file->sections; i; i = g_list_next (i)) {
                 _auto_cleanup_ IPAddress *a = NULL;
@@ -1694,6 +1701,23 @@ static int manager_remove_gateway_or_route_full(const char *network, bool gatewa
                         }
                 }
         }
+
+        return 0;
+}
+
+int manager_remove_gateway_or_route_full(const char *network, bool gateway, AddressFamily family) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert(network);
+
+        r = parse_key_file(network, &key_file);
+        if (r < 0)
+                return r;
+
+        r = manager_remove_gateway_or_route_full_internal(key_file, gateway, family);
+        if (r < 0)
+                return r;
 
         r = key_file_save (key_file);
         if (r < 0)
@@ -2669,21 +2693,21 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         return dbus_network_reload();
 }
 
-int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_ra, bool keep) {
+int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, Route *rt6, bool keep) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
-        _auto_cleanup_ char *network = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
+        _auto_cleanup_ char *network = NULL;
         int r;
 
-        assert(ifidx);
+        assert(p);
 
         if (keep) {
-                r = create_or_parse_network_file(ifidx, &network);
+                r = create_or_parse_network_file(p, &network);
                 if (r < 0)
                         return r;
         } else {
-                r = create_network_conf_file(ifidx->ifname, &network);
+                r = create_network_conf_file(p->ifname, &network);
                 if (r < 0)
                         return r;
         }
@@ -2695,18 +2719,38 @@ int manager_set_ipv6(const IfNameIndex *ifidx, const int dhcp, const int accept_
         if (accept_ra >= 0)
                 set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
 
-        r = manager_acquire_link_dhcp_client_kind(ifidx, &mode);
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (dhcp > 0) {
                 set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
                 if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
                         set_config(key_file, "Network", "DHCP", "ipv6");
                 else  if (mode == DHCP_CLIENT_IPV4)
                         set_config(key_file, "Network", "DHCP", "yes");
-        } else if (dhcp == 0) {
+        } else if (dhcp == DHCP_CLIENT_NO) {
                 if (mode == DHCP_CLIENT_YES)
                         set_config(key_file, "Network", "DHCP", "ipv4");
                 else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
                         set_config(key_file, "Network", "DHCP", "no");
+        }
+
+        r = manager_replace_link_address_internal(key_file, addrs, AF_INET6);
+        if (r < 0) {
+                log_warning("Failed to replaces address on device '%s': %s", p->ifname, strerror(-r));
+                return r;
+        }
+
+        if (rt6) {
+                r = manager_set_gateway(key_file, rt6);
+                if (r < 0) {
+                        log_warning("Failed to configure gateway on device '%s': %s", p->ifname, strerror(-r));
+                        return r;
+                }
+        } else {
+                r = manager_remove_gateway_or_route_full_internal(key_file, true, ADDRESS_FAMILY_IPV6);
+                if (r < 0) {
+                        log_warning("Failed to remove gateway from device=%s: %s", p->ifname, strerror(-r));
+                        return r;
+                }
         }
 
         r = key_file_save (key_file);
@@ -2747,7 +2791,7 @@ int manager_set_ipv4(const IfNameIndex *ifidx, const int dhcp, const IPAddress *
                         set_config(key_file, "Network", "DHCP", "ipv4");
                 else  if (mode == DHCP_CLIENT_IPV6)
                         set_config(key_file, "Network", "DHCP", "yes");
-        } else if (dhcp == 0) {
+        } else if (dhcp == DHCP_CLIENT_NO) {
                 if (mode == DHCP_CLIENT_YES)
                         set_config(key_file, "Network", "DHCP", "ipv6");
                 else  if (mode == DHCP_CLIENT_IPV4 || mode == _DHCP_CLIENT_INVALID)
