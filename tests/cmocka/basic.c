@@ -1699,6 +1699,7 @@ int main(void) {
         cmocka_unit_test (test_yaml_add_sriov),
         cmocka_unit_test (test_set_ipv4_dhcp_yes_with_static),
         cmocka_unit_test (test_set_ipv4_dhcp_no_with_static),
+        cmocka_unit_test (test_set_ipv4_dhcp_yes_with_static_address_static_dns),
         cmocka_unit_test (test_set_ipv6_dhcp_yes_accept_ra_yes),
         cmocka_unit_test (test_set_ipv6_dhcp_no_accept_ra_yes),
         cmocka_unit_test (test_set_network_address_gw),
