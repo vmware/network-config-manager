@@ -4621,7 +4621,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                         if (r < 0)
                                 return log_oom();
 
-                      continue;
+                        continue;
                 } else if (streq_fold(argv[i], "many")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4644,7 +4644,6 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                         continue;
                 }
 
-
                 log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
                 return -EINVAL;
         }
@@ -4664,7 +4663,8 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
-        _auto_cleanup_ IPAddress *gw = NULL, *address = NULL;
+        _auto_cleanup_strv_ char **addrs = NULL;
+        _auto_cleanup_ IPAddress *gw = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         bool keep = true;
         int dhcp = -1;
@@ -4690,11 +4690,32 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                         }
                         continue;
                 } else if (streq_fold(argv[i], "address") || streq_fold(argv[i], "a") || streq_fold(argv[i], "addr")) {
+                        _auto_cleanup_ IPAddress *a = NULL;
+
                         parse_next_arg(argv, argc, i);
 
-                        r = parse_ip_from_str(argv[i], &address);
+                        r = parse_ip_from_str(argv[i], &a);
                         if (r < 0) {
-                                log_warning("Failed to parse address '%s': %s", argv[i], strerror(-r));
+                                log_warning("Failed to parse address='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        if (a->family != AF_INET6) {
+                                log_warning("Failed to parse address='%s': invalid family", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        r = strv_extend(&addrs, argv[i]);
+                        if (r < 0)
+                                return log_oom();
+
+                        continue;
+                } else if (streq_fold(argv[i], "many")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_address_many(argv, argc, &i, &addrs);
+                        if (r < 0) {
+                                log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
                         continue;
@@ -4731,7 +4752,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv4(p, dhcp, address, gw, keep);
+        r = manager_set_ipv4(p, dhcp, addrs, gw, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
                 return r;

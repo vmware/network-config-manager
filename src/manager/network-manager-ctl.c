@@ -217,7 +217,7 @@ static int help(void) {
                                                       "\n\t\t\t\t      route [Prefix ADDRESS] route-lifetime [LifetimeSec NUMBER] Configures IPv6 Router Advertisement.\n"
                "  remove-ipv6ra                dev [DEVICE] Removes Ipv6 Router Advertisement.\n"
                "  enable-ipv6                  dev [DEVICE] [BOOLEAN] Enable or disables IPv6 on the link.\n"
-               "  set-ipv4                     dev [DEVICE] addr [ADDRESS] gw [GATEWAY ADDRESS] dhcp [BOOLEAN] keep [BOOLEAN] Configures device IPv4.\n"
+               "  set-ipv4                     dev [DEVICE] addr [ADDRESS] many [ADDRESS1,ADDRESS2...] gw [GATEWAY ADDRESS] dhcp [BOOLEAN] keep [BOOLEAN] Configures device IPv4.\n"
                "  set-ipv6                     dev [DEVICE] accept-ra [BOOLEAN] dhcp [BOOLEAN] keep [BOOLEAN] address|a|addr [ADDRESS] many [ADDRESS1,ADDRESS2...] gw [GATEWAY] Configures device IPv6.\n"
                "  add-sr-iov                   dev [DEVICE] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN]"
                                                      "\n\t\t\t\t      [trust BOOLEAN] [linkstate BOOLEAN or STRING] [macaddr ADDRESS] Configures SR-IOV VirtualFunction, "
