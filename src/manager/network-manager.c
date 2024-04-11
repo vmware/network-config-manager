@@ -2715,7 +2715,7 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
                         set_config(key_file, "Network", "DHCP", "ipv6");
                 else  if (mode == DHCP_CLIENT_IPV4)
                         set_config(key_file, "Network", "DHCP", "yes");
-        } else if (dhcp == 0) {
+        } else if (dhcp == DHCP_CLIENT_NO) {
                 if (mode == DHCP_CLIENT_YES)
                         set_config(key_file, "Network", "DHCP", "ipv4");
                 else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
