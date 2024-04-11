@@ -220,7 +220,7 @@ static int help(void) {
                "  set-ipv4                     dev [DEVICE] dhcp [BOOLEAN] addr [ADDRESS] many [ADDRESS1,ADDRESS2...] gw|gw4|g [GATEWAY] dns [SERVER1,SERVER2...]"
                                                       "\n\t\t\t\t      keep [BOOLEAN] Configures device IPv4.\n"
                "  set-ipv6                     dev [DEVICE] accept-ra [BOOLEAN] dhcp [BOOLEAN] address|a|addr [ADDRESS] many [ADDRESS1,ADDRESS2...] gw|gw6|g [GATEWAY]"
-                                                      "\n\t\t\t\t      keep [BOOLEAN] Configures device IPv6.\n"
+                                                      "\n\t\t\t\t     dns [SERVER1,SERVER2...] keep [BOOLEAN] Configures device IPv6.\n"
                "  add-sr-iov                   dev [DEVICE] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN]"
                                                      "\n\t\t\t\t      [trust BOOLEAN] [linkstate BOOLEAN or STRING] [macaddr ADDRESS] Configures SR-IOV VirtualFunction, "
                                                      "\n\t\t\t\t      VLANId, QualityOfService, VLANProtocol, MACSpoofCheck, QueryReceiveSideScaling, Trust, LinkState, MACAddress \n"
