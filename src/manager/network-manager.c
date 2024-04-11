@@ -2702,15 +2702,12 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
@@ -2771,15 +2768,12 @@ int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *
 
         assert(p);
 
-        if (keep) {
+        if (keep)
                 r = create_or_parse_network_file(p, &network);
-                if (r < 0)
-                        return r;
-        } else {
+        else
                 r = create_network_conf_file(p->ifname, &network);
-                if (r < 0)
-                        return r;
-        }
+        if (r < 0)
+                return r;
 
         r = parse_key_file(network, &key_file);
         if (r < 0)
