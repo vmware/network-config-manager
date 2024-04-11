@@ -4680,7 +4680,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                                 return r;
                         }
                         continue;
-                } else if (streq_fold(argv[i], "gateway") || streq_fold(argv[i], "gw") || streq_fold(argv[i], "g")) {
+                } else if (streq_fold(argv[i], "gateway") || streq_fold(argv[i], "gw") || streq_fold(argv[i], "gw4") || streq_fold(argv[i], "g")) {
                         parse_next_arg(argv, argc, i);
 
                         r = parse_ip_from_str(argv[i], &gw);
