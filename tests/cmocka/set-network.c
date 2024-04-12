@@ -170,7 +170,7 @@ void test_set_ipv6_dhcp_no_accept_ra_yes(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
 
-        assert_true(system("nmctl set-ipv6 dev test99 dhcp no accept-ra yes") >= 0);
+        assert_true(system("nmctl set-ipv6 dev test99 dhcp no send-release no accept-ra yes") >= 0);
 
         r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
         assert_true(r >= 0);
@@ -181,6 +181,8 @@ void test_set_ipv6_dhcp_no_accept_ra_yes(void **state) {
         assert_true(key_file_config_exists(key_file, "Network", "DHCP", "no"));
         assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
         assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+
+        assert_true(key_file_config_exists(key_file, "DHCPv6", "SendRelease", "no"));
 
         unlink("/etc/systemd/network/10-test99.network");
 }
