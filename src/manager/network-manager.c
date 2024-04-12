@@ -1263,7 +1263,7 @@ int manager_replace_link_address_internal(KeyFile *key_file, char **many, Addres
                         if (r >= 0) {
                                 if ((addr->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
                                     (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
-                                        i = g_list_delete_link(key_file->sections, i);
+                                        g_list_delete_link(key_file->sections, i);
                         }
                 }
         }
@@ -2693,6 +2693,7 @@ int manager_set_ipv6(const IfNameIndex *p,
 
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
+        AddressFamily family = ADDRESS_FAMILY_NO;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ char *network = NULL;
         int r;
@@ -2750,7 +2751,8 @@ int manager_set_ipv6(const IfNameIndex *p,
                         return r;
         }
 
-        r = manager_replace_link_address_internal(key_file, addrs, AF_INET6);
+        family = ADDRESS_FAMILY_IPV6;
+        r = manager_replace_link_address_internal(key_file, addrs, family);
         if (r < 0) {
                 log_warning("Failed to replace address on device='%s': %s", p->ifname, strerror(-r));
                 return r;
@@ -2783,6 +2785,7 @@ int manager_set_ipv4(const IfNameIndex *p, int lla, const int dhcp, char **addrs
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
+        AddressFamily family = ADDRESS_FAMILY_NO;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
         int r;
 
@@ -2832,7 +2835,8 @@ int manager_set_ipv4(const IfNameIndex *p, int lla, const int dhcp, char **addrs
                         return r;
         }
 
-        r = manager_replace_link_address_internal(key_file, addrs, AF_INET);
+        family = ADDRESS_FAMILY_IPV4;
+        r = manager_replace_link_address_internal(key_file, addrs, family);
         if (r < 0) {
                 log_warning("Failed to replace address on device='%s': %s", p->ifname, strerror(-r));
                 return r;
