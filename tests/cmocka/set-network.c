@@ -112,6 +112,40 @@ void test_set_ipv4_dhcp_yes_with_static_address_static_dns_use_dns_no(void **sta
         unlink("/etc/systemd/network/10-test99.network");
 }
 
+void test_set_ipv4_dhcp_yes_with_static_remove_static_automatic(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl set-ipv4 dev test99 dhcp yes a 192.168.1.14/24 gw 192.168.1.1") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        /* Remove static conf automatically */
+        assert_true(system("nmctl set-ipv4 dev test99 dhcp yes") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
+
+        assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.14/24"));
+        assert_false(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
+}
+
 void test_set_ipv6_dhcp_yes_accept_ra_yes(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
