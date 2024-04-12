@@ -1563,7 +1563,7 @@ _public_ int ncm_link_replace_address(int argc, char *argv[]) {
                                 log_warning("Failed to parse family='%s': %s", argv[i], strerror(EINVAL));
                                 return -EINVAL;
                         }
-                        family |= r;
+                        family = r;
                         continue;
                 }
 
@@ -1576,7 +1576,7 @@ _public_ int ncm_link_replace_address(int argc, char *argv[]) {
                 return -ENXIO;
         }
 
-        if (!addrs && family == ADDRESS_FAMILY_NO) {
+        if (!addrs || family == ADDRESS_FAMILY_NO) {
                 log_warning("Failed to parse address or family for device '%s': %s", p->ifname, strerror(-r));
                 return r;
         }

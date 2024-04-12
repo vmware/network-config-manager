@@ -1262,8 +1262,9 @@ int manager_replace_link_address_internal(KeyFile *key_file, char **many, Addres
                         r = parse_ip_from_str(key->v, &addr);
                         if (r >= 0) {
                                 if ((addr->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
-                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
-                                        g_list_delete_link(key_file->sections, i);
+                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6) ||
+                                    family == ADDRESS_FAMILY_YES)
+                                        i = g_list_delete_link(key_file->sections, i);
                         }
                 }
         }
@@ -1365,7 +1366,8 @@ int manager_remove_link_address(const IfNameIndex *p, char **addresses, AddressF
                         r = parse_ip_from_str(key->v, &addr);
                         if (r >= 0) {
                                 if ((addr->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
-                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
+                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6) ||
+                                    family == ADDRESS_FAMILY_YES)
                                         i = g_list_delete_link(key_file->sections, i);
                         }
                 }
