@@ -2712,6 +2712,25 @@ int manager_set_ipv6(const IfNameIndex *p,
         if (r < 0)
                 return r;
 
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
+        if (dhcp > 0) {
+                if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
+                        set_config(key_file, "Network", "DHCP", "ipv6");
+                else  if (mode == DHCP_CLIENT_IPV4)
+                        set_config(key_file, "Network", "DHCP", "yes");
+
+                /* Automatically turn on LinkLocalAddressing= and IPv6AcceptRA= */
+                set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                set_config(key_file, "Network", "IPv6AcceptRA", "yes");
+
+        } else if (dhcp == DHCP_CLIENT_NO) {
+                if (mode == DHCP_CLIENT_YES)
+                        set_config(key_file, "Network", "DHCP", "ipv4");
+                else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
+                        set_config(key_file, "Network", "DHCP", "no");
+        }
+
+        /* override  */
         if (accept_ra >= 0) {
                 if (accept_ra > 0)
                         set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
@@ -2723,19 +2742,6 @@ int manager_set_ipv6(const IfNameIndex *p,
                 r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(lla));
                 if (r < 0)
                         return r;
-        }
-
-        r = manager_acquire_link_dhcp_client_kind(p, &mode);
-        if (dhcp > 0) {
-                if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
-                        set_config(key_file, "Network", "DHCP", "ipv6");
-                else  if (mode == DHCP_CLIENT_IPV4)
-                        set_config(key_file, "Network", "DHCP", "yes");
-        } else if (dhcp == DHCP_CLIENT_NO) {
-                if (mode == DHCP_CLIENT_YES)
-                        set_config(key_file, "Network", "DHCP", "ipv4");
-                else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
-                        set_config(key_file, "Network", "DHCP", "no");
         }
 
         if (dns) {
