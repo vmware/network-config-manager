@@ -2686,11 +2686,12 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
 int manager_set_ipv6(const IfNameIndex *p,
                      const int dhcp,
                      const int accept_ra,
-                     int lla,
+                     const int lla,
                      char **addrs,
                      Route *rt6,
                      char **dns,
-                     int use_dns,
+                     const int use_dns,
+                     const int send_release,
                      bool keep) {
 
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -2758,6 +2759,12 @@ int manager_set_ipv6(const IfNameIndex *p,
                         return r;
         }
 
+        if (send_release >= 0) {
+                r = key_file_set_str(key_file, "DHCPv6", "SendRelease", bool_to_str(send_release));
+                if (r < 0)
+                        return r;
+        }
+
         /* Replace existing address with new one. Remove all if none is supplied */
         r = manager_replace_link_address_internal(key_file, addrs, ADDRESS_FAMILY_IPV6);
         if (r < 0) {
@@ -2789,7 +2796,16 @@ int manager_set_ipv6(const IfNameIndex *p,
         return dbus_network_reload();
 }
 
-int manager_set_ipv4(const IfNameIndex *p, int lla, const int dhcp, char **addrs, Route *rt4, char **dns, int use_dns, bool keep) {
+int manager_set_ipv4(const IfNameIndex *p,
+                     const int lla,
+                     const int dhcp,
+                     char **addrs,
+                     Route *rt4,
+                     char **dns,
+                     const int use_dns,
+                     const int send_release,
+                     bool keep) {
+
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
@@ -2842,6 +2858,11 @@ int manager_set_ipv4(const IfNameIndex *p, int lla, const int dhcp, char **addrs
                         return r;
         }
 
+        if (send_release >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "SendRelease", bool_to_str(send_release));
+                if (r < 0)
+                        return r;
+        }
         /* Replace existing address with new one. Remove all if none is supplied */
         r = manager_replace_link_address_internal(key_file, addrs, ADDRESS_FAMILY_IPV4);
         if (r < 0) {
