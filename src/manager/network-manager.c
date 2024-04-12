@@ -2779,7 +2779,7 @@ int manager_set_ipv6(const IfNameIndex *p,
         return dbus_network_reload();
 }
 
-int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *rt4, char **dns, int use_dns, bool keep) {
+int manager_set_ipv4(const IfNameIndex *p, int lla, const int dhcp, char **addrs, Route *rt4, char **dns, int use_dns, bool keep) {
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
@@ -2798,6 +2798,12 @@ int manager_set_ipv4(const IfNameIndex *p, const int dhcp, char **addrs, Route *
         r = parse_key_file(network, &key_file);
         if (r < 0)
                 return r;
+
+        if (lla >= 0) {
+                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(lla));
+                if (r < 0)
+                        return r;
+        }
 
         r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (dhcp > 0) {
