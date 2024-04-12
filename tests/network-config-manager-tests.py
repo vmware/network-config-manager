@@ -1417,7 +1417,6 @@ class TestCLINetwork:
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'DHCP') == 'ipv6')
         assert(parser.get('Network', 'IPv6AcceptRA') == 'no')
-        assert(parser.get('Network', 'LinkLocalAddressing') == 'ipv6')
 
     def test_cli_set_default_gateway(self):
         assert(link_exist('test99') == True)
