@@ -4555,8 +4555,8 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
+        int accept_ra = -1, dhcp = -1, use_dns = -1, lla = -1, send_release = -1;
         _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL;
-        int accept_ra = -1, dhcp = -1, use_dns = -1, lla = -1;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt6 = NULL;
         bool keep = true;
@@ -4682,6 +4682,17 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                         use_dns = r;
                         continue;
 
+                } else if (streq_fold(argv[i], "send-release")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse send-release-ipv6='%s': %s", argv[i], strerror(-r));
+                                return r;
+                        }
+
+                        send_release = r;
+                        continue;
                 } else if (streq_fold(argv[i], "keep")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4704,7 +4715,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv6(p, dhcp, accept_ra, lla, addrs, rt6, dns, use_dns, keep);
+        r = manager_set_ipv6(p, dhcp, accept_ra, lla, addrs, rt6, dns, use_dns, send_release, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
                 return r;

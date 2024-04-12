@@ -2686,11 +2686,12 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
 int manager_set_ipv6(const IfNameIndex *p,
                      const int dhcp,
                      const int accept_ra,
-                     int lla,
+                     const int lla,
                      char **addrs,
                      Route *rt6,
                      char **dns,
-                     int use_dns,
+                     const int use_dns,
+                     const int send_release,
                      bool keep) {
 
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
@@ -2754,6 +2755,12 @@ int manager_set_ipv6(const IfNameIndex *p,
 
         if (use_dns >= 0) {
                 r = key_file_set_str(key_file, "DHCPv6", "UseDNS", bool_to_str(use_dns));
+                if (r < 0)
+                        return r;
+        }
+
+        if (send_release >= 0) {
+                r = key_file_set_str(key_file, "DHCPv6", "SendRelease", bool_to_str(send_release));
                 if (r < 0)
                         return r;
         }

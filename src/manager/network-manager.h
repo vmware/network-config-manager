@@ -223,12 +223,13 @@ bool manager_config_exists(const char *section, const char *k, const char *v);
 int manager_set_ipv6(const IfNameIndex *p,
                      const int dhcp,
                      const int accept_ra,
-                     int lla,
+                     const int lla,
                      char **addrs,
                      Route *rt6,
                      char **dns,
-                     int use_dns,
-                     bool keep);
+                     const int use_dns,
+                     const int send_release,
+                     const bool keep);
 int manager_set_ipv4(const IfNameIndex *p,
                      int lla,
                      const int dhcp,
