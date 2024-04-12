@@ -1033,6 +1033,71 @@ _public_ int ncm_link_set_network_section(int argc, char *argv[]) {
         return manager_set_network_section_bool(p, ctl_to_config(m, argv[0]), v);
 }
 
+_public_ int ncm_link_set_network_section_lldp(int argc, char *argv[]) {
+        _cleanup_(config_manager_freep) ConfigManager *m = NULL;
+        _auto_cleanup_ IfNameIndex *p = NULL;
+        int r, receive = -1, emit = -1;
+
+        for (int i = 1; i < argc; i++) {
+                if (streq_fold(argv[i], "dev") || streq_fold(argv[i], "device") || streq_fold(argv[i], "d")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_ifname_or_index(argv[i], &p);
+                        if (r < 0) {
+                                log_warning("Failed to find device: %s", argv[i]);
+                                return r;
+                        }
+                        continue;
+                } else if (streq_fold(argv[i], "receive") || streq_fold(argv[i], "rx") || streq_fold(argv[i], "r")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse '%s': %s", argv[3], strerror(-r));
+                                return r;
+                        }
+
+                        receive = r;
+                        continue;
+                } else if (streq_fold(argv[i], "emit") || streq_fold(argv[i], "tx") || streq_fold(argv[i], "t")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse '%s': %s", argv[3], strerror(-r));
+                                return r;
+                        }
+
+                        emit = r;
+                        continue;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(-r));
+                return r;
+
+        }
+
+        if (!p) {
+                log_warning("Failed to find device: %s",  strerror(ENXIO));
+                return -ENXIO;
+        }
+
+        r = manager_network_section_configs_new(&m);
+        if (r < 0)
+                return log_oom();
+
+        if (receive >= 0)
+               r = manager_set_network_section_bool(p, ctl_to_config(m, "set-lldp"), receive);
+        if (emit >= 0)
+               r =  manager_set_network_section_bool(p, ctl_to_config(m, "set-emit-lldp"), emit);
+        if (r < 0) {
+                log_warning("Failed to set LLDP: %s",  strerror(-r));
+                return r;
+        }
+
+        return 0;
+}
+
 _public_ int ncm_link_set_network_ipv6_dad(int argc, char *argv[]) {
         _cleanup_(config_manager_freep) ConfigManager *m = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;

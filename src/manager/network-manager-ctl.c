@@ -186,8 +186,7 @@ static int help(void) {
                "                                      with IPv4LL-only hosts.\n"
                "  set-llmnr                    dev [DEVICE] [LLMNR BOOLEAN|resolve] Configures Link Local Multicast Name Resolution.\n"
                "  set-mcast-dns                dev [DEVICE] [MulticastDNS BOOLEAN|resolve] Configures Link Multicast DNS.\n"
-               "  set-lldp                     dev [DEVICE] [LLDP BOOLEAN] Configures Link Ethernet LLDP packet reception.\n"
-               "  set-emit-lldp                dev [DEVICE] [EmitLLDP BOOLEAN] Configures Link Ethernet LLDP packet emission.\n"
+               "  set-lldp                     dev [DEVICE] receive [BOOLEAN] emit [BOOLEAN] Configures Link Ethernet LLDP.\n"
                "  set-ipforward                dev [DEVICE] [IPForward BOOLEAN] Configures Link IP packet forwarding for the system.\n"
                "  set-ipv6acceptra             dev [DEVICE] [IPv6AcceptRA BOOLEAN] Configures Link IPv6 Router Advertisement (RA) reception support for the interface.\n"
                "  set-ipv6mtu                  dev [DEVICE] [MTU NUMBER] Configures IPv6 maximum transmission unit (MTU).\n"
@@ -426,8 +425,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-ipv4ll-route",              "ipv4ll-route",     3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-llmnr",                     "llmnr",            3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-mcast-dns",                 "mcast-dns",        3,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-lldp",                      "lldp",             3,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-emit-lldp",                 "elldp",            3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-lldp",                      "lldp",             3,        WORD_ANY, false, ncm_link_set_network_section_lldp },
                 { "set-ipforward",                 "ipfwd",            3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-ipv6acceptra",              "ipv6ara",          3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-ipmasquerade",              "ipmasq",           3,        WORD_ANY, false, ncm_link_set_network_section },
