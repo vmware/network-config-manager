@@ -186,8 +186,7 @@ static int help(void) {
                "                                      with IPv4LL-only hosts.\n"
                "  set-llmnr                    dev [DEVICE] [LLMNR BOOLEAN|resolve] Configures Link Local Multicast Name Resolution.\n"
                "  set-mcast-dns                dev [DEVICE] [MulticastDNS BOOLEAN|resolve] Configures Link Multicast DNS.\n"
-               "  set-lldp                     dev [DEVICE] [LLDP BOOLEAN] Configures Link Ethernet LLDP packet reception.\n"
-               "  set-emit-lldp                dev [DEVICE] [EmitLLDP BOOLEAN] Configures Link Ethernet LLDP packet emission.\n"
+               "  set-lldp                     dev [DEVICE] receive [BOOLEAN] emit [BOOLEAN] Configures Link Ethernet LLDP.\n"
                "  set-ipforward                dev [DEVICE] [IPForward BOOLEAN] Configures Link IP packet forwarding for the system.\n"
                "  set-ipv6acceptra             dev [DEVICE] [IPv6AcceptRA BOOLEAN] Configures Link IPv6 Router Advertisement (RA) reception support for the interface.\n"
                "  set-ipv6mtu                  dev [DEVICE] [MTU NUMBER] Configures IPv6 maximum transmission unit (MTU).\n"
@@ -218,9 +217,9 @@ static int help(void) {
                "  remove-ipv6ra                dev [DEVICE] Removes Ipv6 Router Advertisement.\n"
                "  enable-ipv6                  dev [DEVICE] [BOOLEAN] Enable or disables IPv6 on the link.\n"
                "  set-ipv4                     dev [DEVICE] dhcp [BOOLEAN] addr [ADDRESS] many [ADDRESS1,ADDRESS2...] gw|gw4|g [GATEWAY] dns [SERVER1,SERVER2...]"
-                                                      "\n\t\t\t\t      use-dns [BOOLEAN keep [BOOLEAN] Configures device IPv4.\n"
+                                                      "\n\t\t\t\t     lla [BOOLEAN|ipv6|ipv4] use-dns [BOOLEAN keep [BOOLEAN] Configures device IPv4.\n"
                "  set-ipv6                     dev [DEVICE] accept-ra [BOOLEAN] dhcp [BOOLEAN] address|a|addr [ADDRESS] many [ADDRESS1,ADDRESS2...] gw|gw6|g [GATEWAY]"
-                                                      "\n\t\t\t\t     dns [SERVER1,SERVER2...] use-dns [BOOLEAN] keep [BOOLEAN] Configures device IPv6.\n"
+                                                      "\n\t\t\t\t     lla [BOOLEAN|ipv6|ipv4] dns [SERVER1,SERVER2...] use-dns [BOOLEAN] keep [BOOLEAN] Configures device IPv6.\n"
                "  add-sr-iov                   dev [DEVICE] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN]"
                                                      "\n\t\t\t\t      [trust BOOLEAN] [linkstate BOOLEAN or STRING] [macaddr ADDRESS] Configures SR-IOV VirtualFunction, "
                                                      "\n\t\t\t\t      VLANId, QualityOfService, VLANProtocol, MACSpoofCheck, QueryReceiveSideScaling, Trust, LinkState, MACAddress \n"
@@ -426,8 +425,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "set-ipv4ll-route",              "ipv4ll-route",     3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-llmnr",                     "llmnr",            3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-mcast-dns",                 "mcast-dns",        3,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-lldp",                      "lldp",             3,        WORD_ANY, false, ncm_link_set_network_section },
-                { "set-emit-lldp",                 "elldp",            3,        WORD_ANY, false, ncm_link_set_network_section },
+                { "set-lldp",                      "lldp",             3,        WORD_ANY, false, ncm_link_set_network_section_lldp },
                 { "set-ipforward",                 "ipfwd",            3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-ipv6acceptra",              "ipv6ara",          3,        WORD_ANY, false, ncm_link_set_network_section },
                 { "set-ipmasquerade",              "ipmasq",           3,        WORD_ANY, false, ncm_link_set_network_section },

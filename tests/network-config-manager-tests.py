@@ -1676,7 +1676,7 @@ class TestCLINetwork:
     def test_cli_set_link_lldp(self):
         assert(link_exist('test99') == True)
 
-        subprocess.check_call("nmctl set-lldp dev test99 yes", shell = True)
+        subprocess.check_call("nmctl set-lldp dev test99 receive yes emit yes", shell = True)
 
         assert(unit_exist('10-test99.network') == True)
         parser = configparser.ConfigParser()
@@ -1684,17 +1684,6 @@ class TestCLINetwork:
 
         assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'LLDP') == 'yes')
-
-    def test_cli_set_link_emit_lldp(self):
-        assert(link_exist('test99') == True)
-
-        subprocess.check_call("nmctl set-emit-lldp dev test99 yes", shell = True)
-
-        assert(unit_exist('10-test99.network') == True)
-        parser = configparser.ConfigParser()
-        parser.read(os.path.join(networkd_unit_file_path, '10-test99.network'))
-
-        assert(parser.get('Match', 'Name') == 'test99')
         assert(parser.get('Network', 'EmitLLDP') == 'yes')
 
     def test_cli_set_domains(self):
