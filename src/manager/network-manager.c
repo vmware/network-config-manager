@@ -1262,8 +1262,9 @@ int manager_replace_link_address_internal(KeyFile *key_file, char **many, Addres
                         r = parse_ip_from_str(key->v, &addr);
                         if (r >= 0) {
                                 if ((addr->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
-                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
-                                        g_list_delete_link(key_file->sections, i);
+                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6) ||
+                                    family == ADDRESS_FAMILY_YES)
+                                        i = g_list_delete_link(key_file->sections, i);
                         }
                 }
         }
@@ -1365,7 +1366,8 @@ int manager_remove_link_address(const IfNameIndex *p, char **addresses, AddressF
                         r = parse_ip_from_str(key->v, &addr);
                         if (r >= 0) {
                                 if ((addr->family == AF_INET && family & ADDRESS_FAMILY_IPV4) ||
-                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6))
+                                    (addr->family == AF_INET6 && family & ADDRESS_FAMILY_IPV6) ||
+                                    family == ADDRESS_FAMILY_YES)
                                         i = g_list_delete_link(key_file->sections, i);
                         }
                 }
@@ -2693,7 +2695,6 @@ int manager_set_ipv6(const IfNameIndex *p,
 
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
-        AddressFamily family = ADDRESS_FAMILY_NO;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ char *network = NULL;
         int r;
@@ -2711,6 +2712,25 @@ int manager_set_ipv6(const IfNameIndex *p,
         if (r < 0)
                 return r;
 
+        r = manager_acquire_link_dhcp_client_kind(p, &mode);
+        if (dhcp > 0) {
+                if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
+                        set_config(key_file, "Network", "DHCP", "ipv6");
+                else  if (mode == DHCP_CLIENT_IPV4)
+                        set_config(key_file, "Network", "DHCP", "yes");
+
+                /* Automatically turn on LinkLocalAddressing= and IPv6AcceptRA= */
+                set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                set_config(key_file, "Network", "IPv6AcceptRA", "yes");
+
+        } else if (dhcp == DHCP_CLIENT_NO) {
+                if (mode == DHCP_CLIENT_YES)
+                        set_config(key_file, "Network", "DHCP", "ipv4");
+                else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
+                        set_config(key_file, "Network", "DHCP", "no");
+        }
+
+        /* override  */
         if (accept_ra >= 0) {
                 if (accept_ra > 0)
                         set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
@@ -2722,19 +2742,6 @@ int manager_set_ipv6(const IfNameIndex *p,
                 r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(lla));
                 if (r < 0)
                         return r;
-        }
-
-        r = manager_acquire_link_dhcp_client_kind(p, &mode);
-        if (dhcp > 0) {
-                if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
-                        set_config(key_file, "Network", "DHCP", "ipv6");
-                else  if (mode == DHCP_CLIENT_IPV4)
-                        set_config(key_file, "Network", "DHCP", "yes");
-        } else if (dhcp == DHCP_CLIENT_NO) {
-                if (mode == DHCP_CLIENT_YES)
-                        set_config(key_file, "Network", "DHCP", "ipv4");
-                else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
-                        set_config(key_file, "Network", "DHCP", "no");
         }
 
         if (dns) {
@@ -2751,13 +2758,14 @@ int manager_set_ipv6(const IfNameIndex *p,
                         return r;
         }
 
-        family = ADDRESS_FAMILY_IPV6;
-        r = manager_replace_link_address_internal(key_file, addrs, family);
+        /* Replace existing address with new one. Remove all if none is supplied */
+        r = manager_replace_link_address_internal(key_file, addrs, ADDRESS_FAMILY_IPV6);
         if (r < 0) {
                 log_warning("Failed to replace address on device='%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
+        /* Replace existing GW6 with new one. Remove if none is supplied */
         if (rt6) {
                 r = manager_set_gateway(key_file, rt6);
                 if (r < 0) {
@@ -2785,7 +2793,6 @@ int manager_set_ipv4(const IfNameIndex *p, int lla, const int dhcp, char **addrs
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
-        AddressFamily family = ADDRESS_FAMILY_NO;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
         int r;
 
@@ -2835,13 +2842,14 @@ int manager_set_ipv4(const IfNameIndex *p, int lla, const int dhcp, char **addrs
                         return r;
         }
 
-        family = ADDRESS_FAMILY_IPV4;
-        r = manager_replace_link_address_internal(key_file, addrs, family);
+        /* Replace existing address with new one. Remove all if none is supplied */
+        r = manager_replace_link_address_internal(key_file, addrs, ADDRESS_FAMILY_IPV4);
         if (r < 0) {
                 log_warning("Failed to replace address on device='%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
+        /* Replace existing GW4 with new one. Remove if none is supplied */
         if (rt4) {
                 r = manager_set_gateway(key_file, rt4);
                 if (r < 0) {

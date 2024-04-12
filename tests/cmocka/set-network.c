@@ -184,6 +184,41 @@ void test_set_ipv6_dhcp_no_accept_ra_yes(void **state) {
         unlink("/etc/systemd/network/10-test99.network");
 }
 
+void test_set_ipv6_dhcp_yes_with_static_remove_static_automatic(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl set-ipv6 dev test99 dhcp yes a fe80::4/64 gw fe80::1") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+        assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
+        assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "fe80::4/64"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "fe80::1"));
+
+        /* Remove static conf automatically */
+        assert_true(system("nmctl set-ipv6 dev test99 dhcp yes") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
+
+        assert_false(key_file_config_exists(key_file, "Address", "Address", "fe80::4/64"));
+        assert_false(key_file_config_exists(key_file, "Route", "Gateway", "fe80::1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
+}
+
 void test_set_static_address_gw(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
