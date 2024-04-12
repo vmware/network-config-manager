@@ -2752,14 +2752,14 @@ int manager_set_ipv6(const IfNameIndex *p,
 
         r = manager_replace_link_address_internal(key_file, addrs, AF_INET6);
         if (r < 0) {
-                log_warning("Failed to replace address on device '%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to replace address on device='%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
         if (rt6) {
                 r = manager_set_gateway(key_file, rt6);
                 if (r < 0) {
-                        log_warning("Failed to configure gateway on device '%s': %s", p->ifname, strerror(-r));
+                        log_warning("Failed to configure gateway on device='%s': %s", p->ifname, strerror(-r));
                         return r;
                 }
         } else {
@@ -2834,14 +2834,14 @@ int manager_set_ipv4(const IfNameIndex *p, int lla, const int dhcp, char **addrs
 
         r = manager_replace_link_address_internal(key_file, addrs, AF_INET);
         if (r < 0) {
-                log_warning("Failed to replace address on device '%s': %s", p->ifname, strerror(-r));
+                log_warning("Failed to replace address on device='%s': %s", p->ifname, strerror(-r));
                 return r;
         }
 
         if (rt4) {
                 r = manager_set_gateway(key_file, rt4);
                 if (r < 0) {
-                        log_warning("Failed to configure gateway on device '%s': %s", p->ifname, strerror(-r));
+                        log_warning("Failed to configure gateway on device='%s': %s", p->ifname, strerror(-r));
                         return r;
                 }
         } else {
