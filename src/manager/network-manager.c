@@ -2681,7 +2681,16 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
         return dbus_network_reload();
 }
 
-int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, char **addrs, Route *rt6, char **dns, int use_dns, bool keep) {
+int manager_set_ipv6(const IfNameIndex *p,
+                     const int dhcp,
+                     const int accept_ra,
+                     int lla,
+                     char **addrs,
+                     Route *rt6,
+                     char **dns,
+                     int use_dns,
+                     bool keep) {
+
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
@@ -2708,6 +2717,11 @@ int manager_set_ipv6(const IfNameIndex *p, const int dhcp, const int accept_ra, 
                 set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
         }
 
+        if (lla >= 0) {
+                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(lla));
+                if (r < 0)
+                        return r;
+        }
 
         r = manager_acquire_link_dhcp_client_kind(p, &mode);
         if (dhcp > 0) {

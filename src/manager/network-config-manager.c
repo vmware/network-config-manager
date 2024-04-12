@@ -4491,7 +4491,7 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL;
-        int accept_ra = -1, dhcp = -1, use_dns = -1;
+        int accept_ra = -1, dhcp = -1, use_dns = -1, lla = -1;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt6 = NULL;
         bool keep = true;
@@ -4516,6 +4516,16 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                                 return r;
                         }
                         accept_ra = r;
+                        continue;
+                } else if (streq_fold(argv[i], "lla") || streq_fold(argv[i], "link-local")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = link_local_address_type_to_kind(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse link-local %s': %s", argv[2], strerror(-r));
+                                return r;
+                        }
+                        lla = r;
                         continue;
                 } else if (streq_fold(argv[i], "dhcp")) {
                         parse_next_arg(argv, argc, i);
@@ -4629,7 +4639,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
-        r = manager_set_ipv6(p, dhcp, accept_ra, addrs, rt6, dns, use_dns, keep);
+        r = manager_set_ipv6(p, dhcp, accept_ra, lla, addrs, rt6, dns, use_dns, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
