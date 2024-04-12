@@ -500,6 +500,11 @@ static int cli_run(int argc, char *argv[]) {
                 { "show-nft-rules",                "nft-rule",         1,        WORD_ANY, false, ncm_nft_show_rules },
                 { "delete-nft-rule",               "dnft-rule",        2,        WORD_ANY, false, ncm_nft_delete_rule },
                 { "nft-run",                       "nftr",             WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
+
+                /* VCSA */
+                { "set-ipv4",                      "sip4" ,            4,        WORD_ANY, false, ncm_link_set_ipv4 },
+                { "set-ipv6",                      "sip6" ,            4,        WORD_ANY, false, ncm_link_set_ipv6 },
+
                 /* Deprecated */
                 { "show",                          "",                 WORD_ANY, WORD_ANY, false, ncm_link_status },
                 { "add-dns",                       "adns",             2,        WORD_ANY, false, ncm_set_dns_server },
@@ -509,8 +514,6 @@ static int cli_run(int argc, char *argv[]) {
                 { "delete-ntp",                    "dntp",             1,        WORD_ANY, false, ncm_link_remove_ntp },
                 { "del-addr",                      "da",               3,        WORD_ANY, false, ncm_link_remove_address },
                 { "add-default-gw",                "gw",               4,        WORD_ANY, false, ncm_link_set_default_gateway },
-                { "set-ipv4",                      "sip4" ,            2,        WORD_ANY, false, ncm_link_set_ipv4 },
-                { "set-ipv6",                      "sip6" ,            2,        WORD_ANY, false, ncm_link_set_ipv6 },
                 {}
         };
 
