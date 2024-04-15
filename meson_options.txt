@@ -1,5 +1,8 @@
 option('version-tag', type : 'string',
        description : 'override the git version string')
 
+option('nftables', type : 'boolean', value : false,
+       description : 'enable nftable support')
+
 option('tests', type : 'boolean', value : false,
        description : 'enable tests')

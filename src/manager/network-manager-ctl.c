@@ -299,6 +299,7 @@ static int help(void) {
                "  apply-file                   [FILE] Generates network file configuration from yaml file.\n"
                "  apply                        Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
                "  apply-cmdline                [FILE | COMMAND LINE] Generates network file configuration from command kernel command line or command line.\n"
+#if HAVE_NFTABLES
                "  add-nft-table                [FAMILY {ipv4|ipv6|ip}] [TABLE] adds a new table.\n"
                "  show-nft-tables              [FAMILY {ipv4|ipv6|ip}] shows nftable's tables.\n"
                "  delete-nft-table             [FAMILY {ipv4|ipv6|ip}] [TABLE] deletes a existing nftable's table.\n"
@@ -310,6 +311,7 @@ static int help(void) {
                "  show-nft-rules               [TABLE] shows nftable's rules.\n"
                "  delete-nft-rule              [FAMILY {ipv4|ipv6|ip}] [TABLE] [CHAIN] [HANDLE] deletes a nftable's rule from table\n"
                "  nft-run                      runs a nft command. See man NFT(8)\n"
+#endif
                , program_invocation_short_name
         );
 
@@ -490,6 +492,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "apply-file",                    "af",               1,        WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply",                         "apply",            WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply-cmdline",                 "applycmd",         WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
+#if HAVE_NFTABLES
                 { "add-nft-table",                 "atable",           2,        WORD_ANY, false, ncm_nft_add_tables },
                 { "show-nft-tables",               "table",            WORD_ANY, WORD_ANY, false, ncm_nft_show_tables },
                 { "delete-nft-table",              "dtable",           2,        WORD_ANY, false, ncm_nft_delete_table },
@@ -500,7 +503,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "show-nft-rules",                "nft-rule",         1,        WORD_ANY, false, ncm_nft_show_rules },
                 { "delete-nft-rule",               "dnft-rule",        2,        WORD_ANY, false, ncm_nft_delete_rule },
                 { "nft-run",                       "nftr",             WORD_ANY, WORD_ANY, false, ncm_nft_run_command },
-
+#endif
                 /* VCSA */
                 { "set-ipv4",                      "sip4" ,            4,        WORD_ANY, false, ncm_link_set_ipv4 },
                 { "set-ipv6",                      "sip6" ,            4,        WORD_ANY, false, ncm_link_set_ipv6 },

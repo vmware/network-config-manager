@@ -2,6 +2,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#if HAVE_NFTABLES
+
 #include <assert.h>
 #include <errno.h>
 #include <libnftnl/table.h>
@@ -93,3 +95,5 @@ int nf_add_payload(NFTNLRule *rl, uint32_t base, uint32_t dreg, uint32_t offset,
         nftnl_rule_add_expr(rl->rule, e);
         return 0;
 }
+
+#endif

@@ -1,6 +1,9 @@
 /* Copyright 2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+#if HAVE_NFTABLES
+
 #include <arpa/inet.h>
 #include <assert.h>
 #include <errno.h>
@@ -747,3 +750,5 @@ int nft_delete_rule(int family, const char *table, const char *chain, int handle
 
         return mnl_send(m, 0, 0, NETLINK_NETFILTER);
 }
+
+#endif

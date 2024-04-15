@@ -93,6 +93,14 @@ else
 endif
 
 ############################################################
+want_nftables = get_option('nftables')
+if want_nftables
+   conf.set10('HAVE_NFTABLES', get_option('nftables'))
+else
+   conf.set10('HAVE_NFTABLES', false)
+endif
+
+##############################################################
 
 config_h = configure_file(
         output : 'config.h',
@@ -115,9 +123,9 @@ gobj_dep = dependency('gobject-2.0')
 gio_dep = dependency('gio-2.0')
 yaml_dep = dependency('yaml-0.1')
 libmnl_dep = dependency('libmnl')
-libnftnl_dep = dependency('libnftnl')
-libnnft_dep = dependency('libnftables')
 libjson_dep = dependency('json-c')
+libnftnl_dep = dependency('libnftnl')
+libnft_dep = dependency('libnftables')
 
 includes = include_directories('src/ctl',
                                'src/dbus',
@@ -135,22 +143,43 @@ includes = include_directories('src/ctl',
                                'include',
                                '.')
 
-network_config_managerlib = library('network_config_manager',
+if want_nftables
+   network_config_managerlib = library('network_config_managerlib',
                         network_config_manager_sources,
                         include_directories: includes,
                         dependencies : [
-                        libsystemd, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnnft_dep, libjson_dep],
+                        libsystemd, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libjson_dep, libnftnl_dep, libnft_dep],
                         install: true,
                         version: meson.project_version(),
                         soversion: so_version)
+else
+  network_config_managerlib = library('network_config_managerlib',
+                        network_config_manager_sources,
+                        include_directories: includes,
+                        dependencies : [
+                        libsystemd, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libjson_dep],
+                        install: true,
+                        version: meson.project_version(),
+                        soversion: so_version)
+endif
 
-network_config_manager = executable(
+if want_nftables
+   network_config_manager = executable(
                               'nmctl',
                               [network_config_manager_sources, 'src/manager/network-manager-ctl.c'],
                               include_directories : includes,
                               dependencies : [
-                              libsystemd, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnnft_dep, libjson_dep],
+                              libsystemd, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnft_dep, libjson_dep],
                               install : true)
+else
+    network_config_manager = executable(
+                              'nmctl',
+                              [network_config_manager_sources, 'src/manager/network-manager-ctl.c'],
+                              include_directories : includes,
+                              dependencies : [
+                              libsystemd, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libjson_dep],
+                              install : true)
+endif
 
 pkg = import('pkgconfig')
 pkg.generate(libraries : network_config_managerlib,
@@ -176,6 +205,6 @@ network_config_manager_tests = executable(
                               ],
                               include_directories : includes,
                               dependencies : [
-                              libsystemd, cmocka_dep, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnnft_dep, libjson_dep],
+                              libsystemd, cmocka_dep, glib_dep, gio_dep, gobj_dep, yaml_dep, libmnl_dep, libnftnl_dep, libnft_dep, libjson_dep],
                               install : true)
 endif
