@@ -27,4 +27,4 @@ jobs:
     - name: build without nftables and tests
       run: meson --prefix=/usr build-ex; ninja -C build-ex
     - name: build clang
-      run: CC=clang  meson build-clang; ninja -C build-clang
+      run: CC=clang  meson setup build-clang; ninja -C build-clang

@@ -299,7 +299,6 @@ int json_fill_system_status(char **ret) {
         _auto_cleanup_ char *mdns = NULL, *llmnr = NULL, *dns_over_tls = NULL, *conf_mode = NULL;
         _cleanup_(routing_policy_rules_freep) RoutingPolicyRules *rules = NULL;
         _cleanup_(links_freep) Links *links = NULL;
-        _auto_cleanup_strv_ char **ntp = NULL;
         _auto_cleanup_ DNSServer *c = NULL;
         sd_id128_t machine_id = {};
         sd_id128_t boot_id = {};
@@ -683,7 +682,6 @@ int json_fill_system_status(char **ret) {
 }
 
 int json_fill_dns_server(const IfNameIndex *p, int ifindex, json_object *jn) {
-        _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jdns = NULL;
         int r;
 
@@ -711,7 +709,6 @@ int json_build_dns_server(const IfNameIndex *p, char **dns_config) {
         _cleanup_(dns_servers_freep) DNSServers *fallback = NULL, *dns = NULL;
         _cleanup_(json_object_putp) json_object *jobj = NULL, *jdns = NULL;
         _auto_cleanup_strv_ char **dhcp_dns = NULL;
-        _auto_cleanup_ DNSServer *current = NULL;
         _auto_cleanup_ char *provider = NULL;
         GSequenceIter *i;
         DNSServer *d;
@@ -810,7 +807,6 @@ int json_build_dns_server(const IfNameIndex *p, char **dns_config) {
 }
 
 static int json_parse_dns_search_domains(const json_object *jn, const char *link, json_object **ret) {
-        _cleanup_(json_object_putp) json_object *jdns = NULL;
         json_object *interfaces = NULL, *ifname = NULL;
 
         assert(jn);
@@ -1064,7 +1060,6 @@ int json_build_ntp_server(const IfNameIndex *p, json_object **ret) {
         strv_foreach(n, link_ntp ? link_ntp : ntp) {
                 _cleanup_(json_object_putp) json_object *jaddr = NULL, *s = NULL;
                 _auto_cleanup_ IPAddress *a = NULL;
-                _auto_cleanup_ char *pretty = NULL;
 
                 jaddr = json_object_new_object();
                 if (!jaddr)
