@@ -21,8 +21,10 @@ jobs:
     - name: install config parser
       run: pip3 install configparser
     - name: make
-      run: meson --prefix=/usr -Dtests=true build; ninja -C build; sudo ninja -C build install; sudo make install-tests
+      run: meson --prefix=/usr -Dtests=true -Dnftables=true build; ninja -C build; sudo ninja -C build install; sudo make install-tests
     - name: run tests
       run: sudo cp -r tests /run/network-config-manager-ci; sudo pytest -v -s /run/network-config-manager-ci/network-config-manager-tests.py
+    - name: build without nftables and tests
+      run: meson --prefix=/usr build-ex; ninja -C build-ex
     - name: build clang
       run: CC=clang  meson build-clang; ninja -C build-clang
