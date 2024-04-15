@@ -619,7 +619,6 @@ int remove_key_value_from_config_file(const char *path, const char *section, con
 
 int remove_section_from_config_file(const char *path, const char *section) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
-        _cleanup_ (section_freep) Section *sec = NULL;
         int r;
 
         assert(path);
