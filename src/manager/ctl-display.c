@@ -29,7 +29,6 @@
 #include "network-sriov.h"
 #include "network-util.h"
 #include "networkd-api.h"
-#include "nftables.h"
 #include "parse-util.h"
 #include "udev-hwdb.h"
 
