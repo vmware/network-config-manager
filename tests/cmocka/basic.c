@@ -721,6 +721,47 @@ static void test_cli_set_ipv6_with_static_address_and_dns(void **state) {
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "::1"));
 }
 
+static void test_cli_set_ipv6_with_static_dynamic_and_dns(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl add-addr dev test99 a fe80::15/64") >= 0);
+        assert_true(system("nmctl set-gw-family dev test99 gw6 ::1") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "fe80::15/64"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "::1"));
+
+        assert_true(system("nmctl set-ipv6 dev test99 dhcp yes send-release no use-dns no many fe80::10/64,fe80::11/64 gw fe80::1 dns fe80::4,fe80::5") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
+        assert_true(key_file_config_exists(key_file, "Network", "IPv6AcceptRA", "yes"));
+        assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv6"));
+        assert_true(key_file_config_exists(key_file, "Network", "DNS", "fe80::4 fe80::5"));
+
+        assert_true(key_file_config_exists(key_file, "DHCPv6", "UseDNS", "no"));
+        assert_true(key_file_config_exists(key_file, "DHCPv6", "SendRelease", "no"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "fe80::10/64"));
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "fe80::11/64"));
+
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "fe80::1"));
+
+        assert_false(key_file_config_exists(key_file, "Address", "Address", "fe80::15/64"));
+        assert_false(key_file_config_exists(key_file, "Route", "Gateway", "::1"));
+}
+
 static void test_add_many_address_space_separated(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
@@ -1741,6 +1782,7 @@ int main(void) {
         cmocka_unit_test (test_cli_set_ipv6_with_static_address),
         cmocka_unit_test (test_cli_set_ipv6_with_send_release),
         cmocka_unit_test (test_cli_set_ipv6_with_static_address_and_dns),
+        cmocka_unit_test (test_cli_set_ipv6_with_static_dynamic_and_dns),
         cmocka_unit_test (test_add_many_address_space_separated),
         cmocka_unit_test (test_add_remove_many_address_family_ipv6),
         cmocka_unit_test (test_add_remove_many_address_family_ipv4),
