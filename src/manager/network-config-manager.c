@@ -23,7 +23,6 @@
 #include "network-sriov.h"
 #include "network-util.h"
 #include "networkd-api.h"
-#include "nftables.h"
 #include "parse-util.h"
 
 _public_ int ncm_link_set_mtu(int argc, char *argv[]) {

@@ -2,6 +2,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#if HAVE_NFTABLES
+
 #include <network-config-manager.h>
 
 #include "alloc-util.h"
@@ -394,3 +396,5 @@ _public_ int ncm_nft_run_command(int argc, char *argv[]) {
         g_print("%s", s->str);
         return r;
 }
+
+#endif
