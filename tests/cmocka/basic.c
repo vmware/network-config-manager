@@ -762,6 +762,149 @@ static void test_cli_set_ipv6_with_static_dynamic_and_dns(void **state) {
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "::1"));
 }
 
+static void test_cli_set_ipv4_with_static_address(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl add-addr dev test99 a 192.168.1.100") >= 0);
+        assert_true(system("nmctl set-gw-family dev test99 gw4 192.168.1.1") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        assert_true(system("nmctl set-ipv4 dev test99 dhcp no many 192.168.1.101,192.168.1.102, gw 192.168.1.2") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.101"));
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.102"));
+
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+
+        assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
+        assert_false(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+}
+
+static void test_cli_set_ipv4_with_send_release(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl add-addr dev test99 a 192.168.1.100") >= 0);
+        assert_true(system("nmctl set-gw-family dev test99 gw4 192.168.1.1") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        assert_true(system("nmctl set-ipv4 dev test99 dhcp yes lla ipv4 send-release no") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+        assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv4"));
+
+        assert_true(key_file_config_exists(key_file, "DHCPv4", "SendRelease", "no"));
+
+        assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
+        assert_false(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+}
+
+static void test_cli_set_ipv4_with_static_address_and_dns(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl add-addr dev test99 a 192.168.1.100") >= 0);
+        assert_true(system("nmctl set-gw-family dev test99 gw4 192.168.1.1") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        assert_true(system("nmctl set-ipv4 dev test99 dhcp no use-dns no addr 192.168.1.101 gw 192.168.1.2 dns 192.168.1.10,192.168.1.20") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
+        assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.10 192.168.1.20"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.101"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+        assert_true(key_file_config_exists(key_file, "DHCPv4", "UseDNS", "no"));
+
+        assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
+        assert_false(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+}
+
+static void test_cli_set_ipv4_with_static_dynamic_and_dns(void **state) {
+        _cleanup_(key_file_freep) KeyFile *key_file = NULL;
+        int r;
+
+        assert_true(system("nmctl add-addr dev test99 a 192.168.1.100") >= 0);
+        assert_true(system("nmctl set-gw-family dev test99 gw4 192.168.1.1") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        assert_true(system("nmctl set-ipv4 dev test99 dhcp yes lla ipv4 send-release no use-dns no many 192.168.1.101,192.168.1.102 gw 192.168.1.2 dns 192.168.1.10,192.168.1.20") >= 0);
+
+        r = parse_key_file("/etc/systemd/network/10-test99.network", &key_file);
+        assert_true(r >= 0);
+
+        display_key_file(key_file);
+        assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
+
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+        assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv4"));
+        assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.10 192.168.1.20"));
+
+        assert_true(key_file_config_exists(key_file, "DHCPv4", "UseDNS", "no"));
+        assert_true(key_file_config_exists(key_file, "DHCPv4", "SendRelease", "no"));
+
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.101"));
+        assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.102"));
+
+        assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+
+        assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
+        assert_false(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+}
+
 static void test_add_many_address_space_separated(void **state) {
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         int r;
@@ -1783,6 +1926,10 @@ int main(void) {
         cmocka_unit_test (test_cli_set_ipv6_with_send_release),
         cmocka_unit_test (test_cli_set_ipv6_with_static_address_and_dns),
         cmocka_unit_test (test_cli_set_ipv6_with_static_dynamic_and_dns),
+        cmocka_unit_test (test_cli_set_ipv4_with_static_address),
+        cmocka_unit_test (test_cli_set_ipv4_with_send_release),
+        cmocka_unit_test (test_cli_set_ipv4_with_static_address_and_dns),
+        cmocka_unit_test (test_cli_set_ipv4_with_static_dynamic_and_dns),
         cmocka_unit_test (test_add_many_address_space_separated),
         cmocka_unit_test (test_add_remove_many_address_family_ipv6),
         cmocka_unit_test (test_add_remove_many_address_family_ipv4),
