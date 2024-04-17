@@ -96,6 +96,7 @@ Or by simply doing
 - [Generate systemd-networkd's configuration from yaml](https://www.linkedin.com/pulse/generate-systemd-networkds-configuration-from-yml-file-susant-sahani)
 - [VCSA Photon OS Network Configurations via network-config-manager](https://www.linkedin.com/pulse/vcsa-network-configurations-via-nmctl-susant-sahani-5xh8f)
 - [Configure ipv6 address via network-config-manager](https://www.linkedin.com/pulse/photon-os-ipv6-network-configuration-via-nitesh-kumar-xvgac)
+- [Configure ipv4 address via network-config-manager](https://www.linkedin.com/pulse/photon-os-ipv4-network-configuration-via-nitesh-kumar-ejemc)
 - [Configure DNSMode via network-config-manager](https://www.linkedin.com/pulse/configure-dnsmode-using-network-config-manager-nitesh-kumar-di3kf)
 
 ### Contributing
