@@ -366,6 +366,7 @@ static int manager_set_link_dynamic_conf_internal(KeyFile *key_file,
 
         return 0;
 }
+
 int manager_set_link_dynamic_conf(const IfNameIndex *p,
                                   int accept_ra,
                                   DHCPClient dhcp_kind,
@@ -424,7 +425,6 @@ int manager_set_link_dynamic_conf(const IfNameIndex *p,
 
         return dbus_network_reload();
 }
-
 
 static int manager_set_link_static_conf_internal(KeyFile *key_file,
                                                  const IfNameIndex *p,
@@ -2902,32 +2902,48 @@ int manager_reconfigure_link(const IfNameIndex *i) {
         return dbus_reconfigure_link(i->ifindex);
 }
 
-int manager_write_wifi_config(const Network *n, const GString *config) {
+int manager_write_networkd_debug_config(void) {
+        const char *s = "[Service]\nEnvironment=SYSTEMD_LOG_LEVEL=debug\n";
         _auto_cleanup_ char *path = NULL;
         _auto_cleanup_close_ int fd = -1;
         int r;
 
-        assert(config);
+        (void) mkdir("/etc/systemd/system/systemd-networkd.service.d/", 0755);
 
-        (void) mkdir("/etc/network-config-manager", 0755);
-
-        r = create_conf_file("/etc/network-config-manager", "wpa_supplicant", "conf", &path);
-        if (r < 0)
+        r = create_conf_file("/etc/systemd/system/systemd-networkd.service.d/", "10-debug", "conf", &path);
+        if (r < 0) {
+                log_warning("Failed to create systemd-networkd debug file '%s': %s", path, strerror(-r));
                 return r;
+        }
 
         r = open(path, O_WRONLY);
         if (r < 0) {
-                log_warning("Failed to open wpa supplicant file '%s': %s", path, strerror(-r));
+                log_warning("Failed to open systemd-networkd debug file '%s': %s", path, strerror(-r));
                 return r;
         }
 
         fd = r;
-        r = write(fd, config->str, config->len);
-        if (r < 0)
-                return -errno;
+        r = write(fd, s, strlen(s));
+        if (r < 0) {
+                log_warning("Failed to write to systemd-networkd debug file '%s': %s", path, strerror(-r));
+                return r;
+        }
 
         chmod(path, 0644);
-        return 0;
+
+        return dbus_restart_unit("systemd-networkd.service");
+}
+
+int manager_remove_networkd_debug_config(void) {
+        _auto_cleanup_ char *path = NULL;
+        _auto_cleanup_close_ int fd = -1;
+        int r;
+
+        r = remove("/etc/systemd/system/systemd-networkd.service.d/10-debug.conf");
+        if (r < 0)
+                return r;
+
+        return dbus_restart_unit("systemd-networkd.service");
 }
 
 int manager_write_network_config(const Network *n, const GString *config) {
