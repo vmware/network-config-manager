@@ -175,9 +175,9 @@ int ncm_get_link_status(const char *ifname, char **ret);
 
 int ncm_get_dhcp_mode(int argc, char *argv[]);
 
+int ncm_enable_networkd_debug(int argc, char *argv[]);
 
-/* deprecated API*/
-
+/* Used by VCSA*/
 int ncm_link_set_ipv6(int argc, char *argv[]);
 int ncm_link_set_ipv4(int argc, char *argv[]);
 

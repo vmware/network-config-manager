@@ -299,6 +299,7 @@ static int help(void) {
                "  apply-file                   [FILE] Generates network file configuration from yaml file.\n"
                "  apply                        Generates network file configuration from yaml files found in /etc/network-config-manager/yaml.\n"
                "  apply-cmdline                [FILE | COMMAND LINE] Generates network file configuration from command kernel command line or command line.\n"
+               "  set-systemd-networkd-debug   debug [BOOLEAN] sets sytstemd-networkd into debug mode.\n"
 #if HAVE_NFTABLES
                "  add-nft-table                [FAMILY {ipv4|ipv6|ip}] [TABLE] adds a new table.\n"
                "  show-nft-tables              [FAMILY {ipv4|ipv6|ip}] shows nftable's tables.\n"
@@ -492,6 +493,7 @@ static int cli_run(int argc, char *argv[]) {
                 { "apply-file",                    "af",               1,        WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply",                         "apply",            WORD_ANY, WORD_ANY, false, generate_networkd_config_from_yaml },
                 { "apply-cmdline",                 "applycmd",         WORD_ANY, WORD_ANY, false, generate_networkd_config_from_command_line },
+                { "set-systemd-networkd-debug",    "debug",            WORD_ANY, WORD_ANY, false, ncm_enable_networkd_debug},
 #if HAVE_NFTABLES
                 { "add-nft-table",                 "atable",           2,        WORD_ANY, false, ncm_nft_add_tables },
                 { "show-nft-tables",               "table",            WORD_ANY, WORD_ANY, false, ncm_nft_show_tables },

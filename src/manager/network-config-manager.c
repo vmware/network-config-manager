@@ -4862,7 +4862,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                         if (r < 0) {
                                 log_warning("Failed to parse keep='%s': %s", argv[i], strerror(-r));
                                 return r;
-                                }
+                        }
 
                         keep = r;
                         continue;
@@ -5021,6 +5021,35 @@ _public_ int ncm_link_edit_link_config(int argc, char *argv[]) {
                 log_warning("Failed to edit link configuration of device '%s': %s", argv[1], strerror(-r));
                 return r;
         }
+
+        return 0;
+}
+
+_public_ int ncm_enable_networkd_debug(int argc, char *argv[]) {
+        bool b = false;
+        int r;
+
+        for (int i = 0; i < argc; i++) {
+                if (streq_fold(argv[i], "debug")) {
+                        parse_next_arg(argv, argc, i);
+
+                        r = parse_bool(argv[i]);
+                        if (r < 0) {
+                                log_warning("Failed to parse debug mode='%s': %s", argv[1], strerror(-r));
+                                return r;
+                        }
+                        b = r;
+                        break;
+                }
+
+                log_warning("Failed to parse '%s': %s", argv[i], strerror(EINVAL));
+                return -EINVAL;
+        }
+
+        if (b)
+                manager_write_networkd_debug_config();
+        else
+                manager_remove_networkd_debug_config();
 
         return 0;
 }

@@ -156,7 +156,6 @@ int manager_set_dhcp_section(DHCPClient kind, const IfNameIndex *p, const char *
 int manager_create_vlan(const IfNameIndex *p, const char *ifname, VLan *v);
 
 int manager_generate_network_config_from_yaml(const char *file);
-int manager_write_wifi_config(const Network *n, const GString *config);
 
 int manager_generate_networkd_config_from_command_line(const char *file, const char *command_line);
 
@@ -239,3 +238,7 @@ int manager_set_ipv4(const IfNameIndex *p,
                      const int use_dns,
                      const int send_release,
                      bool keep);
+
+int manager_write_networkd_debug_config(void);
+int manager_remove_networkd_debug_config(void);
+
