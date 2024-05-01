@@ -144,7 +144,7 @@ includes = include_directories('src/ctl',
                                '.')
 
 if want_nftables
-   network_config_managerlib = library('network_config_managerlib',
+   network_config_managerlib = library('network_config_manager',
                         network_config_manager_sources,
                         include_directories: includes,
                         dependencies : [
@@ -153,7 +153,7 @@ if want_nftables
                         version: meson.project_version(),
                         soversion: so_version)
 else
-  network_config_managerlib = library('network_config_managerlib',
+  network_config_managerlib = library('network_config_manager',
                         network_config_manager_sources,
                         include_directories: includes,
                         dependencies : [
