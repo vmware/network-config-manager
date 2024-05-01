@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: install update
       run: sudo apt-get update -y; sudo apt-get upgrade -y
     - name: install packages
