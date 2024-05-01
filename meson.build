@@ -2,20 +2,28 @@ project('network-config-manager', 'c',
         version : '0.7.3',
         license : 'Apache-2.0',
         default_options: [
-                'c_std=gnu99',
+                'c_std=gnu11',
+                'prefix=/usr',
+                'sysconfdir=/etc',
                 'localstatedir=/var',
+                'warning_level=2',
         ],
         meson_version : '>= 0.40')
 
 so_version = '1'
 
 conf = configuration_data()
+conf.set_quoted('PROJECT_URL', 'https://github.com/vmware/network-config-manager')
+conf.set('PROJECT_VERSION', meson.project_version().split('~')[0],
+         description : 'Numerical project version (used where a simple number is expected)')
+conf.set_quoted('PROJECT_VERSION_FULL', meson.project_version(), description : 'Full project version')
+
 conf.set_quoted('PACKAGE_VERSION', meson.project_version())
 conf.set_quoted('PACKAGE_STRING',  meson.project_name() + ' ' + meson.project_version())
 
 substs = configuration_data()
+
 substs.set('PACKAGE_URL',          'https://github.com/vmware/network-config-manager')
-substs.set('PACKAGE_VERSION',      meson.project_version())
 conf.set_quoted('PKGSYSCONFDIR',   get_option('sysconfdir'))
 
 #####################################################################
