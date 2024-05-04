@@ -1,5 +1,7 @@
 # network-config-manager
-![build](https://github.com/vmware/network-config-manager/actions/workflows/network-config-manager.yml/badge.svg)
+
+![build](https://github.com/vmware/network-config-manager/actions/workflows/network-config-manager.yml/badge.svg?branch=main)
+
 
 ### What is nmctl
 
