@@ -132,8 +132,11 @@ gio_dep = dependency('gio-2.0')
 yaml_dep = dependency('yaml-0.1')
 libmnl_dep = dependency('libmnl')
 libjson_dep = dependency('json-c')
-libnftnl_dep = dependency('libnftnl')
-libnft_dep = dependency('libnftables')
+
+if want_nftables
+   libnftnl_dep = dependency('libnftnl')
+   libnft_dep = dependency('libnftables')
+endif
 
 includes = include_directories('src/ctl',
                                'src/dbus',
