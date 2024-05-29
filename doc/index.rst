@@ -9,26 +9,38 @@ The network-config-manager nmctl allows to configure and introspect the state of
 
 Configure Static Address and Gateway
 ------------------------------------
-The ``set-static`` command allows to configure static address and routes/gateway.
+- The ``set-static`` command allows to configure static address and routes/gateway.
 
 .. code-block::
 
   ❯ nmctl set-static dev [DEVICE] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] dns [SERVER1,SERVER2...] keep [BOOLEAN] Configures static configuration of the device
-
-- Example
+|
+| Example
 
 .. code-block::
 
   ❯ nmctl set-static dev eth0 a 192.168.10.51/24 gw 192.168.10.1
 
-- Configure multiple address and gateways can be configured at once.
+| Configure multiple address and gateways can be configured at once.
 
 .. code-block::
 
   ❯ nmctl set-static dev eth0 a 192.168.10.51/24 a 192.168.10.52/24 a FE80::10 gw 192.168.10.1 gw FE80::1
 
-- Configure address, gateway and static DNS
+| Configure address, gateway and static DNS
 
 .. code-block:: bash
 
   ❯ nmctl set-static dev eth0 a 192.168.1.12/24 gw 192.168.1.1 dns 192.168.1.2,192.168.1.1
+
+- The ``set-gw-family`` command allows to configure set IPv4 and IPv6 Gateway.
+
+.. code-block:: bash
+
+  ❯ set-gw-family dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS] Configures device default IPv4/IPv6 Gateway.
+
+| Example
+
+.. code-block:: bash
+
+  ❯ nmctl set-gw-family dev eth0 gw4 192.168.10.1 gw6 FE80::1
