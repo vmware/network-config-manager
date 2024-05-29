@@ -3,7 +3,7 @@ all: build
 .PHONY: all
 
 build:
-	meson setup --prefix=/usr -Dtests=true -Dnftables=true build
+	meson setup --prefix=/usr -Dtests=true -Dnftables=true -Ddocs=true build
 
 clang:
 	CC=clang meson setup --prefix=/usr -Dtests=true build-clang; ninja -C build-clang
