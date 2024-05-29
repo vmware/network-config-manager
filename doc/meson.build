@@ -5,7 +5,7 @@ sphinx_sources = [
 man_pages = [
         'network-config-manager.8']
 
-mandir1 = join_paths(get_option('mandir'), 'man1')
+mandir8 = join_paths(get_option('mandir'), 'man8')
 
 sphinx_build = find_program('sphinx-build-3', 'sphinx-build')
 
@@ -18,4 +18,4 @@ custom_target(
               input : sphinx_sources,
               output : man_pages,
               install : true,
-              install_dir : '/usr/share/man/man8')
+              install_dir : mandir8)
