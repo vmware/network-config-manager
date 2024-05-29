@@ -4,5 +4,8 @@ option('version-tag', type : 'string',
 option('nftables', type : 'boolean', value : false,
        description : 'enable nftable support')
 
+option('docs', type : 'boolean', value : false,
+       description : 'enable  docs')
+
 option('tests', type : 'boolean', value : false,
        description : 'enable tests')

@@ -109,7 +109,12 @@ else
 endif
 
 ##############################################################
+want_docs = get_option('docs')
+if want_docs
+   subdir('doc')
+endif
 
+##############################################################
 config_h = configure_file(
         output : 'config.h',
         configuration : conf)
@@ -117,7 +122,6 @@ add_project_arguments('-include', 'config.h', language : 'c')
 
 subdir('include')
 subdir('src')
-#subdir('doc')
 subdir('units')
 subdir('conf')
 
