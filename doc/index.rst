@@ -39,8 +39,31 @@ Configure Static Address and Gateway
 
   ❯ set-gw-family dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS] Configures device default IPv4/IPv6 Gateway.
 
+|
 | Example
 
 .. code-block:: bash
 
   ❯ nmctl set-gw-family dev eth0 gw4 192.168.10.1 gw6 FE80::1
+
+| Remove GW from device
+
+- The ``remove-gw`` command allows to remove IPv4 and IPv6 Gateway.
+
+.. code-block:: bash
+
+  ❯ remove-gw dev [DEVICE] f|family [ipv4|ipv6|yes].
+
+|
+| Remove all GWs (IPv4/IPv6)
+
+.. code-block:: bash
+
+  ❯  nmctl remove-gw dev eth0
+
+|
+| Remove only GW of an explicit family i.e IPv4/IPv6
+
+.. code-block:: bash
+
+  ❯ nmctl remove-gw dev eth0 family ipv4
