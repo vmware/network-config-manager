@@ -67,3 +67,59 @@ Configure Static Address and Gateway
 .. code-block:: bash
 
   ❯ nmctl remove-gw dev eth0 family ipv4
+
+- The ``add-addr`` command allows to configure static address.
+
+.. code-block:: bash
+
+   ❯ add-addr dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [STRING] pref-lifetime|pl [{forever|infinity|0}] scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN] prefix-route|pr [PREFIXROUTE BOOLEAN] many [ADDRESS1,ADDRESS2...] Configures device Address.
+
+- Add one address
+
+.. code-block:: bash
+
+  ❯ nmctl add-addr dev eth0 a 192.168.1.5
+
+
+- The ``remove-addr`` command allows to remove static address.
+
+.. code-block:: bash
+
+   ❯ nmctl remove-addr dev eth0 a 192.168.1.5
+
+
+- Add many addresses at once
+
+.. code-block:: bash
+
+  ❯ nmctl add-addr dev eth0 many 192.168.1.5/24,192.168.1.6/24,192.168.1.7/24,192.168.1.8/24
+
+
+- Remove many addresses at once
+
+.. code-block:: bash
+
+  ❯ nmctl remove-addr dev eth0 many 192.168.1.5/24,192.168.1.6/24,192.168.1.7/24,192.168.1.8/24
+
+
+- Remove many addresses at once by family
+
+.. code-block:: bash
+
+  ❯ nmctl remove-addr dev eth0 family ipv4
+
+
+- Remove all addresses at once
+
+.. code-block:: bash
+
+  ❯ nmctl remove-addr dev eth0 family yes
+
+- The ``set-gw`` command allows to configure static Gateway.
+
+| Example:
+
+.. code-block:: bash
+
+   ❯ nmctl set-gw dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures device default Gateway.
+   ❯ nmctl set-gw dev eth0 gw 192.168.1.1 onlink yes
