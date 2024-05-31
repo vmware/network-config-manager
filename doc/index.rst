@@ -127,6 +127,7 @@ Configure Static Address and Gateway
 Configure Dynamic Address and Gateway
 -------------------------------------
 |
+
 - ``nmctl`` provides set-dynamic command to configure dynamic address
 
 .. code-block:: bash
@@ -172,13 +173,11 @@ Configure Dynamic Address and Gateway
   IPv6AcceptRA=yes         # Enables RA client
   DHCP=ipv6                # Enables IPv6 client
 
-- Note: We need to enable LinkLocalAddressing=, So that RA client and DHCPv6 client can talk to respective servers. RA IPv6AcceptRA= is requred to get the default route and It also indicates The 'M' and the 'O' bit. When M or O bit is on that implies the systemd-networkd should talk to DHCPv6 server to obtain the DHCPv6 address.
-See rfc4861 Section 4.2
-M 1-bit "Managed address configuration" flag. When set, it indicates that addresses are available via Dynamic Host Configuration Protocol [DHCPv6]. If the M flag is set, the O flag is redundant and can be ignored because DHCPv6 will return all available configuration information.
-O 1-bit "Other configuration" flag. When set, it indicates that other configuration information is available via DHCPv6. Examples of such information are DNS-related information or information on other servers within the network.
+- Note: We need to enable LinkLocalAddressing=, So that RA client and DHCPv6 client can talk to respective servers. RA IPv6AcceptRA= is requred to get the default route and It also indicates The 'M' and the 'O' bit. When M or O bit is on that implies the systemd-networkd should talk to DHCPv6 server to obtain the DHCPv6 address. See rfc4861 Section 4.2 M 1-bit "Managed address configuration" flag. When set, it indicates that addresses are available via Dynamic Host Configuration Protocol [DHCPv6]. If the M flag is set, the O flag is redundant and can be ignored because DHCPv6 will return all available configuration information. O 1-bit "Other configuration" flag. When set, it indicates that other configuration information is available via DHCPv6. Examples of such information are DNS-related information or information on other servers within the network.
 
-- DHCPv4 + DHCPv6 (IPv6 + IPv4)
-- With nmctl set-dynamic we can configure DHCPv4 and DHCPv6 addresses.
+- Configure DHCPv4 + DHCPv6
+
+   With ``nmctl set-dynamic`` we can configure DHCPv4 and DHCPv6 addresses.
 
 .. code-block:: bash
 
@@ -189,7 +188,239 @@ O 1-bit "Other configuration" flag. When set, it indicates that other configurat
   [Match]
   Name=eth0
 
+  [Network``
+  LinkLocalAddressing=ipv6 # Enables IPv6 Link Local Address
+  IPv6AcceptRA=yes         # Enables RA client
+  DHCP=yes                 # Enables IPv4 and IPv6 client
+
+
+Configure Dynamic and Static Address and Gateway at once
+--------------------------------------------------------
+|
+
+-  The ``set-network`` allows to configure both static and dynamic configuration. It is a combination of ``set-dynamic`` and ``set-static`` . Hence we can replace any command of ``set-dynamic`` or ``set-static`` with ``set-network``. We can call ``set-network`` as ``hybrid`` or ``mixed`` mode.
+
+.. code-block:: bash
+
+   ❯ set-network dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN] use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] client-id-ipv4|dhcp4-client-id [DHCPv4 IDENTIFIER {mac|duid|duid-only}  iaid-ipv4|dhcpv4-iaid  [DHCPv4 IAID] iaid-ipv6|dhcp6-iaid [DHCPv6 IAID] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] dns [SERVER1,SERVER2...]
+ keep [BOOLEAN] Configures dynamic and static configuration of the device.
+
+- Note: By default set-static / set-dynamic / set-network creates a new .network file. To keep the previous configuration use "keep yes"
+
+- Auto IPv6
+
+configuring AUTOV6 for our VCSA and the vami command we would run is the following:
+
+.. code-block:: bash
+
+  ❯ nmctl set-network dev eth0 accept-ra yes
+
+  ❯ sudo nmctl show-config eth0
+  /etc/systemd/network/10-eth0.network
+
+  [Match]
+  Name=eth0
+
+  [Network]
+  LinkLocalAddressing=ipv6
+  IPv6AcceptRA=yes
+
+
+- Configure DHCPv4
+
+- With ``nmctl set-dynamic`` we can configure DHCPv4 addresses.
+
+.. code-block:: bash
+
+  ❯ nmctl set-network dev eth0 dhcp ipv4
+  ❯ nmctl show-config dev eth0
+  /etc/systemd/network/10-eth0.network
+
+  [Match]
+  Name=eth0
+
+  [Network]
+  LinkLocalAddressing=no # Disables IPv6
+  IPv6AcceptRA=no
+  DHCP=ipv4              # Enables DHCPv4 client
+
+
+- Configure DHCPv6 (IPv6 only)
+
+.. code-block:: bash
+
+  ❯ nmctl set-network dev eth0 dhcp ipv6
+  ❯ nmctl show-config dev eth0
+  /etc/systemd/network/10-eth0.network
+
+  [Match]
+  Name=eth0
+
+  [Network]
+  LinkLocalAddressing=ipv6 # Enables IPv6 Link Local Address
+  IPv6AcceptRA=yes         # Enables RA client
+  DHCP=ipv6                # Enables IPv6 client
+
+- Configure DHCPv4 and DHCPv6 (IPv6 + IPv4)
+
+.. code-block:: bash
+
+  ❯ nmctl set-network dev eth0 dhcp yes
+  ❯ nmctl show-config dev eth0
+  /etc/systemd/network/10-eth0.network
+
+  [Match]
+  Name=eth0
+
   [Network]
   LinkLocalAddressing=ipv6 # Enables IPv6 Link Local Address
   IPv6AcceptRA=yes         # Enables RA client
   DHCP=yes                 # Enables IPv4 and IPv6 client
+
+- Configure Static IPv4 Address and GW
+
+.. code-block:: bash
+
+   ❯ nmctl set-network dev eth0 a 192.168.10.51/24 gw 192.168.10.1
+   ❯ nmctl show-config dev eth0
+   /etc/systemd/network/10-eth0.network
+
+   [Match]
+   Name=eth0
+
+   [Address]
+   Address=192.168.10.51/24
+
+   [Route]
+   Gateway=192.168.10.1
+
+
+- Configure Static IPv6 Address and GW
+
+.. code-block:: bash
+
+   ❯ nmctl set-network dev eth0 FE80::10 gw FE80::1
+
+   ❯ nmctl show-config eth0
+   /etc/systemd/network/10-eth0.network
+
+   [Match]
+   Name=eth0
+
+   [Address]
+   Address=FE80::10
+
+   [Route]
+   Gateway=FE80::1
+
+- Configure Static IPv4 + Static IPv6
+
+.. code-block:: bash
+
+   ❯ nmctl set-network dev eth0 a 192.168.10.51/24 a 192.168.10.52/24 a FE80::10 gw 192.168.10.1 gw FE80::1
+
+   ❯ nmctl show-config eth0
+   /etc/systemd/network/10-eth0.network
+
+   [Match]
+   Name=eth0
+
+   [Address]
+   Address=192.168.10.51/24
+
+   [Address]
+   Address=192.168.10.52/24
+
+   [Address]
+   Address=FE80::10
+
+   [Route]
+   Gateway=192.168.10.1
+
+   [Route]
+   Gateway=FE80::1
+
+- Configure DHCPv4 and Static v6
+
+.. code-block:: bash
+
+  ❯ nmctl set-network dev eth0 dhcp ipv4 a fe80::4 gw fe80::1
+
+  ❯ nmctl show-config eth0
+  /etc/systemd/network/10-eth0.network
+
+  [Match]
+  Name=eth0
+
+  [Network]
+  LinkLocalAddressing=ipv6
+  IPv6AcceptRA=no
+  DHCP=ipv4
+
+  [Address]
+  Address=fe80::4
+
+  [Route]
+  Gateway=fe80::1
+
+- Configure Static v4 + DHCPv6
+
+.. code-block:: bash
+
+   ❯ nmctl set-network dev eth0 dhcp ipv6 a 192.168.1.41/24 gw 192.168.1.1
+
+   ❯ nmctl show-config eth0
+   /etc/systemd/network/10-eth0.network
+
+   [Match]
+   Name=eth0
+
+   [Network]
+   LinkLocalAddressing=ipv6
+   IPv6AcceptRA=yes
+   DHCP=ipv6
+
+   [Address]
+   Address=192.168.1.41/24
+
+   [Route]
+   Gateway=192.168.1.1
+
+- Configure DHCPv4 and Auto v6
+
+.. code-block:: bash
+
+  ❯ nmctl set-network dev eth0 dhcp ipv4 accept-ra yes
+
+  ❯ nmctl show-config eth0
+  /etc/systemd/network/10-eth0.network
+
+  [Match]
+  Name=eth0
+
+  [Network]
+  LinkLocalAddressing=ipv6
+  IPv6AcceptRA=yes
+  DHCP=ipv4
+
+- Configure Static v4 + Auto v6
+
+.. code-block:: bash
+
+   ❯ nmctl set-network dev eth0 accept-ra yes a 192.168.1.41/24 gw 192.168.1.1
+
+   ❯ nmctl show-config eth0
+   /etc/systemd/network/10-eth0.network
+
+   [Match]
+   Name=eth0
+
+   [Network]
+   LinkLocalAddressing=ipv6
+   IPv6AcceptRA=yes
+
+   [Address]
+   Address=192.168.1.41/24
+
+   [Route]
+   Gateway=192.168.1.1
