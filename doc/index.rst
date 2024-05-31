@@ -123,3 +123,73 @@ Configure Static Address and Gateway
 
    ❯ nmctl set-gw dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures device default Gateway.
    ❯ nmctl set-gw dev eth0 gw 192.168.1.1 onlink yes
+
+Configure Dynamic Address and Gateway
+-------------------------------------
+|
+- ``nmctl`` provides set-dynamic command to configure dynamic address
+
+.. code-block:: bash
+
+  set-dynamic  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN]accept-ra [BOOLEAN] Configures dynamic configration of the device (IPv4|IPv6|RA).
+
+- By default set-static creates a new .network file. To keep the previous configuration use "keep yes"
+
+- DHCPv4 (IPv4 only)
+  With nmctl ``set-dynamic`` we can configure DHCPv4 addresses.
+
+.. code-block:: bash
+
+  ❯ nmctl set-dynamic dev eth0 dhcp ipv4
+
+.. code-block:: bash
+
+  ❯ nmctl show-config dev eth0
+  /etc/systemd/network/10-eth0.network
+
+  [Match]
+  Name=eth0
+
+  [Network]
+  LinkLocalAddressing=no # Disables IPv6
+  IPv6AcceptRA=no
+  DHCP=ipv4              # Enables DHCPv4 client
+
+- DHCPv6 (IPv6 only)
+- With nmctl set-dynamic we can configure DHCPv4 addresses.
+
+.. code-block:: bash
+
+  ❯ nmctl set-dynamic dev eth0 dhcp ipv6
+  ❯ nmctl show-config dev eth0
+  /etc/systemd/network/10-eth0.network
+
+  [Match]
+  Name=eth0
+
+  [Network]
+  LinkLocalAddressing=ipv6 # Enables IPv6 Link Local Address
+  IPv6AcceptRA=yes         # Enables RA client
+  DHCP=ipv6                # Enables IPv6 client
+
+- Note: We need to enable LinkLocalAddressing=, So that RA client and DHCPv6 client can talk to respective servers. RA IPv6AcceptRA= is requred to get the default route and It also indicates The 'M' and the 'O' bit. When M or O bit is on that implies the systemd-networkd should talk to DHCPv6 server to obtain the DHCPv6 address.
+See rfc4861 Section 4.2
+M 1-bit "Managed address configuration" flag. When set, it indicates that addresses are available via Dynamic Host Configuration Protocol [DHCPv6]. If the M flag is set, the O flag is redundant and can be ignored because DHCPv6 will return all available configuration information.
+O 1-bit "Other configuration" flag. When set, it indicates that other configuration information is available via DHCPv6. Examples of such information are DNS-related information or information on other servers within the network.
+
+- DHCPv4 + DHCPv6 (IPv6 + IPv4)
+- With nmctl set-dynamic we can configure DHCPv4 and DHCPv6 addresses.
+
+.. code-block:: bash
+
+  ❯ nmctl set-dynamic dev eth0 dhcp yes
+  ❯ nmctl show-config dev eth0
+  /etc/systemd/network/10-eth0.network
+
+  [Match]
+  Name=eth0
+
+  [Network]
+  LinkLocalAddressing=ipv6 # Enables IPv6 Link Local Address
+  IPv6AcceptRA=yes         # Enables RA client
+  DHCP=yes                 # Enables IPv4 and IPv6 client
