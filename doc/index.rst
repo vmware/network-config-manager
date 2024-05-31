@@ -15,7 +15,7 @@ Commands
 
 The following commands are understood:
 
-``status``
+- ``status``
 
 .. code-block::
 
@@ -45,6 +45,59 @@ The following commands are understood:
                 DNS: 172.16.130.2
        DNS Settings: MulticastDNS (yes) LLMNR (yes) DNSOverTLS (no) ResolvConfMode (stub) DNSSEC (allow-downgrade
 
+-   ``status dev``
+
+.. code-block::
+
+   ❯ nmctl status ens33
+                           Name: ens33
+                          Index: 2
+              Alternative names: enp2s1 enx000c296a96a3
+                          Group: 0
+                          Flags: up broadcast running multicast lowerup
+                           Type: ether
+                           Path: pci-0000:02:01.0
+                     Parent Dev: 0000:02:01.0
+                     Parent Bus: pci
+                         Driver: e1000
+                         Vendor: Intel Corporation
+                          Model: 82545EM Gigabit Ethernet Controller (Copper) (PRO/1000 MT Single Port Adapter)
+                      Link File: /usr/lib/systemd/network/99-default.link
+                   Network File: /etc/systemd/network/ens33.network
+                          State: routable (configured)
+                  Address State: routable
+             IPv4 Address State: routable
+             IPv6 Address State: degraded
+                   Online State: online
+            Required for Online: yes
+              Activation Policy: up
+                     HW Address: 00:0c:29:6a:96:a3 (VMware, Inc.)
+                            MTU: 1500 (min: 46 max: 16110)
+                         Duplex: full
+                          Speed: 1000
+                          QDISC: fq_codel
+                 Queues (Tx/Rx): 1/1
+                Tx Queue Length: 1000
+   IPv6 Address Generation Mode: eui64
+                 GSO Max Size: 65536 GSO Max Segments: 65535
+                 TSO Max Size: 65536 TSO Max Segments: 65535
+                      Address: 172.16.130.178/24 (DHCPv4 via 172.16.130.254) lease time: 30min seconds T1: 15min seconds T2: 26min 15s seconds
+                               fe80::20c:29ff:fe6a:96a3/64 (IPv6 Link Local)
+                      Gateway: 172.16.130.2 (DHCPv4) via (172.16.130.254) (configuring,configured)
+                          DNS: 172.16.130.2
+            DHCP6 Client DUID: DUID-EN/Vendor:0000ab11d48ecc34dc43d9ff
+
+- Display DNS mode. Allow to show how DNS servers are configured. Displays one of 'static', 'DHCP' or 'merged' (DHCP + static)
+
+.. code-block::
+
+   ❯ nmctl show-dns-mode dev ens33
+        DNS Mode: merged
+
+   ❯ nmctl show-dns-mode dev ens33 -j
+        {
+          "DNSMode": "merged"
+        }
 
 Configure Static Address and Gateway
 ------------------------------------
