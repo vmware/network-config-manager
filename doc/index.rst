@@ -7,6 +7,98 @@ Description
 -----------
 The network-config-manager nmctl allows to configure and introspect the state of the network links as seen by systemd-networkd. nmctl can be used to query and configure devices's for Address, Routes, Gateways, DNS, NTP, domain, hostname. nmctl also allows to create virtual NetDev (VLan, VXLan, Bridge, Bond) etc. It also allows to configure link's various configuration such as WakeOnLanPassword, Port, BitsPerSecond, Duplex and Advertise etc. nmctl uses sd-bus, sd-device APIs to interact with systemd, systemd-networkd, systemd-resolved, systemd-hostnamed, and systemd-timesyncd via dbus. nmctl uses networkd verbs to explain output. nmctl can generate configurations for required network links from YAML description. It also understands kernel command line specified in dracut's network configuration format and can generate systemd-networkd's configuration while the system boots and will persist between reboots.
 
+Introspect system or network via nmctl
+--------------------------------------
+nmctl may be used to query or modify the state of the network links as seen by systemd-networkd. Please refer to systemd-networkd.service(8) for an introduction to the basic concepts, functionality, and configuration syntax.
+
+Commands
+
+The following commands are understood:
+
+- ``status``
+
+.. code-block::
+
+  ❯ nmctl status
+             Kernel: Linux (6.8.0-76060800daily20240311-generic)
+    Systemd Version: 256~rc2-gfe816c2
+       Architecture: x86-64
+     Virtualization: vmware
+   Operating System: Pop!_OS 22.04 LTS
+    Hardware Vendor: VMware, Inc.
+     Hardware Model: VMware Virtual Platform
+   Firmware Version: 6.00
+    Firmware Vendor: Phoenix Technologies LTD
+      Firmware Date: Thu Nov 12 05:30:00 2020
+            Boot ID: 35e5d01458ba4fcaa62e280a28010b56
+         Machine ID: f0911fed670d14871b0f12cc66482080
+       System State: routable
+       Online State: online
+      Address State: routable
+ IPv4 Address State: routable
+ IPv6 Address State: degraded
+          Addresses: ::1/128                        on device lo
+                     127.0.0.1/8                    on device lo
+                     fe80::20c:29ff:fe6a:96a3/64    on device ens33
+                     172.16.130.178/24              on device ens33
+                     Gateway: 172.16.130.2                   on device ens33
+                DNS: 172.16.130.2
+       DNS Settings: MulticastDNS (yes) LLMNR (yes) DNSOverTLS (no) ResolvConfMode (stub) DNSSEC (allow-downgrade
+
+-   ``status dev``
+
+.. code-block::
+
+   ❯ nmctl status ens33
+                           Name: ens33
+                          Index: 2
+              Alternative names: enp2s1 enx000c296a96a3
+                          Group: 0
+                          Flags: up broadcast running multicast lowerup
+                           Type: ether
+                           Path: pci-0000:02:01.0
+                     Parent Dev: 0000:02:01.0
+                     Parent Bus: pci
+                         Driver: e1000
+                         Vendor: Intel Corporation
+                          Model: 82545EM Gigabit Ethernet Controller (Copper) (PRO/1000 MT Single Port Adapter)
+                      Link File: /usr/lib/systemd/network/99-default.link
+                   Network File: /etc/systemd/network/ens33.network
+                          State: routable (configured)
+                  Address State: routable
+             IPv4 Address State: routable
+             IPv6 Address State: degraded
+                   Online State: online
+            Required for Online: yes
+              Activation Policy: up
+                     HW Address: 00:0c:29:6a:96:a3 (VMware, Inc.)
+                            MTU: 1500 (min: 46 max: 16110)
+                         Duplex: full
+                          Speed: 1000
+                          QDISC: fq_codel
+                 Queues (Tx/Rx): 1/1
+                Tx Queue Length: 1000
+   IPv6 Address Generation Mode: eui64
+                 GSO Max Size: 65536 GSO Max Segments: 65535
+                 TSO Max Size: 65536 TSO Max Segments: 65535
+                      Address: 172.16.130.178/24 (DHCPv4 via 172.16.130.254) lease time: 30min seconds T1: 15min seconds T2: 26min 15s seconds
+                               fe80::20c:29ff:fe6a:96a3/64 (IPv6 Link Local)
+                      Gateway: 172.16.130.2 (DHCPv4) via (172.16.130.254) (configuring,configured)
+                          DNS: 172.16.130.2
+            DHCP6 Client DUID: DUID-EN/Vendor:0000ab11d48ecc34dc43d9ff
+
+- Display DNS mode. Allow to show how DNS servers are configured. Displays one of 'static', 'DHCP' or 'merged' (DHCP + static)
+
+.. code-block::
+
+   ❯ nmctl show-dns-mode dev ens33
+        DNS Mode: merged
+
+   ❯ nmctl show-dns-mode dev ens33 -j
+        {
+          "DNSMode": "merged"
+        }
+
 Configure Static Address and Gateway
 ------------------------------------
 - The ``set-static`` command allows to configure static address and routes/gateway.
