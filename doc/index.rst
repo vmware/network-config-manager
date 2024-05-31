@@ -7,6 +7,45 @@ Description
 -----------
 The network-config-manager nmctl allows to configure and introspect the state of the network links as seen by systemd-networkd. nmctl can be used to query and configure devices's for Address, Routes, Gateways, DNS, NTP, domain, hostname. nmctl also allows to create virtual NetDev (VLan, VXLan, Bridge, Bond) etc. It also allows to configure link's various configuration such as WakeOnLanPassword, Port, BitsPerSecond, Duplex and Advertise etc. nmctl uses sd-bus, sd-device APIs to interact with systemd, systemd-networkd, systemd-resolved, systemd-hostnamed, and systemd-timesyncd via dbus. nmctl uses networkd verbs to explain output. nmctl can generate configurations for required network links from YAML description. It also understands kernel command line specified in dracut's network configuration format and can generate systemd-networkd's configuration while the system boots and will persist between reboots.
 
+Introspect system or network via nmctl
+--------------------------------------
+nmctl may be used to query or modify the state of the network links as seen by systemd-networkd. Please refer to systemd-networkd.service(8) for an introduction to the basic concepts, functionality, and configuration syntax.
+
+Commands
+
+The following commands are understood:
+
+``status``
+
+.. code-block::
+
+  ❯ nmctl status
+             Kernel: Linux (6.8.0-76060800daily20240311-generic)
+    Systemd Version: 256~rc2-gfe816c2
+       Architecture: x86-64
+     Virtualization: vmware
+   Operating System: Pop!_OS 22.04 LTS
+    Hardware Vendor: VMware, Inc.
+     Hardware Model: VMware Virtual Platform
+   Firmware Version: 6.00
+    Firmware Vendor: Phoenix Technologies LTD
+      Firmware Date: Thu Nov 12 05:30:00 2020
+            Boot ID: 35e5d01458ba4fcaa62e280a28010b56
+         Machine ID: f0911fed670d14871b0f12cc66482080
+       System State: routable
+       Online State: online
+      Address State: routable
+ IPv4 Address State: routable
+ IPv6 Address State: degraded
+          Addresses: ::1/128                        on device lo
+                     127.0.0.1/8                    on device lo
+                     fe80::20c:29ff:fe6a:96a3/64    on device ens33
+                     172.16.130.178/24              on device ens33
+                     Gateway: 172.16.130.2                   on device ens33
+                DNS: 172.16.130.2
+       DNS Settings: MulticastDNS (yes) LLMNR (yes) DNSOverTLS (no) ResolvConfMode (stub) DNSSEC (allow-downgrade
+
+
 Configure Static Address and Gateway
 ------------------------------------
 - The ``set-static`` command allows to configure static address and routes/gateway.
