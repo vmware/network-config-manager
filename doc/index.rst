@@ -516,3 +516,21 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    [Route]
    Gateway=192.168.1.1
+
+Generate network config from YAML file
+----------------------------------------
+
+- `nmctl` can generate configurations for required network links from YAML description. Configuration written to disk under `/etc/systemd/network` will persist between reboots. When `network-config-manager-yaml-generator.service` is enabled it reads yaml files from `/etc/network-config-manager/yaml` and generates systemd-networkd configuration files. `nmctl apply` and `nmctl apply-file` can be used to generate configuration from yml file.
+
+- `nmctl` uses similar format as defined by [different YAML format](https://curtin.readthedocs.io/en/latest/topics/networking.html).
+
+- Using DHCP
+
+To set the device named `eth1` get an address via DHCP4 create a YAML file with the following:
+
+.. code-block:: yml
+
+   network:
+     ethernets:
+       eth1:
+         dhcp4: true
