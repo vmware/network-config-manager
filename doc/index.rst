@@ -933,3 +933,78 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
            public: syR+psKigVdJ+PZvpEkacU5niqg9WGYxepDZT/zLGj8=
            endpoint: 10.48.132.39:51000
            allowed-ips: [10.10.11.0/24, 10.10.10.0/24]
+
+ - Generate network config from kernel command line
+
+ `nmctl` understands kernel command line specified in [dracut's](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) network configuration format and can generate [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html)'s configuration while the system boots and will persist between reboots.
+
+.. code-block:: yml
+
+ Network
+       ip={dhcp|on|any|dhcp6|auto6}
+           dhcp|on|any: get ip from dhcp server from all devices. If root=dhcp, loop
+           sequentially through all devices (eth0, eth1, ...) and use the first with a valid
+           DHCP root-path.
+
+           auto6: IPv6 autoconfiguration
+
+           dhcp6: IPv6 DHCP
+
+       ip=<device>:{dhcp|on|any|dhcp6|auto6}
+           dhcp|on|any|dhcp6: get ip from dhcp server on a specific device
+
+           auto6: do IPv6 autoconfiguration
+
+           This parameter can be specified multiple times.
+
+       ip=<client-IP>:[ <server-id>]:<gateway-IP>:<netmask>:<client_hostname>:<device>:{none|off}
+           explicit network configuration.
+
+       ifname=<device>:<MAC>
+           Assign network device name <device> (ie eth0) to the NIC with MAC <MAC>. Note
+           letters in the MAC-address must be lowercase!  Note: If you use this option you must
+           specify an ifname= argument for all devices used in ip= or fcoe= arguments.  This
+           parameter can be specified multiple times.
+
+       nameserver=<IP>[nameserver=<IP> ...]
+           specify nameserver(s) to use
+
+- Generate network config from kernel command line
+
+`nmctl` understands kernel command line specified in [dracut's](https://mirrors.edge.kernel.org/pub/linux/utils/boot/dracut/dracut.html#dracutkernel7) network configuration format and can generate [systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html)'s configuration while the system boots and will persist between reboots.
+
+.. code-block:: bash
+
+ Network
+       ip={dhcp|on|any|dhcp6|auto6}
+           dhcp|on|any: get ip from dhcp server from all devices. If root=dhcp, loop
+           sequentially through all devices (eth0, eth1, ...) and use the first with a valid
+           DHCP root-path.
+
+           auto6: IPv6 autoconfiguration
+
+           dhcp6: IPv6 DHCP
+
+       ip=<device>:{dhcp|on|any|dhcp6|auto6}
+           dhcp|on|any|dhcp6: get ip from dhcp server on a specific device
+
+           auto6: do IPv6 autoconfiguration
+
+           This parameter can be specified multiple times.
+
+       ip=<client-IP>:[ <server-id>]:<gateway-IP>:<netmask>:<client_hostname>:<device>:{none|off}
+           explicit network configuration.
+
+       ifname=<device>:<MAC>
+           Assign network device name <device> (ie eth0) to the NIC with MAC <MAC>. Note
+           letters in the MAC-address must be lowercase!  Note: If you use this option you must
+           specify an ifname= argument for all devices used in ip= or fcoe= arguments.  This
+           parameter can be specified multiple times.
+
+       nameserver=<IP>[nameserver=<IP> ...]
+           specify nameserver(s) to use
+
+.. code-block:: bash
+
+  ➜  ~ cat /proc/cmdline
+      BOOT_IMAGE=/boot/vmlinuz-6.8.0-76060800daily20240311-generic root=UUID=1c01f709-ae8a-4947-88e9-3973f4c0833a ro quiet splash ip=dhcp
