@@ -624,3 +624,24 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
          send-release: no
          iaid: 0xb6220feb
          without-ra: solicit
+
+ Using IPv6 Router Advertisement (RA)
+
+.. code-block:: yml
+
+   network:
+    ethernets:
+      eth0:
+        dhcp4: yes
+        dhcp6: yes
+        accept-ra: yes
+        link-local: ipv6
+        ra-overrides:
+          token: eui64
+          use-dns: true
+          use-domain: true
+          use-mtu: true
+          use-gateway: true
+          use-route-prefix: true
+          use-autonomous-prefix: true
+          use-on-link-prefix: true
