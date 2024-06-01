@@ -829,3 +829,20 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
               - ens37
           parameters:
               mode: active-backup
+
+- Generate Bridge configuration
+
+  Configure bridge `bridge0` and set slave master devices to `ens33` with IPv4 DHCP network.
+
+.. code-block:: yml
+
+ network:
+  renderer: networkd
+  ethernets:
+      ens33:
+          dhcp4: no
+  bridges:
+      br0:
+          dhcp4: yes
+          interfaces:
+              - ens33
