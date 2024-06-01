@@ -679,3 +679,29 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
              - from: 10.100.1.5/24
                to: 10.100.1.5/24
                table: 101
+
+ Configure SR-IOV Virtual Functions
+
+.. code-block:: yml
+
+   network:
+    ethernets:
+      eni99np1:
+       addresses:
+           - 10.100.1.5/24
+       routes:
+           - to: default
+             via: 10.100.1.1
+       sriovs:
+             - virtual-function: 0
+               vlan-id: 1
+               quality-of-service: 101
+               vlan-protocol: 802.1Q
+               link-state: yes
+               macaddress: 00:11:22:33:44:55
+             - virtual-function: 1
+               vlan-id: 2
+               quality-of-service: 102
+               vlan-protocol: 802.1Q
+               link-state: yes
+               macaddress: 00:11:22:33:44:56
