@@ -846,3 +846,29 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
           dhcp4: yes
           interfaces:
               - ens33
+
+- Generate Tunnel configuration
+
+  Configure IPv6 tunnel sit `he-ipv6` with address and routes.
+
+.. code-block:: yml
+
+ network:
+  ethernets:
+      eth0:
+          addresses:
+              - 1.1.1.1/24
+              - "2001:cafe:face::1/64"
+          routes:
+              - to: default
+                via: 1.1.1.254
+  tunnels:
+      he-ipv6:
+          mode: sit
+          remote: 2.2.2.2
+          local: 1.1.1.1
+          addresses:
+              - "2001:dead:beef::2/64"
+          routes:
+              - to: default
+                via: "2001:dead:beef::1"
