@@ -551,7 +551,7 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
           - 10.10.10.5/24
         nameservers:
           search: [mydomain, otherdomain]
-          addresses: [10.10.10.1, 1.1.1.1]
+        addresses: [10.10.10.1, 1.1.1.1]
         routes:
           - to: 192.168.1.1
            via: 10.10.10.1
@@ -568,3 +568,22 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
             - to: 0.0.0.0/0
               via: 9.9.9.9
               on-link: true
+
+  Multiple addresses on a single device
+
+.. code-block:: yml
+
+ network:
+   ethernets:
+     ens3:
+       addresses:
+           - 10.100.1.37/24
+           - 10.100.1.38/24:
+               label: ens3:0
+               lifetime: 1000
+           - 10.100.1.39/24:
+               label: ens3:test-label
+               lifetime: 2000
+       routes:
+           - to: default
+             via: 10.100.1.1
