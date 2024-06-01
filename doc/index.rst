@@ -645,3 +645,291 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
           use-route-prefix: true
           use-autonomous-prefix: true
           use-on-link-prefix: true
+
+ Using match as MacAddress
+
+.. code-block:: yml
+
+ network:
+   ethernets:
+       eth0:
+           match:
+               macaddress: "de:ad:be:ef:ca:fe"
+           addresses: [ "10.3.0.5/23" ]
+           nameservers:
+               addresses: [ "8.8.8.8", "8.8.4.4" ]
+               search: [ example.com ]
+           routes:
+               - to: default
+                 via: 10.3.0.1
+
+ Configure Routing Policy Rule
+
+.. code-block:: yml
+
+ network:
+   ethernets:
+     eth1:
+       addresses:
+           - 10.100.1.5/24
+       routes:
+           - to: default
+             via: 10.100.1.1
+       routing-policy:
+             - from: 10.100.1.5/24
+               to: 10.100.1.5/24
+               table: 101
+
+ Configure SR-IOV Virtual Functions
+
+.. code-block:: yml
+
+   network:
+    ethernets:
+      eni99np1:
+       addresses:
+           - 10.100.1.5/24
+       routes:
+           - to: default
+             via: 10.100.1.1
+       sriovs:
+             - virtual-function: 0
+               vlan-id: 1
+               quality-of-service: 101
+               vlan-protocol: 802.1Q
+               link-state: yes
+               macaddress: 00:11:22:33:44:55
+             - virtual-function: 1
+               vlan-id: 2
+               quality-of-service: 102
+               vlan-protocol: 802.1Q
+               link-state: yes
+               macaddress: 00:11:22:33:44:56
+
+ DHCP4 Server
+
+.. code-block:: yml
+
+   network:
+    version: 2
+    renderer: networkd
+      ethernets:
+       ens33:
+          dhcp4: no
+          accept-ra: no
+          addresses:
+            - 10.100.1.1/24
+          enable-dhcp4-server: yes
+          dhcp4-server:
+              pool-offset: 0
+              pool-size: 200
+              emit-dns: yes
+              dns: 8.8.8.8
+              static-leases:
+                - address: 10.100.1.2/24
+                  macaddress: 00:0c:29:5f:d1:41
+                - address: 10.100.1.3/24
+                  macaddress: 00:0c:29:5f:d1:42
+                - address: 10.100.1.4/24
+                  macaddress: 00:0c:29:5f:d1:43
+
+ Generate link config from yml file
+
+ `nmctl` can generate link configuration from YAML description.
+
+.. code-block:: yml
+
+   network:
+    ethernets:
+      eth1:
+       receive-checksum-offload: true
+       transmit-checksum-offload: true
+       tcp-segmentation-offload: true
+       tcp6-segmentation-offload: true
+       generic-segmentation-offload: true
+       generic-receive-offload: true
+       large-receive-offload: true
+       ifname: test99
+       alias: ifalias
+       description: testconf
+       mtu: 1600
+       bitspersecond: 5G
+       duplex: full
+       wakeonlan: phy unicast broadcast multicast arp magic secureon
+       wakeonlan-password: cb:a9:87:65:43:21
+       port: mii
+       advertise: 10baset-half 10baset-full 100baset-half 100baset-full 1000baset-half 1000baset-full 10000baset-full 2500basex-full 1000basekx-full 10000basekx4-full 10000basekr-full 10000baser-fec 20000basemld2-full 20000basekr2-full
+       auto-negotiation: no
+       receive-vlan-ctag-hardware-acceleration: yes
+       transmit-vlan-ctag-hardware-acceleration: no
+       receive-vlan-ctag-filter: no
+       transmit-vlan-stag-hardware-acceleration: yes
+       ntuple-filter: no
+       use-adaptive-rx-coalesce: yes
+       use-adaptive-tx-coalesce: yes
+       macaddress-policy: none
+       macaddress: 00:0c:29:3a:bc:11
+       namepolicy: kernel database onboard slot path mac keep
+       name: dm1
+       alternative-names-policy: database onboard slot path mac
+       alternative-name: demo1
+       rx-buffer-size: max
+       rx-mini-buffer-size: 65335
+       rx-jumbo-buffer-size: 88776555
+       tx-buffer-size: max
+       transmit-queues: 4096
+       receive-queues: 4096
+       transmit-queue-length: 1024
+       tx-flow-control: no
+       rx-flow-control: yes
+       auto-negotiation-flow-control: yes
+       generic-segment-offload-maxbytes: 65535
+       generic-segment-offload-max-segments: 1024
+       rx-channels: max
+       tx-channels: 656756677
+       other-channels: 429496729
+
+- Generate VLAN configuration
+
+ Configure VLan with id 10 and set it's master device to `ens33` .
+
+.. code-block:: yml
+
+ network:
+  ethernets:
+     ens33:
+          addresses: [ "192.168.10.2/23" ]
+          nameservers:
+              addresses: [ "8.8.8.8", "8.8.4.4" ]
+              search: [ example.com ]
+          routes:
+              - to: default
+                via: 192.168.1.1
+  vlans:
+      vlan10:
+          id: 10
+          link: ens33
+          addresses: [ "192.168.10.5/24" ]
+          nameservers:
+              addresses: [ "8.8.8.8" ]
+              search: [ domain1.example.com, domain2.example.com ]
+
+- Generate Bond configuration
+
+ Configure bond `bond0` with mode `active-backup`  and set slave devices to `ens33` and `ens37`.
+
+.. code-block:: yml
+
+   network:
+     bonds:
+       bond0:
+          dhcp4: yes
+          interfaces:
+              - ens33
+              - ens37
+          parameters:
+              mode: active-backup
+
+- Generate Bridge configuration
+
+  Configure bridge `bridge0` and set slave master devices to `ens33` with IPv4 DHCP network.
+
+.. code-block:: yml
+
+ network:
+  renderer: networkd
+  ethernets:
+      ens33:
+          dhcp4: no
+  bridges:
+      br0:
+          dhcp4: yes
+          interfaces:
+              - ens33
+
+- Generate Tunnel configuration
+
+  Configure IPv6 tunnel sit `he-ipv6` with address and routes.
+
+.. code-block:: yml
+
+ network:
+  ethernets:
+      eth0:
+          addresses:
+              - 1.1.1.1/24
+              - "2001:cafe:face::1/64"
+          routes:
+              - to: default
+                via: 1.1.1.254
+  tunnels:
+      he-ipv6:
+          mode: sit
+          remote: 2.2.2.2
+          local: 1.1.1.1
+          addresses:
+              - "2001:dead:beef::2/64"
+          routes:
+              - to: default
+                via: "2001:dead:beef::1"
+
+- Generate VRF configuration
+
+ Configure vrf `vrf1005` with table `1005` and interface `ens33` and `ens37`
+
+.. code-block:: yml
+
+ network:
+  ethernets:
+    ens33:
+    dhcp4: true
+  vrfs:
+    vrf1005:
+      table: 1005
+      interfaces:
+        - ens33
+        - ens37
+      routes:
+      - to: default
+        via: 1.2.3.4
+      routing-policy:
+      - from: 2.3.4.5
+
+- Generate VXLan configuration
+
+  Configure VXLan `vxlan1` id 1 on interface `ens33`
+
+.. code-block:: yml
+
+ network:
+   ethernets:
+     ens33:
+       routes:
+         - to: 10.20.30.40/32
+           via: 10.20.30.1
+   tunnels:
+     vxlan1:
+       mode: vxlan
+       id: 1
+       link: ens33
+       local: 192.168.1.34
+       remote: 192.168.1.35
+
+- Generate WireGuard configuration
+
+ Configure WireGuard `wg1`
+
+.. code-block:: yml
+
+   network:
+    tunnels:
+      wg1:
+       mode: wireguard
+       key: /etc/wireguard/laptop-private.key
+       port: 51000
+       addresses: [10.10.11.2/24]
+       peers:
+         - keys:
+           public: syR+psKigVdJ+PZvpEkacU5niqg9WGYxepDZT/zLGj8=
+           endpoint: 10.48.132.39:51000
+           allowed-ips: [10.10.11.0/24, 10.10.10.0/24]
