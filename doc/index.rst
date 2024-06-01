@@ -587,3 +587,40 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
        routes:
            - to: default
              via: 10.100.1.1
+
+ Using DHCP4 and DHCP6 overrides
+
+.. code-block:: yml
+
+ network:
+   ethernets:
+     eth0:
+       dhcp4: yes
+       dhcp6: yes
+       dhcp4-overrides:
+         route-metric: 200
+         send-release: no
+         use-gateway: true
+         use-hostname: no
+         send-hostname: yes
+         use-mtu: yes
+         iaid: 0xb6220feb
+         initial-congestion-window: 20
+         initial-advertised-receive-window: 20
+     eth1:
+       dhcp4: yes
+       dhcp4-overrides:
+         route-metric: 300
+         iaid: 0xb6220feb
+         initial-congestion-window: 20
+         initial-advertised-receive-window: 20
+       dhcp6-overrides:
+         use-dns: true
+         use-domain: true
+         use-address: true
+         use-hostname: true
+         use-ntp: true
+         rapid-commit: false
+         send-release: no
+         iaid: 0xb6220feb
+         without-ra: solicit
