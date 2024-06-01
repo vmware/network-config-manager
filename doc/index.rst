@@ -645,3 +645,20 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
           use-route-prefix: true
           use-autonomous-prefix: true
           use-on-link-prefix: true
+
+ Using match as MacAddress
+
+.. code-block:: yml
+
+ network:
+   ethernets:
+       eth0:
+           match:
+               macaddress: "de:ad:be:ef:ca:fe"
+           addresses: [ "10.3.0.5/23" ]
+           nameservers:
+               addresses: [ "8.8.8.8", "8.8.4.4" ]
+               search: [ example.com ]
+           routes:
+               - to: default
+                 via: 10.3.0.1
