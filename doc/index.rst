@@ -534,3 +534,24 @@ To set the device named `eth1` get an address via DHCP4 create a YAML file with 
      ethernets:
        eth1:
          dhcp4: true
+
+- Configuring static address and routes
+
+  To set static IP address, use the addresses key, which takes a list of (IPv4 or IPv6), addresses along with the subnet prefix length (e.g. /24). Gateway and DNS information can be provided as well:
+
+.. code-block:: yml
+
+  network:
+    ethernets:
+      eth0:
+        addresses:
+          - 10.10.10.2/24
+          - 10.10.10.3/24
+          - 10.10.10.4/24
+          - 10.10.10.5/24
+        nameservers:
+          search: [mydomain, otherdomain]
+          addresses: [10.10.10.1, 1.1.1.1]
+        routes:
+          - to: 192.168.1.1
+           via: 10.10.10.1
