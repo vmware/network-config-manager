@@ -526,7 +526,7 @@ Generate network config from YAML file
 
 - Using DHCP
 
-To set the device named `eth1` get an address via DHCP4 create a YAML file with the following:
+To set the device named ``eth1`` get an address via DHCP4 create a YAML file with the following:
 
 .. code-block:: yml
 
@@ -537,7 +537,7 @@ To set the device named `eth1` get an address via DHCP4 create a YAML file with 
 
 - Configuring static address and routes
 
-  To set static IP address, use the addresses key, which takes a list of (IPv4 or IPv6), addresses along with the subnet prefix length (e.g. /24). Gateway and DNS information can be provided as well:
+   To set static IP address, use the addresses key, which takes a list of (IPv4 or IPv6), addresses along with the subnet prefix length (e.g. /24). Gateway and DNS information can be provided as well:
 
 .. code-block:: yml
 
@@ -555,3 +555,16 @@ To set the device named `eth1` get an address via DHCP4 create a YAML file with 
         routes:
           - to: 192.168.1.1
            via: 10.10.10.1
+
+   Directly connected gateway
+
+.. code-block:: yml
+
+   network:
+     ethernets:
+       ens3:
+          addresses: [ "10.10.10.1/24" ]
+          routes:
+            - to: 0.0.0.0/0
+              via: 9.9.9.9
+              on-link: true
