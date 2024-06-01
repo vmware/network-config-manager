@@ -872,3 +872,25 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
           routes:
               - to: default
                 via: "2001:dead:beef::1"
+
+- Generate VRF configuration
+
+ Configure vrf `vrf1005` with table `1005` and interface `ens33` and `ens37`
+
+.. code-block:: yml
+
+ network:
+  ethernets:
+    ens33:
+    dhcp4: true
+  vrfs:
+    vrf1005:
+      table: 1005
+      interfaces:
+        - ens33
+        - ens37
+      routes:
+      - to: default
+        via: 1.2.3.4
+      routing-policy:
+      - from: 2.3.4.5
