@@ -662,3 +662,20 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
            routes:
                - to: default
                  via: 10.3.0.1
+
+ Configure Routing Policy Rule
+
+.. code-block:: yml
+
+ network:
+   ethernets:
+     eth1:
+       addresses:
+           - 10.100.1.5/24
+       routes:
+           - to: default
+             via: 10.100.1.1
+       routing-policy:
+             - from: 10.100.1.5/24
+               to: 10.100.1.5/24
+               table: 101
