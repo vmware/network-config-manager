@@ -914,3 +914,22 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
        link: ens33
        local: 192.168.1.34
        remote: 192.168.1.35
+
+- Generate WireGuard configuration
+
+ Configure WireGuard `wg1`
+
+.. code-block:: yml
+
+   network:
+    tunnels:
+      wg1:
+       mode: wireguard
+       key: /etc/wireguard/laptop-private.key
+       port: 51000
+       addresses: [10.10.11.2/24]
+       peers:
+         - keys:
+           public: syR+psKigVdJ+PZvpEkacU5niqg9WGYxepDZT/zLGj8=
+           endpoint: 10.48.132.39:51000
+           allowed-ips: [10.10.11.0/24, 10.10.10.0/24]
