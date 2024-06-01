@@ -788,3 +788,28 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
        rx-channels: max
        tx-channels: 656756677
        other-channels: 429496729
+
+- Generate VLAN configuration
+
+ Configure VLan with id 10 and set it's master device to `ens33` .
+
+.. code-block:: yml
+
+ network:
+  ethernets:
+     ens33:
+          addresses: [ "192.168.10.2/23" ]
+          nameservers:
+              addresses: [ "8.8.8.8", "8.8.4.4" ]
+              search: [ example.com ]
+          routes:
+              - to: default
+                via: 192.168.1.1
+  vlans:
+      vlan10:
+          id: 10
+          link: ens33
+          addresses: [ "192.168.10.5/24" ]
+          nameservers:
+              addresses: [ "8.8.8.8" ]
+              search: [ domain1.example.com, domain2.example.com ]
