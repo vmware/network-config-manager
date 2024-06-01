@@ -526,7 +526,7 @@ Generate network config from YAML file
 
 - Using DHCP
 
-To set the device named `eth1` get an address via DHCP4 create a YAML file with the following:
+To set the device named ``eth1`` get an address via DHCP4 create a YAML file with the following:
 
 .. code-block:: yml
 
@@ -534,3 +534,114 @@ To set the device named `eth1` get an address via DHCP4 create a YAML file with 
      ethernets:
        eth1:
          dhcp4: true
+
+- Configuring static address and routes
+
+   To set static IP address, use the addresses key, which takes a list of (IPv4 or IPv6), addresses along with the subnet prefix length (e.g. /24). Gateway and DNS information can be provided as well:
+
+.. code-block:: yml
+
+  network:
+    ethernets:
+      eth0:
+        addresses:
+          - 10.10.10.2/24
+          - 10.10.10.3/24
+          - 10.10.10.4/24
+          - 10.10.10.5/24
+        nameservers:
+          search: [mydomain, otherdomain]
+        addresses: [10.10.10.1, 1.1.1.1]
+        routes:
+          - to: 192.168.1.1
+           via: 10.10.10.1
+
+   Directly connected gateway
+
+.. code-block:: yml
+
+   network:
+     ethernets:
+       ens3:
+          addresses: [ "10.10.10.1/24" ]
+          routes:
+            - to: 0.0.0.0/0
+              via: 9.9.9.9
+              on-link: true
+
+  Multiple addresses on a single device
+
+.. code-block:: yml
+
+ network:
+   ethernets:
+     ens3:
+       addresses:
+           - 10.100.1.37/24
+           - 10.100.1.38/24:
+               label: ens3:0
+               lifetime: 1000
+           - 10.100.1.39/24:
+               label: ens3:test-label
+               lifetime: 2000
+       routes:
+           - to: default
+             via: 10.100.1.1
+
+ Using DHCP4 and DHCP6 overrides
+
+.. code-block:: yml
+
+ network:
+   ethernets:
+     eth0:
+       dhcp4: yes
+       dhcp6: yes
+       dhcp4-overrides:
+         route-metric: 200
+         send-release: no
+         use-gateway: true
+         use-hostname: no
+         send-hostname: yes
+         use-mtu: yes
+         iaid: 0xb6220feb
+         initial-congestion-window: 20
+         initial-advertised-receive-window: 20
+     eth1:
+       dhcp4: yes
+       dhcp4-overrides:
+         route-metric: 300
+         iaid: 0xb6220feb
+         initial-congestion-window: 20
+         initial-advertised-receive-window: 20
+       dhcp6-overrides:
+         use-dns: true
+         use-domain: true
+         use-address: true
+         use-hostname: true
+         use-ntp: true
+         rapid-commit: false
+         send-release: no
+         iaid: 0xb6220feb
+         without-ra: solicit
+
+ Using IPv6 Router Advertisement (RA)
+
+.. code-block:: yml
+
+   network:
+    ethernets:
+      eth0:
+        dhcp4: yes
+        dhcp6: yes
+        accept-ra: yes
+        link-local: ipv6
+        ra-overrides:
+          token: eui64
+          use-dns: true
+          use-domain: true
+          use-mtu: true
+          use-gateway: true
+          use-route-prefix: true
+          use-autonomous-prefix: true
+          use-on-link-prefix: true
