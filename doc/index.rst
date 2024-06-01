@@ -813,3 +813,19 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
           nameservers:
               addresses: [ "8.8.8.8" ]
               search: [ domain1.example.com, domain2.example.com ]
+
+- Generate Bond configuration
+
+ Configure bond `bond0` with mode `active-backup`  and set slave devices to `ens33` and `ens37`.
+
+.. code-block:: yml
+
+   network:
+     bonds:
+       bond0:
+          dhcp4: yes
+          interfaces:
+              - ens33
+              - ens37
+          parameters:
+              mode: active-backup
