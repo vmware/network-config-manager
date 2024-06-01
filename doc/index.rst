@@ -705,3 +705,30 @@ To set the device named ``eth1`` get an address via DHCP4 create a YAML file wit
                vlan-protocol: 802.1Q
                link-state: yes
                macaddress: 00:11:22:33:44:56
+
+ DHCP4 Server
+
+.. code-block:: yml
+
+   network:
+    version: 2
+    renderer: networkd
+      ethernets:
+       ens33:
+          dhcp4: no
+          accept-ra: no
+          addresses:
+            - 10.100.1.1/24
+          enable-dhcp4-server: yes
+          dhcp4-server:
+              pool-offset: 0
+              pool-size: 200
+              emit-dns: yes
+              dns: 8.8.8.8
+              static-leases:
+                - address: 10.100.1.2/24
+                  macaddress: 00:0c:29:5f:d1:41
+                - address: 10.100.1.3/24
+                  macaddress: 00:0c:29:5f:d1:42
+                - address: 10.100.1.4/24
+                  macaddress: 00:0c:29:5f:d1:43
