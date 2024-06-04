@@ -280,7 +280,7 @@ Configure Dynamic Address and Gateway
   [Match]
   Name=eth0
 
-  [Network``
+  [Network]
   LinkLocalAddressing=ipv6 # Enables IPv6 Link Local Address
   IPv6AcceptRA=yes         # Enables RA client
   DHCP=yes                 # Enables IPv4 and IPv6 client
@@ -288,7 +288,6 @@ Configure Dynamic Address and Gateway
 
 Configure Dynamic and Static Address and Gateway at once
 --------------------------------------------------------
-|
 
 -  The ``set-network`` allows to configure both static and dynamic configuration. It is a combination of ``set-dynamic`` and ``set-static`` . Hence we can replace any command of ``set-dynamic`` or ``set-static`` with ``set-network``. We can call ``set-network`` as ``hybrid`` or ``mixed`` mode.
 
@@ -516,6 +515,55 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    [Route]
    Gateway=192.168.1.1
+
+- Setup the MTU for device
+
+   The `set-mtu` allows to set the device MTU.
+
+.. code-block:: bash
+
+   ❯ nmctl set-mtu dev eth0 mtu 1800
+
+- Configure device MAC address
+
+   The `set-mac` allows to set the device MAC address.
+
+.. code-block:: bash
+
+   ❯ nmctl set-mtu dev eth0 mac 00:0c:29:3a:bc:11
+
+- Configure device the ARP (low-level Address Resolution Protocol)
+
+   The `set-link-option` allows to set device ARP. Takes a boolean If set to true, the ARP (low-level Address Resolution Protocol) for this interface is enabled.
+
+.. code-block:: bash
+
+   ❯ nmctl set-link-option dev eth0 arp yes
+
+- Configure device Multicast
+
+   The `set-link-option` allows to set device multicast. Takes a boolean. If set to true, the multicast flag on the device is enabled
+
+.. code-block:: bash
+
+   ❯ nmctl set-link-option dev eth0 mc yes
+
+- Configure device All Multicast
+
+   The `set-link-option` allows to set device all multicast. Takes a boolean. If set to true, the all multicast flag on the device is enabled
+
+.. code-block:: bash
+
+   ❯ nmctl set-link-option dev eth0 amc yes
+
+- Configure device Promiscuous
+
+   The `set-link-option` allows to set device all Promiscuous. Takes a boolean. If set to true, promiscuous mode of the interface is enabled.
+
+.. code-block:: bash
+
+   ❯ nmctl set-link-option dev eth0 pcs yes
+
 
 Generate network config from YAML file
 ----------------------------------------
