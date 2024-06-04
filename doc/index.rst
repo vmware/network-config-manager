@@ -525,6 +525,15 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-mtu dev eth0 mtu 1800
 
+- Configure device MAC address
+
+   The `set-mac` allows to set the device MAC address.
+
+.. code-block:: bash
+
+   ❯ nmctl set-mtu dev eth0 mac 00:0c:29:3a:bc:11
+
+
 Generate network config from YAML file
 ----------------------------------------
 
