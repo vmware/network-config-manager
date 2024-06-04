@@ -517,6 +517,14 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
    [Route]
    Gateway=192.168.1.1
 
+- Setup the MTU for device
+
+   The `set-mtu` allows to set the device MTU.
+
+.. code-block:: bash
+
+   ❯ nmctl set-mtu dev eth0 mtu 1800
+
 Generate network config from YAML file
 ----------------------------------------
 
