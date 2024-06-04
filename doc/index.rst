@@ -580,6 +580,30 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-link-rfo dev eth0 f ipv4
 
+- Configure DHCPv4 and/or DHCPv6 client
+
+   The `set-dhcp` enables DHCPv4 and/or DHCPv6 client support. Accepts "yes", "no", "ipv4", or "ipv6". Defaults to "no". With `set-dhcp` ``use-dns-ipv4``, ``use-dns-ipv6``, ``use-domains-ipv4``, ``use-domains-ipv6``, ``send-release-ipv4`` and ``send-release-ipv6`` can also be applied.
+
+.. code-block:: bash
+
+   ❯ nmctl set-dhcp dev eth0 dhcp ipv4
+
+- Configure DHCPv4 client identifier.
+
+   The `set-dhcp4-cid` allows to set DHCPv4 client identifier. Takes one of mac or duid. If set to mac, the MAC address of the link is used. If set to duid, an RFC4361-compliant Client ID, which is the combination of IAID and DUID, is used. IAID can be configured by IAID=. DUID can be configured by DUIDType= and DUIDRawData=. Defaults to duid.
+
+.. code-block:: bash
+
+   ❯ nmctl set-dhcp dev eth0 id mac
+
+- Configure DHCP Identity Association Identifier (IAID).
+
+   The `set-dhcp-iaid` allows to set DHCP (IPv4 and / or IPv6) client Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.
+
+.. code-block:: bash
+
+   ❯ nmctl set-dhcp dev eth0 f 6 iaid 0xb6220feb
+   ❯ nmctl set-dhcp dev eth0 f 4 iaid 0xb6220f12
 
 Generate network config from YAML file
 ----------------------------------------
