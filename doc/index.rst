@@ -580,6 +580,13 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-link-rfo dev eth0 f ipv4
 
+- Configure DHCPv4 and/or DHCPv6 client
+
+   The `set-dhcp` enables DHCPv4 and/or DHCPv6 client support. Accepts "yes", "no", "ipv4", or "ipv6". Defaults to "no". With `set-dhcp` ``use-dns-ipv4``, ``use-dns-ipv6``, ``use-domains-ipv4``, ``use-domains-ipv6``, ``send-release-ipv4`` and ``send-release-ipv6`` can also be applied.
+
+.. code-block:: bash
+
+   ❯ nmctl set-dhcp dev eth0 dhcp ipv4
 
 Generate network config from YAML file
 ----------------------------------------
