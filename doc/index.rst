@@ -588,6 +588,14 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-dhcp dev eth0 dhcp ipv4
 
+- Configure DHCPv4 client identifier.
+
+   The `set-dhcp4-cid` allows to set DHCPv4 client identifier. Takes one of mac or duid. If set to mac, the MAC address of the link is used. If set to duid, an RFC4361-compliant Client ID, which is the combination of IAID and DUID, is used. IAID can be configured by IAID=. DUID can be configured by DUIDType= and DUIDRawData=. Defaults to duid.
+
+.. code-block:: bash
+
+   ❯ nmctl set-dhcp dev eth0 id mac
+
 Generate network config from YAML file
 ----------------------------------------
 
