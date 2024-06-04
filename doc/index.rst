@@ -533,6 +533,14 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-mtu dev eth0 mac 00:0c:29:3a:bc:11
 
+- Configure device the ARP (low-level Address Resolution Protocol)
+
+   The `set-link-option` allows to set device ARP. Takes a boolean If set to true, the ARP (low-level Address Resolution Protocol) for this interface is enabled.
+
+.. code-block:: bash
+
+   ❯ nmctl set-link-option dev eth0 arp yes
+
 
 Generate network config from YAML file
 ----------------------------------------
