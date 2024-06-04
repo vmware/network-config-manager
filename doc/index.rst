@@ -564,6 +564,13 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-link-option dev eth0 pcs yes
 
+- Configure device group
+
+   The `set-link-group` allows to set device group. Link groups are similar to port ranges found in managed switches. When network interfaces are added to a numbered group, operations on all the interfaces from that group can be performed at once. Takes an unsigned integer in the range 0…2147483647
+
+.. code-block:: bash
+
+   ❯ nmctl set-link-group dev eth0 group 2147483647
 
 Generate network config from YAML file
 ----------------------------------------
