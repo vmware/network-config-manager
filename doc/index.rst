@@ -541,6 +541,13 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-link-option dev eth0 arp yes
 
+- Configure device Multicast
+
+   The `set-link-option` allows to set device multicast. Takes a boolean. If set to true, the multicast flag on the device is enabled
+
+.. code-block:: bash
+
+   ❯ nmctl set-link-option dev eth0 mc yes
 
 Generate network config from YAML file
 ----------------------------------------
