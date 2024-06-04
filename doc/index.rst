@@ -596,6 +596,15 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-dhcp dev eth0 id mac
 
+- Configure DHCP Identity Association Identifier (IAID).
+
+   The `set-dhcp-iaid` allows to set DHCP (IPv4 and / or IPv6) client Identity Association Identifier (IAID) for the interface, a 32-bit unsigned integer.
+
+.. code-block:: bash
+
+   ❯ nmctl set-dhcp dev eth0 f 6 iaid 0xb6220feb
+   ❯ nmctl set-dhcp dev eth0 f 4 iaid 0xb6220f12
+
 Generate network config from YAML file
 ----------------------------------------
 
