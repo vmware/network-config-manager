@@ -556,6 +556,14 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-link-option dev eth0 amc yes
 
+- Configure device Promiscuous
+
+   The `set-link-option` allows to set device all Promiscuous. Takes a boolean. If set to true, promiscuous mode of the interface is enabled.
+
+.. code-block:: bash
+
+   ❯ nmctl set-link-option dev eth0 pcs yes
+
 
 Generate network config from YAML file
 ----------------------------------------
