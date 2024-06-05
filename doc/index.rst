@@ -605,6 +605,22 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
    ❯ nmctl set-dhcp dev eth0 f 6 iaid 0xb6220feb
    ❯ nmctl set-dhcp dev eth0 f 4 iaid 0xb6220f12
 
+- Configure DHCP unique identifier (DUID)
+
+  The `set-dhcp-duid` allow to set DHCP unique identifier (DUID).
+
+``set-dhcp-duid dev|system [DEVICE] family|f [ipv4|ipv6|4|6] type [DUIDType {link-layer-time|vendor|link-layer|uuid|0…65535}] data [RAWDATA]``
+
+  `family` Takes one of ipv4 or ipv6.
+
+  `type` Takes one of link-layer-time, vendor, link-layer, uuid or 0…65535.
+
+  `data` Takes raw data.
+
+ .. code-block:: bash
+
+   ❯ nmctl set-dhcp-duid dev eth0 f 6 type vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00
+
 Generate network config from YAML file
 ----------------------------------------
 
