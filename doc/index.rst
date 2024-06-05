@@ -173,13 +173,11 @@ Configure Static Address and Gateway
 
   ❯ nmctl add-addr dev eth0 a 192.168.1.5
 
-
 - The ``remove-addr`` command allows to remove static address.
 
 .. code-block:: bash
 
    ❯ nmctl remove-addr dev eth0 a 192.168.1.5
-
 
 - Add many addresses at once
 
@@ -205,9 +203,7 @@ Configure Static Address and Gateway
 
   ❯ nmctl remove-addr dev eth0 family yes
 
-- The ``set-gw`` command allows to configure static Gateway.
-
-- Replace addresses
+- Replace address
 
    The `replace-addr` allows to replace address or addresses on a device. Takes one or many address and family ipv4, ipv6 or yes. The family specifies which family of address to be replaced with.
 
@@ -243,16 +239,57 @@ Configure Static Address and Gateway
    ❯ nmctl remove-gw dev [DEVICE] f|family [ipv4|ipv6|yes]
    ❯ nmctl remov-gw dev eth0 gw family ipv4
 
+- Configure route
+
+   The `add-route` allows to configure route on a device.
+
+.. code-block:: bash
+
+   add-route dev [DEVICE] gw [GATEWAY ADDRESS] dest [DESTINATION ADDRESS] src [SOURCE ADDRESS] pref-src [PREFFREDSOURCE ADDRESS] metric [METRIC NUMBER] scope [SCOPE {global|site|link|host|nowhere}] mtu [MTU NUMBER] table [TABLE {default|main|local|NUMBER}] proto [PROTOCOL {boot|static|ra|dhcp|NUMBER}] type [TYPE {unicast|local|broadcast|anycast|multicast|blackhole|unreachable|prohibit|throw|nat|resolve}] ipv6-pref [IPV6PREFERENCE {low|medium|high}] onlink [{ONLINK BOOLEN}]
+
+   `gw` Takes the gateway address.
+
+   `dest` The destination prefix of the route. Possibly followed by a slash and the prefix length. If omitted, a full-length host route is assumed.
+
+   `src` The source prefix of the route. Possibly followed by a slash and the prefix length. If omitted, a full-length host route is assumed.
+
+   `pref-src` The preferred source address of the route. The address must be in the format described in inet_pton(3).
+
+   `metric` The metric of the route. Takes an unsigned integer in the range 0…4294967295. Defaults to unset, and the kernel's default will be used.
+
+   `scope` The scope of the IPv4 route, which can be "global", "site", "link", "host", or "nowhere":
+
+   "global" means the route can reach hosts more than one hop away.
+   "site" means an interior route in the local autonomous system.
+   "link" means the route can only reach hosts on the local network (one hop away).
+   "host" means the route will not leave the local machine (used for internal addresses like 127.0.0.1).
+   "nowhere" means the destination doesn't exist.
+
+    `mtu` The maximum transmission unit in bytes to set for the route.
+
+   `table` The table identifier for the route. Takes one of predefined names "default", "main", and "local", and names defined in RouteTable= in networkd.conf(5), or a number between 1 and 4294967295. The table can be retrieved using ip route show table num. If unset and Type= is "local", "broadcast", "anycast", or "nat", then "local" is used. In other cases, defaults to "main".
+
+   `proto` The protocol identifier for the route. Takes a number between 0 and 255 or the special values "kernel", "boot", "static", "ra" and "dhcp". Defaults to "static".
+
+    `type` Specifies the type for the route. Takes one of "unicast", "local", "broadcast", "anycast", "multicast", "blackhole", "unreachable", "prohibit", "throw", "nat", and "xresolve". If "unicast", a regular route is defined, i.e. a route indicating the path to take to a destination network address. If "blackhole", packets to the defined route are discarded silently. If "unreachable", packets to the defined route are discarded and the ICMP message "Host Unreachable" is generated. If "prohibit", packets to the defined route are discarded and the ICMP message "Communication Administratively Prohibited" is generated. If "throw", route lookup in the current routing table will fail and the route selection process will return to Routing Policy Database (RPDB). Defaults to "unicast".
+
+    `onlink` Takes a boolean. If set to true, the kernel does not have to check if the gateway is reachable directly by the current machine (i.e., attached to the local network), so that we can insert the route in the kernel table without it being complained about. Defaults to "no".
+
+    `ipv6-pref` Specifies the route preference as defined in RFC 4191 for Router Discovery messages. Which can be one of "low" the route has a lowest priority, "medium" the route has a default priority or "high" the route has a highest priority.
+
+.. code-block:: bash
+
+  ❯ nmctl add-route dev eth0 gw 192.168.1.1 dest 192.168.1.2 metric 111
 
 Configure Dynamic Address and Gateway
 -------------------------------------
 |
 
-- ``nmctl`` provides set-dynamic command to configure dynamic address
+- ``nmctl`` provides ``set-dynamic`` command to configure dynamic address
 
 .. code-block:: bash
 
-  set-dynamic  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN] accept-ra [BOOLEAN]
+  set-dynamic dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN] accept-ra [BOOLEAN]
 
 - By default set-static creates a new .network file. To keep the previous configuration use "keep yes"
 
@@ -293,11 +330,11 @@ Configure Dynamic Address and Gateway
   IPv6AcceptRA=yes         # Enables RA client
   DHCP=ipv6                # Enables IPv6 client
 
-- Note: We need to enable LinkLocalAddressing=, So that RA client and DHCPv6 client can talk to respective servers. RA IPv6AcceptRA= is requred to get the default route and It also indicates The 'M' and the 'O' bit. When M or O bit is on that implies the systemd-networkd should talk to DHCPv6 server to obtain the DHCPv6 address. See rfc4861 Section 4.2 M 1-bit "Managed address configuration" flag. When set, it indicates that addresses are available via Dynamic Host Configuration Protocol [DHCPv6]. If the M flag is set, the O flag is redundant and can be ignored because DHCPv6 will return all available configuration information. O 1-bit "Other configuration" flag. When set, it indicates that other configuration information is available via DHCPv6. Examples of such information are DNS-related information or information on other servers within the network.
+- Note: We need to enable ``LinkLocalAddressing=``, So that RA client and DHCPv6 client can talk to respective servers. RA ``IPv6AcceptRA=`` is requred to get the default route and It also indicates The 'M' and the 'O' bit. When M or O bit is on that implies the systemd-networkd should talk to DHCPv6 server to obtain the DHCPv6 address. See rfc4861 Section 4.2 M 1-bit "Managed address configuration" flag. When set, it indicates that addresses are available via Dynamic Host Configuration Protocol [DHCPv6]. If the M flag is set, the O flag is redundant and can be ignored because DHCPv6 will return all available configuration information. O 1-bit "Other configuration" flag. When set, it indicates that other configuration information is available via DHCPv6. Examples of such information are DNS-related information or information on other servers within the network.
 
 - Configure DHCPv4 + DHCPv6
 
-   With ``nmctl set-dynamic`` we can configure DHCPv4 and DHCPv6 addresses.
+   With ``set-dynamic`` we can configure DHCPv4 and DHCPv6 addresses.
 
 .. code-block:: bash
 
@@ -324,7 +361,7 @@ Configure Dynamic and Static Address and Gateway at once
    ❯ set-network dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN] use-domains-ipv4 [BOOLEAN] use-domains-ipv6 [BOOLEAN] accept-ra [BOOLEAN] client-id-ipv4|dhcp4-client-id [DHCPv4 IDENTIFIER {mac|duid|duid-only}  iaid-ipv4|dhcpv4-iaid  [DHCPv4 IAID] iaid-ipv6|dhcp6-iaid [DHCPv6 IAID] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] dns [SERVER1,SERVER2...]
  keep [BOOLEAN] Configures dynamic and static configuration of the device.
 
-- Note: By default set-static / set-dynamic / set-network creates a new .network file. To keep the previous configuration use "keep yes"
+- Note: By default ``set-static`` / ``set-dynamic`` / ``set-network`` creates a new .network file. To keep the previous configuration use "keep yes"
 
 - Auto IPv6
 
@@ -347,7 +384,7 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
 - Configure DHCPv4
 
-- With ``nmctl set-dynamic`` we can configure DHCPv4 addresses.
+- With ``set-dynamic`` we can configure DHCPv4 addresses.
 
 .. code-block:: bash
 
