@@ -281,6 +281,15 @@ Configure Static Address and Gateway
 
   ❯ nmctl add-route dev eth0 gw 192.168.1.1 dest 192.168.1.2 metric 111
 
+- Remove route
+
+   The `remove-route` allows to remove a route. Taken one of family ipv4/ipv6 or yes .
+
+.. code-block:: bash
+
+  ❯ nmctl remove-route dev [DEVICE] f|family [ipv4|ipv6|yes]
+  ❯ nmctl remove-route dev eth0 family yes
+
 Configure Dynamic Address and Gateway
 -------------------------------------
 |
