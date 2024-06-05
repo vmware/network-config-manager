@@ -186,20 +186,17 @@ Configure Static Address and Gateway
 
   ❯ nmctl add-addr dev eth0 many 192.168.1.5/24,192.168.1.6/24,192.168.1.7/24,192.168.1.8/24
 
-
 - Remove many addresses at once
 
 .. code-block:: bash
 
   ❯ nmctl remove-addr dev eth0 many 192.168.1.5/24,192.168.1.6/24,192.168.1.7/24,192.168.1.8/24
 
-
 - Remove many addresses at once by family
 
 .. code-block:: bash
 
   ❯ nmctl remove-addr dev eth0 family ipv4
-
 
 - Remove all addresses at once
 
@@ -208,6 +205,27 @@ Configure Static Address and Gateway
   ❯ nmctl remove-addr dev eth0 family yes
 
 - The ``set-gw`` command allows to configure static Gateway.
+
+- Replace addresses
+
+   The `replace-addr` allows to replace address or addresses on a device. Takes one or many address and family ipv4, ipv6 or yes. The family specifies which family of address to be replaced with.
+
+.. code-block:: bash
+
+   replace-addr dev [DEVICE] address|a|addr [ADDRESS] many [ADDRESS1,ADDRESS2...] f|family [ipv4|ipv6|yes] Replaces family of addresses, address with a address or many
+
+   Replace many address with specified family
+
+.. code-block:: bash
+
+   ❯ nmctl replace-addr dev eth0 many 192.168.1.7/24,192.168.1.8/24 family ipv4
+
+.. code-block:: bash
+
+  ❯ nmctl remove-addr dev eth0 family yes
+
+- The ``set-gw`` command allows to configure static Gateway.
+
 
 | Example:
 
@@ -612,9 +630,7 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 ``set-dhcp-duid dev|system [DEVICE] family|f [ipv4|ipv6|4|6] type [DUIDType {link-layer-time|vendor|link-layer|uuid|0…65535}] data [RAWDATA]``
 
   `family` Takes one of ipv4 or ipv6.
-
-  `type` Takes one of link-layer-time, vendor, link-layer, uuid or 0…65535.
-
+  `type` Takes one of link-layer-time, vendor, link-layer, uuid, 0…65535.
   `data` Takes raw data.
 
  .. code-block:: bash
