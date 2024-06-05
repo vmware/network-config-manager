@@ -105,7 +105,8 @@ Configure Static Address and Gateway
 
 .. code-block::
 
-  ❯ nmctl set-static dev [DEVICE] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] dns [SERVER1,SERVER2...] keep [BOOLEAN] Configures static configuration of the device
+  ❯ nmctl set-static dev [DEVICE] address|a|addr [ADDRESS] gw|gateway|g [GATEWAY ADDRESS] dns [SERVER1,SERVER2...] keep [BOOLEAN]
+
 |
 | Example
 
@@ -129,7 +130,7 @@ Configure Static Address and Gateway
 
 .. code-block:: bash
 
-  ❯ set-gw-family dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS] Configures device default IPv4/IPv6 Gateway.
+  ❯ set-gw-family dev [DEVICE] gw4 [IPv4 GATEWAY ADDRESS] gw6 [IPv6 GATEWAY ADDRESS]
 
 |
 | Example
@@ -164,7 +165,7 @@ Configure Static Address and Gateway
 
 .. code-block:: bash
 
-   ❯ add-addr dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [STRING] pref-lifetime|pl [{forever|infinity|0}] scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN] prefix-route|pr [PREFIXROUTE BOOLEAN] many [ADDRESS1,ADDRESS2...] Configures device Address.
+   ❯ add-addr dev [DEVICE] address|a|addr [ADDRESS] peer [ADDRESS]] label [STRING] pref-lifetime|pl [{forever|infinity|0}] scope {global|link|host|NUMBER}] dad [DAD {none|ipv4|ipv6|both}] prefix-route|pr [PREFIXROUTE BOOLEAN] prefix-route|pr [PREFIXROUTE BOOLEAN] many [ADDRESS1,ADDRESS2...]
 
 - Add one address
 
@@ -186,13 +187,11 @@ Configure Static Address and Gateway
 
   ❯ nmctl add-addr dev eth0 many 192.168.1.5/24,192.168.1.6/24,192.168.1.7/24,192.168.1.8/24
 
-
 - Remove many addresses at once
 
 .. code-block:: bash
 
   ❯ nmctl remove-addr dev eth0 many 192.168.1.5/24,192.168.1.6/24,192.168.1.7/24,192.168.1.8/24
-
 
 - Remove many addresses at once by family
 
@@ -200,8 +199,27 @@ Configure Static Address and Gateway
 
   ❯ nmctl remove-addr dev eth0 family ipv4
 
-
 - Remove all addresses at once
+
+.. code-block:: bash
+
+  ❯ nmctl remove-addr dev eth0 family yes
+
+- The ``set-gw`` command allows to configure static Gateway.
+
+- Replace addresses
+
+   The `replace-addr` allows to replace address or addresses on a device. Takes one or many address and family ipv4, ipv6 or yes. The family specifies which family of address to be replaced with.
+
+.. code-block:: bash
+
+   replace-addr dev [DEVICE] address|a|addr [ADDRESS] many [ADDRESS1,ADDRESS2...] f|family [ipv4|ipv6|yes]
+
+   Replace many address with specified family
+
+.. code-block:: bash
+
+   ❯ nmctl replace-addr dev eth0 many 192.168.1.7/24,192.168.1.8/24 family ipv4
 
 .. code-block:: bash
 
@@ -213,8 +231,18 @@ Configure Static Address and Gateway
 
 .. code-block:: bash
 
-   ❯ nmctl set-gw dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN] Configures device default Gateway.
+   ❯ nmctl set-gw dev [DEVICE] gw [GATEWAY ADDRESS] onlink [ONLINK BOOLEAN]
    ❯ nmctl set-gw dev eth0 gw 192.168.1.1 onlink yes
+
+- The ``remove-gw`` command allows to remove static gateway by family or all.
+
+| Example:
+
+.. code-block:: bash
+
+   ❯ nmctl remove-gw dev [DEVICE] f|family [ipv4|ipv6|yes]
+   ❯ nmctl remov-gw dev eth0 gw family ipv4
+
 
 Configure Dynamic Address and Gateway
 -------------------------------------
@@ -224,7 +252,7 @@ Configure Dynamic Address and Gateway
 
 .. code-block:: bash
 
-  set-dynamic  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN]accept-ra [BOOLEAN] Configures dynamic configration of the device (IPv4|IPv6|RA).
+  set-dynamic  dev [DEVICE] dhcp [DHCP {BOOLEAN|ipv4|ipv6}] use-dns-ipv4 [BOOLEAN] use-dns-ipv6 [BOOLEAN] send-release-ipv4 [BOOLEAN] send-release-ipv6 [BOOLEAN] accept-ra [BOOLEAN]
 
 - By default set-static creates a new .network file. To keep the previous configuration use "keep yes"
 
@@ -604,6 +632,20 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-dhcp dev eth0 f 6 iaid 0xb6220feb
    ❯ nmctl set-dhcp dev eth0 f 4 iaid 0xb6220f12
+
+- Configure DHCP unique identifier (DUID)
+
+  The `set-dhcp-duid` allow to set DHCP unique identifier (DUID).
+
+``set-dhcp-duid dev|system [DEVICE] family|f [ipv4|ipv6|4|6] type [DUIDType {link-layer-time|vendor|link-layer|uuid|0…65535}] data [RAWDATA]``
+
+  `family` Takes one of ipv4 or ipv6.
+  `type` Takes one of link-layer-time, vendor, link-layer, uuid, 0…65535.
+  `data` Takes raw data.
+
+ .. code-block:: bash
+
+   ❯ nmctl set-dhcp-duid dev eth0 f 6 type vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00
 
 Generate network config from YAML file
 ----------------------------------------
