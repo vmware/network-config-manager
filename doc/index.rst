@@ -283,7 +283,7 @@ Configure Static Address and Gateway
 
 - Remove route
 
-   The `remove-route` allows to remove a route. Taken one of family ipv4/ipv6 or yes .
+   The `remove-route` allows to remove a route. Taken one of family ``ipv4/ipv6`` or ``yes`` .
 
 .. code-block:: bash
 
@@ -692,6 +692,15 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
  .. code-block:: bash
 
    ❯ nmctl set-dhcp-duid dev eth0 f 6 type vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00
+
+- Configure Link Layer Discovery Protocol (LLDP).
+
+  The `set-lldp`  Controls support for Ethernet LLDP packet reception and  LLDP packet emission.
+
+.. code-block:: bash
+
+   ❯ nmctl set-lldp dev eth0 receive yes emit yes
+
 
 Generate network config from YAML file
 ----------------------------------------
