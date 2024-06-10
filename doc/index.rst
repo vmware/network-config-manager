@@ -693,9 +693,17 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
 
    ❯ nmctl set-dhcp-duid dev eth0 f 6 type vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00
 
+- Configure link-local address autoconfiguration.
+
+  The `set-lla` Controls link-local address autoconfiguration. Takes a boolean or `ipv4/ipv6`
+
+.. code-block:: bash
+
+   ❯ nmctl set-lla dev eth0 ipv6
+
 - Configure Link Layer Discovery Protocol (LLDP).
 
-  The `set-lldp`  Controls support for Ethernet LLDP packet reception and  LLDP packet emission.
+  The `set-lldp` Controls support for Ethernet LLDP packet reception and LLDP packet emission.
 
 .. code-block:: bash
 
