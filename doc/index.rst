@@ -710,6 +710,14 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
    ❯ nmctl set-lldp dev eth0 receive yes emit yes
 
 
+- Configures Link Local Multicast Name Resolution (LLMNR).
+
+  The `set-llmnr` allow to configure Link Local Multicast Name Resolution (LLMNR). Takes a boolean or "resolve". When true, enables Link-Local Multicast Name Resolution on the link. When set to "resolve", only resolution is enabled, but not host registration and announcement. Defaults to true. This setting is read by systemd-resolved.service(8).
+
+.. code-block:: bash
+
+   ❯ nmctl set-llmnr dev eth0 yes
+
 Generate network config from YAML file
 ----------------------------------------
 
