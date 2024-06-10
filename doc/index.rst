@@ -283,7 +283,7 @@ Configure Static Address and Gateway
 
 - Remove route
 
-   The `remove-route` allows to remove a route. Taken one of family ipv4/ipv6 or yes .
+   The `remove-route` allows to remove a route. Taken one of family ``ipv4/ipv6`` or ``yes`` .
 
 .. code-block:: bash
 
@@ -692,6 +692,39 @@ configuring AUTOV6 for our VCSA and the vami command we would run is the followi
  .. code-block:: bash
 
    ❯ nmctl set-dhcp-duid dev eth0 f 6 type vendor data 00:00:ab:11:f9:2a:c2:77:29:f9:5c:00
+
+- Configure link-local address autoconfiguration.
+
+  The `set-lla` Controls link-local address autoconfiguration. Takes a boolean or `ipv4/ipv6`
+
+.. code-block:: bash
+
+   ❯ nmctl set-lla dev eth0 ipv6
+
+- Configure Link Layer Discovery Protocol (LLDP).
+
+  The `set-lldp` Controls support for Ethernet LLDP packet reception and LLDP packet emission.
+
+.. code-block:: bash
+
+   ❯ nmctl set-lldp dev eth0 receive yes emit yes
+
+- Configures Link Local Multicast Name Resolution (LLMNR).
+
+  The `set-llmnr` allow to configure Multicast Name Resolution (LLMNR). Takes a boolean or "resolve". When true, enables Link-Local Multicast Name Resolution on the link. When set to "resolve", only resolution is enabled, but not host registration and announcement. Defaults to true. This setting is read by systemd-resolved.service(8).
+
+.. code-block:: bash
+
+   ❯ nmctl set-llmnr dev eth0 yes
+
+- Configures Link Multicast DNS.
+
+  The `set-mcast-dns` allow to configure Multicast DNS. Takes a boolean or "resolve". Takes a boolean or "resolve". When true, enables Multicast DNS support on the link. When set to "resolve", only resolution is enabled, but not host or service registration and announcement. Defaults to false. This setting is read by systemd-resolved.service(8).
+
+.. code-block:: bash
+
+   ❯ nmctl set-mcast-dns dev eth0 yes
+
 
 Generate network config from YAML file
 ----------------------------------------
