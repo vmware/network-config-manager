@@ -1157,21 +1157,21 @@ static int json_array_to_ip(const json_object *obj, const int family, const int 
                 }
         }
 
+        if (prefix > 0)
+                g_string_append_printf(v, "/%d", prefix);
+
         if (family == AF_INET6) {
                 _auto_cleanup_ IPAddress *addr = NULL;
                 int r;
 
-                r = parse_ipv6(v->str, &addr);
+                r = parse_ip_from_str(v->str, &addr);
                 if (r < 0)
                         return r;
 
-                r = ip_to_str(AF_INET6, addr, &ip);
+                r = ip_to_str_prefix(AF_INET6, addr, &ip);
                 if (r < 0)
                         return r;
         }
-
-        if (prefix > 0)
-                g_string_append_printf(v, "/%d", prefix);
 
         if (family == AF_INET6)
                 *ret = steal_ptr(ip);
