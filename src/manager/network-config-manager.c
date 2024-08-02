@@ -4774,6 +4774,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL, **domains = NULL;
+        DHCPClientIdentifier client_id = _DHCP_CLIENT_IDENTIFIER_INVALID;
         int dhcp = -1, use_dns = -1, lla = -1, send_release = -1;
         UseDomains use_domains = _USE_DOMAINS_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
@@ -4904,6 +4905,16 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else if (streq_fold(argv[i], "cid") || streq_fold(argv[i], "client-id")) {
+                        parse_next_arg(argv, argc, i);
+
+                        client_id = dhcp_client_identifier_to_kind(argv[i]);
+                        if (client_id == _DHCP_CLIENT_IDENTIFIER_INVALID) {
+                                log_warning("Failed to parse DHCP4 client identifier: %s", argv[i]);
+                                return -EINVAL;
+                        }
+
+                        continue;
                 } else if (streq_fold(argv[i], "use-dns")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4971,7 +4982,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
 
         dns = strv_remove_duplicates(dns);
         domains = strv_remove_duplicates(domains);
-        r = manager_set_ipv4(p, lla, dhcp, addrs, rt4, dns, domains, use_dns, use_domains, send_release, keep);
+        r = manager_set_ipv4(p, lla, dhcp, addrs, rt4, dns, domains, client_id, use_dns, use_domains, send_release, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
                 return r;

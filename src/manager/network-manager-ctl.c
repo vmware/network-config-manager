@@ -217,7 +217,7 @@ static int help(void) {
                "  remove-ipv6ra                dev [DEVICE] Removes Ipv6 Router Advertisement.\n"
                "  enable-ipv6                  dev [DEVICE] [BOOLEAN] Enable or disables IPv6 on the link.\n"
                "  set-ipv4                     dev [DEVICE] dhcp [BOOLEAN] addr [ADDRESS] many [ADDRESS1,ADDRESS2...] gw|gw4|g [GATEWAY] dns [SERVER1,SERVER2...] domains [DOMAIN1,DOMAIN2 ...]"
-                                                      "\n\t\t\t\t     lla [BOOLEAN|ipv6|ipv4] use-dns [BOOLEAN use-domains [route|BOOLEAN] send-release [BOOLEAN] keep [BOOLEAN] Configures device IPv4.\n"
+                                                      "\n\t\t\t\t     lla [BOOLEAN|ipv6|ipv4] cid|client-id [IDENTIFIER {mac|duid|duid-only} use-dns [BOOLEAN use-domains [route|BOOLEAN] send-release [BOOLEAN] keep [BOOLEAN] Configures device IPv4.\n"
                "  set-ipv6                     dev [DEVICE] accept-ra [BOOLEAN] dhcp [BOOLEAN] address|a|addr [ADDRESS] many [ADDRESS1,ADDRESS2...] gw|gw6|g [GATEWAY]"
                                                       "\n\t\t\t\t     lla [BOOLEAN|ipv6|ipv4] dns [SERVER1,SERVER2...] domains [DOMAIN1,DOMAIN2 ...] use-dns [BOOLEAN] use-domains [route|BOOLEAN] send-release [BOOLEAN] keep [BOOLEAN] Configures device IPv6.\n"
                "  add-sr-iov                   dev [DEVICE] [vf INTEGER] [vlanid INTEGER] [qos INTEGER] [vlanproto STRING] [macspoofck BOOLEAN] [qrss BOOLEAN]"

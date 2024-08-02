@@ -2889,6 +2889,7 @@ int manager_set_ipv4(const IfNameIndex *p,
                      Route *rt4,
                      char **dns,
                      char **domains,
+                     const DHCPClientIdentifier client_id,
                      const int use_dns,
                      UseDomains use_domains,
                      const int send_release,
@@ -2994,6 +2995,12 @@ int manager_set_ipv4(const IfNameIndex *p,
                         log_warning("Failed to write Network Domains= '%s': %s", network, strerror(-r));
                         return r;
                 }
+        }
+
+        if (client_id >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "ClientIdentifier", dhcp_client_identifier_to_name(client_id));
+                if (r < 0)
+                        return r;
         }
 
         if (use_domains >= 0) {
