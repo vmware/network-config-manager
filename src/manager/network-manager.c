@@ -2712,6 +2712,7 @@ int manager_set_ipv6(const IfNameIndex *p,
                      char **addrs,
                      Route *rt6,
                      char **dns,
+                     char **domains,
                      const int use_dns,
                      const int send_release,
                      bool keep) {
@@ -2804,6 +2805,33 @@ int manager_set_ipv6(const IfNameIndex *p,
                 }
         }
 
+        if (domains) {
+                if (keep) {
+                        r = key_file_network_parse_search_domains(network, &s);
+                        if (r < 0)
+                                return r;
+
+                        if (strv_empty((const char **) s)) {
+                                t = strv_dup(domains);
+                                if (!t)
+                                        return log_oom();
+                        } else {
+                                t = strv_unique(domains, s);
+                                if (!t)
+                                        return log_oom();
+                        }
+
+                        l = t;
+                } else
+                        l = domains;
+
+                r = set_config(key_file, "Network", "Domains", strv_join(" ", l));
+                if (r < 0) {
+                        log_warning("Failed to write Network Domains= '%s': %s", network, strerror(-r));
+                        return r;
+                }
+        }
+
         if (use_dns >= 0) {
                 r = key_file_set_str(key_file, "DHCPv6", "UseDNS", bool_to_str(use_dns));
                 if (r < 0)
@@ -2853,6 +2881,7 @@ int manager_set_ipv4(const IfNameIndex *p,
                      char **addrs,
                      Route *rt4,
                      char **dns,
+                     char **domains,
                      const int use_dns,
                      const int send_release,
                      bool keep) {
@@ -2928,6 +2957,33 @@ int manager_set_ipv4(const IfNameIndex *p,
                 r = set_config(key_file, "Network", "DNS", strv_join(" ", l));
                 if (r < 0) {
                         log_warning("Failed to write Network DNS= '%s': %s", network, strerror(-r));
+                        return r;
+                }
+        }
+
+        if (domains) {
+                if (keep) {
+                        r = key_file_network_parse_search_domains(network, &s);
+                        if (r < 0)
+                                return r;
+
+                        if (strv_empty((const char **) s)) {
+                                t = strv_dup(domains);
+                                if (!t)
+                                        return log_oom();
+                        } else {
+                                t = strv_unique(domains, s);
+                                if (!t)
+                                        return log_oom();
+                        }
+
+                        l = t;
+                } else
+                        l = domains;
+
+                r = set_config(key_file, "Network", "Domains", strv_join(" ", l));
+                if (r < 0) {
+                        log_warning("Failed to write Network Domains= '%s': %s", network, strerror(-r));
                         return r;
                 }
         }

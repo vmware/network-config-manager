@@ -4555,7 +4555,7 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
 
 _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
         int accept_ra = -1, dhcp = -1, use_dns = -1, lla = -1, send_release = -1;
-        _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL;
+        _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL, **domains = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt6 = NULL;
         bool keep = true;
@@ -4669,6 +4669,37 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else if (streq_fold(argv[i], "domains")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (strchr(argv[i], ',')) {
+                                char **d;
+
+                                d = strsplit(argv[i], ",", -1);
+                                if (!d) {
+                                        log_warning("Failed to parse DNS Search domains '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                d = strv_remove(d, "");
+                                if (!d) {
+                                        log_warning("Failed to parse DNS Search domains '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                if (!domains)
+                                        domains = d;
+                                else {
+                                        domains = strv_merge(domains, d);
+                                        if (!domains)
+                                                return log_oom();
+                                }
+                        } else {
+                                r = strv_extend(&domains, argv[i]);
+                                if (r < 0)
+                                        return log_oom();
+                        }
+                        continue;
                 } else if (streq_fold(argv[i], "use-dns")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4715,7 +4746,8 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
         }
 
         dns = strv_remove_duplicates(dns);
-        r = manager_set_ipv6(p, dhcp, accept_ra, lla, addrs, rt6, dns, use_dns, send_release, keep);
+        domains = strv_remove_duplicates(domains);
+        r = manager_set_ipv6(p, dhcp, accept_ra, lla, addrs, rt6, dns, domains, use_dns, send_release, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
@@ -4725,8 +4757,8 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 }
 
 _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
+        _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL, **domains = NULL;
         int dhcp = -1, use_dns = -1, lla = -1, send_release = -1;
-        _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt4 = NULL;
         bool keep = true;
@@ -4821,6 +4853,37 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                         }
 
                         continue;
+                } else if (streq_fold(argv[i], "domains")) {
+                        parse_next_arg(argv, argc, i);
+
+                        if (strchr(argv[i], ',')) {
+                                char **d;
+
+                                d = strsplit(argv[i], ",", -1);
+                                if (!d) {
+                                        log_warning("Failed to parse DNS Search domains '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                d = strv_remove(d, "");
+                                if (!d) {
+                                        log_warning("Failed to parse DNS Search domains '%s': %s", argv[i], strerror(EINVAL));
+                                        return -EINVAL;
+                                }
+
+                                if (!domains)
+                                        domains = d;
+                                else {
+                                        domains = strv_merge(domains, d);
+                                        if (!domains)
+                                                return log_oom();
+                                }
+                        } else {
+                                r = strv_extend(&domains, argv[i]);
+                                if (r < 0)
+                                        return log_oom();
+                        }
+                        continue;
                 } else if (streq_fold(argv[i], "use-dns")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4879,7 +4942,8 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
         }
 
         dns = strv_remove_duplicates(dns);
-        r = manager_set_ipv4(p, lla, dhcp, addrs, rt4, dns, use_dns, send_release, keep);
+        domains = strv_remove_duplicates(domains);
+        r = manager_set_ipv4(p, lla, dhcp, addrs, rt4, dns, domains, use_dns, send_release, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
                 return r;

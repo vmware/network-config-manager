@@ -227,15 +227,18 @@ int manager_set_ipv6(const IfNameIndex *p,
                      char **addrs,
                      Route *rt6,
                      char **dns,
+                     char **domains,
                      const int use_dns,
                      const int send_release,
                      const bool keep);
+
 int manager_set_ipv4(const IfNameIndex *p,
                      const int lla,
                      const int dhcp,
                      char **addrs,
                      Route *rt4,
                      char **dns,
+                     char **domains,
                      const int use_dns,
                      const int send_release,
                      bool keep);
