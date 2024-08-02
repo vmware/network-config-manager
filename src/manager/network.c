@@ -131,8 +131,8 @@ int dhcp_client_duid_name_to_type(char *name) {
 }
 
 static const char *const link_local_address_type[_LINK_LOCAL_ADDRESS_MAX] =  {
-        [LINK_LOCAL_ADDRESS_YES]           = "yes",
         [LINK_LOCAL_ADDRESS_NO]            = "no",
+        [LINK_LOCAL_ADDRESS_YES]           = "yes",
         [LINK_LOCAL_ADDRESS_IPV4]          = "ipv4",
         [LINK_LOCAL_ADDRESS_IPV6]          = "ipv6",
 };
@@ -150,7 +150,7 @@ const char *link_local_address_type_to_name(int id) {
 int link_local_address_type_to_kind(const char *name) {
         assert(name);
 
-        for (size_t i = LINK_LOCAL_ADDRESS_YES; i < (size_t) ELEMENTSOF(link_local_address_type); i++)
+        for (size_t i = LINK_LOCAL_ADDRESS_NO; i < (size_t) ELEMENTSOF(link_local_address_type); i++)
                 if (streq_fold(name, link_local_address_type[i]))
                         return i;
 

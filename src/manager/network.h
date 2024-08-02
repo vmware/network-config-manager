@@ -37,8 +37,8 @@ typedef enum DHCPClientDUIDType {
 } DHCPClientDUIDType;
 
 typedef enum LinkLocalAddress {
-        LINK_LOCAL_ADDRESS_YES,
         LINK_LOCAL_ADDRESS_NO,
+        LINK_LOCAL_ADDRESS_YES,
         LINK_LOCAL_ADDRESS_IPV4,
         LINK_LOCAL_ADDRESS_IPV6,
        _LINK_LOCAL_ADDRESS_MAX,

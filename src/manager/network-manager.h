@@ -148,6 +148,7 @@ int manager_network_dhcp4_section_configs_new(ConfigManager **ret);
 int manager_network_dhcp6_section_configs_new(ConfigManager **ret);
 int manager_network_link_section_configs_new(ConfigManager **ret);
 
+int manager_acquire_link_local_addressing_kind(const IfNameIndex *p, LinkLocalAddress *lla_mode);
 int manager_set_link_local_address(const IfNameIndex *p, const char *k, const char *v);
 int manager_set_network_section_bool(const IfNameIndex *p, const char *k, bool v);
 int manager_set_network_section(const IfNameIndex *p, const char *k, const char *v);
@@ -222,7 +223,7 @@ bool manager_config_exists(const char *section, const char *k, const char *v);
 int manager_set_ipv6(const IfNameIndex *p,
                      const int dhcp,
                      const int accept_ra,
-                     const int lla,
+                     int lla,
                      char **addrs,
                      Route *rt6,
                      char **dns,

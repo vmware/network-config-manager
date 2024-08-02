@@ -222,6 +222,28 @@ int manager_set_link_dhcp_client(const IfNameIndex *p,
         return dbus_network_reload();
 }
 
+int manager_acquire_link_local_addressing_kind(const IfNameIndex *p, LinkLocalAddress *lla_mode) {
+        _auto_cleanup_ char *network = NULL, *config_lla = NULL;
+        int r;
+
+        assert(p);
+
+        r = network_parse_link_network_file(p->ifindex, &network);
+        if (r < 0)
+                return r;
+
+        r = parse_config_file(network, "Network", "LinkLocalAddressing", &config_lla);
+        if (r < 0)
+                return r;
+
+        r = link_local_address_type_to_kind(config_lla);
+        if (r < 0)
+                return r;
+
+        *lla_mode = r;
+        return 0;
+}
+
 int manager_acquire_link_dhcp_client_kind(const IfNameIndex *p, DHCPClient *mode) {
         _auto_cleanup_ char *network = NULL, *config_dhcp = NULL;
         int r;
@@ -2686,7 +2708,7 @@ int manager_enable_ipv6(const IfNameIndex *i, bool enable) {
 int manager_set_ipv6(const IfNameIndex *p,
                      const int dhcp,
                      const int accept_ra,
-                     const int lla,
+                     int lla,
                      char **addrs,
                      Route *rt6,
                      char **dns,
@@ -2694,6 +2716,7 @@ int manager_set_ipv6(const IfNameIndex *p,
                      const int send_release,
                      bool keep) {
 
+        LinkLocalAddress lla_mode = _LINK_LOCAL_ADDRESS_INVALID;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
@@ -2717,32 +2740,39 @@ int manager_set_ipv6(const IfNameIndex *p,
         if (dhcp > 0) {
                 if (mode == DHCP_CLIENT_NO || mode == _DHCP_CLIENT_INVALID)
                         set_config(key_file, "Network", "DHCP", "ipv6");
-                else  if (mode == DHCP_CLIENT_IPV4)
+                else if (mode == DHCP_CLIENT_IPV4)
                         set_config(key_file, "Network", "DHCP", "yes");
 
                 /* Automatically turn on LinkLocalAddressing= and IPv6AcceptRA= */
-                set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                lla = LINK_LOCAL_ADDRESS_IPV6;
                 set_config(key_file, "Network", "IPv6AcceptRA", "yes");
 
         } else if (dhcp == DHCP_CLIENT_NO) {
                 if (mode == DHCP_CLIENT_YES)
                         set_config(key_file, "Network", "DHCP", "ipv4");
-                else  if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
+                else if (mode == DHCP_CLIENT_IPV6 || mode == _DHCP_CLIENT_INVALID)
                         set_config(key_file, "Network", "DHCP", "no");
         }
 
         /* override  */
         if (accept_ra >= 0) {
                 if (accept_ra > 0)
-                        set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                        lla = LINK_LOCAL_ADDRESS_IPV6;
 
                 set_config(key_file, "Network", "IPv6AcceptRA", bool_to_str(accept_ra));
         }
 
-        if (lla >= 0) {
-                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(lla));
-                if (r < 0)
-                        return r;
+        r = manager_acquire_link_local_addressing_kind(p, &lla_mode);
+        if (lla > 0) {
+                if (lla_mode == LINK_LOCAL_ADDRESS_NO || lla_mode == _LINK_LOCAL_ADDRESS_INVALID)
+                        set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                else if (lla_mode == LINK_LOCAL_ADDRESS_IPV4)
+                        set_config(key_file, "Network", "LinkLocalAddressing", "yes");
+        } else if (lla == LINK_LOCAL_ADDRESS_NO) {
+                if (lla_mode == LINK_LOCAL_ADDRESS_YES)
+                        set_config(key_file, "Network", "LinkLocalAddressing", "ipv4");
+                else if (lla_mode == LINK_LOCAL_ADDRESS_IPV4 || lla_mode == _LINK_LOCAL_ADDRESS_INVALID)
+                        set_config(key_file, "Network", "LinkLocalAddressing", "no");
         }
 
         if (dns) {
@@ -2807,6 +2837,7 @@ int manager_set_ipv4(const IfNameIndex *p,
                      bool keep) {
 
         _auto_cleanup_ char *network = NULL, *gw = NULL, *addr = NULL;
+        LinkLocalAddress lla_mode = _LINK_LOCAL_ADDRESS_INVALID;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
@@ -2825,10 +2856,17 @@ int manager_set_ipv4(const IfNameIndex *p,
         if (r < 0)
                 return r;
 
-        if (lla >= 0) {
-                r = key_file_set_str(key_file, "Network", "LinkLocalAddressing", link_local_address_type_to_name(lla));
-                if (r < 0)
-                        return r;
+        r = manager_acquire_link_local_addressing_kind(p, &lla_mode);
+        if (lla > 0) {
+                if (lla_mode == LINK_LOCAL_ADDRESS_NO || lla_mode == _LINK_LOCAL_ADDRESS_INVALID)
+                        set_config(key_file, "Network", "LinkLocalAddressing", "ipv4");
+                else if (lla_mode == LINK_LOCAL_ADDRESS_IPV6)
+                        set_config(key_file, "Network", "LinkLocalAddressing", "yes");
+        } else if (lla == LINK_LOCAL_ADDRESS_NO) {
+                if (lla_mode == LINK_LOCAL_ADDRESS_YES)
+                        set_config(key_file, "Network", "LinkLocalAddressing", "ipv6");
+                else if (lla_mode == LINK_LOCAL_ADDRESS_IPV4 || lla_mode == _LINK_LOCAL_ADDRESS_INVALID)
+                        set_config(key_file, "Network", "LinkLocalAddressing", "no");
         }
 
         r = manager_acquire_link_dhcp_client_kind(p, &mode);
