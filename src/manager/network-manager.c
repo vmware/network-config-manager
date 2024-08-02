@@ -2719,8 +2719,10 @@ int manager_set_ipv6(const IfNameIndex *p,
         LinkLocalAddress lla_mode = _LINK_LOCAL_ADDRESS_INVALID;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
+        _auto_cleanup_strv_ char **s = NULL, **t = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
         _auto_cleanup_ char *network = NULL;
+        char **l;
         int r;
 
         assert(p);
@@ -2776,7 +2778,26 @@ int manager_set_ipv6(const IfNameIndex *p,
         }
 
         if (dns) {
-                r = set_config(key_file, "Network", "DNS", strv_join(" ", dns));
+                if (keep) {
+                        r = key_file_network_parse_dns(network, &s);
+                        if (r < 0)
+                                return r;
+
+                        if (strv_empty((const char **) s)) {
+                                t = strv_dup(dns);
+                                if (!t)
+                                        return log_oom();
+                        } else {
+                                t = strv_unique(dns, s);
+                                if (!t)
+                                        return log_oom();
+                        }
+
+                        l = t;
+                } else
+                        l = dns;
+
+                r = set_config(key_file, "Network", "DNS", strv_join(" ", l));
                 if (r < 0) {
                         log_warning("Failed to write Network DNS= '%s': %s", network, strerror(-r));
                         return r;
@@ -2840,7 +2861,9 @@ int manager_set_ipv4(const IfNameIndex *p,
         LinkLocalAddress lla_mode = _LINK_LOCAL_ADDRESS_INVALID;
         _cleanup_(key_file_freep) KeyFile *key_file = NULL;
         _cleanup_(section_freep) Section *section = NULL;
+        _auto_cleanup_strv_ char **s = NULL, **t = NULL;
         DHCPClient mode = _DHCP_CLIENT_INVALID;
+        char **l;
         int r;
 
         assert(p);
@@ -2883,7 +2906,26 @@ int manager_set_ipv4(const IfNameIndex *p,
         }
 
         if (dns) {
-                r = set_config(key_file, "Network", "DNS", strv_join(" ", dns));
+                if (keep) {
+                        r = key_file_network_parse_dns(network, &s);
+                        if (r < 0)
+                                return r;
+
+                        if (strv_empty((const char **) s)) {
+                                t = strv_dup(dns);
+                                if (!t)
+                                        return log_oom();
+                        } else {
+                                t = strv_unique(dns, s);
+                                if (!t)
+                                        return log_oom();
+                        }
+
+                        l = t;
+                } else
+                        l = dns;
+
+                r = set_config(key_file, "Network", "DNS", strv_join(" ", l));
                 if (r < 0) {
                         log_warning("Failed to write Network DNS= '%s': %s", network, strerror(-r));
                         return r;

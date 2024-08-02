@@ -4714,6 +4714,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        dns = strv_remove_duplicates(dns);
         r = manager_set_ipv6(p, dhcp, accept_ra, lla, addrs, rt6, dns, use_dns, send_release, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
@@ -4877,6 +4878,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                 return -EINVAL;
         }
 
+        dns = strv_remove_duplicates(dns);
         r = manager_set_ipv4(p, lla, dhcp, addrs, rt4, dns, use_dns, send_release, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
