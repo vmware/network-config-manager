@@ -2008,6 +2008,19 @@ int main(void) {
         cmocka_unit_test (test_vami_set_dynamic_ipv4_static_address_gw),
         cmocka_unit_test (test_vami_set_static_ipv6_static_address_gw),
         cmocka_unit_test (test_vami_set_static_ipv4_ipv6_static_address_gw),
+        /* test cases with set-ipv4 and set-ipv6 */
+        cmocka_unit_test (test_dhcp_ipv4_none_ipv6_dhcp_dns),
+        cmocka_unit_test (test_dhcp_ipv4_none_ipv6_none_dns),
+        cmocka_unit_test (test_dhcp_ipv4_dhcp_ipv6_dhcp_dns),
+        cmocka_unit_test (test_dhcp_ipv4_auto_ipv6_dhcp_dns),
+        cmocka_unit_test (test_dhcp_ipv4_static_ipv6_static_dns),
+        cmocka_unit_test (test_static_ipv4_none_ipv6_static_dns),
+        cmocka_unit_test (test_static_ipv4_dhcp_ipv6_static_dns),
+        cmocka_unit_test (test_static_ipv4_auto_ipv6_static_dns),
+        cmocka_unit_test (test_static_ipv4_static_ipv6_static_dns),
+        cmocka_unit_test (test_none_ipv4_dhcp_ipv6_dhcp_dns),
+        cmocka_unit_test (test_none_ipv4_auto_ipv6_dhcp_dns),
+        cmocka_unit_test (test_none_ipv4_static_ipv6_static_dns),
 };
 
         int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

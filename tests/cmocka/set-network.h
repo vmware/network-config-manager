@@ -50,3 +50,17 @@ void test_vami_set_dynamic_dhcpv4_and_dhcpv6(void **state);
 void test_vami_set_dynamic_ipv4_static_address_gw(void **state);
 void test_vami_set_static_ipv6_static_address_gw(void **state);
 void test_vami_set_static_ipv4_ipv6_static_address_gw(void **state);
+
+/* with set-ipv4 and set-ipv6 */
+void test_dhcp_ipv4_none_ipv6_dhcp_dns(void **state) ;
+void test_dhcp_ipv4_none_ipv6_none_dns(void **state) ;
+void test_dhcp_ipv4_dhcp_ipv6_dhcp_dns(void **state) ;
+void test_dhcp_ipv4_auto_ipv6_dhcp_dns(void **state) ;
+void test_dhcp_ipv4_static_ipv6_static_dns(void **state) ;
+void test_static_ipv4_none_ipv6_static_dns(void **state) ;
+void test_static_ipv4_dhcp_ipv6_static_dns(void **state) ;
+void test_static_ipv4_auto_ipv6_static_dns(void **state) ;
+void test_static_ipv4_static_ipv6_static_dns(void **state) ;
+void test_none_ipv4_dhcp_ipv6_dhcp_dns(void **state) ;
+void test_none_ipv4_auto_ipv6_dhcp_dns(void **state) ;
+void test_none_ipv4_static_ipv6_static_dns(void **state) ;
