@@ -2714,6 +2714,7 @@ int manager_set_ipv6(const IfNameIndex *p,
                      char **dns,
                      char **domains,
                      const int use_dns,
+                     UseDomains use_domains,
                      const int send_release,
                      bool keep) {
 
@@ -2832,6 +2833,12 @@ int manager_set_ipv6(const IfNameIndex *p,
                 }
         }
 
+        if (use_domains >= 0) {
+                r = key_file_set_str(key_file, "DHCPv6", "UseDomains", use_domains_modes_to_name(use_domains));
+                if (r < 0)
+                        return r;
+        }
+
         if (use_dns >= 0) {
                 r = key_file_set_str(key_file, "DHCPv6", "UseDNS", bool_to_str(use_dns));
                 if (r < 0)
@@ -2883,6 +2890,7 @@ int manager_set_ipv4(const IfNameIndex *p,
                      char **dns,
                      char **domains,
                      const int use_dns,
+                     UseDomains use_domains,
                      const int send_release,
                      bool keep) {
 
@@ -2986,6 +2994,12 @@ int manager_set_ipv4(const IfNameIndex *p,
                         log_warning("Failed to write Network Domains= '%s': %s", network, strerror(-r));
                         return r;
                 }
+        }
+
+        if (use_domains >= 0) {
+                r = key_file_set_str(key_file, "DHCPv4", "UseDomains", use_domains_modes_to_name(use_domains));
+                if (r < 0)
+                        return r;
         }
 
         if (use_dns >= 0) {

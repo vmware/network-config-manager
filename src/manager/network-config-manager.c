@@ -4556,6 +4556,7 @@ _public_ int ncm_link_enable_ipv6(int argc, char *argv[]) {
 _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
         int accept_ra = -1, dhcp = -1, use_dns = -1, lla = -1, send_release = -1;
         _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL, **domains = NULL;
+        UseDomains use_domains = _USE_DOMAINS_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt6 = NULL;
         bool keep = true;
@@ -4570,7 +4571,8 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
-                       continue;
+
+                        continue;
                 } else if (streq_fold(argv[i], "accept-ra") || streq_fold(argv[i], "ara")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4579,6 +4581,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                                 log_warning("Failed to parse accept-ra %s': %s", argv[i], strerror(-r));
                                 return r;
                         }
+
                         accept_ra = r;
                         continue;
                 } else if (streq_fold(argv[i], "lla") || streq_fold(argv[i], "link-local")) {
@@ -4589,6 +4592,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                                 log_warning("Failed to parse link-local %s': %s", argv[2], strerror(-r));
                                 return r;
                         }
+
                         lla = r;
                         continue;
                 } else if (streq_fold(argv[i], "dhcp")) {
@@ -4599,6 +4603,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                                 log_warning("Failed to parse dhcp: %s", argv[i]);
                                 return -EINVAL;
                         }
+
                         dhcp = r;
                         continue;
                 } else if (streq_fold(argv[i], "gateway") || streq_fold(argv[i], "gw") || streq_fold(argv[i], "gw6") || streq_fold(argv[i], "g")) {
@@ -4657,6 +4662,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                                 log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
+
                         continue;
                 } else if (streq_fold(argv[i], "dns")) {
                         parse_next_arg(argv, argc, i);
@@ -4699,6 +4705,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
                                 if (r < 0)
                                         return log_oom();
                         }
+
                         continue;
                 } else if (streq_fold(argv[i], "use-dns")) {
                         parse_next_arg(argv, argc, i);
@@ -4711,7 +4718,16 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 
                         use_dns = r;
                         continue;
+                } else if (streq_fold(argv[i], "use-domains")) {
+                        parse_next_arg(argv, argc, i);
 
+                        use_domains = use_domains_name_to_mode(argv[i]);
+                        if (use_domains < 0) {
+                                log_warning("Failed to parse use-domains='%s': %s", argv[i], strerror(-r));
+                                return -EINVAL;
+                        }
+
+                        continue;
                 } else if (streq_fold(argv[i], "send-release")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4747,7 +4763,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 
         dns = strv_remove_duplicates(dns);
         domains = strv_remove_duplicates(domains);
-        r = manager_set_ipv6(p, dhcp, accept_ra, lla, addrs, rt6, dns, domains, use_dns, send_release, keep);
+        r = manager_set_ipv6(p, dhcp, accept_ra, lla, addrs, rt6, dns, domains, use_dns, use_domains, send_release, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv6 on device '%s': %s", p->ifname, strerror(-r));
                 return r;
@@ -4759,6 +4775,7 @@ _public_ int ncm_link_set_ipv6(int argc, char *argv[]) {
 _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
         _auto_cleanup_strv_ char **addrs = NULL, **dns = NULL, **domains = NULL;
         int dhcp = -1, use_dns = -1, lla = -1, send_release = -1;
+        UseDomains use_domains = _USE_DOMAINS_INVALID;
         _auto_cleanup_ IfNameIndex *p = NULL;
         _auto_cleanup_ Route *rt4 = NULL;
         bool keep = true;
@@ -4773,6 +4790,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                                 log_warning("Failed to find device: %s", argv[i]);
                                 return r;
                         }
+
                         continue;
                 } else if (streq_fold(argv[i], "gateway") || streq_fold(argv[i], "gw") || streq_fold(argv[i], "gw4") || streq_fold(argv[i], "g")) {
                         _auto_cleanup_ IPAddress *gw = NULL;
@@ -4830,6 +4848,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                                 log_warning("Failed to parse many addresses '%s': %s", argv[i], strerror(EINVAL));
                                 return r;
                         }
+
                         continue;
                 } else if (streq_fold(argv[i], "dhcp")) {
                         parse_next_arg(argv, argc, i);
@@ -4883,6 +4902,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                                 if (r < 0)
                                         return log_oom();
                         }
+
                         continue;
                 } else if (streq_fold(argv[i], "use-dns")) {
                         parse_next_arg(argv, argc, i);
@@ -4895,7 +4915,16 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
 
                         use_dns = r;
                         continue;
+                } else if (streq_fold(argv[i], "use-domains")) {
+                        parse_next_arg(argv, argc, i);
 
+                        use_domains = use_domains_name_to_mode(argv[i]);
+                        if (use_domains < 0) {
+                                log_warning("Failed to parse use-domains='%s': %s", argv[i], strerror(-r));
+                                return -EINVAL;
+                        }
+
+                        continue;
                 } else if (streq_fold(argv[i], "send-release")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4906,9 +4935,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                         }
 
                         send_release = r;
-
                         continue;
-
                 } else if (streq_fold(argv[i], "lla") || streq_fold(argv[i], "link-local")) {
                         parse_next_arg(argv, argc, i);
 
@@ -4917,6 +4944,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
                                 log_warning("Failed to parse link-local %s': %s", argv[2], strerror(-r));
                                 return r;
                         }
+
                         lla = r;
                         continue;
                 } else if (streq_fold(argv[i], "keep")) {
@@ -4943,7 +4971,7 @@ _public_ int ncm_link_set_ipv4(int argc, char *argv[]) {
 
         dns = strv_remove_duplicates(dns);
         domains = strv_remove_duplicates(domains);
-        r = manager_set_ipv4(p, lla, dhcp, addrs, rt4, dns, domains, use_dns, send_release, keep);
+        r = manager_set_ipv4(p, lla, dhcp, addrs, rt4, dns, domains, use_dns, use_domains, send_release, keep);
         if (r < 0) {
                 log_warning("Failed to configure IPv4 on device '%s': %s", p->ifname, strerror(-r));
                 return r;

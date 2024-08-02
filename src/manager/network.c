@@ -20,6 +20,32 @@
 
 #define BRIDGE_PRIORITY_MAX 63
 
+static const char *const use_domains_mode_table[_USE_DOMAINS_MAX] = {
+        [USE_DOMAINS_NO]   = "no",
+        [USE_DOMAINS_YES]  = "yes",
+        [USE_DOMAINS_ROUTE] = "route",
+};
+
+const char *use_domains_modes_to_name(int id) {
+        if (id < 0)
+                return NULL;
+
+        if ((size_t) id >= ELEMENTSOF(use_domains_mode_table))
+                return NULL;
+
+        return use_domains_mode_table[id];
+}
+
+int use_domains_name_to_mode(char *name) {
+        assert(name);
+
+        for (size_t i = USE_DOMAINS_NO; i < (size_t) ELEMENTSOF(use_domains_mode_table); i++)
+                if (streq_fold(name, use_domains_mode_table[i]))
+                        return i;
+
+        return _USE_DOMAINS_INVALID;
+}
+
 static const char *const dhcp_client_mode_table[_DHCP_CLIENT_MAX] = {
         [DHCP_CLIENT_NO]   = "no",
         [DHCP_CLIENT_YES]  = "yes",
