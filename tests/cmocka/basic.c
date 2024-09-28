@@ -479,6 +479,8 @@ static void test_set_dhcp6_duid(void **state) {
 
         assert_true(key_file_config_exists(key_file, "DHCPv6", "DUIDType", "vendor"));
         assert_true(key_file_config_exists(key_file, "DHCPv6", "DUIDRawData", "00:00:ab:11:f9:2a:c2:77:29:f9:5c:00"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_set_dhcp4_duid(void **state) {
@@ -495,6 +497,8 @@ static void test_set_dhcp4_duid(void **state) {
 
         assert_true(key_file_config_exists(key_file, "DHCPv4", "DUIDType", "vendor"));
         assert_true(key_file_config_exists(key_file, "DHCPv4", "DUIDRawData", "00:00:ab:11:f9:2a:c2:77:29:f9:5c:00"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_set_dns(void **state) {
@@ -510,6 +514,8 @@ static void test_set_dns(void **state) {
         assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
 
         assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.5 192.168.1.4"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_revert_dns(void **state) {
@@ -533,6 +539,8 @@ static void test_revert_dns(void **state) {
 
         display_key_file(key_file2);
         assert_true(!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_revert_dns_with_parametre(void **state) {
@@ -556,6 +564,8 @@ static void test_revert_dns_with_parametre(void **state) {
 
         display_key_file(key_file2);
         assert_true(!key_file_config_exists(key_file2, "Network", "DNS", "192.168.1.5 192.168.1.4"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_add_remove_many_address(void **state) {
@@ -573,6 +583,8 @@ static void test_add_remove_many_address(void **state) {
         assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.6/24"));
         assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.7/24"));
         assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.8/24"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_add_many_address(void **state) {
@@ -591,6 +603,8 @@ static void test_add_many_address(void **state) {
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.6/24"));
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.7/24"));
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.8/24"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_add_many_address_ipv6(void **state) {
@@ -610,6 +624,8 @@ static void test_add_many_address_ipv6(void **state) {
         assert_true(key_file_config_exists(key_file, "Address", "Address", "fe80::12/64"));
         assert_true(key_file_config_exists(key_file, "Address", "Address", "fe80::13/64"));
         assert_true(key_file_config_exists(key_file, "Address", "Address", "fe80::14/64"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_cli_set_ipv6_with_static_address(void **state) {
@@ -649,6 +665,8 @@ static void test_cli_set_ipv6_with_static_address(void **state) {
 
         assert_false(key_file_config_exists(key_file, "Address", "Address", "fe80::15/64"));
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "::1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_cli_set_ipv6_with_send_release(void **state) {
@@ -684,6 +702,7 @@ static void test_cli_set_ipv6_with_send_release(void **state) {
         assert_false(key_file_config_exists(key_file, "Address", "Address", "fe80::15/64"));
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "::1"));
 
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_cli_set_ipv6_with_static_address_and_dns(void **state) {
@@ -719,6 +738,8 @@ static void test_cli_set_ipv6_with_static_address_and_dns(void **state) {
 
         assert_false(key_file_config_exists(key_file, "Address", "Address", "fe80::15/64"));
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "::1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_cli_set_ipv6_with_static_dynamic_and_dns(void **state) {
@@ -760,6 +781,8 @@ static void test_cli_set_ipv6_with_static_dynamic_and_dns(void **state) {
 
         assert_false(key_file_config_exists(key_file, "Address", "Address", "fe80::15/64"));
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "::1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_cli_set_ipv4_with_static_address(void **state) {
@@ -786,7 +809,7 @@ static void test_cli_set_ipv4_with_static_address(void **state) {
         display_key_file(key_file);
         assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
 
-        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "no"));
 
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.101"));
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.102"));
@@ -795,6 +818,8 @@ static void test_cli_set_ipv4_with_static_address(void **state) {
 
         assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_cli_set_ipv4_with_send_release(void **state) {
@@ -821,13 +846,15 @@ static void test_cli_set_ipv4_with_send_release(void **state) {
         display_key_file(key_file);
         assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
 
-        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
         assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv4"));
 
         assert_true(key_file_config_exists(key_file, "DHCPv4", "SendRelease", "no"));
 
         assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_cli_set_ipv4_with_static_address_and_dns(void **state) {
@@ -854,7 +881,7 @@ static void test_cli_set_ipv4_with_static_address_and_dns(void **state) {
         display_key_file(key_file);
         assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
 
-        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv6"));
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "no"));
         assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.10 192.168.1.20"));
 
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.101"));
@@ -863,6 +890,8 @@ static void test_cli_set_ipv4_with_static_address_and_dns(void **state) {
 
         assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_cli_set_ipv4_with_static_dynamic_and_dns(void **state) {
@@ -889,7 +918,7 @@ static void test_cli_set_ipv4_with_static_dynamic_and_dns(void **state) {
         display_key_file(key_file);
         assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
 
-        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "yes"));
+        assert_true(key_file_config_exists(key_file, "Network", "DHCP", "ipv4"));
         assert_true(key_file_config_exists(key_file, "Network", "LinkLocalAddressing", "ipv4"));
         assert_true(key_file_config_exists(key_file, "Network", "DNS", "192.168.1.10 192.168.1.20"));
 
@@ -903,6 +932,8 @@ static void test_cli_set_ipv4_with_static_dynamic_and_dns(void **state) {
 
         assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.100"));
         assert_false(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_add_many_address_space_separated(void **state) {
@@ -936,6 +967,8 @@ static void test_add_one_address(void **state) {
         assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
 
         assert_true(key_file_config_exists(key_file, "Address", "Address", "192.168.1.5/24"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_add_remove_address(void **state) {
@@ -961,6 +994,8 @@ static void test_add_remove_address(void **state) {
         display_key_file(key_file2);
         printf("--------------------------------------\n");
         assert_false(key_file_config_exists(key_file2, "Address", "Address", "192.168.1.5/24"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_add_remove_many_address_family_ipv6(void **state) {
@@ -981,6 +1016,8 @@ static void test_add_remove_many_address_family_ipv6(void **state) {
         assert_true(!key_file_config_exists(key_file, "Address", "Address", "fe80::12/64"));
         assert_true(!key_file_config_exists(key_file, "Address", "Address", "fe80::13/64"));
         assert_true(!key_file_config_exists(key_file, "Address", "Address", "fe80::14/64"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_add_remove_many_address_family(void **state) {
@@ -1005,6 +1042,8 @@ static void test_add_remove_many_address_family(void **state) {
         assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.6/24"));
         assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.7/24"));
         assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.8/24"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_add_remove_many_address_family_ipv4(void **state) {
@@ -1024,6 +1063,8 @@ static void test_add_remove_many_address_family_ipv4(void **state) {
         assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.6/24"));
         assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.7/24"));
         assert_true(!key_file_config_exists(key_file, "Address", "Address", "192.168.1.8/24"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_replace_many_address_ipv6(void **state) {
@@ -1064,6 +1105,8 @@ static void test_replace_many_address_ipv6(void **state) {
         assert_false(key_file_config_exists(key_file, "Address", "Address", "fe80::12/64"));
         assert_false(key_file_config_exists(key_file, "Address", "Address", "fe80::13/64"));
         assert_false(key_file_config_exists(key_file, "Address", "Address", "fe80::14/64"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_replace_many_address_ipv4(void **state) {
@@ -1106,6 +1149,8 @@ static void test_replace_many_address_ipv4(void **state) {
 
         assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.5/24"));
         assert_false(key_file_config_exists(key_file, "Address", "Address", "192.168.1.6/24"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_set_gw_keep(void **state) {
@@ -1123,6 +1168,8 @@ static void test_set_gw_keep(void **state) {
         assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
         assert_true(key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.2"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_set_gw_family(void **state) {
@@ -1155,6 +1202,8 @@ static void test_remove_gw_family(void **state) {
         assert_true(key_file_config_exists(key_file, "Match", "Name", "test99"));
         assert_true(!key_file_config_exists(key_file, "Route", "Gateway", "192.168.1.1"));
         assert_true(!key_file_config_exists(key_file, "Route", "Gateway", "::1"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_additional_gw_source_routing(void **state) {
@@ -1183,6 +1232,8 @@ static void test_additional_gw_source_routing(void **state) {
 
         assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "To", "192.168.10.5/24"));
         assert_true(key_file_config_exists(key_file, "RoutingPolicyRule", "Table", "100"));
+
+        unlink("/etc/systemd/network/10-test99.network");
 }
 
 static void test_add_dhcp4_server_static_address(void **state) {
@@ -2008,6 +2059,19 @@ int main(void) {
         cmocka_unit_test (test_vami_set_dynamic_ipv4_static_address_gw),
         cmocka_unit_test (test_vami_set_static_ipv6_static_address_gw),
         cmocka_unit_test (test_vami_set_static_ipv4_ipv6_static_address_gw),
+        /* test cases with set-ipv4 and set-ipv6 */
+        cmocka_unit_test (test_dhcp_ipv4_none_ipv6_dhcp_dns),
+        cmocka_unit_test (test_dhcp_ipv4_none_ipv6_none_dns),
+        cmocka_unit_test (test_dhcp_ipv4_dhcp_ipv6_dhcp_dns),
+        cmocka_unit_test (test_dhcp_ipv4_auto_ipv6_dhcp_dns),
+        cmocka_unit_test (test_dhcp_ipv4_static_ipv6_static_dns),
+        cmocka_unit_test (test_static_ipv4_none_ipv6_static_dns),
+        cmocka_unit_test (test_static_ipv4_dhcp_ipv6_static_dns),
+        cmocka_unit_test (test_static_ipv4_auto_ipv6_static_dns),
+        cmocka_unit_test (test_static_ipv4_static_ipv6_static_dns),
+        cmocka_unit_test (test_none_ipv4_dhcp_ipv6_dhcp_dns),
+        cmocka_unit_test (test_none_ipv4_auto_ipv6_dhcp_dns),
+        cmocka_unit_test (test_none_ipv4_static_ipv6_static_dns),
 };
 
         int count_fail_tests = cmocka_run_group_tests (tests, setup, teardown);

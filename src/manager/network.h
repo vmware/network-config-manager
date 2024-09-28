@@ -10,6 +10,14 @@
 #include "network-address.h"
 #include "network-route.h"
 
+typedef enum UseDomains {
+        USE_DOMAINS_NO,
+        USE_DOMAINS_YES,
+        USE_DOMAINS_ROUTE,
+        _USE_DOMAINS_MAX,
+        _USE_DOMAINS_INVALID = -EINVAL
+} UseDomains;
+
 typedef enum DHCPClient {
         DHCP_CLIENT_NO,
         DHCP_CLIENT_YES,
@@ -37,8 +45,8 @@ typedef enum DHCPClientDUIDType {
 } DHCPClientDUIDType;
 
 typedef enum LinkLocalAddress {
-        LINK_LOCAL_ADDRESS_YES,
         LINK_LOCAL_ADDRESS_NO,
+        LINK_LOCAL_ADDRESS_YES,
         LINK_LOCAL_ADDRESS_IPV4,
         LINK_LOCAL_ADDRESS_IPV6,
        _LINK_LOCAL_ADDRESS_MAX,
@@ -346,3 +354,6 @@ int link_event_type_to_mode(const char *name);
 int generate_network_config(Network *n);
 int generate_master_device_network(Network *n);
 int generate_wifi_config(Network *n, GString **ret);
+
+const char *use_domains_modes_to_name(int id);
+int use_domains_name_to_mode(char *name);
